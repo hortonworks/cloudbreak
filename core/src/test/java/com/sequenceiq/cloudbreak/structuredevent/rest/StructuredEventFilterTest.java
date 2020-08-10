@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_CRN;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_CRN;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
@@ -45,7 +45,7 @@ import com.sequenceiq.flow.ha.NodeConfig;
 class StructuredEventFilterTest {
 
     @InjectMocks
-    private StructuredEventFilter underTest;
+    private LegacyStructuredEventFilter underTest;
 
     @Mock
     private SecurityContext securityContext;
@@ -64,7 +64,7 @@ class StructuredEventFilterTest {
 
     @BeforeEach
     public void setup() {
-        ReflectionTestUtils.setField(underTest, "restUrlParsers", new ArrayList<>());
+        ReflectionTestUtils.setField(underTest, "legacyRestUrlParsers", new ArrayList<>());
         ReflectionTestUtils.setField(underTest, "contentLogging", true);
     }
 

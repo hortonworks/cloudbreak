@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.MaintenanceModeValidationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
@@ -43,7 +44,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
@@ -66,8 +66,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
@@ -263,7 +264,7 @@ public class OfflineStateGenerator {
 
             inject(bean, "structuredEventClient", (StructuredEventClient) structuredEvent -> {
             });
-            StructuredFlowEventFactory factory = new StructuredFlowEventFactory();
+            StructuredFlowEventFactory factory = new LegacyStructuredFlowEventFactory();
             inject(bean, "structuredFlowEventFactory", factory);
             inject(factory, "cloudbreakNodeConfig", new NodeConfig());
             inject(factory, "conversionService", new CustomConversionService());

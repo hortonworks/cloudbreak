@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;

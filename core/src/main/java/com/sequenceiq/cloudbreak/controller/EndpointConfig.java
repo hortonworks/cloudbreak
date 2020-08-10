@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
-import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
+import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
@@ -95,7 +95,7 @@ public class EndpointConfig extends ResourceConfig {
     @PostConstruct
     private void init() {
         if (auditEnabled) {
-            register(StructuredEventFilter.class);
+            register(LegacyStructuredEventFilter.class);
         }
         registerEndpoints();
         registerExceptionMappers();

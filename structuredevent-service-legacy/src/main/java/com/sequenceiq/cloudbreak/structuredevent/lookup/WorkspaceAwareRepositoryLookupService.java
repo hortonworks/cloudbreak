@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.authorization.lookup;
+package com.sequenceiq.cloudbreak.structuredevent.lookup;
 
 import java.util.List;
 

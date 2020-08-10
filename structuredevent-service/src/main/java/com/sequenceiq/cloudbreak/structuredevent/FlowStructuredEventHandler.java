@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredFlowEventFactory;
 import com.sequenceiq.flow.core.FlowEventListener;
 
 @Primary

@@ -14,7 +14,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;

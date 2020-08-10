@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.structuredevent;
 
 import org.springframework.stereotype.Service;
 

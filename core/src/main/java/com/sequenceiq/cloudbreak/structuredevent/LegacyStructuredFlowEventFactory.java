@@ -25,22 +25,19 @@ import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.LdapDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.LdapNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.RdsNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
+import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredFlowEventFactory;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 @Transactional
-public class StructuredFlowEventFactory {
+public class LegacyStructuredFlowEventFactory implements StructuredFlowEventFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredFlowEventFactory.class);
 
     @Inject
     private StackService stackService;
@@ -60,10 +57,12 @@ public class StructuredFlowEventFactory {
     @Value("${info.app.version:}")
     private String cbVersion;
 
+    @Override
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed) {
         return createStucturedFlowEvent(stackId, flowDetails, detailed, null);
     }
 
+    @Override
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
@@ -90,6 +89,7 @@ public class StructuredFlowEventFactory {
         return event;
     }
 
+    @Override
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         return createStructuredNotificationEvent(stack, notificationType, message, instanceGroupName);
@@ -135,66 +135,6 @@ public class StructuredFlowEventFactory {
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), NOTIFICATION, resourceType, stackId, stackName,
                 nodeConfig.getInstanceUUID(), cbVersion, stack.getWorkspace().getId(), userId, userName,
                 stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
-        return new StructuredNotificationEvent(operationDetails, notificationDetails);
-    }
-
-    public StructuredNotificationEvent createStructuredNotificationEvent(LdapDetails ldapDetails, String notificationType, String message,
-            boolean notifyWorkspace) {
-        LdapNotificationDetails notificationDetails = new LdapNotificationDetails();
-        notificationDetails.setLdapDetails(ldapDetails);
-        notificationDetails.setNotification(message);
-        notificationDetails.setNotificationType(notificationType);
-
-        OperationDetails operationDetails = new OperationDetails(
-                clock.getCurrentTimeMillis(),
-                NOTIFICATION,
-                "ldaps",
-                ldapDetails.getId(),
-                ldapDetails.getName(),
-                nodeConfig.getInstanceUUID(),
-                cbVersion,
-                null,
-                ldapDetails.getUserId(),
-                null,
-                null,
-                ldapDetails.getId().toString(),
-                null, null, null
-        );
-        if (notifyWorkspace) {
-            operationDetails.setWorkspaceId(ldapDetails.getWorkspaceId());
-            operationDetails.setUserName(ldapDetails.getUserName());
-            operationDetails.setTenant(ldapDetails.getTenantName());
-        }
-        return new StructuredNotificationEvent(operationDetails, notificationDetails);
-    }
-
-    public StructuredNotificationEvent createStructuredNotificationEvent(RdsDetails rdsDetails, String notificationType, String message,
-            boolean notifyWorkspace) {
-        RdsNotificationDetails notificationDetails = new RdsNotificationDetails();
-        notificationDetails.setRdsDetails(rdsDetails);
-        notificationDetails.setNotification(message);
-        notificationDetails.setNotificationType(notificationType);
-
-        OperationDetails operationDetails = new OperationDetails(
-                clock.getCurrentTimeMillis(),
-                NOTIFICATION,
-                "rds",
-                rdsDetails.getId(),
-                rdsDetails.getName(),
-                nodeConfig.getInstanceUUID(),
-                cbVersion,
-                null,
-                rdsDetails.getUserId(),
-                null,
-                null,
-                rdsDetails.getId().toString(),
-                null, null, null
-        );
-        if (notifyWorkspace) {
-            operationDetails.setWorkspaceId(rdsDetails.getWorkspaceId());
-            operationDetails.setUserName(rdsDetails.getUserName());
-            operationDetails.setTenant(rdsDetails.getTenantName());
-        }
         return new StructuredNotificationEvent(operationDetails, notificationDetails);
     }
 }

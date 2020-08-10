@@ -1,0 +1,18 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+}
+
+jar {
+    baseName = 'structuredevent-service-legacy'
+    archiveName = 'structuredevent-service-legacy.jar'
+}
+
+dependencies {
+    compile project(':structuredevent-service')
+    compile project(':workspace')
+    compile project(':cloud-reactor')
+}

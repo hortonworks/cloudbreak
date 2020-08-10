@@ -1,12 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.REST;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_CRN;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_EVENT;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_NAME;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_TYPE;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.WORKSPACE_ID;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -56,25 +50,25 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.authorization.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-import com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser;
+import com.sequenceiq.cloudbreak.structuredevent.lookup.WorkspaceAwareRepositoryLookupService;
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
-public class StructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
+public class LegacyStructuredEventFilter implements WriterInterceptor, ContainerRequestFilter, ContainerResponseFilter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredEventFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventFilter.class);
 
     private static final String LOGGING_ENABLED_PROPERTY = "structuredevent.loggingEnabled";
 
@@ -109,7 +103,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private String cbVersion;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+    private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
     @Inject
     @Named("structuredEventClient")
@@ -119,7 +113,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     private AuthenticatedUserService authenticatedUserService;
 
     @Autowired
-    private List<RestUrlParser> restUrlParsers;
+    private List<LegacyRestUrlParser> legacyRestUrlParsers;
 
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
@@ -198,29 +192,29 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private void sendStructuredEvent(RestRequestDetails restRequest, RestResponseDetails restResponse, Map<String, String> restParams, Long requestTime,
-            String responseBody) {
+        String responseBody) {
         restResponse.setBody(responseBody);
         RestCallDetails restCall = new RestCallDetails();
         restCall.setRestRequest(restRequest);
         restCall.setRestResponse(restResponse);
         restCall.setDuration(System.currentTimeMillis() - requestTime);
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        CloudbreakUser cloudbreakUser = cloudbreakRestRequestThreadLocalService.getCloudbreakUser();
         if (cloudbreakUser == null) {
             String serviceId = authenticatedUserService.getServiceAccountId();
             cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, serviceId);
         }
-        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        Long workspaceId = cloudbreakRestRequestThreadLocalService.getRequestedWorkspaceId();
         structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
                 restCall));
     }
 
     private Map<String, String> getRequestUrlParameters(ContainerRequestContext requestContext) {
         Map<String, String> params = Maps.newHashMap();
-        for (RestUrlParser restUrlParser : restUrlParsers) {
-            if (restUrlParser.fillParams(requestContext, params)) {
-                String workspaceId = params.get(WORKSPACE_ID);
+        for (LegacyRestUrlParser legacyRestUrlParser : legacyRestUrlParsers) {
+            if (legacyRestUrlParser.fillParams(requestContext, params)) {
+                String workspaceId = params.get(LegacyRestUrlParser.WORKSPACE_ID);
                 if (isResourceIdIsAbsentOrNull(params) && NumberUtils.isCreatable(workspaceId)) {
-                    putResourceIdFromRepository(requestContext, params, restUrlParser, workspaceId);
+                    putResourceIdFromRepository(requestContext, params, legacyRestUrlParser, workspaceId);
                 }
                 break;
             }
@@ -229,16 +223,16 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
-            RestUrlParser restUrlParser, String workspaceId) {
+        LegacyRestUrlParser legacyRestUrlParser, String workspaceId) {
         for (Entry<String, WorkspaceResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", workspaceId);
-            String requestUrl = restUrlParser.getUrl(requestContext);
+            String requestUrl = legacyRestUrlParser.getUrl(requestContext);
             if (('/' + requestUrl).startsWith(pathWithWorkspaceId)) {
                 WorkspaceResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
-                String resourceName = params.get(RESOURCE_NAME);
+                String resourceName = params.get(LegacyRestUrlParser.RESOURCE_NAME);
                 if (resourceName != null) {
                     resourceRepository.findByNameAndWorkspaceId(resourceName, Long.valueOf(workspaceId))
-                            .ifPresent(resource -> params.put(RESOURCE_ID, Long.toString(resource.getId())));
+                            .ifPresent(resource -> params.put(LegacyRestUrlParser.RESOURCE_ID, Long.toString(resource.getId())));
                 }
                 break;
             }
@@ -255,8 +249,8 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
             Map<String, String> resourceParams = extractResourceValueFromJson(responseBody, resourcesParamsToCollect);
             extractResourceParamWithPattern(responseBody, resourceIdIsAbsentOrNull, resourceParams, ID, extractIdRestParamFromResponsePattern);
             extractResourceParamWithPattern(responseBody, resourceCrnIsAbsentOrNull, resourceParams, CRN, extractCrnRestParamFromResponsePattern);
-            addExtractedValuesToParameters(params, resourceParams, ID, RESOURCE_ID);
-            addExtractedValuesToParameters(params, resourceParams, CRN, RESOURCE_CRN);
+            addExtractedValuesToParameters(params, resourceParams, ID, LegacyRestUrlParser.RESOURCE_ID);
+            addExtractedValuesToParameters(params, resourceParams, CRN, LegacyRestUrlParser.RESOURCE_CRN);
         }
     }
 
@@ -267,7 +261,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private void extractResourceParamWithPattern(CharSequence responseBody, boolean resourceIdIsAbsentOrNull, Map<String, String> resourceParams, String key,
-            Pattern pattern) {
+        Pattern pattern) {
         if (resourceIdIsAbsentOrNull && !resourceParams.containsKey(key)) {
             Matcher matcher = pattern.matcher(responseBody);
             if (matcher.find() && matcher.groupCount() >= 1) {
@@ -303,7 +297,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private boolean isResourceIdIsAbsentOrNull(Map<String, String> params) {
-        return isParameterAbsentOrNull(params, RESOURCE_ID);
+        return isParameterAbsentOrNull(params, LegacyRestUrlParser.RESOURCE_ID);
     }
 
     private boolean isParameterAbsentOrNull(Map<String, String> params, String parameter) {
@@ -311,7 +305,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     }
 
     private boolean isResourceCrnIsAbsentOrNull(Map<String, String> params) {
-        return isParameterAbsentOrNull(params, RESOURCE_CRN);
+        return isParameterAbsentOrNull(params, LegacyRestUrlParser.RESOURCE_CRN);
     }
 
     private boolean isLoggingEnabled(ContainerRequestContext requestContext) {
@@ -325,16 +319,17 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
         String resourceCrn = null;
         String resourceEvent = null;
         if (restParams != null) {
-            resourceType = restParams.get(RESOURCE_TYPE);
-            resourceId = restParams.get(RESOURCE_ID);
-            resourceName = restParams.get(RESOURCE_NAME);
-            resourceCrn = restParams.get(RESOURCE_CRN);
-            resourceEvent = restParams.get(RESOURCE_EVENT);
+            resourceType = restParams.get(LegacyRestUrlParser.RESOURCE_TYPE);
+            resourceId = restParams.get(LegacyRestUrlParser.RESOURCE_ID);
+            resourceName = restParams.get(LegacyRestUrlParser.RESOURCE_NAME);
+            resourceCrn = restParams.get(LegacyRestUrlParser.RESOURCE_CRN);
+            resourceEvent = restParams.get(LegacyRestUrlParser.RESOURCE_EVENT);
         }
         return new OperationDetails(requestTime, REST, resourceType, StringUtils.isNotEmpty(resourceId) ? Long.valueOf(resourceId) : null, resourceName,
                 nodeConfig.getId(), cbVersion, workspaceId,
                 cloudbreakUser != null ? cloudbreakUser.getUserId() : "", cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
                 cloudbreakUser.getTenant(), resourceCrn, cloudbreakUser.getUserCrn(), null, resourceEvent);
+
     }
 
     private RestRequestDetails createRequestDetails(ContainerRequestContext requestContext, String body) {

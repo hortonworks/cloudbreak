@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class V4ExistingResourceIdRestUrlParser extends RestUrlParser {
+public class V4ExistingResourceIdRestUrlParser extends LegacyRestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 

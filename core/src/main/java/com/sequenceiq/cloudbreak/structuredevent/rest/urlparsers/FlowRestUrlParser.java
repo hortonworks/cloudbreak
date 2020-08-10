@@ -8,9 +8,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
 
 @Component
-public class FlowRestUrlParser extends RestUrlParser {
+public class FlowRestUrlParser extends LegacyRestUrlParser {
 
     public static final int RESOURCE_CRN_GROUP_NUMBER = 5;
 
