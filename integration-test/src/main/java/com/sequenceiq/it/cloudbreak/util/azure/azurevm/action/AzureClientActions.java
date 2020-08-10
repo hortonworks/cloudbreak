@@ -55,7 +55,9 @@ public class AzureClientActions {
                     String resourceGroup = getResourceGroupName(id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     String powerState = getVmPowerState(vm);
-                    Log.log("Delete action is successful={}, vm {} power state is {} (expected null)", vm == null, id, powerState);
+                    String provisioningState = getVmProvisioningState(vm);
+                    Log.log("Delete action is successful={} (expected true), vm {} power state is {}, provisioning state is {}",
+                            vm == null, id, powerState, provisioningState);
                     return new AzureInstanceActionResult(vm == null, powerState, id);
                 })
                 .withTimeout(10, TimeUnit.MINUTES)
@@ -79,8 +81,9 @@ public class AzureClientActions {
                     String resourceGroup = getResourceGroupName(id);
                     VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
                     String powerState = getVmPowerState(vm);
+                    String provisioningState = getVmProvisioningState(vm);
                     boolean success = PowerState.DEALLOCATED.toString().equals(powerState);
-                    Log.log("Stop action isSuccessful={}, vm {} power state is {}", success, id, powerState);
+                    Log.log("Stop action isSuccessful={}, vm {} power state is {}, provisioning state is {}", success, id, powerState, provisioningState);
                     return new AzureInstanceActionResult(success, powerState, id);
                 })
                 .withTimeout(10, TimeUnit.MINUTES)
@@ -90,7 +93,11 @@ public class AzureClientActions {
     }
 
     private String getVmPowerState(VirtualMachine vm) {
-        return Optional.ofNullable(vm).map(v -> v.powerState().toString()).orElse("vm not found");
+        return Optional.ofNullable(vm).map(VirtualMachine::powerState).map(PowerState::toString).orElse("no power state");
+    }
+
+    private String getVmProvisioningState(VirtualMachine vm) {
+        return Optional.ofNullable(vm).map(VirtualMachine::provisioningState).orElse("no provisioning state");
     }
 
     private String getResourceGroupName(String id) {
