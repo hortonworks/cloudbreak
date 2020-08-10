@@ -29,6 +29,8 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
+import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -61,6 +63,9 @@ public class AzureStorage {
 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Inject
+    private AzureStorageAccountBuilderService azureStorageAccountBuilderService;
 
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
         String attachedStorageOption = parameters.get("attachedStorageOption");
@@ -107,7 +112,9 @@ public class AzureStorage {
             Map<String, String> tags)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
+            StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
+                    storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
+            azureStorageAccountBuilderService.buildStorageAccount(client, storageAccountParameters);
         }
     }
 

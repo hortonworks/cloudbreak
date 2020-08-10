@@ -186,6 +186,7 @@ cb:
   arm:
     template.path: templates/arm-v2-freeipa.ftl
     parameter.path: templates/parameters-freeipa.ftl
+    storageaccount.template.path: templates/arm-storageaccount.ftl
 
   openstack:
     heat.template.path: templates/openstack-heat.ftl
