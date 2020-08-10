@@ -48,9 +48,6 @@ public class AwsCredentialConnectorTest {
     @Mock
     private AwsCredentialView credentialView;
 
-    @Mock
-    private AwsDefaultRegionSelector defaultRegionSelector;
-
     @InjectMocks
     private AwsCredentialConnector underTest;
 
@@ -74,8 +71,6 @@ public class AwsCredentialConnectorTest {
         when(credentialView.getRoleArn()).thenReturn(roleArn);
 
         String exceptionMessageComesFromSdk = "SomethingTerribleHappened!";
-        String expectedExceptionMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct " +
-                "external ID. Cause: '%s'", roleArn, exceptionMessageComesFromSdk);
         Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
 
         doThrow(sdkException).when(awsCredentialVerifier).validateAws(credentialView);
@@ -83,7 +78,7 @@ public class AwsCredentialConnectorTest {
 
         assertNotNull(result);
         assertEquals(CredentialStatus.FAILED, result.getStatus());
-        assertEquals(expectedExceptionMessage, result.getStatusReason());
+        assertEquals(exceptionMessageComesFromSdk, result.getStatusReason());
         assertEquals(sdkException, result.getException());
 
         verify(awsCredentialVerifier, times(1)).validateAws(any());

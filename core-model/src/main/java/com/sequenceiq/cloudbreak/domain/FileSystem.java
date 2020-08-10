@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Entity

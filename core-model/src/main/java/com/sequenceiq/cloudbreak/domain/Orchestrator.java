@@ -10,6 +10,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @Entity
 public class Orchestrator implements ProvisionEntity {

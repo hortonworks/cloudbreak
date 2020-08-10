@@ -144,8 +144,7 @@ public class AzureVirtualMachineService {
                         cloudInstance.putParameter(INSTANCE_NAME, computerName);
                         statuses.add(new CloudVmInstanceStatus(cloudInstance, AzureInstanceStatus.get(virtualMachinePowerState)));
                     }, () -> statuses.stream()
-                            .filter(cvis -> cvis.getCloudInstance().getInstanceId() != null
-                                    && cvis.getCloudInstance().getInstanceId().equals(cloudInstance.getInstanceId()))
+                            .filter(cvis -> cvis.getCloudInstance().getInstanceId().equals(cloudInstance.getInstanceId()))
                             .findAny()
                             .ifPresentOrElse(cloudInstanceWithStatus -> logTheStatusOfTheCloudInstance(cloudInstanceWithStatus),
                                     () -> statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.TERMINATED))));

@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.Config;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
+import com.sequenceiq.freeipa.client.model.DnsZoneList;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.IpaServer;
@@ -370,43 +371,29 @@ public class FreeIpaClient {
         invoke("privilege_add_permission", flags, params, Object.class);
     }
 
-    public Set<DnsZone> findAllDnsZone() throws FreeIpaClientException {
+    public Set<DnsZoneList> findAllDnsZone() throws FreeIpaClientException {
         List<Object> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
+                "pkey_only", true,
                 "raw", true
         );
         ParameterizedType type = TypeUtils
-                .parameterize(Set.class, DnsZone.class);
-        return (Set<DnsZone>) invoke("dnszone_find", flags, params, type).getResult();
+                .parameterize(Set.class, DnsZoneList.class);
+        return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
     }
 
-    public Set<DnsZone> findDnsZone(String cidr) throws FreeIpaClientException {
+    public Set<DnsZoneList> findDnsZone(String cidr) throws FreeIpaClientException {
         List<Object> flags = List.of();
         Map<String, Object> params = Map.of(
                 "sizelimit", 0,
+                "pkey_only", true,
                 "raw", true,
                 "name_from_ip", cidr
         );
         ParameterizedType type = TypeUtils
-                .parameterize(Set.class, DnsZone.class);
-        return (Set<DnsZone>) invoke("dnszone_find", flags, params, type).getResult();
-    }
-
-    public DnsZone setDnsZoneAuthoritativeNameserver(String dnsZone, String authoritativeNameserverFqdn) throws FreeIpaClientException {
-        return dnsZoneMod(dnsZone, "idnssoamname", authoritativeNameserverFqdn);
-    }
-
-    private DnsZone dnsZoneMod(String zoneName, String key, Object value) throws FreeIpaClientException {
-        Map<String, Object> params = Map.of(
-                key, value
-        );
-        return dnsZoneMod(zoneName, params);
-    }
-
-    private DnsZone dnsZoneMod(String zoneName, Map<String, Object> params) throws FreeIpaClientException {
-        List<Object> flags = List.of(zoneName);
-        return (DnsZone) invoke("dnszone_mod", flags, params, DnsZone.class).getResult();
+                .parameterize(Set.class, DnsZoneList.class);
+        return (Set<DnsZoneList>) invoke("dnszone_find", flags, params, type).getResult();
     }
 
     public Set<Service> findAllService() throws FreeIpaClientException {

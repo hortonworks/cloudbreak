@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.GatewayTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.SSOTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;

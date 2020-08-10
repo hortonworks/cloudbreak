@@ -87,7 +87,7 @@ class RemoveHostsHandlerTest {
         RemoveHostsFromOrchestrationRequest request = new RemoveHostsFromOrchestrationRequest(cleanupEvent);
         when(stackService.getByIdWithListsInTransaction(any())).thenThrow(new RuntimeException("expected exception"));
         underTest.accept(new Event<>(request));
-        verify(eventBus, times(1)).notify(eq("REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT"), ArgumentMatchers.<Event>any());
+        verify(eventBus, times(1)).notify(eq("DOWNSCALEFAILUREEVENT"), ArgumentMatchers.<Event>any());
     }
 
     @Test

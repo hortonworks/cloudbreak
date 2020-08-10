@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
+import com.sequenceiq.cloudbreak.structuredevent.domain.converter.StructuredEventTypeConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 
 import javax.persistence.AttributeConverter;

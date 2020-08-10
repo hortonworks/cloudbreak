@@ -7,6 +7,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.common.api.util.ProvisionEntity;
+
 @Entity
 public class StackAuthentication implements ProvisionEntity {
 

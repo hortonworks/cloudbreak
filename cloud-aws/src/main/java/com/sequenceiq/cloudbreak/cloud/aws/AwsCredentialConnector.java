@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.model.CredentialStatus.PERMISSIONS_MISSING;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.Map;
-
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.SdkBaseException;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialViewProvider;
@@ -40,6 +39,9 @@ public class AwsCredentialConnector implements CredentialConnector {
     private AwsSessionCredentialClient credentialClient;
 
     @Inject
+    private AwsClient awsClient;
+
+    @Inject
     private AwsCredentialVerifier awsCredentialVerifier;
 
     @Inject
@@ -47,9 +49,6 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Inject
     private AwsCredentialViewProvider credentialViewProvider;
-
-    @Inject
-    private AwsDefaultRegionSelector defaultRegionSelector;
 
     @Override
     public CloudCredentialStatus verify(AuthenticatedContext authenticatedContext) {
@@ -59,20 +58,19 @@ public class AwsCredentialConnector implements CredentialConnector {
         String roleArn = awsCredential.getRoleArn();
         String accessKey = awsCredential.getAccessKey();
         String secretKey = awsCredential.getSecretKey();
-
-        CloudCredentialStatus result;
         if (isNoneEmpty(roleArn, accessKey, secretKey)) {
             String message = "Please only provide the 'role arn' or the 'access' and 'secret key'";
-            result = new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
-        } else if (isNotEmpty(roleArn)) {
-            result = verifyIamRoleIsAssumable(credential);
-        } else if (isEmpty(accessKey) || isEmpty(secretKey)) {
-            String message = "Please provide both the 'access' and 'secret key'";
-            result = new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
-        } else {
-            result = verifyAccessKeySecretKeyIsAssumable(credential);
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
         }
-        return result;
+        if (isNotEmpty(roleArn)) {
+            return verifyIamRoleIsAssumable(credential);
+        }
+        if (isEmpty(accessKey) || isEmpty(secretKey)) {
+            String message = "Please provide both the 'access' and 'secret key'";
+            return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
+        } else {
+            return verifyAccessKeySecretKeyIsAssumable(credential);
+        }
     }
 
     @Override
@@ -104,78 +102,65 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     private CloudCredentialStatus verifyIamRoleIsAssumable(CloudCredential cloudCredential) {
         AwsCredentialView awsCredential = credentialViewProvider.createAwsCredentialView(cloudCredential);
-        CloudCredentialStatus credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
         try {
             credentialClient.retrieveSessionCredentials(awsCredential);
-            if (cloudCredential.isVerifyPermissions()) {
-                try {
-                    awsCredentialVerifier.validateAws(awsCredential);
-                } catch (AwsPermissionMissingException e) {
-                    credentialStatus = new CloudCredentialStatus(cloudCredential, PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
-                }
-            }
-            boolean defaultRegionChanged = determineDefaultRegionViaDescribingRegions(cloudCredential);
-            if (defaultRegionChanged) {
-                credentialStatus = new CloudCredentialStatus(credentialStatus, defaultRegionChanged);
-            }
         } catch (AmazonClientException ae) {
-            String errorMessage = String.format("Unable to verify AWS credential due to: '%s'", ae.getMessage());
             if (ae.getMessage().contains("Unable to load AWS credentials")) {
-                errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
+                String errorMessage = String.format("Unable to load AWS credentials: please make sure that you configured your assumer %s and %s to deployer.",
                         awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_ACCESS_KEY_ID" : "AWS_ACCESS_KEY_ID",
                         awsCredential.isGovernmentCloudEnabled() ? "AWS_GOV_SECRET_ACCESS_KEY" : "AWS_SECRET_ACCESS_KEY");
+                LOGGER.info(errorMessage, ae);
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             } else if (ae.getMessage().contains("is not authorized to perform: sts:AssumeRole on resource")) {
-                errorMessage = String.format("CDP Control Pane is not authorized to perform sts:AssumeRole on '%s' role", awsCredential.getRoleArn());
+                String errorMessage = String.format("CDP Control Pane is not authorized to perform sts:AssumeRole on '%s' role",
+                        awsCredential.getRoleArn());
+                LOGGER.info(errorMessage, ae);
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }
-            LOGGER.warn(errorMessage, ae);
-            credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Unable to verify credential: check if the role '%s' exists and it's created with the correct external ID. " +
-                            "Cause: '%s'", awsCredential.getRoleArn(), e.getMessage());
+            String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
+                    awsCredential.getRoleArn());
             LOGGER.warn(errorMessage, e);
-            credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
-        return credentialStatus;
+        if (cloudCredential.isVerifyPermissions()) {
+            try {
+                awsCredentialVerifier.validateAws(awsCredential);
+            } catch (AwsPermissionMissingException e) {
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
+            } catch (SdkBaseException e) {
+                LOGGER.warn("AWS credential validation failed due to {}", e.getMessage(), e);
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, e.getMessage());
+            }
+        }
+        return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
 
     private CloudCredentialStatus verifyAccessKeySecretKeyIsAssumable(CloudCredential cloudCredential) {
         AwsCredentialView awsCredential = new AwsCredentialView(cloudCredential);
-        CloudCredentialStatus credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
         try {
-            boolean defaultRegionChanged = determineDefaultRegionViaDescribingRegions(cloudCredential);
-            if (cloudCredential.isVerifyPermissions()) {
-                try {
-                    awsCredentialVerifier.validateAws(awsCredential);
-                } catch (AwsPermissionMissingException e) {
-                    credentialStatus = new CloudCredentialStatus(cloudCredential, PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
-                }
-            }
-            if (defaultRegionChanged) {
-                credentialStatus = new CloudCredentialStatus(credentialStatus, defaultRegionChanged);
-            }
+            AmazonEC2Client access = awsClient.createAccess(cloudCredential);
+            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            access.describeRegions(describeRegionsRequest);
         } catch (AmazonClientException ae) {
             String errorMessage = "Unable to verify AWS credentials: "
                     + "please make sure the access key and secret key is correct. "
                     + ae.getMessage();
             LOGGER.debug(errorMessage, ae);
-            credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
         } catch (RuntimeException e) {
-            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists. %s",
+            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID. %s",
                     awsCredential.getAccessKey(), e.getMessage());
             LOGGER.warn(errorMessage, e);
-            credentialStatus = new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
-        return credentialStatus;
-    }
-
-    private boolean determineDefaultRegionViaDescribingRegions(CloudCredential credential) {
-        boolean defaultRegionChanged = false;
-        String defaultRegion = defaultRegionSelector.determineDefaultRegion(credential);
-        if (StringUtils.isNoneEmpty(defaultRegion)) {
-            LOGGER.debug("New default region '{}' has been selected for the credential.", defaultRegion);
-            credential.getParameter(AwsCredentialView.AWS, Map.class).put(AwsCredentialView.DEFAULT_REGION_KEY, defaultRegion);
-            defaultRegionChanged = true;
+        if (cloudCredential.isVerifyPermissions()) {
+            try {
+                awsCredentialVerifier.validateAws(awsCredential);
+            } catch (AwsPermissionMissingException e) {
+                return new CloudCredentialStatus(cloudCredential, CredentialStatus.PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());
+            }
         }
-        return defaultRegionChanged;
+        return new CloudCredentialStatus(cloudCredential, CredentialStatus.VERIFIED);
     }
 }

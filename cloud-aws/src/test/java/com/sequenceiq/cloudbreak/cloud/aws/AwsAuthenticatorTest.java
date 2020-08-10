@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,7 +24,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.amazonaws.AmazonClientException;
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.ec2.AmazonEC2Client;
@@ -58,9 +56,9 @@ public class AwsAuthenticatorTest {
 
     @BeforeEach
     public void awsClientSetup() {
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(AwsSessionCredentialProvider.class), any(ClientConfiguration.class));
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(BasicAWSCredentials.class), any(ClientConfiguration.class));
-        doReturn(instanceProfileCredentialsProvider).when(awsClient).getInstanceProfileProvider();
+        when(awsClient.getAmazonEC2Client(any(AwsSessionCredentialProvider.class))).thenReturn(amazonEC2Client);
+        when(awsClient.getAmazonEC2Client(any(BasicAWSCredentials.class))).thenReturn(amazonEC2Client);
+        when(awsClient.getInstanceProfileProvider()).thenReturn(instanceProfileCredentialsProvider);
     }
 
     @Test

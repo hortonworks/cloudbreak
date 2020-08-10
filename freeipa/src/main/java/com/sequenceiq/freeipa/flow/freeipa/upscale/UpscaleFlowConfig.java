@@ -6,10 +6,6 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ADD_INSTANCES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_BOOTSTRAP_MACHINES_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_EXTEND_METADATA_FINISHED_EVENT;
@@ -34,8 +30,6 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FINAL_STA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ADD_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_BOOTSTRAPPING_MACHINES_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_DISABLE_STATUS_CHECKER_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ENABLE_STATUS_CHECKER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FREEIPA_POST_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_RECORD_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_STATE;
@@ -66,13 +60,9 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_EVENT)
                     .defaultFailureEvent()
 
-                    .from(UPSCALE_STARTING_STATE).to(UPSCALE_DISABLE_STATUS_CHECKER_STATE)
+                    .from(UPSCALE_STARTING_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
                     .event(UPSCALE_STARTING_FINISHED_EVENT)
                     .defaultFailureEvent()
-
-                    .from(UPSCALE_DISABLE_STATUS_CHECKER_STATE).to(UPSCALE_ADD_INSTANCES_STATE)
-                    .event(UPSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT)
-                    .failureEvent(UPSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(UPSCALE_ADD_INSTANCES_STATE).to(UPSCALE_VALIDATE_INSTANCES_STATE)
                     .event(UPSCALE_ADD_INSTANCES_FINISHED_EVENT)
@@ -118,13 +108,9 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_FREEIPA_POST_INSTALL_FINISHED_EVENT)
                     .failureEvent(UPSCALE_FREEIPA_POST_INSTALL_FAILED_EVENT)
 
-                    .from(UPSCALE_UPDATE_METADATA_STATE).to(UPSCALE_ENABLE_STATUS_CHECKER_STATE)
+                    .from(UPSCALE_UPDATE_METADATA_STATE).to(UPSCALE_FINISHED_STATE)
                     .event(UPSCALE_UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
-
-                    .from(UPSCALE_ENABLE_STATUS_CHECKER_STATE).to(UPSCALE_FINISHED_STATE)
-                    .event(UPSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT)
-                    .failureEvent(UPSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT)
 
                     .from(UPSCALE_FINISHED_STATE).to(FINAL_STATE)
                     .event(UPSCALE_FINISHED_EVENT)

@@ -69,7 +69,7 @@ public class AccountTagController extends NotificationController implements Acco
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public AccountTagResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return listInAccount(accountId);
@@ -85,7 +85,7 @@ public class AccountTagController extends NotificationController implements Acco
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_WRITE)
     public AccountTagResponses put(@Valid AccountTagRequests request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         List<AccountTag> accountTags = accountTagsRequestToAccountTagConverter.convert(request.getTags());
@@ -95,7 +95,7 @@ public class AccountTagController extends NotificationController implements Acco
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public GeneratedAccountTagResponses generate(@ResourceName String environmentName, @ResourceCrn @TenantAwareParam String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = null;

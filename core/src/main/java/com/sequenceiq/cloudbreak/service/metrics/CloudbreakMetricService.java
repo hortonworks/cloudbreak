@@ -6,10 +6,8 @@ import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 @Service("MetricService")
 public class CloudbreakMetricService extends AbstractMetricService {
@@ -56,9 +54,10 @@ public class CloudbreakMetricService extends AbstractMetricService {
     }
 
     public void recordImageCopyTime(Stack stack, Runnable checkImage) {
-        String[] tags = {MetricTag.TENANT.name(), Optional.ofNullable(stack.getTenant()).map(Tenant::getName).orElse("NA"),
-                MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.cloudPlatform()).orElse("NA"),
-                MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
+        String[] tags = nullableValueTags(
+                MetricTag.TENANT.name(), stack.getTenant().getName(),
+                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
+                MetricTag.REGION.name(), stack.getRegion());
         recordLongTaskTimer(MetricType.STACK_IMAGE_COPY, checkImage, tags);
     }
 
@@ -73,7 +72,7 @@ public class CloudbreakMetricService extends AbstractMetricService {
                 accumulatedTags.add(tags[i + 1]);
             }
         }
-        String[] arrAccumulatedTags = new String[accumulatedTags.size()];
+        String [] arrAccumulatedTags = new String[accumulatedTags.size()];
         arrAccumulatedTags = accumulatedTags.toArray(arrAccumulatedTags);
         return arrAccumulatedTags;
     }

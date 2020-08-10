@@ -20,12 +20,12 @@ public interface CloudbreakEventService {
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs);
 
-    void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String instanceGroupName, ResourceEvent resourceEvent,
+    void fireCloudbreakInstanceGroupEvent(Long entityId, String eventType, String instanceGroupName, ResourceEvent resourceEvent,
             Collection<String> eventMessageArgs);
 
     List<StructuredNotificationEvent> cloudbreakEvents(Long workspaceId, Long since);
 
-    List<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId);
+    List<StructuredNotificationEvent> cloudbreakEventsForStack(Long entityId);
 
-    Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String stackType, Pageable pageable);
+    Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long entityId, String type, Pageable pageable);
 }

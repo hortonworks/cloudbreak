@@ -1,0 +1,39 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+}
+
+jar {
+    baseName = 'structuredevent-service'
+    archiveName = 'structuredevent-service.jar'
+}
+
+// override Spring Depenendencies
+ext['kafka.version'] = '2.3.1'
+
+dependencies {
+    compile project(':structuredevent-model')
+    compile project(':audit-connector')
+
+    compile group: 'org.springframework.kafka',          name: 'spring-kafka',      version: '2.2.9.RELEASE'
+
+}
+
+
+task testJar(type: Jar, dependsOn: testClasses) {
+    baseName = "test-${project.archivesBaseName}"
+    from sourceSets.test.output
+    from sourceSets.main.output
+}
+
+configurations {
+    tests
+}
+
+artifacts {
+    tests testJar
+}
+

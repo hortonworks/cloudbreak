@@ -6,7 +6,7 @@ import javax.persistence.MappedSuperclass;
 
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @MappedSuperclass
 public abstract class CompactView implements ProvisionEntity, WorkspaceAwareResource {

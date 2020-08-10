@@ -835,10 +835,6 @@ public class AwsPlatformResources implements PlatformResources {
         return new CloudResourceGroups();
     }
 
-    Set<Region> getEnabledRegions() {
-        return enabledRegions;
-    }
-
     private AmazonDynamoDB getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         return awsClient.createDynamoDbClient(awsCredentialView, region.value());

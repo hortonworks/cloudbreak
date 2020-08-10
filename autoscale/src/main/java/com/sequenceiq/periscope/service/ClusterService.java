@@ -20,9 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -35,17 +38,21 @@ import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
 
 @Service
-public class ClusterService {
+public class ClusterService implements ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private FailedNodeRepository failedNodeRepository;
 
     @Inject
     private SecurityConfigRepository securityConfigRepository;
@@ -60,7 +67,7 @@ public class ClusterService {
     private PeriscopeNodeConfig periscopeNodeConfig;
 
     @Inject
-    private PeriscopeMetricService periscopeMetricService;
+    private PeriscopeMetricService metricService;
 
     @Inject
     private SecurityConfigService securityConfigService;
@@ -130,8 +137,13 @@ public class ClusterService {
             }
         }
         cluster = save(cluster);
+        addPrometheusAlertsToConsul(cluster);
         calculateClusterStateMetrics();
         return cluster;
+    }
+
+    public List<Cluster> findAllByUser(CloudbreakUser user) {
+        return clusterRepository.findByUserId(user.getUserId());
     }
 
     public List<Cluster> findDistroXByTenant(String tenant) {
@@ -150,6 +162,10 @@ public class ClusterService {
         return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
     }
 
+    public Optional<Cluster> findOneByClusterIdAndTenant(Long clusterId, String tenant) {
+        return  clusterRepository.findByClusterIdAndTenant(clusterId, tenant);
+    }
+
     public Cluster save(Cluster cluster) {
         return clusterRepository.save(cluster);
     }
@@ -163,6 +179,7 @@ public class ClusterService {
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
+        failedNodeRepository.deleteByClusterId(clusterId);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }
@@ -189,6 +206,7 @@ public class ClusterService {
         MDCBuilder.buildMdcContext(cluster);
         cluster.setState(state);
         calculateClusterStateMetrics();
+        addPrometheusAlertsToConsul(cluster);
         return clusterRepository.save(cluster);
     }
 
@@ -196,9 +214,15 @@ public class ClusterService {
         Cluster cluster = findById(clusterId);
         MDCBuilder.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
+        addPrometheusAlertsToConsul(cluster);
         cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();
         return cluster;
+    }
+
+    @Override
+    public AuthorizationResourceType getResourceType() {
+        return AuthorizationResourceType.DATAHUB;
     }
 
     public List<Cluster> findAllByPeriscopeNodeId(String nodeId) {
@@ -251,10 +275,16 @@ public class ClusterService {
         save(cluster);
     }
 
+    private void addPrometheusAlertsToConsul(Cluster cluster) {
+        if (RUNNING.equals(cluster.getState())) {
+            alertService.addPrometheusAlertsToConsul(cluster);
+        }
+    }
+
     private void calculateClusterStateMetrics() {
-        periscopeMetricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
+        metricService.submit(MetricType.CLUSTER_STATE_ACTIVE,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(RUNNING, true, periscopeNodeConfig.getId()));
-        periscopeMetricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
+        metricService.submit(MetricType.CLUSTER_STATE_SUSPENDED,
                 clusterRepository.countByStateAndAutoscalingEnabledAndPeriscopeNodeId(SUSPENDED, true, periscopeNodeConfig.getId()));
     }
 }

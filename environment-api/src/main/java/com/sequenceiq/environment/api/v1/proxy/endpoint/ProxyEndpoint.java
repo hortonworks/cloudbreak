@@ -12,7 +12,6 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
@@ -41,13 +40,6 @@ public interface ProxyEndpoint {
     @ApiOperation(value = ProxyConfigDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigByNameV1")
     ProxyResponse getByName(@PathParam("name") String name);
-
-    @GET
-    @Path("account/{accountId}/name/{name}/crn")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ProxyConfigDescription.GET_CRN_BY_NAME, produces = MediaType.APPLICATION_JSON,
-            notes = ProxyConfigDescription.PROXY_CONFIG_NOTES, nickname = "getProxyConfigCrnByNameV1")
-    String getCrnByAccountIdAndName(@AccountId @PathParam("accountId") String accountId, @PathParam("name") String name);
 
     @GET
     @Path("environment/crn/{environmentCrn}")

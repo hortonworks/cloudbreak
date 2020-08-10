@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,8 +31,8 @@ public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new DownscaleFailureEvent(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT.event(),
-                resourceId, "Downscale Collect Additional Hostnames", Set.of(), Map.of(), e);
+        return new DownscaleFailureEvent(resourceId, "Downscale Collect Additional Hostnames",
+                Set.of(), Map.of(), e);
     }
 
     @Override
@@ -53,8 +51,8 @@ public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHand
             result = new CollectAdditionalHostnamesResponse(request.getResourceId(), fqdns);
         } catch (Exception e) {
             LOGGER.error("Collecting additional hostnames failed", e);
-            result = new DownscaleFailureEvent(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT.event(),
-                    request.getResourceId(), "Downscale Collect Additional Hostnames", Set.of(), Map.of(), e);
+            result = new DownscaleFailureEvent(request.getResourceId(), "Downscale Collect Additional Hostnames",
+                    Set.of(), Map.of(), e);
         }
         return result;
     }

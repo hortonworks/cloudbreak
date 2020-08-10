@@ -26,12 +26,8 @@ do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
   if [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
     # This can be fairly slow, for large clusters
-    COPY_RESULT=$(salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token)
-    if [[ "$COPY_RESULT" != *"False"* ]]; then
-      echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_copied_to_client
-    else
-      echo "Could not copy the token to agent: $fqdn"
-    fi
+    salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_copied_to_client
   else
     echo "CM agent token copy to ${fqdn} will be skipped as it was already copied to the agent instance."
   fi

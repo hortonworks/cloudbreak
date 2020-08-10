@@ -4,9 +4,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.periscope.api.endpoint.v2.AutoScaleClusterV2Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -15,12 +14,7 @@ import com.sequenceiq.periscope.converter.ClusterConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.ClusterService;
 
-/**
- * @deprecated Database ID based endpoints are deprecated for removal.
- */
-@Controller
-@Deprecated(since = "CB 2.26.0", forRemoval = true)
-@InternalOnly
+@Component
 public class AutoScaleClusterV2Controller implements AutoScaleClusterV2Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScaleClusterV2Controller.class);

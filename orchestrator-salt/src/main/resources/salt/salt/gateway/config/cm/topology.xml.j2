@@ -15,9 +15,15 @@
            </param>
         </provider>
 
-{%- if salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True -%}
-    {% set aclsauthz_prefix = 'AclsAuthz.' %}
+{%- if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
+    {% set ranger_installed = True %}
+    {%- if salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True -%}
+        {% set aclsauthz_prefix = 'AclsAuthz.' %}
+    {%- else -%}
+        {% set aclsauthz_prefix = '' %}
+    {%- endif -%}
 {%- else -%}
+    {% set ranger_installed = False %}
     {% set aclsauthz_prefix = '' %}
 {%- endif -%}
 
@@ -32,7 +38,7 @@
         </param>
     </provider>
     <provider>
-    {%- if salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True %}
+    {%- if ranger_installed == True and salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True %}
              <role>authorization</role>
              <name>CompositeAuthz</name>
              <enabled>true</enabled>

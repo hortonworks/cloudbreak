@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.converter.ResourceTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @Entity
 public class Resource implements ProvisionEntity {

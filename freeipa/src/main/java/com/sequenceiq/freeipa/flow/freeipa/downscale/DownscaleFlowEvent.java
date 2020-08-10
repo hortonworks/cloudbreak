@@ -6,8 +6,8 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
@@ -17,12 +17,10 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterP
 public enum DownscaleFlowEvent implements FlowEvent {
     DOWNSCALE_EVENT("DOWNSCALE_EVENT"),
     STARTING_DOWNSCALE_FINISHED_EVENT("STARTING_DOWNSCALE_FINISHED_EVENT"),
-    DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT("DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT"),
-    DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT("DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT"),
     CLUSTERPROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyUpdateRegistrationSuccess.class)),
     CLUSTERPROXY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyUpdateRegistrationFailed.class)),
     DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FINISHED_EVENT(EventSelectorUtil.selector(CollectAdditionalHostnamesResponse.class)),
-    DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT("DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT"),
+    DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT(EventSelectorUtil.selector(DownscaleFailureEvent.class)),
     DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT("DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT"),
     STOP_TELEMETRY_FINISHED_EVENT(EventSelectorUtil.selector(StopTelemetryResponse.class)),
     COLLECT_RESOURCES_FINISHED_EVENT(EventSelectorUtil.selector(DownscaleStackCollectResourcesResult.class)),
@@ -35,13 +33,9 @@ public enum DownscaleFlowEvent implements FlowEvent {
     REVOKE_CERTS_FAILED_EVENT(EventSelectorUtil.failureSelector(RevokeCertsResponse.class)),
     REMOVE_DNS_ENTRIES_FINISHED_EVENT(EventSelectorUtil.selector(RemoveDnsResponse.class)),
     REMOVE_DNS_FAILED_EVENT(EventSelectorUtil.failureSelector(RemoveDnsResponse.class)),
-    DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FINISHED_EVENT(EventSelectorUtil.selector(UpdateDnsSoaRecordsResponse.class)),
-    DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT("DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT"),
     UPDATE_METADATA_FINISHED_EVENT("UPDATE_METADATA_FINISHED_EVENT"),
     REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT(EventSelectorUtil.selector(RemoveHostsFromOrchestrationSuccess.class)),
-    REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT("REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT"),
-    DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT("DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT"),
-    DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT("DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT"),
+    REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT(EventSelectorUtil.selector(DownscaleFailureEvent.class)),
     DOWNSCALE_FINISHED_EVENT("DOWNSCALE_FINISHED_EVENT"),
     FAILURE_EVENT("DOWNSCALE_FAILURE_EVENT"),
     FAIL_HANDLED_EVENT("DOWNSCALE_FAIL_HANDLED_EVENT");

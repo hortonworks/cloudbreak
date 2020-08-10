@@ -9,7 +9,6 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -40,7 +39,6 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
@@ -107,9 +105,9 @@ public class AwsInstanceConnectorTest {
 
     @BeforeEach
     public void awsClientSetup() {
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(AwsSessionCredentialProvider.class), any(ClientConfiguration.class));
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(BasicAWSCredentials.class), any(ClientConfiguration.class));
-        doReturn(instanceProfileCredentialsProvider).when(awsClient).getInstanceProfileProvider();
+        when(awsClient.getAmazonEC2Client(any(AwsSessionCredentialProvider.class))).thenReturn(amazonEC2Client);
+        when(awsClient.getAmazonEC2Client(any(BasicAWSCredentials.class))).thenReturn(amazonEC2Client);
+        when(awsClient.getInstanceProfileProvider()).thenReturn(instanceProfileCredentialsProvider);
 
         CloudContext context = new CloudContext(1L, "context", "AWS", "AWS",
                 Location.location(Region.region("region")), "user", "account");

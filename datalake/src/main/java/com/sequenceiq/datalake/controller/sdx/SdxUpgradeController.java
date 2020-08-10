@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.controller.sdx;
 
-import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.LATEST_ONLY;
-import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.SHOW;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import javax.inject.Inject;
@@ -21,7 +19,6 @@ import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
-import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 @Controller
 @AuthorizationResource
@@ -57,8 +54,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     private void lockComponentsIfRuntimeUpgradeIsDisabled(SdxUpgradeRequest request, String userCrn, String clusterNameOrCrn) {
-        boolean runtimeUpgradeEnabled = sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn);
-        if (!runtimeUpgradeEnabled && (!requestSpecifiesUpgradeType(request) || isShowOnly(request))) {
+        if (!requestSpecifiesUpgradeType(request) && !sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn)) {
             LOGGER.info("Set lock-components since no upgrade type is specified and runtime upgrade is disabled for cluster: {}", clusterNameOrCrn);
             request.setLockComponents(true);
         }
@@ -69,15 +65,6 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     private boolean isDryRunOnly(SdxUpgradeRequest request) {
-        return request.isDryRun() && isRequestTypeEmpty(request);
-    }
-
-    private boolean isRequestTypeEmpty(SdxUpgradeRequest request) {
-        return isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !sdxRuntimeUpgradeService.isOsUpgrade(request);
-    }
-
-    private boolean isShowOnly(SdxUpgradeRequest request) {
-        SdxUpgradeShowAvailableImages showOption = request.getShowAvailableImages();
-        return (LATEST_ONLY.equals(showOption) || SHOW.equals(showOption)) && isRequestTypeEmpty(request);
+        return request.isDryRun() && isEmpty(request.getRuntime()) && isEmpty(request.getImageId()) && !sdxRuntimeUpgradeService.isOsUpgrade(request);
     }
 }

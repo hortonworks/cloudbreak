@@ -1,10 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_HANDLED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_SAVE_METADATA_FINISHED_EVENT;
@@ -135,27 +131,6 @@ public class FreeIpaUpscaleActions {
                 LOGGER.info("Starting upscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting upscale");
                 sendEvent(context, UPSCALE_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
-            }
-        };
-    }
-
-    @Bean(name = "UPSCALE_DISABLE_STATUS_CHECKER_STATE")
-    public Action<?, ?> disableStatusCheckerAction() {
-        return new AbstractUpscaleAction<>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Disabling the status checker while upscaling");
-                try {
-                    if (!isRepair(variables)) {
-                        disableStatusChecker(stack, "Upscaling FreeIPA");
-                    }
-                    sendEvent(context, UPSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
-                } catch (Exception e) {
-                    LOGGER.error("Failed to disable the status checker", e);
-                    sendEvent(context, UPSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT.event(),
-                            new UpscaleFailureEvent(stack.getId(), "disable status checker", Set.of(), Map.of(), e));
-                }
             }
         };
     }
@@ -457,27 +432,6 @@ public class FreeIpaUpscaleActions {
         };
     }
 
-    @Bean(name = "UPSCALE_ENABLE_STATUS_CHECKER_STATE")
-    public Action<?, ?> enableStatusCheckerAction() {
-        return new AbstractUpscaleAction<>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Enabling the status checker after upscaling");
-                try {
-                    if (!isRepair(variables)) {
-                        enableStatusChecker(stack, "Finished upscaling FreeIPA");
-                    }
-                    sendEvent(context, UPSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
-                } catch (Exception e) {
-                    LOGGER.error("Failed to enable the status checker", e);
-                    sendEvent(context, UPSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT.event(),
-                            new UpscaleFailureEvent(stack.getId(), "enable status checker", Set.of(), Map.of(), e));
-                }
-            }
-        };
-    }
-
     @Bean(name = "UPSCALE_FINISHED_STATE")
     public Action<?, ?> upscaleFinsihedAction() {
         return new AbstractUpscaleAction<>(StackEvent.class) {
@@ -534,7 +488,6 @@ public class FreeIpaUpscaleActions {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
-                enableStatusChecker(stack, "Failed upscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

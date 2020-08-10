@@ -85,15 +85,11 @@ public class ServiceProviderCredentialAdapter {
                 LOGGER.info(message, res.getErrorDetails());
                 throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
             }
-            CloudCredentialStatus cloudCredentialStatus = res.getCloudCredentialStatus();
-            if (CredentialStatus.FAILED.equals(cloudCredentialStatus.getStatus())) {
-                return new CredentialVerification(credential, setNewStatusText(credential, cloudCredentialStatus));
+            if (CredentialStatus.FAILED.equals(res.getCloudCredentialStatus().getStatus())) {
+                return new CredentialVerification(credential, setNewStatusText(credential, res.getCloudCredentialStatus()));
             }
-            changed = setNewStatusText(credential, cloudCredentialStatus);
-            CloudCredential cloudCredentialResponse = cloudCredentialStatus.getCloudCredential();
-            if (cloudCredentialStatus.isDefaultRegionChanged()) {
-                changed = mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
-            }
+            changed = setNewStatusText(credential, res.getCloudCredentialStatus());
+            CloudCredential cloudCredentialResponse = res.getCloudCredentialStatus().getCloudCredential();
             changed = changed || mergeCloudProviderParameters(credential, cloudCredentialResponse, Collections.singleton(SMART_SENSE_ID));
         } catch (InterruptedException e) {
             LOGGER.error("Error while executing credential verification", e);

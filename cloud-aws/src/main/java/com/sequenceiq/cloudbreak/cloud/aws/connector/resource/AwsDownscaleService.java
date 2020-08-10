@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
-import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -80,55 +79,44 @@ public class AwsDownscaleService {
                     auth.getCloudContext().getLocation().getRegion().value());
             AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
-            detachInstances(asGroupName, instanceIds, amazonASClient, true);
+            detachInstances(asGroupName, instanceIds, amazonASClient);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
-
-            Long stackId = auth.getCloudContext().getId();
-            terminateInstances(stackId, instanceIds, amazonEC2Client);
-            waitForTerminateInstances(stackId, instanceIds, amazonEC2Client);
-
+            terminateInstances(instanceIds, amazonEC2Client);
+            LOGGER.debug("Terminated instances in stack '{}': '{}'", auth.getCloudContext().getId(), instanceIds);
             try {
-                int maxSize = getInstanceCount(stack, vms.get(0).getTemplate().getGroupName());
-                UpdateAutoScalingGroupRequest updateDesiredAndMax = new UpdateAutoScalingGroupRequest()
+                amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                         .withAutoScalingGroupName(asGroupName)
-                        .withDesiredCapacity(maxSize)
-                        .withMaxSize(maxSize);
-                amazonASClient.updateAutoScalingGroup(updateDesiredAndMax);
+                        .withMaxSize(getInstanceCount(stack, vms.get(0).getTemplate().getGroupName())));
             } catch (AmazonServiceException e) {
-                LOGGER.warn("Failed to update asGroupName: {}, error: {}", asGroupName, e.getErrorMessage(), e);
+                LOGGER.warn(e.getErrorMessage());
             }
 
+            LOGGER.debug("Polling instance until terminated. [stack: {}, instance: {}]", auth.getCloudContext().getId(),
+                    asGroupName);
+            Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
+            DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
+            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(auth.getCloudContext().getId());
+            run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck);
         }
         return awsResourceConnector.check(auth, resources);
     }
 
-    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient,
-            boolean retryIfUnattachedInstancesPresent) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
         try {
             for (int i = 0; i < instanceIds.size(); i += MAX_DETACH_INSTANCE_SIZE) {
                 List<String> idPartition = instanceIds.subList(i, i + Math.min(instanceIds.size() - i, MAX_DETACH_INSTANCE_SIZE));
                 DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(idPartition)
                         .withShouldDecrementDesiredCapacity(true);
-                LOGGER.info("Detach instances from asGroupName: {}, instanceIds: {}, detachInstancesRequest: {}", asGroupName,
-                        instanceIds, detachInstancesRequest);
-                DetachInstancesResult result = amazonASClient.detachInstances(detachInstancesRequest);
-                LOGGER.info("Detach instances from asGroupName: {}, instanceIds: {}, result: {}", asGroupName,
-                        instanceIds, result);
+                amazonASClient.detachInstances(detachInstancesRequest);
             }
         } catch (AmazonServiceException e) {
-            LOGGER.info("Detach instances failed: {}", instanceIds, e);
-            // it is good enough to check with string contains, because AWS instance ids are unique and the lengths are fix
-            if (retryIfUnattachedInstancesPresent &&
-                    ("ValidationError".equals(e.getErrorCode()) && e.getErrorMessage().contains("not part of Auto Scaling"))) {
-                List<String> attachedInstances = instanceIds.stream().filter(id -> !e.getErrorMessage().contains(id)).collect(Collectors.toList());
-                if (!attachedInstances.isEmpty()) {
-                    LOGGER.info("Attached instances from AWS error response: {}", attachedInstances);
-                    detachInstances(asGroupName, attachedInstances, amazonASClient, false);
-                    return;
-                }
+            if (!"ValidationError".equals(e.getErrorCode())
+                    || !e.getErrorMessage().contains("not part of Auto Scaling")
+                    || instanceIds.stream().anyMatch(id -> !e.getErrorMessage().contains(id))) {
+                throw e;
             }
-            throw e;
+            LOGGER.info(e.getErrorMessage());
         }
     }
 
@@ -141,8 +129,7 @@ public class AwsDownscaleService {
         return result;
     }
 
-    private void terminateInstances(Long stackId, List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
-        LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIds);
+    private void terminateInstances(List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
         try {
             amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         } catch (AmazonServiceException e) {
@@ -158,14 +145,5 @@ public class AwsDownscaleService {
             }
             LOGGER.debug(e.getErrorMessage());
         }
-    }
-
-    private void waitForTerminateInstances(Long stackId, List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
-        LOGGER.debug("Polling instance until terminated. [stack: {}, instances: {}]", stackId,
-                instanceIds);
-        Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
-        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(stackId);
-        run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck);
     }
 }

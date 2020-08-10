@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 
 import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -86,8 +85,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
             result = new RemoveHostsFromOrchestrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to remove hosts from orchestration", e);
-            result = new DownscaleFailureEvent(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT.event(),
-                    request.getResourceId(), "Removing host from orchestration", Set.of(), Map.of(), e);
+            result = new DownscaleFailureEvent(request.getResourceId(), "Removing host from orchestration", Set.of(), Map.of(), e);
         }
         eventBus.notify(result.selector(), new Event<>(removeHostsRequestEvent.getHeaders(), result));
     }

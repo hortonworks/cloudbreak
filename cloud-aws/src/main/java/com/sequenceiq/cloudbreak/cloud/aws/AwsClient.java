@@ -52,7 +52,7 @@ public class AwsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
 
-    // Default retries is 3. This allows more time for backoff during throttling
+    // Default retries is 3. This allows for more time for backoff during throttling
     private static final int MAX_CLIENT_RETRIES = 30;
 
     private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
@@ -89,27 +89,19 @@ public class AwsClient {
     }
 
     public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
-        return createAccessWithClientConfiguration(awsCredential, regionName, getDefaultClientConfiguration());
-    }
-
-    public AmazonEC2Client createAccessWithMinimalRetries(AwsCredentialView awsCredential, String regionName) {
-        return createAccessWithClientConfiguration(awsCredential, regionName, getClientConfigurationWithMinimalRetries());
-    }
-
-    public AmazonEC2Client createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientConfiguration clientConfiguration) {
         AmazonEC2Client client = isRoleAssumeRequired(awsCredential) ?
-                getAmazonEC2Client(createAwsSessionCredentialProvider(awsCredential), clientConfiguration) :
-                getAmazonEC2Client(createAwsCredentials(awsCredential), clientConfiguration);
+                getAmazonEC2Client(createAwsSessionCredentialProvider(awsCredential)) :
+                getAmazonEC2Client(createAwsCredentials(awsCredential));
         client.setRegion(RegionUtils.getRegion(regionName));
         return client;
     }
 
-    public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider, ClientConfiguration clientConfiguration) {
-        return new AmazonEC2Client(awsSessionCredentialProvider, clientConfiguration);
+    public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider) {
+        return new AmazonEC2Client(awsSessionCredentialProvider, getDefaultClientConfiguration());
     }
 
-    public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials, ClientConfiguration clientConfiguration) {
-        return new AmazonEC2Client(basicAWSCredentials, clientConfiguration);
+    public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials) {
+        return new AmazonEC2Client(basicAWSCredentials, getDefaultClientConfiguration());
     }
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
@@ -200,13 +192,6 @@ public class AwsClient {
                 .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
     }
 
-    private ClientConfiguration getClientConfigurationWithMinimalRetries() {
-        return new ClientConfiguration()
-                .withThrottledRetries(true)
-                .withMaxConsecutiveRetriesBeforeThrottling(MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING)
-                .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicy());
-    }
-
     private ClientConfiguration getDynamoDbClientConfiguration() {
         return new ClientConfiguration()
                 .withRetryPolicy(PredefinedRetryPolicies.getDynamoDBDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
@@ -267,6 +252,10 @@ public class AwsClient {
 
     public InstanceProfileCredentialsProvider getInstanceProfileProvider() {
         return new InstanceProfileCredentialsProvider();
+    }
+
+    public boolean roleBasedCredential(AwsCredentialView awsCredential) {
+        return isNotEmpty(awsCredential.getRoleArn());
     }
 
     private boolean isRoleAssumeRequired(AwsCredentialView awsCredential) {

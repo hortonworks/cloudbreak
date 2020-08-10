@@ -38,7 +38,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -369,11 +368,14 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
                 stream = new BufferedInputStream(stream);
             }
             stream.mark(MAX_CONTENT_LENGTH + 1);
-            String entityString = IOUtils.toString(stream, charset);
-            if (entityString.length() > MAX_CONTENT_LENGTH) {
-                entityString = entityString.substring(0, MAX_CONTENT_LENGTH) + "...more...";
+            byte[] entity = new byte[MAX_CONTENT_LENGTH + 1];
+            int entitySize = stream.read(entity);
+            if (entitySize != -1) {
+                content.append(new String(entity, 0, Math.min(entitySize, MAX_CONTENT_LENGTH), charset));
+                if (entitySize > MAX_CONTENT_LENGTH) {
+                    content.append("...more...");
+                }
             }
-            content.append(entityString);
             content.append('\n');
             stream.reset();
         }

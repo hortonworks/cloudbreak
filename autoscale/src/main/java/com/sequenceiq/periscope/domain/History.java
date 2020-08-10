@@ -114,12 +114,24 @@ public class History {
     }
 
     public History withAlert(BaseAlert alert) {
-        if (alert instanceof TimeAlert) {
+        if (alert instanceof MetricAlert) {
+            MetricAlert ma = (MetricAlert) alert;
+            properties.put(ALERT_DEFINITION, ma.getDefinitionName());
+            properties.put(PERIOD, "" + ma.getPeriod());
+            properties.put(ALERT_STATE, ma.getAlertState().name());
+            alertType = AlertType.METRIC;
+        } else if (alert instanceof TimeAlert) {
             TimeAlert ta = (TimeAlert) alert;
             properties.put(TIME_ZONE, ta.getTimeZone());
             properties.put(CRON, ta.getCron());
             properties.put(SCALING_TARGET, "" + ta.getScalingPolicy().getScalingAdjustment());
             alertType = AlertType.TIME;
+        } else if (alert instanceof PrometheusAlert) {
+            PrometheusAlert pa = (PrometheusAlert) alert;
+            properties.put(ALERT_RULE, pa.getAlertRule());
+            properties.put(PERIOD, "" + pa.getPeriod());
+            properties.put(ALERT_STATE, pa.getAlertState().name());
+            properties.put(PARAMETERS, pa.getParameters().getValue());
         } else if (alert instanceof  LoadAlert) {
             LoadAlert la = (LoadAlert) alert;
             properties.put(PARAMETERS, la.getLoadAlertConfiguration().toString());

@@ -17,7 +17,7 @@ dependencies {
   compile project(':auth-connector')
   compile project(':common')
   compile project(':common-model')
-  compile project(':structuredevent-model')
+  compile project(':structuredevent-service')
   compile project(':environment-api')
   compile project(':flow-api')
 

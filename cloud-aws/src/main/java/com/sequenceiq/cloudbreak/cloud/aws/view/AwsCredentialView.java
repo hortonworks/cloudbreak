@@ -7,9 +7,8 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AwsCredentialView {
-    public static final String DEFAULT_REGION_KEY = "defaultRegion";
 
-    public static final String AWS = "aws";
+    private static final String AWS = "aws";
 
     private static final String ROLE_ARN = "roleArn";
 
@@ -102,9 +101,5 @@ public class AwsCredentialView {
 
     public String getCredentialCrn() {
         return cloudCredential.getId();
-    }
-
-    public String getDefaultRegion() {
-        return (String) cloudCredential.getParameter(AWS, Map.class).get(DEFAULT_REGION_KEY);
     }
 }

@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.common.api.util.ProvisionEntity;
+
 @Entity
 public class SecurityRule implements ProvisionEntity {
 

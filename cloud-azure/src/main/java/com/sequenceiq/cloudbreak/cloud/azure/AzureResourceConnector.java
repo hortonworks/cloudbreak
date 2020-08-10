@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -92,7 +93,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
-        boolean resourcesPersisted = false;
         try {
             List<CloudResource> templateResources;
             List<CloudResource> instances;
@@ -100,13 +100,19 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
-                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+                instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
+                osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
+                azureCloudResourceService.saveCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
             } else {
                 Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
                 LOGGER.debug("Get template deployment for launch as it exists: {}", templateDeployment.exportTemplate().template());
-                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
+                instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
+                osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
+                azureCloudResourceService.deleteCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
+                azureCloudResourceService.saveCloudResources(notifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
             }
-            resourcesPersisted = true;
             String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
             List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
             List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
@@ -124,12 +130,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
-        } finally {
-            if (!resourcesPersisted) {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
-                persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
-            }
         }
 
         CloudResource cloudResource = new Builder()
@@ -139,27 +139,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
-    }
-
-    private List<CloudResource> persistCloudResources(
-            AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier, CloudContext cloudContext, String stackName,
-            String resourceGroupName, Deployment templateDeployment) {
-        List<CloudResource> allResourcesToPersist = new ArrayList<>();
-        List<CloudResource> instances;
-        try {
-            List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
-            LOGGER.debug("Template resources retrieved: {}", templateResources);
-            allResourcesToPersist.addAll(templateResources);
-            instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
-            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
-            LOGGER.debug("OS disk resources retrieved: {}", osDiskResources);
-            allResourcesToPersist.addAll(osDiskResources);
-        } finally {
-            azureCloudResourceService.deleteCloudResources(notifier, cloudContext, allResourcesToPersist);
-            azureCloudResourceService.saveCloudResources(notifier, cloudContext, allResourcesToPersist);
-            LOGGER.info("Resources persisted: {}", allResourcesToPersist);
-        }
-        return instances;
     }
 
     @Override

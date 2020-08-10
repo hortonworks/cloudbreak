@@ -10,11 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -25,15 +21,11 @@ import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
-import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
-import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
-import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 
 @Controller
@@ -52,7 +44,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     private HistoryService historyService;
 
     @Inject
-    private AlertValidator alertValidator;
+    private AlertController alertController;
 
     @Inject
     private TransactionService transactionService;
@@ -66,102 +58,91 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     @Inject
     private CloudbreakMessagesService messagesService;
 
-    @Inject
-    private TimeAlertRequestConverter timeAlertRequestConverter;
-
-    @Inject
-    private LoadAlertRequestConverter loadAlertRequestConverter;
-
-    @Inject
-    private EntitlementValidationService entitlementValidationService;
-
     @Override
-    @DisableCheckPermissions
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
     public List<DistroXAutoscaleClusterResponse> getClusters() {
         return distroXAutoscaleClusterResponseConverter.convertAllToJson(asClusterCommonService.getDistroXClusters());
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse getClusterByCrn(@ResourceCrn String clusterCrn) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public DistroXAutoscaleClusterResponse getClusterByCrn(String clusterCrn) {
         return createClusterJsonResponse(
                 asClusterCommonService.getClusterByStackCrn(clusterCrn));
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse getClusterByName(@ResourceName String clusterName) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    public DistroXAutoscaleClusterResponse getClusterByName(String clusterName) {
         return createClusterJsonResponse(
                 asClusterCommonService.getClusterByStackName(clusterName));
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse enableAutoscaleForClusterCrn(@ResourceCrn String clusterCrn, AutoscaleClusterState autoscaleState) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public DistroXAutoscaleClusterResponse enableAutoscaleForClusterCrn(String clusterCrn, AutoscaleClusterState autoscaleState) {
         Cluster cluster = asClusterCommonService.getClusterByStackCrn(clusterCrn);
         return createClusterJsonResponse(asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse enableAutoscaleForClusterName(@ResourceName String clusterName, AutoscaleClusterState autoscaleState) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public DistroXAutoscaleClusterResponse enableAutoscaleForClusterName(String clusterName, AutoscaleClusterState autoscaleState) {
         Cluster cluster = asClusterCommonService.getClusterByStackName(clusterName);
         return createClusterJsonResponse(asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void deleteAlertsForClusterName(@ResourceName String clusterName) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public void deleteAlertsForClusterName(String clusterName) {
         asClusterCommonService.deleteAlertsForClusterName(clusterName);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void deleteAlertsForClusterCrn(@ResourceCrn String clusterCrn) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public void deleteAlertsForClusterCrn(String clusterCrn) {
         asClusterCommonService.deleteAlertsForClusterCrn(clusterCrn);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(@ResourceCrn String clusterCrn,
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterCrn(String clusterCrn,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
         Cluster cluster = asClusterCommonService.getClusterByStackCrn(clusterCrn);
-        return updateClusterAutoScaleConfig(cluster, autoscaleClusterRequest);
+        return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(@ResourceName String clusterName,
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
+    public DistroXAutoscaleClusterResponse updateAutoscaleConfigByClusterName(String clusterName,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
         Cluster cluster = asClusterCommonService.getClusterByStackName(clusterName);
-        return updateClusterAutoScaleConfig(cluster, autoscaleClusterRequest);
+        return updateClusterAutoScaleConfig(cluster.getId(), autoscaleClusterRequest);
     }
 
     private DistroXAutoscaleClusterResponse createClusterJsonResponse(Cluster cluster) {
         return distroXAutoscaleClusterResponseConverter.convert(cluster);
     }
 
-    private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Cluster cluster,
+    private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Long clusterId,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
 
-        alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
-        alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
+        alertController.validateLoadAlertRequests(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+        alertController.validateTimeAlertRequests(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
 
         try {
             transactionService.required(() -> {
-                clusterService.deleteAlertsForCluster(cluster.getId());
-                asClusterCommonService.createLoadAlerts(cluster.getId(),
-                        loadAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getLoadAlertRequests()));
-                asClusterCommonService.createTimeAlerts(cluster.getId(),
-                        timeAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getTimeAlertRequests()));
-                asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleClusterRequest.getEnableAutoscaling());
+                clusterService.deleteAlertsForCluster(clusterId);
+                alertController.createLoadAlerts(clusterId, autoscaleClusterRequest.getLoadAlertRequests());
+                alertController.createTimeAlerts(clusterId, autoscaleClusterRequest.getTimeAlertRequests());
+                asClusterCommonService.setAutoscaleState(clusterId, autoscaleClusterRequest.getEnableAutoscaling());
             });
-            createHistoryAndNotifyConfigChange(cluster.getId());
+            createHistoryAndNotifyConfigChange(clusterId);
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
         }
 
-        return createClusterJsonResponse(clusterService.findById(cluster.getId()));
+        return createClusterJsonResponse(clusterService.findById(clusterId));
     }
 
     private void createHistoryAndNotifyConfigChange(long clusterId) {

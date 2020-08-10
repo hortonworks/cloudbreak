@@ -9,6 +9,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.converter.AdjustmentTypeConverter;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @Entity
 public class FailurePolicy implements ProvisionEntity {

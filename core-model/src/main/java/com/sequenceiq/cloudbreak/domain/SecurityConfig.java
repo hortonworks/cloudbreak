@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @Entity
 public class SecurityConfig implements ProvisionEntity, WorkspaceAwareResource {

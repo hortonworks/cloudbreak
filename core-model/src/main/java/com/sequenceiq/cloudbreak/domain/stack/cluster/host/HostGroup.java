@@ -21,7 +21,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.converter.RecoveryModeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;

@@ -9,6 +9,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 @Entity
 public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {

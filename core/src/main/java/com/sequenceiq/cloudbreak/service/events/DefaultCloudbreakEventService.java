@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyCoreStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -75,7 +75,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackService stackService;
 
     @Inject
-    private StructuredFlowEventFactory structuredFlowEventFactory;
+    private LegacyCoreStructuredFlowEventFactory legacyCoreStructuredFlowEventFactory;
 
     @Inject
     private StackToStackV4ResponseConverter stackV4ResponseConverter;
@@ -113,8 +113,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         List<StructuredNotificationEvent> events;
-        events = null == since ? structuredEventService.getEventsForWorkspaceWithType(workspace, StructuredNotificationEvent.class)
-                : structuredEventService.getEventsForWorkspaceWithTypeSince(workspace, StructuredNotificationEvent.class, since);
+        events = null == since ? structuredEventService.getEventsForAccountWithType(workspace.get, StructuredNotificationEvent.class)
+                : structuredEventService.getEventsForAccountWithTypeSince(workspace.gt, StructuredNotificationEvent.class, since);
         return events;
     }
 
@@ -145,7 +145,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             String eventMessage, String instanceGroupName) {
 
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        StructuredNotificationEvent structuredNotificationEvent = structuredFlowEventFactory.createStructuredNotificationEvent(
+        StructuredNotificationEvent structuredNotificationEvent = legacyCoreStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,
                 eventType,
                 eventMessage,

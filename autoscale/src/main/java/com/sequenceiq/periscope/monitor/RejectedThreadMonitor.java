@@ -7,11 +7,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.RejectedThread;
+import com.sequenceiq.periscope.monitor.context.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
+import com.sequenceiq.periscope.monitor.evaluator.ClusterCreationEvaluator;
 
 @Component
 public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
@@ -41,7 +44,12 @@ public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
     @Override
     public EvaluatorContext getContext(RejectedThread rejectedThread) {
         try {
-            return new ClusterIdEvaluatorContext(JsonUtil.readValue(rejectedThread.getJson(), Cluster.class).getId());
+            if (getEvaluatorType(rejectedThread).isAssignableFrom(ClusterCreationEvaluator.class)) {
+                AutoscaleStackV4Response response = JsonUtil.readValue(rejectedThread.getJson(), AutoscaleStackV4Response.class);
+                return new ClusterCreationEvaluatorContext(response);
+            } else {
+                return new ClusterIdEvaluatorContext(JsonUtil.readValue(rejectedThread.getJson(), Cluster.class).getId());
+            }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

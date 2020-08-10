@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.LoadAlertResponse;
+import com.sequenceiq.periscope.api.model.MetricAlertResponse;
+import com.sequenceiq.periscope.api.model.PrometheusAlertResponse;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -18,7 +20,13 @@ import com.sequenceiq.periscope.domain.Cluster;
 public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse, Cluster> {
 
     @Inject
+    private MetricAlertResponseConverter metricAlertResponseConverter;
+
+    @Inject
     private TimeAlertResponseConverter timeAlertResponseConverter;
+
+    @Inject
+    private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
 
     @Inject
     private LoadAlertResponseConverter loadAlertResponseConverter;
@@ -37,10 +45,22 @@ public class ClusterConverter extends AbstractConverter<AutoscaleClusterResponse
                 source.getId(),
                 source.getState().name());
 
+        if (!source.getMetricAlerts().isEmpty()) {
+            List<MetricAlertResponse> metricAlerts =
+                    metricAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getMetricAlerts()));
+            json.setMetricAlerts(metricAlerts);
+        }
+
         if (!source.getTimeAlerts().isEmpty()) {
             List<TimeAlertResponse> timeAlertRequests =
                     timeAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getTimeAlerts()));
             json.setTimeAlerts(timeAlertRequests);
+        }
+
+        if (!source.getPrometheusAlerts().isEmpty()) {
+            List<PrometheusAlertResponse> prometheusAlertRequests =
+                    prometheusAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getPrometheusAlerts()));
+            json.setPrometheusAlerts(prometheusAlertRequests);
         }
 
         if (!source.getLoadAlerts().isEmpty()) {

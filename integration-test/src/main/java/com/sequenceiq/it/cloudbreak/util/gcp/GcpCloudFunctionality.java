@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util.gcp;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -55,10 +54,5 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public void cloudStorageDeleteContainer(String baseLocation) {
         throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
-    }
-
-    @Override
-    public Map<String, Boolean> enaSupport(List<String> instanceIds) {
-        return Collections.emptyMap();
     }
 }

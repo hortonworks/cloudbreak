@@ -1,9 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.event;
 
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
-
 import java.util.Map;
 import java.util.Set;
+
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class DownscaleFailureEvent extends StackEvent {
 
@@ -17,12 +17,7 @@ public class DownscaleFailureEvent extends StackEvent {
 
     public DownscaleFailureEvent(Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
             Exception exception) {
-        this(null, stackId, failedPhase, success, failureDetails, exception);
-    }
-
-    public DownscaleFailureEvent(String selector, Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
-            Exception exception) {
-        super(selector, stackId);
+        super(null, stackId);
         this.exception = exception;
         this.failedPhase = failedPhase;
         this.success = success;

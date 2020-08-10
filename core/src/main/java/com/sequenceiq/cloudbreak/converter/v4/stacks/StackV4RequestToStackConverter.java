@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,8 +38,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.cmtemplate.servicetype.ServiceTypeResolver;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -48,7 +45,6 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
@@ -63,7 +59,6 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -116,12 +111,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
-    @Inject
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
-
-    @Inject
-    private ServiceTypeResolver serviceTypeResolver;
-
     @Override
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -173,7 +162,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
-        determineServiceTypeTag(stack, source.getTags());
         return stack;
     }
 
@@ -396,32 +384,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), availabilityZone);
                 stack.setNetwork(network);
             }
-        }
-    }
-
-    private void determineServiceTypeTag(Stack stack, TagsV4Request tags) {
-        if (tags != null && tags.getApplication() != null
-                && tags.getApplication().containsKey(ClusterTemplateApplicationTag.SERVICE_TYPE.key())) {
-            LOGGER.debug("The following service type tag is provided for the cluster template: {}",
-                    tags.getApplication().get(ClusterTemplateApplicationTag.SERVICE_TYPE.key()));
-        } else {
-            updateServiceTypeApplicationTag(stack);
-        }
-    }
-
-    private void updateServiceTypeApplicationTag(Stack stack) {
-        try {
-            if (!StackType.DATALAKE.equals(stack.getType()) && stack.getCluster() != null && stack.getCluster().getBlueprint() != null) {
-                Blueprint blueprint = stack.getCluster().getBlueprint();
-                String serviceType = serviceTypeResolver.resolveServiceType(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
-                if (stack.getTags() != null) {
-                    StackTags tags = stack.getTags().get(StackTags.class);
-                    tags.getApplicationTags().put(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), serviceType);
-                    stack.setTags(new Json(tags));
-                }
-            }
-        } catch (IOException e) {
-            throw new BadRequestException("Failed to convert dynamic tags for updating stack tags with service type.");
         }
     }
 }

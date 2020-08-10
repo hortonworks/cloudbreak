@@ -4,14 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceName;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.periscope.api.endpoint.v1.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
 import com.sequenceiq.periscope.converter.HistoryConverter;
@@ -20,8 +14,7 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NotFoundException;
 
-@Controller
-@AuthorizationResource
+@Component
 public class HistoryController implements HistoryEndpoint {
 
     @Inject
@@ -37,16 +30,14 @@ public class HistoryController implements HistoryEndpoint {
     private ClusterService clusterService;
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public List<AutoscaleClusterHistoryResponse> getHistoryByCrn(@ResourceCrn String stackCrn, Integer historyCount) {
+    public List<AutoscaleClusterHistoryResponse> getHistoryByCrn(String stackCrn, Integer historyCount) {
         return clusterService.findOneByStackCrnAndTenant(stackCrn, restRequestThreadLocalService.getCloudbreakTenant())
                 .map(cluster -> historyConverter.convertAllToJson(historyService.getHistory(cluster.getId(), historyCount)))
                 .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public List<AutoscaleClusterHistoryResponse> getHistoryByName(@ResourceName String stackName, Integer historyCount) {
+    public List<AutoscaleClusterHistoryResponse> getHistoryByName(String stackName, Integer historyCount) {
         return clusterService.findOneByStackNameAndTenant(stackName, restRequestThreadLocalService.getCloudbreakTenant())
                 .map(cluster -> historyConverter.convertAllToJson(historyService.getHistory(cluster.getId(), historyCount)))
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));

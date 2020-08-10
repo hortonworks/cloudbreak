@@ -21,14 +21,13 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
     @Override
     public boolean checkStatus(T waitObject) {
         String environmentCrn = waitObject.getEnvironmentCrn();
+        String crn = waitObject.getFreeIpaCrn();
         Status desiredStatus = waitObject.getDesiredStatus();
         try {
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             if (freeIpa == null) {
-                LOGGER.error("No freeIpa found with environmentCrn '{}'! Check '{}' status.", environmentCrn, desiredStatus);
-                throw new TestFailException(String.format("No freeIpa found with environmentCrn '%s'! Check '%s' status.", environmentCrn, desiredStatus));
+                throw new TestFailException(String.format("'%s' freeIpa cluster was not found for environment '%s'", crn, environmentCrn));
             }
-            String crn = freeIpa.getCrn();
             String name = freeIpa.getName();
             Status status = freeIpa.getStatus();
             LOGGER.info("Waiting for the '{}' state of '{}' '{}' freeIpa at '{}' environment. Actual state is: '{}'", desiredStatus, name, crn, environmentCrn,
@@ -56,14 +55,16 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
     @Override
     public void handleTimeout(T waitObject) {
         String environmentCrn = waitObject.getEnvironmentCrn();
+        String crn = waitObject.getFreeIpaCrn();
         try {
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             if (freeIpa == null) {
-                LOGGER.error("No freeIpa found with environmentCrn '{}'! Wait operation timed out.", environmentCrn);
-                throw new TestFailException(String.format("No freeIpa found with environmentCrn '%s'! Wait operation timed out.", environmentCrn));
+                throw new TestFailException(String.format("'%s' freeIpa cluster was not found for environment '%s'", crn, environmentCrn));
             }
+            String name = freeIpa.getName();
+            Status status = freeIpa.getStatus();
             throw new TestFailException(String.format("Wait operation timed out, freeIpa '%s' '%s' has been failed for environment '%s'. FreeIpa status: '%s' "
-                    + "statusReason: '%s'", freeIpa.getName(), freeIpa.getCrn(), environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
+                    + "statusReason: '%s'", name, crn, environmentCrn, status, freeIpa.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
             throw new TestFailException(String.format("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: %s",
@@ -73,17 +74,18 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
 
     @Override
     public String successMessage(T waitObject) {
-        return String.format("Wait operation has successfully been done with '%s' freeIpa state for '%s' environment.", waitObject.getDesiredStatus(),
-                waitObject.getEnvironmentCrn());
+        return String.format("Wait operation was successfully done. '%s' freeIpa is in the desired state '%s'", waitObject.getFreeIpaCrn(),
+                waitObject.getDesiredStatus());
     }
 
     @Override
     public boolean exitWaiting(T waitObject) {
         String environmentCrn = waitObject.getEnvironmentCrn();
+        String crn = waitObject.getFreeIpaCrn();
         try {
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             if (freeIpa == null) {
-                LOGGER.info("No freeIpa found with environmentCrn '{}'! Exit waiting.", environmentCrn);
+                LOGGER.info("'{}' freeIpa was not found for environment '{}'. Exit waiting", crn, environmentCrn);
                 return true;
             }
             Status status = freeIpa.getStatus();

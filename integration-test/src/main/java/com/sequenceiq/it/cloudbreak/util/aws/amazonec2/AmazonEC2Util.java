@@ -32,8 +32,4 @@ public class AmazonEC2Util {
     public void stopHostGroupInstances(List<String> instanceIds) {
         ec2ClientActions.stopHostGroupInstances(instanceIds);
     }
-
-    public Map<String, Boolean> enaSupport(List<String> instanceIds) {
-        return ec2ClientActions.enaSupport(instanceIds);
-    }
 }

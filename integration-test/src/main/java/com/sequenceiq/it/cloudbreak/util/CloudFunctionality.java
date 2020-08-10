@@ -22,5 +22,4 @@ public interface CloudFunctionality {
 
     void cloudStorageDeleteContainer(String baseLocation);
 
-    Map<String, Boolean> enaSupport(List<String> instanceIds);
 }

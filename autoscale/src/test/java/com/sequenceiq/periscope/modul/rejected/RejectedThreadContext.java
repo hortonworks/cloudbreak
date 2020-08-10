@@ -22,13 +22,17 @@ import org.springframework.test.context.TestPropertySource;
 import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.periscope.aspects.RequestLogging;
+import com.sequenceiq.periscope.monitor.ClusterManagerHostHealthMonitor;
+import com.sequenceiq.periscope.monitor.evaluator.ClusterManagerHostHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EventPublisher;
 import com.sequenceiq.periscope.monitor.executor.EvaluatorExecutorRegistry;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.monitor.handler.PersistRejectedThreadExecutionHandler;
+import com.sequenceiq.periscope.repository.FailedNodeRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 import com.sequenceiq.periscope.service.configuration.CloudbreakClientConfiguration;
+import com.sequenceiq.periscope.service.evaluator.HostHealthEvaluatorService;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.utils.MetricUtils;
 
@@ -40,18 +44,21 @@ public class RejectedThreadContext {
             useDefaultFilters = false,
             includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE,
                     value = {
+                            ClusterManagerHostHealthMonitor.class,
                             PersistRejectedThreadExecutionHandler.class,
                             RejectedThreadService.class,
                             RequestLogging.class,
                             PeriscopeNodeConfig.class,
+                            ClusterManagerHostHealthEvaluator.class,
                             EventPublisher.class,
                             ExecutorServiceWithRegistry.class,
                             EvaluatorExecutorRegistry.class,
+                            HostHealthEvaluatorService.class,
                             Clock.class
                     })
     )
     @MockBean({Clock.class, ClusterService.class, CloudbreakClientConfiguration.class,
-            MetricUtils.class, InternalCrnBuilder.class})
+            MetricUtils.class, InternalCrnBuilder.class, FailedNodeRepository.class})
     @EnableAsync
     @Profile("devtest")
     public static class SpringConfig implements AsyncConfigurer {

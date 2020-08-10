@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 
 import java.util.Collection;
 
-import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.common.api.util.ProvisionEntity;
 
 public class BaseFileSystemConfigurationsView implements ProvisionEntity {
 

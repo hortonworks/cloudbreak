@@ -45,7 +45,7 @@ public class StructuredFlowEventFactoryTest {
     private ClusterToClusterDetailsConverter clusterToClusterDetailsConverter;
 
     @InjectMocks
-    private StructuredFlowEventFactory structuredFlowEventFactory;
+    private LegacyCoreStructuredFlowEventFactory legacyCoreStructuredFlowEventFactory;
 
     private String bpName = "testBpName";
 
@@ -61,7 +61,7 @@ public class StructuredFlowEventFactoryTest {
         when(conversionService.convert(any(), eq(StackDetails.class))).thenReturn(null);
         when(conversionService.convert(blueprint, BlueprintDetails.class)).thenReturn(blueprintDetails);
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
-        StructuredFlowEvent result = structuredFlowEventFactory.createStucturedFlowEvent(1L, new FlowDetails(), true);
+        StructuredFlowEvent result = legacyCoreStructuredFlowEventFactory.createStucturedFlowEvent(1L, new FlowDetails(), true);
         assertNull(result.getException());
         assertEquals(bpName, result.getBlueprintDetails().getBlueprintName());
     }

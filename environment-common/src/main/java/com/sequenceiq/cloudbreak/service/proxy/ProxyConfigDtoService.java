@@ -35,6 +35,10 @@ public class ProxyConfigDtoService {
     @Inject
     private SecretService secretService;
 
+    public ProxyConfig getByName(String resourceName) {
+        return convert(getProxyConfig(resourceName, proxyEndpoint::getByName));
+    }
+
     public ProxyConfig getByCrn(String resourceCrn) {
         return convert(getProxyConfig(resourceCrn, proxyEndpoint::getByResourceCrn));
     }
@@ -53,6 +57,14 @@ public class ProxyConfigDtoService {
                     convert(proxyEndpoint.getByEnvironmentCrn(environmentCrn))));
         } catch (NotFoundException ex) {
             return Optional.empty();
+        }
+    }
+
+    public boolean isProxyConfiguredForEnvironment(String environmentCrn) {
+        try {
+            return proxyEndpoint.getByEnvironmentCrn(environmentCrn) != null;
+        } catch (NotFoundException ex) {
+            return false;
         }
     }
 
@@ -77,7 +89,7 @@ public class ProxyConfigDtoService {
 
     private ProxyResponse getProxyConfig(String value, Function<String, ProxyResponse> function) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> function.apply(value));
+            return function.apply(value);
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get Proxy config from Environment service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);

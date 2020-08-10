@@ -5,11 +5,6 @@ set -e
 FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 
-if [ ! -f /etc/resolv.conf.orig ]; then
-  cp /etc/resolv.conf /etc/resolv.conf.orig
-fi
-FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}');
-
 install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
 ipa-server-install --unattended --uninstall
@@ -38,7 +33,7 @@ ipa-replica-install \
           --ssh-trust-dns \
           --mkhomedir \
           --ip-address "$IPADDR" \
-          $FORWARDERS \
+          --auto-forwarders \
           --force-join \
 {%- if not salt['pillar.get']('freeipa:dnssecValidationEnabled') %}
           --no-dnssec-validation \

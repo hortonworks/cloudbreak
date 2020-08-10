@@ -23,11 +23,12 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
     @Override
     public boolean checkStatus(T waitObject) {
         String environmentCrn = waitObject.getEnvironmentCrn();
+        String crn = waitObject.getFreeIpaCrn();
         Status desiredStatus = waitObject.getDesiredStatus();
         try {
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
-            LOGGER.info("Waiting for the '{}' state of '{}' freeIpa at '{}' environment. Actual state is: '{}'", desiredStatus, freeIpa.getCrn(),
-                    environmentCrn, freeIpa.getStatus());
+            LOGGER.info("Waiting for the '{}' state of '{}' freeIpa at '{}' environment. Actual state is: '{}'", desiredStatus, crn, environmentCrn,
+                    freeIpa.getStatus());
             if (freeIpa.getStatus().equals(DELETE_FAILED)) {
                 throw new TestFailException("FreeIpa termination failed: " + freeIpa.getStatusReason());
             }
@@ -35,7 +36,7 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
                 return false;
             }
         } catch (NotFoundException e) {
-            LOGGER.warn("No freeIpa found with environmentCrn '{}'! It has been deleted successfully.", environmentCrn, e);
+            LOGGER.warn("No freeIpa found with crn '{}'", crn, e);
         } catch (Exception e) {
             LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
             throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
@@ -47,19 +48,20 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
     public void handleTimeout(T waitObject) {
         try {
             String environmentCrn = waitObject.getEnvironmentCrn();
+            String crn = waitObject.getFreeIpaCrn();
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             throw new TestFailException(String.format("Wait operation timed out, '%s' freeIpa termination failed for '%s' environment. FreeIpa status: '%s' " +
-                    "statusReason: '%s'", freeIpa.getCrn(), environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
+                    "statusReason: '%s'", crn, environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
         } catch (Exception e) {
-            LOGGER.error("Wait operation timed out, freeIpa termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, freeIpa termination failed: %s",
+            LOGGER.error("Wait operation timed out, freeIpa termination failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
+            throw new TestFailException(String.format("Wait operation timed out, freeIpa termination failed. Also failed to get freeIpa status: %s",
                     e.getMessage()));
         }
     }
 
     @Override
     public String successMessage(T waitObject) {
-        return String.format("FreeIpa termination have successfully been finished for '%s' environment.", waitObject.getEnvironmentCrn());
+        return String.format("'%s' FreeIpa termination successfully finished.", waitObject.getFreeIpaCrn());
     }
 
     @Override
