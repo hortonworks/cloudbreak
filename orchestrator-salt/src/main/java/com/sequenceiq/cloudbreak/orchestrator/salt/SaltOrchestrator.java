@@ -131,7 +131,10 @@ SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry.forced:2}")
     private int maxRetryRecipeForced;
 
-    @Value("${cb.max.salt.database.dr.retry.onerror:2}")
+    @Value("${cb.max.salt.database.dr.retry:60}")
+    private int maxDatabaseDrRetry;
+
+    @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
 
     @Inject
@@ -929,13 +932,14 @@ SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
-                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetryOnError, true);
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
 
             StateRunner stateRunner = new StateRunner(target, allNodes, state);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxDatabaseDrRetryOnError, true);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel,
+                    maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during database backup/restore", e);
