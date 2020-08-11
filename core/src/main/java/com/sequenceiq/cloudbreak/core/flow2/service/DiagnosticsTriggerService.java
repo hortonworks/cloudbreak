@@ -58,6 +58,8 @@ public class DiagnosticsTriggerService {
                 .withResourceCrn(stack.getResourceCrn())
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
+                .withHosts(parameters.getHosts())
+                .withHostGroups(parameters.getHostGroups())
                 .build();
         return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }
