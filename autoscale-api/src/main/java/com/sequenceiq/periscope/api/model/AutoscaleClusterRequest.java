@@ -26,15 +26,8 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
     private boolean enableAutoscaling;
 
     @Valid
-    @ApiModelProperty(ClusterJsonsProperties.METRIC_ALERTS)
-    private List<MetricAlertRequest> metricAlerts;
-
-    @Valid
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertRequest> timeAlerts;
-
-    @ApiModelProperty(ClusterJsonsProperties.PROMETHEUS_ALERTS)
-    private List<PrometheusAlertRequest> prometheusAlerts;
 
     @ApiModelProperty(ClusterJsonsProperties.SCALING_CONFIGURATION)
     @Valid
@@ -73,28 +66,12 @@ public class AutoscaleClusterRequest extends ClusterBaseJson {
         this.enableAutoscaling = enableAutoscaling;
     }
 
-    public List<MetricAlertRequest> getMetricAlerts() {
-        return metricAlerts;
-    }
-
-    public void setMetricAlerts(List<MetricAlertRequest> metricAlerts) {
-        this.metricAlerts = metricAlerts;
-    }
-
     public List<TimeAlertRequest> getTimeAlerts() {
         return timeAlerts;
     }
 
     public void setTimeAlerts(List<TimeAlertRequest> timeAlerts) {
         this.timeAlerts = timeAlerts;
-    }
-
-    public List<PrometheusAlertRequest> getPrometheusAlerts() {
-        return prometheusAlerts;
-    }
-
-    public void setPrometheusAlerts(List<PrometheusAlertRequest> prometheusAlerts) {
-        this.prometheusAlerts = prometheusAlerts;
     }
 
     public ScalingConfigurationRequest getScalingConfiguration() {
