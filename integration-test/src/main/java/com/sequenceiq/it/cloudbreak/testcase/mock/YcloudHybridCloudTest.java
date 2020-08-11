@@ -83,7 +83,7 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
     @Inject
     private UtilTestClient utilTestClient;
 
-    protected void setupTest(TestContext testContext) {
+    protected void setupTest(MockedTestContext testContext) {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
