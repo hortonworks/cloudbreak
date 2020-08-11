@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -94,12 +95,13 @@ public class DiagnosticsFlowService {
                 .collect(Collectors.toSet());
     }
 
-    private boolean filterNodes(Node node, Set<String> hosts, Set<String> hostGroups) {
+    @VisibleForTesting
+    boolean filterNodes(Node node, Set<String> hosts, Set<String> hostGroups) {
         boolean result = true;
         if (CollectionUtils.isNotEmpty(hosts)) {
             result = hosts.contains(node.getHostname());
         }
-        if (!result && CollectionUtils.isNotEmpty(hostGroups)) {
+        if (result && CollectionUtils.isNotEmpty(hostGroups)) {
             result = hostGroups.contains(node.getHostGroup());
         }
         return result;
