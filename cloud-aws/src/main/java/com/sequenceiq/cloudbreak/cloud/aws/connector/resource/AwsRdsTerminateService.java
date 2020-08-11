@@ -92,7 +92,7 @@ public class AwsRdsTerminateService {
                 LOGGER.warn("Stack deletion for '{}' failed, continuing because termination is forced", cFStackName, e);
             } else {
                 if (e instanceof RuntimeException) {
-                    throw new CloudConnectorException(e.getMessage(), e);
+                    throw new CloudConnectorException("RDS termination failed " + e.getMessage(), e);
                 } else {
                     throw e;
                 }

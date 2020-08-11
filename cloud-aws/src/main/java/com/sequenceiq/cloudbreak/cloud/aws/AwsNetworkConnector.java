@@ -207,7 +207,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
         EnvironmentCancellationCheck environmentCancellationCheck = new EnvironmentCancellationCheck(networkRequest.getEnvId(), networkRequest.getEnvName());
 
         run(creationWaiter, stackRequestWithStackId,
-                environmentCancellationCheck);
+                environmentCancellationCheck, String.format("Network creation failed (cloudformation stack: %s)", networkRequest.getStackName()));
 
         return getCreatedCloudNetwork(cloudFormationRetryClient, networkRequest, subnetRequests);
     }
@@ -251,7 +251,8 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
             Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
             LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", networkDeletionRequest.getStackName());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(networkDeletionRequest.getStackName());
-            run(deletionWaiter, describeStacksRequest, null);
+            run(deletionWaiter, describeStacksRequest, null,
+                    String.format("Network delete failed (cloudformation: %s)", networkDeletionRequest.getStackName()));
         }
     }
 
