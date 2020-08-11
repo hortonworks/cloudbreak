@@ -17,7 +17,6 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -26,14 +25,13 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDele
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.notification.NotificationService;
 
 @Configuration
 public class EnvClustersDeleteActions {
@@ -42,17 +40,13 @@ public class EnvClustersDeleteActions {
 
     private final EnvironmentService environmentService;
 
-    private final NotificationService notificationService;
-
-    private final EnvironmentResponseConverter environmentResponseConverter;
+    private final EventSenderService eventService;
 
     private final EnvironmentMetricService metricService;
 
-    public EnvClustersDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentResponseConverter environmentResponseConverter, EnvironmentMetricService metricService) {
+    public EnvClustersDeleteActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentMetricService metricService) {
         this.environmentService = environmentService;
-        this.notificationService = notificationService;
-        this.environmentResponseConverter = environmentResponseConverter;
+        this.eventService = eventService;
         this.metricService = metricService;
     }
 
@@ -103,9 +97,8 @@ public class EnvClustersDeleteActions {
                             environment.setStatus(EnvironmentStatus.DELETE_FAILED);
                             Environment result = environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CLUSTERS_DELETION_FAILED, environmentDto, payload.getException());
-                            notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
+                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_DELETION_FAILED);
                         }, () -> LOGGER.error("Cannot set delete failed to env because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CLUSTERS_DELETE_FAILED_STATE");
@@ -132,8 +125,7 @@ public class EnvClustersDeleteActions {
                     environment.setStatus(environmentStatus);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
                 }, () -> LOGGER.error("Cannot delete {} because the environment does not exist: {}. "
                         + "But the flow will continue, how can this happen?", logDeleteState, payload.getResourceId()));
         EnvironmentDto envDto = new EnvironmentDto();

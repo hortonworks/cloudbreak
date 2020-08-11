@@ -35,7 +35,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -65,7 +65,7 @@ public class RecipeServiceTest {
     private UserService userService;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Mock
     private WorkspaceService workspaceService;
@@ -141,7 +141,7 @@ public class RecipeServiceTest {
     public void testPopulateCrnCorrectly() {
         Recipe recipe = getRecipe();
 
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
+        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
         when(userService.getOrCreate(any())).thenReturn(mock(User.class));
         Workspace workspace = mock(Workspace.class);
         when(workspaceService.get(eq(1L), any())).thenReturn(workspace);

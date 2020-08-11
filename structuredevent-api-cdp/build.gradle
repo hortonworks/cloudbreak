@@ -1,0 +1,17 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+}
+
+jar {
+    baseName = 'structuredevent-api-cdp'
+    archiveName = 'structuredevent-api-cdp.jar'
+}
+
+dependencies {
+  compile project(':structuredevent-model')
+  compile project(':common-model')
+}

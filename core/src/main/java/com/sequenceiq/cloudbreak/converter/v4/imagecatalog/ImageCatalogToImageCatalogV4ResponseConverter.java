@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -23,7 +23,7 @@ public class ImageCatalogToImageCatalogV4ResponseConverter extends AbstractConve
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Override
     public ImageCatalogV4Response convert(ImageCatalog source) {
@@ -42,7 +42,7 @@ public class ImageCatalogToImageCatalogV4ResponseConverter extends AbstractConve
     }
 
     private boolean isDefault(String imageCatalogName) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         String defaultImageCatalogName = imageCatalogService.getDefaultImageCatalogName(user);
         return imageCatalogName.equals(defaultImageCatalogName) || (defaultImageCatalogName == null && imageCatalogService.isEnvDefault(imageCatalogName));

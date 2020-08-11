@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -49,7 +51,7 @@ import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Service
-public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnProvider {
+public class EnvironmentService extends AbstractAccountAwareResourceService<Environment> implements ResourceIdProvider, ResourceBasedCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -177,6 +179,11 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
         platformResourceRequest.setCredential(environment.getCredential());
         platformResourceRequest.setCloudPlatform(environment.getCloudPlatform());
         return platformParameterService.getRegionsByCredential(platformResourceRequest, false);
+    }
+
+    public Environment findEnvironmentByIdOrThrow(Long id) {
+        Optional<Environment> environmentOptional = findEnvironmentById(id);
+        return environmentOptional.orElseThrow(notFound("Environment", id));
     }
 
     public Optional<Environment> findEnvironmentById(Long id) {
@@ -375,5 +382,20 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
                 EnvironmentStatus.STOP_DATALAKE_STARTED,
                 EnvironmentStatus.STOP_FREEIPA_STARTED,
                 EnvironmentStatus.ENV_STOPPED));
+    }
+
+    @Override
+    protected AccountAwareResourceRepository<Environment, Long> repository() {
+        return environmentRepository;
+    }
+
+    @Override
+    protected void prepareDeletion(Environment resource) {
+
+    }
+
+    @Override
+    protected void prepareCreation(Environment resource) {
+
     }
 }

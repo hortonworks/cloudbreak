@@ -33,14 +33,13 @@ import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -48,7 +47,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.notification.NotificationService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -80,10 +78,7 @@ class EnvCreationActionsTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
-    private EnvironmentResponseConverter environmentResponseConverter;
+    private EventSenderService eventSenderService;
 
     @Mock
     private StateContext stateContext;
@@ -195,8 +190,7 @@ class EnvCreationActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -212,8 +206,7 @@ class EnvCreationActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -236,13 +229,11 @@ class EnvCreationActionsTest {
         when(environmentDto.getName()).thenReturn(ENVIRONMENT_NAME);
         when(environmentDto.getId()).thenReturn(ENVIRONMENT_ID);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
-        SimpleEnvironmentResponse response = mock(SimpleEnvironmentResponse.class);
-        when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(response);
 
         action.execute(stateContext);
 
         verify(environment).setStatus(environmentStatus);
-        verify(notificationService).send(eventStarted, response, FLOW_TRIGGER_USER_CRN);
+        verify(eventSenderService).sendEventAndNotification(environmentDto, FLOW_TRIGGER_USER_CRN, eventStarted);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 

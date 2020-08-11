@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.LegacyStructuredEventDBService;
@@ -57,7 +57,7 @@ public class AuditEventServiceTest {
     private UserService userService;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Mock
     private User user;
@@ -72,7 +72,7 @@ public class AuditEventServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(testWorkspace.getId()).thenReturn(TEST_DEFAULT_ORG_ID);
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         when(workspaceService.getDefaultWorkspaceForUser(user)).thenReturn(testWorkspace);
     }

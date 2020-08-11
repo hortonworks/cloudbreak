@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response;
 
-import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
+import com.sequenceiq.common.model.annotations.Immutable;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;

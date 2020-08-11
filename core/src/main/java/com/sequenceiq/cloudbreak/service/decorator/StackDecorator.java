@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -100,7 +100,7 @@ public class StackDecorator {
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Inject
     private CredentialConverter credentialConverter;
@@ -221,12 +221,12 @@ public class StackDecorator {
     private void prepareInstanceGroups(Stack subject, StackV4Request request, Credential credential, User user) {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
         subject.getInstanceGroups().parallelStream().forEach(instanceGroup -> {
             subject.getCluster().getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
                     .forEach(hostGroup -> hostGroup.setInstanceGroup(instanceGroup));
-            restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
+            legacyRestRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
             updateInstanceGroupParameters(instanceGroupParameterResponse, instanceGroup);
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();

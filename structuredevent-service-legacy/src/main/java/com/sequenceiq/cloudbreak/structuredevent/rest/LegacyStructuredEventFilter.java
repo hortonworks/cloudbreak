@@ -20,8 +20,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -53,14 +51,14 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-import com.sequenceiq.cloudbreak.structuredevent.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+import com.sequenceiq.cloudbreak.structuredevent.service.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -96,34 +94,41 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
 
     private final Pattern extractCrnRestParamFromResponsePattern = Pattern.compile("\"" + CRN + "\":\"([0-9a-zA-Z:-]*)\"");
 
-    @Inject
-    private NodeConfig nodeConfig;
-
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    @Inject
+    @Value("${cb.structuredevent.rest.contentlogging}")
+    private Boolean contentLogging;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private NodeConfig nodeConfig;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
-    @Inject
-    @Named("structuredEventClient")
-    private StructuredEventClient structuredEventClient;
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 
-    @Inject
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
     private AuthenticatedUserService authenticatedUserService;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private List<LegacyRestUrlParser> legacyRestUrlParsers;
 
-    @Value("${cb.structuredevent.rest.contentlogging:false}")
-    private Boolean contentLogging;
-
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private ApplicationContext applicationContext;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private ListableBeanFactory listableBeanFactory;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private WorkspaceAwareRepositoryLookupService repositoryLookupService;
 
@@ -192,7 +197,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void sendStructuredEvent(RestRequestDetails restRequest, RestResponseDetails restResponse, Map<String, String> restParams, Long requestTime,
-        String responseBody) {
+            String responseBody) {
         restResponse.setBody(responseBody);
         RestCallDetails restCall = new RestCallDetails();
         restCall.setRestRequest(restRequest);
@@ -204,7 +209,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
             cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, serviceId);
         }
         Long workspaceId = cloudbreakRestRequestThreadLocalService.getRequestedWorkspaceId();
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
+        legacyStructuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
                 restCall));
     }
 
@@ -223,7 +228,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
-        LegacyRestUrlParser legacyRestUrlParser, String workspaceId) {
+            LegacyRestUrlParser legacyRestUrlParser, String workspaceId) {
         for (Entry<String, WorkspaceResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", workspaceId);
             String requestUrl = legacyRestUrlParser.getUrl(requestContext);
@@ -261,7 +266,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void extractResourceParamWithPattern(CharSequence responseBody, boolean resourceIdIsAbsentOrNull, Map<String, String> resourceParams, String key,
-        Pattern pattern) {
+            Pattern pattern) {
         if (resourceIdIsAbsentOrNull && !resourceParams.containsKey(key)) {
             Matcher matcher = pattern.matcher(responseBody);
             if (matcher.find() && matcher.groupCount() >= 1) {

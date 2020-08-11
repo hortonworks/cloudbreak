@@ -58,12 +58,14 @@ vault:
       service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
       mount.path: "dps-dev"
       login.role: "cloudbreak.default"
-
+cdp.structuredevent:
+  rest:
+    contentlogging: true
 environment:
   cert.dir: /certs/
   structuredevent:
     rest:
-      enabled: false
+      enabled: true
   cloudbreak:
     url: http://localhost:9091
     contextPath: /cb

@@ -29,7 +29,8 @@ import io.swagger.util.Json;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = EndpointConfig.class)
-@TestPropertySource(locations = "file:./build/resources/main/application.properties")
+@TestPropertySource(locations = "file:./build/resources/main/application.properties",
+        properties = {"cb.structuredevent.rest.enabled=false"})
 public class SwaggerGenerator {
 
     @MockBean

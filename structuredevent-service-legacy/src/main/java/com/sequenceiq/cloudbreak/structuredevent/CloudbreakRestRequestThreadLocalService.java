@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
-@Service("RestRequestThreadLocalService")
-public class CloudbreakRestRequestThreadLocalService implements RestRequestThreadLocalService {
+@Service
+public class CloudbreakRestRequestThreadLocalService implements LegacyRestRequestThreadLocalService {
 
     private static final ThreadLocal<Long> REQUESTED_WORKSPACE_ID = new ThreadLocal<>();
 

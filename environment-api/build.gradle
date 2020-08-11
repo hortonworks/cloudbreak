@@ -20,6 +20,7 @@ dependencies {
     implementation     project(":authorization-common-api")
     implementation     project(":auth-connector")
     implementation     project(":common-model")
+    implementation     project(":structuredevent-api-cdp")
 
     implementation     group: "org.apache.commons",            name: "commons-lang3",                  version: apacheCommonsLangVersion
     implementation     group: "io.swagger",                    name: "swagger-jersey2-jaxrs",          version: swaggerVersion

@@ -22,7 +22,8 @@ import org.springframework.data.repository.support.Repositories;
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.environment.service.integration.SqlStatementInspector"})
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
         "com.sequenceiq.environment",
-        "com.sequenceiq.cloudbreak.ha.domain"})
+        "com.sequenceiq.cloudbreak.ha.domain",
+        "com.sequenceiq.cloudbreak.structuredevent.domain"})
 @Import(SqlStatementInspector.class)
 public class JpaTest {
 
@@ -91,12 +92,12 @@ public class JpaTest {
                 Assertions.assertEquals(1, SqlStatementInspector.getSelectCountNumberAndReset(),
                         "find method should compile only one select!");
             } catch (IllegalAccessException | IllegalArgumentException e) {
-                Assertions.fail("Could not call find method", e);
+                Assertions.fail("Could not call find method: " + method.toString(), e);
             } catch (InvocationTargetException e) {
                 if (e.getCause() instanceof UnsupportedOperationException) {
                     Assertions.assertTrue(true, "find finished with UnsupportedOperation");
                 } else {
-                    Assertions.fail("Could not call find method", e);
+                    Assertions.fail("Could not call find method: " + method.toString(), e);
                 }
             }
         };

@@ -39,12 +39,12 @@ import com.sequenceiq.environment.environment.flow.start.EnvStartState;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.notification.NotificationService;
 
 @Configuration
 public class EnvDeleteActions {
@@ -53,7 +53,7 @@ public class EnvDeleteActions {
 
     private final EnvironmentService environmentService;
 
-    private final NotificationService notificationService;
+    private final EventSenderService eventService;
 
     private final EnvironmentResponseConverter environmentResponseConverter;
 
@@ -61,11 +61,10 @@ public class EnvDeleteActions {
 
     private final EnvironmentMetricService metricService;
 
-    public EnvDeleteActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentResponseConverter environmentResponseConverter, EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentMetricService metricService) {
+    public EnvDeleteActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentResponseConverter environmentResponseConverter,
+            EnvironmentStatusUpdateService environmentStatusUpdateService, EnvironmentMetricService metricService) {
         this.environmentService = environmentService;
-        this.notificationService = notificationService;
+        this.eventService = eventService;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
@@ -237,7 +236,8 @@ public class EnvDeleteActions {
                             SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             simpleResponse.setName(originalName);
                             metricService.incrementMetricCounter(MetricType.ENV_DELETION_FINISHED, environmentDto);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_DELETION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
+                            eventService.sendEventAndNotificationWithPayload(environmentDto, context.getFlowTriggerUserCrn(),
+                                    ResourceEvent.ENVIRONMENT_DELETION_FINISHED, simpleResponse);
                         }, () -> LOGGER.error("Cannot finish the delete flow because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_DELETE_FINISHED_STATE");

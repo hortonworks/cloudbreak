@@ -1,5 +1,17 @@
 package com.sequenceiq.environment.environment.flow.creation;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CREATION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_INITIALIZATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_INITIALIZATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
@@ -19,9 +31,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -30,13 +40,12 @@ import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFai
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
-import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.notification.NotificationService;
 
 @Configuration
 public class EnvCreationActions {
@@ -45,19 +54,16 @@ public class EnvCreationActions {
 
     private final EnvironmentService environmentService;
 
-    private final NotificationService notificationService;
-
-    private final EnvironmentResponseConverter environmentResponseConverter;
+    private final EventSenderService eventService;
 
     private final EnvironmentMetricService metricService;
 
     private final EnvironmentJobService environmentJobService;
 
-    public EnvCreationActions(EnvironmentService environmentService, NotificationService notificationService,
-            EnvironmentResponseConverter environmentResponseConverter, EnvironmentMetricService metricService, EnvironmentJobService environmentJobService) {
+    public EnvCreationActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentMetricService metricService,
+            EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
-        this.notificationService = notificationService;
-        this.environmentResponseConverter = environmentResponseConverter;
+        this.eventService = eventService;
         this.metricService = metricService;
         this.environmentJobService = environmentJobService;
     }
@@ -72,8 +78,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_INITIALIZATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_INITIALIZATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_INITIALIZATION_STARTED);
                     sendEvent(context, INITIALIZE_ENVIRONMENT_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -81,7 +86,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_INITIALIZATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_INITIALIZATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -99,8 +104,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_VALIDATION_STARTED);
                     sendEvent(context, VALIDATE_ENVIRONMENT_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -108,7 +112,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_VALIDATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -126,8 +130,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_NETWORK_CREATION_STARTED);
                     sendEvent(context, CREATE_NETWORK_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -135,7 +138,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_NETWORK_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_NETWORK_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -153,8 +156,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_PUBLICKEY_CREATION_STARTED);
                     sendEvent(context, CREATE_PUBLICKEY_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -162,7 +164,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_PUBLICKEY_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create public key for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -180,8 +182,7 @@ public class EnvCreationActions {
                     environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_FREEIPA_CREATION_STARTED);
                     sendEvent(context, CREATE_FREEIPA_EVENT.selector(), environmentDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
@@ -189,7 +190,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
-                    notificationService.send(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED, payload, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_FREEIPA_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
@@ -210,9 +211,8 @@ public class EnvCreationActions {
                             Environment result = environmentService.save(environment);
                             environmentJobService.schedule(result);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FINISHED, simpleResponse, context.getFlowTriggerUserCrn());
+                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FINISHED);
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FINISHED_STATE");
@@ -235,9 +235,8 @@ public class EnvCreationActions {
                             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
                             environmentService.save(environment);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
-                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FAILED, environmentDto, exception);
-                            notificationService.send(ResourceEvent.ENVIRONMENT_CREATION_FAILED, simpleResponse, context.getFlowTriggerUserCrn());
+                            eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FAILED);
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
                 LOGGER.info("Flow entered into ENV_CREATION_FAILED_STATE");

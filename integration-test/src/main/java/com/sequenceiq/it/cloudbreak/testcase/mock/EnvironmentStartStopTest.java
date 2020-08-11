@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentListStructuredEventAssertions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -48,6 +49,9 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     @Inject
     private DistroXTestClient distroXTestClient;
 
+    @Inject
+    private EnvironmentListStructuredEventAssertions environmentListStructuredEventAssertions;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -60,7 +64,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     @Description(
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
-            then = "should be stopped first and started after it")
+            then = "should be stopped first and started after it and validate the flow events")
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         setUpFreeIpaRouteStubbing(testContext);
         testContext
@@ -69,7 +73,9 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
-                .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .withCatalog(testContext
+                        .getImageCatalogMockServerSetup()
+                        .getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
@@ -122,6 +128,13 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 // await started env
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
+                .when(environmentTestClient.delete())
+                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
+                .then(environmentListStructuredEventAssertions::checkCreateEvents)
+                .then(environmentListStructuredEventAssertions::checkStopEvents)
+                .then(environmentListStructuredEventAssertions::checkStartEvents)
+                .then(environmentListStructuredEventAssertions::checkDeleteEvents)
                 .validate();
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }
 }

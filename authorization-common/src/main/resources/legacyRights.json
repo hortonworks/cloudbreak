@@ -73,5 +73,6 @@
   "datalake/read": "datalake/read",
   "datalake/write": "datalake/write",
   "datahub/read": "datahub/read",
-  "datahub/write": "datahub/write"
+  "datahub/write": "datahub/write",
+  "structured_events/read": "structured_events/read"
 }

@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
@@ -41,7 +41,7 @@ public class EventV4Controller implements EventV4Endpoint {
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
     @Inject
-    private StructuredEventService structuredEventService;
+    private LegacyStructuredEventService legacyStructuredEventService;
 
     @Inject
     private StackService stackService;
@@ -68,12 +68,12 @@ public class EventV4Controller implements EventV4Endpoint {
 
     @Override
     public StructuredEventContainer structured(String name) {
-        return structuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
+        return legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
     }
 
     @Override
     public Response download(String name) {
-        StructuredEventContainer events = structuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
+        StructuredEventContainer events = legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));

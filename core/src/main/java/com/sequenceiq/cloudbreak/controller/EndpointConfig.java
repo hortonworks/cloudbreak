@@ -84,7 +84,7 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${info.app.version:unspecified}")
     private String cbVersion;
 
-    @Value("${cb.structuredevent.rest.enabled:false}")
+    @Value("${cb.structuredevent.rest.enabled}")
     private Boolean auditEnabled;
 
     @Inject
