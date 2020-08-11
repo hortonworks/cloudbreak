@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
@@ -102,4 +104,26 @@ public class CredentialValidator {
                 .orElse(null)), "Role ARN is not found in credential request.");
         return resultBuilder.build();
     }
+
+    public ValidationResult validateAzureCredentialRequest(CredentialRequest credentialRequest) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.ifError(() -> !AZURE.name().equalsIgnoreCase(credentialRequest.getCloudPlatform()),
+                "Credential request is not for AZURE.");
+        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(credentialRequest.getAzure())
+                .map(AzureCredentialRequestParameters::getSubscriptionId)
+                .orElse(null)), "Subscription ID is not found in credential request.");
+        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(credentialRequest.getAzure())
+                .map(AzureCredentialRequestParameters::getTenantId)
+                .orElse(null)), "Tenant ID is not found in credential request.");
+        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(credentialRequest.getAzure())
+                .map(AzureCredentialRequestParameters::getAppBased)
+                .map(AppBasedRequest::getAccessKey)
+                .orElse(null)), "Access key is not found in credential request.");
+        resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(credentialRequest.getAzure())
+                .map(AzureCredentialRequestParameters::getAppBased)
+                .map(AppBasedRequest::getSecretKey)
+                .orElse(null)), "Secret key (app password) is not found in credential request.");
+        return resultBuilder.build();
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.v1;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Map;
@@ -32,7 +34,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
@@ -224,9 +225,13 @@ public class CredentialV1Controller extends NotificationController implements Cr
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
     public Object getCreateCredentialForCli(CredentialRequest credentialRequest) {
-        if (!CloudPlatform.AWS.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
+        if (AWS.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
+            return credentialService.getCreateAWSCredentialForCli(credentialRequest);
+        } else if (AZURE.equalsIgnoreCase(credentialRequest.getCloudPlatform())) {
+            return credentialService.getCreateAzureCredentialForCli(credentialRequest);
+        } else {
             return new EmptyResponse();
         }
-        return credentialService.getCreateAWSCredentialForCli(credentialRequest);
     }
+
 }

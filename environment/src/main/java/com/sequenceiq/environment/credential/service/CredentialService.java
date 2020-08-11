@@ -28,6 +28,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
+import com.cloudera.cdp.environments.model.CreateAzureCredentialRequest;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
@@ -51,6 +52,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
+import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAzureCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.notification.NotificationSender;
@@ -82,6 +84,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Inject
     private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
+
+    @Inject
+    private CredentialRequestToCreateAzureCredentialRequestConverter credentialRequestToCreateAzureCredentialRequestConverter;
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -265,6 +270,14 @@ public class CredentialService extends AbstractCredentialService implements Reso
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
         return credentialRequestToCreateAWSCredentialRequestConverter.convert(credentialRequest);
+    }
+
+    public CreateAzureCredentialRequest getCreateAzureCredentialForCli(CredentialRequest credentialRequest) {
+        ValidationResult validationResult = credentialValidator.validateAzureCredentialRequest(credentialRequest);
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        return credentialRequestToCreateAzureCredentialRequestConverter.convert(credentialRequest);
     }
 
     Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms, CredentialType type) {
