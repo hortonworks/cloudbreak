@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.config;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.List;
 import java.util.Set;
@@ -63,20 +62,6 @@ public class CmMgmtServiceConfigLocationServiceTest {
         assertEquals(VOLUME_PREFIX + "cloudera-scm-headlamp", getApiConfig(REPORTSMANAGER, "headlamp_scratch_dir", apiRoleList).getValue());
         assertEquals(VOLUME_PREFIX + "cloudera-service-monitor", getApiConfig(SERVICEMONITOR, "firehose_storage_dir", apiRoleList).getValue());
         assertEquals(TEST_CONFIG_VALUE, getApiConfig(TEST_ROLE, TEST_CONFIG_NAME, apiRoleList).getValue());
-    }
-
-    @Test
-    public void testSetConfigLocationsShouldNotSetLocationsWhenThereAreNoAttachedVolumes() {
-        Stack stack = new Stack();
-        stack.setPlatformVariant(CloudConstants.AWS);
-        ApiRoleList apiRoleList = createApiRoleListWithoutConfig();
-
-        underTest.setConfigs(stack, apiRoleList);
-
-        assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(EVENTSERVER)).findFirst().get().getConfig());
-        assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(HOSTMONITOR)).findFirst().get().getConfig());
-        assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(REPORTSMANAGER)).findFirst().get().getConfig());
-        assertNull(apiRoleList.getItems().stream().filter(apiRole -> apiRole.getName().equals(SERVICEMONITOR)).findFirst().get().getConfig());
     }
 
     private ApiConfig getApiConfig(String roleName, String configName, ApiRoleList apiRoleList) {
