@@ -53,6 +53,9 @@ public class CloudStorageLocationValidator {
             if (logging.getAdlsGen2() != null) {
                 return Optional.of(logging.getAdlsGen2().getType());
             }
+            if (logging.getGcs() != null) {
+                return Optional.of(logging.getGcs().getType());
+            }
         }
         return response;
     }
