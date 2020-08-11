@@ -47,6 +47,6 @@ public class AwsRdsStartService {
         Waiter<DescribeDBInstancesRequest> rdsWaiter = rdsClient.waiters().dBInstanceAvailable();
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(rdsWaiter, describeDBInstancesRequest, stackCancellationCheck);
+        run(rdsWaiter, describeDBInstancesRequest, stackCancellationCheck, "RDS start failed");
     }
 }

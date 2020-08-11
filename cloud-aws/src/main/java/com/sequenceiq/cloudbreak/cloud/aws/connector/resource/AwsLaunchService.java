@@ -150,7 +150,7 @@ public class AwsLaunchService {
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(creationWaiter, describeStacksRequest, stackCancellationCheck);
+        run(creationWaiter, describeStacksRequest, stackCancellationCheck, "Stack creation failed");
 
         List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);

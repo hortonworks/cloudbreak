@@ -166,6 +166,7 @@ public class AwsDownscaleService {
         Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(stackId);
-        run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck);
+        run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck,
+                String.format("There was an error when application are deleting instances", String.join(",", instanceIds)));
     }
 }
