@@ -31,6 +31,7 @@
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-JOURNALNODE-BASE",
+          "ranger-RANGER_ADMIN-BASE",
           "ranger-RANGER_USERSYNC-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE",
