@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.client;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -19,5 +20,7 @@ public interface EnvironmentClient {
     FlowEndpoint flowEndpoint();
 
     FlowPublicEndpoint flowPublicEndpoint();
+
+    CDPStructuredEventV1Endpoint structuredEventsV1Endpoint();
 
 }

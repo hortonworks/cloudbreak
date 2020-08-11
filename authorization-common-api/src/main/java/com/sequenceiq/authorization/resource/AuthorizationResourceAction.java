@@ -83,7 +83,8 @@ public enum AuthorizationResourceAction {
     DATALAKE_READ("datalake/read", AuthorizationResourceType.DATALAKE),
     DATALAKE_WRITE("datalake/write", AuthorizationResourceType.DATALAKE),
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
-    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
+    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB),
+    STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT);
 
     private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
             .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));

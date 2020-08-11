@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -84,7 +84,7 @@ public class ImageCatalogServiceDefaultTest {
     private UserService userService;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Mock
     private EntitlementService entitlementService;

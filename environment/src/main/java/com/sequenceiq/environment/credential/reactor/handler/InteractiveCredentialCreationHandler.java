@@ -16,9 +16,9 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.notification.NotificationService;
 
 import reactor.bus.Event;
 
@@ -30,7 +30,7 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
     private CredentialService credentialService;
 
     @Inject
-    private NotificationService notificationService;
+    private EventSenderService eventService;
 
     @Inject
     private CredentialToCredentialV1ResponseConverter extendedCloudCredentialToCredentialConverter;
@@ -53,12 +53,12 @@ public class InteractiveCredentialCreationHandler implements EventHandler<Intera
             CredentialResponse payload = extendedCloudCredentialToCredentialConverter.convert(credential);
             LOGGER.debug("Sending notification that the interactive credential successfully created account id {} creator {} credential name {}",
                     credential.getAccountId(), credential.getCreator(), credential.getName());
-            notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_CREATED, payload, credential.getCreator());
+            eventService.sendEventAndNotificationWithPayload(credential, credential.getCreator(), CREDENTIAL_AZURE_INTERACTIVE_CREATED, payload);
             LOGGER.info("Azure interactive credential ({}) succesfully created", credential.getName());
         } catch (BadRequestException e) {
             LOGGER.debug("Sending notification that the interactive credential failed to create account id {} creator {} credential name {}",
                     credential.getAccountId(), credential.getCreator(), credential.getName());
-            notificationService.send(CREDENTIAL_AZURE_INTERACTIVE_FAILED, credential.getCreator());
+            eventService.sendEventAndNotificationWithPayload(credential, credential.getCreator(), CREDENTIAL_AZURE_INTERACTIVE_FAILED, null);
             LOGGER.info("Failed to create Azure interactive credential with name \"{}\"", credential.getName());
         }
     }

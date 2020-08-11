@@ -3,6 +3,7 @@ package com.sequenceiq.environment.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -44,6 +45,11 @@ public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
     @Override
     public FlowPublicEndpoint flowPublicEndpoint() {
         return getEndpoint(FlowPublicEndpoint.class);
+    }
+
+    @Override
+    public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
+        return getEndpoint(CDPStructuredEventV1Endpoint.class);
     }
 }
 

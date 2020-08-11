@@ -8,15 +8,17 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Transactional(TxType.REQUIRED)
-public interface EnvironmentRepository extends JpaRepository<Environment, Long> {
+@EntityType(entityClass = Environment.class)
+public interface EnvironmentRepository extends AccountAwareResourceRepository<Environment, Long> {
 
     @Query("SELECT e FROM Environment e "
             + "LEFT JOIN FETCH e.network n "

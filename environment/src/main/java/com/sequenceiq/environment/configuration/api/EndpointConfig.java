@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -45,7 +47,8 @@ public class EndpointConfig extends ResourceConfig {
             UtilController.class,
             FlowController.class,
             FlowPublicController.class,
-            AuthorizationInfoController.class);
+            AuthorizationInfoController.class,
+            CDPStructuredEventV1Controller.class);
 
     private final String applicationVersion;
 
@@ -54,7 +57,7 @@ public class EndpointConfig extends ResourceConfig {
     private final List<ExceptionMapper<?>> exceptionMappers;
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
-            @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
+            @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
             List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
             ClientTracingFeature clientTracingFeature) {
 
@@ -91,6 +94,10 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
+
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

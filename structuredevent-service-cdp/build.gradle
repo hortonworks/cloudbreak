@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = "$repoUrl" }
+}
+
+ext['kafka.version'] = '2.3.1'
+
+jar {
+    baseName = 'structuredevent-service-cdp'
+    archiveName = 'structuredevent-service-cdp.jar'
+}
+
+dependencies {
+    compile group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
+
+    compile project(':cloud-reactor')
+    compile project(':structuredevent-model')
+    compile project(':structuredevent-api-cdp')
+    compile project(':auth-connector')
+}

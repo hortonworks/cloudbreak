@@ -137,4 +137,9 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     protected String name(CredentialResponse entity) {
         return entity.getName();
     }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
 }

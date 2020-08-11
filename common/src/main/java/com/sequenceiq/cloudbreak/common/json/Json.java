@@ -4,20 +4,28 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 
+import net.sf.json.JSONArray;
+import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
 
 public class Json implements Serializable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Json.class);
 
     private String value;
 
@@ -169,5 +177,29 @@ public class Json implements Serializable {
         sb.append("value='").append(value).append('\'');
         sb.append('}');
         return sb.toString();
+    }
+
+    public boolean isObject() {
+        try {
+            JSONObject.fromObject(value);
+            return true;
+        } catch (JSONException e) {
+            LOGGER.debug("This json is not an Object: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean isArray() {
+        try {
+            JSONArray.fromObject(value);
+            return true;
+        } catch (JSONException e) {
+            LOGGER.debug("This json is not an Array: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    public List<String> asArray() {
+        return (List<String>) JSONArray.fromObject(value).stream().map(Object::toString).collect(Collectors.toList());
     }
 }

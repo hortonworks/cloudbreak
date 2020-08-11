@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.db.LegacyStructuredEventDBService;
@@ -40,10 +40,10 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     private LegacyStructuredEventDBService legacyStructuredEventDBService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     public AuditEventV4Response getAuditEvent(Long auditId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
     }
 
@@ -54,7 +54,7 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     }
 
     public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace,
                 resourceType, resourceId, resourceCrn);

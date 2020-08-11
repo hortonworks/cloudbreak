@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -39,12 +40,12 @@ public class StructuredNotificationEvent extends StructuredEvent {
 
     @Override
     public String getStatus() {
-        return "SENT";
+        return SENT;
     }
 
     @Override
     public Long getDuration() {
-        return 0L;
+        return ZERO;
     }
 
     public void setNotificationDetails(NotificationDetails notificationDetails) {

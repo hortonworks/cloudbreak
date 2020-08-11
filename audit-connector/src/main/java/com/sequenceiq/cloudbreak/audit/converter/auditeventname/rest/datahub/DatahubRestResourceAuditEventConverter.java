@@ -7,18 +7,18 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.RestCommonService;
 import com.sequenceiq.cloudbreak.audit.converter.auditeventname.rest.RestResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyRestCommonService;
 
 @Component
 public class DatahubRestResourceAuditEventConverter implements RestResourceAuditEventConverter {
 
     @Inject
-    private RestCommonService restCommonService;
+    private LegacyRestCommonService legacyRestCommonService;
 
     @Override
     public AuditEventName auditEventName(StructuredRestCallEvent structuredEvent) {
@@ -77,6 +77,6 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
 
     @Override
     public Map<String, Object> requestParameters(StructuredRestCallEvent structuredEvent) {
-        return restCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
+        return legacyRestCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
     }
 }

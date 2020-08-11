@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 

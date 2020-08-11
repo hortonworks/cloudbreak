@@ -36,7 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -51,7 +51,7 @@ class StructuredEventFilterTest {
     private SecurityContext securityContext;
 
     @Mock
-    private StructuredEventClient structuredEventClient;
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -106,10 +106,10 @@ class StructuredEventFilterTest {
         ContainerRequest requestContext = createRequestContext(headersMap);
         underTest.filter(requestContext);
 
-        requestContext.setProperty("structuredevent.loggingEnabled", Boolean.TRUE);
+        requestContext.setProperty("cdp.structuredevent.loggingEnabled", Boolean.TRUE);
 
         ArgumentCaptor<StructuredRestCallEvent> structuredEventCaptor = ArgumentCaptor.forClass(StructuredRestCallEvent.class);
-        doNothing().when(structuredEventClient).sendStructuredEvent(structuredEventCaptor.capture());
+        doNothing().when(legacyStructuredEventClient).sendStructuredEvent(structuredEventCaptor.capture());
 
         ContainerResponseContext responseContext = new ContainerResponse(requestContext, Response.accepted().build());
         underTest.filter(requestContext, responseContext);

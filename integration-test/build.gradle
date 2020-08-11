@@ -79,6 +79,12 @@ dependencies {
   compile (project(':environment-api')) {
     transitive = false;
   }
+  compile (project(':structuredevent-api-cdp')) {
+    transitive = false;
+  }
+  compile (project(':structuredevent-service-legacy')) {
+    transitive = false;
+  }
   compile (project(':authorization-common-api')) {
     transitive = false;
   }

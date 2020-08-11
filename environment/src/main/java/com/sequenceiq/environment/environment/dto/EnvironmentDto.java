@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -18,7 +19,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
-public class EnvironmentDto implements Payload {
+public class EnvironmentDto implements Payload, AccountAwareResource {
 
     private Long id;
 

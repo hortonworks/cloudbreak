@@ -11,24 +11,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 
 public class CloudbreakUserConfiguratorFilter extends OncePerRequestFilter {
 
-    private final RestRequestThreadLocalService restRequestThreadLocalService;
+    private final LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     private final AuthenticatedUserService authenticatedUserService;
 
-    public CloudbreakUserConfiguratorFilter(RestRequestThreadLocalService restRequestThreadLocalService, AuthenticatedUserService authenticatedUserService) {
-        this.restRequestThreadLocalService = restRequestThreadLocalService;
+    public CloudbreakUserConfiguratorFilter(LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService,
+            AuthenticatedUserService authenticatedUserService) {
+        this.legacyRestRequestThreadLocalService = legacyRestRequestThreadLocalService;
         this.authenticatedUserService = authenticatedUserService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
-        restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
+        legacyRestRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
         filterChain.doFilter(request, response);
-        restRequestThreadLocalService.removeCloudbreakUser();
+        legacyRestRequestThreadLocalService.removeCloudbreakUser();
     }
 }

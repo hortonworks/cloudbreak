@@ -22,13 +22,13 @@ public class FlowDetails implements Serializable {
 
     private String flowEvent;
 
-    private Long duration;
+    private long duration;
 
     public FlowDetails() {
     }
 
     public FlowDetails(String flowChainType, String flowType, String flowChainId, String flowId, String flowState, String nextFlowState, String flowEvent,
-            Long duration) {
+            long duration) {
         this.flowChainType = flowChainType;
         this.flowType = flowType;
         this.flowChainId = flowChainId;
@@ -67,7 +67,7 @@ public class FlowDetails implements Serializable {
         return flowEvent;
     }
 
-    public Long getDuration() {
+    public long getDuration() {
         return duration;
     }
 

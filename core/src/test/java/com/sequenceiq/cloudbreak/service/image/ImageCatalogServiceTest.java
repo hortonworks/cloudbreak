@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.structuredevent.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
@@ -143,7 +143,7 @@ public class ImageCatalogServiceTest {
     private UserService userService;
 
     @Mock
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Mock
     private User user;
@@ -619,7 +619,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
+        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
         when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
         when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
 
@@ -636,7 +636,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
-        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
+        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
         when(userService.getOrCreate(any(CloudbreakUser.class))).thenReturn(user);
         when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
 
