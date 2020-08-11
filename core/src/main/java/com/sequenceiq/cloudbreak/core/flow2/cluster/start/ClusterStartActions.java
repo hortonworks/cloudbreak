@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
@@ -32,11 +34,26 @@ public class ClusterStartActions {
     @Inject
     private ClusterStartService clusterStartService;
 
-    @Bean(name = "UPDATING_DNS_IN_PEM_STATE")
-    public Action<?, ?> updateClusterDnsEntriesInPem() {
+    @Bean(name = "CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE")
+    public Action<?, ?> startingClusterPillarConfigUpdate() {
         return new AbstractClusterAction<>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) {
+                sendEvent(context, new ClusterStartPillarConfigUpdateRequest(context.getStackId()));
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new ClusterStartRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "UPDATING_DNS_IN_PEM_STATE")
+    public Action<?, ?> updateClusterDnsEntriesInPem() {
+        return new AbstractClusterAction<>(ClusterStartPillarConfigUpdateResult.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, ClusterStartPillarConfigUpdateResult payload, Map<Object, Object> variables) {
                 Stack stack = getStackService().getByIdWithListsInTransaction(payload.getResourceId());
                 clusterStartService.updateDnsEntriesInPem(stack);
                 sendEvent(context);
