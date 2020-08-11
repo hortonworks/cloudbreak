@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -142,14 +143,18 @@ public class StackOperationService {
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
         if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
-                throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because the cluster's state is %s.",
-                        stack.getName(), cluster.getStatus().name()));
+                throw NotAllowedStatusUpdate
+                        .stack(stack)
+                        .to(STOPPED)
+                        .badRequest();
             } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
                 setStackStatusToStopRequested(stack);
                 return clusterOperationService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
-                throw new BadRequestException(format("Cannot update the status of cluster '%s' to STOPPED, because the cluster's state is %s.",
-                        cluster.getName(), cluster.getStatus()));
+                throw NotAllowedStatusUpdate
+                        .cluster(stack)
+                        .to(STOPPED)
+                        .badRequest();
             }
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
@@ -169,7 +174,7 @@ public class StackOperationService {
 
     private FlowIdentifier repairFailedNodes(Stack stack, User user) {
         permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
-        LOGGER.debug("Received request to replace failed nodes: " + stack.getId());
+        LOGGER.debug("Received request to replace failed nodes: {}", stack.getId());
         return flowManager.triggerManualRepairFlow(stack.getId());
     }
 
@@ -244,8 +249,10 @@ public class StackOperationService {
                 clusterOperationService.updateStatus(startStack, StatusRequest.STARTED);
             }
         } else {
-            throw new BadRequestException(format("Cannot update the status of stack '%s' to STARTED, because it is in %s state",
-                    stack.getName(), stack.getStatus().name()));
+            throw NotAllowedStatusUpdate
+                    .stack(stack)
+                    .to(DetailedStackStatus.START_REQUESTED)
+                    .badRequest();
         }
         return flowIdentifier;
     }
@@ -266,8 +273,10 @@ public class StackOperationService {
             throw new BadRequestException(
                     format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
-            throw new BadRequestException(
-                    format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
+            throw NotAllowedStatusUpdate
+                    .stack(stack)
+                    .to(STOPPED)
+                    .badRequest();
         }
         return result;
     }
