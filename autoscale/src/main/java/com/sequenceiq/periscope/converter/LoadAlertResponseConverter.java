@@ -19,7 +19,6 @@ public class LoadAlertResponseConverter extends AbstractConverter<LoadAlertRespo
     @Override
     public LoadAlertResponse convert(LoadAlert source) {
         LoadAlertResponse json = new LoadAlertResponse();
-        json.setId(source.getId());
         json.setCrn(source.getAlertCrn());
         json.setAlertName(source.getName());
         json.setDescription(source.getDescription());

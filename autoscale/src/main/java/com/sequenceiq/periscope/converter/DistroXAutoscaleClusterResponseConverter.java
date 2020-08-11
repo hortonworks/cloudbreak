@@ -27,7 +27,6 @@ public class DistroXAutoscaleClusterResponseConverter extends AbstractConverter<
                 source.getStackCrn(),
                 source.getStackName(),
                 source.isAutoscalingEnabled(),
-                source.getId(),
                 source.getState());
 
         json.setStackType(source.getStackType());

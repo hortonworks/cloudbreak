@@ -9,9 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class TimeAlertResponse extends AbstractAlertJson {
 
-    @ApiModelProperty(BaseAlertJsonProperties.ID)
-    private Long id;
-
     @ApiModelProperty(BaseAlertJsonProperties.CRN)
     private String crn;
 
@@ -38,14 +35,6 @@ public class TimeAlertResponse extends AbstractAlertJson {
 
     public void setCron(String cron) {
         this.cron = cron;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getCrn() {

@@ -9,9 +9,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class LoadAlertResponse extends AbstractAlertJson {
 
-    @ApiModelProperty(BaseAlertJsonProperties.ID)
-    private Long id;
-
     @ApiModelProperty(BaseAlertJsonProperties.CRN)
     private String crn;
 
@@ -20,14 +17,6 @@ public class LoadAlertResponse extends AbstractAlertJson {
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION)
     private LoadAlertConfigurationResponse loadAlertConfiguration;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getCrn() {
         return crn;

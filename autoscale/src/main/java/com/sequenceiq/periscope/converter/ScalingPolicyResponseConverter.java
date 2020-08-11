@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.ScalingPolicyResponse;
-import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 
 @Component
@@ -22,12 +21,7 @@ public class ScalingPolicyResponseConverter extends AbstractConverter<ScalingPol
     @Override
     public ScalingPolicyResponse convert(ScalingPolicy source) {
         ScalingPolicyResponse json = new ScalingPolicyResponse();
-        json.setId(source.getId());
         json.setAdjustmentType(source.getAdjustmentType());
-        BaseAlert alert = source.getAlert();
-        if (alert != null) {
-            json.setAlertId(alert.getId());
-        }
         json.setName(source.getName());
         json.setScalingAdjustment(source.getScalingAdjustment());
         json.setHostGroup(source.getHostGroup());
