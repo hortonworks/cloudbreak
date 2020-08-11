@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -185,9 +183,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     .withVersion(defaultCDHInfo.getVersion())
                     .withName(stack.get("repoid").split("-")[0])
                     .withParcel(stack.get(osType));
-            Set<ClouderaManagerProduct> products = CollectionUtils.isNotEmpty(defaultCDHInfo.getParcels())
-                    ? Sets.newHashSet(defaultCDHInfo.getParcels()) : new HashSet<>();
-            products.add(cmProduct);
+            Set<ClouderaManagerProduct> products = Sets.newHashSet(cmProduct);
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
             Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint(), true);
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
