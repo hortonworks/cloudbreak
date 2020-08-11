@@ -13,6 +13,13 @@ import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 
 @Service
 public class CleanupClientUtil {
+
+    private EnvironmentClient environmentClient;
+
+    private SdxClient sdxClient;
+
+    private CloudbreakClient cloudbreakClient;
+
     @Value("${integrationtest.cloudbreak.server}")
     private String server;
 
@@ -35,23 +42,50 @@ public class CleanupClientUtil {
     }
 
     public CloudbreakClient createCloudbreakClient() {
-        return new CloudbreakApiKeyClient(
+        cloudbreakClient = new CloudbreakApiKeyClient(
                 server + cbRootContextPath,
                 new ConfigKey(false, true, true))
                 .withKeys(accesskey, secretkey);
+        return cloudbreakClient;
+    }
+
+    public void setCloudbreakClient(CloudbreakClient cloudbreakClient) {
+        this.cloudbreakClient = cloudbreakClient;
+    }
+
+    public CloudbreakClient getCloudbreakClient() {
+        return cloudbreakClient;
     }
 
     public EnvironmentClient createEnvironmentClient() {
-        return new EnvironmentServiceApiKeyClient(
+        environmentClient = new EnvironmentServiceApiKeyClient(
                 server + envRootContextPath,
                 new ConfigKey(false, true, true))
                 .withKeys(accesskey, secretkey);
+        return environmentClient;
+    }
+
+    public void setEnvironmentClient(EnvironmentClient environmentClient) {
+        this.environmentClient = environmentClient;
+    }
+
+    public EnvironmentClient getEnvironmentClient() {
+        return environmentClient;
     }
 
     public SdxClient createSdxClient() {
-        return new SdxServiceApiKeyClient(
+        sdxClient = new SdxServiceApiKeyClient(
                 server + sdxRootContextPath,
                 new ConfigKey(false, true, true))
                 .withKeys(accesskey, secretkey);
+        return sdxClient;
+    }
+
+    public void setSdxClient(SdxClient sdxClient) {
+        this.sdxClient = sdxClient;
+    }
+
+    public SdxClient getSdxClient() {
+        return sdxClient;
     }
 }

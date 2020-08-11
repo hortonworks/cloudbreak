@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
@@ -124,8 +125,8 @@ public class IntegrationTestApp implements CommandLineRunner {
         setupSuites(testng);
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
-            LOG.info("Html result of test run: file://{}/test-output/index.html", outputDirectory);
-            LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", outputDirectory);
+            LOG.info("Html result of test run: file://{}/test-output/index.html", Paths.get(outputDirectory).toAbsolutePath().normalize());
+            LOG.info("Text based result of test run: file://{}/test-output/emailable-report.html", Paths.get(outputDirectory).toAbsolutePath().normalize());
         }
     }
 
@@ -143,10 +144,7 @@ public class IntegrationTestApp implements CommandLineRunner {
                 removeOldResourceFiles();
                 break;
             case CLEANUP_COMMAND:
-                cleanupUtil.cleanupDistroxes();
-                cleanupUtil.cleanupSdxes();
-                cleanupUtil.cleanupEnvironments();
-                cleanupUtil.cleanupCredentials();
+                cleanupUtil.cleanupAllResources();
                 break;
             default:
                 LOG.info("Unknown command: {}", itCommand);
