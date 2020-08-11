@@ -19,12 +19,12 @@ public abstract class AccountTagBase implements Serializable {
 
     @NotNull
     @ApiModelProperty(value = TagDescription.KEY, required = true)
-    @Size(max = 127, min = 4, message = "The length of the key has to be in range of 4 to 127")
+    @Size(max = 127, min = 3, message = "The length of the key has to be in range of 3 to 127")
     private String key;
 
     @NotNull
     @ApiModelProperty(value = TagDescription.VALUE, required = true)
-    @Size(max = 255, min = 4, message = "The length of the value has to be in range of 4 to 255")
+    @Size(max = 255, min = 3, message = "The length of the value has to be in range of 3 to 255")
     private String value;
 
     public String getValue() {
