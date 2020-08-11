@@ -13,8 +13,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import com.cloudera.cdp.datahub.model.AzureInstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.CreateAzureClusterRequest;
-import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -103,16 +103,16 @@ class DistroXV1RequestToCreateAzureClusterRequestConverterTest {
         return instanceGroup;
     }
 
-    private void assertInstanceGroups(Set<InstanceGroupV1Request> request, List<InstanceGroupRequest> result) {
+    private void assertInstanceGroups(Set<InstanceGroupV1Request> request, List<AzureInstanceGroupRequest> result) {
         request.forEach(expected -> {
-            Optional<InstanceGroupRequest> first = result.stream().filter(ig -> expected.getName().equals(ig.getInstanceGroupName())).findFirst();
+            Optional<AzureInstanceGroupRequest> first = result.stream().filter(ig -> expected.getName().equals(ig.getInstanceGroupName())).findFirst();
             assertTrue(first.isPresent());
-            InstanceGroupRequest igRequest = first.get();
+            AzureInstanceGroupRequest igRequest = first.get();
             assertInstanceGroup(expected, igRequest);
         });
     }
 
-    private void assertInstanceGroup(InstanceGroupV1Request expected, InstanceGroupRequest igRequest) {
+    private void assertInstanceGroup(InstanceGroupV1Request expected, AzureInstanceGroupRequest igRequest) {
         expected.getTemplate().getAttachedVolumes().forEach(av -> assertThat(igRequest.getAttachedVolumeConfiguration().stream()
                 .anyMatch(igr -> Objects.equals(av.getCount(), igr.getVolumeCount())
                         && Objects.equals(av.getSize(), igr.getVolumeSize())
@@ -124,8 +124,6 @@ class DistroXV1RequestToCreateAzureClusterRequestConverterTest {
         assertThat(igRequest.getRecipeNames()).hasSameElementsAs(expected.getRecipeNames());
         assertThat(igRequest.getRecoveryMode()).isEqualTo(expected.getRecoveryMode().name());
         assertThat(igRequest.getRootVolumeSize()).isEqualTo(expected.getTemplate().getRootVolume().getSize());
-        assertThat(igRequest.getVolumeEncryption().getEnableEncryption())
-                .isEqualTo(expected.getTemplate().getAzure().getEncrypted());
     }
 
 }
