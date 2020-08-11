@@ -132,7 +132,7 @@ export PUBLIC_IP=127.0.0.1
 
 Go to https://github.com/hortonworks/cloudbreak, either clone or download the repository, use SSH which is described here: https://help.github.com/articles/connecting-to-github-with-ssh/
 
-**Important**: update `~/.gradle/gradle.properties` file with the two following properties in order to download artifacts from the internal repository. Ask us for details in the [#eng_cb_dev_internal](https://cloudera.slack.com/archives/CF66M7WP6) Slack channel.
+**Important**: update `~/.gradle/gradle.properties` file with the two following properties in order to download artifacts from the internal repository. You can find the details on our [Wiki page](https://cloudera.atlassian.net/wiki/spaces/ENG/pages/793674498/CM+SDK+Credentials+-+Gradle+properties).
 - `defaultCmPrivateRepoUser`
 - `defaultCmPrivateRepoPassword`
 
