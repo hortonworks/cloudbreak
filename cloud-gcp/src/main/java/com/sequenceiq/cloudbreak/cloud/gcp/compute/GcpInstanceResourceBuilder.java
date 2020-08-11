@@ -122,6 +122,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
+        instance.setHostname(getHostname(cloudStack, buildableResource));
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
@@ -139,10 +140,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
-
+        // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
+        if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
+            tagList.add(group.getSecurity().getCloudSecurityId());
+        }
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '_', MAX_TAG_LENGTH)));
+        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
@@ -180,6 +184,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
+        if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
+            return cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+        }
+
+        return buildableResource.get(0).getName();
     }
 
     private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {

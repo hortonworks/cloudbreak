@@ -5,6 +5,7 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,6 +17,8 @@ public class EnvironmentLogging implements Serializable {
     private S3CloudStorageParameters s3;
 
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
+
+    private GcsCloudStorageV1Parameters gcs;
 
     private CloudwatchParams cloudwatch;
 
@@ -41,6 +44,14 @@ public class EnvironmentLogging implements Serializable {
 
     public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
+    }
+
+    public GcsCloudStorageV1Parameters getGcs() {
+        return gcs;
+    }
+
+    public void setGcs(GcsCloudStorageV1Parameters gcs) {
+        this.gcs = gcs;
     }
 
     public CloudwatchParams getCloudwatch() {
