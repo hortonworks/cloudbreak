@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.handler;
+package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import javax.inject.Inject;
 
@@ -9,22 +9,21 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateFailed;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateRequest;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Component
-public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<PillarConfigUpdateRequest> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PillarConfigUpdateHandler.class);
+public class ClusterStartPillarConfigUpdateHandler extends ExceptionCatcherEventHandler<ClusterStartPillarConfigUpdateRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartPillarConfigUpdateHandler.class);
 
     @Inject
     private PillarConfigUpdateService pillarConfigUpdateService;
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(PillarConfigUpdateRequest.class);
+        return EventSelectorUtil.selector(ClusterStartPillarConfigUpdateRequest.class);
     }
 
     @Override
@@ -34,11 +33,11 @@ public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<Pill
 
     @Override
     protected Selectable doAccept(HandlerEvent event) {
-        PillarConfigUpdateRequest request = event.getData();
+        ClusterStartPillarConfigUpdateRequest request = event.getData();
         Selectable response;
         try {
             pillarConfigUpdateService.doConfigUpdate(request.getResourceId());
-            response = new PillarConfigUpdateSuccess(request.getResourceId());
+            response = new ClusterStartPillarConfigUpdateResult(request);
         } catch (Exception e) {
             LOGGER.warn("Pillar configuration update failed.", e);
             response = new PillarConfigUpdateFailed(request.getResourceId(), e);
