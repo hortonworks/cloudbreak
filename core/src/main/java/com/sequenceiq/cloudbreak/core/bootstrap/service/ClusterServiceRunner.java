@@ -85,11 +85,18 @@ public class ClusterServiceRunner {
         stack.setCluster(updatedCluster);
     }
 
-    public void updateSaltState(Long stackId) throws CloudbreakException {
+    public void updateSaltState(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
                 .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
         hostRunner.runClusterServices(stack, cluster, List.of());
+    }
+
+    public void redeployGatewayCertificate(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
+                .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
+        hostRunner.redeployGatewayCertificate(stack, cluster);
     }
 
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
