@@ -26,16 +26,15 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
-import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredFlowEventFactory;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
 @Transactional
-public class LegacyStructuredFlowEventFactory implements StructuredFlowEventFactory {
+public class LegacyStructuredFlowEventFactory implements com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredFlowEventFactory.class);
 

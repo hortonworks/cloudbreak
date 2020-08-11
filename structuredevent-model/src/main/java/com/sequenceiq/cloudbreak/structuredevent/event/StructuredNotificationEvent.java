@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StructuredNotificationEvent extends StructuredEvent {

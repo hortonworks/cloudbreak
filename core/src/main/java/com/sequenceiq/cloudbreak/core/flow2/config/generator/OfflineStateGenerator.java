@@ -65,10 +65,9 @@ import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyFlowStructuredEventHandler;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.Flow;
@@ -258,13 +257,13 @@ public class OfflineStateGenerator {
     static class CustomBeanFactory extends DefaultListableBeanFactory {
         @Override
         public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
-            FlowStructuredEventHandler<?, ?> bean = new FlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
+            LegacyFlowStructuredEventHandler<?, ?> bean = new LegacyFlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
                     args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
                     (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
 
-            inject(bean, "structuredEventClient", (StructuredEventClient) structuredEvent -> {
+            inject(bean, "structuredEventClient", (LegacyStructuredEventClient) structuredEvent -> {
             });
-            StructuredFlowEventFactory factory = new LegacyStructuredFlowEventFactory();
+            LegacyStructuredFlowEventFactory factory = new com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory();
             inject(bean, "structuredFlowEventFactory", factory);
             inject(factory, "cloudbreakNodeConfig", new NodeConfig());
             inject(factory, "conversionService", new CustomConversionService());

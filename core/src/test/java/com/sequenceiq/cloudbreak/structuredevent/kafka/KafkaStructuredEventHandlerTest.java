@@ -39,7 +39,7 @@ public class KafkaStructuredEventHandlerTest {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     @InjectMocks
-    private KafkaStructuredEventHandler classIntest;
+    private LegacyKafkaStructuredEventHandler classIntest;
 
     @Test
     public void checkEventTypeBasedTopicDistribution() throws ExecutionException, InterruptedException {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
@@ -25,7 +26,7 @@ public class StructuredFlowEvent extends StructuredEvent {
     }
 
     public StructuredFlowEvent(String type, OperationDetails operation, FlowDetails flow, StackDetails stack,
-            ClusterDetails cluster, BlueprintDetails blueprintDetails) {
+                               ClusterDetails cluster, BlueprintDetails blueprintDetails) {
         super(type, operation);
         this.flow = flow;
         this.stack = stack;

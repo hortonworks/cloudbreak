@@ -53,8 +53,8 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
@@ -107,7 +107,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
 
     @Inject
     @Named("structuredEventClient")
-    private StructuredEventClient structuredEventClient;
+    private LegacyStructuredEventClient legacyStructuredEventClient;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -204,7 +204,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
             cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, serviceId);
         }
         Long workspaceId = cloudbreakRestRequestThreadLocalService.getRequestedWorkspaceId();
-        structuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
+        legacyStructuredEventClient.sendStructuredEvent(new StructuredRestCallEvent(createOperationDetails(restParams, requestTime, workspaceId, cloudbreakUser),
                 restCall));
     }
 
