@@ -225,6 +225,10 @@
         ],
         "serviceConfigs": [
           {
+            "name": "hbase_wal_dir",
+            "value": "/hbase-wals"
+          },          
+          {
             "name": "service_config_suppression_hadoop_secure_web_ui",
             "value": "true"
           }
