@@ -139,10 +139,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
-
+        // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
+        if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
+            tagList.add(group.getSecurity().getCloudSecurityId());
+        }
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '_', MAX_TAG_LENGTH)));
+        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
