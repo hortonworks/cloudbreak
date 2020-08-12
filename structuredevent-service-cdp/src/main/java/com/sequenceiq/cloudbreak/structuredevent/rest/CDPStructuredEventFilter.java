@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.lookup.CDPAccountAwareRepositoryLookupService;
-import com.sequenceiq.cloudbreak.structuredevent.repository.CDPResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser;
 import com.sequenceiq.flow.ha.NodeConfig;
 
@@ -89,7 +89,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
 
     private final List<String> skippedHeadersList = Lists.newArrayList("authorization");
 
-    private final Map<String, CDPResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
+    private final Map<String, AccountAwareResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
 
     private final Pattern extractIdRestParamFromResponsePattern = Pattern.compile("\"" + ID + "\":([0-9]*)");
 
@@ -135,7 +135,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
             if (pathAnnotation != null) {
                 String pathValue = pathAnnotation.value();
                 Class<?> entityClass = entityTypeAnnotation.value();
-                CDPResourceRepository<?, ?> repository = repositoryLookupService.getRepositoryForEntity(entityClass);
+                AccountAwareResourceRepository<?, ?> repository = repositoryLookupService.getRepositoryForEntity(entityClass);
                 pathRepositoryMap.put(pathValue, repository);
             }
         }
@@ -223,11 +223,11 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
 
     private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
         CDPRestUrlParser cdpRestUrlParser, String accountId) {
-        for (Entry<String, CDPResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
+        for (Entry<String, AccountAwareResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", accountId);
             String requestUrl = cdpRestUrlParser.getUrl(requestContext);
             if (('/' + requestUrl).startsWith(pathWithWorkspaceId)) {
-                CDPResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
+                AccountAwareResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
                 String resourceName = params.get(CDPRestUrlParser.RESOURCE_NAME);
                 if (resourceName != null) {
                     resourceRepository.findByNameAndAccountId(resourceName, accountId)

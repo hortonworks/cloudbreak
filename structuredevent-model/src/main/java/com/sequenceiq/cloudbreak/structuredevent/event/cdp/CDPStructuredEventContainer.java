@@ -17,7 +17,10 @@ public class CDPStructuredEventContainer {
     public CDPStructuredEventContainer() {
     }
 
-    public CDPStructuredEventContainer(List<CDPStructuredFlowEvent> flow, List<CDPStructuredRestCallEvent> rest, List<CDPStructuredNotificationEvent> notification) {
+    public CDPStructuredEventContainer(
+        List<CDPStructuredFlowEvent> flow,
+        List<CDPStructuredRestCallEvent> rest,
+        List<CDPStructuredNotificationEvent> notification) {
         this.flow = flow;
         this.rest = rest;
         this.notification = notification;

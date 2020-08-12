@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.BaseLegacyStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyFlowStructuredEventHandler;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventFactory;
@@ -263,7 +264,7 @@ public class OfflineStateGenerator {
 
             inject(bean, "structuredEventClient", (LegacyStructuredEventClient) structuredEvent -> {
             });
-            LegacyStructuredFlowEventFactory factory = new com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory();
+            LegacyStructuredFlowEventFactory factory = new BaseLegacyStructuredFlowEventFactory();
             inject(bean, "structuredFlowEventFactory", factory);
             inject(factory, "cloudbreakNodeConfig", new NodeConfig());
             inject(factory, "conversionService", new CustomConversionService());

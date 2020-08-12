@@ -12,7 +12,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)
-public interface CDPResourceRepository<T extends AccountAwareResource, ID extends Serializable> extends CrudRepository<T, ID> {
+public interface AccountAwareResourceRepository<T extends AccountAwareResource, ID extends Serializable> extends CrudRepository<T, ID> {
 
     Set<T> findAllByAccount(String accountId);
 

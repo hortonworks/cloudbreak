@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventSenderService;
 
 public interface CDPStructuredEventService extends CDPStructuredEventSenderService {
@@ -19,7 +19,7 @@ public interface CDPStructuredEventService extends CDPStructuredEventSenderServi
 
     <T extends CDPStructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId, Pageable pageable);
 
-    StructuredEventContainer getEventsForUserWithResourceId(String resourceType, Long resourceId);
+    CDPStructuredEventContainer getEventsForUserWithResourceId(String resourceType, Long resourceId);
 
-    StructuredEventContainer getStructuredEventsForStack(String name, Long workspaceId);
+    CDPStructuredEventContainer getStructuredEventsForObject(String name, String accountId);
 }

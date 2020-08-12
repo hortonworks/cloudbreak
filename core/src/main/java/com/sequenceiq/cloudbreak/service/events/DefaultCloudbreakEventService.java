@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.BaseLegacyStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -75,7 +75,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackService stackService;
 
     @Inject
-    private LegacyStructuredFlowEventFactory legacyStructuredFlowEventFactory;
+    private BaseLegacyStructuredFlowEventFactory baseLegacyStructuredFlowEventFactory;
 
     @Inject
     private StackToStackV4ResponseConverter stackV4ResponseConverter;
@@ -145,7 +145,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             String eventMessage, String instanceGroupName) {
 
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        StructuredNotificationEvent structuredNotificationEvent = legacyStructuredFlowEventFactory.createStructuredNotificationEvent(
+        StructuredNotificationEvent structuredNotificationEvent = baseLegacyStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,
                 eventType,
                 eventMessage,

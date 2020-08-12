@@ -6,16 +6,16 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.structuredevent.repository.CDPResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 
 @Service
-public class CDPAccountAwareRepositoryLookupService extends CDPRepositoryLookupService<CDPResourceRepository<?, ?>> {
+public class CDPAccountAwareRepositoryLookupService extends CDPRepositoryLookupService<AccountAwareResourceRepository<?, ?>> {
 
     @Inject
-    private List<CDPResourceRepository<?, ?>> repositoryList;
+    private List<AccountAwareResourceRepository<?, ?>> repositoryList;
 
     @Override
-    protected List<CDPResourceRepository<?, ?>> getRepositoryList() {
+    protected List<AccountAwareResourceRepository<?, ?>> getRepositoryList() {
         return repositoryList;
     }
 }
