@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
 @Service
 public class AzureStorage {
@@ -75,23 +76,24 @@ public class AzureStorage {
         return ArmAttachedStorageOption.valueOf(attachedStorageOption);
     }
 
-    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
-        return getCustomImageId(client, ac, stack, stack.getImage().getImageName());
+    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
+        return getCustomImage(client, ac, stack, stack.getImage().getImageName());
     }
 
-    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
+    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
         String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        return getCustomImageId(imageBlobUri, imageResourceGroupName, region, client);
+        return getCustomImage(imageBlobUri, imageResourceGroupName, region, client);
     }
 
-    private String getCustomImageId(String vhd, String imageResourceGroupName, String region, AzureClient client) {
-        String customImageId = client.getCustomImageId(imageResourceGroupName, vhd, region);
+    private AzureImage getCustomImage(String vhd, String imageResourceGroupName, String region, AzureClient client) {
+        AzureImage image = client.getCustomImageId(imageResourceGroupName, vhd, region);
+        String customImageId = image.getId();
         LOGGER.debug("Custom image id: {}", customImageId);
-        return customImageId;
+        return image;
     }
 
     public String getImageStorageName(AzureCredentialView acv, CloudContext cloudContext, CloudStack cloudStack) {
@@ -108,14 +110,15 @@ public class AzureStorage {
         return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region, Boolean encrypted,
-            Map<String, String> tags)
+    public StorageAccount createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup,
+            String region, Boolean encrypted, Map<String, String> tags)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
             StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
                     storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
-            azureStorageAccountBuilderService.buildStorageAccount(client, storageAccountParameters);
+            return azureStorageAccountBuilderService.buildStorageAccount(client, storageAccountParameters);
         }
+        throw new CloudbreakServiceException(String.format("Trying to delete non-existing storage account %s", osStorageName));
     }
 
     public void deleteStorage(AzureClient client, String osStorageName, String storageGroup)

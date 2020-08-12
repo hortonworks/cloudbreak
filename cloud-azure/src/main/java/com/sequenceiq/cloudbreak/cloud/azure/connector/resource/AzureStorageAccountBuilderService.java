@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
+import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -25,16 +26,17 @@ public class AzureStorageAccountBuilderService {
     @Inject
     private AzureStorageAccountTemplateBuilder azureStorageAccountTemplateBuilder;
 
-    public void buildStorageAccount(AzureClient client, StorageAccountParameters storageAccountParameters) {
+    public StorageAccount buildStorageAccount(AzureClient client, StorageAccountParameters storageAccountParameters) {
         String resourceGroupName = storageAccountParameters.getResourceGroupName();
         String storageAccountName = storageAccountParameters.getStorageAccountName();
         try {
             String template = azureStorageAccountTemplateBuilder.build(storageAccountParameters);
-            if (!client.templateDeploymentExists(resourceGroupName, storageAccountName)) {
+            if (client.getTemplateDeploymentStatus(resourceGroupName, storageAccountName).isPermanent()) {
                 String parameters = new Json(Map.of()).getValue();
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, storageAccountName, template, parameters);
                 LOGGER.debug("Created template deployment for storage account: {}", templateDeployment.exportTemplate().template());
             }
+            return client.getStorageAccountByGroup(resourceGroupName, storageAccountName);
         } catch (CloudException e) {
             LOGGER.info("Provisioning error, cloud exception happened: ", e);
             if (e.body() != null && e.body().details() != null) {
