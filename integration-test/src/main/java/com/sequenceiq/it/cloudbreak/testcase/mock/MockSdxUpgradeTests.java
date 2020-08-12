@@ -47,7 +47,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running Cloudbreak",
+            given = "there is a running Cloudbreak1",
             when = "start an sdx cluster",
             then = "Upgrade criteria is not met"
     )
