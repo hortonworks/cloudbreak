@@ -192,7 +192,7 @@ public class ScalingRequest implements Runnable {
     private void createHistoryAndNotify(int adjustmentCount, int totalNodes, String statusReason, ScalingStatus scalingStatus) {
         History history = historyService.createEntry(scalingStatus,
                 StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
-        notificationSender.send(policy.getAlert().getCluster(), history);
+        notificationSender.sendHistoryUpdateNotification(history, cluster);
     }
 
     private String getMessageForCBStatus(String cbMessage) {

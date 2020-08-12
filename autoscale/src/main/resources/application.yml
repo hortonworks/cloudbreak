@@ -44,6 +44,8 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
+  notification:
+    endpoint: http://localhost:3000/notifications
   entitlementCheckEnabled: true
   enabledAutoscaleMonitors:
     time-monitor:

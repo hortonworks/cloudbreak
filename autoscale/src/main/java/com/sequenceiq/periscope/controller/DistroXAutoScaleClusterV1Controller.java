@@ -1,7 +1,6 @@
 package com.sequenceiq.periscope.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,18 +18,15 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
-import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
-import com.sequenceiq.periscope.api.model.ScalingStatus;
-import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
+import com.sequenceiq.periscope.converter.HistoryConverter;
 import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
 import com.sequenceiq.periscope.converter.TimeAlertRequestConverter;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
@@ -74,6 +70,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     @Inject
     private EntitlementValidationService entitlementValidationService;
+
+    @Inject
+    private HistoryConverter historyConverter;
 
     @Override
     @DisableCheckPermissions
@@ -156,37 +155,12 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                         timeAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getTimeAlertRequests()));
                 asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleClusterRequest.getEnableAutoscaling());
             });
-            createHistoryAndNotifyConfigChange(cluster.getId());
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();
         }
 
-        return createClusterJsonResponse(clusterService.findById(cluster.getId()));
-    }
-
-    private void createHistoryAndNotifyConfigChange(long clusterId) {
-        Cluster cluster = clusterService.findById(clusterId);
-        ScalingStatus scalingStatus = ScalingStatus.DISABLED;
-        String statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_DISABLED);
-
-        if (!cluster.getLoadAlerts().isEmpty()) {
-            String loadBasedHostGroups = cluster.getLoadAlerts().stream()
-                    .map(loadAlert -> loadAlert.getScalingPolicy().getHostGroup())
-                    .collect(Collectors.joining(","));
-            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
-                    List.of(AlertType.LOAD, loadBasedHostGroups));
-            scalingStatus = ScalingStatus.CONFIG_UPDATED;
-        } else if (!cluster.getTimeAlerts().isEmpty()) {
-            String timeBasedHostGroups = cluster.getTimeAlerts().stream()
-                    .map(timeAlert -> timeAlert.getScalingPolicy().getHostGroup())
-                    .distinct()
-                    .collect(Collectors.joining(","));
-            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
-                    List.of(AlertType.TIME, timeBasedHostGroups));
-            scalingStatus = ScalingStatus.CONFIG_UPDATED;
-        }
-
-        History history = historyService.createEntry(scalingStatus, statusMessage, cluster);
-        notificationSender.send(cluster, history);
+        Cluster updatedCluster = clusterService.findById(cluster.getId());
+        asClusterCommonService.createAutoscalingConfigChangedHistoryAndNotify(updatedCluster);
+        return createClusterJsonResponse(updatedCluster);
     }
 }
