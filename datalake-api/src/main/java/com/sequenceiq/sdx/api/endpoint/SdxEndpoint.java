@@ -16,7 +16,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -33,6 +33,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -203,6 +204,7 @@ public interface SdxEndpoint {
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "set ranger cloud identity mapping", produces = MediaType.APPLICATION_JSON, nickname = "setRangerCloudIdentityMapping")
-    void setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn String envCrn, @NotNull @Valid SetRangerCloudIdentityMappingRequest request);
+    RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn String envCrn,
+            @NotNull @Valid SetRangerCloudIdentityMappingRequest request);
 
 }
