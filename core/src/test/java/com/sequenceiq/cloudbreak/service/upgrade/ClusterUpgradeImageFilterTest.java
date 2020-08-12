@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,6 +81,9 @@ public class ClusterUpgradeImageFilterTest {
     @Mock
     private PreWarmParcelParser preWarmParcelParser;
 
+    @Mock
+    private EntitlementDrivenPackageLocationFilter entitlementDrivenPackageLocationFilter;
+
     private Image currentImage;
 
     private Image properImage;
@@ -92,6 +97,9 @@ public class ClusterUpgradeImageFilterTest {
         currentImage = createCurrentImage();
         properImage = createProperImage();
         activatedParcels = Map.of("stack", V_7_0_3);
+        Predicate<Image> predicate = mock(Predicate.class);
+        when(predicate.test(any())).thenReturn(Boolean.TRUE);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class))).thenReturn(predicate);
     }
 
     @Test
@@ -107,6 +115,23 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
+    }
+
+    @Test
+    public void testFilterShouldNotReturnImageIfPackageFilterReturnFalse() {
+        List<Image> properImages = List.of(properImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null), "");
+
+        Predicate<Image> predicate = mock(Predicate.class);
+        when(predicate.test(any())).thenReturn(Boolean.FALSE);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class))).thenReturn(predicate);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
+        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
+
+        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
+
+        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
     }
 
     @Test

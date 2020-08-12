@@ -53,6 +53,9 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
 
+    @Inject
+    private EntitlementDrivenPackageLocationFilter packageLocationFilter;
+
     private String reason;
 
     ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents,
@@ -81,6 +84,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
                 .filter(validateSaltVersion(currentImage))
+                .filter(packageLocationFilter.filterImage(currentImage))
                 .collect(Collectors.toList());
 
         return new ImageFilterResult(new Images(null, images, null), getReason(images));
