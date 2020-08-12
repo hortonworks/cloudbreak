@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
@@ -77,8 +78,11 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 import rx.Completable;
 import rx.Observable;
@@ -180,6 +184,13 @@ public class AzureClient {
 
     public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {
         return handleAuthException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName));
+    }
+
+    public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
+        return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
+                .map(Deployment::provisioningState)
+                .map(AzureStackStatus::mapResourceStatus)
+                .orElse(ResourceStatus.DELETED);
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
@@ -503,7 +514,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -514,11 +525,12 @@ public class AzureClient {
                 .findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            return virtualMachineCustomImage.get().id();
+            VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
+            return new AzureImage(customImage.id(), customImage.name(), true);
         } else {
             LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
             VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-            return customImage.id();
+            return new AzureImage(customImage.id(), customImage.name(), false);
         }
     }
 
@@ -530,16 +542,21 @@ public class AzureClient {
         return handleAuthException(() -> {
             LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
-                azure.resourceGroups().define(resourceGroup).withRegion(region).create();
+                azure.resourceGroups()
+                        .define(resourceGroup)
+                        .withRegion(region)
+                        .create();
             }
             LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
-            return azure.virtualMachineCustomImages()
-                    .define(imageName)
-                    .withRegion(region)
-                    .withExistingResourceGroup(resourceGroup)
-                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                    .create();
+            return measure(() ->
+                            azure.virtualMachineCustomImages()
+                                    .define(imageName)
+                                    .withRegion(region)
+                                    .withExistingResourceGroup(resourceGroup)
+                                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                                    .create(),
+                    LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
     }
 
@@ -600,6 +617,14 @@ public class AzureClient {
 
     public Observable<String> deleteNetworksAsync(Collection<String> networkIds) {
         return handleAuthException(() -> azure.networks().deleteByIdsAsync(networkIds));
+    }
+
+    public Observable<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
+        return handleAuthException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
+    }
+
+    public Observable<String> deleteImagesAsync(Collection<String> imageIds) {
+        return handleAuthException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds));
     }
 
     public NetworkSecurityGroups getSecurityGroups() {

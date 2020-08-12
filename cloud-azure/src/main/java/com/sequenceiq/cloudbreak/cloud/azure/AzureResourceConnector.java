@@ -84,9 +84,14 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
+        AzureImage image = azureStorage.getCustomImage(client, ac, stack);
+        if (!image.getAlreadyExists()) {
+            LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
+            CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
+            azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
+        }
+        String customImageId = image.getId();
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
-
-        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
                 cloudContext, stack, AzureInstanceTemplateOperation.PROVISION);
 
@@ -94,9 +99,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
         boolean resourcesPersisted = false;
         try {
-            List<CloudResource> templateResources;
             List<CloudResource> instances;
-            List<CloudResource> osDiskResources;
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());

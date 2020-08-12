@@ -512,7 +512,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public Map<String, String> gatherInstalledComponents(String stackName) {
         try {
-        return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
+            return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
         } catch (ApiException e) {
             LOGGER.info("Unable to fetch the list of activated parcels", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);

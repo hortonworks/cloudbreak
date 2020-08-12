@@ -177,6 +177,17 @@ public class AzureCloudResourceService {
         return vmResourceList;
     }
 
+    public CloudResource buildCloudResource(String name, String id, ResourceType type) {
+        LOGGER.debug("{} {} is being created with id {}", type.name(), name, id);
+        return CloudResource.builder()
+                .name(name)
+                .status(CommonStatus.CREATED)
+                .persistent(true)
+                .reference(id)
+                .type(type)
+                .build();
+    }
+
     private CloudResource buildVm(CloudResource sourceResource, String instanceGroupName, String resourceGroupName) {
         return CloudResource.builder()
                 .type(sourceResource.getType())

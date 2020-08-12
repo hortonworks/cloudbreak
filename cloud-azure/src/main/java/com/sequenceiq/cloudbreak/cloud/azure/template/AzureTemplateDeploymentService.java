@@ -44,7 +44,7 @@ public class AzureTemplateDeploymentService {
 
     private String getTemplate(CloudStack stack, AzureStackView azureStackView, AuthenticatedContext ac, CloudContext cloudContext,
             String stackName, AzureClient client, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
-        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
+        String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
         return azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation);
     }
 

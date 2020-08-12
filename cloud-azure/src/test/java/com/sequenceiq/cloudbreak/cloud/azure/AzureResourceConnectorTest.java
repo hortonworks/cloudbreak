@@ -105,12 +105,14 @@ public class AzureResourceConnectorTest {
         CloudResource cloudResource = mock(CloudResource.class);
         instances = List.of(cloudResource);
         network = new Network(new Subnet("0.0.0.0/16"));
+        AzureImage image = new AzureImage("id", "name", true);
         when(stack.getGroups()).thenReturn(groups);
         when(stack.getNetwork()).thenReturn(network);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
         when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
+        when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);

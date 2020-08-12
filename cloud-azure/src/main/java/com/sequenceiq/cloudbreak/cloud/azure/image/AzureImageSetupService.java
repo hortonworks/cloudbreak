@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
@@ -50,14 +49,14 @@ public class AzureImageSetupService {
         try {
             CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (StringUtils.isEmpty(armStorage.getCustomImageId(client, ac, stack))) {
-                    LOGGER.error("The image is not found in the storage.");
+                if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+                    LOGGER.error("The image has not been found in the storage account.");
                     return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
                 }
                 LOGGER.info("The image copy has been finished.");
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
-                LOGGER.error("The image copy has been failed with status: {}", copyState.getStatus());
+                LOGGER.error("The image copy has failed with status: {}", copyState.getStatus());
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
                 int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
@@ -90,7 +89,7 @@ public class AzureImageSetupService {
                 LOGGER.warn("Something happened during start image copy.", e);
             }
         } else {
-            LOGGER.info("The image is already exists in the storage account.");
+            LOGGER.info("The image already exists in the storage account.");
         }
     }
 

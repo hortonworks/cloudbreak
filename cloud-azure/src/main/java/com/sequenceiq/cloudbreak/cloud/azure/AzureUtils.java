@@ -6,9 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -385,6 +385,40 @@ public class AzureUtils {
                     .doOnCompleted(() -> LOGGER.debug("Delete networks completed successfully"))
                     .subscribeOn(Schedulers.io());
             deletionObservable.subscribe(network -> LOGGER.debug("Deleting {}", network));
+            deletionObservable.toCompletable().await();
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteStorageAccounts(AzureClient azureClient, Collection<String> accountIds) {
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            LOGGER.info("Delete storage accounts with id-s: {}", accountIds);
+
+            Observable<String> deletionObservable = azureClient.deleteStorageAccountsAsync(accountIds)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened during the deletion of the storage accounts ", throwable);
+                        throw new CloudbreakServiceException("Can't delete all storage accounts: ", throwable);
+                    })
+                    .doOnCompleted(() -> LOGGER.debug("Delete storage accounts completed successfully"))
+                    .subscribeOn(Schedulers.io());
+            deletionObservable.subscribe(account -> LOGGER.debug("Deleting {}", account));
+            deletionObservable.toCompletable().await();
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteImages(AzureClient azureClient, Collection<String> imageIds) {
+        if (CollectionUtils.isNotEmpty(imageIds)) {
+            LOGGER.info("Delete images with id-s: {}", imageIds);
+
+            Observable<String> deletionObservable = azureClient.deleteImagesAsync(imageIds)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened during the deletion of the images ", throwable);
+                        throw new CloudbreakServiceException("Can't delete all images: ", throwable);
+                    })
+                    .doOnCompleted(() -> LOGGER.debug("Delete images completed successfully"))
+                    .subscribeOn(Schedulers.io());
+            deletionObservable.subscribe(image -> LOGGER.debug("Deleting {}", image));
             deletionObservable.toCompletable().await();
         }
     }
