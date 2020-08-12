@@ -1,10 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.action;
 
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
@@ -118,27 +114,6 @@ public class FreeIpaDownscaleActions {
                 LOGGER.info("Starting downscale {}", payload);
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Starting downscale");
                 sendEvent(context, STARTING_DOWNSCALE_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
-            }
-        };
-    }
-
-    @Bean(name = "DOWNSCALE_DISABLE_STATUS_CHECKER_STATE")
-    public Action<?, ?> disableStatusCheckerAction() {
-        return new AbstractDownscaleAction<>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Disabling the status checker while downscaling");
-                try {
-                    if (!isRepair(variables)) {
-                        disableStatusChecker(stack, "Downscaling FreeIPA");
-                    }
-                    sendEvent(context, DOWNSCALE_DISABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
-                } catch (Exception e) {
-                    LOGGER.error("Failed to disable the status checker", e);
-                    sendEvent(context, DOWNSCALE_DISABLE_STATUS_CHECKER_FAILED_EVENT.event(),
-                            new DownscaleFailureEvent(stack.getId(), "disable status checker", Set.of(), Map.of(), e));
-                }
             }
         };
     }
@@ -330,27 +305,6 @@ public class FreeIpaDownscaleActions {
                     }
                 }
                 sendEvent(context, UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
-            }
-        };
-    }
-
-    @Bean(name = "DOWNSCALE_ENABLE_STATUS_CHECKER_STATE")
-    public Action<?, ?> enableStatusCheckerAction() {
-        return new AbstractDownscaleAction<>(StackEvent.class) {
-            @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                Stack stack = context.getStack();
-                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Enabling the status checker after downscaling");
-                try {
-                    if (!isRepair(variables)) {
-                        enableStatusChecker(stack, "Finished downscaling FreeIPA");
-                    }
-                    sendEvent(context, DOWNSCALE_ENABLE_STATUS_CHECKER_FINISHED_EVENT.event(), new StackEvent(stack.getId()));
-                } catch (Exception e) {
-                    LOGGER.error("Failed to enable the status checker", e);
-                    sendEvent(context, DOWNSCALE_ENABLE_STATUS_CHECKER_FAILED_EVENT.event(),
-                            new DownscaleFailureEvent(stack.getId(), "enable status checker", Set.of(), Map.of(), e));
-                }
             }
         };
     }
