@@ -7,6 +7,7 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENABLED;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,9 +20,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
+import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.LoadAlert;
@@ -96,7 +99,7 @@ public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider 
 
     public Cluster setState(Long clusterId, StateJson stateJson) {
         Cluster cluster = clusterService.setState(clusterId, stateJson.getState());
-        createHistoryAndNotification(cluster);
+        createAutoscalingStateChangedHistoryAndNotify(cluster);
         return cluster;
     }
 
@@ -108,7 +111,7 @@ public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider 
         Cluster cluster = clusterService.findById(clusterId);
         if (!cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
             cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
-            createHistoryAndNotification(cluster);
+            createAutoscalingStateChangedHistoryAndNotify(cluster);
         }
         return cluster;
     }
@@ -168,11 +171,37 @@ public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider 
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));
     }
 
-    protected void createHistoryAndNotification(Cluster cluster) {
+    protected void createAutoscalingStateChangedHistoryAndNotify(Cluster cluster) {
         History history;
         history = cluster.isAutoscalingEnabled()
                 ? historyService.createEntry(ScalingStatus.ENABLED, messagesService.getMessage(AUTOSCALING_ENABLED), cluster)
                 : historyService.createEntry(ScalingStatus.DISABLED, messagesService.getMessage(AUTOSCALING_DISABLED), cluster);
-        notificationSender.send(cluster, history);
+        notificationSender.sendHistoryUpdateNotification(history, cluster);
+    }
+
+    protected void createAutoscalingConfigChangedHistoryAndNotify(Cluster cluster) {
+        ScalingStatus scalingStatus = ScalingStatus.DISABLED;
+        String statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_DISABLED);
+
+        if (!cluster.getLoadAlerts().isEmpty()) {
+            String loadBasedHostGroups = cluster.getLoadAlerts().stream()
+                    .map(loadAlert -> loadAlert.getScalingPolicy().getHostGroup())
+                    .collect(Collectors.joining(","));
+            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
+                    List.of(AlertType.LOAD, loadBasedHostGroups));
+            scalingStatus = ScalingStatus.CONFIG_UPDATED;
+        } else if (!cluster.getTimeAlerts().isEmpty()) {
+            String timeBasedHostGroups = cluster.getTimeAlerts().stream()
+                    .map(timeAlert -> timeAlert.getScalingPolicy().getHostGroup())
+                    .distinct()
+                    .collect(Collectors.joining(","));
+            statusMessage = messagesService.getMessage(MessageCode.AUTOSCALING_CONFIG_UPDATED,
+                    List.of(AlertType.TIME, timeBasedHostGroups));
+            scalingStatus = ScalingStatus.CONFIG_UPDATED;
+        }
+
+        notificationSender.sendConfigUpdateNotification(cluster);
+        notificationSender.sendHistoryUpdateNotification(
+                historyService.createEntry(scalingStatus, statusMessage, cluster), cluster);
     }
 }

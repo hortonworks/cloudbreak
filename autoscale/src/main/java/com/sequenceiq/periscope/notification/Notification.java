@@ -1,28 +1,18 @@
 package com.sequenceiq.periscope.notification;
 
-import java.util.Date;
-
-import com.sequenceiq.periscope.domain.History;
-
 public class Notification {
-
-    private Long workspaceId;
 
     private String eventType;
 
-    private Date eventTimestamp;
+    private Long eventTimestamp;
 
-    private History historyRecord;
+    private Object payload;
 
     private String eventMessage;
 
-    public Long getWorkspaceId() {
-        return workspaceId;
-    }
+    private String payloadType;
 
-    public void setWorkspaceId(Long workspaceId) {
-        this.workspaceId = workspaceId;
-    }
+    private String tenantName;
 
     public String getEventType() {
         return eventType;
@@ -32,20 +22,20 @@ public class Notification {
         this.eventType = eventType;
     }
 
-    public Date getEventTimestamp() {
+    public Long getEventTimestamp() {
         return eventTimestamp;
     }
 
-    public void setEventTimestamp(Date eventTimestamp) {
+    public void setEventTimestamp(Long eventTimestamp) {
         this.eventTimestamp = eventTimestamp;
     }
 
-    public History getHistoryRecord() {
-        return historyRecord;
+    public Object getPayload() {
+        return payload;
     }
 
-    public void setHistoryRecord(History historyRecord) {
-        this.historyRecord = historyRecord;
+    public void setPayload(Object payload) {
+        this.payload = payload;
     }
 
     public String getEventMessage() {
@@ -54,5 +44,21 @@ public class Notification {
 
     public void setEventMessage(String eventMessage) {
         this.eventMessage = eventMessage;
+    }
+
+    public String getPayloadType() {
+        return payloadType;
+    }
+
+    public void setPayloadType(String payloadType) {
+        this.payloadType = payloadType;
+    }
+
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
 }

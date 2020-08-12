@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.notification;
 
-import java.util.Date;
+import java.time.Instant;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
@@ -14,6 +14,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
+import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
+import com.sequenceiq.periscope.common.MessageCode;
+import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
+import com.sequenceiq.periscope.converter.HistoryConverter;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.Subscription;
@@ -26,19 +32,43 @@ public class HttpNotificationSender {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private HistoryConverter historyConverter;
+
+    @Inject
+    private DistroXAutoscaleClusterResponseConverter autoscaleClusterResponseConverter;
+
     private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
-    public void send(Cluster cluster, History history) {
-        send(convertHistory(cluster, history));
+    public void sendHistoryUpdateNotification(History historyUpdate, Cluster cluster) {
+        Notification historyNotification = new Notification();
+        historyNotification.setTenantName(cluster.getClusterPertain().getTenant());
+        historyNotification.setEventType(NotificationType.AUTOSCALE_HISTORY_UPDATE.name());
+        historyNotification.setEventTimestamp(historyUpdate.getTimestamp());
+        historyNotification.setEventMessage(
+                messagesService.getMessage(MessageCode.NOTIFICATION_HISTORY_UPDATE));
+
+        AutoscaleClusterHistoryResponse historyResponse = historyConverter.convert(historyUpdate);
+        historyNotification.setPayload(historyResponse);
+        historyNotification.setPayloadType(historyResponse.getClass().getSimpleName());
+        send(historyNotification);
     }
 
-    private Notification convertHistory(Cluster cluster, History history) {
-        Notification n = new Notification();
-        n.setEventType("PERISCOPE_HISTORY");
-        n.setHistoryRecord(history);
-        n.setEventTimestamp(new Date());
-        n.setWorkspaceId(cluster.getClusterPertain().getWorkspaceId());
-        return n;
+    public void sendConfigUpdateNotification(Cluster configUpdate) {
+        Notification configUpdateNotification = new Notification();
+        configUpdateNotification.setTenantName(configUpdate.getClusterPertain().getTenant());
+        configUpdateNotification.setEventType(NotificationType.AUTOSCALE_CONFIG_UPDATE.name());
+        configUpdateNotification.setEventTimestamp(Instant.now().toEpochMilli());
+        configUpdateNotification.setEventMessage(
+                messagesService.getMessage(MessageCode.NOTIFICATION_AS_CONFIG_UPDATE));
+
+        DistroXAutoscaleClusterResponse asResponse = autoscaleClusterResponseConverter.convert(configUpdate);
+        configUpdateNotification.setPayload(asResponse);
+        configUpdateNotification.setPayloadType(asResponse.getClass().getSimpleName());
+        send(configUpdateNotification);
     }
 
     private void send(Notification notification) {
