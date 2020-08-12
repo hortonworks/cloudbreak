@@ -13,15 +13,15 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.structuredevent.conf.StructuredEventEnablementConfig;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 
 @Component
-public class LegacyFileStructuredEventHandler<T extends StructuredEvent> implements EventHandler<T> {
+public class CDPFileStructuredEventHandler<T extends CDPStructuredEvent> implements EventHandler<T> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyFileStructuredEventHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDPFileStructuredEventHandler.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 

@@ -17,8 +17,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -26,7 +26,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import reactor.bus.Event;
 
 @Component
-public class CDPKafkaStructuredEventHandler<T extends StructuredEvent> implements EventHandler<T> {
+public class CDPKafkaStructuredEventHandler<T extends CDPStructuredEvent> implements EventHandler<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPKafkaStructuredEventHandler.class);
 
@@ -42,7 +42,7 @@ public class CDPKafkaStructuredEventHandler<T extends StructuredEvent> implement
     public void accept(Event<T> structuredEvent) {
         String topicByType = getTopicNameForEvent(structuredEvent);
         try {
-            StructuredEvent event = structuredEvent.getData();
+            CDPStructuredEvent event = structuredEvent.getData();
             sanitizeSensitiveRestData(event);
             ListenableFuture<SendResult<String, String>> sendResultFuture =
                     kafkaTemplate.send(topicByType, JsonUtil.writeValueAsString(structuredEvent.getData()));
@@ -57,9 +57,9 @@ public class CDPKafkaStructuredEventHandler<T extends StructuredEvent> implement
         }
     }
 
-    protected void sanitizeSensitiveRestData(StructuredEvent event) {
+    protected void sanitizeSensitiveRestData(CDPStructuredEvent event) {
         if ("StructuredRestCallEvent".equals(event.getType())) {
-            StructuredRestCallEvent restEvent = (StructuredRestCallEvent) event;
+            CDPStructuredRestCallEvent restEvent = (CDPStructuredRestCallEvent) event;
             RestRequestDetails restRequestDetails = restEvent.getRestCall().getRestRequest();
             restRequestDetails.setBody(REPLACEMENT);
             restRequestDetails.setHeaders(new HashMap());
