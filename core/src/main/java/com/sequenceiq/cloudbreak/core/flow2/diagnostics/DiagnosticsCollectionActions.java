@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -54,8 +55,10 @@ public class DiagnosticsCollectionActions {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
                 InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
-                String hosts = payload.getHosts() == null ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
-                String hostGroups = payload.getHostGroups() == null ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHostGroups()));
+                String hosts = CollectionUtils.isEmpty(payload.getHosts())
+                        ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
+                String hostGroups = CollectionUtils.isEmpty(payload.getHostGroups())
+                        ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHostGroups()));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
                         ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING, List.of(hosts, hostGroups));
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
@@ -63,6 +66,8 @@ public class DiagnosticsCollectionActions {
                         .withResourceCrn(resourceCrn)
                         .withSelector(DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
                         .build();
                 sendEvent(context, event);
             }
