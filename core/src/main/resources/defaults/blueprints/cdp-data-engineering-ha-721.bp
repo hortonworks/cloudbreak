@@ -20,10 +20,6 @@
         "serviceType": "HDFS",
         "serviceConfigs": [
           {
-            "name": "redaction_policy_enabled",
-            "value": "false"
-          },
-          {
             "name": "zookeeper_service",
             "ref": "zookeeper"
           },
