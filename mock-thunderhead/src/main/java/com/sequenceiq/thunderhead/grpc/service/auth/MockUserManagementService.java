@@ -204,6 +204,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
 
+    private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -270,6 +272,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
+
+    @Value("${auth.mock.upgrade.internalrepo.enable}")
+    private boolean enableInternalRepositoryForUpgrade;
 
     private String cbLicense;
 
@@ -559,6 +564,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
+        }
+        if (enableInternalRepositoryForUpgrade) {
+            builder.addEntitlements(createEntitlement(CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

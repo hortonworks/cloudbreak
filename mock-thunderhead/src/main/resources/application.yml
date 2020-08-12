@@ -25,3 +25,4 @@ auth:
     fastebsencryption.enable: true
     cloudidentitymappinng.enable: true
     mediumdutysdx.enable: true
+    upgrade.internalrepo.enable: true

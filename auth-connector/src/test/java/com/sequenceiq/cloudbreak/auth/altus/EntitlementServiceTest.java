@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
@@ -115,6 +116,10 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, false},
                 {"CDP_CLOUD_IDENTITY_MAPPING == true", CDP_CLOUD_IDENTITY_MAPPING,
                         (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, true},
+                {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE == true", CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE,
+                        (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, true},
+                {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE == false", CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE,
+                        (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, false},
         };
     }
 

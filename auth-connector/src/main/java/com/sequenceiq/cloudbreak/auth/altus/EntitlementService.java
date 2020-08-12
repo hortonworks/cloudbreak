@@ -62,6 +62,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
 
+    @VisibleForTesting
+    static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -127,6 +130,10 @@ public class EntitlementService {
 
     public boolean cloudIdentityMappingEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_CLOUD_IDENTITY_MAPPING);
+    }
+
+    public boolean isInternalRepositoryForUpgradeAllowed(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {
