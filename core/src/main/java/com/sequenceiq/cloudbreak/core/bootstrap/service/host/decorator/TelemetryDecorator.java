@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
@@ -81,12 +82,15 @@ public class TelemetryDecorator {
 
     private final AltusMachineUserService altusMachineUserService;
 
+    private final VmLogsService vmLogsService;
+
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
             TelemetryCommonConfigService telemetryCommonConfigService,
             AltusMachineUserService altusMachineUserService,
+            VmLogsService vmLogsService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
@@ -94,6 +98,7 @@ public class TelemetryDecorator {
         this.monitoringConfigService = monitoringConfigService;
         this.telemetryCommonConfigService = telemetryCommonConfigService;
         this.altusMachineUserService = altusMachineUserService;
+        this.vmLogsService = vmLogsService;
         this.version = version;
     }
 
@@ -128,7 +133,7 @@ public class TelemetryDecorator {
                 .withVersion(version)
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
-                telemetry, null, clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
+                telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
         servicePillar.put("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 
