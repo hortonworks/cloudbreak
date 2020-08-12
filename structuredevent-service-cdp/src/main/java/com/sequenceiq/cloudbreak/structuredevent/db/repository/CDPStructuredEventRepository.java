@@ -26,22 +26,22 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
             @Param("accountId") Long accountId,
             @Param("id") Long id);
 
-    List<CDPStructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(
+    List<CDPStructuredEventEntity> findByAccountIdAndResourceTypeAndResourceId(
             String accountId,
             String resourceType,
             Long resourceId);
 
-    List<CDPStructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(
+    List<CDPStructuredEventEntity> findByAccountIdAndResourceTypeAndResourceCrn(
             String accountId,
             String resourceType,
             String resourceCrn);
 
-    List<CDPStructuredEventEntity> findByWorkspaceAndEventType(
+    List<CDPStructuredEventEntity> findByAccountIdAndEventType(
             String accountId,
             StructuredEventType eventType);
 
     @Query("SELECT se from CDPStructuredEventEntity se WHERE se.accountId = :accountId AND se.eventType = :eventType AND se.timestamp >= :since")
-    List<CDPStructuredEventEntity> findByWorkspaceIdAndEventTypeSince(
+    List<CDPStructuredEventEntity> findByAccountIdAndEventTypeSince(
             @Param("accountId") String accountId,
             @Param("eventType") StructuredEventType eventType,
             @Param("since") Long since);
@@ -50,9 +50,6 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
             StructuredEventType eventType,
             String resourceType,
             Long resourceId);
-
-    @Query("SELECT se from CDPStructuredEventEntity se WHERE se.accountId = null OR se.user = null")
-    List<CDPStructuredEventEntity> findAllWithoutWorkspaceOrUser();
 
     @Override
     default Optional<CDPStructuredEventEntity> findByNameAndAccountId(

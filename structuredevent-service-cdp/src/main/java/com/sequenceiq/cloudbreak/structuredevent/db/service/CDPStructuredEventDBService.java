@@ -58,7 +58,7 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     @Override
     public <T extends CDPStructuredEvent> List<T> getEventsForAccountWithType(String accountId, Class<T> eventClass) {
-        List<CDPStructuredEventEntity> events = structuredEventRepository.findByWorkspaceAndEventType(accountId, StructuredEventType.getByCDPClass(eventClass));
+        List<CDPStructuredEventEntity> events = structuredEventRepository.findByAccountIdAndEventType(accountId, StructuredEventType.getByCDPClass(eventClass));
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(CDPStructuredEvent.class))) : Collections.emptyList();
@@ -66,7 +66,7 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     @Override
     public <T extends CDPStructuredEvent> List<T> getEventsForAccountWithTypeSince(String accountId, Class<T> eventClass, Long since) {
-        List<CDPStructuredEventEntity> events = structuredEventRepository.findByWorkspaceIdAndEventTypeSince(accountId,
+        List<CDPStructuredEventEntity> events = structuredEventRepository.findByAccountIdAndEventTypeSince(accountId,
                 StructuredEventType.getByCDPClass(eventClass), since);
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
