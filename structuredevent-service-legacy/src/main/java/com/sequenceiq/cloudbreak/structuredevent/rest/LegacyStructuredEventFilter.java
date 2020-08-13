@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -53,14 +52,14 @@ import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserS
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-import com.sequenceiq.cloudbreak.structuredevent.service.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+import com.sequenceiq.cloudbreak.structuredevent.service.lookup.WorkspaceAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -105,9 +104,9 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     @Inject
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
+    // TODO WHY?
     @Inject
-    @Named("structuredEventClient")
-    private LegacyStructuredEventClient legacyStructuredEventClient;
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;

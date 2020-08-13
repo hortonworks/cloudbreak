@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.notification.NotificationService;
 
@@ -21,8 +21,9 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEventHandler.class);
 
+    // TODO WHY?
     @Inject
-    private LegacyStructuredEventClient legacyStructuredEventClient;
+    private LegacyDefaultStructuredEventClient legacyStructuredEventAsyncNotifier;
 
     @Inject
     private NotificationService notificationService;
@@ -31,7 +32,7 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
     public void accept(Event<CloudbreakCompositeEvent> cloudbreakEvent) {
         CloudbreakCompositeEvent cloudbreakCompositeEvent = cloudbreakEvent.getData();
         StructuredNotificationEvent structuredNotificationEvent = cloudbreakCompositeEvent.getStructuredNotificationEvent();
-        legacyStructuredEventClient.sendStructuredEvent(structuredNotificationEvent);
+        legacyStructuredEventAsyncNotifier.sendStructuredEvent(structuredNotificationEvent);
         sendDistroxNotificaiton(cloudbreakCompositeEvent);
     }
 

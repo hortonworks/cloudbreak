@@ -64,14 +64,14 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     }
 
     @Override
-    default Optional<CDPStructuredEventEntity> findByCrnAndAccountId(
+    default Optional<CDPStructuredEventEntity> findByResourceCrnAndAccountId(
             String crn,
             String accountId) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    default Set<CDPStructuredEventEntity> findByCrnInAndAccountId(Set<String> crn, String accountId) {
+    default Set<CDPStructuredEventEntity> findByResourceCrnInAndAccountId(Set<String> crn, String accountId) {
         throw new UnsupportedOperationException();
     }
 }

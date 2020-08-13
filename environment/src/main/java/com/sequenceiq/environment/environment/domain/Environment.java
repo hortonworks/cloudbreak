@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -33,7 +34,7 @@ import com.sequenceiq.environment.store.EnvironmentStatusUpdater;
 
 @Entity
 @Table
-public class Environment implements AuthResource {
+public class Environment implements AuthResource, AccountAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "environment_generator")
@@ -154,6 +155,11 @@ public class Environment implements AuthResource {
     @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String getResourceName() {
+        return null;
     }
 
     public Long getId() {

@@ -66,8 +66,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.BaseLegacyStructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyBaseStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyFlowStructuredEventHandler;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventFactory;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.CommonContext;
@@ -262,7 +262,7 @@ public class OfflineStateGenerator {
                     args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
                     (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
 
-            inject(bean, "structuredEventClient", (LegacyStructuredEventClient) structuredEvent -> {
+            inject(bean, "legacyStructuredEventClient", (LegacyBaseStructuredEventClient) structuredEvent -> {
             });
             LegacyStructuredFlowEventFactory factory = new BaseLegacyStructuredFlowEventFactory();
             inject(bean, "structuredFlowEventFactory", factory);

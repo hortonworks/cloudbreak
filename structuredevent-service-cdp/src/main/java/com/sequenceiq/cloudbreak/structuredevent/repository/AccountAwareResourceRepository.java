@@ -20,7 +20,7 @@ public interface AccountAwareResourceRepository<T extends AccountAwareResource, 
 
     Set<T> findByNameInAndAccountId(Set<String> names, String accountId);
 
-    Optional<T> findByCrnAndAccountId(String crn, String accountId);
+    Optional<T> findByResourceCrnAndAccountId(String crn, String accountId);
 
-    Set<T> findByCrnInAndAccountId(Set<String> crn, String accountId);
+    Set<T> findByResourceCrnInAndAccountId(Set<String> crn, String accountId);
 }

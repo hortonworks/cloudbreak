@@ -5,7 +5,7 @@ public interface AccountAwareResource {
 
     Long getId();
 
-    String getCrn();
+    String getResourceCrn();
 
     String getAccountId();
 

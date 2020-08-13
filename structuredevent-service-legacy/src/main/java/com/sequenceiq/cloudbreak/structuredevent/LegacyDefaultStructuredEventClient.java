@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
-@Service
-public class LegacyDefaultStructuredEventClient implements LegacyStructuredEventClient {
+@Service("legacyDefaultStructuredEventClient")
+public class LegacyDefaultStructuredEventClient implements LegacyBaseStructuredEventClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyDefaultStructuredEventClient.class);
 

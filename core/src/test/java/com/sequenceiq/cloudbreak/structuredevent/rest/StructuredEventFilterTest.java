@@ -36,7 +36,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyBaseStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -51,7 +51,7 @@ class StructuredEventFilterTest {
     private SecurityContext securityContext;
 
     @Mock
-    private LegacyStructuredEventClient legacyStructuredEventClient;
+    private LegacyBaseStructuredEventClient legacyStructuredEventClient;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
