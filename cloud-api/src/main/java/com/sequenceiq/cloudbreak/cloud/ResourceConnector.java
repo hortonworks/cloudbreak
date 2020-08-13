@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 /**
@@ -74,10 +75,12 @@ public interface ResourceConnector<R> {
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
      * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @param cancellationToken    a token holding information whether cancellation was requested
      * @return the status of resources allocated on the cloud platform
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier)
+    List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            CancellationToken cancellationToken)
             throws Exception;
 
     /**

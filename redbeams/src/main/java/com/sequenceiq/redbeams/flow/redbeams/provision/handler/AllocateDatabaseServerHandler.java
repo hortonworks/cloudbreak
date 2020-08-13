@@ -27,6 +27,7 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.stack.DBResourceService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -49,6 +50,9 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
     @Inject
+    private DBResourceService dbResourceService;
+
+    @Inject
     private EventBus eventBus;
 
     @Override
@@ -65,7 +69,7 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatuses =
-                connector.resources().launchDatabaseServer(ac, request.getDatabaseStack(), persistenceNotifier);
+                    connector.resources().launchDatabaseServer(ac, request.getDatabaseStack(), persistenceNotifier, request.getCancellationToken());
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);

@@ -24,6 +24,8 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
 
     private boolean flowFailed;
 
+    private boolean flowStopped;
+
     private final Class<? extends FlowConfiguration<E>> flowConfigClass;
 
     private final FlowEventListener<S, E> flowEventListener;
@@ -62,6 +64,7 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
 
     @Override
     public void stop() {
+        flowStopped = true;
         flowMachine.stop();
     }
 
@@ -99,5 +102,10 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
     @Override
     public boolean isFlowFailed() {
         return flowFailed;
+    }
+
+    @Override
+    public boolean isFlowStopped() {
+        return flowStopped;
     }
 }

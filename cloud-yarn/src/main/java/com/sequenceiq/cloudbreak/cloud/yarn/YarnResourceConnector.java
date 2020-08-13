@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDet
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
@@ -96,7 +97,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier) {
+            PersistenceNotifier persistenceNotifier, CancellationToken cancellationToken) {
         throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 

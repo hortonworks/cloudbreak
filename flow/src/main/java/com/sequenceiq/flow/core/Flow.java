@@ -2,6 +2,7 @@ package com.sequenceiq.flow.core;
 
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
 import io.opentracing.SpanContext;
@@ -24,6 +25,12 @@ public interface Flow {
     void setFlowFailed(Exception exception);
 
     boolean isFlowFailed();
+
+    boolean isFlowStopped();
+
+    default CancellationToken getCancellationToken() {
+        return new FlowCancellationToken(this);
+    }
 
     Class<? extends FlowConfiguration<?>> getFlowConfigClass();
 }

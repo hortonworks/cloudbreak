@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 /**
@@ -78,7 +79,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
+            PersistenceNotifier persistenceNotifier, CancellationToken cancellationToken) {
         throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 

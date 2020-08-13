@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 import freemarker.template.Configuration;
@@ -97,7 +98,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier) throws Exception {
+            PersistenceNotifier persistenceNotifier, CancellationToken cancellationToken) throws Exception {
         return awsRdsLaunchService.launch(ac, stack, persistenceNotifier);
     }
 

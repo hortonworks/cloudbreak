@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -58,7 +59,8 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureCloudResourceService azureCloudResourceService;
 
-    public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
+    public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            CancellationToken cancellationToken) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
@@ -95,7 +97,13 @@ public class AzureDatabaseResourceService {
         } finally {
             deployment = client.getTemplateDeployment(resourceGroupName, stackName);
             List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            if (cancellationToken.isCancelled()) {
+                LOGGER.debug("Cancellation requested during databaseServer launch, deleting all cloud resources: {}", cloudResources);
+                terminateDatabaseServer(ac, stack, cloudResources, false, persistenceNotifier);
+            } else {
+                LOGGER.debug("Persisting cloud resources: {}", cloudResources);
+                cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            }
         }
 
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");

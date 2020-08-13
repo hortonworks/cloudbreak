@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -122,7 +123,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
+            PersistenceNotifier persistenceNotifier, CancellationToken cancellationToken) {
         throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
     }
 

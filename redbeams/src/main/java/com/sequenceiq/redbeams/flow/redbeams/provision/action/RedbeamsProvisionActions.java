@@ -66,8 +66,9 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
+                Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 return new AllocateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
-                        context.getDatabaseStack());
+                        context.getDatabaseStack(), flow.getCancellationToken());
             }
         };
     }

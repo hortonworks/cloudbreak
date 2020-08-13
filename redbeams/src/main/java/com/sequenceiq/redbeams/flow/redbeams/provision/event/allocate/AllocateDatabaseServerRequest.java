@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.event.CancellationToken;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -16,11 +17,15 @@ public class AllocateDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    public AllocateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) {
+    private final CancellationToken cancellationToken;
+
+    public AllocateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack,
+            CancellationToken cancellationToken) {
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.databaseStack = databaseStack;
+        this.cancellationToken = cancellationToken;
     }
 
     public CloudContext getCloudContext() {
@@ -33,6 +38,10 @@ public class AllocateDatabaseServerRequest extends RedbeamsEvent {
 
     public DatabaseStack getDatabaseStack() {
         return databaseStack;
+    }
+
+    public CancellationToken getCancellationToken() {
+        return cancellationToken;
     }
 
     public String toString() {
