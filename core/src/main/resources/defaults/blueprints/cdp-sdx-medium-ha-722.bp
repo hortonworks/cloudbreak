@@ -20,9 +20,7 @@
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
           "solr-SOLR_SERVER-BASE",
-          "ranger-RANGER_ADMIN-BASE",
-          "hbase-REGIONSERVER-BASE",
-          "hbase-MASTER-BASE"
+          "ranger-RANGER_ADMIN-BASE"
         ]
       },
       {
@@ -36,11 +34,13 @@
           "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE",
           "knox-KNOX_GATEWAY-BASE",
-          "atlas-ATLAS_SERVER-BASE"
+          "atlas-ATLAS_SERVER-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE"
         ]
       },
       {
-        "cardinality": 1,
+        "cardinality": 2,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
           "knox-IDBROKER-BASE"
@@ -178,6 +178,10 @@
               {
                 "name": "solr_https_port",
                 "value": "8985"
+              },
+              {
+                "name": "solr_java_opts",
+                "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
@@ -228,7 +232,7 @@
           {
             "name": "hbase_wal_dir",
             "value": "/hbase-wals"
-          },          
+          },
           {
             "name": "service_config_suppression_hadoop_secure_web_ui",
             "value": "true"
