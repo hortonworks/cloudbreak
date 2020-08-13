@@ -11,7 +11,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "m5.4xlarge",
+        "instanceType": "m5.2xlarge",
         "attachedVolumes": [
           {
             "count": 1,
@@ -31,7 +31,7 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "m5.4xlarge",
+        "instanceType": "m5.xlarge",
         "attachedVolumes": [
           {
             "count": 1,
@@ -63,7 +63,7 @@
           "size": 50
         }
       },
-      "nodeCount": 1,
+      "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
