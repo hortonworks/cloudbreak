@@ -61,9 +61,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         prepareMdcContextWithStack(stack);
         if (flowLogService.isOtherFlowRunning(stackId)) {
             LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", stackId);
-            return;
+        } else {
+            LOGGER.debug("No flows running, trying to sync freeipa");
+            syncAStack(stack);
         }
-        syncAStack(stack);
         MDCBuilder.cleanupMdc();
     }
 
