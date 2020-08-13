@@ -1,11 +1,29 @@
 package com.sequenceiq.cloudbreak.structuredevent.service;
 
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
-public interface CDPRestRequestThreadLocalService {
-    void setCloudbreakUser(CloudbreakUser cloudbreakUser);
+@Service("RestRequestThreadLocalService")
+public class CDPRestRequestThreadLocalService implements CDPBaseRestRequestThreadLocalService {
 
-    CloudbreakUser getCloudbreakUser();
+    private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
+    @Override
+    public void setCloudbreakUser(CloudbreakUser cloudbreakUser) {
+        CLOUDBREAK_USER.set(cloudbreakUser);
+    }
 
-    void removeCloudbreakUser();
+    @Override
+    public CloudbreakUser getCloudbreakUser() {
+        return CLOUDBREAK_USER.get();
+    }
+
+    @Override
+    public void removeCloudbreakUser() {
+        CLOUDBREAK_USER.remove();
+    }
+
+    public void setCloudbreakUserByUsernameAndTenant(String userId, String tenant) {
+        CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", "", tenant));
+    }
 }

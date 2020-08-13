@@ -14,13 +14,13 @@ import org.springframework.data.repository.NoRepositoryBean;
 @Transactional(TxType.REQUIRED)
 public interface AccountAwareResourceRepository<T extends AccountAwareResource, ID extends Serializable> extends CrudRepository<T, ID> {
 
-    Set<T> findAllByAccount(String accountId);
+    Set<T> findAllByAccountId(String accountId);
 
     Optional<T> findByNameAndAccountId(String name, String accountId);
 
-    Set<T> findByNamesInAndAccountId(Set<String> names, String accountId);
+    Set<T> findByNameInAndAccountId(Set<String> names, String accountId);
 
     Optional<T> findByCrnAndAccountId(String crn, String accountId);
 
-    Set<T> findByCrnsInAndAccountId(Set<String> crn, String accountId);
+    Set<T> findByCrnInAndAccountId(Set<String> crn, String accountId);
 }

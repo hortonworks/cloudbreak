@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,7 +52,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.structuredevent.service.CDPRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.service.CDPBaseRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
@@ -102,7 +103,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     private String cbVersion;
 
     @Inject
-    private CDPRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
+    private CDPBaseRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
     @Inject
     @Named("structuredEventClient")
@@ -111,8 +112,8 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired
-    private List<CDPRestUrlParser> legacyRestUrlParsers;
+    @Autowired(required = false)
+    private List<CDPRestUrlParser> cdpRestUrlParsers = new ArrayList<>();
 
     @Value("${structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
@@ -208,7 +209,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
 
     private Map<String, String> getRequestUrlParameters(ContainerRequestContext requestContext) {
         Map<String, String> params = Maps.newHashMap();
-        for (CDPRestUrlParser cdpRestUrlParser : legacyRestUrlParsers) {
+        for (CDPRestUrlParser cdpRestUrlParser : cdpRestUrlParsers) {
             if (cdpRestUrlParser.fillParams(requestContext, params)) {
                 //TODO
 //                String workspaceId = params.get(CDPRestUrlParser.WORKSPACE_ID);

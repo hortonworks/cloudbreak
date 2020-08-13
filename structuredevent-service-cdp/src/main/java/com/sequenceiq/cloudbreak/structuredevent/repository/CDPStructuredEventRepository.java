@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -54,6 +55,23 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     default Optional<CDPStructuredEventEntity> findByNameAndAccountId(
             String name,
             String accountId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default Set<CDPStructuredEventEntity> findByNameInAndAccountId(Set<String> name, String accountId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default Optional<CDPStructuredEventEntity> findByCrnAndAccountId(
+            String crn,
+            String accountId) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    default Set<CDPStructuredEventEntity> findByCrnInAndAccountId(Set<String> crn, String accountId) {
         throw new UnsupportedOperationException();
     }
 }

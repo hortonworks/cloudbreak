@@ -26,7 +26,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAccountAwareResourceService.class);
 
     @Inject
-    private CDPRestRequestThreadLocalService cdpRestRequestThreadLocalService;
+    private CDPBaseRestRequestThreadLocalService cdpBaseRestRequestThreadLocalService;
 
     @Override
     public T create(T resource, @Nonnull String accountId) {
@@ -67,7 +67,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
 
     @Override
     public Set<T> getByNamesForAccountId(Set<String> names, String accountId) {
-        Set<T> results = repository().findByNamesInAndAccountId(names, accountId);
+        Set<T> results = repository().findByNameInAndAccountId(names, accountId);
         Set<String> notFound = Sets.difference(names,
                 results.stream().map(AccountAwareResource::getName).collect(Collectors.toSet()));
 
@@ -91,7 +91,7 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
 
     @Override
     public Set<T> findAllByAccountId(String accountId) {
-        return repository().findAllByAccount(accountId);
+        return repository().findAllByAccountId(accountId);
     }
 
     @Override

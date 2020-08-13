@@ -5,6 +5,8 @@ public interface AccountAwareResource {
 
     Long getId();
 
+    String getCrn();
+
     String getAccountId();
 
     String getName();

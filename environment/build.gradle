@@ -45,7 +45,8 @@ dependencies {
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")
-    implementation project(':status-checker')
+    implementation     project(":structuredevent-service-cdp")
+    implementation     project(':status-checker')
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
