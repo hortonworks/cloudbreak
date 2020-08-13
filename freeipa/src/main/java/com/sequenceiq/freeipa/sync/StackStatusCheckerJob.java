@@ -58,14 +58,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Long stackId = getStackId();
         Stack stack = stackService.getStackById(stackId);
-        prepareMdcContextWithStack(stack);
-        if (flowLogService.isOtherFlowRunning(stackId)) {
-            LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", stackId);
-        } else {
-            LOGGER.debug("No flows running, trying to sync freeipa");
-            syncAStack(stack);
+        try {
+            prepareMdcContextWithStack(stack);
+            if (flowLogService.isOtherFlowRunning(stackId)) {
+                LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", stackId);
+            } else {
+                LOGGER.debug("No flows running, trying to sync freeipa");
+                syncAStack(stack);
+            }
+        } finally {
+            MDCBuilder.cleanupMdc();
         }
-        MDCBuilder.cleanupMdc();
     }
 
     private Long getStackId() {

@@ -78,8 +78,8 @@ public class RebootActions {
         return new AbstractRebootAction<>(RebootInstanceEvent.class) {
             @Override
             protected void doExecute(RebootContext context, RebootInstanceEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Starting reboot for {}", context.getInstanceIds());
                 setOperationId(variables, payload.getOperationId());
+                LOGGER.info("Starting reboot for {}", context.getInstanceIds());
                 rebootService.startInstanceReboot(context);
                 sendEvent(context);
             }
@@ -123,6 +123,7 @@ public class RebootActions {
 
             @Override
             protected void doExecute(RebootContext context, RebootInstancesResult payload, Map<Object, Object> variables) {
+                addMdcOperationId(variables);
                 rebootService.finishInstanceReboot(context, payload);
                 LOGGER.info("Finished rebooting {}.", context.getInstanceIds());
                 Stack stack = context.getStack();
@@ -152,6 +153,7 @@ public class RebootActions {
                 }).collect(Collectors.toList());
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
+                MDCBuilder.buildMdcContext(stack);
                 return new RebootContext(flowParameters, stack, instances, null, null);
             }
         };
@@ -165,6 +167,7 @@ public class RebootActions {
 
             @Override
             protected void doExecute(RebootContext context, InstanceFailureEvent payload, Map<Object, Object> variables) {
+                addMdcOperationId(variables);
                 rebootService.handleInstanceRebootError(context);
                 String message = String.format("Rebooting failed for {}.", context.getInstanceIds());
                 LOGGER.error(message);
@@ -180,6 +183,7 @@ public class RebootActions {
                     RebootEvent> stateContext, InstanceFailureEvent payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
+                MDCBuilder.buildMdcContext(stack);
 
                 return new RebootContext(flowParameters, stack, payload.getInstanceIds().stream().map(instanceId -> {
                     InstanceMetaData md = new InstanceMetaData();

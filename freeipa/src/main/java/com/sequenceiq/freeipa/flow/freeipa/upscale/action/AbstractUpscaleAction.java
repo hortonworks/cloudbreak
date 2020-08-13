@@ -56,6 +56,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
             P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
+        addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
         Location location = location(region(stack.getRegion()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
