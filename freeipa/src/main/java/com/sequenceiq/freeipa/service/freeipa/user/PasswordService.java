@@ -112,8 +112,12 @@ public class PasswordService {
     }
 
     private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
-        MDCBuilder.addFlowId(operationId);
-        asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, actorCrn, userCrn, password, stacks));
+        try {
+            MDCBuilder.addOperationId(operationId);
+            asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, actorCrn, userCrn, password, stacks));
+        } finally {
+            MDCBuilder.removeOperationId();
+        }
     }
 
     private void internalSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {

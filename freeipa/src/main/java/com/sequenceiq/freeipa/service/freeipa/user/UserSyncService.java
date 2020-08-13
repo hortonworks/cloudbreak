@@ -193,9 +193,13 @@ public class UserSyncService {
     void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
 
-        MDCBuilder.addFlowId(operationId);
-        asyncTaskExecutor.submit(() -> internalSynchronizeUsers(
-                operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
+        try {
+            MDCBuilder.addOperationId(operationId);
+            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(
+                    operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
+        } finally {
+            MDCBuilder.removeOperationId();
+        }
 
     }
 

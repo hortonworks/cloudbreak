@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
@@ -51,6 +52,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     protected void setOperationId(Map<Object, Object> variables, String operationId) {
         variables.put(OPERATION_ID, operationId);
+        addMdcOperationIdIfPresent(variables);
     }
 
     protected String getOperationId(Map<Object, Object> variables) {
@@ -105,5 +107,12 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     protected void disableStatusChecker(Stack stack, String reason) {
         LOGGER.info("Disabling the status checker for stack ID {}. {}", stack.getId(), reason);
         jobService.unschedule(stack);
+    }
+
+    protected void addMdcOperationIdIfPresent(Map<Object, Object> varialbes) {
+        String operationId = getOperationId(varialbes);
+        if (operationId != null) {
+            MDCBuilder.addOperationId(operationId);
+        }
     }
 }

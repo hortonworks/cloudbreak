@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
@@ -15,7 +15,8 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 
-public abstract class AbstractFreeIpaCleanupAction<P extends Payload> extends AbstractStackAction<FreeIpaCleanupState, FreeIpaCleanupEvent, FreeIpaContext, P> {
+public abstract class AbstractFreeIpaCleanupAction<P extends CleanupEvent>
+        extends AbstractStackAction<FreeIpaCleanupState, FreeIpaCleanupEvent, FreeIpaContext, P> {
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -34,6 +35,7 @@ public abstract class AbstractFreeIpaCleanupAction<P extends Payload> extends Ab
     protected FreeIpaContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaCleanupState, FreeIpaCleanupEvent> stateContext,
             P payload) {
         FreeIpa freeIpa = freeIpaService.findByStackId(payload.getResourceId());
+        MDCBuilder.addOperationId(payload.getOperationId());
         return new FreeIpaContext(flowParameters, freeIpa);
     }
 
