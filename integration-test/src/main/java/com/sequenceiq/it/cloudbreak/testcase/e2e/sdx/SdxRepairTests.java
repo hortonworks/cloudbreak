@@ -18,6 +18,7 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -92,46 +93,27 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "recovery called on the IDBROKER host group, where the EC2 instance had been stopped",
+            when = "recovery called on the MASTER and then the IDBROKER host group, where the EC2 instance had been stopped",
             then = "SDX recovery should be successful, the cluster should be up and running"
     )
-    public void testSDXRepairIDBRokerWithStoppedEC2Instance(TestContext testContext) {
+    public void testSDXRepairMasterAndIDBRokerWithStoppedEC2Instance(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
-
-        List<String> actualIDBrokerVolumeIds = new ArrayList<>();
-        List<String> expectedIDBrokerVolumeIds = new ArrayList<>();
 
         DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .getResponse();
 
-        testContext
+        SdxTestDto sdxTestDto = testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
-                .then((tc, testDto, client) -> {
-                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
-                    expectedIDBrokerVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
-                    getCloudFunctionality(tc).stopInstances(instancesToStop);
-                    return testDto;
-                })
-                .awaitForInstance(Map.of(IDBROKER.getName(), InstanceStatus.STOPPED))
-                .when(sdxTestClient.repair(), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
-                .awaitForFlow(key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
-                .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName());
-                    actualIDBrokerVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
-                    return compareVolumeIdsAfterRepair(testDto, new ArrayList<>(actualIDBrokerVolumeIds),
-                            new ArrayList<>(expectedIDBrokerVolumeIds));
-                })
+                .awaitForInstance(getSdxInstancesHealthyState());
+
+        repair(sdxTestDto, sdx, MASTER);
+        repair(sdxTestDto, sdx, IDBROKER);
+
+        sdxTestDto
                 .then((tc, testDto, client) -> {
                     getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
                             testDto.getResponse().getName(), testDto.getResponse().getStackCrn());
@@ -145,59 +127,30 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "recovery called on the MASTER host group, where the EC2 instance had been stopped",
-            then = "SDX recovery should be successful, the cluster should be up and running"
-    )
-    public void testSDXRepairMasterWithStoppedEC2Instance(TestContext testContext) {
-        String sdx = resourcePropertyProvider().getName();
+    private void repair(SdxTestDto sdxTestDto, String sdx, HostGroupType hostGroupType) {
+        List<String> expectedVolumeIds = new ArrayList<>();
+        List<String> actualVolumeIds = new ArrayList<>();
 
-        List<String> actualMasterVolumeIds = new ArrayList<>();
-        List<String> expectedMasterVolumeIds = new ArrayList<>();
-
-        DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .getResponse();
-
-        testContext
-                .given(sdx, SdxTestDto.class).withCloudStorage()
-                .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
-                .awaitForInstance(getSdxInstancesHealthyState())
+        sdxTestDto
                 .then((tc, testDto, client) -> {
-                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                    expectedMasterVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
+                    List<String> instancesToStop = sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName());
+                    expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instancesToStop));
                     getCloudFunctionality(tc).stopInstances(instancesToStop);
                     return testDto;
                 })
-                .awaitForInstance(Map.of(MASTER.getName(), InstanceStatus.STOPPED))
+                .awaitForInstance(Map.of(hostGroupType.getName(), InstanceStatus.STOPPED))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
-                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                    actualMasterVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
+                    List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName());
+                    actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
-                .then((tc, testDto, client) -> {
-                    return compareVolumeIdsAfterRepair(testDto, new ArrayList<>(actualMasterVolumeIds),
-                            new ArrayList<>(expectedMasterVolumeIds));
-                })
-                .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerDataLake(getBaseLocation(testDto),
-                            testDto.getResponse().getName(), testDto.getResponse().getStackCrn());
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
-                    getCloudFunctionality(tc).cloudStorageListContainerFreeIpa(getBaseLocation(testDto),
-                            describeFreeIpaResponse.getName(), describeFreeIpaResponse.getCrn());
-                    return testDto;
-                })
-                .validate();
+                .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto,
+                        new ArrayList<>(actualVolumeIds),
+                        new ArrayList<>(expectedVolumeIds)));
     }
 }

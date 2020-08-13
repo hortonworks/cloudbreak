@@ -27,34 +27,12 @@ public class FreeIpaTests extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent AND the stack is stopped AND the stack is started",
+            when = "a valid stack create request is sent with 2 FreeIPA instances " +
+                    "AND the stack is stopped " +
+                    "AND the stack is started " +
+                    "AND the stack is repaired one node at a time",
             then = "the stack should be available AND deletable")
-    public void testCreateStopStartFreeIpa(TestContext testContext) {
-        String freeIpa = resourcePropertyProvider().getName();
-
-        testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(freeIpa, FreeIpaTestDto.class)
-                .withTelemetry("telemetry")
-                .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
-                .when(freeIpaTestClient.stop())
-                .await(Status.STOPPED)
-                .when(freeIpaTestClient.start())
-                .await(Status.AVAILABLE)
-                .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
-                .await(FREEIPA_DELETE_COMPLETED)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent with 2 FreeIPA instances AND the stack is stopped AND the stack is started",
-            then = "the stack should be available AND deletable")
-    public void testCreateStopStartFreeIpaWithTwoInstances(TestContext testContext) {
+    public void testCreateStopStartRepairFreeIpaWithTwoInstances(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
 
         int instanceGroupCount = 1;
@@ -73,31 +51,6 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
-                .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
-                .await(FREEIPA_DELETE_COMPLETED)
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT)
-    @Description(
-            given = "there is a running cloudbreak",
-            when = "a valid stack create request is sent with 2 FreeIPA instances AND the stack is repaired one node at a time",
-            then = "the stack should be available AND deletable")
-    public void testCreateThenRepairFreeIpaWithTwoInstances(TestContext testContext) {
-        String freeIpa = resourcePropertyProvider().getName();
-
-        int instanceGroupCount = 1;
-        int instanceCountByGroup = 2;
-
-        testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(freeIpa, FreeIpaTestDto.class)
-                .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
-                .withTelemetry("telemetry")
-                .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(Status.UPDATE_IN_PROGRESS)
                 .await(FREEIPA_AVAILABLE)
