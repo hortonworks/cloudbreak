@@ -207,13 +207,15 @@ public class StackSyncService {
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, boolean stackStatusUpdateEnabled) {
         Set<InstanceMetaData> instances = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+        boolean someInstancesRunningOrDeletedOnProviderSide = (instanceStateCounts.get(InstanceSyncState.RUNNING)
+                + instanceStateCounts.get(InstanceSyncState.DELETED_ON_PROVIDER_SIDE)) > 0;
         if (instanceStateCounts.get(InstanceSyncState.UNKNOWN) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.IN_PROGRESS) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_OPERATION_IN_PROGRESS.code()));
-        } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0 && instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
+        } else if (someInstancesRunningOrDeletedOnProviderSide && instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(),
                     cloudbreakMessagesService.getMessage(Msg.STACK_SYNC_INSTANCE_STOPPED_ON_PROVIDER.code()));
         } else if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
