@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -214,6 +215,9 @@ public class StackUpscaleActions {
                 if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
+                    if (null == gatewayMetaData && isRepair(variables)) {
+                        throw new CloudbreakServiceException("Could not get gateway instance metadata from the cloud provider.");
+                    }
                     CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
