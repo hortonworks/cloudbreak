@@ -118,6 +118,8 @@ public enum ResourceEvent {
     ENVIRONMENT_START_DATALAKE_FAILED("environment.start.datalake.failed"),
     ENVIRONMENT_START_FREEIPA_STARTED("environment.start.freeipa.started"),
     ENVIRONMENT_START_FREEIPA_FAILED("environment.start.freeipa.failed"),
+    ENVIRONMENT_START_SYNCHRONIZE_USERS_STARTED("environment.start.syncusers.started"),
+    ENVIRONMENT_START_SYNCHRONIZE_USERS_FAILED("environment.start.syncusers.failed"),
 
     ENVIRONMENT_STACK_CONFIGS_UPDATE_STARTED("environment.stack.config.updates.started"),
     ENVIRONMENT_STACK_CONFIGS_UPDATE_FINISHED("environment.stack.config.updates.finished"),

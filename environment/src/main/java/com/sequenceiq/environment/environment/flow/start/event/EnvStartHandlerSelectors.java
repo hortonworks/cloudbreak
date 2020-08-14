@@ -6,7 +6,8 @@ public enum EnvStartHandlerSelectors implements FlowEvent {
 
     START_DATAHUB_HANDLER_EVENT,
     START_DATALAKE_HANDLER_EVENT,
-    START_FREEIPA_HANDLER_EVENT;
+    START_FREEIPA_HANDLER_EVENT,
+    SYNCHRONIZE_USERS_HANDLER_EVENT;
 
     @Override
     public String event() {

@@ -58,6 +58,8 @@ public enum EnvironmentStatus {
     START_DATALAKE_FAILED("Failed to Start Data Lake"),
     START_FREEIPA_STARTED("Starting Free IPA"),
     START_FREEIPA_FAILED("Failed to Start Free IPA"),
+    START_SYNCHRONIZE_USERS_STARTED("Starting to synchronize users"),
+    START_SYNCHRONIZE_USERS_FAILED("Failed to synchronize users"),
 
     FREEIPA_DELETED_ON_PROVIDER_SIDE("Free IPA deleted on cloud provider side");
 
@@ -65,6 +67,7 @@ public enum EnvironmentStatus {
             AVAILABLE,
             START_DATALAKE_STARTED,
             START_DATAHUB_STARTED,
+            START_SYNCHRONIZE_USERS_STARTED,
             START_FREEIPA_STARTED
     );
 
@@ -105,6 +108,7 @@ public enum EnvironmentStatus {
     private static final Set<EnvironmentStatus> START_IN_PROGRESS_STATUSES = Set.of(
             START_DATAHUB_STARTED,
             START_DATALAKE_STARTED,
+            START_SYNCHRONIZE_USERS_STARTED,
             START_FREEIPA_STARTED
     );
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.environment.flow.start.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -17,13 +20,18 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class SynchronizeUsersHandler extends EventSenderAwareHandler<EnvironmentDto> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeUsersHandler.class);
 
     private final FreeIpaPollerService freeIpaPollerService;
 
     private final FreeIpaService freeIpaService;
 
-    protected StartFreeIpaHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService) {
+    @Value("${environment.freeipa.synchronizeOnStart:}")
+    private boolean synchronizeOnStartEnabled;
+
+    protected SynchronizeUsersHandler(EventSender eventSender, FreeIpaPollerService freeIpaPollerService, FreeIpaService freeIpaService) {
         super(eventSender);
         this.freeIpaPollerService = freeIpaPollerService;
         this.freeIpaService = freeIpaService;
@@ -31,27 +39,32 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
 
     @Override
     public String selector() {
-        return EnvStartHandlerSelectors.START_FREEIPA_HANDLER_EVENT.name();
+        return EnvStartHandlerSelectors.SYNCHRONIZE_USERS_HANDLER_EVENT.name();
     }
 
     @Override
     public void accept(Event<EnvironmentDto> environmentDtoEvent) {
+        LOGGER.debug("User synchronization is {}.", synchronizeOnStartEnabled ? "enabled" : "disabled");
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
-            freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
-                if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStartable()) {
-                    throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to start! Current state is: " + freeIpa.getStatus().name());
-                }
-            });
-            freeIpaPollerService.startAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
+            if (synchronizeOnStartEnabled) {
+                freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
+                    if (freeIpa.getStatus() != null && !freeIpa.getStatus().isAvailable()) {
+                        throw new FreeIpaOperationFailedException("FreeIPA is not in AVAILABLE state to synchronize users! Current state is: " +
+                                freeIpa.getStatus().name());
+                    }
+                });
+
+                freeIpaPollerService.waitForSynchronizeUsers(environmentDto.getId(), environmentDto.getResourceCrn());
+            }
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
-                    .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
+                    .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
                     .build();
             eventSender().sendEvent(envStartEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto, e, EnvironmentStatus.START_FREEIPA_FAILED);
+            EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto, e, EnvironmentStatus.START_SYNCHRONIZE_USERS_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
     }
