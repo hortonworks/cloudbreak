@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.client.WebTargetEndpointFactory;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
@@ -58,6 +59,12 @@ public class FreeIpaApiClientConfig {
     @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     FreeIpaV1Endpoint freeIpaV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
+    UserV1Endpoint userV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, UserV1Endpoint.class);
     }
 
     @Bean

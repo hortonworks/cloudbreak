@@ -53,6 +53,22 @@ public class EnvStartActions {
         };
     }
 
+    @Bean(name = "SYNCHRONIZE_USERS_STATE")
+    public Action<?, ?> synchronizeUsers() {
+        return new AbstractEnvStartAction<>(EnvStartEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvStartEvent payload, Map<Object, Object> variables) {
+                EnvironmentStatus environmentStatus = EnvironmentStatus.START_SYNCHRONIZE_USERS_STARTED;
+                ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_START_SYNCHRONIZE_USERS_STARTED;
+                EnvStartState envStartState = EnvStartState.SYNCHRONIZE_USERS_STATE;
+                EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
+                        envStartState);
+                sendEvent(context, EnvStartHandlerSelectors.SYNCHRONIZE_USERS_HANDLER_EVENT.selector(), envDto);
+            }
+        };
+    }
+
     @Bean(name = "START_DATALAKE_STATE")
     public Action<?, ?> startDatalake() {
         return new AbstractEnvStartAction<>(EnvStartEvent.class) {

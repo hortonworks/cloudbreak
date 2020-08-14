@@ -366,6 +366,8 @@ public class EnvironmentService implements ResourceIdProvider, ResourceBasedCrnP
                 EnvironmentStatus.START_DATAHUB_STARTED,
                 EnvironmentStatus.START_DATALAKE_STARTED,
                 EnvironmentStatus.START_FREEIPA_STARTED,
+                EnvironmentStatus.START_SYNCHRONIZE_USERS_STARTED,
+                EnvironmentStatus.START_SYNCHRONIZE_USERS_FAILED,
                 EnvironmentStatus.STOP_DATAHUB_FAILED,
                 EnvironmentStatus.STOP_DATALAKE_FAILED,
                 EnvironmentStatus.STOP_FREEIPA_FAILED,
