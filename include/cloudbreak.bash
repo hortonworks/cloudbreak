@@ -373,7 +373,7 @@ cloudbreak-generate-cert() {
           --label cbreak.sidekick=true \
           $run_as_user \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} \
+          hortonworks/certm:${DOCKER_TAG_CERT_TOOL} \
           -d /certs/traefik ca generate -o=local &> $cbd_ca_cert_gen_out || CA_CERT_EXIT_CODE=$? && true;
       if [[ $CA_CERT_EXIT_CODE -ne 0 ]]; then
           cat $cbd_ca_cert_gen_out;
@@ -385,7 +385,7 @@ cloudbreak-generate-cert() {
           --label cbreak.sidekick=true \
           $run_as_user \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} \
+          hortonworks/certm:${DOCKER_TAG_CERT_TOOL} \
           -d /certs/traefik client generate --common-name=${PUBLIC_IP} -o=local &> $cbd_client_cert_gen_out || CLIENT_CERT_EXIT_CODE=$? && true;
       if [[ $CLIENT_CERT_EXIT_CODE -ne 0 ]]; then
          cat $cbd_client_cert_gen_out;
