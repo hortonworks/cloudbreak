@@ -10,4 +10,4 @@ docker run -i --rm \
     -v $(pwd)/../:/tmp/prj:rw \
     -e "CM_PRIVATE_REPO_USER=$CM_PRIVATE_REPO_USER" \
     -e "CM_PRIVATE_REPO_PASSWORD=$CM_PRIVATE_REPO_PASSWORD" \
-    openjdk:11-jdk /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test
+    docker-private.infra.cloudera.com/cloudera_thirdparty/openjdk/openjdk:11-jdk /tmp/prj/gradlew -b /tmp/prj/build.gradle clean build -x test

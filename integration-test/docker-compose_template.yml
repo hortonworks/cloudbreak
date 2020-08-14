@@ -12,7 +12,7 @@ services:
     - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
     - ./integcb/etc:/etc/auth
     command: java -jar /mock-thunderhead.jar
-    image: openjdk:11-jdk
+    image: docker-private.infra.cloudera.com/cloudera_thirdparty/openjdk/openjdk:11-jdk
   test:
     networks:
       cbreak_default: {}
