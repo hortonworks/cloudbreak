@@ -12,7 +12,7 @@ services:
     - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
     - ./integcb/etc:/etc/auth
     command: java -jar /mock-thunderhead.jar
-    image: openjdk:11-jdk
+    image: docker-private.infra.cloudera.com/cloudera_thirdparty/openjdk/openjdk:11-jdk
   test:
     networks:
       cbreak_default: {}
@@ -76,6 +76,7 @@ services:
       - INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION
       - INTEGRATIONTEST_AWS_CLOUDSTORAGE_FILESYSTEMTYPE
       - INTEGRATIONTEST_OUTPUTDIR=/it
+      - INTEGRATIONTEST_DEFAULTPRIVATEKEYFILE
     image: openjdk:11-jdk
   swagger-diff:
     networks:

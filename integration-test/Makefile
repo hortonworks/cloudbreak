@@ -58,7 +58,7 @@ fetch-secrets-docker:
 	-e AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} \
 	-e AZURE_TENANT_ID=${AZURE_TENANT_ID} \
 	-e AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID} \
-	mcr.microsoft.com/azure-cli /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
+	docker-private.infra.cloudera.com/cloudera_thirdparty/mcr.microsoft.com/azure-cli:1.0 /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
 
 docker-compose:
 	CB_VERSION=$(CB_VERSION) ./scripts/docker-compose.sh

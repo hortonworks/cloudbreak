@@ -24,7 +24,7 @@ if [[ "$CIRCLECI" ]]; then
        -v "$(pwd)"/scripts/analyse_postgres_stat.jsh:/opt/analyse_postgres_stat.jsh \
        -v "$(pwd)"/test-output/docker_stats/pg_stat_network_io.result:/tmp/pg_stat_network_io.result \
        --env INTEGRATION_TEST_MAX_POSTGRES_OUTPUT=${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT} \
-       openjdk:11-jdk \
+       docker-private.infra.cloudera.com/cloudera_thirdparty/openjdk/openjdk:11-jdk \
        jshell /opt/analyse_postgres_stat.jsh > ./test-output/docker_stats/pg_stat_network_io_analysed.result;
 
       pg_res=$(cat ./test-output/docker_stats/pg_stat_network_io_analysed.result);
