@@ -57,7 +57,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it")
-    public void testCreateStopStartEnvironment(TestContext testContext) {
+    public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         setUpFreeIpaRouteStubbing(mockedTestContext);
         testContext

@@ -17,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
@@ -71,7 +70,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateABlueprintAndGetOtherUser(TestContext testContext) {
+    public void testCreateABlueprintAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(BlueprintTestDto.class)
                 .withBlueprint(BLUEPRINT_TEXT)
@@ -82,7 +81,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateARecipeAndGetOtherUser(TestContext testContext) {
+    public void testCreateARecipeAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
@@ -92,7 +91,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAnLdapAndGetOtherUser(TestContext testContext) {
+    public void testCreateAnLdapAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(LdapTestDto.class)
                 .when(ldapTestClient.createV1())
@@ -102,7 +101,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAnImageCatalogWithImagesAndGetOtherUser(TestContext testContext) {
+    public void testCreateAnImageCatalogWithImagesAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.createV4())
@@ -113,7 +112,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAnImageCatalogWithoutImagesAndGetOtherUser(TestContext testContext) {
+    public void testCreateAnImageCatalogWithoutImagesAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.createV4())
@@ -124,7 +123,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateAProxyConfigAndGetOtherUser(TestContext testContext) {
+    public void testCreateAProxyConfigAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(ProxyTestDto.class)
                 .when(proxyTestClient.create())
@@ -134,7 +133,7 @@ public class WorkspaceTest extends AbstractIntegrationTest {
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    public void testCreateKerberosConfigAndGetOtherUser(TestContext testContext) {
+    public void testCreateKerberosConfigAndGetOtherUser(MockedTestContext testContext) {
         testContext
                 .given(KerberosTestDto.class)
                 .when(kerberosTestClient.createV1())

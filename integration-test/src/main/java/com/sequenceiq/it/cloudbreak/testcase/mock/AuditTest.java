@@ -19,7 +19,7 @@ import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -73,7 +73,7 @@ public class AuditTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "a Cluster Template is created",
             then = "and audit record must be available in the database")
-    public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(TestContext testContext) {
+    public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(MockedTestContext testContext) {
         String clusterTemplateName = resourcePropertyProvider().getName();
         testContext
                 .given(EnvironmentTestDto.class)

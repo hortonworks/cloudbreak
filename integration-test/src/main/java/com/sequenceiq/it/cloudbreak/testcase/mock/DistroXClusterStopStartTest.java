@@ -17,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
@@ -106,7 +105,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    private String getImageCatalogName(TestContext testContext) {
+    private String getImageCatalogName(MockedTestContext testContext) {
         return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
     }
 }

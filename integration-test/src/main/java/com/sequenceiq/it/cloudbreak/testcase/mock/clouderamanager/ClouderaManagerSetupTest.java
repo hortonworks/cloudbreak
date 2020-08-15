@@ -8,7 +8,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -23,7 +23,7 @@ public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
             given = "a working environment",
             when = "a stack is created",
             then = "ClouderaManager user endpoints should be invoked with the proper requests")
-    public void verifyCallsAgainstCmUserCreation(TestContext testContext) {
+    public void verifyCallsAgainstCmUserCreation(MockedTestContext testContext) {
         testContext
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())

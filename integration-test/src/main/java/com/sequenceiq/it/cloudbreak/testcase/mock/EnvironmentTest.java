@@ -48,7 +48,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "valid create environment request is sent",
             then = "environment should be created")
-    public void testCreateEnvironment(TestContext testContext) {
+    public void testCreateEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -64,7 +64,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "a create environment request with reference to a non-existing credential is sent",
             then = "a BadRequestException should be returned")
-    public void testCreateEnvironmentNotExistCredential(TestContext testContext) {
+    public void testCreateEnvironmentNotExistCredential(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
@@ -79,7 +79,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             given = "there is an available environment",
             when = "a delete request is sent for the environment",
             then = "the environment should be deleted")
-    public void testDeleteEnvironment(TestContext testContext) {
+    public void testDeleteEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -97,7 +97,7 @@ public class EnvironmentTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "a delete request is sent for a non-existing environment",
             then = "a NotFoundException should be returned")
-    public void testDeleteEnvironmentNotExist(TestContext testContext) {
+    public void testDeleteEnvironmentNotExist(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)

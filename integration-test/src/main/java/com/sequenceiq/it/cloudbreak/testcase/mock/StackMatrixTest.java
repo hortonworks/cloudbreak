@@ -22,7 +22,7 @@ public class StackMatrixTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+        createDefaultUser((MockedTestContext) data[0]);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

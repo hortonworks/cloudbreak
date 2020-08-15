@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.assertion.CBAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 
@@ -22,12 +23,12 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
         createDefaultUser(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid CM Template based blueprint create request is sent",
             then = "the blueprint should be in the response")
-    public void testCreateCMBlueprint(TestContext testContext) {
+    public void testCreateCMBlueprint(MockedTestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();
         testContext.given(BlueprintTestDto.class)
                 .withName(blueprintName)
