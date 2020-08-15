@@ -7,8 +7,8 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -22,7 +22,7 @@ public class MockStackCreationTest extends AbstractIntegrationTest {
             given = "a valid stack request",
             when = "create stack twice",
             then = "getting BadRequestException in the second time because the names are same")
-    public void testAttemptToCreateTwoRegularClusterWithTheSameName(TestContext testContext) {
+    public void testAttemptToCreateTwoRegularClusterWithTheSameName(MockedTestContext testContext) {
         String badRequest = resourcePropertyProvider().getName();
         testContext.given(StackTestDto.class)
                 .when(stackTestClient.createV4())

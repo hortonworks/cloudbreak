@@ -83,7 +83,7 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
     @Inject
     private UtilTestClient utilTestClient;
 
-    protected void setupTest(MockedTestContext testContext) {
+    protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
@@ -105,7 +105,7 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
+        MockedTestContext testContext = (MockedTestContext) data[0];
 
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
@@ -116,14 +116,14 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
         testContext.cleanupTestContext();
     }
 
-    private void validateParentEnvironment(TestContext testContext) {
+    private void validateParentEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName);
     }
 
-    private void createAndValidateChildEnvironment(TestContext testContext)  {
+    private void createAndValidateChildEnvironment(MockedTestContext testContext)  {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                     .withParentEnvironment()
@@ -135,7 +135,7 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void createAndValidateSdx(TestContext testContext) {
+    private void createAndValidateSdx(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();

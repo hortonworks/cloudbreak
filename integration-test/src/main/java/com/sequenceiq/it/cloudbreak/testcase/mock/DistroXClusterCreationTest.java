@@ -292,7 +292,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    private String getImageCatalogName(TestContext testContext) {
+    private String getImageCatalogName(MockedTestContext testContext) {
         return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
     }
 

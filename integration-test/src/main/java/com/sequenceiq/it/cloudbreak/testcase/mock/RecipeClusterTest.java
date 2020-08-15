@@ -111,7 +111,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             given = "a deleted recipe",
             when = "starting cluster with deleted recipe",
             then = "badrequest exception is received")
-    public void testDeletedRecipeCannotBeAssignedToCluster(TestContext testContext) {
+    public void testDeletedRecipeCannotBeAssignedToCluster(MockedTestContext testContext) {
         LOGGER.info("testing recipe execution for type: {}", PRE_CLOUDERA_MANAGER_START.name());
         String recipeName = resourcePropertyProvider().getName();
         String stackName = resourcePropertyProvider().getName();
@@ -143,7 +143,7 @@ public class RecipeClusterTest extends AbstractIntegrationTest {
             given = "a created cluster with pretermination recipe",
             when = "calling termination",
             then = "the pretermination highstate has to called on pretermination recipes")
-    public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(TestContext testContext) {
+    public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)

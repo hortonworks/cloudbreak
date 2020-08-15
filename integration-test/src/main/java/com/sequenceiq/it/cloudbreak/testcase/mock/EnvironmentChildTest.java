@@ -68,7 +68,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is an available child environment with a referenced available parent environment",
             when = "child create request is sent but parent environment is a child environment",
             then = "a BadRequestException should be returned")
-    public void testCreateChildEnvironmentWhereParentIsAChild(TestContext testContext) {
+    public void testCreateChildEnvironmentWhereParentIsAChild(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
@@ -87,7 +87,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "child create request is sent but parent is not created yet",
             then = "a BadRequestException should be returned")
-    public void testCreateChildWithoutParentEnvironment(TestContext testContext) {
+    public void testCreateChildWithoutParentEnvironment(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(PARENT_ENVIRONMENT, EnvironmentTestDto.class)
@@ -103,7 +103,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete request is sent for the parent environment without cascading",
             then = "a BadRequestException should be returned")
-    public void testDeleteParentEnvironmentWithExistingChild(TestContext testContext) {
+    public void testDeleteParentEnvironmentWithExistingChild(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
@@ -122,7 +122,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             when = "a delete request is sent for the child environment",
             then = "the child environment should be deleted",
             and = "dns zone should be deleted")
-    public void testDeleteChildEnvironment(TestContext testContext) {
+    public void testDeleteChildEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                     .withParentEnvironment()
@@ -141,7 +141,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete multiple request is sent for both environments",
             then = "the child and parent environments should be deleted")
-    public void testDeleteChildAndParentEnvironment(TestContext testContext) {
+    public void testDeleteChildAndParentEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                     .withParentEnvironment()
@@ -166,7 +166,7 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             given = "there is an available child environment with a referenced available parent environment",
             when = "a delete request is sent for the child environment",
             then = "the child environment should be deleted, but dns zone should not be removed")
-    public void testDeleteChildEnvironmentThatHasSibling(TestContext testContext) {
+    public void testDeleteChildEnvironmentThatHasSibling(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                     .withParentEnvironment()

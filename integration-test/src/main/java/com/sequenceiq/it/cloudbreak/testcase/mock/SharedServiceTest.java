@@ -124,7 +124,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds and ldap are attached", then = "cluster creation is failed by invalid hostgroups")
-    public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInBlueprint(TestContext testContext) {
+    public void testCreateDatalakeClusterWithMoreHostgroupThanSpecifiedInBlueprint(MockedTestContext testContext) {
         String hiveRdsName = resourcePropertyProvider().getName();
         String rangerRdsName = resourcePropertyProvider().getName();
         String ldapName = resourcePropertyProvider().getName();
@@ -154,7 +154,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "hive rds, ranger rds are attached", then = "cluster creation is failed by missing ldap")
-    public void testCreateDatalakeClusterWithoutLdap(TestContext testContext) {
+    public void testCreateDatalakeClusterWithoutLdap(MockedTestContext testContext) {
         String hiveRdsName = resourcePropertyProvider().getName();
         String rangerRdsName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
@@ -182,7 +182,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "hive rds and ldap are attached", then = "cluster creation is failed by missing ranger rds")
-    public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(TestContext testContext) {
+    public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsHive(MockedTestContext testContext) {
         String hiveRdsName = resourcePropertyProvider().getName();
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
@@ -210,7 +210,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "ranger rds and ldap are attached", then = "cluster creation is failed by missing hive rds")
-    public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(TestContext testContext) {
+    public void testCreateDatalakeClusterWithOnlyOneRdsWhichIsRanger(MockedTestContext testContext) {
         String rangerRdsName = resourcePropertyProvider().getName();
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
@@ -238,7 +238,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "ldap are attached", then = "cluster creation is failed by missing hive and ranger rds")
-    public void testCreateDatalakeClusterWithoutRds(TestContext testContext) {
+    public void testCreateDatalakeClusterWithoutRds(MockedTestContext testContext) {
         String ldapName = resourcePropertyProvider().getName();
         String blueprintName = resourcePropertyProvider().getName();
         testContext
@@ -265,7 +265,7 @@ public class SharedServiceTest extends AbstractIntegrationTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
     @Description(given = "a datalake cluster", when = "without ldap, ranger and hive rds",
             then = "cluster creation is failed by missing hive and ranger rds and ldap")
-    public void testCreateDatalakeClusterWithoutRdsAndLdap(TestContext testContext) {
+    public void testCreateDatalakeClusterWithoutRdsAndLdap(MockedTestContext testContext) {
         String blueprintName = resourcePropertyProvider().getName();
         testContext
                 .given(BlueprintTestDto.class).withName(blueprintName)

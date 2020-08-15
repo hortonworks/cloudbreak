@@ -10,7 +10,6 @@ import com.sequenceiq.it.cloudbreak.assertion.util.DeploymentPreferencesTestAsse
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -21,7 +20,7 @@ public class DeploymentPreferencesTest extends AbstractIntegrationTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {
-        createDefaultUser((TestContext) data[0]);
+        createDefaultUser((MockedTestContext) data[0]);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

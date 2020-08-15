@@ -12,7 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -44,7 +44,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "a valid http proxy request",
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
-    public void testCreateValidProxy(TestContext testContext) {
+    public void testCreateValidProxy(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
@@ -69,7 +69,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "a valid https proxy request",
             when = "calling create proxy",
             then = "getting back a list which contains the proxy object")
-    public void testCreateValidHttpsProxy(TestContext testContext) {
+    public void testCreateValidHttpsProxy(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
@@ -94,7 +94,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request with too long name",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithTooLongName(TestContext testContext) {
+    public void testCreateProxyWithTooLongName(MockedTestContext testContext) {
         String name = getLongNameGenerator().stringGenerator(101);
         testContext
                 .given(ProxyTestDto.class)
@@ -117,7 +117,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request with too short name",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithShortName(TestContext testContext) {
+    public void testCreateProxyWithShortName(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
@@ -139,7 +139,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request with specific characters in the name",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithInvalidName(TestContext testContext) {
+    public void testCreateProxyWithInvalidName(MockedTestContext testContext) {
         testContext
                 .given(ProxyTestDto.class)
                 .withName(INVALID_PROXY_NAME)
@@ -161,7 +161,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request with empty name",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithoutName(TestContext testContext) {
+    public void testCreateProxyWithoutName(MockedTestContext testContext) {
         String key = "noname";
         testContext
                 .given(ProxyTestDto.class)
@@ -184,7 +184,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request with too long description",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyLongDesc(TestContext testContext) {
+    public void testCreateProxyLongDesc(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         String longDescription = getLongNameGenerator().stringGenerator(1001);
         testContext
@@ -208,7 +208,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request without host",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithoutHost(TestContext testContext) {
+    public void testCreateProxyWithoutHost(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         String key = "nohost";
         testContext
@@ -232,7 +232,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "an invalid proxy request without port",
             when = "calling create proxy",
             then = "getting back a BadRequestException")
-    public void testCreateProxyWithoutPort(TestContext testContext) {
+    public void testCreateProxyWithoutPort(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         String key = "noport";
         testContext
@@ -256,7 +256,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "a valid proxy request",
             when = "calling create proxy then delete that and create again",
             then = "getting back list with proxy which contains the proxy object")
-    public void testCreateDeleteCreateAgain(TestContext testContext) {
+    public void testCreateDeleteCreateAgain(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, ProxyTestDto.class)
@@ -283,7 +283,7 @@ public class ProxyConfigTest extends AbstractIntegrationTest {
             given = "a valid proxy request",
             when = "calling create proxy then create again",
             then = "getting a BadRequestException")
-    public void testCreateProxyWithSameName(TestContext testContext) {
+    public void testCreateProxyWithSameName(MockedTestContext testContext) {
 
         String name = resourcePropertyProvider().getName();
         testContext

@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
@@ -42,7 +43,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak managed ssh key",
             when = "change managed ssh key to existing one",
             then = "delete managed ssh key but not create new one")
-    public void authenticationEditWhenSetExistingKeyAndDeleteManagedSuccessfully(TestContext testContext) {
+    public void authenticationEditWhenSetExistingKeyAndDeleteManagedSuccessfully(MockedTestContext testContext) {
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
                 .thenReturn((s, model, uriParameters) -> "")
@@ -83,7 +84,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak with existed ssh key",
             when = "change existing ssh key to managed one",
             then = "delete managed ssh key but not create new one")
-    public void authenticationEditWhenSetManagedKeyAndNotDeleteExisted(TestContext testContext) {
+    public void authenticationEditWhenSetManagedKeyAndNotDeleteExisted(MockedTestContext testContext) {
         testContext
                 .given(HttpMock.class)
                 .whenRequested(SpiEndpoints.GetPublicKey.class).get()
@@ -126,7 +127,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "change authentication",
             then = "get validation errors")
-    public void authenticationEditValidationErrors(TestContext testContext) {
+    public void authenticationEditValidationErrors(MockedTestContext testContext) {
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.GetPublicKey.class).get()
                 .thenReturn((s, model, uriParameters) -> {
@@ -161,7 +162,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
             given = "there is a running cloudbreak",
             when = "change authentication",
             then = "get validation errors")
-    public void securityAccessEditValidationErrors(TestContext testContext) {
+    public void securityAccessEditValidationErrors(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)

@@ -140,12 +140,11 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .validate();
     }
 
-    protected ImageCatalogTestDto createImageCatalogForOsUpgrade(TestContext testContext, String name) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
+    protected ImageCatalogTestDto createImageCatalogForOsUpgrade(MockedTestContext testContext, String name) {
         return testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(name)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
+                .withUrl(testContext.getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(name));
     }
 }
