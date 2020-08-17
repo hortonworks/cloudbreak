@@ -247,6 +247,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_FINISHED_NOVERSION("cluster.upgrade.finished.noversion"),
     CLUSTER_UPGRADE_DOWNLOAD_PARCEL("cluster.upgrade.download.parcel"),
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
+    CLUSTER_UPGRADE_ACTIVATE_PARCEL("cluster.upgrade.activate.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
 

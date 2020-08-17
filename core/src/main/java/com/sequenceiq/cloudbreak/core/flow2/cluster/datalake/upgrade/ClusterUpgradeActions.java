@@ -13,6 +13,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatalakeClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -89,8 +91,7 @@ public class ClusterUpgradeActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeInitSuccess payload, Map<Object, Object> variables) {
                 StatedImage currentImage = (StatedImage) variables.get(CURRENT_IMAGE);
                 StatedImage targetImage = (StatedImage) variables.get(TARGET_IMAGE);
-                boolean clusterManagerUpdateNeeded =
-                        clusterUpgradeService.upgradeClusterManager(context.getStackId(), currentImage, targetImage);
+                boolean clusterManagerUpdateNeeded = clusterUpgradeService.upgradeClusterManager(context.getStackId(), currentImage, targetImage);
                 Selectable event;
                 if (clusterManagerUpdateNeeded) {
                     event = new ClusterManagerUpgradeRequest(context.getStackId());
@@ -119,16 +120,27 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterManagerUpgradeSuccess payload, Map<Object, Object> variables) {
-                StatedImage currentImage = (StatedImage) variables.get(CURRENT_IMAGE);
-                StatedImage targetImage = (StatedImage) variables.get(TARGET_IMAGE);
+                Image currentImage = getImage(variables, CURRENT_IMAGE);
+                Image targetImage = getImage(variables, TARGET_IMAGE);
                 boolean clusterRuntimeUpgradeNeeded = clusterUpgradeService.upgradeCluster(context.getStackId(), currentImage, targetImage);
                 Selectable event;
                 if (clusterRuntimeUpgradeNeeded) {
-                    event = new ClusterUpgradeRequest(context.getStackId());
+                    event = new ClusterUpgradeRequest(context.getStackId(), isPatchUpgrade(currentImage, targetImage));
                 } else {
                     event = new ClusterUpgradeSuccess(context.getStackId());
                 }
                 sendEvent(context, event.selector(), event);
+            }
+
+            private boolean isPatchUpgrade(Image currentImage, Image targetImage) {
+                StackDetails currentImageStackDetails = currentImage.getStackDetails();
+                StackDetails targetImageStackDetails = targetImage.getStackDetails();
+                return currentImageStackDetails != null && targetImageStackDetails != null
+                        && currentImageStackDetails.getVersion().equals(targetImageStackDetails.getVersion());
+            }
+
+            private Image getImage(Map<Object, Object> variables, String key) {
+                return ((StatedImage) variables.get(key)).getImage();
             }
 
             @Override

@@ -4,8 +4,15 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterUpgradeRequest extends StackEvent {
 
-    public ClusterUpgradeRequest(Long stackId) {
+    private final boolean patchUpgrade;
+
+    public ClusterUpgradeRequest(Long stackId, boolean patchUpgrade) {
         super(stackId);
+        this.patchUpgrade = patchUpgrade;
+    }
+
+    public boolean isPatchUpgrade() {
+        return patchUpgrade;
     }
 
 //    @Override

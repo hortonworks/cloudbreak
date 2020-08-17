@@ -116,8 +116,8 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterUpgradeNeededButCMNot(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        StatedImage currentImage = StatedImage.statedImage(createImage(CURRENT_BUILD_NUMBER, currentStackVersion), null, null);
-        StatedImage targetImage = StatedImage.statedImage(createImage(CURRENT_BUILD_NUMBER, targetStackVersion), null, null);
+        Image currentImage = createImage(CURRENT_BUILD_NUMBER, currentStackVersion);
+        Image targetImage = createImage(CURRENT_BUILD_NUMBER, targetStackVersion);
         // WHEN
         boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
         // THEN
@@ -129,10 +129,7 @@ public class ClusterUpgradeServiceTest {
 
     @ParameterizedTest
     @MethodSource("upgradeNeededImages")
-    public void testClusterUpgradeNeededButCMNotNoStackDetails(Image currentIm, Image targetIm) {
-        // GIVEN
-        StatedImage currentImage = StatedImage.statedImage(currentIm, null, null);
-        StatedImage targetImage = StatedImage.statedImage(targetIm, null, null);
+    public void testClusterUpgradeNeededButCMNotNoStackDetails(Image currentImage, Image targetImage) {
         // WHEN
         boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
         // THEN
@@ -146,10 +143,8 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterAndCMUpgradeNeeded(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImmage = createImage(currentStackVersion, currentStackVersion);
-        StatedImage currentImage = StatedImage.statedImage(currentImmage, null, null);
-        Image targetImmage = createImage(targetStackVersion, targetStackVersion);
-        StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
+        Image currentImage = createImage(currentStackVersion, currentStackVersion);
+        Image targetImage = createImage(targetStackVersion, targetStackVersion);
         // WHEN
         boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
         // THEN
@@ -162,10 +157,8 @@ public class ClusterUpgradeServiceTest {
     @MethodSource("upgradeNeededVersions")
     public void testClusterUpgradeNotNeededButCMNeeded(String currentStackVersion, String targetStackVersion) {
         // GIVEN
-        Image currentImmage = createImage(currentStackVersion, CURRENT_BUILD_NUMBER);
-        StatedImage currentImage = StatedImage.statedImage(currentImmage, null, null);
-        Image targetImmage = createImage(targetStackVersion, CURRENT_BUILD_NUMBER);
-        StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
+        Image currentImage = createImage(currentStackVersion, CURRENT_BUILD_NUMBER);
+        Image targetImage = createImage(targetStackVersion, CURRENT_BUILD_NUMBER);
         // WHEN
         boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
         // THEN
@@ -177,10 +170,8 @@ public class ClusterUpgradeServiceTest {
     @Test
     public void testNeitherClusterNorCMUpgradeNeeded() {
         // GIVEN
-        Image currentImmage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
-        StatedImage currentImage = StatedImage.statedImage(currentImmage, null, null);
-        Image targetImmage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
-        StatedImage targetImage = StatedImage.statedImage(targetImmage, null, null);
+        Image currentImage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
+        Image targetImage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
         // WHEN
         boolean actualResult = underTest.upgradeCluster(STACK_ID, currentImage, targetImage);
         // THEN
