@@ -40,13 +40,31 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Inject
     private BlueprintService blueprintService;
 
+    /**
+     * @deprecated Do not use it, we can't use Credential's Name by themselves with internalCrn's
+     */
     @Override
+    @Deprecated
     public RecommendationV4Response createRecommendation(Long workspaceId, String blueprintName, String credentialName,
-        String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         PlatformRecommendation recommendation = blueprintService.getRecommendation(
                 workspaceId,
                 blueprintName,
                 credentialName,
+                region,
+                platformVariant,
+                availabilityZone,
+                cdpResourceType);
+        return converterUtil.convert(recommendation, RecommendationV4Response.class);
+    }
+
+    @Override
+    public RecommendationV4Response createRecommendationByCredCrn(Long workspaceId, String blueprintName, String credentialCrn,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+        PlatformRecommendation recommendation = blueprintService.getRecommendationByCredentialCrn(
+                workspaceId,
+                blueprintName,
+                credentialCrn,
                 region,
                 platformVariant,
                 availabilityZone,
