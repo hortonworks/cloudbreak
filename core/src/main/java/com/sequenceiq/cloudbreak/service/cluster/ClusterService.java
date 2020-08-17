@@ -550,6 +550,10 @@ public class ClusterService {
     }
 
     private void validateRepair(Stack stack, HostMetadata hostMetadata) {
+        if (isGateway(hostMetadata)
+                && (Objects.isNull(stack.getCustomDomain()) || Objects.isNull(stack.getCustomHostname()))) {
+            throw new BadRequestException("Ambari server failure cannot be repaired without custom domain and hostname!");
+        }
         if (isGateway(hostMetadata) && !isMultipleGateway(stack)) {
             throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
         }
