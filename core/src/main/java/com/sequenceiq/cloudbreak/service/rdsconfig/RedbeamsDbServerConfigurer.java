@@ -61,6 +61,7 @@ public class RedbeamsDbServerConfigurer {
         rdsConfig.setConnectionURL(dbCommon.getJdbcConnectionUrl(resp.getDatabaseVendor(), resp.getHost(), resp.getPort(), Optional.of(dbName)));
         rdsConfig.setConnectionUserName(dbUsernameConverterService.toConnectionUsername(resp.getHost(), dbUser));
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
+        rdsConfig.setConnectionDriver(resp.getConnectionDriver());
         rdsConfig.setDatabaseEngine(DatabaseVendor.fromValue(resp.getDatabaseVendor()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setName(type.name() + '_' + stack.getName() + stack.getId());
