@@ -23,7 +23,7 @@
         "serviceConfigs": [
           {
             "name": "zookeeper_service",
-            "ref": "zookeeper-BASE"
+            "ref": "zookeeper"
           },
           {
             "name": "auto.ranger.repository.create",
@@ -149,7 +149,7 @@
         ]
       },
       {
-        "refName": "zookeeper-BASE",
+        "refName": "zookeeper",
         "serviceType": "ZOOKEEPER",
         "roleConfigGroups": [
           {
