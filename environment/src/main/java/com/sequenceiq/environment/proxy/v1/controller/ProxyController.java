@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -56,7 +57,7 @@ public class ProxyController extends NotificationController implements ProxyEndp
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @DisableCheckPermissions
     public ProxyResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Set<ProxyConfig> listInAccount = proxyConfigService.listInAccount(accountId);

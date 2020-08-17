@@ -243,13 +243,13 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public List<String> versions() {
         return cdpConfigService.getDatalakeVersions();
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public List<AdvertisedRuntime> advertisedRuntimes() {
         return cdpConfigService.getAdvertisedRuntimes();
     }
