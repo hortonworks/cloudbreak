@@ -102,6 +102,13 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     @Override
+    public Page<CDPStructuredNotificationEvent> getPagedNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn,
+            Pageable pageable) {
+        pagingStructuredEventRepository
+        return null;
+    }
+
+    @Override
     public AccountAwareResourceRepository<CDPStructuredEventEntity, Long> repository() {
         return structuredEventRepository;
     }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPAuditEventV1Controller;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -43,7 +44,8 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentPlatformResourceController.class,
             UtilController.class,
             FlowController.class,
-            AuthorizationInfoController.class);
+            AuthorizationInfoController.class,
+            CDPAuditEventV1Controller.class);
 
     private final String applicationVersion;
 
