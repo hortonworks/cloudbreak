@@ -60,8 +60,8 @@ public interface ClusterApi {
         return clusterModificationService().upscaleCluster(hostGroup, metas);
     }
 
-    default void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException {
-        clusterModificationService().upgradeClusterRuntime(components);
+    default void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade);
     }
 
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {

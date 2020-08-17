@@ -54,16 +54,14 @@ public class ClusterUpgradeService {
         return clusterManagerUpdateNeeded;
     }
 
-    public boolean upgradeCluster(long stackId, StatedImage currentImage, StatedImage targetImage) {
-        Image targetIm = targetImage.getImage();
-        Image currentIm = currentImage.getImage();
-        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentIm.getStackDetails(), StackDetails::getStackBuildNumber);
-        boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentIm.getCmBuildNumber(), targetIm.getCmBuildNumber());
+    public boolean upgradeCluster(long stackId, Image currentImage, Image targetImage) {
+        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentImage.getStackDetails(), StackDetails::getStackBuildNumber);
+        boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentImage.getCmBuildNumber(), targetImage.getCmBuildNumber());
         boolean clusterRuntimeUpgradeNeeded =
-                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), StackDetails::getStackBuildNumber));
+                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetImage.getStackDetails(), StackDetails::getStackBuildNumber));
 
         if (clusterManagerUpdateNeeded) {
-            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, targetIm.getVersion());
+            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, targetImage.getVersion());
         }
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (clusterRuntimeUpgradeNeeded) {

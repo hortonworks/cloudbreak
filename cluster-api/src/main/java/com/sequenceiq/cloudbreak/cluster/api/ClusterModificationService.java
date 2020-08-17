@@ -27,7 +27,7 @@ public interface ClusterModificationService {
 
     void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
-    void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException;
+    void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException;
 
     Map<String, String> gatherInstalledParcels(String stackName);
 

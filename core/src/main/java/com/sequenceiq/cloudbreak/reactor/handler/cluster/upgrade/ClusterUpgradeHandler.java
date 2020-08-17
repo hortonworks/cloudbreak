@@ -56,7 +56,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
             Set<ClusterComponent> components = clusterComponentProvider.getComponentsByClusterId(stack.getCluster().getId());
-            connector.upgradeClusterRuntime(components);
+            connector.upgradeClusterRuntime(components, request.isPatchUpgrade());
 
             result = new ClusterUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
