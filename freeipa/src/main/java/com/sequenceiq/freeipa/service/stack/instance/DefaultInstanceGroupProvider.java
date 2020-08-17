@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -23,6 +24,10 @@ import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 
 @Service
 public class DefaultInstanceGroupProvider {
+
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
+
+    private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
@@ -55,4 +60,15 @@ public class DefaultInstanceGroupProvider {
         return template;
     }
 
+    public Json createAttributes(CloudPlatform cloudPlatform, String stackName, String instanceGroupName) {
+        if (cloudPlatform == CloudPlatform.AZURE) {
+            Map<String, Object> asParameters = Map.ofEntries(
+                    entry(AzureInstanceGroupParameters.NAME, String.format("%s-%s-as", stackName, instanceGroupName)),
+                    entry(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT, DEFAULT_FAULT_DOMAIN_COUNTER),
+                    entry(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT, DEFAULT_UPDATE_DOMAIN_COUNTER));
+            return new Json(Map.of("availabilitySet", asParameters));
+        } else {
+            return null;
+        }
+    }
 }
