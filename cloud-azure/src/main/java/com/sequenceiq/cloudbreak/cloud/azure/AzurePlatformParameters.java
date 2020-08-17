@@ -171,7 +171,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         Map<String, InstanceGroupParameterResponse> result = new HashMap<>();
         for (InstanceGroupParameterRequest groupParameterRequest : instanceGroupParameterRequests) {
             InstanceGroupParameterResponse instanceGroupParameterResponse = new InstanceGroupParameterResponse();
-            if (groupParameterRequest.getParameters().keySet().contains("availabilitySet")) {
+            if (groupParameterRequest.getParameters().containsKey("availabilitySet")) {
                 instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
                 instanceGroupParameterResponse.setParameters(groupParameterRequest.getParameters());
 

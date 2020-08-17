@@ -60,7 +60,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME);
         // THEN
         assertThat(result).isNotNull();
         assertThat(result.getGroupName()).isEqualTo(NAME);
@@ -82,7 +82,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         Template template = mock(Template.class);
         when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID)).thenReturn(template);
 
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME);
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);

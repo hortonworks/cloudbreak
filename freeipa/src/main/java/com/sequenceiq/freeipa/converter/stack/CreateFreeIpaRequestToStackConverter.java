@@ -248,7 +248,7 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform()))
+                .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName()))
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
