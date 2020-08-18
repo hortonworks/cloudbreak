@@ -26,7 +26,7 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyFlowStructuredEventHandler.class);
 
     @Inject
-    private LegacyBaseStructuredEventClient legacyStructuredEventClient;
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 
     @Inject
     private LegacyStructuredFlowEventFactory legacyStructuredFlowEventFactory;

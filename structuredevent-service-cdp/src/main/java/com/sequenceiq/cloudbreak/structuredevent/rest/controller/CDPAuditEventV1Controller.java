@@ -13,12 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPAuditEventV1Endpoint;
-import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPAuditEventV4Response;
-import com.sequenceiq.cloudbreak.structuredevent.rest.model.CDPAuditEventV4Responses;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventDBService;
 
 @Controller
@@ -35,18 +34,19 @@ public class CDPAuditEventV1Controller implements CDPAuditEventV1Endpoint {
 
     @Override
     public Response getAuditEventsZip(String resourceCrn) {
-        CDPAuditEventV4Responses auditEvents = getAuditEvents(resourceCrn);
-        return getAuditEventsZipResponse(auditEvents.getResponses());
+        Page<CDPStructuredNotificationEvent> auditEvents = getAuditEvents(resourceCrn, 0, 1000);
+        return getAuditEventsZipResponse(auditEvents.getContent(), resourceCrn);
     }
 
-    private Response getAuditEventsZipResponse(Collection<CDPAuditEventV4Response> auditEventV4Responses, String resourceType) {
+    private Response getAuditEventsZipResponse(Collection<CDPStructuredNotificationEvent> events, String resourceCrn) {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                zipOutputStream.write(JsonUtil.writeValueAsString(auditEventV4Responses).getBytes());
+                zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
                 zipOutputStream.closeEntry();
             }
         };
+        String resourceType = Crn.safeFromString(resourceCrn).getResourceType().getName();
         String fileName = String.format("audit-%s.zip", resourceType);
         return Response.ok(streamingOutput).header("content-disposition", String.format("attachment; filename = %s", fileName)).build();
     }

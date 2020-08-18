@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.service;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
@@ -24,11 +22,11 @@ import com.sequenceiq.flow.core.FlowEventListener;
 public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> implements FlowEventListener<S, E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPFlowStructuredEventHandler.class);
 
-    @Inject
-    private CDPStructuredEventClient cdpStructuredEventClient;
+//    @Inject
+//    private CDPDefaultStructuredEventClient cdpStructuredEventClient;
 
-    @Inject
-    private CDPStructuredFlowEventFactory cdpStructuredFlowEventFactory;
+//    @Inject
+//    private CDPStructuredFlowEventFactory cdpStructuredFlowEventFactory;
 
     private final S initState;
 
@@ -86,12 +84,12 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
             CDPStructuredEvent structuredEvent;
             if (exception == null) {
-                structuredEvent = cdpStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
+//                structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(stackId, flowDetails, detailed);
             } else {
-                structuredEvent = cdpStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true, exception);
+//                structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(stackId, flowDetails, true, exception);
                 exception = null;
             }
-            cdpStructuredEventClient.sendStructuredEvent(structuredEvent);
+//            cdpStructuredEventClient.sendStructuredEvent(structuredEvent);
             lastStateChange = currentTime;
         } catch (RuntimeException ex) {
             LOGGER.error("Error happened during structured flow event generation! The event won't be stored!", ex);
@@ -116,8 +114,8 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
             String fromId = currentState != null ? currentState.getId().toString() : "unknown";
             FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, "unknown", "FLOW_CANCEL",
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
-            CDPStructuredEvent structuredEvent = cdpStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
-            cdpStructuredEventClient.sendStructuredEvent(structuredEvent);
+//            CDPStructuredEvent structuredEvent = cdpStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
+//            cdpStructuredEventClient.sendStructuredEvent(structuredEvent);
             lastStateChange = currentTime;
         }
     }
