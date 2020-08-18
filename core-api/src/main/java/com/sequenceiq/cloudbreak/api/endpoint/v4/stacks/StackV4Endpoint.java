@@ -6,11 +6,16 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_STACK_UPGRADE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CREATE_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DATABASE_BACKUP;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DATABASE_BACKUP_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DATABASE_RESTORE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DATABASE_RESTORE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_BY_NAME_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_INSTANCE_BY_ID_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_WITH_KERBEROS_IN_WORKSPACE;
@@ -23,11 +28,15 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.PUT_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RETRY_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SCALE_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STACK_UPGRADE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STACK_UPGRADE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.START_BY_NAME_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.START_BY_NAME_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STOP_BY_NAME_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.STOP_BY_NAME_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.SYNC_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
 
@@ -67,6 +76,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -95,6 +105,14 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "postStackInWorkspaceV4")
     StackV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request, @AccountId @QueryParam("accountId") String accountId);
 
+    @POST
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CREATE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postStackInWorkspaceV4Internal")
+    StackV4Response postInternal(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
     @GET
     @Path("{name}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -114,6 +132,14 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "deleteStackInWorkspaceV4")
     void delete(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") boolean forced, @AccountId @QueryParam("accountId") String accountId);
+
+    @DELETE
+    @Path("internal/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "deleteStackInWorkspaceV4Internal")
+    void deleteInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/sync")
@@ -146,11 +172,27 @@ public interface StackV4Endpoint {
             @AccountId @QueryParam("accountId") String accountId);
 
     @PUT
+    @Path("internal/{name}/stop")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = STOP_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "stopStackInWorkspaceV4Internal")
+    FlowIdentifier putStopInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
     @Path("{name}/start")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = START_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "startStackInWorkspaceV4")
     FlowIdentifier putStart(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @AccountId @QueryParam("accountId") String accountId);
+
+    @PUT
+    @Path("internal/{name}/start")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = START_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "startStackInWorkspaceV4Internal")
+    FlowIdentifier putStartInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/scaling")
@@ -169,12 +211,28 @@ public interface StackV4Endpoint {
             @Valid ClusterRepairV4Request clusterRepairRequest, @AccountId @QueryParam("accountId") String accountId);
 
     @POST
+    @Path("internal/{name}/manual_repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
+            nickname = "repairStackInWorkspaceV4Internal")
+    FlowIdentifier repairClusterInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid ClusterRepairV4Request clusterRepairRequest, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
             nickname = "upgradeOsInWorkspaceV4")
     FlowIdentifier upgradeOs(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @AccountId @QueryParam("accountId") String accountId);
+
+    @POST
+    @Path("internal/{name}/upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
+            nickname = "upgradeOsInWorkspaceV4Internal")
+    FlowIdentifier upgradeOsInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("{name}/check_for_upgrade")
@@ -199,6 +257,14 @@ public interface StackV4Endpoint {
             notes = Notes.STACK_NOTES, nickname = "changeImageStackInWorkspaceV4")
     FlowIdentifier changeImage(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @Valid StackImageChangeV4Request stackImageChangeRequest, @AccountId @QueryParam("accountId") String accountId);
+
+    @PUT
+    @Path("internal/{name}/change_image")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CHECK_IMAGE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "changeImageStackInWorkspaceV4Internal")
+    FlowIdentifier changeImageInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid StackImageChangeV4Request stackImageChangeRequest, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @DELETE
     @Path("{name}/cluster")
@@ -285,6 +351,13 @@ public interface StackV4Endpoint {
     FlowIdentifier upgradeClusterByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId,
             @AccountId @QueryParam("accountId") String accountId);
 
+    @POST
+    @Path("internal/{name}/cluster_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = STACK_UPGRADE_INTERNAL, nickname = "upgradeClusterByNameInternal")
+    FlowIdentifier upgradeClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
     @PUT
     @Path("{name}/salt_update")
     @Produces(MediaType.APPLICATION_JSON)
@@ -317,10 +390,26 @@ public interface StackV4Endpoint {
             @AccountId @QueryParam("accountId") String accountId);
 
     @POST
+    @Path("internal/{name}/database_backup")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DATABASE_BACKUP_INTERNAL, nickname = "databaseBackupInternal")
+    BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
     @Path("{name}/database_restore")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DATABASE_RESTORE, nickname = "databaseRestore")
     RestoreV4Response restoreDatabaseByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
             @AccountId @QueryParam("accountId") String accountId);
+
+    @POST
+    @Path("internal/{name}/database_restore")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DATABASE_RESTORE_INTERNAL, nickname = "databaseRestoreInternal")
+    RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
+            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

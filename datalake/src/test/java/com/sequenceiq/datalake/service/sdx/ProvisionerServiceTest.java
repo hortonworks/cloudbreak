@@ -92,7 +92,7 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         StackV4Response stackV4Response = new StackV4Response();
         when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
-        when(stackV4Endpoint.post(anyLong(), any(StackV4Request.class), anyString())).thenReturn(stackV4Response);
+        when(stackV4Endpoint.postInternal(anyLong(), any(StackV4Request.class), nullable(String.class))).thenReturn(stackV4Response);
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
 
         underTest.startStackProvisioning(clusterId, getEnvironmentResponse());
@@ -183,11 +183,12 @@ class ProvisionerServiceTest {
         when(sdxClusterRepository.findById(clusterId)).thenReturn(Optional.of(sdxCluster));
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-        doThrow(new NotFoundException()).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE), anyString());
+        doThrow(new NotFoundException()).when(stackV4Endpoint).deleteInternal(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE),
+                nullable(String.class));
 
         underTest.startStackDeletion(clusterId, false);
 
-        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(false), anyString());
+        verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(false), nullable(String.class));
     }
 
     @Test
@@ -200,7 +201,7 @@ class ProvisionerServiceTest {
 
         underTest.startStackDeletion(clusterId, true);
 
-        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(true), anyString());
+        verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(true), nullable(String.class));
     }
 
     @Test
@@ -211,14 +212,14 @@ class ProvisionerServiceTest {
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
         WebApplicationException webApplicationException = new WebApplicationException();
-        doThrow(webApplicationException).when(stackV4Endpoint).delete(anyLong(), eq(sdxCluster.getClusterName()),
-                eq(Boolean.FALSE), anyString());
+        doThrow(webApplicationException).when(stackV4Endpoint).deleteInternal(anyLong(), eq(sdxCluster.getClusterName()),
+                eq(Boolean.FALSE), nullable(String.class));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
         RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
         Assertions.assertEquals("Cannot delete stack, some error happened on Cloudbreak side: web-error", actual.getMessage());
 
-        verify(stackV4Endpoint).delete(eq(0L), eq(null), eq(false), anyString());
+        verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(false), nullable(String.class));
     }
 
     @Test
