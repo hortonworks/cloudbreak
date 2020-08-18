@@ -17,15 +17,13 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
-import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredEventRepository;
-import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventContainer;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredEventRepository;
+import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
 
@@ -74,28 +72,11 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     @Override
-    public <T extends CDPStructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId) {
-        List<CDPStructuredEventEntity> events = structuredEventRepository
-                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByCDPClass(eventClass), resourceType, resourceId);
-        return events != null ? (List<T>) conversionService.convert(events,
-                TypeDescriptor.forObject(events),
-                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(CDPStructuredEvent.class))) : Collections.emptyList();
-    }
-
-    @Override
-    public <T extends CDPStructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId, Pageable pageable) {
+    public <T extends CDPStructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceCrn(Class<T> eventClass, String resourceType, String resourceCrn,
+            Pageable pageable) {
         Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository
-                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByCDPClass(eventClass), resourceType, resourceId, pageable);
+                .findByEventTypeAndResourceTypeAndResourceCrn(StructuredEventType.getByCDPClass(eventClass), resourceType, resourceCrn, pageable);
         return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, CDPStructuredEvent.class));
-    }
-
-    @Override
-    public CDPStructuredEventContainer getEventsForUserWithResourceId(String resourceType, Long resourceId) {
-        List<CDPStructuredRestCallEvent> rest = getEventsWithTypeAndResourceId(CDPStructuredRestCallEvent.class, resourceType, resourceId);
-        List<CDPStructuredFlowEvent> flow = getEventsWithTypeAndResourceId(CDPStructuredFlowEvent.class, resourceType, resourceId);
-        List<CDPStructuredNotificationEvent> notification
-                = getEventsWithTypeAndResourceId(CDPStructuredNotificationEvent.class, resourceType, resourceId);
-        return new CDPStructuredEventContainer(flow, rest, notification);
     }
 
     @Override
@@ -106,7 +87,6 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     @Override
     public Page<CDPStructuredNotificationEvent> getPagedNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn,
             Pageable pageable) {
-//        pagingStructuredEventRepository
         return null;
     }
 

@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface CDPPagingStructuredEventRepository extends PagingAndSortingRepository<CDPStructuredEventEntity, Long> {
 
-    Page<CDPStructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(StructuredEventType eventType,
+    Page<CDPStructuredEventEntity> findByEventTypeAndResourceTypeAndResourceCrn(StructuredEventType eventType,
         String resourceType,
-        Long resourceId,
+        String resourceCrn,
         Pageable pageable);
 }

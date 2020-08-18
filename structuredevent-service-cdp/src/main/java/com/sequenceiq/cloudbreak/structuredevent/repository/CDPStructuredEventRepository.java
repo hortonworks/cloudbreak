@@ -9,6 +9,7 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = CDPStructuredEventEntity.class)
 @Transactional(TxType.REQUIRED)
+@Repository
 public interface CDPStructuredEventRepository extends AccountAwareResourceRepository<CDPStructuredEventEntity, Long> {
 
     @Override
@@ -25,11 +27,6 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     CDPStructuredEventEntity findByAccountIdAndId(
             @Param("accountId") Long accountId,
             @Param("id") Long id);
-
-    List<CDPStructuredEventEntity> findByAccountIdAndResourceTypeAndResourceId(
-            String accountId,
-            String resourceType,
-            Long resourceId);
 
     List<CDPStructuredEventEntity> findByAccountIdAndResourceTypeAndResourceCrn(
             String accountId,
@@ -45,11 +42,6 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
             @Param("accountId") String accountId,
             @Param("eventType") StructuredEventType eventType,
             @Param("since") Long since);
-
-    List<CDPStructuredEventEntity> findByEventTypeAndResourceTypeAndResourceId(
-            StructuredEventType eventType,
-            String resourceType,
-            Long resourceId);
 
     @Override
     default Optional<CDPStructuredEventEntity> findByNameAndAccountId(

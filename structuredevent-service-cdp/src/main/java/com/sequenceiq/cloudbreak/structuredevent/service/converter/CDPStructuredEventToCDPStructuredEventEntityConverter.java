@@ -23,7 +23,6 @@ public class CDPStructuredEventToCDPStructuredEventEntityConverter extends Abstr
             CDPOperationDetails operationDetails = source.getOperation();
             structuredEventEntity.setEventType(operationDetails.getEventType());
             structuredEventEntity.setResourceType(operationDetails.getResourceType());
-            structuredEventEntity.setResourceId(operationDetails.getResourceId());
             structuredEventEntity.setResourceCrn(operationDetails.getResourceCrn());
             structuredEventEntity.setTimestamp(operationDetails.getTimestamp());
             structuredEventEntity.setAccountId(source.getOperation().getAccountId());

@@ -16,12 +16,12 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 
 @Entity
-@Table(name = "cdpstructuredevent")
+@Table(name = "cdp_structured_event")
 public class CDPStructuredEventEntity implements AccountAwareResource {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cdpstructuredevent_generator")
-    @SequenceGenerator(name = "cdpstructuredevent_generator", sequenceName = "cdpstructuredevent_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cdp_structured_event_generator")
+    @SequenceGenerator(name = "cdp_structured_event_generator", sequenceName = "cdp_structured_event_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(nullable = false)
@@ -30,9 +30,6 @@ public class CDPStructuredEventEntity implements AccountAwareResource {
 
     @Column(nullable = false)
     private String resourceType;
-
-    @Column(nullable = false)
-    private Long resourceId;
 
     @Column(nullable = false)
     private String resourceCrn;
@@ -74,14 +71,6 @@ public class CDPStructuredEventEntity implements AccountAwareResource {
 
     public void setResourceType(String resourceType) {
         this.resourceType = resourceType;
-    }
-
-    public Long getResourceId() {
-        return resourceId;
-    }
-
-    public void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
     }
 
     public Long getTimestamp() {

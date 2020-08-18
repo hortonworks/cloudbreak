@@ -17,11 +17,8 @@ public interface CDPStructuredEventService extends CDPStructuredEventSenderServi
 
     <T extends CDPStructuredEvent> List<T> getEventsForAccountWithTypeSince(String accountId, Class<T> eventClass, Long since);
 
-    <T extends CDPStructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId);
-
-    <T extends CDPStructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId, Pageable pageable);
-
-    CDPStructuredEventContainer getEventsForUserWithResourceId(String resourceType, Long resourceId);
+    <T extends CDPStructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceCrn(Class<T> eventClass, String resourceType, String resourceCrn,
+            Pageable pageable);
 
     CDPStructuredEventContainer getStructuredEventsForObject(String name, String accountId);
 
