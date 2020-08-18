@@ -22,9 +22,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class NifiRegistryServiceConfigProviderTest {
+public class NifiRegistryRoleConfigProviderTest {
 
-    private final NifiRegistryServiceConfigProvider underTest = new NifiRegistryServiceConfigProvider();
+    private final NifiRegistryRoleConfigProvider underTest = new NifiRegistryRoleConfigProvider();
 
     @Test
     public void testGetSchemaRegistryServiceConfigs701() {
@@ -42,7 +42,7 @@ public class NifiRegistryServiceConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor);
 
-        List<ApiClusterTemplateConfig> roleConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(NifiRegistryRoles.NIFI_REGISTRY_SERVER, preparationObject);
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(config("nifi.registry.db.url", "jdbc:postgresql://testhost:5432/nifi_registry"),
