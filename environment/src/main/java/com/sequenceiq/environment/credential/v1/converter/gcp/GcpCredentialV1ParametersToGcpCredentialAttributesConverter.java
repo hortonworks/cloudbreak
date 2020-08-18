@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.v1.converter;
+package com.sequenceiq.environment.credential.v1.converter.gcp;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
@@ -12,7 +12,7 @@ import com.sequenceiq.environment.credential.attributes.gcp.JsonAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.P12Attributes;
 
 @Component
-class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
+public class GcpCredentialV1ParametersToGcpCredentialAttributesConverter {
 
     public GcpCredentialAttributes convert(GcpCredentialParameters source) {
         GcpCredentialAttributes response = new GcpCredentialAttributes();

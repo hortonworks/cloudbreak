@@ -70,6 +70,7 @@ public class NetworkCreationRequestFactory {
                 .withPrivateSubnetEnabled(privateSubnetEnabled)
                 .withServiceEndpointsEnabled(ServiceEndpointCreation.ENABLED == networkDto.getServiceEndpointCreation())
                 .withUserName(getUserFromCrn(environment.getCreator()))
+                .withAccountId(environment.getAccountId())
                 .withCreatorCrn(environment.getCreator())
                 .withTags(costTagging.mergeTags(mergeRequest))
                 .withPrivateSubnets(cidrs.getPrivateSubnets())

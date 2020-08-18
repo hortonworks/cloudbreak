@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.validation.securitygroup;
+package com.sequenceiq.environment.environment.validation.securitygroup.aws;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 
@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 

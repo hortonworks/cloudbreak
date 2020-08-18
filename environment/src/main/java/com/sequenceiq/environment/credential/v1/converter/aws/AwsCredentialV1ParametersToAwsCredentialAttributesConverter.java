@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.v1.converter;
+package com.sequenceiq.environment.credential.v1.converter.aws;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
@@ -12,7 +12,7 @@ import com.sequenceiq.environment.credential.attributes.aws.KeyBasedCredentialAt
 import com.sequenceiq.environment.credential.attributes.aws.RoleBasedCredentialAttributes;
 
 @Component
-class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
+public class AwsCredentialV1ParametersToAwsCredentialAttributesConverter {
 
     public AwsCredentialAttributes convert(AwsCredentialParameters source) {
         AwsCredentialAttributes response = new AwsCredentialAttributes();

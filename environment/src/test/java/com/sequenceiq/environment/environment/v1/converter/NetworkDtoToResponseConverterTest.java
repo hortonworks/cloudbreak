@@ -154,7 +154,7 @@ public class NetworkDtoToResponseConverterTest {
     }
 
     private AwsParams createAwsParams() {
-        return AwsParams.AwsParamsBuilder.anAwsParams()
+        return AwsParams.builder()
                 .withVpcId("aws-vpc-id")
                 .build();
     }

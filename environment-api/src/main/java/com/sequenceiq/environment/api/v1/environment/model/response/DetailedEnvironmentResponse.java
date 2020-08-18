@@ -11,6 +11,8 @@ import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageVali
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.openstack.OpenstackEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 
 import io.swagger.annotations.ApiModel;
@@ -99,6 +101,10 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String parentEnvironmentCloudPlatform;
 
         private ProxyResponse proxyConfig;
+
+        private GcpEnvironmentParameters gcp;
+
+        private OpenstackEnvironmentParameters openstack;
 
         private Builder() {
         }
@@ -247,6 +253,16 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withGcp(GcpEnvironmentParameters gcp) {
+            this.gcp = gcp;
+            return this;
+        }
+
+        public Builder withOpenstack(OpenstackEnvironmentParameters openstack) {
+            this.openstack = openstack;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -271,12 +287,14 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCloudStorageValidation(cloudStorageValidation);
             detailedEnvironmentResponse.setAdminGroupName(adminGroupName);
             detailedEnvironmentResponse.setAws(aws);
-            detailedEnvironmentResponse.setAzure(azure);
             detailedEnvironmentResponse.setTags(tag);
             detailedEnvironmentResponse.setParentEnvironmentCrn(parentEnvironmentCrn);
             detailedEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
             detailedEnvironmentResponse.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             detailedEnvironmentResponse.setProxyConfig(proxyConfig);
+            detailedEnvironmentResponse.setAzure(azure);
+            detailedEnvironmentResponse.setOpenstack(openstack);
+            detailedEnvironmentResponse.setGcp(gcp);
             return detailedEnvironmentResponse;
         }
     }

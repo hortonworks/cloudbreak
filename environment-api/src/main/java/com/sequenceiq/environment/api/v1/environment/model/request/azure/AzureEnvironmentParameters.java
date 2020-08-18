@@ -28,7 +28,7 @@ public class AzureEnvironmentParameters {
                 "resourceGroup=" + resourceGroup +
                 '}';
     }
-
+    
     public static Builder builder() {
         return new Builder();
     }

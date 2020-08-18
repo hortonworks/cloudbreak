@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.validation.securitygroup;
+package com.sequenceiq.environment.environment.validation.securitygroup.azure;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
@@ -16,6 +16,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
+import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 
 @Component
 public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecurityGroupValidator {

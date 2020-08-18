@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.validation;
+package com.sequenceiq.environment.credential.validation.aws;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.validation.ProviderCredentialValidator;
 
 @Component
 public class AwsCredentialValidator implements ProviderCredentialValidator {

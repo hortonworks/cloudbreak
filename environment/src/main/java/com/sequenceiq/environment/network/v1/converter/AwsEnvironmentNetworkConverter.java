@@ -79,8 +79,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AwsNetwork awsNetwork = (AwsNetwork) network;
         return builder.withAws(
-                AwsParams.AwsParamsBuilder
-                    .anAwsParams()
+                AwsParams.builder()
                     .withVpcId(awsNetwork.getVpcId())
                     .build())
                 .build();

@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.v1.converter;
+package com.sequenceiq.environment.credential.v1.converter.openstack;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
@@ -16,11 +16,12 @@ import com.sequenceiq.environment.credential.attributes.openstack.OpenStackCrede
 import com.sequenceiq.environment.credential.attributes.openstack.ProjectKeystoneV3Attributes;
 
 @Component
-class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter {
+public class OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter {
 
     public OpenStackCredentialAttributes convert(OpenstackParameters source) {
         OpenStackCredentialAttributes response = new OpenStackCredentialAttributes();
         doIfNotNull(source.getKeystoneV2(), param -> response.setKeystoneV2(getKeystoneV2(param)));
+
         doIfNotNull(source.getKeystoneV3(), param -> response.setKeystoneV3(getKeystoneV3(param)));
         response.setEndpoint(source.getEndpoint());
         response.setFacing(source.getFacing());

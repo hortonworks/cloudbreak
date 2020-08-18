@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.v1.converter;
+package com.sequenceiq.environment.credential.v1.converter.azure;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
@@ -14,7 +14,7 @@ import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAtt
 import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttributes;
 
 @Component
-class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
+public class AzureCredentialV1ParametersToAzureCredentialAttributesConverter {
 
     public AzureCredentialAttributes convert(AzureCredentialRequestParameters source) {
         AzureCredentialAttributes response = new AzureCredentialAttributes();
