@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -127,7 +128,7 @@ class SdxDeleteServiceTest {
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
         when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(Set.of("name"));
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
-        verify(stackV4Endpoint).delete(eq(0L), eq("name"), eq(true), anyString());
+        verify(stackV4Endpoint).deleteInternal(eq(0L), eq("name"), eq(true), nullable(String.class));
         verify(sdxEndpoint, times(0)).deleteByCrn(anyString(), anyBoolean());
     }
 }

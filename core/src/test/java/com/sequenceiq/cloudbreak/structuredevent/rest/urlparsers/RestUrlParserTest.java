@@ -167,7 +167,8 @@ public class RestUrlParserTest {
         if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
             resourceEvent = parts[2];
         } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
-                && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
+                && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])
+                && !("internal".equals(parts[3]) && parts.length == 4)) {
             // Skip v4/{workspaceId}/audits/{auditId}
             // Skip v4/{workspaceId}/blueprints/{name} and similars
             // Skip v4/{workspaceId}/credentials/code_grant_flow/init

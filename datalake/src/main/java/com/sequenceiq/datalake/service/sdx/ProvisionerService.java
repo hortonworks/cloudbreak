@@ -79,8 +79,9 @@ public class ProvisionerService {
     public void startStackDeletion(Long id, boolean forced) {
         sdxClusterRepository.findById(id).ifPresentOrElse(sdxCluster -> {
             try {
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        stackV4Endpoint.delete(0L, sdxCluster.getClusterName(), forced, sdxCluster.getAccountId()));
+                        stackV4Endpoint.deleteInternal(0L, sdxCluster.getClusterName(), forced, initiatorUserCrn));
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_DELETION_IN_PROGRESS,
                         "Data Lake stack deletion in progress", sdxCluster);
             } catch (NotFoundException e) {
@@ -172,8 +173,9 @@ public class ProvisionerService {
                             stackV4Endpoint.getByCrn(0L, sdxCluster.getCrn(), null));
                 } catch (NotFoundException e) {
                     LOGGER.info("Stack does not exist on cloudbreak side, POST new cluster: {}", sdxCluster.getClusterName(), e);
+                    String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                     stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                            stackV4Endpoint.post(0L, stackV4Request, sdxCluster.getAccountId()));
+                            stackV4Endpoint.postInternal(0L, stackV4Request, initiatorUserCrn));
                 }
                 sdxCluster.setStackId(stackV4Response.getId());
                 sdxCluster.setStackCrn(stackV4Response.getCrn());

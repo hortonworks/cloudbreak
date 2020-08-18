@@ -74,9 +74,9 @@ public class SdxUpgradeService {
                     DatalakeStatusEnum.CHANGE_IMAGE_IN_PROGRESS,
                     "Changing image",
                     cluster.get());
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.changeImage(0L, cluster.get().getClusterName(),
-                    stackImageChangeRequest, cluster.get().getAccountId()));
+                    stackV4Endpoint.changeImageInternal(0L, cluster.get().getClusterName(), stackImageChangeRequest, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
         } else {
             throw new NotFoundException("Not found cluster with id" + id);
@@ -90,9 +90,9 @@ public class SdxUpgradeService {
                 "Upgrading datalake stack",
                 sdxCluster);
         try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.upgradeClusterByName(0L, sdxCluster.getClusterName(),
-                    imageId, sdxCluster.getAccountId()));
+                    stackV4Endpoint.upgradeClusterByNameInternal(0L, sdxCluster.getClusterName(), imageId, initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
             String message = String.format("Stack upgrade failed on cluster: [%d]. Message: [%s]", id, e.getMessage());
@@ -172,8 +172,9 @@ public class SdxUpgradeService {
                     DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS,
                     "OS upgrade started",
                     cluster.get());
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeOs(0L,
-                    cluster.get().getClusterName(), cluster.get().getAccountId()));
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeOsInternal(0L,
+                    cluster.get().getClusterName(), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(cluster.get(), flowIdentifier);
         } else {
             throw new NotFoundException("Cluster not found with id" + id);

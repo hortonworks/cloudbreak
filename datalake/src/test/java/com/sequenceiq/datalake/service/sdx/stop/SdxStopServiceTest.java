@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -97,7 +98,7 @@ public class SdxStopServiceTest {
 
         underTest.stop(CLUSTER_ID);
 
-        verify(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
+        verify(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
     }
@@ -105,7 +106,7 @@ public class SdxStopServiceTest {
     @Test
     public void testStopWhenNotFoundException() {
         SdxCluster sdxCluster = sdxCluster();
-        doThrow(NotFoundException.class).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(NotFoundException.class).when(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         underTest.stop(CLUSTER_ID);
@@ -120,7 +121,7 @@ public class SdxStopServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(clientErrorException).when(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
@@ -132,7 +133,7 @@ public class SdxStopServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("error");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStop(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(clientErrorException).when(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));

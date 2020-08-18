@@ -17,6 +17,8 @@ public class V4EventRestUrlParser extends LegacyRestUrlParser {
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
 
+    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/internal");
+
     private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([a-z_]+)");
 
     // POST is the norm. Irregular GET requests:
@@ -31,6 +33,11 @@ public class V4EventRestUrlParser extends LegacyRestUrlParser {
     @Override
     protected List<String> parsedMethods() {
         return List.of("POST", "GET");
+    }
+
+    @Override
+    protected Pattern getAntiPattern() {
+        return ANTI_PATTERN;
     }
 
     @Override

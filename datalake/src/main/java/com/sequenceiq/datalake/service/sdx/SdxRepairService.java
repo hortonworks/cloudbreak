@@ -90,8 +90,9 @@ public class SdxRepairService {
     protected void startRepairInCb(SdxCluster sdxCluster, SdxRepairSettings repairRequest) {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint
-                    .repairCluster(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest), sdxCluster.getAccountId()));
+                    .repairClusterInternal(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", sdxCluster);
         } catch (NotFoundException e) {
