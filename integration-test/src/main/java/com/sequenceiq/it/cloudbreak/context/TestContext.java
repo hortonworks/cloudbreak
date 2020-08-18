@@ -427,6 +427,10 @@ public abstract class TestContext implements ApplicationContextAware {
         return Crn.fromString(new String(Base64.getDecoder().decode(getActingUserAccessKey())));
     }
 
+    public String getActingUserName() {
+        return Crn.fromString(new String(Base64.getDecoder().decode(getActingUserAccessKey()))).getUserId();
+    }
+
     protected void setActingUser(CloudbreakUser actingUser) {
         this.actingUser = actingUser;
     }

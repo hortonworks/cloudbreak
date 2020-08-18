@@ -27,6 +27,6 @@ public class SparklessTestContext extends TestContext {
     @Override
     public void cleanupTestContext() {
         super.cleanupTestContext();
-        getResources().values().forEach(tagsUtil::verifyTags);
+        getResources().values().forEach(value -> tagsUtil.verifyTags(value, this));
     }
 }

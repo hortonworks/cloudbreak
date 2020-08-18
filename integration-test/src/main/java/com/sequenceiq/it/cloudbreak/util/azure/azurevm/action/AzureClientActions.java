@@ -109,8 +109,16 @@ public class AzureClientActions {
     }
 
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
-        return instanceIds.stream()
+        Map<String, Map<String, String>> tagsByInstanceId = instanceIds.stream()
                 .map(id -> azure.virtualMachines().getByResourceGroup(getResourceGroupName(id), id))
                 .collect(Collectors.toMap(VirtualMachine::id, VirtualMachine::tags));
+
+        tagsByInstanceId.forEach((instance, tags) -> {
+            LOGGER.info(" Tags for Azure instance [{}]: ", instance);
+            tags.forEach((key, value) -> {
+                LOGGER.info(" [{}] : [{}] ", key, value);
+            });
+        });
+        return tagsByInstanceId;
     }
 }
