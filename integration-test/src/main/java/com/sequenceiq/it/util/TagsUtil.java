@@ -1,15 +1,21 @@
 package com.sequenceiq.it.util;
 
+import static java.lang.String.format;
+
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.testng.asserts.SoftAssert;
 
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class TagsUtil {
@@ -25,6 +31,8 @@ public class TagsUtil {
 
     private static final int GCP_TAG_MAX_LENGTH = 63;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TagsUtil.class);
+
     public void addTestNameTag(CloudbreakTestDto testDto, String testName) {
         if (testDto instanceof AbstractTestDto) {
             Object request = ((AbstractTestDto<?, ?, ?, ?>) testDto).getRequest();
@@ -34,19 +42,19 @@ public class TagsUtil {
         }
     }
 
-    public void verifyTags(CloudbreakTestDto testDto) {
+    public void verifyTags(CloudbreakTestDto testDto, TestContext testContext) {
         if (testDto instanceof AbstractTestDto) {
             AbstractTestDto<?, ?, ?, ?> abstractTestDto = (AbstractTestDto<?, ?, ?, ?>) testDto;
 
             if (abstractTestDto.getResponse() instanceof TaggedResponse) {
-                verifyTags((TaggedResponse) abstractTestDto.getResponse());
+                verifyTags((TaggedResponse) abstractTestDto.getResponse(), testContext);
             }
 
             if (!CollectionUtils.isEmpty(abstractTestDto.getResponses())) {
                 abstractTestDto.getResponses().stream()
                         .filter(TaggedResponse.class::isInstance)
                         .map(TaggedResponse.class::cast)
-                        .forEach(this::verifyTags);
+                        .forEach(taggedResponse -> verifyTags(taggedResponse, testContext));
             }
         }
     }
@@ -64,10 +72,31 @@ public class TagsUtil {
         return tag;
     }
 
-    public void verifyTags(TaggedResponse response) {
+    public void verifyTags(TaggedResponse response, TestContext testContext) {
         SoftAssert softAssert = new SoftAssert();
+
+        Log.log(LOGGER, format(" Verify test name tag: [%s] value is: [%s] Not Null! ", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG)));
         softAssert.assertNotNull(response.getTagValue(TEST_NAME_TAG), MISSING_TEST_NAME_TAG_MESSAGE);
-        DEFAULT_TAGS.forEach(tag -> softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag)));
+        Log.log(LOGGER, format(" Verify test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG,
+                response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
+        softAssert.assertEquals(response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get(), String.format("Test name tag value is: [%s]" +
+                " NOT equals [%s] test method name!", response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
+        DEFAULT_TAGS.forEach(tag -> {
+            Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] Not Null! ", tag, response.getTagValue(tag)));
+            softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag));
+            if (tag.equalsIgnoreCase("owner")) {
+                Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
+                        testContext.getActingUserName()));
+                softAssert.assertEquals(response.getTagValue(tag), testContext.getActingUserName(), String.format("Default tag: [%s] value is: [%s] " +
+                        "NOT equals [%s] acting user name!", tag, response.getTagValue(tag), testContext.getActingUserName()));
+            }
+            if (tag.equalsIgnoreCase("Cloudera-Creator-Resource-Name")) {
+                Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] contains [%s] acting user name! ", tag, response.getTagValue(tag),
+                        testContext.getActingUserName()));
+                softAssert.assertTrue(response.getTagValue(tag).contains(testContext.getActingUserName()), String.format("Default tag: [%s] value is: [%s] " +
+                        "NOT contains [%s] acting user name!", tag, response.getTagValue(tag), testContext.getActingUserName()));
+            }
+        });
         softAssert.assertAll();
     }
 

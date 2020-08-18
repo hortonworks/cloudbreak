@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -18,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -25,6 +28,8 @@ import com.sequenceiq.it.util.TagsUtil;
 
 @Service
 public class CloudProviderSideTagAssertion {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderSideTagAssertion.class);
 
     private final CloudProviderProxy cloudProviderProxy;
 
@@ -48,7 +53,7 @@ public class CloudProviderSideTagAssertion {
                     .map(InstanceMetaDataResponse::getInstanceId)
                     .collect(Collectors.toList());
 
-            verifyTags(instanceIds, customTags);
+            verifyTags(instanceIds, customTags, testContext);
 
             return testDto;
         };
@@ -61,7 +66,7 @@ public class CloudProviderSideTagAssertion {
                     .map(InstanceMetaDataV4Response::getInstanceId)
                     .collect(Collectors.toList());
 
-            verifyTags(instanceIds, customTags);
+            verifyTags(instanceIds, customTags, testContext);
 
             return testDto;
         };
@@ -74,16 +79,16 @@ public class CloudProviderSideTagAssertion {
                     .map(InstanceMetaDataV4Response::getInstanceId)
                     .collect(Collectors.toList());
 
-            verifyTags(instanceIds, customTags);
+            verifyTags(instanceIds, customTags, testContext);
 
             return testDto;
         };
     }
 
-    private void verifyTags(List<String> instanceIds, Map<String, String> customTags) {
+    private void verifyTags(List<String> instanceIds, Map<String, String> customTags, TestContext testContext) {
         Map<String, Map<String, String>> tagsByInstanceId = cloudProviderProxy.getCloudFunctionality().listTagsByInstanceId(instanceIds);
         tagsByInstanceId.forEach((id, tags) -> {
-            tagsUtil.verifyTags(new MapToTaggedResponseAdapter(tags));
+            tagsUtil.verifyTags(new MapToTaggedResponseAdapter(tags), testContext);
             customTags.forEach((key, value) -> assertThat(tags.get(key)).isEqualTo(value));
         });
     }
