@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifiregistry;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static java.util.Collections.emptyList;
 
 import java.util.List;
 
@@ -11,13 +10,12 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class NifiRegistryServiceConfigProvider extends AbstractRdsRoleConfigProvider {
+public class NifiRegistryRoleConfigProvider extends AbstractRdsRoleConfigProvider {
 
     static final String DATABASE_USER = "nifi.registry.db.username";
 
@@ -30,20 +28,25 @@ public class NifiRegistryServiceConfigProvider extends AbstractRdsRoleConfigProv
     static final String DRIVER_DIRECTORY = "nifi.registry.db.driver.directory";
 
     @Override
-    public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
+    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
             RdsView nifiRegistryRdsView = getRdsView(source);
-            return List.of(
-                    config(DATABASE_URL, nifiRegistryRdsView.getConnectionURL()),
-                    config(DRIVER_DIRECTORY, "/usr/share/java/"),
-                    config(DRIVER_CLASS, nifiRegistryRdsView.getConnectionDriver()),
-                    config(DATABASE_USER, nifiRegistryRdsView.getConnectionUserName()),
-                    config(DATABASE_PASSWORD, nifiRegistryRdsView.getConnectionPassword())
-            );
+            switch (roleType) {
+                case NifiRegistryRoles.NIFI_REGISTRY_SERVER:
+                    return List.of(
+                            config(DATABASE_URL, nifiRegistryRdsView.getConnectionURL()),
+                            config(DRIVER_DIRECTORY, "/usr/share/java/"),
+                            config(DRIVER_CLASS, nifiRegistryRdsView.getConnectionDriver()),
+                            config(DATABASE_USER, nifiRegistryRdsView.getConnectionUserName()),
+                            config(DATABASE_PASSWORD, nifiRegistryRdsView.getConnectionPassword())
+                    );
+                default:
+                    return List.of();
+            }
         }
-        return emptyList();
+        return List.of();
     }
 
     @Override
@@ -59,10 +62,5 @@ public class NifiRegistryServiceConfigProvider extends AbstractRdsRoleConfigProv
     @Override
     protected DatabaseType dbType() {
         return DatabaseType.NIFIREGISTRY;
-    }
-
-    @Override
-    protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        return List.of();
     }
 }
