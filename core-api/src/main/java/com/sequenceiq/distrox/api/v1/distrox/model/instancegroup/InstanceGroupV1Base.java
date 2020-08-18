@@ -38,6 +38,12 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @ApiModelProperty(InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV1Parameters aws;
 
+    @ApiModelProperty
+    private GcpInstanceGroupV1Parameters gcp;
+
+    @ApiModelProperty
+    private OpenstackInstanceGroupV1Parameters openstack;
+
     private YarnInstanceGroupV1Parameters yarn;
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
@@ -83,6 +89,24 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @Override
     public AwsInstanceGroupV1Parameters getAws() {
         return aws;
+    }
+
+    @Override
+    public GcpInstanceGroupV1Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpInstanceGroupV1Parameters gcp) {
+        this.gcp = gcp;
+    }
+
+    @Override
+    public OpenstackInstanceGroupV1Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenstackInstanceGroupV1Parameters openstack) {
+        this.openstack = openstack;
     }
 
     @Override

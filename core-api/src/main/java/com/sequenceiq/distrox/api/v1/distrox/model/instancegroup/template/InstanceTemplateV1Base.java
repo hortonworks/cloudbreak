@@ -25,6 +25,12 @@ public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvid
     @ApiModelProperty(TemplateModelDescription.AZURE_PARAMETERS)
     private AzureInstanceTemplateV1Parameters azure;
 
+    @ApiModelProperty
+    private GcpInstanceTemplateV1Parameters gcp;
+
+    @ApiModelProperty
+    private OpenstackInstanceTemplateV1Parameters openstack;
+
     @ApiModelProperty(TemplateModelDescription.YARN_PARAMETERS)
     private YarnInstanceTemplateV1Parameters yarn;
 
@@ -55,6 +61,24 @@ public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvid
     @Override
     public AzureInstanceTemplateV1Parameters getAzure() {
         return azure;
+    }
+
+    @Override
+    public GcpInstanceTemplateV1Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpInstanceTemplateV1Parameters gcp) {
+        this.gcp = gcp;
+    }
+
+    @Override
+    public OpenstackInstanceTemplateV1Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenstackInstanceTemplateV1Parameters openstack) {
+        this.openstack = openstack;
     }
 
     public YarnInstanceTemplateV1Parameters getYarn() {

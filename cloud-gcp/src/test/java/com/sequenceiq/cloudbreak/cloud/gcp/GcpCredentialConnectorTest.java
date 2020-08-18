@@ -42,11 +42,20 @@ public class GcpCredentialConnectorTest {
 
     private static final Map<String, Object> CREDENTIAL_PARAMETERS = new HashMap<>();
 
+    private static final Map<String, Object> GCP_PARAMETERS = new HashMap<>();
+
+    private static final Map<String, Object> GCP_JSON = new HashMap<>();
+
     static {
-        CREDENTIAL_PARAMETERS.put("compute", new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> {
+        GCP_JSON.put("credentialJson", "");
+
+        GCP_PARAMETERS.put("compute", new Compute(new MockHttpTransport(), new MockJsonFactory(), request -> {
         }));
-        CREDENTIAL_PARAMETERS.put("serviceAccountId", "some service account");
-        CREDENTIAL_PARAMETERS.put("projectId", "some id");
+        GCP_PARAMETERS.put("serviceAccountId", "some service account");
+        GCP_PARAMETERS.put("projectId", "some id");
+        GCP_PARAMETERS.put("json", GCP_JSON);
+
+        CREDENTIAL_PARAMETERS.put("gcp", GCP_PARAMETERS);
     }
 
     @Rule

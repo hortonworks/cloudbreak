@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AwsParams;
-import com.sequenceiq.environment.network.dto.AwsParams.AwsParamsBuilder;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
@@ -73,8 +72,8 @@ public class NetworkTestUtils {
     }
 
     public static AwsParams getAwsParams(String vpcId) {
-        return AwsParamsBuilder
-                .anAwsParams()
+        return AwsParams
+                .builder()
                 .withVpcId(vpcId)
                 .build();
     }

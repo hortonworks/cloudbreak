@@ -4,24 +4,25 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.GcpDistroXV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.OpenstackDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.YarnDistroXV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 
 @Component
 public class DistroXParameterConverter {
 
-    public AzureStackV4Parameters convert(AzureDistroXV1Parameters source) {
-        AzureStackV4Parameters response = new AzureStackV4Parameters();
-        response.setEncryptStorage(source.isEncryptStorage());
-        response.setResourceGroupName(source.getResourceGroupName());
-        return response;
-    }
-
     public AwsStackV4Parameters convert(AwsDistroXV1Parameters source) {
         return new AwsStackV4Parameters();
+    }
+
+    public AwsDistroXV1Parameters convert(AwsStackV4Parameters source) {
+        return new AwsDistroXV1Parameters();
     }
 
     public AzureDistroXV1Parameters convert(AzureStackV4Parameters source) {
@@ -31,8 +32,27 @@ public class DistroXParameterConverter {
         return response;
     }
 
-    public AwsDistroXV1Parameters convert(AwsStackV4Parameters source) {
-        return new AwsDistroXV1Parameters();
+    public AzureStackV4Parameters convert(AzureDistroXV1Parameters source) {
+        AzureStackV4Parameters response = new AzureStackV4Parameters();
+        response.setEncryptStorage(source.isEncryptStorage());
+        response.setResourceGroupName(source.getResourceGroupName());
+        return response;
+    }
+
+    public GcpStackV4Parameters convert(GcpDistroXV1Parameters source) {
+        return new GcpStackV4Parameters();
+    }
+
+    public GcpDistroXV1Parameters convert(GcpStackV4Parameters source) {
+        return new GcpDistroXV1Parameters();
+    }
+
+    public OpenStackStackV4Parameters convert(OpenstackDistroXV1Parameters source) {
+        return new OpenStackStackV4Parameters();
+    }
+
+    public OpenstackDistroXV1Parameters convert(OpenStackStackV4Parameters source) {
+        return new OpenstackDistroXV1Parameters();
     }
 
     public YarnStackV4Parameters convert(YarnDistroXV1Parameters source) {

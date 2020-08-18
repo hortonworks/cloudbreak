@@ -141,7 +141,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(key + '-' + value));
+        cloudStack.getTags().forEach((key, value) ->
+                tagList.add(getTagWithKeyAndValue(key, value).length() > 63 ? value : getTagWithKeyAndValue(key, value)));
 
         labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
@@ -179,6 +180,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private String getTagWithKeyAndValue(String key, String value) {
+        return String.format("%s-%s", key, value);
     }
 
     private void verifyOperation(Operation operation, List<CloudResource> buildableResource) {

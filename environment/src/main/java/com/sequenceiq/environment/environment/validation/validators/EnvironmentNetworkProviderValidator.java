@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.validation.validators;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.valueOf;
@@ -60,6 +61,7 @@ public class EnvironmentNetworkProviderValidator {
                     AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
                     MOCK, optional(networkDto.getMock()),
+                    GCP, optional(networkDto.getGcp()),
                     YARN, optional(networkDto.getYarn())
             );
             String supportedPlatforms = String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet()));

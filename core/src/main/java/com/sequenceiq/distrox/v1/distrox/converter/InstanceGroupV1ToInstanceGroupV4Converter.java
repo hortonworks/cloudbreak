@@ -54,6 +54,8 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));
+        response.setOpenstack(getIfNotNull(source.getOpenstack(), instanceGroupParameterConverter::convert));
         return response;
     }
 
@@ -67,6 +69,8 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
+        response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));
+        response.setOpenstack(getIfNotNull(source.getOpenstack(), instanceGroupParameterConverter::convert));
         return response;
     }
 

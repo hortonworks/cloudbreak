@@ -17,14 +17,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 
-public abstract class DefaultNetworkConnector implements NetworkConnector {
+public interface DefaultNetworkConnector extends NetworkConnector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNetworkConnector.class);
+    Logger LOGGER = LoggerFactory.getLogger(DefaultNetworkConnector.class);
 
-    private static final String NOT_ENOUGH_AZ = "Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.";
+    String NOT_ENOUGH_AZ = "Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.";
 
     @Override
-    public SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+    default SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         LOGGER.debug("Trying to choose subnets from: {}.", subnetMetas);
         SubnetSelectionResult subnetSelectionResult = filterSubnets(subnetMetas, subnetSelectionParameters);
         if (subnetSelectionResult.hasResult()) {
@@ -39,13 +39,13 @@ public abstract class DefaultNetworkConnector implements NetworkConnector {
         return subnetSelectionResult;
     }
 
-    public abstract SubnetSelectionResult filterSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters);
+    SubnetSelectionResult filterSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters);
 
-    public abstract int subnetCountInDifferentAzMin();
+    int subnetCountInDifferentAzMin();
 
-    public abstract int subnetCountInDifferentAzMax();
+    int subnetCountInDifferentAzMax();
 
-    public SubnetSelectionResult selectForHAScenario(List<CloudSubnet> subnets) {
+    default SubnetSelectionResult selectForHAScenario(List<CloudSubnet> subnets) {
         List<CloudSubnet> result = new ArrayList<>();
         Map<String, List<CloudSubnet>> groupedSubnetsByAz = groupSubnetsByAz(subnets);
         LOGGER.debug("The subnets groupped by AZs and the result is: {}.", groupedSubnetsByAz);
@@ -72,7 +72,7 @@ public abstract class DefaultNetworkConnector implements NetworkConnector {
         return new SubnetSelectionResult(result);
     }
 
-    public SubnetSelectionResult selectForNonHAScenario(List<CloudSubnet> subnets) {
+    default SubnetSelectionResult selectForNonHAScenario(List<CloudSubnet> subnets) {
         List<CloudSubnet> result = new ArrayList<>();
         int random = new Random().nextInt(subnets.size());
         CloudSubnet cloudSubnet = subnets.get(random);
@@ -81,14 +81,14 @@ public abstract class DefaultNetworkConnector implements NetworkConnector {
         return new SubnetSelectionResult(result);
     }
 
-    public boolean isDifferentAzCountEnough(Map<String, List<CloudSubnet>> groupedSubnetsByAz) {
+    default boolean isDifferentAzCountEnough(Map<String, List<CloudSubnet>> groupedSubnetsByAz) {
         if (groupedSubnetsByAz.keySet().size() < subnetCountInDifferentAzMin()) {
             return false;
         }
         return true;
     }
 
-    public Map<String, List<CloudSubnet>> groupSubnetsByAz(List<CloudSubnet> subnetMetas) {
+    default Map<String, List<CloudSubnet>> groupSubnetsByAz(List<CloudSubnet> subnetMetas) {
         List<String> azs = new ArrayList<>();
         for (CloudSubnet subnetMeta : subnetMetas) {
             if (!azs.contains(subnetMeta.getAvailabilityZone()) && !Strings.isNullOrEmpty(subnetMeta.getAvailabilityZone())) {
