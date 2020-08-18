@@ -27,15 +27,11 @@ public class CDPOperationDetails implements Serializable {
 
     private Long timestamp;
 
-    private String userId;
-
-    private String userName;
-
     private String cloudbreakId;
 
     private String cloudbreakVersion;
 
-    private String tenant;
+    private String accountId;
 
     private String uuid;
 
@@ -49,8 +45,7 @@ public class CDPOperationDetails implements Serializable {
     }
 
     public CDPOperationDetails(Long timestamp, StructuredEventType eventType, String resourceType, Long resourceId, String resourceName, String cloudbreakId,
-        String cloudbreakVersion, String userId, String userName, String tenant, String resourceCrn, String userCrn,
-        String environmentCrn, String resourceEvent) {
+        String cloudbreakVersion, String accountId, String resourceCrn, String userCrn, String environmentCrn, String resourceEvent) {
         this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
@@ -58,11 +53,9 @@ public class CDPOperationDetails implements Serializable {
         this.resourceType = resourceType;
         this.cloudbreakId = cloudbreakId;
         this.cloudbreakVersion = cloudbreakVersion;
-        this.userId = userId;
-        this.userName = userName;
-        this.tenant = tenant;
         this.resourceCrn = resourceCrn;
         this.userCrn = userCrn;
+        this.accountId = accountId;
         this.environmentCrn = environmentCrn;
         this.resourceEvent = resourceEvent;
         uuid = UUID.randomUUID().toString();
@@ -132,28 +125,12 @@ public class CDPOperationDetails implements Serializable {
         this.cloudbreakVersion = cloudbreakVersion;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getUuid() {

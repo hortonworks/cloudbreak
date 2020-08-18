@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPAuditEventV1Endpoint;
-import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventDBService;
+import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
 
 @Controller
 public class CDPAuditEventV1Controller implements CDPAuditEventV1Endpoint {

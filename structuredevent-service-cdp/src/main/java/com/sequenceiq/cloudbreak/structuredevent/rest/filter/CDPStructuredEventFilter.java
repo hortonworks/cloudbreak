@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -52,17 +51,17 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.structuredevent.service.CDPBaseRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventClient;
-import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
-import com.sequenceiq.cloudbreak.structuredevent.service.lookup.CDPAccountAwareRepositoryLookupService;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser;
+import com.sequenceiq.cloudbreak.structuredevent.service.CDPBaseRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.service.lookup.CDPAccountAwareRepositoryLookupService;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
@@ -106,13 +105,12 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     private CDPBaseRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
     @Inject
-    @Named("structuredEventClient")
-    private CDPStructuredEventClient structuredEventClient;
+    private CDPDefaultStructuredEventClient structuredEventClient;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired(required = false)
+    @Inject
     private List<CDPRestUrlParser> cdpRestUrlParsers = new ArrayList<>();
 
     @Value("${structuredevent.rest.contentlogging:false}")
@@ -332,8 +330,6 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
                 resourceName,
                 nodeConfig.getId(),
                 cbVersion,
-                cloudbreakUser != null ? cloudbreakUser.getUserId() : "",
-                cloudbreakUser != null ? cloudbreakUser.getUsername() : "",
                 cloudbreakUser.getTenant(),
                 resourceCrn,
                 cloudbreakUser.getUserCrn(),

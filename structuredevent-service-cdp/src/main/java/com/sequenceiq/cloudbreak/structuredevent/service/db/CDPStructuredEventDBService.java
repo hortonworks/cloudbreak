@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.service;
+package com.sequenceiq.cloudbreak.structuredevent.service.db;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
+import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
 
 @Component
 public class CDPStructuredEventDBService extends AbstractAccountAwareResourceService<CDPStructuredEventEntity> implements CDPStructuredEventService {

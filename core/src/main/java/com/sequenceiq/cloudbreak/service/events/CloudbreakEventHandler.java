@@ -21,7 +21,6 @@ public class CloudbreakEventHandler implements Consumer<Event<CloudbreakComposit
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEventHandler.class);
 
-    // TODO WHY?
     @Inject
     private LegacyDefaultStructuredEventClient legacyStructuredEventAsyncNotifier;
 

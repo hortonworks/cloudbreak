@@ -12,14 +12,13 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventSenderService;
 
 @Service
-public class CDPDefaultStructuredEventClient implements CDPStructuredEventClient {
+public class CDPDefaultStructuredEventClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPDefaultStructuredEventClient.class);
 
     @Inject
     private List<CDPStructuredEventSenderService> structuredEventServices;
 
-    @Override
     public void sendStructuredEvent(CDPStructuredEvent structuredEvent) {
         for (CDPStructuredEventSenderService structuredEventSenderService : structuredEventServices) {
             LOGGER.trace("Send event {} with eventsender {}", structuredEvent, structuredEventSenderService.getClass());

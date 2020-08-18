@@ -8,29 +8,23 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CDPStructuredFlowEvent extends CDPStructuredEvent {
+public class CDPStructuredFlowEvent<T> extends CDPStructuredEvent {
     private FlowDetails flow;
 
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
     private String exception;
 
+    private T payload;
+
     public CDPStructuredFlowEvent() {
         super(CDPStructuredFlowEvent.class.getSimpleName());
     }
 
-    public CDPStructuredFlowEvent(String type, CDPOperationDetails operation, FlowDetails flow) {
+    public CDPStructuredFlowEvent(String type, CDPOperationDetails operation, FlowDetails flow, T payload) {
         super(type, operation);
         this.flow = flow;
-    }
-
-    public CDPStructuredFlowEvent(CDPOperationDetails operation, FlowDetails flow) {
-        this(CDPStructuredFlowEvent.class.getSimpleName(), operation, flow);
-    }
-
-    public CDPStructuredFlowEvent(CDPOperationDetails operation, FlowDetails flow, String exception) {
-        this(CDPStructuredFlowEvent.class.getSimpleName(), operation, flow);
-        this.exception = exception;
+        this.payload = payload;
     }
 
     @Override
@@ -66,5 +60,13 @@ public class CDPStructuredFlowEvent extends CDPStructuredEvent {
 
     public void setException(String exception) {
         this.exception = exception;
+    }
+
+    public T getPayload() {
+        return payload;
+    }
+
+    public void setPayload(T payload) {
+        this.payload = payload;
     }
 }

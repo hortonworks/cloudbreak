@@ -26,6 +26,7 @@ public class CDPStructuredEventToCDPStructuredEventEntityConverter extends Abstr
             structuredEventEntity.setResourceId(operationDetails.getResourceId());
             structuredEventEntity.setResourceCrn(operationDetails.getResourceCrn());
             structuredEventEntity.setTimestamp(operationDetails.getTimestamp());
+            structuredEventEntity.setAccountId(source.getOperation().getAccountId());
             return structuredEventEntity;
         } catch (IllegalArgumentException e) {
             LOGGER.error("Failed to parse structured event JSON", e);

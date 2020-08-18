@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
@@ -25,12 +24,9 @@ public abstract class AbstractAccountAwareResourceService<T extends AccountAware
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAccountAwareResourceService.class);
 
-    @Inject
-    private CDPBaseRestRequestThreadLocalService cdpBaseRestRequestThreadLocalService;
-
     @Override
     public T create(T resource, @Nonnull String accountId) {
-        return create(resource, accountId);
+        return createInternal(resource, accountId);
     }
 
     @Override

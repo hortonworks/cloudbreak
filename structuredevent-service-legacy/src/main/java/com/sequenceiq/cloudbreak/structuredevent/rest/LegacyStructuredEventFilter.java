@@ -39,7 +39,6 @@ import org.glassfish.jersey.message.MessageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -111,19 +110,19 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Autowired
+    @Inject
     private List<LegacyRestUrlParser> legacyRestUrlParsers;
 
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
-    @Autowired
+    @Inject
     private ApplicationContext applicationContext;
 
-    @Autowired
+    @Inject
     private ListableBeanFactory listableBeanFactory;
 
-    @Autowired
+    @Inject
     private WorkspaceAwareRepositoryLookupService repositoryLookupService;
 
     @PostConstruct
