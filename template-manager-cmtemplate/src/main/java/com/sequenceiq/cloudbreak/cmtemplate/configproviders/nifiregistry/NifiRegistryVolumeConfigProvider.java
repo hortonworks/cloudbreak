@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifiregistry;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
