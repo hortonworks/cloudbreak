@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 @Service
-public class MockNetworkConnector extends DefaultNetworkConnector {
+public class MockNetworkConnector implements DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockNetworkConnector.class);
 

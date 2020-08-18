@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.sync;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
@@ -47,7 +48,7 @@ public class StackInstanceProviderChecker {
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     public List<CloudVmInstanceStatus> checkStatus(Stack stack, Set<InstanceMetaData> notTerminatedForStack) {
-        Location location = location(region(stack.getRegion()));
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));

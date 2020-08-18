@@ -96,7 +96,7 @@ public class DefaultCostTaggingService implements CostTagging {
     private void addCDPCrnIfPresent(Map<String, String> result, DefaultApplicationTag tag, String crn, String platform) {
         if (StringUtils.isNotEmpty(crn)) {
             LOGGER.debug("Adding  crn {} tag to default tags.", crn);
-            result.put(transform(tag.key(), platform), crn);
+            result.put(transform(tag.key(), platform), transform(crn, platform));
         } else {
             LOGGER.debug("Unable to add \"{}\" - cost - tag to the resource's default tags because it's value is empty or null!", tag.key());
         }
@@ -112,7 +112,18 @@ public class DefaultCostTaggingService implements CostTagging {
     private String transform(String value, String platform) {
         String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
         return "GCP".equalsIgnoreCase(platform)
-                ? valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-") : valueAfterCheck;
+                ? getGcpString(value)
+                : valueAfterCheck;
+    }
+
+    private String getGcpString(String value) {
+        String transformedString = value.split("@")[0].toLowerCase()
+                .replaceAll("[^\\w]", "-");
+        transformedString = transformedString.substring(0, Math.min(transformedString.length(), 63));
+        if (transformedString.endsWith("-")){
+            transformedString = transformedString.substring(0, transformedString.length() - 1);
+        }
+        return transformedString;
     }
 
     private void validateResourceTagsNotContainTheSameTag(Map<String, String> userDefinedResourceTags, Map<String, String> accountTags) {
