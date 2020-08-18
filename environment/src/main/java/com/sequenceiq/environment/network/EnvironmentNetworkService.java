@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.network;
 
-
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;
 
@@ -67,7 +66,6 @@ public class EnvironmentNetworkService {
                 .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + environment.getCloudPlatform()));
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
-
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
@@ -95,7 +93,14 @@ public class EnvironmentNetworkService {
                 .withStackName(networkCreationRequestFactory.getStackName(environment))
                 .withCloudCredential(cloudCredential)
                 .withRegion(environment.getLocation().getName())
-                .withSingleResourceGroup(isSingleResourceGroup(environment));
+                .withSingleResourceGroup(isSingleResourceGroup(environment))
+                .withSubnetIds(environment.getNetwork().getSubnetIds())
+                .withNetworkId(environment.getNetwork().getNetworkId())
+                .withEnvName(environment.getName())
+                .withEnvId(environment.getId())
+                .withAccountId(environment.getAccountId())
+                .withUserId(environment.getCreator())
+                .withRegion(environment.getLocation().getName());
         getResourceGroupName(environment.getNetwork()).ifPresent(builder::withResourceGroup);
         getNetworkId(environment.getNetwork()).ifPresent(builder::withNetworkId);
         builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);

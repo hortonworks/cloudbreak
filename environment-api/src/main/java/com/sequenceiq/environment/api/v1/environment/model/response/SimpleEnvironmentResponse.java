@@ -6,6 +6,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 
 import io.swagger.annotations.ApiModel;
@@ -75,13 +77,17 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private AwsEnvironmentParameters aws;
 
-        private AzureEnvironmentParameters azure;
-
         private TagResponse tags;
 
         private String parentEnvironmentName;
 
         private ProxyViewResponse proxyConfig;
+
+        private AzureEnvironmentParameters azure;
+
+        private GcpEnvironmentParameters gcp;
+
+        private YarnEnvironmentParameters yarn;
 
         private Builder() {
         }
@@ -181,6 +187,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withYarn(YarnEnvironmentParameters yarn) {
+            this.yarn = yarn;
+            return this;
+        }
+
         public Builder withTag(TagResponse tags) {
             this.tags = tags;
             return this;
@@ -193,6 +204,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withProxyConfig(ProxyViewResponse proxyConfig) {
             this.proxyConfig = proxyConfig;
+            return this;
+        }
+
+        public Builder withGcp(GcpEnvironmentParameters gcp) {
+            this.gcp = gcp;
             return this;
         }
 
@@ -216,6 +232,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
             simpleEnvironmentResponse.setAzure(azure);
+            simpleEnvironmentResponse.setGcp(gcp);
+            simpleEnvironmentResponse.setYarn(yarn);
             simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);

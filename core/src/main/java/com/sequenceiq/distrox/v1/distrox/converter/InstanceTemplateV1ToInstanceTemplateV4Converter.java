@@ -26,6 +26,8 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceTemplateParameterConverter::convert));
+        response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
+        response.setOpenstack(getIfNotNull(source.getOpenstack(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setInstanceType(source.getInstanceType());
@@ -40,6 +42,8 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceTemplateParameterConverter::convert));
+        response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
+        response.setOpenstack(getIfNotNull(source.getOpenstack(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
         response.setInstanceType(source.getInstanceType());
         return response;

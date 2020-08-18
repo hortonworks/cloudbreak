@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -127,6 +128,7 @@ public class GcpPlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        CloudRegions regions = regions(cloudCredential, region, filters, false);
         NetworkList networkList = compute.networks().list(projectId).execute();
         List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
         for (Network network : networkList.getItems()) {
@@ -140,7 +142,16 @@ public class GcpPlatformResources implements PlatformResources {
             if (subnetworkList != null && network.getSubnetworks() != null) {
                 for (Subnetwork subnetwork : subnetworkList) {
                     if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                        subnets.add(new CloudSubnet(subnetwork.getId().toString(), subnetwork.getName(), null, subnetwork.getIpCidrRange()));
+                        subnets.add(
+                                new CloudSubnet(
+                                        subnetwork.getId().toString(),
+                                        subnetwork.getName(),
+                                        regions.getCloudRegions().get(region).get(0).value(),
+                                        subnetwork.getIpCidrRange(),
+                                        subnetwork.getPrivateIpGoogleAccess(),
+                                        !subnetwork.getPrivateIpGoogleAccess(),
+                                        !Strings.isNullOrEmpty(subnetwork.getGatewayAddress()),
+                                        PUBLIC));
                     }
                 }
             }

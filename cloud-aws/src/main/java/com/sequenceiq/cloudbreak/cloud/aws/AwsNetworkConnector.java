@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 @Service
-public class AwsNetworkConnector extends DefaultNetworkConnector {
+public class AwsNetworkConnector implements DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsNetworkConnector.class);
 
@@ -65,7 +65,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
     @Value("${cb.aws.subnet.ha.different.az.min:2}")
     private int minSubnetCountInDifferentAz;
 
-    @Value("${cb.aws.subnet.ha123.different.az.max:3}")
+    @Value("${cb.aws.subnet.ha.different.az.max:3}")
     private int maxSubnetCountInDifferentAz;
 
     @Inject
@@ -199,7 +199,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
     }
 
     private CreatedCloudNetwork getCreatedNetworkWithPolling(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-            AmazonCloudFormationRetryClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
+        AmazonCloudFormationRetryClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
@@ -213,7 +213,7 @@ public class AwsNetworkConnector extends DefaultNetworkConnector {
     }
 
     private CreatedCloudNetwork getCreatedCloudNetwork(AmazonCloudFormationRetryClient cloudFormationRetryClient, NetworkCreationRequest networkRequest,
-            List<SubnetRequest> subnetRequests) {
+        List<SubnetRequest> subnetRequests) {
         Map<String, String> output = cfStackUtil.getOutputs(networkRequest.getStackName(), cloudFormationRetryClient);
         String vpcId = getCreatedVpc(output);
         Set<CreatedSubnet> subnets = awsCreatedSubnetProvider.provide(output, subnetRequests, networkRequest.isPrivateSubnetEnabled());
