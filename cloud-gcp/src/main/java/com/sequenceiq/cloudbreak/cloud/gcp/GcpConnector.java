@@ -54,6 +54,9 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
     private GcpMetadataCollector metadataCollector;
 
     @Inject
+    private GcpNetworkConnector gcpNetworkConnector;
+
+    @Inject
     private GcpConstants gcpConstants;
 
     @Override
@@ -118,7 +121,7 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
 
     @Override
     public NetworkConnector networkConnector() {
-        return null;
+        return gcpNetworkConnector;
     }
 
 }

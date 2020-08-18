@@ -66,14 +66,6 @@ public abstract class NetworkBase extends ProviderParametersBase {
         return azure;
     }
 
-    public void setGcp(GcpNetworkParameters gcp) {
-        this.gcp = gcp;
-    }
-
-    public void setOpenstack(OpenStackNetworkParameters openstack) {
-        this.openstack = openstack;
-    }
-
     public void setMock(MockNetworkParameters mock) {
         this.mock = mock;
     }
@@ -82,20 +74,28 @@ public abstract class NetworkBase extends ProviderParametersBase {
         this.yarn = yarn;
     }
 
-    public GcpNetworkParameters getGcp() {
-        return gcp;
-    }
-
-    public OpenStackNetworkParameters getOpenstack() {
-        return openstack;
-    }
-
     public MockNetworkParameters getMock() {
         return mock;
     }
 
     public YarnNetworkParameters getYarn() {
         return yarn;
+    }
+
+    public GcpNetworkParameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpNetworkParameters gcp) {
+        this.gcp = gcp;
+    }
+
+    public OpenStackNetworkParameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackNetworkParameters openstack) {
+        this.openstack = openstack;
     }
 
     @Override

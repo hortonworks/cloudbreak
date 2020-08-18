@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.validation.aws.AwsCredentialValidator;
 
 public class AwsCredentialValidatorTest {
 

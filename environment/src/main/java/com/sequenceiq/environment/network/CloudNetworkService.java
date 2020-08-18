@@ -8,10 +8,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -50,6 +52,13 @@ public class CloudNetworkService {
             filter.put("networkId", network.getAzure().getNetworkId());
             filter.put("resourceGroupName", network.getAzure().getResourceGroupName());
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(), network, filter);
+        } else if (isGcp(environmentDto.getCloudPlatform())) {
+            Map<String, String> filter = new HashMap<>();
+            filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
+            filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
+            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
+            return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(), network, filter);
         } else {
             return network.getSubnetIds().stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
         }
@@ -68,6 +77,13 @@ public class CloudNetworkService {
             Map<String, String> filter = new HashMap<>();
             filter.put("networkId", network.getAzure().getNetworkId());
             filter.put("resourceGroupName", network.getAzure().getResourceGroupName());
+            return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(), network, filter);
+        } else if (isGcp(environment.getCloudPlatform())) {
+            Map<String, String> filter = new HashMap<>();
+            filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
+            filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
+            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
+            filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(), network, filter);
         } else {
             return network.getSubnetIds().stream().collect(toMap(Function.identity(), id -> new CloudSubnet(id, null)));
@@ -94,12 +110,29 @@ public class CloudNetworkService {
         Set<CloudNetwork> cloudNetworkSet = cloudNetworks.getCloudNetworkResponses().get(regionName);
         return cloudNetworkSet.stream()
                 .flatMap(it -> it.getSubnetsMeta().stream())
-                .filter(sn -> network.getSubnetIds().contains(sn.getId()))
-                .collect(toMap(CloudSubnet::getId, Function.identity()));
+                .filter(sn -> isNetworkIdMatches(network, sn, cloudPlatform) || isNetworkNameMatches(network, sn, cloudPlatform))
+                .collect(toMap(getNetworkIdentifier(cloudPlatform), Function.identity()));
+    }
+
+    @NotNull
+    private Function<? super CloudSubnet, ? extends String> getNetworkIdentifier(String cloudPlatform) {
+        return isGcp(cloudPlatform) ? CloudSubnet::getName : CloudSubnet::getId;
+    }
+
+    private boolean isNetworkNameMatches(NetworkDto network, CloudSubnet cs, String cloudPlatform) {
+        return network.getSubnetIds().contains(cs.getName()) && isGcp(cloudPlatform);
+    }
+
+    private boolean isNetworkIdMatches(NetworkDto network, CloudSubnet cs, String cloudPlatform) {
+        return network.getSubnetIds().contains(cs.getId()) && !isGcp(cloudPlatform);
     }
 
     private boolean isAzure(String cloudPlatform) {
         return CloudPlatform.AZURE.name().equalsIgnoreCase(cloudPlatform);
+    }
+
+    private boolean isGcp(String cloudPlatform) {
+        return CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform);
     }
 
     private boolean isAws(String cloudPlatform) {

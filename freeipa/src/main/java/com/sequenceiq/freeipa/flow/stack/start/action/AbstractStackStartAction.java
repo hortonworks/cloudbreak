@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.start.action;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -49,7 +50,7 @@ public abstract class AbstractStackStartAction<P extends Payload> extends Abstra
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = stack.getNotDeletedInstanceMetaDataList();
-        Location location = location(region(stack.getRegion()));
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
