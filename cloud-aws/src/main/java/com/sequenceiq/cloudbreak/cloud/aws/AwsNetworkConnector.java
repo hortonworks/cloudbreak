@@ -1,4 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
+
 import static com.amazonaws.services.cloudformation.model.Capability.CAPABILITY_IAM;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
@@ -198,7 +199,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
     }
 
     private CreatedCloudNetwork getCreatedNetworkWithPolling(NetworkCreationRequest networkRequest, AwsCredentialView credentialView,
-                                                             AmazonCloudFormationRetryClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
+        AmazonCloudFormationRetryClient cloudFormationRetryClient, List<SubnetRequest> subnetRequests) {
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();

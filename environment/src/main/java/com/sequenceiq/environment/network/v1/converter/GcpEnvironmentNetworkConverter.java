@@ -74,7 +74,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         gcpNetwork.setNoFirewallRules(noFirewallRules == null ? false : Boolean.valueOf(noFirewallRules.toString()));
 
         Object noPublicIp = properties.get("noPublicIp");
-        gcpNetwork.setNoPublicIp(noPublicIp == null ? false : Boolean.valueOf(properties.get("noPublicIp").toString()));
+        gcpNetwork.setNoPublicIp(noPublicIp == null ? false : Boolean.valueOf(noPublicIp.toString()));
 
         gcpNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(

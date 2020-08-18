@@ -7,7 +7,6 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialVie
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.openstack.OpenstackEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 
@@ -89,8 +88,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private GcpEnvironmentParameters gcp;
 
         private YarnEnvironmentParameters yarn;
-
-        private OpenstackEnvironmentParameters openstack;
 
         private Builder() {
         }
@@ -190,6 +187,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withYarn(YarnEnvironmentParameters yarn) {
+            this.yarn = yarn;
+            return this;
+        }
+
         public Builder withTag(TagResponse tags) {
             this.tags = tags;
             return this;
@@ -207,11 +209,6 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withGcp(GcpEnvironmentParameters gcp) {
             this.gcp = gcp;
-            return this;
-        }
-
-        public Builder withOpenstack(OpenstackEnvironmentParameters openstack) {
-            this.openstack = openstack;
             return this;
         }
 
@@ -235,8 +232,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
             simpleEnvironmentResponse.setAzure(azure);
-            simpleEnvironmentResponse.setOpenstack(openstack);
             simpleEnvironmentResponse.setGcp(gcp);
+            simpleEnvironmentResponse.setYarn(yarn);
             simpleEnvironmentResponse.setAdminGroupName(adminGroupName);
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);

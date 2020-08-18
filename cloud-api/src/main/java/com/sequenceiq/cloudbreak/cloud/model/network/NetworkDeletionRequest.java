@@ -113,7 +113,6 @@ public class NetworkDeletionRequest {
         public Builder() {
         }
 
-
         public Builder withUserId(String userId) {
             this.userId = userId;
             return this;
@@ -123,7 +122,6 @@ public class NetworkDeletionRequest {
             this.accountId = accountId;
             return this;
         }
-
 
         public Builder withEnvId(Long envId) {
             this.envId = envId;

@@ -15,7 +15,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.openstack.OpenstackEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -102,8 +102,8 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
 
-    @ApiModelProperty(EnvironmentModelDescription.OPENSTACK_PARAMETERS)
-    private OpenstackEnvironmentParameters openstack;
+    @ApiModelProperty(EnvironmentModelDescription.YARN_PARAMETERS)
+    private YarnEnvironmentParameters yarn;
 
     public String getCrn() {
         return crn;
@@ -334,11 +334,11 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
         this.gcp = gcp;
     }
 
-    public OpenstackEnvironmentParameters getOpenstack() {
-        return openstack;
+    public YarnEnvironmentParameters getYarn() {
+        return yarn;
     }
 
-    public void setOpenstack(OpenstackEnvironmentParameters openstack) {
-        this.openstack = openstack;
+    public void setYarn(YarnEnvironmentParameters yarn) {
+        this.yarn = yarn;
     }
 }

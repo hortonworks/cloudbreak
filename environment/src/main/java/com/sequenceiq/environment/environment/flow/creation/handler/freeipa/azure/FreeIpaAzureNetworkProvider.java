@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
+package com.sequenceiq.environment.environment.flow.creation.handler.freeipa.azure;
 
 import java.util.Set;
 
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaNetworkProvider;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.service.SubnetIdProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;

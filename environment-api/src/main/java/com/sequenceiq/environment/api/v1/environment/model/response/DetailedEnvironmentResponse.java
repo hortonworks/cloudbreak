@@ -12,7 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.openstack.OpenstackEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 
 import io.swagger.annotations.ApiModel;
@@ -104,7 +104,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private GcpEnvironmentParameters gcp;
 
-        private OpenstackEnvironmentParameters openstack;
+        private YarnEnvironmentParameters yarn;
 
         private Builder() {
         }
@@ -228,6 +228,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withYarn(YarnEnvironmentParameters yarn) {
+            this.yarn = yarn;
+            return this;
+        }
+
         public Builder withTag(TagResponse tag) {
             this.tag = tag;
             return this;
@@ -255,11 +260,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withGcp(GcpEnvironmentParameters gcp) {
             this.gcp = gcp;
-            return this;
-        }
-
-        public Builder withOpenstack(OpenstackEnvironmentParameters openstack) {
-            this.openstack = openstack;
             return this;
         }
 
@@ -293,8 +293,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             detailedEnvironmentResponse.setProxyConfig(proxyConfig);
             detailedEnvironmentResponse.setAzure(azure);
-            detailedEnvironmentResponse.setOpenstack(openstack);
             detailedEnvironmentResponse.setGcp(gcp);
+            detailedEnvironmentResponse.setYarn(yarn);
             return detailedEnvironmentResponse;
         }
     }
