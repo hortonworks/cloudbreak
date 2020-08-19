@@ -55,7 +55,7 @@ public class EndpointConfig extends ResourceConfig {
     private final List<ExceptionMapper<?>> exceptionMappers;
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
-            @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
+            @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
             List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
             ClientTracingFeature clientTracingFeature) {
 

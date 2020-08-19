@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -94,33 +93,41 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
 
     private final Pattern extractCrnRestParamFromResponsePattern = Pattern.compile("\"" + CRN + "\":\"([0-9a-zA-Z:-]*)\"");
 
-    @Inject
-    private NodeConfig nodeConfig;
-
     @Value("${info.app.version:}")
     private String cbVersion;
-
-    @Inject
-    private CDPBaseRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
-
-    @Inject
-    private CDPDefaultStructuredEventClient structuredEventClient;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
-    private List<CDPRestUrlParser> cdpRestUrlParsers;
 
     @Value("${structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private NodeConfig nodeConfig;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private CDPBaseRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private CDPDefaultStructuredEventClient structuredEventClient;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private List<CDPRestUrlParser> cdpRestUrlParsers;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private ApplicationContext applicationContext;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private ListableBeanFactory listableBeanFactory;
 
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
     @Autowired
     private CDPAccountAwareRepositoryLookupService repositoryLookupService;
 
@@ -189,7 +196,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     }
 
     private void sendStructuredEvent(RestRequestDetails restRequest, RestResponseDetails restResponse, Map<String, String> restParams, Long requestTime,
-        String responseBody) {
+            String responseBody) {
         restResponse.setBody(responseBody);
         RestCallDetails restCall = new RestCallDetails();
         restCall.setRestRequest(restRequest);
@@ -220,7 +227,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     }
 
     private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
-        CDPRestUrlParser cdpRestUrlParser, String accountId) {
+            CDPRestUrlParser cdpRestUrlParser, String accountId) {
         for (Entry<String, AccountAwareResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", accountId);
             String requestUrl = cdpRestUrlParser.getUrl(requestContext);
@@ -258,7 +265,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     }
 
     private void extractResourceParamWithPattern(CharSequence responseBody, boolean resourceIdIsAbsentOrNull, Map<String, String> resourceParams, String key,
-        Pattern pattern) {
+            Pattern pattern) {
         if (resourceIdIsAbsentOrNull && !resourceParams.containsKey(key)) {
             Matcher matcher = pattern.matcher(responseBody);
             if (matcher.find() && matcher.groupCount() >= 1) {

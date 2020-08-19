@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.inject.Inject;
 import javax.ws.rs.Path;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
@@ -39,6 +38,7 @@ import org.glassfish.jersey.message.MessageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -94,34 +94,42 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
 
     private final Pattern extractCrnRestParamFromResponsePattern = Pattern.compile("\"" + CRN + "\":\"([0-9a-zA-Z:-]*)\"");
 
-    @Inject
-    private NodeConfig nodeConfig;
-
     @Value("${info.app.version:}")
     private String cbVersion;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
-
-    @Inject
-    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
-
-    @Inject
-    private AuthenticatedUserService authenticatedUserService;
-
-    @Inject
-    private List<LegacyRestUrlParser> legacyRestUrlParsers;
 
     @Value("${cb.structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;
 
-    @Inject
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private NodeConfig nodeConfig;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
+    private List<LegacyRestUrlParser> legacyRestUrlParsers;
+
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
     private ApplicationContext applicationContext;
 
-    @Inject
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
     private ListableBeanFactory listableBeanFactory;
 
-    @Inject
+    //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
+    @Autowired
     private WorkspaceAwareRepositoryLookupService repositoryLookupService;
 
     @PostConstruct
@@ -189,7 +197,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void sendStructuredEvent(RestRequestDetails restRequest, RestResponseDetails restResponse, Map<String, String> restParams, Long requestTime,
-        String responseBody) {
+            String responseBody) {
         restResponse.setBody(responseBody);
         RestCallDetails restCall = new RestCallDetails();
         restCall.setRestRequest(restRequest);
@@ -220,7 +228,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void putResourceIdFromRepository(ContainerRequestContext requestContext, Map<String, String> params,
-        LegacyRestUrlParser legacyRestUrlParser, String workspaceId) {
+            LegacyRestUrlParser legacyRestUrlParser, String workspaceId) {
         for (Entry<String, WorkspaceResourceRepository<?, ?>> pathRepositoryEntry : pathRepositoryMap.entrySet()) {
             String pathWithWorkspaceId = pathRepositoryEntry.getKey().replaceFirst("\\{.*\\}", workspaceId);
             String requestUrl = legacyRestUrlParser.getUrl(requestContext);
@@ -258,7 +266,7 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     }
 
     private void extractResourceParamWithPattern(CharSequence responseBody, boolean resourceIdIsAbsentOrNull, Map<String, String> resourceParams, String key,
-        Pattern pattern) {
+            Pattern pattern) {
         if (resourceIdIsAbsentOrNull && !resourceParams.containsKey(key)) {
             Matcher matcher = pattern.matcher(responseBody);
             if (matcher.find() && matcher.groupCount() >= 1) {
