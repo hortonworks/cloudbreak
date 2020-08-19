@@ -33,30 +33,34 @@ public class ErrorLogMessageProvider {
         return messageBuilder.toString().replace("%", "%%");
     }
 
-    private void addCluesToMessage(StringBuilder builder, List<Clue> clues) {
-        if (clues.stream().anyMatch(Clue::isHasSpotTermination)) {
-            String spotTerminatedNames = clues.stream()
-                    .filter(Clue::isHasSpotTermination)
-                    .map(Clue::getName)
-                    .collect(Collectors.joining(", "));
+    void addCluesToMessage(StringBuilder builder, List<Clue> clues) {
+        try {
+            if (clues.stream().anyMatch(Clue::isHasSpotTermination)) {
+                String spotTerminatedNames = clues.stream()
+                        .filter(Clue::isHasSpotTermination)
+                        .map(Clue::getName)
+                        .collect(Collectors.joining(", "));
 
-            LOGGER.warn("There were spot terminations in the following resources: {}", spotTerminatedNames);
-            builder.append("There were spot terminations in the following resources: ")
-                    .append(spotTerminatedNames)
+                LOGGER.warn("There were spot terminations in the following resources: {}", spotTerminatedNames);
+                builder.append("There were spot terminations in the following resources: ")
+                        .append(spotTerminatedNames)
+                        .append(System.lineSeparator());
+            }
+            builder.append("Responses:")
                     .append(System.lineSeparator());
+            clues.forEach(clue -> builder.append(clue.getName())
+                    .append(" response: ")
+                    .append(convertToString(clue.getResponse()))
+                    .append(System.lineSeparator()));
+            builder.append("All audit events:")
+                    .append(System.lineSeparator());
+            clues.forEach(clue -> builder.append(clue.getName())
+                    .append(" audit events: ")
+                    .append(convertToString(clue.getAuditEvents()))
+                    .append(System.lineSeparator()));
+        } catch (Exception e) {
+            LOGGER.warn("Exception occurred during processing clues. Clues: {}.", convertToString(clues), e);
         }
-        builder.append("Responses:")
-                .append(System.lineSeparator());
-        clues.forEach(clue -> builder.append(clue.getName())
-                .append(" response: ")
-                .append(convertToString(clue.getResponse()))
-                .append(System.lineSeparator()));
-        builder.append("All audit events:")
-                .append(System.lineSeparator());
-        clues.forEach(clue -> builder.append(clue.getName())
-                .append(" audit events: ")
-                .append(convertToString(clue.getAuditEvents()))
-                .append(System.lineSeparator()));
     }
 
     private String convertToString(Object o) {
