@@ -128,6 +128,7 @@ public class GcpPlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
+        CloudRegions regions = regions(cloudCredential, region, filters, false);
         NetworkList networkList = compute.networks().list(projectId).execute();
         List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
         for (Network network : networkList.getItems()) {
@@ -145,7 +146,7 @@ public class GcpPlatformResources implements PlatformResources {
                                 new CloudSubnet(
                                         subnetwork.getId().toString(),
                                         subnetwork.getName(),
-                                        region.getRegionName(),
+                                        regions.getCloudRegions().get(region).get(0).value(),
                                         subnetwork.getIpCidrRange(),
                                         subnetwork.getPrivateIpGoogleAccess(),
                                         !subnetwork.getPrivateIpGoogleAccess(),
