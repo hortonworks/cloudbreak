@@ -103,7 +103,6 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     @Inject
     private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
 
-    // TODO WHY?
     @Inject
     private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 

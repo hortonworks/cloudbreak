@@ -29,7 +29,7 @@ public abstract class CDPRepositoryLookupService<T extends CrudRepository<?, ?>>
     private void fillRepositoryMap() {
         for (T repo : repositoryList) {
             Arrays.stream(repo.getClass().getInterfaces())
-                    .filter(clazz -> clazz.getName().contains("com.sequenceiq.cloudbreak"))
+                    .filter(clazz -> clazz.getName().contains("com.sequenceiq"))
                     .findFirst().ifPresent(clazz -> {
                 Class<?> entityClassForRepository = getEntityClassForRepository(clazz);
                 repositoryMap.put(entityClassForRepository, repo);

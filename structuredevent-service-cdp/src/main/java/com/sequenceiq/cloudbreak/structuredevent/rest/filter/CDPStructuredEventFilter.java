@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -111,7 +110,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     private AuthenticatedUserService authenticatedUserService;
 
     @Inject
-    private List<CDPRestUrlParser> cdpRestUrlParsers = new ArrayList<>();
+    private List<CDPRestUrlParser> cdpRestUrlParsers;
 
     @Value("${structuredevent.rest.contentlogging:false}")
     private Boolean contentLogging;

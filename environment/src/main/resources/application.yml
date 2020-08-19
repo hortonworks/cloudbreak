@@ -63,7 +63,7 @@ environment:
   cert.dir: /certs/
   structuredevent:
     rest:
-      enabled: false
+      enabled: true
   cloudbreak:
     url: http://localhost:9091
     contextPath: /cb

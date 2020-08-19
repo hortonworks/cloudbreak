@@ -12,10 +12,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Transactional(TxType.REQUIRED)
+@EntityType(entityClass = Environment.class)
 public interface EnvironmentRepository extends AccountAwareResourceRepository<Environment, Long> {
 
     @Query("SELECT e FROM Environment e "

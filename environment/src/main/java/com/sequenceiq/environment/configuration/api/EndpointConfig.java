@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPAuditEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -91,6 +92,10 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
+
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
