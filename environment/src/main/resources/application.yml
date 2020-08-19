@@ -64,6 +64,7 @@ environment:
   structuredevent:
     rest:
       enabled: true
+      contentlogging: true
   cloudbreak:
     url: http://localhost:9091
     contextPath: /cb

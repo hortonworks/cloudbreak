@@ -96,7 +96,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     @Value("${info.app.version:}")
     private String cbVersion;
 
-    @Value("${structuredevent.rest.contentlogging:false}")
+    @Value("${environment.structuredevent.rest.contentlogging}")
     private Boolean contentLogging;
 
     //Do not remove the @Autowired annotation Jersey is able to inject dependencies that are instantiated by Spring this way only!
