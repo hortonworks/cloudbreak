@@ -14,7 +14,7 @@ public class V4RestUrlParser extends LegacyRestUrlParser {
 
     public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)(/internal)?");
 
     @Override
     public Pattern getPattern() {

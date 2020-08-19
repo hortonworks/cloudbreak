@@ -1,10 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws.scheduler;
 
+import java.util.Date;
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.waiters.DescribeAutoScalingGroupsFunction;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
@@ -36,6 +42,28 @@ public class CustomAmazonWaiterProvider {
                     public boolean matches(DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult) {
                         return describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()
                                 .stream().filter(instance -> IN_SERVICE.equals(instance.getLifecycleState())).count() == requiredCount;
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.SUCCESS;
+                    }
+                })
+                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
+                        new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
+                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+    }
+
+    public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {
+        return new WaiterBuilder<DescribeScalingActivitiesRequest, DescribeScalingActivitiesResult>()
+                .withSdkFunction(asClient::describeScalingActivities)
+                .withAcceptors(new WaiterAcceptor<DescribeScalingActivitiesResult>() {
+                    @Override
+                    public boolean matches(DescribeScalingActivitiesResult describeScalingActivitiesResult) {
+                        Optional<Activity> firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst();
+                        return firstActivity
+                                .filter(activity -> timeBeforeASUpdate == null || activity.getStartTime().after(timeBeforeASUpdate))
+                                .isPresent();
                     }
 
                     @Override

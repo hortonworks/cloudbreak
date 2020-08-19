@@ -81,8 +81,9 @@ public class SdxStopService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             LOGGER.info("Triggering stop flow for cluster {}", sdxCluster.getClusterName());
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.putStop(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
+                    stackV4Endpoint.putStopInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOP_IN_PROGRESS, "Datalake stop in progress", sdxCluster);
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {

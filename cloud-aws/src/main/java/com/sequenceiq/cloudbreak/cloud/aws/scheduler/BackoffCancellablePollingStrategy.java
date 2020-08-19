@@ -4,7 +4,7 @@ import com.amazonaws.waiters.PollingStrategy;
 
 public class BackoffCancellablePollingStrategy {
 
-    private static final int DEFAULT_MAX_ATTEMPTS = 1000;
+    private static final int DEFAULT_MAX_ATTEMPTS = 60;
 
     private BackoffCancellablePollingStrategy() {
     }

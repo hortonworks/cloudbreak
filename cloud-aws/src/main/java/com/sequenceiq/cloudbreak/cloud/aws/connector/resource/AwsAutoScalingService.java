@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -16,8 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
@@ -27,6 +31,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.waiters.PollingStrategy;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -85,8 +90,10 @@ public class AwsAutoScalingService {
                 ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : groups) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
-            LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
-                    asGroupName);
+            LOGGER.debug("Check last activity after AS update. Wait for the first if it does not found. [stack: {}, asGroup: {}]",
+                    ac.getCloudContext().getId(), asGroupName);
+            checkLastScalingActivity(asClient, asRetryClient, asGroupName, timeBeforeASUpdate);
+            LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(), asGroupName);
             waitForGroup(amClient, asClient, asRetryClient, asGroupName, group.getInstancesSize(), ac.getCloudContext().getId());
         }
     }
@@ -108,7 +115,7 @@ public class AwsAutoScalingService {
     }
 
     private void waitForGroup(AmazonEC2Client amClient, AmazonAutoScalingClient asClient, AmazonAutoScalingRetryClient asRetryClient,
-        String autoScalingGroupName, Integer requiredInstanceCount, Long stackId) throws AmazonAutoscalingFailed {
+            String autoScalingGroupName, Integer requiredInstanceCount, Long stackId) throws AmazonAutoscalingFailed {
         Waiter<DescribeAutoScalingGroupsRequest> groupInServiceWaiter = asClient.waiters().groupInService();
         PollingStrategy backoff = getBackoffCancellablePollingStrategy(new StackCancellationCheck(stackId));
         try {
@@ -140,6 +147,30 @@ public class AwsAutoScalingService {
                     throw new AmazonAutoscalingFailed(e.getMessage(), e);
                 }
             }
+        }
+    }
+
+    @VisibleForTesting
+    void checkLastScalingActivity(AmazonAutoScalingClient asClient, AmazonAutoScalingRetryClient asRetryClient, String autoScalingGroupName,
+            Date timeBeforeASUpdate) throws AmazonAutoscalingFailed {
+        Optional<Activity> firstActivity;
+        try {
+            Waiter<DescribeScalingActivitiesRequest> autoscalingActivitiesWaiter = customAmazonWaiterProvider
+                    .getAutoscalingActivitesWaiter(asClient, timeBeforeASUpdate);
+            autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName)));
+            DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
+                    .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
+            firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst()
+                    .filter(activity -> "failed".equals(activity.getStatusCode().toLowerCase()));
+        } catch (Exception e) {
+            LOGGER.error("Failed to list activities: {}", e.getMessage(), e);
+            throw new AmazonAutoscalingFailed(e.getMessage(), e);
+        }
+
+        if (firstActivity.isPresent()) {
+            Activity activity = firstActivity.get();
+            LOGGER.error("Cannot execute autoscale, because last activity is failed: {}", activity);
+            throw new AmazonAutoscalingFailed(activity.getDescription() + " " + activity.getCause());
         }
     }
 

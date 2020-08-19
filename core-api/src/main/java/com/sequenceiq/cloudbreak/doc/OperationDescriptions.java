@@ -26,14 +26,20 @@ public class OperationDescriptions {
         public static final String GET_AUTOSCALE_BY_NAME = "get autoscale stack by name in workspace";
         public static final String GET_AUTOSCALE_BY_CRN = "get autoscale stack by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
+        public static final String CREATE_IN_WORKSPACE_INTERNAL = "create stack in workspace, internal only";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete stack by name in workspace";
+        public static final String DELETE_BY_NAME_IN_WORKSPACE_INTERNAL = "delete stack by name in workspace, internal only";
         public static final String SYNC_BY_NAME_IN_WORKSPACE = "syncs the stack by name in workspace";
         public static final String RETRY_BY_NAME_IN_WORKSPACE = "retries the stack by name in workspace";
         public static final String STOP_BY_NAME_IN_WORKSPACE = "stops the stack by name in workspace";
+        public static final String STOP_BY_NAME_IN_WORKSPACE_INTERNAL = "stops the stack by name in workspace, internal only";
         public static final String START_BY_NAME_IN_WORKSPACE = "starts the stack by name in workspace";
+        public static final String START_BY_NAME_IN_WORKSPACE_INTERNAL = "starts the stack by name in workspace, internal only";
         public static final String SCALE_BY_NAME_IN_WORKSPACE = "scales the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
+        public static final String REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL = "repairs the stack by name in workspace, internal only";
         public static final String UPGRADE_CLUSTER_IN_WORKSPACE = "upgrades the stack by name in workspace";
+        public static final String UPGRADE_CLUSTER_IN_WORKSPACE_INTERNAL = "upgrades the stack by name in workspace, internal only";
         public static final String CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE = "check for upgrades for the stack by name in workspace";
         public static final String DELETE_WITH_KERBEROS_IN_WORKSPACE = "deletes the stack (with kerberos cluster) by name in workspace";
         public static final String GET_STACK_REQUEST_IN_WORKSPACE = "gets StackRequest by name in workspace";
@@ -41,12 +47,16 @@ public class OperationDescriptions {
         public static final String DELETE_INSTANCE_BY_ID_IN_WORKSPACE = "deletes instance from the stack's cluster in workspace";
         public static final String DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE = "deletes multiple instances from the stack's cluster in workspace";
         public static final String CHECK_IMAGE_IN_WORKSPACE = "checks image in stack by name in workspace";
+        public static final String CHECK_IMAGE_IN_WORKSPACE_INTERNAL = "checks image in stack by name in workspace, internal only";
         public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";
         public static final String CHECK_STACK_UPGRADE = "Checks for upgrade options by name";
         public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
+        public static final String STACK_UPGRADE_INTERNAL = "Upgrades a cluster to the latest CM or CDH version, internal only";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
         public static final String DATABASE_BACKUP = "Performs a backup of the database to a provided location";
+        public static final String DATABASE_BACKUP_INTERNAL = "Performs a backup of the database to a provided location, internal only";
         public static final String DATABASE_RESTORE = "Performs a restore of the database from a provided location";
+        public static final String DATABASE_RESTORE_INTERNAL = "Performs a restore of the database from a provided location, internal only";
     }
 
     public static class ClusterOpDescription {

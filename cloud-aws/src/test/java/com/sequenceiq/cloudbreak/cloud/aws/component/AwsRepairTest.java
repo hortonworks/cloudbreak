@@ -41,6 +41,8 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.LifecycleState;
 import com.amazonaws.services.autoscaling.waiters.AmazonAutoScalingWaiters;
@@ -170,6 +172,9 @@ public class AwsRepairTest {
     private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
 
     @MockBean
+    private Waiter<DescribeScalingActivitiesRequest> describeScalingActivitiesRequestWaiter;
+
+    @MockBean
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     @Test
@@ -197,6 +202,7 @@ public class AwsRepairTest {
         when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
         when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
         when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
     }
 
     private void setupRetryService() {
@@ -242,6 +248,9 @@ public class AwsRepairTest {
                         new Reservation().withInstances(new com.amazonaws.services.ec2.model.Instance().withInstanceId("i-instance")))
         );
 
+        DescribeScalingActivitiesResult result = new DescribeScalingActivitiesResult();
+        result.setActivities(List.of());
+        when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
 
         AmazonEC2Waiters waiters = mock(AmazonEC2Waiters.class);
         when(amazonEC2Client.waiters()).thenReturn(waiters);

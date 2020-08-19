@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.platformresource;
 
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
+import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -31,11 +33,13 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.platformresource.model.AccessConfigTypeQueryParam;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCloudCredentialConverter;
 
 @Service
 public class PlatformParameterService {
+    private static final String NOT_FOUND_FORMAT_MESSAGE = "Credential with name:";
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -152,9 +156,17 @@ public class PlatformParameterService {
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
         if (!Strings.isNullOrEmpty(credentialName)) {
-            platformResourceRequest.setCredential(credentialService.getByNameForAccountId(credentialName, accountId, ENVIRONMENT));
+            Optional<Credential> credential = credentialService.getOptionalByNameForAccountId(credentialName, accountId, ENVIRONMENT);
+            if (credential.isEmpty()) {
+                credential = credentialService.getOptionalByNameForAccountId(credentialName, accountId, AUDIT);
+            }
+            platformResourceRequest.setCredential(credentialService.extractCredential(credential, credentialName));
         } else if (!Strings.isNullOrEmpty(credentialCrn)) {
-            platformResourceRequest.setCredential(credentialService.getByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT));
+            Optional<Credential> credential = credentialService.getOptionalByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT);
+            if (credential.isEmpty()) {
+                credential = credentialService.getOptionalByCrnForAccountId(credentialCrn, accountId, AUDIT);
+            }
+            platformResourceRequest.setCredential(credentialService.extractCredential(credential, credentialCrn));
         } else {
             throw new BadRequestException("The credentialCrn or the credentialName must be specified in the request");
         }
