@@ -62,7 +62,7 @@ public class CustomAmazonWaiterProvider {
                     public boolean matches(DescribeScalingActivitiesResult describeScalingActivitiesResult) {
                         Optional<Activity> firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst();
                         return firstActivity
-                                .filter(activity -> activity.getStartTime().after(timeBeforeASUpdate))
+                                .filter(activity -> timeBeforeASUpdate == null || activity.getStartTime().after(timeBeforeASUpdate))
                                 .isPresent();
                     }
 
