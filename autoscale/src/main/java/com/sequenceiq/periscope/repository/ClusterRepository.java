@@ -1,19 +1,20 @@
 package com.sequenceiq.periscope.repository;
 
-import java.util.List;
-import java.util.Optional;
-
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.domain.Cluster;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.domain.Cluster;
+import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @EntityType(entityClass = Cluster.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
