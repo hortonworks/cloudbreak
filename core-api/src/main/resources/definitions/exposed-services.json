@@ -491,6 +491,20 @@
       "visibleForDatahub": false
     },
     {
+      "name": "RESOURCEMANAGERAPI",
+      "displayName": "Resource Manager API",
+      "serviceName": "RESOURCEMANAGER",
+      "knoxService": "RESOURCEMANAGERAPI",
+      "knoxUrl": "/",
+      "ssoSupported": true,
+      "port": 8032,
+      "tlsPort": 8032,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
+    },
+    {
       "name": "DATA_DISCOVERY_SERVICE",
       "displayName": "Data Discovery Service",
       "serviceName": "DATA_DISCOVERY_SERVICE_AGENT",
