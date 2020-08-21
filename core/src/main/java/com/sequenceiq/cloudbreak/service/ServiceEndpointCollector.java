@@ -295,6 +295,9 @@ public class ServiceEndpointCollector {
                 case "JOBTRACKER":
                     urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
                     break;
+                case "RESOURCEMANAGERAPI":
+                    urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
+                    break;
                 case "IMPALA_DEBUG_UI":
                     addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
                     break;

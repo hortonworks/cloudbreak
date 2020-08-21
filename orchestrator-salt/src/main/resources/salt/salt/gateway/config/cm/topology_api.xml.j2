@@ -84,6 +84,10 @@
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
+                <name>{{ aclsauthz_prefix ~ "resourcemanagerapi.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>{{ aclsauthz_prefix ~ "livyserver.acl" }}</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -361,6 +365,15 @@
         <role>JOBTRACKER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
         <url>rpc://{{ hostloc }}:{{ ports['JOBTRACKER'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+
+    {% if 'RESOURCEMANAGERAPI' in exposed -%}
+    <service>
+        <role>RESOURCEMANAGERAPI</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+        <url>rpc://{{ hostloc }}:{{ ports['RESOURCEMANAGERAPI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
