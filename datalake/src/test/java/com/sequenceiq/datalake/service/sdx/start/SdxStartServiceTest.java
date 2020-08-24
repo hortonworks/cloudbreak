@@ -8,11 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -123,7 +124,7 @@ public class SdxStartServiceTest {
 
         underTest.start(CLUSTER_ID);
 
-        verify(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
+        verify(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(eq(sdxCluster), any());
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
     }
@@ -131,12 +132,12 @@ public class SdxStartServiceTest {
     @Test
     public void testStartWhenNotFoundException() {
         SdxCluster sdxCluster = sdxCluster();
-        doThrow(NotFoundException.class).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(NotFoundException.class).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         underTest.start(CLUSTER_ID);
 
-        verifyZeroInteractions(cloudbreakFlowService);
+        verifyNoInteractions(cloudbreakFlowService);
         verify(sdxStatusService, times(0)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, ResourceEvent.SDX_START_STARTED,
                 "Datalake start in progress", sdxCluster);
     }
@@ -146,12 +147,12 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(clientErrorException).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
-        verifyZeroInteractions(cloudbreakFlowService);
+        verifyNoInteractions(cloudbreakFlowService);
         assertEquals("Can not start stack, client error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
     }
 
@@ -160,12 +161,12 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStart(eq(0L), eq(CLUSTER_NAME), anyString());
+        doThrow(clientErrorException).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
 
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
-        verifyZeroInteractions(cloudbreakFlowService);
+        verifyNoInteractions(cloudbreakFlowService);
         assertEquals("Can not start stack, web application error happened on Cloudbreak side: Error message: \"error\"", exception.getMessage());
     }
 

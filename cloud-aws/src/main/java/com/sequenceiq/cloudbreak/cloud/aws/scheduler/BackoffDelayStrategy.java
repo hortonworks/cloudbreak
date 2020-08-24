@@ -9,7 +9,7 @@ import com.amazonaws.waiters.PollingStrategyContext;
 public class BackoffDelayStrategy implements PollingStrategy.DelayStrategy {
     private static final int POLLING_INTERVAL = 5;
 
-    private static final int MAX_POLLING_INTERVAL = 50;
+    private static final int MAX_POLLING_INTERVAL = 30;
 
     private static final Random RANDOM = ThreadLocalRandom.current();
 

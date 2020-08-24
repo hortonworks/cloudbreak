@@ -30,6 +30,7 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.LifecycleState;
@@ -150,6 +151,9 @@ public class AwsLaunchTest {
     private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
 
     @MockBean
+    private Waiter<DescribeScalingActivitiesRequest> describeScalingActivitiesRequestWaiter;
+
+    @MockBean
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
     @Test
@@ -206,6 +210,7 @@ public class AwsLaunchTest {
         when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
         when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
         when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
     }
 
     private void setupRetryService() {

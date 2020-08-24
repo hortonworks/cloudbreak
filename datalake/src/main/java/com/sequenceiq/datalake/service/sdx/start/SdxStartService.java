@@ -77,8 +77,9 @@ public class SdxStartService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             LOGGER.info("Triggering start flow for cluster {}", sdxCluster.getClusterName());
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.putStart(0L, sdxCluster.getClusterName(), sdxCluster.getAccountId()));
+                    stackV4Endpoint.putStartInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
         } catch (NotFoundException e) {

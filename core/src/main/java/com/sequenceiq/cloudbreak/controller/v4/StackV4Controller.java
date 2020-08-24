@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -78,6 +80,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public StackV4Response postInternal(Long workspaceId, @Valid StackV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.post(restRequestThreadLocalService.getRequestedWorkspaceId(), request, false);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response get(Long workspaceId, String name, Set<String> entries, @AccountId String accountId) {
         return stackOperations.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), entries, null);
@@ -92,6 +100,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public void delete(Long workspaceId, String name, boolean forced, @AccountId String accountId) {
+        stackOperations.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), forced);
+    }
+
+    @Override
+    @InternalOnly
+    public void deleteInternal(Long workspaceId, String name, boolean forced, @InitiatorUserCrn String initiatorUserCrn) {
         stackOperations.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), forced);
     }
 
@@ -122,8 +136,20 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public FlowIdentifier putStopInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.putStop(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putStart(Long workspaceId, String name, @AccountId String accountId) {
+        return stackOperations.putStart(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier putStartInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperations.putStart(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
@@ -141,8 +167,21 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public FlowIdentifier repairClusterInternal(Long workspaceId, String name, @Valid ClusterRepairV4Request clusterRepairRequest,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.repairCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), clusterRepairRequest);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier upgradeOs(Long workspaceId, String name, @AccountId String accountId) {
+        return stackOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier upgradeOsInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperations.upgradeOs(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
@@ -163,6 +202,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier changeImage(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest,
             @AccountId String accountId) {
+        return stackOperations.changeImage(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), stackImageChangeRequest);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier changeImageInternal(Long workspaceId, String name, @Valid StackImageChangeV4Request stackImageChangeRequest,
+            @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperations.changeImage(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), stackImageChangeRequest);
     }
 
@@ -239,6 +285,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.upgradeCluster(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), imageId);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier updateSaltByName(Long workspaceId, String name, @AccountId String accountId) {
         return stackOperations.updateSalt(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
@@ -270,9 +322,27 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public BackupV4Response backupDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+        return new BackupV4Response(flowIdentifier);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId) {
+        FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+        return new RestoreV4Response(flowIdentifier);
+    }
+
+    @Override
+    @InternalOnly
+    public RestoreV4Response restoreDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
+            @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
         return new RestoreV4Response(flowIdentifier);

@@ -11,12 +11,20 @@ REPLICA_BASE="cn=${ESCAPED_DOMAIN},cn=mapping tree,cn=config"
 #
 # Add anonymous access for replication agreements
 #
-ldapmodify -x -D "cn=directory manager" -w $FPW -h localhost << EOF
+set +e
+ldapmodify -x -D "cn=directory manager" -w "$FPW" -h localhost << EOF
 dn: ${REPLICA_BASE}
 changetype: modify
 add: aci
 aci: (targetattr="cn||objectClass||nsDS5ReplicaHost||nsds5replicaLastUpdateEnd||nsds5replicaLastUpdateStatus")(targetfilter="(|(objectclass=nsds5replicationagreement)(objectclass=nsDSWindowsReplicationAgreement))")(version 3.0; aci "permission:Read Replication Agreements"; allow (read, search, compare) groupdn = "ldap:///anyone";)
 EOF
+LDAPMODIFY_RET=$?
+set -e
+LDAP_TYPE_OR_VALUE_EXISTS=20
+if [[ $LDAPMODIFY_RET -ne 0 && $LDAPMODIFY_RET -ne $LDAP_TYPE_OR_VALUE_EXISTS ]]; then
+  echo ldapmodify failed
+  false
+fi
 
 #
 # Setup cert copy and service refstart on cert update

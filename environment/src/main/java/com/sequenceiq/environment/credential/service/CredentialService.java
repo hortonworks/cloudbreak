@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.service;
 
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.io.IOException;
@@ -63,8 +64,6 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
-    private static final String NOT_FOUND_FORMAT_MESSAGE = "Credential with name:";
-
     @Inject
     private CredentialRepository repository;
 
@@ -107,11 +106,23 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     public Credential getByNameForAccountId(String name, String accountId, CredentialType type) {
-        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), type).orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
+        return extractCredential(getOptionalByNameForAccountId(name, accountId, type), name);
+    }
+
+    public Optional<Credential> getOptionalByNameForAccountId(String name, String accountId, CredentialType type) {
+        return repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), type);
     }
 
     public Credential getByCrnForAccountId(String crn, String accountId, CredentialType type) {
-        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type).orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
+        return extractCredential(getOptionalByCrnForAccountId(crn, accountId, type), crn);
+    }
+
+    public Optional<Credential> getOptionalByCrnForAccountId(String crn, String accountId, CredentialType type) {
+        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type);
+    }
+
+    public Credential extractCredential(Optional<Credential> credential, String resourceIdentifier) {
+        return credential.orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, resourceIdentifier));
     }
 
     public Credential getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId, CredentialType type) {
@@ -151,7 +162,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     private Credential getCredentialAndValidateUpdate(Credential credential, String accountId, CredentialType type) {
         Credential original = repository.findByNameAndAccountId(credential.getName(), accountId, getEnabledPlatforms(), type)
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, credential.getName()));
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, credential.getName()));
         ValidationResult validationResult = credentialValidator.validateCredentialUpdate(original, credential,
                 type);
         if (validationResult.hasError()) {
@@ -222,7 +233,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     public String initCodeGrantFlow(String accountId, String name, String userId) {
         Credential original = repository.findByNameAndAccountId(name, accountId, getEnabledPlatforms(), ENVIRONMENT)
-                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESSAGE, name));
+                .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         String originalAttributes = original.getAttributes();
         if (getAzureCodeGrantFlowAttributes(original) == null) {
             throw new UnsupportedOperationException("This operation is only allowed on Authorization Code Grant flow based credentails.");
@@ -340,8 +351,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(),
-                ENVIRONMENT).getResourceCrn();
+        Optional<Credential> credential = getOptionalByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(), ENVIRONMENT);
+        if (credential.isEmpty()) {
+            credential = getOptionalByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(), AUDIT);
+        }
+        return extractCredential(credential, resourceName).getResourceCrn();
     }
 
     @Override

@@ -109,9 +109,10 @@ public class SdxDatabaseDrService {
         try {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 BackupV4Response backupV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        stackV4Endpoint.backupDatabaseByName(0L, sdxCluster.getClusterName(),
-                        backupLocation, backupId, sdxCluster.getAccountId()));
+                        stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
+                        backupLocation, backupId, initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
@@ -128,9 +129,10 @@ public class SdxDatabaseDrService {
         try {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 RestoreV4Response restoreV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        stackV4Endpoint.restoreDatabaseByName(0L, sdxCluster.getClusterName(),
-                        backupLocation, backupId, sdxCluster.getAccountId()));
+                        stackV4Endpoint.restoreDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
+                        backupLocation, backupId, initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {
