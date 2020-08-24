@@ -27,9 +27,13 @@ public class EnvironmentLogStorageLocationValidator {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         Optional.ofNullable(environment.getTelemetry())
                 .map(EnvironmentTelemetry::getLogging)
-                .filter(logging -> logging.getCloudwatch() == null)
+                .filter(logging -> isCloudStorageEnabled(logging) && logging.getCloudwatch() == null)
                 .map(EnvironmentLogging::getStorageLocation)
                 .ifPresent(location -> cloudStorageLocationValidator.validate(location, environment, resultBuilder));
         return resultBuilder.build();
+    }
+
+    private boolean isCloudStorageEnabled(EnvironmentLogging logging) {
+        return logging.getS3() != null || logging.getAdlsGen2() != null;
     }
 }
