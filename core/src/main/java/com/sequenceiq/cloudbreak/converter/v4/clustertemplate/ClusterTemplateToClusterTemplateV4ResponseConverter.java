@@ -39,6 +39,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter extends Abstrac
         clusterTemplateV4Response.setStatus(source.getStatus());
         clusterTemplateV4Response.setId(source.getId());
         clusterTemplateV4Response.setDatalakeRequired(source.getDatalakeRequired());
+        clusterTemplateV4Response.setCrn(source.getResourceCrn());
         clusterTemplateV4Response.setStatus(source.getStatus());
         clusterTemplateV4Response.setType(source.getType());
         clusterTemplateV4Response.setFeatureState(source.getFeatureState());

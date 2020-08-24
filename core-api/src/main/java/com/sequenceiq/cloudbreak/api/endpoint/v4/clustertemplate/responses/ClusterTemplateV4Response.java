@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -43,6 +45,10 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateViewModelDescription.STACK_VERSION)
     private String stackVersion;
+
+    @NotNull
+    @ApiModelProperty(value = ModelDescriptions.CRN)
+    private String crn;
 
     public FeatureState getFeatureState() {
         return featureState;
@@ -122,5 +128,13 @@ public class ClusterTemplateV4Response extends ClusterTemplateV4Base {
 
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
+    }
+
+    public String getCrn() {
+        return crn;
+    }
+
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 }
