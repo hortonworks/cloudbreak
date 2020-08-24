@@ -32,6 +32,8 @@ public class CustomAmazonWaiterProvider {
 
     private static final int DEFAULT_MAX_ATTEMPTS = 60;
 
+    private static final int ACTIVITIES_DEFAULT_MAX_ATTEMPTS = 120;
+
     private static final int DEFAULT_DELAY_IN_SECONDS = 30;
 
     public Waiter<DescribeAutoScalingGroupsRequest> getAutoscalingInstancesInServiceWaiter(AmazonAutoScalingClient asClient, Integer requiredCount) {
@@ -54,7 +56,7 @@ public class CustomAmazonWaiterProvider {
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }
 
-    public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {
+    public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitiesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {
         return new WaiterBuilder<DescribeScalingActivitiesRequest, DescribeScalingActivitiesResult>()
                 .withSdkFunction(asClient::describeScalingActivities)
                 .withAcceptors(new WaiterAcceptor<DescribeScalingActivitiesResult>() {
@@ -71,7 +73,7 @@ public class CustomAmazonWaiterProvider {
                         return WaiterState.SUCCESS;
                     }
                 })
-                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
+                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(ACTIVITIES_DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }

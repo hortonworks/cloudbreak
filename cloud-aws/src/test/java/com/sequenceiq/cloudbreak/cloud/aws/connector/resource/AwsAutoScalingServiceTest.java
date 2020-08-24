@@ -49,7 +49,7 @@ public class AwsAutoScalingServiceTest {
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
         when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
-        when(customAmazonWaiterProvider.getAutoscalingActivitesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
 
         Date date = new Date();
         AmazonAutoscalingFailed expected = Assertions.assertThrows(AmazonAutoscalingFailed.class, () ->
@@ -68,7 +68,7 @@ public class AwsAutoScalingServiceTest {
         activity1.setStatusCode("success");
         result.setActivities(List.of(activity1));
         when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
-        when(customAmazonWaiterProvider.getAutoscalingActivitesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
 
         Date date = new Date();
         underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date);

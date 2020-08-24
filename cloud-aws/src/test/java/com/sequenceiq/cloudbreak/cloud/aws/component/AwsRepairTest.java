@@ -202,7 +202,7 @@ public class AwsRepairTest {
         when(ecWaiters.instanceRunning()).thenReturn(instanceWaiter);
         when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
         when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
-        when(customAmazonWaiterProvider.getAutoscalingActivitesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
     }
 
     private void setupRetryService() {

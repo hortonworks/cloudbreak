@@ -156,7 +156,7 @@ public class AwsAutoScalingService {
         Optional<Activity> firstActivity;
         try {
             Waiter<DescribeScalingActivitiesRequest> autoscalingActivitiesWaiter = customAmazonWaiterProvider
-                    .getAutoscalingActivitesWaiter(asClient, timeBeforeASUpdate);
+                    .getAutoscalingActivitiesWaiter(asClient, timeBeforeASUpdate);
             autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName)));
             DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
                     .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
