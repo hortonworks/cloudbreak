@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.client.ApiClient;
@@ -25,7 +26,17 @@ public class ClouderaManagerApiClientProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerApiClientProvider.class);
 
-    private static final Integer CLUSTER_PROXY_TIMEOUT = 90000;
+    @Value("${cb.cm.client.cluster.proxy.timeout}")
+    private Integer clusterProxyTimeout;
+
+    @Value("${cb.cm.client.connect.timeout.seconds}")
+    private Integer connectTimeoutSeconds;
+
+    @Value("${cb.cm.client.read.timeout.seconds}")
+    private Integer readTimeoutSeconds;
+
+    @Value("${cb.cm.client.write.timeout.seconds}")
+    private Integer writeTimeoutSeconds;
 
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig, String apiVersion) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin", apiVersion);
@@ -75,7 +86,7 @@ public class ClouderaManagerApiClientProvider {
             if (clientConfig.isClusterProxyEnabled()) {
                 cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cb-internal" + context);
                 cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
-                cmClient.addDefaultHeader("Proxy-With-Timeout", CLUSTER_PROXY_TIMEOUT.toString());
+                cmClient.addDefaultHeader("Proxy-With-Timeout", clusterProxyTimeout.toString());
             } else if (port != null) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
             } else {
@@ -102,9 +113,9 @@ public class ClouderaManagerApiClientProvider {
                 cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
                 cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             }
-            cmClient.getHttpClient().setConnectTimeout(1L, TimeUnit.MINUTES);
-            cmClient.getHttpClient().setReadTimeout(1L, TimeUnit.MINUTES);
-            cmClient.getHttpClient().setWriteTimeout(1L, TimeUnit.MINUTES);
+            cmClient.getHttpClient().setConnectTimeout(Long.valueOf(connectTimeoutSeconds), TimeUnit.SECONDS);
+            cmClient.getHttpClient().setReadTimeout(Long.valueOf(readTimeoutSeconds), TimeUnit.SECONDS);
+            cmClient.getHttpClient().setWriteTimeout(Long.valueOf(writeTimeoutSeconds), TimeUnit.SECONDS);
             return cmClient;
         } catch (Exception e) {
             LOGGER.info("Cannot create SSL context for Cloudera Manager", e);

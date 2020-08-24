@@ -62,6 +62,12 @@ periscope:
 cb:
   server:
     contextPath: "/cb"
+  cm:
+    client:
+      cluster.proxy.timeout: 90000
+      connect.timeout.seconds: 100
+      read.timeout.seconds: 100
+      write.timeout.seconds: 100
 
 rest:
   debug: false

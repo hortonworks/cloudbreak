@@ -415,6 +415,11 @@ cb:
     heartbeat.interval: 3
     missed.heartbeat.interval: 30
     kerberos.encryption.type: "aes256-cts"
+    client:
+      cluster.proxy.timeout: 90000
+      connect.timeout.seconds: 100
+      read.timeout.seconds: 100
+      write.timeout.seconds: 100
 
   workspace.service.cache.ttl: 15
 
