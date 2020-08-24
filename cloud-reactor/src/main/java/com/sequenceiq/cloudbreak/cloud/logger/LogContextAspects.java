@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -54,10 +55,14 @@ public class LogContextAspects {
     private void buildMdcContext(CloudContext cloudContext, Event<?> event) {
         Map<String, String> eventMdcContext = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (cloudContext != null) {
+            String crn = getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.CRN.toString()));
+            if (StringUtils.isEmpty(crn)) {
+                crn = getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.RESOURCE_CRN.toString()));
+            }
             MdcContext.builder()
                     .flowId(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.FLOW_ID.toString())))
                     .requestId(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.REQUEST_ID.toString())))
-                    .resourceCrn(getIfNotNull(cloudContext.getId(), this::stringValue))
+                    .resourceCrn(crn)
                     .resourceName(getIfNotNull(cloudContext.getName(), this::stringValue))
                     .resourceType(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.RESOURCE_TYPE.toString())))
                     .userCrn(getIfNotNull(eventMdcContext, c -> c.get(LoggerContextKey.USER_CRN.toString())))
