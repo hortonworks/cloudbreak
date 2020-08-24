@@ -15,6 +15,7 @@ import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
@@ -27,7 +28,8 @@ public class TagsUtil {
 
     static final String MISSING_DEFAULT_TAG = "TaggedResponse is missing the [%s] default tag";
 
-    static final List<String> DEFAULT_TAGS = List.of("owner", "Cloudera-Environment-Resource-Name", "Cloudera-Creator-Resource-Name", "Cloudera-Resource-Name");
+    static final List<String> DEFAULT_TAGS = List.of("owner", "Cloudera-Environment-Resource-Name", "Cloudera-Creator-Resource-Name",
+            "Cloudera-Resource-Name");
 
     private static final int GCP_TAG_MAX_LENGTH = 63;
 
@@ -59,6 +61,29 @@ public class TagsUtil {
         }
     }
 
+    public void verifyTags(TaggedResponse response, TestContext testContext) {
+        SoftAssert softAssert = new SoftAssert();
+
+        try {
+            validateTestNameTag(response, testContext);
+            DEFAULT_TAGS.forEach(tag -> {
+                if (tag.equalsIgnoreCase("owner")) {
+                    validateOwnerTag(response, tag, testContext);
+                } else if (tag.equalsIgnoreCase("Cloudera-Creator-Resource-Name")) {
+                    validateClouderaCreatorResourceNameTag(response, tag, testContext);
+                } else {
+                    Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] Not Null! ", tag, response.getTagValue(tag)));
+                    softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag));
+                }
+            });
+            softAssert.assertAll();
+        } catch (NullPointerException e) {
+            LOGGER.error("Tag validation is not possible, because of response: {} throws: {}!", response, e.getMessage(), e);
+            throw new TestFailException(String.format(" Tag validation is not possible, because of response: %s throws: %s ", response,
+                    e.getMessage()));
+        }
+    }
+
     private void addTags(TaggableRequest taggableRequest, String tagKey, String tagValue) {
         tagKey = applyLengthRestrictions(tagKey);
         tagValue = applyLengthRestrictions(tagValue);
@@ -72,32 +97,39 @@ public class TagsUtil {
         return tag;
     }
 
-    public void verifyTags(TaggedResponse response, TestContext testContext) {
-        SoftAssert softAssert = new SoftAssert();
-
-        Log.log(LOGGER, format(" Verify test name tag: [%s] value is: [%s] Not Null! ", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG)));
-        softAssert.assertNotNull(response.getTagValue(TEST_NAME_TAG), MISSING_TEST_NAME_TAG_MESSAGE);
-        Log.log(LOGGER, format(" Verify test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG,
-                response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
-        softAssert.assertEquals(response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get(), String.format("Test name tag value is: [%s]" +
-                " NOT equals [%s] test method name!", response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
-        DEFAULT_TAGS.forEach(tag -> {
-            Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] Not Null! ", tag, response.getTagValue(tag)));
-            softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag));
-            if (tag.equalsIgnoreCase("owner")) {
-                Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
-                        testContext.getActingUserName()));
-                softAssert.assertEquals(response.getTagValue(tag), testContext.getActingUserName(), String.format("Default tag: [%s] value is: [%s] " +
-                        "NOT equals [%s] acting user name!", tag, response.getTagValue(tag), testContext.getActingUserName()));
-            }
-            if (tag.equalsIgnoreCase("Cloudera-Creator-Resource-Name")) {
-                Log.log(LOGGER, format(" Verify default tag: [%s] value is: [%s] contains [%s] acting user name! ", tag, response.getTagValue(tag),
-                        testContext.getActingUserName()));
-                softAssert.assertTrue(response.getTagValue(tag).contains(testContext.getActingUserName()), String.format("Default tag: [%s] value is: [%s] " +
-                        "NOT contains [%s] acting user name!", tag, response.getTagValue(tag), testContext.getActingUserName()));
-            }
-        });
-        softAssert.assertAll();
+    private void validateOwnerTag(TaggedResponse response, String tag, TestContext testContext) {
+        if (response.getTagValue(tag).equals(testContext.getActingUserName())) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
+                    testContext.getActingUserName()));
+        } else {
+            LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user name!", tag, response.getTagValue(tag),
+                    testContext.getActingUserName());
+            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ", tag,
+                    response.getTagValue(tag), testContext.getActingUserName()));
+        }
     }
 
+    private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
+        if (response.getTagValue(tag).contains(testContext.getActingUserName())) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] contains [%s] acting user name! ", tag, response.getTagValue(tag),
+                    testContext.getActingUserName()));
+        } else {
+            LOGGER.error("Default tag: [{}] value is: [{}] NOT contains [{}] acting user name!", tag, response.getTagValue(tag),
+                    testContext.getActingUserName());
+            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT contains [%s] acting user name! ", tag,
+                    response.getTagValue(tag), testContext.getActingUserName()));
+        }
+    }
+
+    private void validateTestNameTag(TaggedResponse response, TestContext testContext) {
+        if (response.getTagValue(TEST_NAME_TAG).equals(testContext.getTestMethodName().get())) {
+            Log.log(LOGGER, format(" Test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG),
+                    testContext.getTestMethodName().get()));
+        } else {
+            LOGGER.error("Test name tag: [{}] value is: [{}] NOT equals [{}] test method name!", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG),
+                    testContext.getTestMethodName().get());
+            throw new TestFailException(String.format(" Test name tag: [%s] value is: [%s] NOT equals [%s] test method name! ", TEST_NAME_TAG,
+                    response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
+        }
+    }
 }
