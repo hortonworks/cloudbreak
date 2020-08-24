@@ -170,17 +170,9 @@ public class EC2ClientActions extends EC2Client {
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         DescribeInstancesResult describeInstancesResult = buildEC2Client().describeInstances(describeInstancesRequest);
-        Map<String, Map<String, String>> tagsByInstanceId = describeInstancesResult.getReservations().stream()
+        return describeInstancesResult.getReservations().stream()
                 .flatMap(reservation -> reservation.getInstances().stream())
                 .collect(Collectors.toMap(Instance::getInstanceId, this::getTagsForInstance));
-
-        tagsByInstanceId.forEach((instance, tags) -> {
-            LOGGER.info(" Tags for EC2 instance [{}]: ", instance);
-            tags.forEach((key, value) -> {
-                LOGGER.info(" [{}] : [{}] ", key, value);
-            });
-        });
-        return tagsByInstanceId;
     }
 
     private Map<String, String> getTagsForInstance(Instance instance) {
