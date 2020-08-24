@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -149,7 +150,7 @@ public class GcpInstanceResourceBuilderTest {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, emptyList());
-        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
+        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"), new HashMap<>());
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
         CloudContext cloudContext = new CloudContext(privateId, "testname", "crn", "GCP", USER_ID, WORKSPACE_ID);
@@ -332,7 +333,8 @@ public class GcpInstanceResourceBuilderTest {
                 instanceAuthentication.getLoginUserName(),
                 instanceAuthentication.getPublicKey(),
                 50,
-                Optional.ofNullable(cloudFileSystemView));
+                Optional.ofNullable(cloudFileSystemView),
+                new GroupNetwork());
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {

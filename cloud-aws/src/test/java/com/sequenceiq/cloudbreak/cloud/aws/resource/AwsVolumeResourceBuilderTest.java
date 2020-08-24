@@ -252,7 +252,7 @@ class AwsVolumeResourceBuilderTest {
         InstanceTemplate template = new InstanceTemplate(FLAVOR, GROUP_NAME, PRIVATE_ID, volumes, InstanceStatus.CREATE_REQUESTED, templateParameters,
                 TEMPLATE_ID, IMAGE_ID);
         CloudInstance instance = new CloudInstance(INSTANCE_ID, template, null);
-        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, ROOT_VOLUME_SIZE, null);
+        return new Group(GROUP_NAME, InstanceGroupType.GATEWAY, singletonList(instance), null, null, null, null, null, null, ROOT_VOLUME_SIZE, null, null);
     }
 
     private VolumeSetAttributes.Volume createVolumeForVolumeSet(String type) {

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public abstract class AbstractRedbeamsStartAction<P extends Payload>
             StateContext<RedbeamsStartState, RedbeamsStartEvent> stateContext, P payload) {
         DBStack dbStack = dbStackService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(dbStack);
-        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()), new HashMap<>());
         String userName = dbStack.getOwnerCrn().getUserId();
         String accountId = dbStack.getOwnerCrn().getAccountId();
         CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),

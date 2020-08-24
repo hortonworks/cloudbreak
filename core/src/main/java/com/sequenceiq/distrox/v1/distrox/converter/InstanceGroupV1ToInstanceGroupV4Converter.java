@@ -12,10 +12,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.SecurityRuleUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
@@ -23,11 +27,18 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.InstanceGroupAzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.InstanceGroupMockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
 @Component
 public class InstanceGroupV1ToInstanceGroupV4Converter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceGroupV1ToInstanceGroupV4Converter.class);
 
     @Inject
     private InstanceTemplateV1ToInstanceTemplateV4Converter instanceTemplateConverter;
@@ -35,15 +46,19 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     @Inject
     private InstanceGroupParameterConverter instanceGroupParameterConverter;
 
-    public List<InstanceGroupV4Request> convertTo(Set<InstanceGroupV1Request> instanceGroups, DetailedEnvironmentResponse environment) {
-        return instanceGroups.stream().map(ig -> convert(ig, environment)).collect(Collectors.toList());
+    @Inject
+    private InstanceGroupNetworkV1ToInstanceGroupNetworkV4Converter networkConverter;
+
+    public List<InstanceGroupV4Request> convertTo(NetworkV1Request network, Set<InstanceGroupV1Request> instanceGroups,
+        DetailedEnvironmentResponse environment) {
+        return instanceGroups.stream().map(ig -> convert(network, ig, environment)).collect(Collectors.toList());
     }
 
     public Set<InstanceGroupV1Request> convertFrom(List<InstanceGroupV4Request> instanceGroups) {
         return instanceGroups.stream().map(this::convert).collect(Collectors.toSet());
     }
 
-    private InstanceGroupV4Request convert(InstanceGroupV1Request source, DetailedEnvironmentResponse environment) {
+    private InstanceGroupV4Request convert(NetworkV1Request network, InstanceGroupV1Request source, DetailedEnvironmentResponse environment) {
         InstanceGroupV4Request response = new InstanceGroupV4Request();
         if (InstanceGroupType.GATEWAY == source.getType() && source.getNodeCount() != 1) {
             throw new BadRequestException("Instance group with GATEWAY type must contain 1 node!");
@@ -54,12 +69,74 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setName(source.getName());
         response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
+        response.setNetwork(getInstanceGroupNetworkV4Request(network, source, environment));
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));
         return response;
+    }
+
+    private InstanceGroupNetworkV4Request getInstanceGroupNetworkV4Request(NetworkV1Request distroxNetwork, InstanceGroupV1Request source,
+        DetailedEnvironmentResponse environment) {
+        if (requestContainsSingleAvailabilityZone(distroxNetwork, environment)) {
+            source.setNetwork(getInstanceGroupNetworkForMultiAz(distroxNetwork, source, environment));
+        }
+        if (source.getNetwork() != null) {
+            InstanceGroupNetworkV4Request network = getIfNotNull(new ImmutablePair<>(source.getNetwork(), environment),
+                    networkConverter::convertToInstanceGroupNetworkV4Request);
+            validateSubnetIds(network, environment);
+            return network;
+        }
+        return null;
+
+    }
+
+    private InstanceGroupNetworkV1Request getInstanceGroupNetworkForMultiAz(NetworkV1Request distroxNetwork, InstanceGroupV1Request source,
+        DetailedEnvironmentResponse environment) {
+        InstanceGroupNetworkV1Request request = null;
+        switch (environment.getCloudPlatform()) {
+            case "AWS":
+                request = new InstanceGroupNetworkV1Request();
+                InstanceGroupAwsNetworkV1Parameters aws = new InstanceGroupAwsNetworkV1Parameters();
+                aws.setSubnetId(distroxNetwork.getAws().getSubnetId());
+                request.setAws(aws);
+                break;
+            case "AZURE":
+                request = new InstanceGroupNetworkV1Request();
+                InstanceGroupAzureNetworkV1Parameters azure = new InstanceGroupAzureNetworkV1Parameters();
+                azure.setSubnetId(distroxNetwork.getAzure().getSubnetId());
+                request.setAzure(azure);
+                break;
+            case "MOCK":
+                request = new InstanceGroupNetworkV1Request();
+                InstanceGroupMockNetworkV1Parameters mock = new InstanceGroupMockNetworkV1Parameters();
+                mock.setSubnetId(distroxNetwork.getMock().getSubnetId());
+                request.setMock(mock);
+                break;
+            default:
+        }
+        return request;
+    }
+
+    private boolean requestContainsSingleAvailabilityZone(NetworkV1Request distroxNetwork, DetailedEnvironmentResponse environment) {
+        boolean requestContainsSingleAvailabilityZone = false;
+        if (distroxNetwork != null) {
+            switch (environment.getCloudPlatform()) {
+                case "AWS":
+                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getAws().getSubnetId());
+                    break;
+                case "AZURE":
+                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getAzure().getSubnetId());
+                    break;
+                case "MOCK":
+                    requestContainsSingleAvailabilityZone = !Strings.isNullOrEmpty(distroxNetwork.getMock().getSubnetId());
+                    break;
+                default:
+            }
+        }
+        return requestContainsSingleAvailabilityZone;
     }
 
     private InstanceGroupV1Request convert(InstanceGroupV4Request source) {
@@ -100,6 +177,28 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
             }
         }
         return null;
+    }
+
+    private void validateSubnetIds(InstanceGroupNetworkV4Request network, DetailedEnvironmentResponse environment) {
+        switch (environment.getCloudPlatform()) {
+            case "AWS":
+                validateSubnet(network, environment, network.getAws().getSubnetId());
+                break;
+            case "AZURE":
+                validateSubnet(network, environment, network.getAzure().getSubnetId());
+                break;
+            default:
+        }
+
+    }
+
+    private void validateSubnet(InstanceGroupNetworkV4Request network, DetailedEnvironmentResponse environment, String subnetId) {
+        if (subnetId != null && (environment == null || environment.getNetwork() == null || environment.getNetwork().getSubnetIds() == null
+                || !environment.getNetwork().getSubnetIds().contains(subnetId))) {
+            LOGGER.info("The given subnet id [{}] is not attached to the Environment [{}]. Network request: [{}]", subnetId, environment, network);
+            throw new BadRequestException(String.format("The given subnet id (%s) is not attached to the Environment (%s)",
+                    subnetId, environment.getName()));
+        }
     }
 
     private List<String> getPorts(InstanceGroupType type) {

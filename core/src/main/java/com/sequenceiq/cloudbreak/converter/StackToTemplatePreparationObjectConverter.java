@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -307,7 +308,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private void decorateBuilderWithPlacement(Stack source, Builder builder) {
         String region = source.getRegion();
-        String availabilityZone = source.getAvailabilityZone();
+        Map<String, String> availabilityZone = new HashMap<String, String>();
+        for (InstanceGroup instanceGroup : source.getInstanceGroups()) {
+            availabilityZone.put(instanceGroup.getGroupName(), instanceGroup.getAvailabilityZone());
+        }
         builder.withPlacementView(new PlacementView(region, availabilityZone));
     }
 

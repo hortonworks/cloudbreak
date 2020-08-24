@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.api.v1.distrox.model.network;
+package com.sequenceiq.distrox.api.v1.distrox.model.network.aws;
 
 import java.io.Serializable;
 
@@ -12,9 +12,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AzureNetworkV1Parameters implements Serializable {
+public class AwsNetworkV1Parameters implements Serializable {
 
+    /**
+     * @deprecated should not be used anymore
+     */
     @ApiModelProperty
+    @Deprecated
     private String subnetId;
 
     public String getSubnetId() {

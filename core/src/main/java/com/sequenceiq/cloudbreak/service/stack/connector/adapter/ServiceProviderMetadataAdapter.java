@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.connector.adapter;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.lang.String.format;
 
 import java.util.Collections;
@@ -24,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.service.location.LocationProvider;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -46,8 +44,11 @@ public class ServiceProviderMetadataAdapter {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     public InstanceSyncState getState(Stack stack, InstanceGroup instanceGroup, String instanceId) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
                 location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);

@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -29,6 +30,8 @@ public class InstanceGroupV1Request extends InstanceGroupV1Base {
     @ApiModelProperty(HostGroupModelDescription.RECIPE_NAMES)
     private Set<String> recipeNames = new HashSet<>();
 
+    private InstanceGroupNetworkV1Request network;
+
     public InstanceTemplateV1Request getTemplate() {
         return template;
     }
@@ -43,5 +46,13 @@ public class InstanceGroupV1Request extends InstanceGroupV1Base {
 
     public void setRecipeNames(Set<String> recipeNames) {
         this.recipeNames = recipeNames;
+    }
+
+    public InstanceGroupNetworkV1Request getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetworkV1Request network) {
+        this.network = network;
     }
 }

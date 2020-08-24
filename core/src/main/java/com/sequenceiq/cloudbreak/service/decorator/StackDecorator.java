@@ -44,11 +44,13 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -81,6 +83,9 @@ public class StackDecorator {
 
     @Inject
     private SecurityGroupService securityGroupService;
+
+    @Inject
+    private InstanceGroupNetworkService instanceGroupNetworkService;
 
     @Inject
     private TemplateDecorator templateDecorator;
@@ -178,7 +183,7 @@ public class StackDecorator {
     private void preparePlacement(Stack subject, StackV4Request request, DetailedEnvironmentResponse environment) {
         if (request.getPlacement() == null && !CloudPlatform.YARN.name().equals(environment.getCloudPlatform())) {
             subject.setRegion(getRegionFromEnv(environment));
-            subject.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
+            //subject.setAvailabilityZone(getAvailabilityZoneFromEnv(environment));
         }
     }
 
@@ -241,7 +246,7 @@ public class StackDecorator {
                 if (template.getId() == null) {
                     template.setCloudPlatform(credential.cloudPlatform());
                     PlacementSettingsV4Request placement = request.getPlacement();
-                    String availabilityZone = placement != null ? placement.getAvailabilityZone() : subject.getAvailabilityZone();
+                    String availabilityZone = placement != null ? placement.getAvailabilityZone() : instanceGroup.getAvailabilityZone();
                     String region = placement != null ? placement.getRegion() : subject.getRegion();
 
                     CdpResourceType cdpResourceType = cdpResourceTypeProvider.fromStackType(request.getType());
@@ -260,6 +265,23 @@ public class StackDecorator {
                     securityGroup.setWorkspace(subject.getWorkspace());
                     securityGroup = securityGroupService.create(user, securityGroup);
                     instanceGroup.setSecurityGroup(securityGroup);
+                }
+            }
+            if (instanceGroup.getSecurityGroup() != null) {
+                SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
+                if (securityGroup.getId() == null) {
+                    securityGroup.setCloudPlatform(credential.cloudPlatform());
+                    securityGroup.setWorkspace(subject.getWorkspace());
+                    securityGroup = securityGroupService.create(user, securityGroup);
+                    instanceGroup.setSecurityGroup(securityGroup);
+                }
+            }
+            if (instanceGroup.getNetwork() != null) {
+                InstanceGroupNetwork network = instanceGroup.getNetwork();
+                if (network.getId() == null) {
+                    network.setCloudPlatform(credential.cloudPlatform());
+                    network = instanceGroupNetworkService.create(network);
+                    instanceGroup.setNetwork(network);
                 }
             }
         });

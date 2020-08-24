@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -102,7 +103,7 @@ public class DBStackStatusSyncService {
 
     private Optional<ExternalDatabaseStatus> getExternalDatabaseStatus(DBStack dbStack) {
         try {
-            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()), new HashMap<>());
             String accountId = dbStack.getOwnerCrn().getAccountId();
             CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
                     dbStack.getPlatformVariant(), location, dbStack.getOwnerCrn().getUserId(), dbStack.getUserName(), accountId);

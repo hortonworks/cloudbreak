@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.stop.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +24,7 @@ import com.sequenceiq.freeipa.flow.stack.stop.StackStopContext;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopState;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -45,6 +42,9 @@ public abstract class AbstractStackStopAction<P extends Payload>
     @Inject
     private CredentialService credentialService;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     protected AbstractStackStopAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -56,7 +56,7 @@ public abstract class AbstractStackStopAction<P extends Payload>
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());

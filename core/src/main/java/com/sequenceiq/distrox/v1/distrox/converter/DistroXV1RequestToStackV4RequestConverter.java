@@ -84,7 +84,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(igs, environment)));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs -> instanceGroupConverter.convertTo(source.getNetwork(), igs, environment)));
         request.setNetwork(getNetwork(source.getNetwork(), environment));
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
@@ -121,7 +121,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, clusterConverter::convert));
         DetailedEnvironmentResponse environmentRef = environment;
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroups -> instanceGroupConverter.convertTo(instanceGroups, environmentRef)));
+        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(),
+                instanceGroups -> instanceGroupConverter.convertTo(source.getNetwork(), instanceGroups, environmentRef)));
         if (environment != null) {
             request.setNetwork(getNetwork(source.getNetwork(), environment));
         }
@@ -146,7 +147,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
         NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment), networkConverter::convertToNetworkV4Request);
-        validateSubnetIds(network, environment);
         return network;
     }
 
@@ -163,7 +163,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
                 break;
             default:
         }
-
     }
 
     private void validateSubnet(NetworkV4Request network, DetailedEnvironmentResponse environment, String subnetId) {

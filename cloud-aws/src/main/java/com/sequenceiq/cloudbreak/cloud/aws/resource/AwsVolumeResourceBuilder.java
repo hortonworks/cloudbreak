@@ -127,7 +127,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             CloudContext cloudContext = auth.getCloudContext();
             String stackName = cloudContext.getName();
 
-            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetResource);
+            String availabilityZone = getAvailabilityZoneFromSubnet(auth, subnetResource, group);
 
             return new Builder()
                     .persistent(true)
@@ -147,7 +147,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         };
     }
 
-    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, CloudResource subnetResource) {
+    private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, CloudResource subnetResource, Group group) {
         AmazonEc2RetryClient amazonEC2Client = getAmazonEC2Client(auth);
         DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest()
                 .withSubnetIds(subnetResource.getName()));
@@ -155,7 +155,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .filter(subnet -> subnetResource.getName().equals(subnet.getSubnetId()))
                 .map(Subnet::getAvailabilityZone)
                 .findFirst()
-                .orElse(auth.getCloudContext().getLocation().getAvailabilityZone().value());
+                .orElse(auth.getCloudContext().getLocation().getAvailabilityZones().get(group.getName()).value());
     }
 
     @Override

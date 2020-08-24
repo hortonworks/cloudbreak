@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.service.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.Optional;
 import java.util.UUID;
 
@@ -26,6 +22,7 @@ import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConvert
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
@@ -42,10 +39,13 @@ public class PlatformParameterService {
     @Inject
     private FreeIpaFlowManager freeIpaFlowManager;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     public PlatformParameters getPlatformParameters(Optional<String> requestId, Stack stack, Credential credential) {
         MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
         LOGGER.debug("Get platform parameters for: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);

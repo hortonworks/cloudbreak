@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -26,6 +22,7 @@ import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractStackProvisionAction<P extends Payload> extends AbstractStackAction<StackProvisionState, StackProvisionEvent, StackContext, P> {
@@ -41,6 +38,9 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
     @Inject
     private CredentialService credentialService;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     protected AbstractStackProvisionAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -49,7 +49,7 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackProvisionState, StackProvisionEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));

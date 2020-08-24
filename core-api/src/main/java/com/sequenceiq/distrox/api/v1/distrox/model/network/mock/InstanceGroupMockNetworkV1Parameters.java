@@ -1,4 +1,4 @@
-package com.sequenceiq.distrox.api.v1.distrox.model.network;
+package com.sequenceiq.distrox.api.v1.distrox.model.network.mock;
 
 import java.io.Serializable;
 
@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class AwsNetworkV1Parameters implements Serializable {
+public class InstanceGroupMockNetworkV1Parameters implements Serializable {
 
     @ApiModelProperty
     private String subnetId;
@@ -24,4 +24,5 @@ public class AwsNetworkV1Parameters implements Serializable {
     public void setSubnetId(String subnetId) {
         this.subnetId = subnetId;
     }
+
 }

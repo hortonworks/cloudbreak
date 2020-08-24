@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -75,6 +76,11 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
     private Set<TargetGroup> targetGroups = new HashSet<>();
+
+    private String availabilityZone;
+
+    @OneToOne
+    private InstanceGroupNetwork network;
 
     public String getGroupName() {
         return groupName;
@@ -230,5 +236,21 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @Override
     public int compareTo(InstanceGroup o) {
         return groupName.compareTo(o.groupName);
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
+    }
+
+    public InstanceGroupNetwork getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(InstanceGroupNetwork network) {
+        this.network = network;
     }
 }

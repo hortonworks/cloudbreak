@@ -12,6 +12,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,7 +100,7 @@ public class AwsStackRequestHelperTest {
 
     @Test
     public void testCreateCreateStackRequestForCloudStack() {
-        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region"), new AvailabilityZone("az")));
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("region"), new AvailabilityZone("az"), new HashMap<>()));
         DescribeImagesResult imagesResult = new DescribeImagesResult();
         when(amazonEC2Client.describeImages(any(DescribeImagesRequest.class)))
                 .thenReturn(imagesResult.withImages(new com.amazonaws.services.ec2.model.Image()));

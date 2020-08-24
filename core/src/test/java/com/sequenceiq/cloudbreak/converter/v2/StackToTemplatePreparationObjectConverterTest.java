@@ -265,7 +265,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.cloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         when(stackMock.getType()).thenReturn(StackType.DATALAKE);
         when(stackMock.getRegion()).thenReturn(REGION);
-        when(stackMock.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(stackMock.getName()).thenReturn("stackname");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
@@ -524,7 +523,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result.getPlacementView().isPresent()).isTrue();
         assertThat(result.getPlacementView().get().getRegion()).isEqualTo(REGION);
-        assertThat(result.getPlacementView().get().getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
+        assertEquals(REGION, result.getPlacementView().get().getRegion());
+        assertEquals(Map.of("master", AVAILABILITY_ZONE), result.getPlacementView().get().getAvailabilityZone());
     }
 
     @Test

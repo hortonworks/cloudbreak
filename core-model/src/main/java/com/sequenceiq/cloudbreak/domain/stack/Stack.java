@@ -90,8 +90,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String region;
 
-    private String availabilityZone;
-
     private Integer gatewayPort;
 
     /**
@@ -356,14 +354,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setOrchestrator(Orchestrator orchestrator) {
         this.orchestrator = orchestrator;
-    }
-
-    public String getAvailabilityZone() {
-        return availabilityZone;
-    }
-
-    public void setAvailabilityZone(String availabilityZone) {
-        this.availabilityZone = availabilityZone;
     }
 
     public Integer getGatewayPort() {

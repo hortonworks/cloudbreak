@@ -53,7 +53,7 @@ public class StackService implements ResourceCrnAndNameProvider {
     }
 
     public Stack getStackById(Long id) {
-        return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
+        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
     }
 
     public Stack save(Stack stack) {

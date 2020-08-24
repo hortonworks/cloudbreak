@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -128,7 +130,7 @@ public class AwsLaunchService {
         AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
         Network network = stack.getNetwork();
-        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network, stack);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
 
@@ -195,6 +197,7 @@ public class AwsLaunchService {
             .withStack(stack)
             .withExistingVpc(existingVPC)
             .withExistingIGW(awsNetworkView.isExistingIGW())
+            .withExistingSubnetIdMap(getSubnetIdMap(stack))
             .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
             .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
             .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
@@ -355,12 +358,14 @@ public class AwsLaunchService {
 
     @VisibleForTesting
     Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView) {
-        List<String> subnetIds;
+        Set<String> subnetIds;
         if (type == LoadBalancerType.PRIVATE) {
             LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
             subnetIds = awsNetworkView.getSubnetList();
         } else {
-            subnetIds = awsNetworkView.getEndpointGatewaySubnetList();
+            subnetIds = awsNetworkView.getEndpointGatewaySubnetList()
+                    .stream()
+                    .collect(Collectors.toSet());
             LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
             if (subnetIds.isEmpty()) {
                 LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
@@ -410,9 +415,18 @@ public class AwsLaunchService {
         Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
         run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
-            () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.UPDATE_FAILED));
+                () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.UPDATE_FAILED));
 
         return cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+    }
+
+    private Map<String, String> getSubnetIdMap(CloudStack stack) {
+        Map<String, String> subnetMap = new HashMap<>();
+        for (Group group : stack.getGroups()) {
+            AwsGroupNetworkView awsGroupNetworkView = new AwsGroupNetworkView(group.getNetwork());
+            subnetMap.put(group.getName(), awsGroupNetworkView.getExistingSubnet());
+        }
+        return subnetMap;
     }
 
     private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient cfRetryClient,
@@ -472,7 +486,7 @@ public class AwsLaunchService {
     private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVpc();
             CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
@@ -486,10 +500,14 @@ public class AwsLaunchService {
         }
 
         if (awsNetworkView.isExistingSubnet()) {
-            String subnetId = awsNetworkView.getExistingSubnet();
-            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
-            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
-            resources.add(subnet);
+            for (Group group : stack.getGroups()) {
+                AwsGroupNetworkView awsGroupNetworkView = new AwsGroupNetworkView(group.getNetwork());
+                if (awsGroupNetworkView.isExistingSubnet()) {
+                    CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(awsGroupNetworkView.getExistingSubnet()).build();
+                    resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+                    resources.add(subnet);
+                }
+            }
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
             CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();

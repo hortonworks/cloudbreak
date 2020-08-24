@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -29,6 +30,9 @@ public class InstanceGroupService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private InstanceGroupNetworkService networkService;
 
     @Inject
     private TemplateService templateService;
@@ -55,6 +59,7 @@ public class InstanceGroupService {
                     securityGroupService.pureSave(ig.getSecurityGroup());
                     ig.getTemplate().setWorkspace(workspace);
                     templateService.savePure(ig.getTemplate());
+                    networkService.create(ig.getNetwork());
                     InstanceGroup instanceGroup = repository.save(ig);
                     ig.getInstanceMetaDataSet().forEach(instanceMetaDataService::save);
                     return instanceGroup;

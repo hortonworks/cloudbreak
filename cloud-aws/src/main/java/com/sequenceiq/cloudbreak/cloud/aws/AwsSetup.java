@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -105,7 +106,7 @@ public class AwsSetup implements Setup {
 
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         verifySpotInstances(stack);
@@ -113,7 +114,7 @@ public class AwsSetup implements Setup {
             try {
                 AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
-                validateExistingSubnet(awsNetworkView, amazonEC2Client);
+                validateExistingSubnet(stack, amazonEC2Client);
             } catch (AmazonServiceException e) {
                 throw new CloudConnectorException(e.getErrorMessage());
             } catch (AmazonClientException e) {
@@ -129,11 +130,20 @@ public class AwsSetup implements Setup {
     private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
         CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap(), true);
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
-        if (location.getAvailabilityZone() != null
-                && !availabilityZones.contains(location.getAvailabilityZone())) {
-            throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zone [%s]",
-                    location.getRegion().getRegionName(), location.getAvailabilityZone().value()));
+        if (location.getAvailabilityZones() != null
+                && !allAvailabilityZoneExist(availabilityZones, location.getAvailabilityZones().values())) {
+            throw new CloudConnectorException(String.format("Region [%s] doesn't contain availability zones [%s]",
+                    location.getRegion().getRegionName(), location.getAvailabilityZones().values()));
         }
+    }
+
+    private boolean allAvailabilityZoneExist(List<AvailabilityZone> providerAzs, Collection<AvailabilityZone> stackAzs) {
+        for (AvailabilityZone stackAz : stackAzs) {
+            if (!providerAzs.contains(stackAz)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private void verifySpotInstances(CloudStack stack) {
@@ -148,18 +158,19 @@ public class AwsSetup implements Setup {
         }
     }
 
-    private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {
+    private void validateExistingSubnet(CloudStack stack, AmazonEC2 amazonEC2Client) {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         if (awsNetworkView.isExistingSubnet()) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
             describeSubnetsRequest.withSubnetIds(awsNetworkView.getSubnetList());
             DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
             if (describeSubnetsResult.getSubnets().size() < awsNetworkView.getSubnetList().size()) {
-                throw new CloudConnectorException(String.format(SUBNET_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet()));
+                throw new CloudConnectorException(String.format(SUBNET_DOES_NOT_EXIST_MSG, awsNetworkView.getSubnetList()));
             } else {
                 for (Subnet subnet : describeSubnetsResult.getSubnets()) {
                     String vpcId = subnet.getVpcId();
                     if (vpcId != null && !vpcId.equals(awsNetworkView.getExistingVpc())) {
-                        throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getExistingSubnet(),
+                        throw new CloudConnectorException(String.format(SUBNETVPC_DOES_NOT_EXIST_MSG, awsNetworkView.getSubnetList(),
                                 awsNetworkView.getExistingVpc()));
                     }
                 }

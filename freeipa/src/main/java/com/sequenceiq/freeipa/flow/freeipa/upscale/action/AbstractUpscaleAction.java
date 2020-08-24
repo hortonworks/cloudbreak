@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -30,6 +26,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractCommonChainAction<UpscaleState, UpscaleFlowEvent, StackContext, P> {
@@ -48,6 +45,9 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
     @Inject
     private CredentialService credentialService;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     protected AbstractUpscaleAction(Class<P> payloadClass) {
         super(payloadClass);
     }
@@ -58,7 +58,7 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));

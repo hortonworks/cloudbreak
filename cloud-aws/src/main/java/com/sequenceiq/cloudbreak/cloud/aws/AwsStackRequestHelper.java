@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsVpcSecurityGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -103,7 +104,7 @@ public class AwsStackRequestHelper {
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         String keyPairName = awsClient.getKeyPairName(ac);
         if (awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
@@ -124,8 +125,8 @@ public class AwsStackRequestHelper {
         if (awsInstanceProfileView.isInstanceProfileAvailable()) {
             parameters.add(new Parameter().withParameterKey("InstanceProfile").withParameterValue(awsInstanceProfileView.getInstanceProfile()));
         }
-        if (ac.getCloudContext().getLocation().getAvailabilityZone() != null
-                && ac.getCloudContext().getLocation().getAvailabilityZone().value() != null) {
+        if (ac.getCloudContext().getLocation().getAvailabilityZones() != null
+                && allAzHasValue(ac.getCloudContext().getLocation().getAvailabilityZones().values())) {
             parameters.add(new Parameter().withParameterKey("AvailabilitySet")
                     .withParameterValue(ac.getCloudContext().getLocation().getAvailabilityZone().value()));
         }
@@ -134,13 +135,17 @@ public class AwsStackRequestHelper {
             if (awsNetworkView.isExistingIGW()) {
                 parameters.add(new Parameter().withParameterKey("InternetGatewayId").withParameterValue(awsNetworkView.getExistingIgw()));
             }
-            if (awsNetworkView.isExistingSubnet()) {
-                parameters.add(new Parameter().withParameterKey("SubnetId").withParameterValue(awsNetworkView.getExistingSubnet()));
-            } else {
-                parameters.add(new Parameter().withParameterKey("SubnetCIDR").withParameterValue(newSubnetCidr));
-            }
         }
         return parameters;
+    }
+
+    private boolean allAzHasValue(Collection<AvailabilityZone> values) {
+        for (AvailabilityZone value : values) {
+            if (Strings.isNullOrEmpty(value.value())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Parameter getStackOwnerFromStack(AuthenticatedContext ac, CloudStack stack, String key, String referenceName) {

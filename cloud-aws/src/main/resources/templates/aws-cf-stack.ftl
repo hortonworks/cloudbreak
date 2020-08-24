@@ -29,15 +29,6 @@
       "MaxLength": "18",
       "AllowedPattern" : "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
     },
-
-    <#else>
-    "SubnetId" : {
-      "Description" : "Id of the Subnet within the existing VPC where to deploy the cluster",
-      "Type" : "String",
-      "MinLength": "15",
-      "MaxLength": "255",
-      "AllowedPattern" : "subnet-[a-z0-9]*(?:,subnet-[a-z0-9]*)*"
-    },
     </#if>
 
     <#if existingIGW>

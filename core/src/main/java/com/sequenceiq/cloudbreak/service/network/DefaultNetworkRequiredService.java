@@ -27,7 +27,6 @@ public class DefaultNetworkRequiredService {
 
     private boolean allTheAwsValueNull(NetworkV4Request network) {
         return Strings.isNullOrEmpty(network.getAws().getInternetGatewayId())
-                && Strings.isNullOrEmpty(network.getAws().getSubnetId())
                 && Strings.isNullOrEmpty(network.getAws().getVpcId());
     }
 
@@ -38,7 +37,6 @@ public class DefaultNetworkRequiredService {
 
     private boolean allTheAzureValueNull(NetworkV4Request network) {
         return Strings.isNullOrEmpty(network.getAzure().getNetworkId())
-                && Strings.isNullOrEmpty(network.getAzure().getSubnetId())
                 && Strings.isNullOrEmpty(network.getAzure().getResourceGroupName());
     }
 

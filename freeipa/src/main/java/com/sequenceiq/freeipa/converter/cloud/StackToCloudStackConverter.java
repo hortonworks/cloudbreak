@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -107,7 +108,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
         Image image = imageConverter.convert(imageService.getByStack(stack));
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
-        List<Group> instanceGroups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(),
+        List<Group> instanceGroups = buildInstanceGroups(stack, Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(),
                 deleteRequestedInstances, stack.getCloudPlatform(), image.getImageName(), fileSystemView, stack.getEnvironmentCrn());
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
@@ -140,7 +141,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     public List<CloudInstance> buildInstances(Stack stack) {
         ImageEntity imageEntity = imageService.getByStack(stack);
         Optional<CloudFileSystemView> fileSystemView = buildFileSystemView(stack);
-        List<Group> groups = buildInstanceGroups(Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
+        List<Group> groups = buildInstanceGroups(stack, Lists.newArrayList(stack.getInstanceGroups()), stack.getStackAuthentication(), Collections.emptySet(),
                 stack.getCloudPlatform(), imageEntity.getImageName(), fileSystemView, stack.getEnvironmentCrn());
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
@@ -189,8 +190,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return result;
     }
 
-    private List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Collection<String> deleteRequests,
-            String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView, String environmentCrn) {
+    private List<Group> buildInstanceGroups(Stack stack, List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication,
+        Collection<String> deleteRequests, String cloudPlatform, String imageName, Optional<CloudFileSystemView> fileSystemView, String environmentCrn) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -228,7 +229,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                                 instanceAuthentication,
                                 instanceAuthentication.getLoginUserName(),
                                 instanceAuthentication.getPublicKey(),
-                                rootVolumeSize, fileSystemView)
+                                rootVolumeSize,
+                                fileSystemView,
+                                buildGroupNetwork(stack))
                 );
             }
         }
@@ -294,6 +297,18 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             }
         }
         return Optional.empty();
+    }
+
+    private GroupNetwork buildGroupNetwork(Stack stack) {
+        com.sequenceiq.freeipa.entity.Network stackNetwork = stack.getNetwork();
+        GroupNetwork result = null;
+        if (stackNetwork != null) {
+            Json attributes = stackNetwork.getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+
+            result = new GroupNetwork(stackNetwork.getOutboundInternetTraffic(), params);
+        }
+        return result;
     }
 
     private Network buildNetwork(Stack stack) {

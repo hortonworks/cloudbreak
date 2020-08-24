@@ -171,7 +171,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
         Network network = cloudStack.getNetwork();
-        AwsNetworkView networkView = new AwsNetworkView(network);
+        AwsNetworkView networkView = new AwsNetworkView(network, cloudStack);
         boolean sameVPC = deployingToSameVPC(networkView, networkView.isExistingVPC());
         return new TlsInfo(sameVPC);
     }

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -122,7 +123,7 @@ class GcpAttachedDiskResourceBuilderTest {
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 
-        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
+        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"), new HashMap<>());
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);
 
@@ -150,7 +151,8 @@ class GcpAttachedDiskResourceBuilderTest {
                 0L, "cb-centos66-amb200-2015-05-25");
         CloudInstance cloudInstance =  new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
         group = new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty(),
+                new GroupNetwork());
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume("1234", "noop", 0, "eph", CloudVolumeUsageType.GENERAL));

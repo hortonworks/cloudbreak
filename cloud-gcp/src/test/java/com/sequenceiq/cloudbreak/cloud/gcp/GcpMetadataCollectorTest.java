@@ -7,6 +7,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -209,8 +210,8 @@ public class GcpMetadataCollectorTest {
     }
 
     private CloudContext createCloudContext() {
-        Location location = Location.location(null, AvailabilityZone.availabilityZone(AZ));
-        return new CloudContext(null, "test-cluster", null, null, null, location, null, null, "");
+        Location location = Location.location(null, AvailabilityZone.availabilityZone(AZ), new HashMap<>());
+        return new CloudContext(null, "test-cluster", "crn", null, null, location, null, null, "");
     }
 
     private List<CloudResource> createCloudResources() {

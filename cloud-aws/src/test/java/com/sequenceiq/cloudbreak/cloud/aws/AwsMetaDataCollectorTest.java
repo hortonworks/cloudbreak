@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import java.util.Optional;
@@ -411,7 +412,7 @@ public class AwsMetaDataCollectorTest {
     }
 
     private AuthenticatedContext authenticatedContext() {
-        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
+        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"), new HashMap<>());
         CloudContext cloudContext = new CloudContext(5L, "name", "crn", "platform", "variant",
                 location, USER_ID, WORKSPACE_ID);
         CloudCredential credential = new CloudCredential("crn", null, null, false);

@@ -32,9 +32,11 @@ public class Group extends DynamicModel {
 
     private final Optional<CloudFileSystemView> identity;
 
+    private final GroupNetwork network;
+
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
-            int rootVolumeSize, Optional<CloudFileSystemView> identity) {
+            int rootVolumeSize, Optional<CloudFileSystemView> identity, GroupNetwork network) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
@@ -45,11 +47,12 @@ public class Group extends DynamicModel {
         this.loginUserName = loginUserName;
         this.rootVolumeSize = rootVolumeSize;
         this.identity = identity;
+        this.network = network;
     }
 
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
-            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity) {
+            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity, GroupNetwork network) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -61,6 +64,7 @@ public class Group extends DynamicModel {
         this.loginUserName = loginUserName;
         this.rootVolumeSize = rootVolumeSize;
         this.identity = identity;
+        this.network = network;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -114,16 +118,21 @@ public class Group extends DynamicModel {
         return identity;
     }
 
+    public GroupNetwork getNetwork() {
+        return network;
+    }
+
     @Override
     public String toString() {
         return "Group{"
                 + "name='" + name + '\''
-                + ", type=" + type
-                + ", instances=" + instances
-                + ", security=" + security
+                + ", type=" + type + '\''
+                + ", instances=" + instances + '\''
+                + ", security=" + security + '\''
                 + ", publicKey='" + publicKey + '\''
                 + ", loginUserName='" + loginUserName + '\''
-                + ", instanceAuthentication=" + instanceAuthentication
+                + ", instanceAuthentication=" + instanceAuthentication + '\''
+                + ", network=" + network + '\''
                 + ", skeleton=" + skeleton
                 + '}';
     }

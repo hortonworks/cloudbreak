@@ -88,7 +88,7 @@ public class OpenStackCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         OpenStackNetworkV4Parameters openStackNetworkV4Parameters = new OpenStackNetworkV4Parameters();
-        openStackNetworkV4Parameters.setPublicNetId(openStackProperties.getPublicNetId());
+        //openStackNetworkV4Parameters.setPublicNetId(openStackProperties.getPublicNetId());
         openStackNetworkV4Parameters.setNetworkingOption(openStackProperties.getNetworkingOption());
         return network.withOpenStack(openStackNetworkV4Parameters)
                 .withSubnetCIDR(getSubnetCIDR());

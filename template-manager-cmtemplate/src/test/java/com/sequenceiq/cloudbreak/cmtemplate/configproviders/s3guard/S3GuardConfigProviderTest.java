@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -97,7 +98,7 @@ public class S3GuardConfigProviderTest {
 
         Gateway gateway = TestUtil.gatewayEnabledWithExposedKnoxServices("NAMENODE");
 
-        PlacementView placementView = new PlacementView("region", "az");
+        PlacementView placementView = new PlacementView("region", new HashMap<>());
 
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withHostgroupViews(Set.of(master, worker))

@@ -28,6 +28,15 @@
       "AllowedPattern" : "subnet-[a-z0-9]*(?:,subnet-[a-z0-9]*)*"
     },
 
+    <#if availabilitySetNeeded>
+    "AvailabilitySet" : {
+      "Description" : "Availability set name",
+      "Type" : "String",
+      "MinLength": "1",
+      "MaxLength": "50"
+    },
+    </#if>
+
     "CBGateWayUserData" : {
       "Description" : "Gateway user data to be executed",
       "Type" : "String",

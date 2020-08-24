@@ -231,14 +231,14 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         NetworkRequest networkRequest = new NetworkRequest();
         if (request.getAws() != null) {
             AwsNetworkParameters params = new AwsNetworkParameters();
-            params.setSubnetId(request.getAws().getSubnetId());
+            //params.setSubnetId(request.getAws().getSubnetId());
             params.setVpcId(request.getAws().getVpcId());
             networkRequest.setAws(params);
         } else if (request.getMock() != null) {
             MockNetworkParameters parameters = new MockNetworkParameters();
-            parameters.setSubnetId(request.getMock().getSubnetId());
+            //parameters.setSubnetId(request.getMock().getSubnetId());
             parameters.setVpcId(request.getMock().getVpcId());
-            parameters.setInternetGatewayId(request.getMock().getInternetGatewayId());
+            //parameters.setInternetGatewayId(request.getMock().getInternetGatewayId());
             networkRequest.setMock(parameters);
         }
         getRequest().setNetwork(networkRequest);

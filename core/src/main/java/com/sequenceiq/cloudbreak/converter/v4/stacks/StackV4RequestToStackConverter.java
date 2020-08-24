@@ -2,6 +2,11 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.MOCK;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static java.lang.String.format;
@@ -12,7 +17,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,18 +27,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupAzureNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupGcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupMockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupOpenStackNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -60,6 +73,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
@@ -162,7 +176,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setStackAuthentication(getConversionService().convert(source.getAuthentication(), StackAuthentication.class));
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
-        stack.setInstanceGroups(convertInstanceGroups(source, stack));
+        stack.setInstanceGroups(convertInstanceGroups(source, stack, environment));
         measure(() -> updateCluster(source, stack, workspace),
                 LOGGER, "Converted cluster and updated the stack in {} ms for stack {}", source.getName());
         stack.setGatewayPort(source.getGatewayPort());
@@ -195,7 +209,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStack(StackV4Request source, Stack stack) {
         validateStackAuthentication(source);
         stack.setName(source.getName());
-        stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         stack.setOrchestrator(getOrchestrator());
         updateCustomDomainOrKerberos(source, stack);
     }
@@ -235,7 +248,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private void convertAsStackTemplate(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (environment != null) {
             updateCloudPlatformAndRelatedFields(source, stack, environment);
-            stack.setAvailabilityZone(getAvailabilityZone(Optional.ofNullable(source.getPlacement())));
         }
         stack.setType(StackType.TEMPLATE);
         stack.setName(UUID.randomUUID().toString());
@@ -245,10 +257,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Orchestrator orchestrator = new Orchestrator();
         orchestrator.setType("SALT");
         return orchestrator;
-    }
-
-    private String getAvailabilityZone(Optional<PlacementSettingsV4Request> placement) {
-        return placement.map(PlacementSettingsV4Request::getAvailabilityZone).orElse(null);
     }
 
     private String getRegion(StackV4Request source, String cloudPlatform) {
@@ -323,7 +331,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack) {
+    private Set<InstanceGroup> convertInstanceGroups(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
         if (source.getInstanceGroups() == null) {
             return null;
         }
@@ -331,13 +339,126 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         source.getInstanceGroups().stream()
                 .map(ig -> {
                     ig.setCloudPlatform(source.getCloudPlatform());
-                    return getConversionService().convert(ig, InstanceGroup.class);
+                    InstanceGroup convert = getConversionService().convert(ig, InstanceGroup.class);
+                    convert.setAvailabilityZone(ig.getAvailabilityZone());
+                    if (ig.getNetwork() == null) {
+                        Pair<InstanceGroupNetwork, String> instanceGroupNetwork = getInstanceGroupNetwork(source, ig, environment);
+                        convert.setNetwork(instanceGroupNetwork.getFirst());
+                        convert.setAvailabilityZone(instanceGroupNetwork.getSecond());
+                    } else {
+                        convert.setAvailabilityZone(getAZBySubnetId(ig, environment, source.getCloudPlatform().name()));
+                    }
+                    return convert;
                 })
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
                 });
         return convertedSet;
+    }
+
+    private Pair<InstanceGroupNetwork, String> getInstanceGroupNetwork(StackV4Request source, InstanceGroupV4Request ig,
+        DetailedEnvironmentResponse environment) {
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        Pair<InstanceGroupNetwork, String> instanceGroupNetworkPair = null;
+        InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
+        instanceGroupNetworkV4Request.setCloudPlatform(source.getCloudPlatform());
+        if (ig.getNetwork() != null) {
+            CloudSubnet envCloudSubnet = null;
+            String subnetId;
+            switch (source.getCloudPlatform()) {
+                case AWS:
+                    InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
+                    subnetId = ig.getNetwork().getAws().getSubnetId();
+                    aws.setSubnetId(subnetId);
+                    envCloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+                    instanceGroupNetworkV4Request.setAws(aws);
+                    break;
+                case AZURE:
+                    InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
+                    subnetId = ig.getNetwork().getAzure().getSubnetId();
+                    azure.setSubnetId(subnetId);
+                    envCloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+                    instanceGroupNetworkV4Request.setAzure(azure);
+                    break;
+                case YARN:
+                    InstanceGroupYarnNetworkV4Parameters yarn = new InstanceGroupYarnNetworkV4Parameters();
+                    instanceGroupNetworkV4Request.setYarn(yarn);
+                    break;
+                case MOCK:
+                    InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
+                    subnetId = ig.getNetwork().getMock().getSubnetId();
+                    mock.setSubnetId(subnetId);
+                    envCloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+                    instanceGroupNetworkV4Request.setMock(mock);
+                    break;
+                case GCP:
+                    InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
+                    subnetId = ig.getNetwork().getGcp().getSubnetId();
+                    gcp.setSubnetId(subnetId);
+                    envCloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+                    instanceGroupNetworkV4Request.setGcp(gcp);
+                    break;
+                case OPENSTACK:
+                    InstanceGroupOpenStackNetworkV4Parameters openstack = new InstanceGroupOpenStackNetworkV4Parameters();
+                    subnetId = ig.getNetwork().getOpenstack().getSubnetId();
+                    openstack.setSubnetId(subnetId);
+                    envCloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+                    instanceGroupNetworkV4Request.setOpenstack(openstack);
+                    break;
+                default:
+                    break;
+            }
+            Map<String, Object> parameters = providerParameterCalculator.get(ig.getNetwork()).asMap();
+            if (parameters != null) {
+                try {
+                    instanceGroupNetwork.setAttributes(new Json(parameters));
+                } catch (IllegalArgumentException ignored) {
+                    throw new BadRequestException("Invalid parameters");
+                }
+            }
+            instanceGroupNetworkPair = Pair.of(instanceGroupNetwork, envCloudSubnet == null ? null : envCloudSubnet.getAvailabilityZone());
+        } else {
+            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
+            String availabilityZone = source.getPlacement() != null ? source.getPlacement().getAvailabilityZone() : null;
+            if (environmentNetworkConverter != null) {
+                instanceGroupNetworkPair = environmentNetworkConverter
+                        .convertToLegacyInstanceGroupNetwork(environment.getNetwork(), availabilityZone);
+            }
+        }
+        return instanceGroupNetworkPair;
+    }
+
+    private String getAZBySubnetId(InstanceGroupV4Request ig, DetailedEnvironmentResponse environment, String cloudPlatform) {
+        String subnetId = null;
+        if (ig.getNetwork() != null) {
+            switch (cloudPlatform) {
+                case AWS:
+                    subnetId = ig.getNetwork().getAws().getSubnetId();
+                    break;
+                case AZURE:
+                    subnetId = ig.getNetwork().getAzure().getSubnetId();
+                    break;
+                case MOCK:
+                    subnetId = ig.getNetwork().getMock().getSubnetId();
+                    break;
+                case GCP:
+                    subnetId = ig.getNetwork().getGcp().getSubnetId();
+                    break;
+                case OPENSTACK:
+                    subnetId = ig.getNetwork().getOpenstack().getSubnetId();
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (!Strings.isNullOrEmpty(subnetId)) {
+            CloudSubnet cloudSubnet = environment.getNetwork().getSubnetMetas().get(subnetId);
+            if (cloudSubnet != null) {
+                return cloudSubnet.getAvailabilityZone();
+            }
+        }
+        return null;
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
@@ -404,9 +525,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             stack.setNetwork(network);
         } else {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(source.getCloudPlatform());
-            String availabilityZone = source.getPlacement() != null ? source.getPlacement().getAvailabilityZone() : null;
             if (environmentNetworkConverter != null) {
-                Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork(), availabilityZone);
+                Network network = environmentNetworkConverter.convertToLegacyNetwork(environment.getNetwork());
                 stack.setNetwork(network);
             }
         }

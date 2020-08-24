@@ -2,9 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkView {
@@ -29,8 +34,39 @@ public class AwsNetworkView {
 
     private final Network network;
 
+    private final boolean existingSubnet;
+
+    private final Set<String> subnets;
+
+    public AwsNetworkView(Network network, CloudStack stack) {
+        this.network = network;
+        boolean tmpIsExistingSubnet = false;
+        for (Group group : stack.getGroups()) {
+            if (new AwsGroupNetworkView(group.getNetwork()).isExistingSubnet()) {
+                tmpIsExistingSubnet = true;
+                break;
+            }
+        }
+        this.existingSubnet = tmpIsExistingSubnet;
+        Set<String> tmpSubnets = new HashSet<>();
+        for (Group group : stack.getGroups()) {
+            AwsGroupNetworkView awsGroupNetworkView = new AwsGroupNetworkView(group.getNetwork());
+            if (awsGroupNetworkView.isExistingSubnet()) {
+                tmpSubnets.add(awsGroupNetworkView.getExistingSubnet());
+            }
+        }
+        this.subnets = tmpSubnets;
+
+    }
+
     public AwsNetworkView(Network network) {
         this.network = network;
+        this.existingSubnet = isNotEmpty(network.getStringParameter(SUBNET_ID));
+        if (this.existingSubnet) {
+            this.subnets = Set.of(network.getStringParameter(SUBNET_ID).split(","));
+        } else {
+            this.subnets = Sets.newHashSet();
+        }
     }
 
     public boolean isExistingVPC() {
@@ -38,7 +74,7 @@ public class AwsNetworkView {
     }
 
     public boolean isExistingSubnet() {
-        return isNotEmpty(network.getStringParameter(SUBNET_ID));
+        return existingSubnet;
     }
 
     public boolean isExistingIGW() {
@@ -46,15 +82,15 @@ public class AwsNetworkView {
     }
 
     public String getExistingSubnet() {
-        return network.getStringParameter(SUBNET_ID);
+        return subnets.stream().findFirst().orElse(null);
     }
 
     public boolean isSubnetList() {
         return isExistingSubnet() && getExistingSubnet().contains(",");
     }
 
-    public List<String> getSubnetList() {
-        return isSubnetList() ? List.of(getExistingSubnet().split(",")) : (isExistingSubnet() ? List.of(getExistingSubnet()) : List.of());
+    public Set<String> getSubnetList() {
+        return isExistingSubnet() ? subnets : Set.of();
     }
 
     private String getEndpointGatewaySubnet() {

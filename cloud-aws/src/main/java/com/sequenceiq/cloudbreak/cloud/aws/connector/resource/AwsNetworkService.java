@@ -55,7 +55,7 @@ public class AwsNetworkService {
     }
 
     public List<String> getExistingSubnetCidr(AuthenticatedContext ac, CloudStack stack) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
         DescribeSubnetsRequest subnetsRequest = new DescribeSubnetsRequest().withSubnetIds(awsNetworkView.getSubnetList());
@@ -84,7 +84,7 @@ public class AwsNetworkService {
     }
 
     public String findNonOverLappingCIDR(AuthenticatedContext ac, CloudStack stack) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
 
@@ -102,7 +102,7 @@ public class AwsNetworkService {
     }
 
     public List<String> getVpcCidrs(AuthenticatedContext ac, CloudStack stack) {
-        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork(), stack);
         if (awsNetworkView.isExistingVPC()) {
             String region = ac.getCloudContext().getLocation().getRegion().value();
             AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);

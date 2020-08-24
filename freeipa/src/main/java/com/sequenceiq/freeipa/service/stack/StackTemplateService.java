@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,6 +16,7 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 
 @Service
@@ -33,8 +30,11 @@ public class StackTemplateService {
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
+    @Inject
+    private LocationProvider locationProvider;
+
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack, Credential credential) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Location location = locationProvider.provide(stack);
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);

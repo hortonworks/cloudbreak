@@ -26,7 +26,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBasedRequest;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
@@ -180,10 +180,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
-        parameters.setNoPublicIp(false);
-        parameters.setSubnetId(azureProperties.getNetwork().getSubnetIds().stream().findFirst().get());
+        // parameters.setNoPublicIp(false);
+        // parameters.setSubnetId(azureProperties.getNetwork().getSubnetIds().stream().findFirst().get());
         parameters.setNetworkId(azureProperties.getNetwork().getNetworkId());
-        parameters.setResourceGroupName(azureProperties.getNetwork().getResourceGroupName());
+        //parameters.setResourceGroupName(azureProperties.getNetwork().getResourceGroupName());
         return network.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
     }

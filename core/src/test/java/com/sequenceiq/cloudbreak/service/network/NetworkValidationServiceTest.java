@@ -41,7 +41,7 @@ public class NetworkValidationServiceTest {
     public void testNetworkIfAwsRequestHasSubnetIdThenShouldReturnFalse() {
         NetworkV4Request networkV4Request = new NetworkV4Request();
         AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();
-        awsNetworkV4Parameters.setSubnetId("subnet");
+        //awsNetworkV4Parameters.setSubnetId("subnet");
         networkV4Request.setAws(awsNetworkV4Parameters);
         Assert.assertFalse(underTest.shouldAddNetwork(CloudPlatform.AWS.name(), networkV4Request));
     }
@@ -58,7 +58,7 @@ public class NetworkValidationServiceTest {
     public void testNetworkIfAzureRequestHasSubnetThenShouldReturnTrue() {
         NetworkV4Request networkV4Request = new NetworkV4Request();
         AzureNetworkV4Parameters azureNetworkV4Parameters = new AzureNetworkV4Parameters();
-        azureNetworkV4Parameters.setSubnetId("subnet");
+        //azureNetworkV4Parameters.setSubnetId("subnet");
         networkV4Request.setAzure(azureNetworkV4Parameters);
         Assert.assertFalse(underTest.shouldAddNetwork(CloudPlatform.AZURE.name(), networkV4Request));
     }

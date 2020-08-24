@@ -29,6 +29,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 
@@ -86,7 +87,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
+        List<InstanceGroupV4Request> results = underTest.convertTo(null, instanceGroups, null);
         assertThat(results).hasSameSizeAs(instanceGroups);
 
         InstanceGroupV4Request first = results.get(0);
@@ -134,7 +135,7 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
                 : null;
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(instanceGroupType);
 
-        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+        List<InstanceGroupV4Request> results = underTest.convertTo(new NetworkV1Request(), instanceGroups, environment);
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV4Request first = results.get(0);
 

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -111,7 +112,7 @@ public class AzureMetadataCollectorTest {
         when(azureClient.getFaultDomainNumber(RESOURCE_GROUP_NAME, INSTANCE_3)).thenReturn(FAULT_DOMAIN_COUNT);
         when(azureVmPublicIpProvider.getPublicIp(eq(azureClient), eq(azureUtils), any(), eq(RESOURCE_GROUP_NAME))).thenReturn(PUBLIC_IP);
         when(cloudContext.getPlatform()).thenReturn(Platform.platform(PLATFORM));
-        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region(REGION), null));
+        when(cloudContext.getLocation()).thenReturn(Location.location(Region.region(REGION), null, new HashMap<>()));
 
         List<CloudVmMetaDataStatus> actual = underTest.collect(authenticatedContext, resources, vms, KNOWN_INSTANCES);
 

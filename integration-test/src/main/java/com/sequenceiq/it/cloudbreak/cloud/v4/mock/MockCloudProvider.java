@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Moc
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -154,15 +154,15 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     public MockNetworkV4Parameters networkParameters() {
         var parameters = new MockNetworkV4Parameters();
-        parameters.setInternetGatewayId(getInternetGatewayId());
+        //parameters.setInternetGatewayId(getInternetGatewayId());
         parameters.setVpcId(getVpcId());
-        parameters.setSubnetId(getSubnetId());
+        // parameters.setSubnetId(getSubnetId());
         return parameters;
     }
 
     public Object subnetProperties() {
         var parameters = new MockNetworkV4Parameters();
-        parameters.setSubnetId(getSubnetId());
+        // parameters.setSubnetId(getSubnetId());
         parameters.setVpcId(getVpcId());
         return parameters;
     }

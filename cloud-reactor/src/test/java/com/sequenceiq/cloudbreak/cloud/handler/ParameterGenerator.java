@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -52,8 +53,8 @@ public class ParameterGenerator {
     private static final long STACK_ID = 5L;
 
     public CloudContext createCloudContext() {
-        Location location = location(region("region"), availabilityZone("availabilityZone"));
-        return new CloudContext(STACK_ID, "teststack", "testCrn", "TESTCONNECTOR", "TESTVARIANT",
+        Location location = location(region("region"), availabilityZone("availabilityZone"), new HashMap<>());
+        return new CloudContext(STACK_ID, "teststack", "crn", "TESTCONNECTOR", "TESTVARIANT",
                 location, USER_ID, WORKSPACE_ID);
     }
 
@@ -76,6 +77,10 @@ public class ParameterGenerator {
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>(), 0L, "default-id");
 
+        Subnet subnet = new Subnet("10.0.0.0/24");
+        Network network = new Network(subnet);
+        network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
+
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
 
@@ -83,7 +88,8 @@ public class ParameterGenerator {
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, emptyList());
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty()));
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty(),
+                new GroupNetwork()));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
@@ -91,9 +97,7 @@ public class ParameterGenerator {
         );
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
 
-        Subnet subnet = new Subnet("10.0.0.0/24");
-        Network network = new Network(subnet);
-        network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
+
 
         return new CloudStack(groups, network, image, new HashMap<>(), new HashMap<>(), null, instanceAuthentication,
                 instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);

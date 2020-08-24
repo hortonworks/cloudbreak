@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -85,7 +86,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         prepareTags(source, stackV4Request);
         prepareTelemetryRequest(source, stackV4Request);
         prepareDatalakeRequest(source, stackV4Request);
-        stackV4Request.setPlacement(getPlacementSettings(source.getRegion(), source.getAvailabilityZone()));
+        stackV4Request.setPlacement(getPlacementSettings(source.getRegion()));
         prepareInputs(source, stackV4Request);
         stackV4Request.setTimeToLive(getStackTimeToLive(source));
         return stackV4Request;
@@ -110,10 +111,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private PlacementSettingsV4Request getPlacementSettings(String region, String availabilityZone) {
+    private PlacementSettingsV4Request getPlacementSettings(String region) {
         PlacementSettingsV4Request ps = new PlacementSettingsV4Request();
         ps.setRegion(region);
-        ps.setAvailabilityZone(availabilityZone);
         return ps;
     }
 
@@ -157,6 +157,7 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV4Request.setRecipeNames(recipeNames);
                         instanceGroupV4Request.setRecoveryMode(hostGroup.getRecoveryMode());
+                        instanceGroupV4Request.setNetwork(getConversionService().convert(instanceGroup.getNetwork(), InstanceGroupNetworkV4Request.class));
                     });
         }
     }

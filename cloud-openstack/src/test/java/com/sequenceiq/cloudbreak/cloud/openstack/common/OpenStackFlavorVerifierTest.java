@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -69,7 +70,8 @@ public class OpenStackFlavorVerifierTest {
     public void openStackNullFlavor() {
         try {
             Group g1 = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, null,
-                    null, "loginUserName", "publicKey", 50, Optional.empty());
+                    null, "loginUserName", "publicKey", 50, Optional.empty(),
+                    new GroupNetwork());
             List<Group> instanceGroups = ImmutableList.of(g1);
             when(flavorService.list()).thenReturn(null);
             underTest.flavorsExist(osClient, instanceGroups);
@@ -96,7 +98,7 @@ public class OpenStackFlavorVerifierTest {
         CloudInstance skeleton = new CloudInstance("id1", template, null);
 
         Group group = new Group("name", InstanceGroupType.GATEWAY, new ArrayList<>(), null, skeleton,
-                null, "loginUserName", "publicKey", 50, Optional.empty());
+                null, "loginUserName", "publicKey", 50, Optional.empty(), new GroupNetwork());
         return group;
     }
 

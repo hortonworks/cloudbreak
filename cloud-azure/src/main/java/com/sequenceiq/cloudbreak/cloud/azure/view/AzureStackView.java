@@ -51,10 +51,19 @@ public class AzureStackView {
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
                     String attachedDiskStorageType = template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
                             : template.getVolumes().get(0).getType();
-                    AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(),
-                            attachedDiskStorageName, attachedDiskStorageType, group.getName(), instanceGroupView.getAvailabilitySetName(),
-                            true, getInstanceSubnetId(instance, subnetStrategy), group.getRootVolumeSize(),
-                            customImageNamePerInstance.get(instance.getInstanceId()), getManagedIdentity(group));
+                    AzureInstanceView azureInstance = new AzureInstanceView(stackName,
+                            stackNamePrefixLength,
+                            instance,
+                            group.getType(),
+                            attachedDiskStorageName,
+                            attachedDiskStorageType,
+                            group.getName(),
+                            instanceGroupView.getAvailabilitySetName(),
+                            true,
+                            getInstanceSubnetId(instance, subnetStrategy),
+                            group.getRootVolumeSize(),
+                            customImageNamePerInstance.get(instance.getInstanceId()),
+                            getManagedIdentity(group));
                     existingInstances.add(azureInstance);
                 }
                 instanceGroupView.setManagedDisk(true);

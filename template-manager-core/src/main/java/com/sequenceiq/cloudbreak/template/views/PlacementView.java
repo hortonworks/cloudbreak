@@ -1,17 +1,19 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import java.util.Map;
+
 public class PlacementView {
 
     private final String region;
 
-    private final String availabilityZone;
+    private final Map<String, String> availabilityZone;
 
-    public PlacementView(String region, String availabilityZone) {
+    public PlacementView(String region, Map<String, String> availabilityZone) {
         this.availabilityZone = availabilityZone;
         this.region = region;
     }
 
-    public String getAvailabilityZone() {
+    public Map<String, String> getAvailabilityZone() {
         return availabilityZone;
     }
 

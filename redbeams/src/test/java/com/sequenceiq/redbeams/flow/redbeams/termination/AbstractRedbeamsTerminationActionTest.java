@@ -1,9 +1,11 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -99,7 +101,7 @@ public class AbstractRedbeamsTerminationActionTest {
         assertEquals(dbStack.getName(), ctx.getCloudContext().getName());
         assertEquals(Platform.platform(dbStack.getCloudPlatform()), ctx.getCloudContext().getPlatform());
         assertEquals(Variant.variant(dbStack.getPlatformVariant()), ctx.getCloudContext().getVariant());
-        assertEquals(Location.location(Region.region(dbStack.getRegion()), AvailabilityZone.availabilityZone(dbStack.getAvailabilityZone())),
+        assertEquals(Location.location(Region.region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()), new HashMap<>()),
             ctx.getCloudContext().getLocation());
         assertEquals(dbStack.getOwnerCrn().getUserId(), ctx.getCloudContext().getUserId());
         assertEquals(dbStack.getOwnerCrn().getAccountId(), ctx.getCloudContext().getAccountId());
@@ -113,5 +115,6 @@ public class AbstractRedbeamsTerminationActionTest {
         TestAction(Class<RedbeamsEvent> payloadClass) {
             super(payloadClass);
         }
+
     }
 }

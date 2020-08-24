@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.location.LocationProvider;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -55,6 +52,9 @@ public class StackStopActions {
 
     @Inject
     private StackStartStopService stackStartStopService;
+
+    @Inject
+    private LocationProvider locationProvider;
 
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
@@ -123,6 +123,9 @@ public class StackStopActions {
         @Inject
         private ResourceService resourceService;
 
+        @Inject
+        private LocationProvider locationProvider;
+
         protected AbstractStackStopAction(Class<P> payloadClass) {
             super(payloadClass);
         }
@@ -135,9 +138,9 @@ public class StackStopActions {
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
-            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(),
-                    stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+            Location location = locationProvider.provide(stack);
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
+                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }

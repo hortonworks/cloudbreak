@@ -64,7 +64,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.empty());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source, EU_AZ))
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source))
         );
         assertEquals(badRequestException.getMessage(), "No subnet for the given availability zone: eu-west-1a");
     }
@@ -80,7 +80,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            network[0] = underTest.convertToLegacyNetwork(source, EU_AZ);
+            network[0] = underTest.convertToLegacyNetwork(source);
         });
         assertEquals(network[0].getAttributes().getValue("subnetId"), "eu-west-1");
         assertTrue(network[0].getNetworkCidrs().containsAll(NETWORK_CIDRS));
@@ -102,7 +102,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
+            network[0] = underTest.convertToLegacyNetwork(source);
         });
 
         assertEquals(PUBLIC_ID_1, network[0].getAttributes().getValue(ENDPOINT_ID));
@@ -121,7 +121,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
         Exception exception = assertThrows(BadRequestException.class, () ->
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source, AZ_1))
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source))
         );
         assertEquals("Could not find public subnet in availability zone: AZ-1", exception.getMessage());
     }
@@ -140,7 +140,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
+            network[0] = underTest.convertToLegacyNetwork(source);
         });
 
         assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));
@@ -159,7 +159,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
+            network[0] = underTest.convertToLegacyNetwork(source);
         });
 
         assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));

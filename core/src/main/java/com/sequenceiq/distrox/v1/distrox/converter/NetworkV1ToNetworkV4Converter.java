@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;
@@ -28,11 +27,11 @@ import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGate
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.GcpNetworkV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -103,17 +102,11 @@ public class NetworkV1ToNetworkV4Converter {
     }
 
     private MockNetworkV4Parameters convertToMockNetworkParams(Pair<MockNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
         MockNetworkV1Parameters key = source.getKey();
 
         MockNetworkV4Parameters params = new MockNetworkV4Parameters();
 
         if (key != null) {
-            String subnetId = key.getSubnetId();
-            if (value != null) {
-                evaluateIfTrueDoOtherwise(subnetId, StringUtils::isNotEmpty, params::setSubnetId,
-                        s -> params.setSubnetId(value.getPreferedSubnetId()));
-            }
             params.setInternetGatewayId(key.getInternetGatewayId());
             params.setVpcId(key.getVpcId());
         }
@@ -131,13 +124,6 @@ public class NetworkV1ToNetworkV4Converter {
             response.setNetworkId(value.getAzure().getNetworkId());
             response.setNoPublicIp(value.getAzure().getNoPublicIp());
             response.setResourceGroupName(value.getAzure().getResourceGroupName());
-
-            String subnetId = key.getSubnetId();
-            if (!Strings.isNullOrEmpty(subnetId)) {
-                response.setSubnetId(subnetId);
-            } else if (source.getValue() != null) {
-                response.setSubnetId(source.getValue().getPreferedSubnetId());
-            }
         }
 
         return response;
@@ -156,11 +142,6 @@ public class NetworkV1ToNetworkV4Converter {
             response.setSharedProjectId(value.getGcp().getSharedProjectId());
 
             String subnetId = key.getSubnetId();
-            if (!Strings.isNullOrEmpty(subnetId)) {
-                response.setSubnetId(subnetId);
-            } else {
-                response.setSubnetId(getFirstSubnetIdFromEnvironment(value));
-            }
         }
 
         return response;
@@ -178,7 +159,6 @@ public class NetworkV1ToNetworkV4Converter {
 
         if (key != null) {
             response.setVpcId(value.getAws().getVpcId());
-
             String subnetId = key.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(key.getSubnetId());
@@ -224,5 +204,13 @@ public class NetworkV1ToNetworkV4Converter {
         AwsNetworkV1Parameters response = new AwsNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;
+    }
+
+    private AzureNetworkV1Parameters convertToDistroXRequest(AzureNetworkV4Parameters source) {
+        return new AzureNetworkV1Parameters();
+    }
+
+    private AwsNetworkV1Parameters convertToDistroXRequest(AwsNetworkV4Parameters source) {
+        return new AwsNetworkV1Parameters();
     }
 }

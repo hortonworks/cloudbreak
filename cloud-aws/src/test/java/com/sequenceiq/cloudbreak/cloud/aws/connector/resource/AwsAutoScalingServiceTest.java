@@ -139,7 +139,7 @@ public class AwsAutoScalingServiceTest {
     }
 
     private Group createGroup(String groupName, InstanceGroupType groupType, List<CloudInstance> instances) {
-        Group group = new Group(groupName, groupType, instances, null, null, null, null, null, 0, null);
+        Group group = new Group(groupName, groupType, instances, null, null, null, null, null, 0, null, null);
         return group;
     }
 }

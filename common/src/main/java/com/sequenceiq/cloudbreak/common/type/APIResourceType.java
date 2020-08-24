@@ -12,6 +12,7 @@ public enum APIResourceType {
     TOPOLOGY("tp"),
     FILESYSTEM("fs"),
     SECURITY_GROUP("sg"),
+    INSTANCE_GROUP_NETWORK("ign"),
     CLUSTER_TEMPLATE("ct"),
     RDS_CONFIG("rds"),
     LDAP_CONFIG("ldap"),

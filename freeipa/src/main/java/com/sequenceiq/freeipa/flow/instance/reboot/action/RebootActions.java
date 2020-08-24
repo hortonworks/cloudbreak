@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.instance.reboot.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +42,7 @@ import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootService;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.LocationProvider;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -68,6 +65,9 @@ public class RebootActions {
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private LocationProvider locationProvider;
 
     @Inject
     @Qualifier("conversionService")
@@ -104,10 +104,9 @@ public class RebootActions {
                 List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
                         .filter(instanceMetaData -> payload.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
                 MDCBuilder.buildMdcContext(stack);
-
-                Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-                CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(),
-                        stack.getCloudPlatform(), location, stack.getOwner(), stack.getAccountId());
+                Location location = locationProvider.provide(stack);
+                CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
+                        location, stack.getOwner(), stack.getAccountId());
                 Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
                 CloudCredential cloudCredential = credentialConverter.convert(credential);
                 return new RebootContext(flowParameters, stack, instances, cloudContext, cloudCredential);

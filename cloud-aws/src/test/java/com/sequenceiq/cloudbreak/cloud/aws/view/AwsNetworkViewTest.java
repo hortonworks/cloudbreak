@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -41,13 +42,12 @@ public class AwsNetworkViewTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-
-        underTest = new AwsNetworkView(network);
     }
 
     @Test
     public void testVpc() {
         when(network.getStringParameter(VPC_ID)).thenReturn("vpc-123");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.isExistingVPC());
         assertEquals("vpc-123", underTest.getExistingVpc());
     }
@@ -55,6 +55,7 @@ public class AwsNetworkViewTest {
     @Test
     public void testNoVpc() {
         when(network.getStringParameter(VPC_ID)).thenReturn(null);
+        underTest = new AwsNetworkView(network);
         assertFalse(underTest.isExistingVPC());
         assertNull(underTest.getExistingVpc());
     }
@@ -62,18 +63,21 @@ public class AwsNetworkViewTest {
     @Test
     public void testVpcCidr() {
         when(network.getStringParameter(VPC_CIDR)).thenReturn("0.1.2.3/24");
+        underTest = new AwsNetworkView(network);
         assertEquals("0.1.2.3/24", underTest.getExistingVpcCidr());
     }
 
     @Test
     public void testNoVpcCidr() {
         when(network.getStringParameter(VPC_ID)).thenReturn(null);
+        underTest = new AwsNetworkView(network);
         assertNull(underTest.getExistingVpcCidr());
     }
 
     @Test
     public void testIgw() {
         when(network.getStringParameter(IGW)).thenReturn("igw-123");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.isExistingIGW());
         assertEquals("igw-123", underTest.getExistingIgw());
     }
@@ -81,6 +85,7 @@ public class AwsNetworkViewTest {
     @Test
     public void testNoIgw() {
         when(network.getStringParameter(IGW)).thenReturn(null);
+        underTest = new AwsNetworkView(network);
         assertFalse(underTest.isExistingIGW());
         assertNull(underTest.getExistingIgw());
     }
@@ -88,33 +93,37 @@ public class AwsNetworkViewTest {
     @Test
     public void testSingleSubnet() {
         when(network.getStringParameter(SUBNET_ID)).thenReturn("subnet-123");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.isExistingSubnet());
         assertEquals("subnet-123", underTest.getExistingSubnet());
         assertFalse(underTest.isSubnetList());
-        assertEquals(List.of("subnet-123"), underTest.getSubnetList());
+        assertEquals(Set.of("subnet-123"), underTest.getSubnetList());
     }
 
     @Test
     public void testMultipleSubnet() {
         when(network.getStringParameter(SUBNET_ID)).thenReturn("subnet-123,subnet-456,subnet-789");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.isExistingSubnet());
-        assertEquals("subnet-123,subnet-456,subnet-789", underTest.getExistingSubnet());
-        assertTrue(underTest.isSubnetList());
-        assertEquals(List.of("subnet-123", "subnet-456", "subnet-789"), underTest.getSubnetList());
+        assertTrue(Set.of("subnet-789", "subnet-123", "subnet-456").contains(underTest.getExistingSubnet()));
+        assertFalse(underTest.isSubnetList());
+        assertEquals(Set.of("subnet-123", "subnet-456", "subnet-789"), underTest.getSubnetList());
     }
 
     @Test
     public void testNoSubnet() {
         when(network.getStringParameter(SUBNET_ID)).thenReturn(null);
+        underTest = new AwsNetworkView(network);
         assertFalse(underTest.isExistingSubnet());
         assertNull(underTest.getExistingSubnet());
         assertFalse(underTest.isSubnetList());
-        assertEquals(List.of(), underTest.getSubnetList());
+        assertEquals(Set.of(), underTest.getSubnetList());
     }
 
     @Test
     public void testMultipleSubnetCidr() {
         when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(List.of("1.1.1.1", "2.2.2.2"));
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.getExistingVpcCidrs().containsAll(List.of("1.1.1.1", "2.2.2.2")));
     }
 
@@ -122,6 +131,7 @@ public class AwsNetworkViewTest {
     public void testMultipleSubnetCidrNull() {
         when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(null);
         when(network.getStringParameter(VPC_CIDR)).thenReturn("1.1.1.1");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.getExistingVpcCidrs().contains("1.1.1.1"));
     }
 
@@ -129,6 +139,7 @@ public class AwsNetworkViewTest {
     public void testMultipleSubnetCidrEmpty() {
         when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(List.of());
         when(network.getStringParameter(VPC_CIDR)).thenReturn("1.1.1.1");
+        underTest = new AwsNetworkView(network);
         assertTrue(underTest.getExistingVpcCidrs().contains("1.1.1.1"));
     }
 

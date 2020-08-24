@@ -197,7 +197,6 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        stack.setAvailabilityZone("avZone");
         Network network = new Network();
         network.setId(1L);
         stack.setNetwork(network);

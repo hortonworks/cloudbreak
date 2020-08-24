@@ -215,7 +215,6 @@ public class StackImageUpdateActionsTest {
         stack.setWorkspace(workspace);
         stack.setId(1L);
         stack.setRegion("region");
-        stack.setAvailabilityZone("az");
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);

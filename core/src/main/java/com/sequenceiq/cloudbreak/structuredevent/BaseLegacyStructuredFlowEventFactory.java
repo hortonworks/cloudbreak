@@ -109,7 +109,7 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
         try {
             notificationDetails.setCloud(stack.cloudPlatform());
             notificationDetails.setRegion(stack.getRegion());
-            notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
+            notificationDetails.setAvailabiltyZone(null);
             notificationDetails.setStackName(stack.getDisplayName());
             notificationDetails.setStackStatus(stack.getStatus().name());
             notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaDataSet().size());
