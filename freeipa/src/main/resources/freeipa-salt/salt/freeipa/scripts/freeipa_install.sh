@@ -5,11 +5,6 @@ set -e
 FQDN=$(hostname -f)
 IPADDR=$(hostname -i)
 
-if [ ! -f /etc/resolv.conf.orig ]; then
-  cp /etc/resolv.conf /etc/resolv.conf.orig
-fi
-FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}');
-
 ipa-server-install --unattended --uninstall
 
 ipa-server-install \
@@ -26,8 +21,8 @@ ipa-server-install \
           --allow-zone-overlap \
           --ssh-trust-dns \
           --mkhomedir \
-          --ip-address "$IPADDR" \
-          $FORWARDERS \
+          --ip-address $IPADDR \
+          --auto-forwarders \
 {%- if not salt['pillar.get']('freeipa:dnssecValidationEnabled') %}
           --no-dnssec-validation \
 {%- endif %}
