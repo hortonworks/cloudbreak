@@ -294,7 +294,7 @@ public class BlueprintServiceTest {
         underTest.decorateWithCrn(blueprint, ACCOUNT_ID, CREATOR);
 
         assertThat(blueprint.getCreator(), is(CREATOR));
-        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clusterdefinition:.*"));
+        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
     }
 
     @Test
