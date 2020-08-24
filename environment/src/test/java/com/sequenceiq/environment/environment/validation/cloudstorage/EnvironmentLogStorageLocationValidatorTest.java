@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 
 @ExtendWith(MockitoExtension.class)
 public class EnvironmentLogStorageLocationValidatorTest {
@@ -53,6 +54,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
     public void validateTelemetryLoggingStorageLocationNoStoragerLocation() {
         when(environment.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getLogging()).thenReturn(logging);
+        when(logging.getS3()).thenReturn(new S3CloudStorageParameters());
         when(logging.getStorageLocation()).thenReturn(null);
         ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
@@ -62,6 +64,7 @@ public class EnvironmentLogStorageLocationValidatorTest {
     public void validateTelemetryLoggingStorageLocationValidatorPasses() {
         when(environment.getTelemetry()).thenReturn(telemetry);
         when(telemetry.getLogging()).thenReturn(logging);
+        when(logging.getS3()).thenReturn(new S3CloudStorageParameters());
         when(logging.getStorageLocation()).thenReturn(REGION_1);
         ValidationResult result = underTest.validateTelemetryLoggingStorageLocation(environment);
         assertFalse(result.hasError());
