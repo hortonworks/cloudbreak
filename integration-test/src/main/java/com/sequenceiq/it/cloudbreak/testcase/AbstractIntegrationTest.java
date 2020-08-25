@@ -40,12 +40,14 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
+import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -185,6 +187,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext
                 .given(SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
+                .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -329,6 +332,18 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         networkReq.setMock(mockReq);
         networkReq.setSubnetIds(Set.of("net1", "net2"));
         return networkReq;
+    }
+
+    protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {
+        String storage = resourcePropertyProvider().getName();
+        testContext.given(storage, SdxCloudStorageTestDto.class);
+
+        SdxCloudStorageTestDto cloudStorage = testContext.getCloudProvider().cloudStorage(testContext.get(storage));
+        if (cloudStorage == null) {
+            throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
+        }
+
+        return cloudStorage.getRequest();
     }
 
     public FreeIpaRouteHandler getFreeIpaRouteHandler() {

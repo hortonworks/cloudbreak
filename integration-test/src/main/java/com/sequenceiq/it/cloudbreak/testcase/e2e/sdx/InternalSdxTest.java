@@ -29,7 +29,11 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
     public void testCreateInternalSdx(TestContext testContext) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
-        testContext.given(SdxInternalTestDto.class).withDatabase(sdxDatabaseRequest)
+
+        testContext
+                .given(SdxInternalTestDto.class)
+                    .withDatabase(sdxDatabaseRequest)
+                    .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
