@@ -122,6 +122,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
+        instance.setHostname(getHostname(cloudStack, buildableResource));
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
@@ -183,6 +184,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
+        if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
+            return cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+        }
+
+        return buildableResource.get(0).getName();
     }
 
     private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {
