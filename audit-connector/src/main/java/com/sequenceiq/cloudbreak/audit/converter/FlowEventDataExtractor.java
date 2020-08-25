@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.audit.converter;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -34,15 +33,17 @@ public class FlowEventDataExtractor implements EventDataExtractor<StructuredFlow
 
     @Override
     public EventData eventData(StructuredFlowEvent structuredEvent) {
-        Map<String, Object> eventDetails = new HashMap<>();
-        eventDetails.put(USER_CRN, structuredEvent.getOperation().getUserCrn());
-        eventDetails.put(CLUSTER_CRN, structuredEvent.getOperation().getResourceCrn());
-        eventDetails.put(TIMESTAMP, System.currentTimeMillis());
-        eventDetails.put(ENVIRONMENT_CRN, structuredEvent.getOperation().getEnvironmentCrn());
-        eventDetails.put(FLOW_STATE, getFlowState(structuredEvent));
-        eventDetails.put(FLOW_ID, structuredEvent.getFlow().getFlowId());
+        AuditEventDetailsProto.AuditEventDetailsOrBuilder auditEventDetails =
+                AuditEventDetailsProto.AuditEventDetails.newBuilder()
+                .setClusterCrn(structuredEvent.getOperation().getResourceCrn())
+                .setUserCrn(structuredEvent.getOperation().getUserCrn())
+                .setTimestamp(System.currentTimeMillis())
+                .setEnvironmentCrn(structuredEvent.getOperation().getEnvironmentCrn())
+                .setFlowState(getFlowState(structuredEvent))
+                .setFlowId(structuredEvent.getFlow().getFlowId())
+                .build();
         return ServiceEventData.builder()
-                .withEventDetails(new Json(eventDetails).getValue())
+                .withEventDetails(new Json(auditEventDetails).getValue())
                 .withVersion(cbVersion)
                 .build();
     }
