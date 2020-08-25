@@ -12,8 +12,11 @@ import static org.mockito.Mockito.when;
 
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncState;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import org.junit.jupiter.api.Test;
@@ -37,14 +40,25 @@ class RangerCloudIdentityServiceTest {
     @Mock
     private SdxService sdxService;
 
+    @Mock
+    private SdxStatusService sdxStatusService;
+
     @InjectMocks
     private RangerCloudIdentityService underTest;
+
+    private SdxStatusEntity mockSdxStatus(DatalakeStatusEnum status) {
+        SdxStatusEntity sdxStatusEntity = mock(SdxStatusEntity.class);
+        when(sdxStatusEntity.getStatus()).thenReturn(status);
+        return sdxStatusEntity;
+    }
 
     @Test
     public void testSetAzureCloudIdentityMappingSuccessSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getSuccess()).thenReturn(true);
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.SUCCESS);
     }
 
@@ -53,6 +67,8 @@ class RangerCloudIdentityServiceTest {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getActive()).thenReturn(true);
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.ACTIVE);
     }
 
@@ -61,17 +77,34 @@ class RangerCloudIdentityServiceTest {
         ApiCommand apiCommand = mock(ApiCommand.class);
         when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getSuccess()).thenReturn(false);
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.FAILED);
     }
 
     @Test
     public void testSetAzureCloudIdentityMappingNoApiCommand() throws ApiException {
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
         testSetAzureCloudIdentityMapping(Optional.empty(), RangerCloudIdentitySyncState.SUCCESS);
     }
 
     @Test
     public void testSetAzureCloudIdentityMappingNoDatalake() throws ApiException {
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(Collections.emptyList());
+
+        Map<String, String> userMapping = Map.of("user", "val1");
+        RangerCloudIdentitySyncStatus status = underTest.setAzureCloudIdentityMapping("env-crn", userMapping);
+
+        assertEquals(RangerCloudIdentitySyncState.NOT_APPLICABLE, status.getState());
+        verify(clouderaManagerRangerUtil, never()).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping));
+    }
+
+    @Test
+    public void testSetAzureCloudIdentityMappingDatalakNotRunning() throws ApiException {
+        when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(mock(SdxCluster.class)));
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.PROVISIONING_FAILED);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
 
         Map<String, String> userMapping = Map.of("user", "val1");
         RangerCloudIdentitySyncStatus status = underTest.setAzureCloudIdentityMapping("env-crn", userMapping);
