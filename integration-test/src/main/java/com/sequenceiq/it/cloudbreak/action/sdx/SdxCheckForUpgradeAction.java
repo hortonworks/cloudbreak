@@ -8,17 +8,17 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
-public class SdxCheckForOsUpgradeAction implements Action<SdxInternalTestDto, SdxClient> {
+public class SdxCheckForUpgradeAction implements Action<SdxTestDto, SdxClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxCheckForOsUpgradeAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxCheckForUpgradeAction.class);
 
     @Override
-    public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
+    public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.log(LOGGER, format(" Environment: %s", testDto.getRequest().getEnvironment()));
         Log.whenJson(LOGGER, " SDX check for upgrade request: ", testDto.getRequest());
         SdxUpgradeRequest request = new SdxUpgradeRequest();

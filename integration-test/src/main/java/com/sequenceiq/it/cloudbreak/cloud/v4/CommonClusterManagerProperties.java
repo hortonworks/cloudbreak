@@ -21,6 +21,8 @@ public class CommonClusterManagerProperties {
 
     private String internalDistroXBlueprintName;
 
+    private UpgradeProperties upgradeProperties = new UpgradeProperties();
+
     public String getRuntimeVersion() {
         return runtimeVersion;
     }
@@ -65,6 +67,10 @@ public class CommonClusterManagerProperties {
         this.internalDistroXBlueprintName = internalDistroXBlueprintName;
     }
 
+    public UpgradeProperties getUpgrade() {
+        return upgradeProperties;
+    }
+
     public static class ClouderaManager {
 
         private String defaultUser;
@@ -95,6 +101,28 @@ public class CommonClusterManagerProperties {
 
         public void setDefaultPort(String defaultPort) {
             this.defaultPort = defaultPort;
+        }
+    }
+
+    public static class UpgradeProperties {
+        private String currentRuntimeVersion;
+
+        private String targetRuntimeVersion;
+
+        public String getCurrentRuntimeVersion() {
+            return currentRuntimeVersion;
+        }
+
+        public void setCurrentRuntimeVersion(String currentRuntimeVersion) {
+            this.currentRuntimeVersion = currentRuntimeVersion;
+        }
+
+        public String getTargetRuntimeVersion() {
+            return targetRuntimeVersion;
+        }
+
+        public void setTargetRuntimeVersion(String targetRuntimeVersion) {
+            this.targetRuntimeVersion = targetRuntimeVersion;
         }
     }
 }
