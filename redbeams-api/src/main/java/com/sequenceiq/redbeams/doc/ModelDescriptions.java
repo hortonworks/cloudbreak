@@ -107,6 +107,10 @@ public final class ModelDescriptions {
         public static final String SUBNETS = "Comma-separated list of fully-qualified subnets with connectivity to the database server";
     }
 
+    public static class GcpNetworkModelDescription {
+        public static final String SUBNETS = "Comma-separated list of fully-qualified subnets with connectivity to the database server";
+    }
+
     public static class AwsDatabaseServerModelDescriptions {
         public static final String BACKUP_RETENTION_PERIOD = "Time to retain backups, in days";
         public static final String ENGINE_VERSION = "Version of the database engine (vendor)";
@@ -115,6 +119,16 @@ public final class ModelDescriptions {
     }
 
     public static class AzureDatabaseServerModelDescriptions {
+        public static final String BACKUP_RETENTION_DAYS = "Time to retain backups, in days";
+        public static final String GEO_REDUNDANT_BACKUPS = "Whether backups are geographically redundant";
+        public static final String SKU_CAPACITY = "The number of vCPUs assigned to the database server";
+        public static final String SKU_FAMILY = "The family of hardware used for the database server";
+        public static final String SKU_TIER = "The tier of SKU for the database server";
+        public static final String STORAGE_AUTO_GROW = "Whether the database server will automatically grow storage when necessary";
+        public static final String DB_VERSION = "The version of the database software to use";
+    }
+
+    public static class GcpDatabaseServerModelDescriptions {
         public static final String BACKUP_RETENTION_DAYS = "Time to retain backups, in days";
         public static final String GEO_REDUNDANT_BACKUPS = "Whether backups are geographically redundant";
         public static final String SKU_CAPACITY = "The number of vCPUs assigned to the database server";

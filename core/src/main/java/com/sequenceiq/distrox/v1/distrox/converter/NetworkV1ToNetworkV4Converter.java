@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
@@ -23,7 +22,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Paramet
 import com.sequenceiq.distrox.api.v1.distrox.model.network.GcpNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.OpenstackNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -54,9 +52,6 @@ public class NetworkV1ToNetworkV4Converter {
             case "GCP":
                 request.setGcp(getGcpNetworkParameters(Optional.ofNullable(key.getGcp()), value));
                 break;
-            case "OPENSTACK":
-                request.setOpenstack(getOpenstackNetworkParameters(Optional.ofNullable(key.getOpenstack()), value));
-                break;
             default:
         }
         return request;
@@ -75,11 +70,6 @@ public class NetworkV1ToNetworkV4Converter {
     private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
         AwsNetworkV1Parameters params = key.orElse(new AwsNetworkV1Parameters());
         return convertToAwsStackRequest(new ImmutablePair<>(params, value));
-    }
-
-    private OpenStackNetworkV4Parameters getOpenstackNetworkParameters(Optional<OpenstackNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
-        OpenstackNetworkV1Parameters params = mock.orElse(new OpenstackNetworkV1Parameters());
-        return convertToOpenstackStackRequest(new ImmutablePair<>(params, value));
     }
 
     private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
@@ -122,29 +112,6 @@ public class NetworkV1ToNetworkV4Converter {
                 response.setSubnetId(subnetId);
             } else if (source.getValue() != null) {
                 response.setSubnetId(source.getValue().getPreferedSubnetId());
-            }
-        }
-
-        return response;
-    }
-
-    private OpenStackNetworkV4Parameters convertToOpenstackStackRequest(Pair<OpenstackNetworkV1Parameters, EnvironmentNetworkResponse> source) {
-        EnvironmentNetworkResponse value = source.getValue();
-        OpenstackNetworkV1Parameters key = source.getKey();
-
-        OpenStackNetworkV4Parameters response = new OpenStackNetworkV4Parameters();
-
-        if (key != null) {
-            response.setNetworkId(value.getOpenstack().getNetworkId());
-            response.setNetworkingOption(value.getOpenstack().getNetworkingOption());
-            response.setPublicNetId(value.getOpenstack().getPublicNetId());
-            response.setRouterId(value.getOpenstack().getRouterId());
-
-            String subnetId = key.getSubnetId();
-            if (!Strings.isNullOrEmpty(subnetId)) {
-                response.setSubnetId(subnetId);
-            } else {
-                response.setSubnetId(getFirstSubnetIdFromEnvironment(value));
             }
         }
 

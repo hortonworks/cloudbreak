@@ -46,6 +46,11 @@ sdx:
       nonha:
         backupretentionperiod: 7
         georedundantbackup: false
+    gcp:
+      ha:
+        backupretentionperiod: 30
+      nonha:
+        backupretentionperiod: 7
 
   gateway:
     topology:

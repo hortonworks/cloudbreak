@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CL
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
@@ -62,6 +63,9 @@ class EntitlementServiceTest {
                 // testCaseName, entitlementName, function, enabled
                 {"CDP_AZURE == false", CDP_AZURE, (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
                 {"CDP_AZURE == true", CDP_AZURE, (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
+
+                {"CDP_GCP == false", CDP_GCP, (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
+                {"CDP_GCP == true", CDP_GCP, (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
 
                 {"CDP_BASE_IMAGE == false", CDP_BASE_IMAGE, (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE == true", CDP_BASE_IMAGE, (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},

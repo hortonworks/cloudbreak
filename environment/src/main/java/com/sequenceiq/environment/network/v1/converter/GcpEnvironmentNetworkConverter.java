@@ -71,10 +71,10 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
         gcpNetwork.setSharedProjectId(sharedProjectId == null ? null : sharedProjectId.toString());
 
         Object noFirewallRules = properties.get("noFirewallRules");
-        gcpNetwork.setNoFirewallRules(noFirewallRules == null ? false : Boolean.valueOf(noFirewallRules.toString()));
+        gcpNetwork.setNoFirewallRules(noFirewallRules != null && Boolean.parseBoolean(noFirewallRules.toString()));
 
         Object noPublicIp = properties.get("noPublicIp");
-        gcpNetwork.setNoPublicIp(noPublicIp == null ? false : Boolean.valueOf(noPublicIp.toString()));
+        gcpNetwork.setNoPublicIp(noPublicIp != null && Boolean.parseBoolean(noPublicIp.toString()));
 
         gcpNetwork.setSubnetMetas(createdCloudNetwork.getSubnets().stream()
                 .collect(Collectors.toMap(
@@ -117,17 +117,6 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
 
     private boolean isExistingNetworkSpecified(NetworkDto networkDto) {
         return networkDto.getGcp() != null && networkDto.getGcp().getNetworkId() != null;
-    }
-
-    @Override
-    public Network convertToNetwork(BaseNetwork baseNetwork) {
-        GcpNetwork gcpNetwork = (GcpNetwork) baseNetwork;
-        Map<String, Object> param = new HashMap<>();
-        param.put(GcpStackUtil.SHARED_PROJECT_ID, gcpNetwork.getSharedProjectId());
-        param.put(GcpStackUtil.NETWORK_ID, gcpNetwork.getNetworkId());
-        param.put(GcpStackUtil.NO_PUBLIC_IP, gcpNetwork.getNoPublicIp());
-        param.put(GcpStackUtil.NO_FIREWALL_RULES, gcpNetwork.getNoFirewallRules());
-        return new Network(null, param);
     }
 
     @Override

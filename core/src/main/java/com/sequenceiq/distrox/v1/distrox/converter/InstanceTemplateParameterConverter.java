@@ -9,14 +9,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.OpenStackInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpInstanceTemplateV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.OpenstackInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 
 @Component
@@ -49,14 +47,6 @@ public class InstanceTemplateParameterConverter {
 
     public GcpInstanceTemplateV1Parameters convert(GcpInstanceTemplateV4Parameters source) {
         return new GcpInstanceTemplateV1Parameters();
-    }
-
-    public OpenStackInstanceTemplateV4Parameters convert(OpenstackInstanceTemplateV1Parameters source) {
-        return new OpenStackInstanceTemplateV4Parameters();
-    }
-
-    public OpenstackInstanceTemplateV1Parameters convert(OpenStackInstanceTemplateV4Parameters source) {
-        return new OpenstackInstanceTemplateV1Parameters();
     }
 
     public AzureInstanceTemplateV4Parameters convert(AzureInstanceTemplateV1Parameters source) {

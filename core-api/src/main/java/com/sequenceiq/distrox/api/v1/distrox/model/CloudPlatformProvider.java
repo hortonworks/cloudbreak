@@ -14,8 +14,6 @@ public interface CloudPlatformProvider {
             return CloudPlatform.YARN;
         } else if (getGcp() != null) {
             return CloudPlatform.GCP;
-        } else if (getOpenstack() != null) {
-            return CloudPlatform.OPENSTACK;
         }
         return null;
     }
@@ -25,8 +23,6 @@ public interface CloudPlatformProvider {
     Object getAzure();
 
     Object getGcp();
-
-    Object getOpenstack();
 
     Object getYarn();
 }

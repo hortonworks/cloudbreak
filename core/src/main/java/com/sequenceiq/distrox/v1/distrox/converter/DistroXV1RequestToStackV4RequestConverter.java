@@ -93,7 +93,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
-        request.setOpenstack(getIfNotNull(source.getOpenstack(), stackParameterConverter::convert));
         request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
@@ -133,7 +132,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
-        request.setOpenstack(getIfNotNull(source.getOpenstack(), stackParameterConverter::convert));
         request.setYarn(getYarnProperties(source, environment));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));
@@ -166,9 +164,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
                 break;
             case "GCP":
                 validateSubnet(network, environment, network.getGcp().getSubnetId());
-                break;
-            case "OPENSTACK":
-                validateSubnet(network, environment, network.getOpenstack().getSubnetId());
                 break;
             default:
         }
@@ -212,7 +207,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
         request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
         request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
-        request.setOpenstack(getIfNotNull(source.getOpenstack(), stackParameterConverter::convert));
         request.setYarn(getIfNotNull(source.getYarn(), stackParameterConverter::convert));
         request.setInputs(source.getInputs());
         request.setTags(getIfNotNull(source.getTags(), this::getTags));

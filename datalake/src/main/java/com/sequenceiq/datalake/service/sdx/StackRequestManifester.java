@@ -10,7 +10,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,6 +51,7 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
@@ -258,7 +258,8 @@ public class StackRequestManifester {
                 LOGGER.info("IDBMMS usage is disabled for environment {}. Proceeding with {} mappings for stack {}.", environmentCrn,
                         mappingSource == IdBrokerMappingSource.MOCK
                                 && (CloudPlatform.AWS.name().equals(cloudPlatform)
-                                || CloudPlatform.AZURE.name().equals(cloudPlatform)) ? "mock" : "missing", stackName);
+                                || CloudPlatform.AZURE.name().equals(cloudPlatform)
+                                || CloudPlatform.GCP.name().equals(cloudPlatform)) ? "mock" : "missing", stackName);
             }
         } else {
             // getAccountMapping() != null is possible only in case of SdxInternalClusterRequest, in which case the user-given values will be honored.
