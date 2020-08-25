@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
@@ -20,6 +23,9 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsAutoScalingServiceTest {
@@ -48,12 +54,13 @@ public class AwsAutoScalingServiceTest {
         activity1.setCause("Cause");
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
         when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
 
         Date date = new Date();
         AmazonAutoscalingFailed expected = Assertions.assertThrows(AmazonAutoscalingFailed.class, () ->
-                underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date));
+                underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group));
 
         Assertions.assertEquals(expected.getMessage(), "Description Cause");
     }
@@ -67,11 +74,38 @@ public class AwsAutoScalingServiceTest {
         activity1.setCause("Cause");
         activity1.setStatusCode("success");
         result.setActivities(List.of(activity1));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
         when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
 
         Date date = new Date();
-        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date);
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
 
+    }
+
+    @Test
+    public void testCheckLastScalingActivityShouldNotCreateWaiterWhenGroupDoesNotHaveAnyInstance() throws AmazonAutoscalingFailed {
+        DescribeScalingActivitiesResult result = new DescribeScalingActivitiesResult();
+        Activity activity1 = new Activity();
+        activity1.setStatusMessage("Status");
+        activity1.setDescription("Description");
+        activity1.setCause("Cause");
+        activity1.setStatusCode("success");
+        result.setActivities(List.of(activity1));
+        Group group = createGroup("gateway", InstanceGroupType.CORE, List.of());
+
+        Date date = new Date();
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
+
+        verify(amazonAutoScalingClient, times(0)).describeScalingActivities(any(DescribeScalingActivitiesRequest.class));
+        verify(customAmazonWaiterProvider, times(0)).getAutoscalingActivitiesWaiter(any(), any());
+        verifyNoMoreInteractions(amazonAutoScalingClient);
+        verifyNoMoreInteractions(customAmazonWaiterProvider);
+
+    }
+
+    private Group createGroup(String groupName, InstanceGroupType groupType, List<CloudInstance> instances) {
+        Group group = new Group(groupName, groupType, instances, null, null, null, null, null, 0, null);
+        return group;
     }
 }

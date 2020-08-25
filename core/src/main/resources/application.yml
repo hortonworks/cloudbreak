@@ -153,6 +153,7 @@ cb:
       enabled.instance.types: >
         t2.large,
         t2.xlarge,
+        m5.xlarge,
         m5.2xlarge,
         m5.4xlarge,
         m5.8xlarge,
