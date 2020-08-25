@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -40,6 +40,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
@@ -209,6 +210,7 @@ class EnvironmentNetworkServiceTest {
                 .withLocationDto(LocationDto.builder().withName("us-west-1").build())
                 .withNetwork(NetworkDto.builder()
                         .withName("net-1")
+                        .withRegistrationType(RegistrationType.EXISTING)
                         .withAzure(AzureParams.builder()
                                 .withResourceGroupName(resourceGroup)
                                 .build())

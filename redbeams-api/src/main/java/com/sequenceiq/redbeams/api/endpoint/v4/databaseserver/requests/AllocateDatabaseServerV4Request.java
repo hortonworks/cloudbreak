@@ -13,6 +13,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDBStackV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDBStackV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DBStack;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
@@ -56,6 +57,9 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @ApiModelProperty(DBStack.AZURE_PARAMETERS)
     private AzureDBStackV4Parameters azure;
+
+    @ApiModelProperty(DBStack.AZURE_PARAMETERS)
+    private GcpDBStackV4Parameters gcp;
 
     public String getName() {
         return name;
@@ -111,7 +115,18 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @Override
     public Mappable createGcp() {
-        return null;
+        if (gcp == null) {
+            gcp = new GcpDBStackV4Parameters();
+        }
+        return gcp;
+    }
+
+    public GcpDBStackV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpDBStackV4Parameters gcp) {
+        this.gcp = gcp;
     }
 
     @Override

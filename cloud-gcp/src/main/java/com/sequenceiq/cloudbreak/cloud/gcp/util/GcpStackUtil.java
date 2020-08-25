@@ -84,9 +84,13 @@ public final class GcpStackUtil {
 
     private static final String EMPTY_BUCKET = "";
 
+    private static final String EMPTY_PATH = "";
+
     private static final int FINISHED = 100;
 
     private static final int PRIVATE_ID_PART = 2;
+
+    private static final int MIN_PATH_PARTS = 3;
 
     private GcpStackUtil() {
     }
@@ -249,6 +253,26 @@ public final class GcpStackUtil {
             return parts[parts.length - 1];
         } else {
             throw new GcpResourceException("Source image path environment variable is not well formed");
+        }
+    }
+
+    public static String getBucketName(String objectStorageLocation) {
+        String[] parts = createParts(objectStorageLocation);
+        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
+            return parts[1];
+        } else {
+            LOGGER.debug("No bucket found in object storage location.");
+            return EMPTY_BUCKET;
+        }
+    }
+
+    public static String getPath(String objectStorageLocation) {
+        String[] parts = createParts(objectStorageLocation);
+        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > MIN_PATH_PARTS) {
+            return StringUtils.join(ArrayUtils.removeAll(parts, 0, 1), "/");
+        } else {
+            LOGGER.debug("No path found in object storage location.");
+            return EMPTY_PATH;
         }
     }
 

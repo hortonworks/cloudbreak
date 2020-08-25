@@ -5,12 +5,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.YarnStackV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.GcpDistroXV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.OpenstackDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.YarnDistroXV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 
@@ -45,14 +43,6 @@ public class DistroXParameterConverter {
 
     public GcpDistroXV1Parameters convert(GcpStackV4Parameters source) {
         return new GcpDistroXV1Parameters();
-    }
-
-    public OpenStackStackV4Parameters convert(OpenstackDistroXV1Parameters source) {
-        return new OpenStackStackV4Parameters();
-    }
-
-    public OpenstackDistroXV1Parameters convert(OpenStackStackV4Parameters source) {
-        return new OpenstackDistroXV1Parameters();
     }
 
     public YarnStackV4Parameters convert(YarnDistroXV1Parameters source) {

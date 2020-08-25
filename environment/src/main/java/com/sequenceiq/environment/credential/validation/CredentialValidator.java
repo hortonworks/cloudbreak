@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.validation;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,9 @@ public class CredentialValidator {
         }
         if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, accountId)) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
+        }
+        if (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(userCrn, accountId)) {
+            throw new BadRequestException("Provisioning in Google Cloud is not enabled for this account.");
         }
     }
 
