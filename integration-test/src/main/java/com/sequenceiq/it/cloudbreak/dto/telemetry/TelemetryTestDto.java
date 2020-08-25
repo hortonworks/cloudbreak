@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -21,6 +22,8 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest, TelemetryResponse, TelemetryTestDto> {
 
     private static final String TELEMETRY = "TELEMETRY";
+
+    private CloudPlatform cloudPlatform;
 
     @Inject
     private AwsCloudProvider awsCloudProvider;
@@ -40,10 +43,16 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         return getCloudProvider().telemetry(this);
     }
 
+    public TelemetryTestDto withLogging(CloudPlatform customCloudPlatform) {
+        cloudPlatform = customCloudPlatform;
+        return withLogging();
+    }
+
     public TelemetryTestDto withLogging() {
         LoggingRequest loggingRequest = new LoggingRequest();
 
-        switch (getTestContext().getCloudProvider().getCloudPlatform()) {
+        cloudPlatform = (cloudPlatform == null) ? getTestContext().getCloudProvider().getCloudPlatform() : cloudPlatform;
+        switch (cloudPlatform) {
             case AWS:
                 S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
                 s3CloudStorageV1Parameters.setInstanceProfile(awsCloudProvider.getInstanceProfile());
@@ -58,6 +67,9 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
                 loggingRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
                 loggingRequest.setStorageLocation(azureCloudProvider.getBaseLocation());
                 getRequest().setLogging(loggingRequest);
+                break;
+            case YARN:
+                getRequest().setLogging(null);
                 break;
             default:
                 break;
