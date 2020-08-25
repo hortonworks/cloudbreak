@@ -45,6 +45,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 @Prototype
 public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxClusterDetailResponse, SdxTestDto> implements Purgable<SdxClusterResponse, SdxClient>,
@@ -252,6 +253,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
+    }
+
+    public SdxUpgradeRequest getSdxUpgradeRequest() {
+        SdxUpgradeTestDto upgrade = given(SdxUpgradeTestDto.class);
+        if (upgrade == null) {
+            throw new IllegalArgumentException("SDX Upgrade does not exist!");
+        }
+        return upgrade.getRequest();
     }
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {

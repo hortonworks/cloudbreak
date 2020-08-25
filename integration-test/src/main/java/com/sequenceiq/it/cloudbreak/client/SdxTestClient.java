@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForOsUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteAction;
@@ -14,7 +14,6 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
@@ -22,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
@@ -76,6 +76,14 @@ public class SdxTestClient {
         return new SdxRepairAction();
     }
 
+    public Action<SdxTestDto, SdxClient> checkForUpgrade() {
+        return new SdxCheckForUpgradeAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> upgrade() {
+        return new SdxUpgradeAction();
+    }
+
     public Action<SdxInternalTestDto, SdxClient> repairInternal() {
         return new SdxRepairInternalAction();
     }
@@ -90,13 +98,5 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> stopInternal() {
         return new SdxStopAction();
-    }
-
-    public Action<SdxInternalTestDto, SdxClient> checkForOsUpgrade() {
-        return new SdxCheckForOsUpgradeAction();
-    }
-
-    public Action<SdxInternalTestDto, SdxClient> upgradeOs() {
-        return new SdxOsUpgradeAction();
     }
 }

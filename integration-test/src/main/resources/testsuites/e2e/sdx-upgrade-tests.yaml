@@ -1,0 +1,5 @@
+name: "sdx-upgrade-tests"
+tests:
+  - name: "sdx e2e upgrade tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
