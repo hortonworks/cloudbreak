@@ -91,6 +91,7 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
 
                 .given(sdx, SdxTestDto.class)
                 .withExternalDatabase(database)
+                .withCloudStorage()
                 .when(sdxTestClient.create(), RunningParameter.key(sdx))
                 .awaitForFlow(RunningParameter.key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
