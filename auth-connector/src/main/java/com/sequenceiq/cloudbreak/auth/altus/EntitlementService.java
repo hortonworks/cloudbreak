@@ -18,6 +18,9 @@ public class EntitlementService {
     static final String CDP_AZURE = "CDP_AZURE";
 
     @VisibleForTesting
+    static final String CDP_GCP = "CDP_GCP";
+
+    @VisibleForTesting
     static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
 
     @VisibleForTesting
@@ -70,6 +73,10 @@ public class EntitlementService {
 
     public boolean azureEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE);
+    }
+
+    public boolean gcpEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_GCP);
     }
 
     public boolean baseImageEnabled(String actorCrn, String accountId) {

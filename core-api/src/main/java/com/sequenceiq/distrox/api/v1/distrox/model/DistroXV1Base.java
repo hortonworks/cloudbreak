@@ -28,9 +28,6 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     private GcpDistroXV1Parameters gcp;
 
     @ApiModelProperty
-    private OpenstackDistroXV1Parameters openstack;
-
-    @ApiModelProperty
     private YarnDistroXV1Parameters yarn;
 
     @ApiModelProperty
@@ -60,10 +57,6 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
         this.gcp = gcp;
     }
 
-    public void setOpenstack(OpenstackDistroXV1Parameters openstack) {
-        this.openstack = openstack;
-    }
-
     @Override
     public AwsDistroXV1Parameters getAws() {
         return aws;
@@ -82,11 +75,6 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     @Override
     public GcpDistroXV1Parameters getGcp() {
         return gcp;
-    }
-
-    @Override
-    public OpenstackDistroXV1Parameters getOpenstack() {
-        return openstack;
     }
 
     public Long getTimeToLive() {

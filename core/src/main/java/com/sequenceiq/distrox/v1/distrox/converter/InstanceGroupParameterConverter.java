@@ -8,12 +8,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureAvailabiltySetV4;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.GcpInstanceGroupV4Parameters;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.OpenStackInstanceGroupV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AzureAvailabiltySetV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AzureInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.GcpInstanceGroupV1Parameters;
-import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.OpenstackInstanceGroupV1Parameters;
 
 @Component
 public class InstanceGroupParameterConverter {
@@ -60,13 +58,5 @@ public class InstanceGroupParameterConverter {
 
     public GcpInstanceGroupV1Parameters convert(GcpInstanceGroupV4Parameters source) {
         return new GcpInstanceGroupV1Parameters();
-    }
-
-    public OpenStackInstanceGroupV4Parameters convert(OpenstackInstanceGroupV1Parameters source) {
-        return new OpenStackInstanceGroupV4Parameters();
-    }
-
-    public OpenstackInstanceGroupV1Parameters convert(OpenStackInstanceGroupV4Parameters source) {
-        return new OpenstackInstanceGroupV1Parameters();
     }
 }

@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.api.services.compute.Compute;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpSubnetResourceBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.subnetselector.GcpSubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpSubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
