@@ -60,8 +60,8 @@ public class EnvironmentNetworkProviderValidator {
             Map<CloudPlatform, Optional<Object>> providerNetworkParamPair = Map.of(
                     AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
-                    MOCK, optional(networkDto.getMock()),
                     GCP, optional(networkDto.getGcp()),
+                    MOCK, optional(networkDto.getMock()),
                     YARN, optional(networkDto.getYarn())
             );
             String supportedPlatforms = String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet()));

@@ -1,0 +1,5 @@
+{
+  "instanceType": "e2-standard-4",
+  "vendor": "postgres",
+  "volumeSize": 100
+}

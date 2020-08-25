@@ -7,7 +7,6 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescriptio
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIpaParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.openstack.OpenstackFreeIpaParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -33,10 +32,6 @@ public class AttachedFreeIpaRequest {
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
     private GcpFreeIpaParameters gcp;
-
-    @Valid
-    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_OPENSTACK_PARAMETERS)
-    private OpenstackFreeIpaParameters openstack;
 
     public Boolean getCreate() {
         return create;
@@ -68,6 +63,8 @@ public class AttachedFreeIpaRequest {
                 "create=" + create +
                 ", instanceCountByGroup=" + instanceCountByGroup +
                 ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
                 '}';
     }
 
@@ -85,13 +82,5 @@ public class AttachedFreeIpaRequest {
 
     public void setGcp(GcpFreeIpaParameters gcp) {
         this.gcp = gcp;
-    }
-
-    public OpenstackFreeIpaParameters getOpenstack() {
-        return openstack;
-    }
-
-    public void setOpenstack(OpenstackFreeIpaParameters openstack) {
-        this.openstack = openstack;
     }
 }

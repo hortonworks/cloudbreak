@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
 import java.util.Set;
 
@@ -24,8 +25,21 @@ public class ClusterTemplateCloudPlatformValidator {
     }
 
     public boolean isClusterTemplateCloudPlatformValid(String cloudPlatform, String accountId) {
-        return (enabledPlatforms.contains(cloudPlatform) || CollectionUtils.isEmpty(enabledPlatforms))
-                && (!AZURE.name().equalsIgnoreCase(cloudPlatform) || entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, accountId));
+        return isPlatformEnabled(cloudPlatform)
+                && (notACloudPlatformWhichIsEntitlementSpecific(cloudPlatform) || isAzureOrGCPEntitlementEnabledForTheAccount(cloudPlatform, accountId));
+    }
+
+    public boolean isPlatformEnabled(String cloudPlatform) {
+        return enabledPlatforms.contains(cloudPlatform) || CollectionUtils.isEmpty(enabledPlatforms);
+    }
+
+    private boolean notACloudPlatformWhichIsEntitlementSpecific(String cloudPlatform) {
+        return !AZURE.name().equalsIgnoreCase(cloudPlatform) && !GCP.name().equalsIgnoreCase(cloudPlatform);
+    }
+
+    private boolean isAzureOrGCPEntitlementEnabledForTheAccount(String cloudPlatform, String accountId) {
+        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, accountId))
+                || (GCP.name().equalsIgnoreCase(cloudPlatform) && entitlementService.gcpEnabled(INTERNAL_ACTOR_CRN, accountId));
     }
 
 }
