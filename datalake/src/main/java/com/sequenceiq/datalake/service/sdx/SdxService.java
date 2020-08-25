@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
@@ -446,12 +447,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
-            if (!(AWS.name().equalsIgnoreCase(environment.getCloudPlatform()) || AZURE.name().equalsIgnoreCase(environment.getCloudPlatform()))) {
+            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+            if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
-            if (!isRazSupported(sdxClusterRequest.getRuntime(), environment.getCloudPlatform())) {
-                boolean aws = AWS.name().equalsIgnoreCase(environment.getCloudPlatform());
-                String errorMsg = aws ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
+            if (!isRazSupported(sdxClusterRequest.getRuntime(), cloudPlatform)) {
+                String errorMsg =  AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
                         "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
                 validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
             }
@@ -485,13 +486,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
      * Ranger Raz is only on 7.2.1 and later on Microsoft Azure, and only on 7.2.2 and later on Amazon Web Services.
      * If runtime is empty, then sdx-internal call was used.
      */
-    private boolean isRazSupported(String runtime, String cloudPlatform) {
+    private boolean isRazSupported(String runtime, CloudPlatform cloudPlatform) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        boolean aws = AWS.name().equalsIgnoreCase(cloudPlatform);
-        return versionComparator.compare(() -> runtime, () -> aws ? "7.2.2" : "7.2.1") > -1;
+        return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
     }
 
     /**
