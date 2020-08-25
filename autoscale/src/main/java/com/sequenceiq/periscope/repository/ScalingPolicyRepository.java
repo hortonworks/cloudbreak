@@ -1,14 +1,15 @@
 package com.sequenceiq.periscope.repository;
 
-import java.util.List;
-
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.domain.ScalingPolicy;
+import javax.transaction.Transactional;
+import java.util.List;
 
 @EntityType(entityClass = ScalingPolicy.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ScalingPolicyRepository extends CrudRepository<ScalingPolicy, Long> {
 
     ScalingPolicy findByCluster(@Param("clusterId") Long clusterId, @Param("policyId") Long policyId);

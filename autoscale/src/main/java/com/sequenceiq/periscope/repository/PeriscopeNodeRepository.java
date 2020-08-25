@@ -1,16 +1,17 @@
 package com.sequenceiq.periscope.repository;
 
-import java.util.List;
-
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.domain.PeriscopeNode;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.domain.PeriscopeNode;
+import javax.transaction.Transactional;
+import java.util.List;
 
 @EntityType(entityClass = PeriscopeNode.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface PeriscopeNodeRepository extends CrudRepository<PeriscopeNode, String> {
 
     long countByLeaderIsTrueAndLastUpdatedIsGreaterThan(long than);
