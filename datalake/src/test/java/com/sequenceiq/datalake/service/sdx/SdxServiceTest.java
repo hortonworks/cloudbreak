@@ -230,10 +230,7 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
         sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -288,10 +285,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
         sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -314,10 +308,7 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
         setSpot(sdxClusterRequest);
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
         sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -545,6 +536,8 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
+        sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -561,6 +554,14 @@ class SdxServiceTest {
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertFalse(capturedSdx.isRangerRazEnabled());
+    }
+
+    private SdxCloudStorageRequest getSdxCloudStorageRequestForS3() {
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        return cloudStorage;
     }
 
     static Object[][] razCloudPlatformAndRuntimeDataProvider() {
@@ -586,10 +587,7 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
         sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -741,10 +739,7 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        SdxCloudStorageRequest cloudStorage = getSdxCloudStorageRequestForS3();
         sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
