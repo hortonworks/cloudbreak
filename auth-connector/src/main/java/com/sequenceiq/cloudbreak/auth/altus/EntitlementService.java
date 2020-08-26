@@ -33,6 +33,9 @@ public class EntitlementService {
     static final String CDP_FREEIPA_HA_REPAIR = "CDP_FREEIPA_HA_REPAIR";
 
     @VisibleForTesting
+    static final String CDP_FREEIPA_HEALTH_CHECK = "CDP_FREEIPA_HEALTH_CHECK";
+
+    @VisibleForTesting
     static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
 
     @VisibleForTesting
@@ -99,6 +102,10 @@ public class EntitlementService {
 
     public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
         return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA_REPAIR);
+    }
+
+    public boolean freeIpaHealthCheckEnabled(String actorCrn, String accountID) {
+        return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HEALTH_CHECK);
     }
 
     public boolean internalTenant(String actorCrn, String accountId) {

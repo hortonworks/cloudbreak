@@ -249,10 +249,16 @@ clusterProxy:
   registerConfigPath: /rpc/forceRegisterConfig
   updateConfigPath: /rpc/updateConfig
   removeConfigPath: /rpc/removeConfig
-  intervalInSec: 5
-  healthStatusEndpoint: /ipa/session/login_password
-  timeoutInSec: 5
-  # the login page returns a 400, update this after CDPAM-609 which will provide a better health check
-  healthyStatusCode: 400
   maxAttempts: 10
   maxFailure: 1
+  healthCheckV1:
+    # the login page returns a 400
+    healthStatusEndpoint: /ipa/session/login_password
+    healthyStatusCode: 400
+    timeoutInSec: 5
+    intervalInSec: 5
+  healthCheckV2:
+    healthStatusEndpoint: /freeipahealthcheck
+    healthyStatusCode: 200
+    timeoutInSec: 5
+    intervalInSec: 5
