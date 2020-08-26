@@ -34,6 +34,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 class StackToDescribeFreeIpaResponseConverterTest {
@@ -98,6 +99,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private UserSyncStatusToUserSyncStatusResponseConverter userSyncStatusConverter;
 
+    @Mock
+    private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
+
     @BeforeAll
     static void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
@@ -118,6 +122,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(freeIpaServerResponse);
         when(instanceGroupConverter.convert(stack.getInstanceGroups())).thenReturn(INSTANCE_GROUP_RESPONSES);
         when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
+        when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus);
 

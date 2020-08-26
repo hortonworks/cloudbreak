@@ -185,6 +185,9 @@ public class MockUserManagementServiceTest {
                 {"enableFreeIpaHaRepair false", "enableFreeIpaHaRepair", false, "CDP_FREEIPA_HA_REPAIR", false},
                 {"enableFreeIpaHaRepair true", "enableFreeIpaHaRepair", true, "CDP_FREEIPA_HA_REPAIR", true},
 
+                {"enableFreeIpaHealthCheck false", "enableFreeIpaHealthCheck", false, "CDP_FREEIPA_HEALTH_CHECK", false},
+                {"enableFreeIpaHealthCheck true", "enableFreeIpaHealthCheck", true, "CDP_FREEIPA_HEALTH_CHECK", true},
+
                 {"enableCloudStorageValidation false", "enableCloudStorageValidation", false, "CDP_CLOUD_STORAGE_VALIDATION", false},
                 {"enableCloudStorageValidation true", "enableCloudStorageValidation", true, "CDP_CLOUD_STORAGE_VALIDATION", true},
 

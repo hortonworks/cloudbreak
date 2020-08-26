@@ -188,6 +188,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_FREEIPA_HA_REPAIR = "CDP_FREEIPA_HA_REPAIR";
 
+    private static final String CDP_FREEIPA_HEALTH_CHECK = "CDP_FREEIPA_HEALTH_CHECK";
+
     private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
 
     private static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
@@ -263,6 +265,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.ha.repair.enable}")
     private boolean enableFreeIpaHaRepair;
+
+    @Value("${auth.mock.freeipa.healthcheck.enable}")
+    private boolean enableFreeIpaHealthCheck;
 
     @Value("${auth.mock.cloudstoragevalidation.enable}")
     private boolean enableCloudStorageValidation;
@@ -560,6 +565,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeIpaHaRepair) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
+        }
+        if (enableFreeIpaHealthCheck) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HEALTH_CHECK));
         }
         if (enableCloudStorageValidation) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
