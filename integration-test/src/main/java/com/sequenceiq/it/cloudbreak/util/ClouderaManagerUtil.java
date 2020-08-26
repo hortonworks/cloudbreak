@@ -37,7 +37,7 @@ public class ClouderaManagerUtil {
 
     private static ClouderaManagerStackDescriptorV4Response getCMDescriptor(TestContext testContext) throws Exception {
         StackMatrixV4Response stackMatrix = testContext
-                .getCloudbreakClient()
+                .getMicroserviceClient(CloudbreakClient.class)
                 .getCloudbreakClient()
                 .utilV4Endpoint().getStackMatrix(null, null);
         return stackMatrix.getCdh().get(CDH_VERSION);

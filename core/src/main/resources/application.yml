@@ -412,6 +412,8 @@ cb:
   cm:
     admin.role: "ROLE_ADMIN"
     limited.admin.role: "ROLE_LIMITED_CLUSTER_ADMIN"
+    global.limited.admin.role: "ROLE_LIMITED_CLUSTER_ADMIN"
+    dashboard.user.role: "ROLE_DASHBOARD_USER"
     user.role: "ROLE_USER"
     heartbeat.interval: 3
     missed.heartbeat.interval: 30

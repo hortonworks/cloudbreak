@@ -42,6 +42,12 @@ public class ClouderaManagerLdapService {
     @Value("${cb.cm.limited.admin.role}")
     private String limitedAdminRole;
 
+    @Value("${cb.cm.global.limited.admin.role}")
+    private String globalLimitedAdminRole;
+
+    @Value("${cb.cm.dashboard.user.role}")
+    private String dashboardUserRole;
+
     @Value("${cb.cm.user.role}")
     private String userRole;
 
@@ -96,8 +102,10 @@ public class ClouderaManagerLdapService {
                 .addItemsItem(new ApiExternalUserMapping()
                         .name(ldapGroup)
                         .type(ApiExternalUserMappingType.LDAP)
-                        .addAuthRolesItem(new ApiAuthRoleRef()
-                                .displayName(role.getDisplayName()).uuid(role.getUuid())));
+                        .addAuthRolesItem(new ApiAuthRoleRef().displayName(role.getDisplayName()).uuid(role.getUuid()))
+                        .addAuthRolesItem(new ApiAuthRoleRef().name(globalLimitedAdminRole))
+                        .addAuthRolesItem(new ApiAuthRoleRef().name(dashboardUserRole))
+                );
         cmApi.createExternalUserMappings(apiExternalUserMappingList);
     }
 

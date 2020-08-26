@@ -28,6 +28,8 @@ public class AssignUmsRoleAction implements Action<UmsTestDto, UmsClient> {
         LOGGER.info(String.format("Assigning resourceRole %s over resource %s for user ",
                 testDto.getRequest().getRoleCrn(), testDto.getRequest().getResourceCrn()), user.getCrn());
         client.getUmsClient().assignResourceRole(user.getCrn(), testDto.getRequest().getResourceCrn(), testDto.getRequest().getRoleCrn(), Optional.of(""));
+        // wait for UmsRightsCache to expire
+        Thread.sleep(7000);
         return testDto;
     }
 }

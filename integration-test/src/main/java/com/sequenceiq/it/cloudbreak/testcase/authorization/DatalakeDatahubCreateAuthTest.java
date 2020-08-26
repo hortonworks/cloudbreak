@@ -45,8 +45,8 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
     }
 
@@ -62,7 +62,7 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
         String clouderaManager = "cm";
         String cluster = "cmcluster";
 
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
         testContext
                 .given(CredentialTestDto.class)
@@ -81,7 +81,7 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("You have no right to perform datalake/describeDetailedDatalake on resource crn:cdp.*")
                                 .withKey("SdxDescribeInternalAction"))

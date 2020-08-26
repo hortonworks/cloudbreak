@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -37,7 +38,7 @@ import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
-public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable {
+public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable, Assignable {
 
     public static final String STACK = "STACK";
 
@@ -135,7 +136,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
             return null;
         }
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
                 null);
@@ -148,5 +149,10 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 }

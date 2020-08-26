@@ -43,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakUserCache;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -59,6 +60,7 @@ import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
@@ -315,6 +317,11 @@ public abstract class TestContext implements ApplicationContextAware {
         return action.action(getTestContext(), entity, getMicroserviceClient(clientClass, who));
     }
 
+    protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
+    T doActionAsAdmin(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
+        return action.action(getTestContext(), entity, getAdminMicroserviceClient(clientClass));
+    }
+
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
             Assertion<T, ? extends MicroserviceClient> assertion) {
         return then(entityClass, clientClass, assertion, emptyRunningParameter());
@@ -424,6 +431,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public Crn getActingUserCrn() {
+        // real ums user
+        if (Crn.isCrn(getActingUser().getCrn())) {
+            return Crn.fromString(getActingUser().getCrn());
+        }
         return Crn.fromString(new String(Base64.getDecoder().decode(getActingUserAccessKey())));
     }
 
@@ -629,16 +640,26 @@ public abstract class TestContext implements ApplicationContextAware {
         return sdxClient;
     }
 
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+        String accessKey;
+        if (CloudbreakUserCache.getInstance().isInitialized()) {
+            accessKey = CloudbreakUserCache.getInstance().getByName(AuthUserKeys.ACCOUNT_ADMIN).getAccessKey();
+        } else {
+            accessKey = INTERNAL_ACTOR_ACCESS_KEY;
+        }
+        U microserviceClient = (U) clients.getOrDefault(accessKey, Map.of()).get(msClientClass);
+        if (microserviceClient == null) {
+            throw new IllegalStateException("Should create a client for this user: " + AuthUserKeys.ACCOUNT_ADMIN);
+        }
+        return microserviceClient;
+    }
+
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String who) {
         U microserviceClient = (U) clients.getOrDefault(who, Map.of()).get(msClientClass);
         if (microserviceClient == null) {
             throw new IllegalStateException("Should create a client for this user: " + who);
         }
         return microserviceClient;
-    }
-
-    public CloudbreakClient getCloudbreakClient() {
-        return getCloudbreakClient(getActingUserAccessKey());
     }
 
     public SdxClient getSdxClient() {
@@ -692,7 +713,7 @@ public abstract class TestContext implements ApplicationContextAware {
         checkShutdown();
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
-        CloudbreakClient cloudbreakClient = getCloudbreakClient(INTERNAL_ACTOR_ACCESS_KEY);
+        CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class);
         flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
         return entity;
     }
@@ -946,7 +967,7 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getCloudbreakClient(getActingUserAccessKey()));
+                testDto.cleanUp(this, getAdminMicroserviceClient(CloudbreakClient.class));
             } catch (Exception e) {
                 LOGGER.error("Cleaning up of {} resource is failing, because of: {}", testDto.getName(), e.getMessage(), e);
             }

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
@@ -54,7 +55,8 @@ public class InstanceWaitObject {
 
     public List<InstanceGroupV4Response> getInstanceGroups() {
         try {
-            return testContext.getCloudbreakClient().getCloudbreakClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
+            return testContext.getMicroserviceClient(CloudbreakClient.class)
+                    .getCloudbreakClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
         } catch (NotFoundException e) {
             LOGGER.info("SDX '{}' instance groups are present for validation.", getName());
             return testContext.getSdxClient().getSdxClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();

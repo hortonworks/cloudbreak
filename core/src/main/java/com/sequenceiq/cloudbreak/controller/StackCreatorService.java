@@ -202,7 +202,8 @@ public class StackCreatorService {
                 Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
                 LOGGER.info("Get credential from environment service with {} environmentCrn.", stack.getEnvironmentCrn());
-                Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+                Credential credential = ThreadBasedUserCrnProvider
+                        .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
                 CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
                 LOGGER.info("Validate Stack parameter for {} name.", stackName);

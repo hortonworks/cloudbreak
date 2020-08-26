@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public class SdxCreateAction implements Action<SdxTestDto, SdxClient> {
@@ -22,6 +25,10 @@ public class SdxCreateAction implements Action<SdxTestDto, SdxClient> {
                 .sdxEndpoint()
                 .create(testDto.getName(), testDto.getRequest());
         testDto.setFlow("SDX create", sdxClusterResponse.getFlowIdentifier());
+        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+                .sdxEndpoint()
+                .getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet());
+        testDto.setResponse(detailedResponse);
         Log.whenJson(LOGGER, " SDX create response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
         return testDto;
     }

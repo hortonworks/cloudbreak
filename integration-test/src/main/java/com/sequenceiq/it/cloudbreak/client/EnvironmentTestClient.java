@@ -27,8 +27,6 @@ import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 @Service
 public class EnvironmentTestClient {
 
-    private static final String DH_CREATOR_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataHubCreator";
-
     public Action<EnvironmentTestDto, EnvironmentClient> create() {
         return new EnvironmentCreateAction();
     }

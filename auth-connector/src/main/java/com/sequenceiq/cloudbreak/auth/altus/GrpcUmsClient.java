@@ -16,7 +16,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -283,9 +285,9 @@ public class GrpcUmsClient {
     /**
      * Retrieves list of service principal cloud identities for an environment from UMS.
      *
-     * @param accountId       the account Id
-     * @param environmentCrn  the environment crn
-     * @param requestId       an optional request Id
+     * @param accountId      the account Id
+     * @param environmentCrn the environment crn
+     * @param requestId      an optional request Id
      * @return list of service principal cloud identities for an environment
      */
     public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(
@@ -381,7 +383,9 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    //"#value.concat(#fieldId).concat(#projectId)"
+//    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
@@ -642,8 +646,13 @@ public class GrpcUmsClient {
     }
 
     // Cache evict does not work with this key, we need to wait 60s
-    // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
-    public void assignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"umsUserRoleAssigmentsCache"}, key = "#userCrn"),
+            @CacheEvict(cacheNames = {"umsResourceAssigneesCache"}, key = "#userCrn"),
+            @CacheEvict(cacheNames = {"umsUserRightsCache"}, key = "{ #userCrn, #right, #resource }")
+    })
+    public void assignResourceRole(
+            String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);

@@ -61,6 +61,8 @@ public class SecurityConfig {
 
         private static final String FLOW_API = API_ROOT_CONTEXT + "/flow/**";
 
+        private static final String FLOW_PUBLIC_API = API_ROOT_CONTEXT + "/flow-public/**";
+
         private static final String AUTHORIZATION_API = API_ROOT_CONTEXT + "/authorization/**";
 
         @Inject
@@ -116,6 +118,8 @@ public class SecurityConfig {
                     .antMatchers(AUTOSCALE_API)
                     .authenticated()
                     .antMatchers(FLOW_API)
+                    .authenticated()
+                    .antMatchers(FLOW_PUBLIC_API)
                     .authenticated()
                     .antMatchers(AUTHORIZATION_API)
                     .authenticated()
