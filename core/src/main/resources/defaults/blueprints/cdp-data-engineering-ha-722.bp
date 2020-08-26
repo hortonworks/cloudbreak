@@ -222,6 +222,18 @@
         ]
       },
       {
+        "refName": "sqoop",
+        "serviceType": "SQOOP_CLIENT",
+        "roleConfigGroups": [
+          {
+            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [ ],
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "yarn",
         "serviceType": "YARN",
         "serviceConfigs": [
@@ -478,6 +490,7 @@
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "das-DAS_EVENT_PROCESSOR",
           "das-DAS_WEBAPP",
