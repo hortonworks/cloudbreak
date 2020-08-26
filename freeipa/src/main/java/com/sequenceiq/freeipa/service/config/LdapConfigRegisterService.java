@@ -47,6 +47,9 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
     @Inject
     private LdapConfigService ldapConfigService;
 
+    @Inject
+    private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
+
     @Override
     public void register(Long stackId) {
         createLdapConfig(stackId, null, null, null, null);
@@ -88,7 +91,7 @@ public class LdapConfigRegisterService extends AbstractConfigRegister {
      * old FreeIPA instance doesn't have ldap CNAME so we have to create the config differently
      */
     private void addServerHost(Stack stack, FreeIpa freeIpa, LdapConfig ldapConfig) {
-        if (BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
+        if (balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
             ldapConfig.setServerHost(FreeIpaDomainUtils.getLdapFqdn(freeIpa.getDomain()));
         } else {
             ldapConfig.setServerHost(getMasterInstance(stack).getDiscoveryFQDN());
