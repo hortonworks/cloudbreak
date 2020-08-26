@@ -395,6 +395,18 @@
         ]
       },
       {
+        "refName": "sqoop",
+        "serviceType": "SQOOP_CLIENT",
+        "roleConfigGroups": [
+          {
+            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [ ],
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "queuemanager",
         "serviceType": "QUEUEMANAGER",
         "serviceConfigs": [
@@ -438,6 +450,7 @@
           "livy-LIVY_SERVER-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "zookeeper-SERVER-BASE",
