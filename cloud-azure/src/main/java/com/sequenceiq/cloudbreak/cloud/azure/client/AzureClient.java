@@ -503,7 +503,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -516,9 +516,13 @@ public class AzureClient {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
             return virtualMachineCustomImage.get().id();
         } else {
-            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-            return customImage.id();
+            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
+            if (createIfNotFound) {
+                VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
+                return customImage.id();
+            } else {
+                return null;
+            }
         }
     }
 
