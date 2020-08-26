@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -75,6 +76,17 @@ public class CloudResourceAdvisor {
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
+        return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
+    }
+
+    public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String blueprintName, String credentialCrn,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+        Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(() -> credentialClientService.getByCrn(credentialCrn));
+        return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
+    }
+
+    private PlatformRecommendation getPlatformRecommendationByCredential(Long workspaceId, String blueprintName, String region,
+            String platformVariant, String availabilityZone, CdpResourceType cdpResourceType, Credential credential) {
         String cloudPlatform = credential.cloudPlatform();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();

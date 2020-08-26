@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.client;
 
 import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
@@ -14,5 +15,7 @@ public interface SdxClient {
     SdxUpgradeEndpoint sdxUpgradeEndpoint();
 
     FlowEndpoint flowEndpoint();
+
+    FlowPublicEndpoint flowPublicEndpoint();
 
 }

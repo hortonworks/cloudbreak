@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -74,6 +75,7 @@ public class EndpointConfig extends ResourceConfig {
             DiagnosticsV4Controller.class,
             CloudProviderServicesV4Controller.class,
             FlowController.class,
+            FlowPublicController.class,
             AuthorizationInfoController.class
     );
 
