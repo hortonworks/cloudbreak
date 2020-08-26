@@ -18,7 +18,7 @@ public class AzureMockAccountMappingService {
     private static final String FIXED_MANAGED_IDENTITY = "/subscriptions/${subscriptionId}/resourceGroups/${resourceGroupId}/" +
             "providers/Microsoft.ManagedIdentity/userAssignedIdentities/mock-idbroker-admin-identity";
 
-    private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS = AccountMappingSubject.DATA_ACCESS_AND_RANGER_AUDIT_USERS
+    private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS = AccountMappingSubject.ALL_SPECIAL_USERS
             .stream()
             .map(user -> Map.entry(user, FIXED_MANAGED_IDENTITY))
             .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));

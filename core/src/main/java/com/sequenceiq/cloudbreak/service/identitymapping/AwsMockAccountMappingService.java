@@ -20,7 +20,7 @@ public class AwsMockAccountMappingService {
 
     private static final String FIXED_IAM_ROLE = "arn:aws:iam::${accountId}:role/mock-idbroker-admin-role";
 
-    private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS = AccountMappingSubject.DATA_ACCESS_AND_RANGER_AUDIT_USERS
+    private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS = AccountMappingSubject.ALL_SPECIAL_USERS
             .stream()
             .map(user -> Map.entry(user, FIXED_IAM_ROLE))
             .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
