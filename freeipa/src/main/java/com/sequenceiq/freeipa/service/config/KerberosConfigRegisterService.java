@@ -29,6 +29,9 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
+
     @Override
     public void register(Long stackId) {
         createKerberosConfig(stackId, FREEIPA_DEFAULT_ADMIN, null, null, null);
@@ -58,7 +61,7 @@ public class KerberosConfigRegisterService extends AbstractConfigRegister {
     }
 
     private void addServerAddress(FreeIpa freeIpa, Stack stack, KerberosConfig kerberosConfig, Set<InstanceMetaData> allNotDeletedInstances) {
-        if (BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
+        if (balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
             kerberosConfig.setUrl(FreeIpaDomainUtils.getKdcFqdn(freeIpa.getDomain()));
             kerberosConfig.setAdminUrl(FreeIpaDomainUtils.getKerberosFqdn(freeIpa.getDomain()));
         } else {
