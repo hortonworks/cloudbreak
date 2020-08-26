@@ -42,11 +42,19 @@ public class AzureImageSetupService {
     private AzureStorageAccountService azureStorageAccountService;
 
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
-        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
+        CloudContext cloudContext = ac.getCloudContext();
+        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
+        String customImageId = client.getCustomImageId(imageResourceGroupName, image.getImageName(), cloudContext.getLocation().getRegion().getRegionName(),
+                false);
+        if (!StringUtils.isEmpty(customImageId)) {
+            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!",
+                    customImageId, imageResourceGroupName);
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        }
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
+        String imageStorageName = armStorage.getImageStorageName(acv, cloudContext, stack);
         try {
             CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
@@ -77,6 +85,12 @@ public class AzureImageSetupService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
+
+        String customImageId = client.getCustomImageId(resourceGroupName, image.getImageName(), region, false);
+        if (!StringUtils.isEmpty(customImageId)) {
+            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!", customImageId, resourceGroupName);
+            return;
+        }
 
         createResourceGroupIfNotExists(client, resourceGroupName, region, stack);
         createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
