@@ -69,6 +69,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -81,6 +82,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -370,9 +372,13 @@ public class StackCreatorService {
         }
     }
 
-    private void fillInstanceMetadata(Stack stack) {
+    void fillInstanceMetadata(Stack stack) {
         long privateIdNumber = 0;
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+        //Gateway HostGroups are sorted first to start with privateIdNumber 0.
+        List<InstanceGroup> sortedInstanceGroups = stack.getInstanceGroups().stream()
+                .sorted(Comparator.comparing(InstanceGroup::getInstanceGroupType)
+                        .thenComparing(InstanceGroup::getGroupName)).collect(Collectors.toList());
+        for (InstanceGroup instanceGroup : sortedInstanceGroups) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);

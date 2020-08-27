@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,11 +10,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,6 +43,8 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
@@ -54,11 +60,13 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.validation.Validator;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackCreatorServiceTest {
@@ -329,4 +337,77 @@ public class StackCreatorServiceTest {
         assertTrue(base);
     }
 
+    @Test
+    public void testFillInstanceMetadataWhenMaster() {
+        Stack stack = new Stack();
+        InstanceGroup masterGroup = getARequestGroup("master", 1, InstanceGroupType.GATEWAY);
+        InstanceGroup workerGroup = getARequestGroup("worker", 2, InstanceGroupType.CORE);
+        InstanceGroup computeGroup = getARequestGroup("compute", 4, InstanceGroupType.CORE);
+        stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup));
+
+        underTest.fillInstanceMetadata(stack);
+
+        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
+                Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));
+        Long privateIdStart = 0L;
+        validateInstanceMetadataPrivateId("master", 1, privateIdStart, hostGroupInstances.get("master"));
+
+        privateIdStart = 1L;
+        validateInstanceMetadataPrivateId("compute", 4, privateIdStart, hostGroupInstances.get("compute"));
+
+        privateIdStart = 5L;
+        validateInstanceMetadataPrivateId("worker", 2, privateIdStart, hostGroupInstances.get("worker"));
+    }
+
+    @Test
+    public void testFillInstanceMetadataWhenManager() {
+        Stack stack = new Stack();
+        InstanceGroup managerGroup = getARequestGroup("manager", 1, InstanceGroupType.GATEWAY);
+        InstanceGroup gatewayGroup = getARequestGroup("gateway", 2, InstanceGroupType.CORE);
+        InstanceGroup computeGroup = getARequestGroup("compute", 0, InstanceGroupType.CORE);
+        InstanceGroup workerGroup = getARequestGroup("worker", 3, InstanceGroupType.CORE);
+        InstanceGroup masterGroup = getARequestGroup("master", 2, InstanceGroupType.CORE);
+        stack.setInstanceGroups(Set.of(masterGroup, workerGroup, computeGroup, managerGroup, gatewayGroup));
+
+        underTest.fillInstanceMetadata(stack);
+
+        Map<String, Set<InstanceMetaData>> hostGroupInstances = stack.getInstanceGroups().stream().collect(
+        Collectors.toMap(InstanceGroup::getGroupName, instanceGroup -> instanceGroup.getAllInstanceMetaData()));
+
+        Long privateIdStart = 0L;
+        validateInstanceMetadataPrivateId("manager", 1, privateIdStart, hostGroupInstances.get("manager"));
+
+        privateIdStart = 1L;
+        validateInstanceMetadataPrivateId("compute", 0, privateIdStart, hostGroupInstances.get("compute"));
+
+        privateIdStart = 1L;
+        validateInstanceMetadataPrivateId("gateway", 2, privateIdStart, hostGroupInstances.get("gateway"));
+
+        privateIdStart = 3L;
+        validateInstanceMetadataPrivateId("master", 2, privateIdStart, hostGroupInstances.get("master"));
+
+        privateIdStart = 5L;
+        validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+    }
+
+    private void validateInstanceMetadataPrivateId(String hostGroup, int nodeCount,
+            Long privateIdStart, Set<InstanceMetaData> instanceMetaData) {
+        assertEquals("Instance Metadata size should match for hostgroup: " + hostGroup, nodeCount, instanceMetaData.size());
+        for (InstanceMetaData im : instanceMetaData) {
+            assertEquals("Private Id should match for hostgroup: " + hostGroup, privateIdStart++, im.getPrivateId());
+        }
+    }
+
+    private InstanceGroup getARequestGroup(String hostGroup, int numOfNodes, InstanceGroupType hostGroupType) {
+        InstanceGroup requestHostGroup = new InstanceGroup();
+        requestHostGroup.setGroupName(hostGroup);
+        requestHostGroup.setInstanceGroupType(hostGroupType);
+
+        Set<InstanceMetaData> instanceMetadata = new HashSet<>();
+        IntStream.range(0, numOfNodes).forEach(count -> {
+            instanceMetadata.add(new InstanceMetaData());
+        });
+        requestHostGroup.setInstanceMetaData(instanceMetadata);
+        return requestHostGroup;
+    }
 }
