@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventDeserializer;
+import com.sequenceiq.cloudbreak.structuredevent.event.CDPStructuredEventDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonDeserialize(using = StructuredEventDeserializer.class)
+@JsonDeserialize(using = CDPStructuredEventDeserializer.class)
 public abstract class CDPStructuredEvent implements Serializable {
 
     public static final String TYPE_FIELD = "type";

@@ -28,20 +28,7 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
             @Param("accountId") Long accountId,
             @Param("id") Long id);
 
-    List<CDPStructuredEventEntity> findByAccountIdAndResourceTypeAndResourceCrn(
-            String accountId,
-            String resourceType,
-            String resourceCrn);
-
-    List<CDPStructuredEventEntity> findByAccountIdAndEventType(
-            String accountId,
-            StructuredEventType eventType);
-
-    @Query("SELECT se from CDPStructuredEventEntity se WHERE se.accountId = :accountId AND se.eventType = :eventType AND se.timestamp >= :since")
-    List<CDPStructuredEventEntity> findByAccountIdAndEventTypeSince(
-            @Param("accountId") String accountId,
-            @Param("eventType") StructuredEventType eventType,
-            @Param("since") Long since);
+    List<CDPStructuredEventEntity> findByEventTypeAndResourceCrn(StructuredEventType eventType, String resourceCrn);
 
     @Override
     default Optional<CDPStructuredEventEntity> findByNameAndAccountId(

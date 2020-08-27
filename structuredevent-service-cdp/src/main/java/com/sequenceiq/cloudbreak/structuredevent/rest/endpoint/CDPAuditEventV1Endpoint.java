@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructu
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE_ZIP;
 
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -33,7 +34,7 @@ public interface CDPAuditEventV1Endpoint {
     @ApiOperation(value = LIST_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
             nickname = "getCDPAuditEventsForResource")
     Page<CDPStructuredNotificationEvent> getAuditEvents(
-            @QueryParam("resourceCrn") String resourceCrn,
+            @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
             @QueryParam("page") @DefaultValue("0") Integer page,
             @QueryParam("size") @DefaultValue("100") Integer size);
 
@@ -42,5 +43,6 @@ public interface CDPAuditEventV1Endpoint {
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = LIST_IN_WORKSPACE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInAccount")
-    Response getAuditEventsZip(@QueryParam("resourceCrn") String resourceCrn);
+    Response getAuditEventsZip(
+            @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn);
 }

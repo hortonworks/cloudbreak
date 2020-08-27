@@ -34,8 +34,9 @@ public class CDPAuditEventV1Controller implements CDPAuditEventV1Endpoint {
 
     @Override
     public Response getAuditEventsZip(String resourceCrn) {
-        Page<CDPStructuredNotificationEvent> auditEvents = getAuditEvents(resourceCrn, 0, 1000);
-        return getAuditEventsZipResponse(auditEvents.getContent(), resourceCrn);
+        Collection<CDPStructuredNotificationEvent> events = structuredEventDBService.getNotificationEventsOfResource(StructuredEventType.NOTIFICATION,
+                resourceCrn);
+        return getAuditEventsZipResponse(events, resourceCrn);
     }
 
     private Response getAuditEventsZipResponse(Collection<CDPStructuredNotificationEvent> events, String resourceCrn) {

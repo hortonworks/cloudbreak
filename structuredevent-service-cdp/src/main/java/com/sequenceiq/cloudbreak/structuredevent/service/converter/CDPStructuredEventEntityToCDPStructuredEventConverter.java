@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.converter;
 
-import java.io.IOException;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
@@ -42,9 +42,10 @@ public class CDPStructuredEventEntityToCDPStructuredEventConverter extends Abstr
             Class<? extends CDPStructuredEvent> eventClass = classes.get(eventType);
             return JsonUtil.treeToValue(jsonNode, eventClass);
 
-        } catch (IOException e) {
-            LOGGER.error("Cannot convert structured event entity to structured event.", e);
-            return null;
+        } catch (Exception e) {
+            String msg = String.format("Cannot convert structured event entity to type: '%s' structured event.", source.getEventType());
+            LOGGER.error(msg, e);
+            throw new CloudbreakServiceException(msg, e);
         }
     }
 }
