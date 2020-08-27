@@ -60,6 +60,7 @@ public class EnvironmentNetworkProviderValidator {
             Map<CloudPlatform, Optional<Object>> providerNetworkParamPair = Map.of(
                     AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
+                    GCP, optional(networkDto.getGcp()),
                     MOCK, optional(networkDto.getMock()),
                     YARN, optional(networkDto.getYarn())
             );
