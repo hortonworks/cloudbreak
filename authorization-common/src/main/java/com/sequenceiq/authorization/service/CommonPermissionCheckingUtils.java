@@ -83,6 +83,18 @@ public class CommonPermissionCheckingUtils {
         umsAccountAuthorizationService.checkRightOfUser(userCrn, action);
     }
 
+    public void checkPermissionForUserOnResource(Map<String, AuthorizationResourceAction> resourcesWithActions, String userCrn) {
+        for (Map.Entry<String, AuthorizationResourceAction> resourceAndAction : resourcesWithActions.entrySet()) {
+            String resourceCrn = resourceAndAction.getKey();
+            AuthorizationResourceAction action = resourceAndAction.getValue();
+            DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action));
+            if (defaultResourceChecker != null && defaultResourceChecker.isDefault(resourceCrn)) {
+                throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
+            }
+        }
+        umsResourceAuthorizationService.checkIfUserHasAtLeastOneRight(userCrn, resourcesWithActions);
+    }
+
     public void checkPermissionForUserOnResource(AuthorizationResourceAction action, String userCrn, String resourceCrn) {
         DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action));
         if (defaultResourceChecker == null || !defaultResourceChecker.isDefault(resourceCrn)) {

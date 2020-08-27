@@ -429,7 +429,7 @@ public class GrpcUmsClient {
      */
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
-                rightChecks.stream().map(rightCheck -> rightCheckToString(rightCheck)).collect(Collectors.toList()));
+                rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
@@ -461,6 +461,7 @@ public class GrpcUmsClient {
                         .setRight(right)
                         .build())
                 .collect(Collectors.toList());
+        LOGGER.debug("Check if {} has rights to resources {}:", actorCrn, rightChecks);
         List<Boolean> result = hasRights(actorCrn, memberCrn, rightChecks, requestId);
         return resources.stream().collect(
                 Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));

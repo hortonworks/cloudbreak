@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityServi
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
@@ -358,4 +359,10 @@ public class StackOperations implements ResourceBasedCrnProvider {
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.DATAHUB;
     }
+
+    @Override
+    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return Optional.of(stackService.getByCrn(resourceCrn).getEnvironmentCrn());
+    }
+
 }

@@ -18,6 +18,8 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.util.CheckedFunction;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
@@ -36,6 +38,7 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
+@InternalReady
 @AuthorizationResource
 public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
@@ -61,7 +64,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private RetryableFreeIpaClientService retryableFreeIpaClientService;
 
     @CheckPermissionByResourceObject
-    public ServiceKeytabResponse generateServiceKeytab(@ResourceObject @Valid ServiceKeytabRequest request) {
+    public ServiceKeytabResponse generateServiceKeytab(@ResourceObject @Valid ServiceKeytabRequest request, @AccountId String accountIdForInternalUsage) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
             return kerberosMgmtV1Service.generateServiceKeytab(request, accountId);

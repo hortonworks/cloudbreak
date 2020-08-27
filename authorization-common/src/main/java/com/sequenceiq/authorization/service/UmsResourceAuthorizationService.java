@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -50,6 +52,20 @@ public class UmsResourceAuthorizationService {
         String right = umsRightProvider.getRight(action);
         String unauthorizedMessage = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
         checkRightOfUserOnResources(userCrn, right, resourceCrns, unauthorizedMessage);
+    }
+
+    public void checkIfUserHasAtLeastOneRight(String userCrn, Map<String, AuthorizationResourceAction> checkedRightsForResources) {
+        LOGGER.info("Check if user has at least one rigth: {}", checkedRightsForResources);
+        List<AuthorizationProto.RightCheck> rightCheckList = checkedRightsForResources.entrySet().stream().map(entry ->
+                AuthorizationProto.RightCheck.newBuilder()
+                .setResource(entry.getKey())
+                .setRight(umsRightProvider.getRight(entry.getValue()))
+                .build()).collect(Collectors.toList());
+        List<Boolean> rightCheckResults = umsClient.hasRights(userCrn, userCrn, rightCheckList, getRequestId());
+        LOGGER.info("Right check results: {}", rightCheckResults);
+        if (rightCheckResults.stream().noneMatch(Boolean::booleanValue)) {
+            throw new AccessDeniedException("You have no right to perform the action");
+        }
     }
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
