@@ -61,7 +61,6 @@ public class EnvironmentNetworkProviderValidator {
                     AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
                     MOCK, optional(networkDto.getMock()),
-                    GCP, optional(networkDto.getGcp()),
                     YARN, optional(networkDto.getYarn())
             );
             String supportedPlatforms = String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet()));
