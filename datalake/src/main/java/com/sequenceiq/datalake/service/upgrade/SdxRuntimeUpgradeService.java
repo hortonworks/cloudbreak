@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -228,13 +227,9 @@ public class SdxRuntimeUpgradeService {
     }
 
     private SdxUpgradeReplaceVms shouldReplaceVmsAfterUpgrade(SdxUpgradeRequest upgradeRequest) {
-        return Optional.ofNullable(upgradeRequest)
+        SdxUpgradeReplaceVms replaceVms = Optional.ofNullable(upgradeRequest)
                 .map(SdxUpgradeRequest::getReplaceVms)
-                .orElse(NullUtil.getIfNotNullOtherwise(upgradeRequest, this::determineReplaceVmsIfParamIsMissing, SdxUpgradeReplaceVms.DISABLED));
-    }
-
-    private SdxUpgradeReplaceVms determineReplaceVmsIfParamIsMissing(SdxUpgradeRequest request) {
-        SdxUpgradeReplaceVms replaceVms = isOsUpgrade(request) ? SdxUpgradeReplaceVms.ENABLED : SdxUpgradeReplaceVms.DISABLED;
+                .orElse(SdxUpgradeReplaceVms.ENABLED);
         LOGGER.debug("VM-s replacement after the upgrade process is {}", replaceVms.name());
         return replaceVms;
     }
