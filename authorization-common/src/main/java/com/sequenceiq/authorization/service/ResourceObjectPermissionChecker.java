@@ -3,8 +3,7 @@ package com.sequenceiq.authorization.service;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
-
-import javax.inject.Inject;
+import java.util.Map;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -24,18 +23,15 @@ import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Component
-public class ResourceObjectPermissionChecker implements PermissionChecker<CheckPermissionByResourceObject> {
+public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<CheckPermissionByResourceObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceObjectPermissionChecker.class);
-
-    @Inject
-    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
     public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
             MethodSignature methodSignature, long startTime) {
         // check fields of resourceObject
-        Object resourceObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceObject.class, Object.class);
+        Object resourceObject = getCommonPermissionCheckingUtils().getParameter(proceedingJoinPoint, methodSignature, ResourceObject.class, Object.class);
         checkPermissionOnResourceObjectFields(userCrn, resourceObject);
     }
 
@@ -84,7 +80,7 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
         if (CollectionUtils.isEmpty(resourceCrns)) {
             return;
         }
-        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrns);
+        getCommonPermissionCheckingUtils().checkPermissionForUserOnResources(action, userCrn, resourceCrns);
     }
 
     private void checkPermissionForResourceNameList(String userCrn, Object resultObject, AuthorizationResourceAction action) {
@@ -95,9 +91,9 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
         if (CollectionUtils.isEmpty(resourceNames)) {
             return;
         }
-        Collection<String> resourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action)
+        Collection<String> resourceCrns = getCommonPermissionCheckingUtils().getResourceBasedCrnProvider(action)
                 .getResourceCrnListByResourceNameList(Lists.newArrayList(resourceNames));
-        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, resourceCrns);
+        getCommonPermissionCheckingUtils().checkPermissionForUserOnResources(action, userCrn, resourceCrns);
     }
 
     private void checkPermissionForResourceCrn(String userCrn, Object resultObject, AuthorizationResourceAction action) {
@@ -105,7 +101,8 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
             throw new AccessDeniedException("Annotated field within resource object is not string, thus access is denied!");
         }
         String resourceCrn = (String) resultObject;
-        commonPermissionCheckingUtils.checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
     }
 
     private void checkPermissionForResourceName(String userCrn, Object resultObject, AuthorizationResourceAction action) {
@@ -113,8 +110,9 @@ public class ResourceObjectPermissionChecker implements PermissionChecker<CheckP
             throw new AccessDeniedException("Annotated field within resource object is not string, thus access is denied!");
         }
         String resourceName = (String) resultObject;
-        String resourceCrn = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnByResourceName(resourceName);
-        commonPermissionCheckingUtils.checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        String resourceCrn = getCommonPermissionCheckingUtils().getResourceBasedCrnProvider(action).getResourceCrnByResourceName(resourceName);
+        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
     }
 
     @Override

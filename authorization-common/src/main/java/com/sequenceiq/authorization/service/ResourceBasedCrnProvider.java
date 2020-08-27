@@ -1,6 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -26,6 +27,10 @@ public interface ResourceBasedCrnProvider {
 
     default List<String> getResourceCrnsInAccount() {
         throw new NotImplementedException("Logic for getting resource CRNs in account should have been implemented for authorization!");
+    }
+
+    default Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return Optional.empty();
     }
 
     AuthorizationResourceType getResourceType();

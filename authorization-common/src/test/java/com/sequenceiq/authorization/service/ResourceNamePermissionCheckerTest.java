@@ -1,18 +1,23 @@
 package com.sequenceiq.authorization.service;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
+import java.util.Optional;
 
+import org.hamcrest.collection.IsMapContaining;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -42,9 +47,10 @@ public class ResourceNamePermissionCheckerTest {
 
     @Test
     public void testCheckPermissions() {
-        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString(), anyString());
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
         when(resourceBasedCrnProvider.getResourceCrnByResourceName(any())).thenReturn(USER_CRN);
+        when(resourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(anyString())).thenReturn(Optional.empty());
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(AuthorizationResourceAction.EDIT_CREDENTIAL)).thenReturn(resourceBasedCrnProvider);
 
         CheckPermissionByResourceName rawMethodAnnotation = new CheckPermissionByResourceName() {
 
@@ -63,6 +69,10 @@ public class ResourceNamePermissionCheckerTest {
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceName.class), eq(String.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
-        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), anyString());
+        ArgumentCaptor<Map<String, AuthorizationResourceAction>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(captor.capture(), eq(USER_CRN));
+        Map<String, AuthorizationResourceAction> capturedActions = captor.getValue();
+        assertEquals(1, capturedActions.keySet().size());
+        assertThat(capturedActions, IsMapContaining.hasEntry(USER_CRN, AuthorizationResourceAction.EDIT_CREDENTIAL));
     }
 }

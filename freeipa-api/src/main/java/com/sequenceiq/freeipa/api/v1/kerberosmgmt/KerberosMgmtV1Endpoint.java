@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabModelNotes;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.doc.KeytabOperationsDescription;
@@ -36,7 +37,7 @@ public interface KerberosMgmtV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = KeytabOperationsDescription.DESCRIBE_GENERATE_SERVICE_KEYTAB, produces = MediaType.APPLICATION_JSON,
             notes = KeytabModelNotes.GENERATE_SERVICE_KEYTAB_NOTES, nickname = "generateServiceKeytabV1")
-    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request);
+    ServiceKeytabResponse generateServiceKeytab(@Valid ServiceKeytabRequest request, @AccountId @QueryParam("accountId") String accountIdForInternalUsage);
 
     @GET
     @Path("servicekeytab")
