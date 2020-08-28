@@ -36,10 +36,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -77,12 +73,6 @@ public class ClusterUpgradeAvailabilityService {
     private ClusterRepairService clusterRepairService;
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
@@ -114,19 +104,6 @@ public class ClusterUpgradeAvailabilityService {
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters));
-        }
-        return upgradeOptions;
-    }
-
-    public UpgradeV4Response checkIfClusterRuntimeUpgradable(Long workspaceId, String stackName, UpgradeV4Response upgradeOptions) {
-
-        Stack stack = stackService.getByNameInWorkspaceWithLists(stackName, workspaceId).orElseThrow();
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfigWithoutLists(stack);
-
-        try {
-            hostOrchestrator.checkIfClusterUpgradable(primaryGatewayConfig);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            upgradeOptions.appendReason(e.getMessage());
         }
         return upgradeOptions;
     }

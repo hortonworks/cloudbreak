@@ -238,9 +238,6 @@ public class StackOperations implements ResourceBasedCrnProvider {
             MDCBuilder.buildMdcContext(stack);
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
-            if (!osUpgrade && !request.isDryRun() && !request.isShowAvailableImagesSet()) {
-                clusterUpgradeAvailabilityService.checkIfClusterRuntimeUpgradable(workspaceId, stackName, upgradeResponse);
-            }
             return upgradeResponse;
         } else {
             LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
