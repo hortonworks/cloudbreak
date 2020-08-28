@@ -12,6 +12,7 @@ public enum AuthorizationResourceAction {
     DESCRIBE_ENVIRONMENT("environments/describeEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ACCESS_ENVIRONMENT("environments/accessEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ADMIN_FREEIPA("environments/adminFreeIPA", AuthorizationResourceType.ENVIRONMENT),
+    REPAIR_FREEIPA("environments/repairFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     CREATE_CREDENTIAL("environments/createCredential", AuthorizationResourceType.CREDENTIAL),
     CREATE_ENVIRONMENT("environments/createEnvironment", AuthorizationResourceType.ENVIRONMENT),
     GET_KEYTAB("environments/getKeytab", AuthorizationResourceType.ENVIRONMENT),

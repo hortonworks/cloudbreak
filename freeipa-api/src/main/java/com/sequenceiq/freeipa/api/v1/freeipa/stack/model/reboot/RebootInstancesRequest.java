@@ -20,7 +20,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class RebootInstancesRequest {
     @NotEmpty
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_ENVIRONMENT, variableType = AuthorizationVariableType.CRN)
+    @ResourceObjectField(action = AuthorizationResourceAction.REPAIR_FREEIPA, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     @ApiModelProperty(ModelDescriptions.FORCE_REBOOT)
