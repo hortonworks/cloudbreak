@@ -79,10 +79,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
-        LOGGER.info("Cleaning up SDX with name: {}", getName());
-        when(sdxTestClient.forceDelete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
-        awaitForFlow(key("delete-sdx-" + getName()));
-        await(DELETED, new RunningParameter().withSkipOnFail(true));
+        LOGGER.info("Cleaning up sdx with name: {}", getName());
+        if (getResponse() != null) {
+            when(sdxTestClient.forceDelete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
+            awaitForFlow(key("delete-sdx-" + getName()));
+            await(DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Sdx: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -137,6 +141,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public SdxTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
     public SdxTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
     }
@@ -245,6 +254,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public String getName() {
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
+    }
+
+    @Override
+    public String getCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("You have tried to assign to SdxTestDto," +
+                    " that hasn't been created and therefore has no Response object yet.");
+        }
+        return getResponse().getCrn();
     }
 
     public SdxRepairRequest getSdxRepairRequest() {

@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import static java.lang.String.format;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxClient> {
 
@@ -18,13 +21,17 @@ public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Starting repair on SDX: %s ", testDto.getName()));
-        Log.whenJson(LOGGER, " SDX repair request: ", testDto.getSdxRepairRequest());
+        Log.when(LOGGER, format(" Starting repair on SDX Internal: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " SDX Internal repair request: ", testDto.getSdxRepairRequest());
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest());
-        testDto.setFlow("SDX repair", flowIdentifier);
-        Log.when(LOGGER, " SDX repair have been initiated.");
+        testDto.setFlow("SDX Internal repair", flowIdentifier);
+        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+                .sdxEndpoint()
+                .getDetail(testDto.getName(), Collections.emptySet());
+        testDto.setResponse(detailedResponse);
+        Log.whenJson(LOGGER, " SDX Internal repair response: ", detailedResponse);
         return testDto;
     }
 }

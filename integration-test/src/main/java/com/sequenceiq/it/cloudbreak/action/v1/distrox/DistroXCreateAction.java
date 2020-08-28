@@ -16,13 +16,13 @@ public class DistroXCreateAction implements Action<DistroXTestDto, CloudbreakCli
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.whenJson(LOGGER, " Stack post request:\n", testDto.getRequest());
-        StackV4Response response = client.getCloudbreakClient()
+        Log.whenJson(LOGGER, " Distrox create request: ", testDto.getRequest());
+        StackV4Response stackV4Response = client.getCloudbreakClient()
                         .distroXV1Endpoint()
                         .post(testDto.getRequest());
-        testDto.setResponse(response);
-        testDto.setFlow("DistroX create", response.getFlowIdentifier());
-        Log.whenJson(LOGGER, " Stack created was successful:\n", testDto.getResponse());
+        testDto.setFlow("Distrox create", stackV4Response.getFlowIdentifier());
+        testDto.setResponse(stackV4Response);
+        Log.whenJson(LOGGER, " Distrox create response: ", stackV4Response);
         return testDto;
     }
 }

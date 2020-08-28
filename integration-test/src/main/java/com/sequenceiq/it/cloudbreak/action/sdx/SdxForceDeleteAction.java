@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,9 +9,9 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 public class SdxForceDeleteAction implements Action<SdxTestDto, SdxClient> {
 
@@ -18,12 +20,16 @@ public class SdxForceDeleteAction implements Action<SdxTestDto, SdxClient> {
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.whenJson(LOGGER, " SDX force delete request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getSdxClient()
                 .sdxEndpoint()
                 .delete(testDto.getName(), true);
         testDto.setFlow("SDX force delete", flowIdentifier);
-        Log.whenJson(LOGGER, " SDX delete response: ",
-                client.getSdxClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
+        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+                .sdxEndpoint()
+                .getDetail(testDto.getName(), Collections.emptySet());
+        testDto.setResponse(detailedResponse);
+        Log.whenJson(LOGGER, " SDX force delete response: ", detailedResponse);
         return testDto;
     }
 }

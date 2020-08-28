@@ -4,8 +4,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteAction;
@@ -16,6 +16,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
@@ -72,6 +73,10 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> refresh() {
         return new SdxRefreshAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> refreshInternal() {
+        return new SdxRefreshInternalAction();
     }
 
     public Action<SdxTestDto, SdxClient> repair() {

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -275,7 +276,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(freeIpaTestClient.describe(), key("refresh-freeipa-" + getName()));
+        LOGGER.info("Refresh FreeIPA with name: {}", getName());
+        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()));
     }
 
     @Override
@@ -305,8 +307,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
+        LOGGER.info("Cleaning up freeipa with name: {}", getName());
         when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+        await(DELETE_COMPLETED, new RunningParameter().withSkipOnFail(true));
     }
 
     @Override

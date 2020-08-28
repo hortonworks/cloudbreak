@@ -99,6 +99,15 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
     }
 
+    @Override
+    public String getCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("You have tried to assign to SdxInternalTestDto," +
+                    " that hasn't been created and therefore has no Response object yet.");
+        }
+        return getResponse().getCrn();
+    }
+
     public SdxInternalTestDto withDatabase(SdxDatabaseRequest sdxDatabaseRequest) {
         getRequest().setExternalDatabase(sdxDatabaseRequest);
         return this;
@@ -266,6 +275,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public SdxInternalTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
     @Override
     public SdxInternalTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
@@ -293,16 +306,20 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Refresh resource with name: {}", getName());
-        return when(sdxTestClient.describeInternal(), key("refresh-sdx-" + getName()));
+        LOGGER.info("Refresh SDX Internal with name: {}", getName());
+        return when(sdxTestClient.refreshInternal(), key("refresh-sdx-" + getName()));
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up sdx with name: {}", getName());
-        when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()))
-                .awaitForFlow(key("delete-sdx-" + getName()))
-                .await(DELETED, new RunningParameter().withSkipOnFail(true));
+        LOGGER.info("Cleaning up sdx internal with name: {}", getName());
+        if (getResponse() != null) {
+            when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
+            awaitForFlow(key("delete-sdx-" + getName()));
+            await(DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Sdx internal: {} response is null!", getName());
+        }
     }
 
     @Override

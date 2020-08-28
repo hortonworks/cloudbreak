@@ -54,6 +54,7 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
                         .withImageCatalog(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getCatalogName())
                         .withImageId(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId()))
                 .when(distroXTestClient.create())
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(STACK_AVAILABLE)
                 .then((context, distrox, client) -> {
                     distrox.getResponse();
