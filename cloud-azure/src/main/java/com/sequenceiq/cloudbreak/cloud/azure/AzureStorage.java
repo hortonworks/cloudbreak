@@ -90,7 +90,7 @@ public class AzureStorage {
     }
 
     private AzureImage getCustomImage(String vhd, String imageResourceGroupName, String region, AzureClient client) {
-        AzureImage image = client.getCustomImageId(imageResourceGroupName, vhd, region);
+        AzureImage image = client.getCustomImageId(imageResourceGroupName, vhd, region, true);
         String customImageId = image.getId();
         LOGGER.debug("Custom image id: {}", customImageId);
         return image;
