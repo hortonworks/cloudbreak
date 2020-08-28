@@ -203,18 +203,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
-        restartClusterArgs.setRedeployClientConfiguration(true);
-        ApiCommand restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
-        if (isExited(pollingResult)) {
-            throw new CancellationException("Cluster was terminated while restarting services.");
-        } else if (isTimeout(pollingResult)) {
-            throw new CloudbreakException("Timeout happened while restarting services.");
-        }
-    }
-
     private ClusterComponent getStackComponent(Set<ClusterComponent> components) {
         return components.stream()
                 .filter(clusterComponent -> clusterComponent.getName().equals(com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name()))
@@ -314,6 +302,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return command;
     }
 
+    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
+        Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
+                .filter(cmd -> "Restart".equals(cmd.getName())).findFirst();
+        ApiCommand restartCommand;
+        if (optionalRestartCommand.isPresent()) {
+            restartCommand = optionalRestartCommand.get();
+            LOGGER.debug("Restart for Cluster services is already running with id: [{}]", restartCommand.getId());
+        } else {
+            ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
+            restartClusterArgs.setRedeployClientConfiguration(true);
+            restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
+        }
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while restarting services.");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout happened while restarting services.");
+        }
+    }
+
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Restarting Cloudera Management Services in Cloudera Manager.");
         ApiCommandList apiCommandList = mgmtServiceResourceApi.listActiveCommands(SUMMARY);
@@ -397,16 +406,33 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        LOGGER.debug("Upgrading the CDP Runtime..");
+        LOGGER.debug("Upgrading the CDP Runtime...");
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
-        ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
-        upgradeArgs.setCdhParcelVersion(stackProductVersion);
-        ApiCommand apiCommand = clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, apiCommand.getId());
-        if (isExited(pollingResult)) {
-            throw new CancellationException("Cluster was terminated while waiting for CDP Runtime to be upgraded");
-        } else if (isTimeout(pollingResult)) {
-            throw new CloudbreakException("Timeout during CDP Runtime upgrade.");
+        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
+        Optional<ApiCommand> optionalUpgradeCommand = apiCommandList.getItems().stream()
+                .filter(cmd -> "UpgradeCluster".equals(cmd.getName())).findFirst();
+        try {
+            ApiCommand upgradeCommand;
+            if (optionalUpgradeCommand.isPresent()) {
+                upgradeCommand = optionalUpgradeCommand.get();
+                LOGGER.debug("Upgrade of CDP Runtime is already running with id: [{}]", upgradeCommand.getId());
+            } else {
+                ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
+                upgradeArgs.setCdhParcelVersion(stackProductVersion);
+                upgradeCommand = clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs);
+            }
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommand.getId());
+            if (isExited(pollingResult)) {
+                throw new CancellationException("Cluster was terminated while waiting for CDP Runtime to be upgraded");
+            } else if (isTimeout(pollingResult)) {
+                throw new CloudbreakException("Timeout during CDP Runtime upgrade.");
+            }
+        } catch (ApiException ex) {
+            if (ex.getResponseBody().contains("Cannot upgrade because the version is already CDH")) {
+                LOGGER.info("The Runtime has already been upgraded to {}", stackProductVersion);
+            } else {
+                throw ex;
+            }
         }
         LOGGER.info("Runtime is successfully upgraded!");
     }
