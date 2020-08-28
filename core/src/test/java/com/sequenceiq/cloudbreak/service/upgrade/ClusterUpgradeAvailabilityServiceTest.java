@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,10 +44,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -111,15 +102,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     @Mock
     private ClusterRepairService clusterRepairService;
-
-    @Mock
-    private HostOrchestrator hostOrchestrator;
-
-    @Mock
-    private GatewayConfigService gatewayConfigService;
-
-    @Mock
-    private GatewayConfig gatewayConfig;
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
@@ -320,32 +302,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         UpgradeV4Response actual = underTest.checkForNotAttachedClusters(stackViewV4Responses, response);
 
         assertNull(actual.getReason());
-    }
-
-    @Test
-    public void testSaltStatesArePresent() {
-        UpgradeV4Response response = new UpgradeV4Response();
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
-
-        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
-
-        assertNull(actual.getReason());
-    }
-
-    @Test
-    public void testSaltStatesAreMissing() throws CloudbreakOrchestratorFailedException {
-        UpgradeV4Response response = new UpgradeV4Response();
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
-        doThrow(new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
-                        + "Please ensure that your cluster is up to date!"))
-                .when(hostOrchestrator).
-                checkIfClusterUpgradable(any());
-
-        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
-
-        assertNotNull(actual.getReason());
-        assertEquals("Cluster is not upgradeable due to required Salt files not being present. "
-                + "Please ensure that your cluster is up to date!", actual.getReason());
     }
 
     @Test
