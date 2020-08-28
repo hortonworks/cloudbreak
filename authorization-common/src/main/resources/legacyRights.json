@@ -9,6 +9,7 @@
   "environments/deleteCdpEnvironment": "environments/write",
   "environments/describeEnvironment": "environments/read",
   "environments/accessEnvironment": "environments/accessEnvironment",
+  "environments/repairFreeIPA": "environments/write",
   "environments/adminFreeIPA": "environments/adminFreeIPA",
   "environments/createCredential": "environments/write",
   "environments/createEnvironment": "environments/write",
