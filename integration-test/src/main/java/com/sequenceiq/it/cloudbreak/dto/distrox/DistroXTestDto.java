@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.dto.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.time.Duration;
@@ -80,9 +79,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(distroXTestClient.forceDelete(), withoutLogError());
-        await(STACK_DELETED);
+        LOGGER.info("Cleaning up distrox with name: {}", getName());
+        if (getResponse() != null) {
+            when(distroXTestClient.forceDelete(), key("delete-distrox-" + getName()).withSkipOnFail(false));
+            awaitForFlow(key("delete-distrox-" + getName()));
+            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Distrox: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -185,6 +189,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
+    }
+
+    public DistroXTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
+    public DistroXTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
     }
 
     private void waitTillFlowInOperation() {

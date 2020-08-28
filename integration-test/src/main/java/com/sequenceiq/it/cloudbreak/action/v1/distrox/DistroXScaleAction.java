@@ -30,7 +30,8 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, String.format("Stack scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), hostGroup, count));
+        Log.when(LOGGER, String.format("Distrox scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), hostGroup, count));
+        Log.whenJson(LOGGER, " Distrox scale request: ", testDto.getRequest());
         DistroXScaleV1Request scaleRequest = new DistroXScaleV1Request();
         scaleRequest.setGroup(hostGroup);
         scaleRequest.setDesiredCount(count);
@@ -40,7 +41,9 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
         StackV4Response stackV4Response = client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
-        testDto.setFlow("DistroX scale", flowIdentifier);
+        testDto.setFlow("Distrox scale", flowIdentifier);
+        testDto.setResponse(stackV4Response);
+        Log.whenJson(LOGGER, " Distrox scale response: ", stackV4Response);
         LOGGER.info("Hardware info for stack after upscale: {}", stackV4Response.getHardwareInfoGroups());
         return testDto;
     }

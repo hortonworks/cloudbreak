@@ -295,18 +295,18 @@ public class EnvironmentTestDto
 
     @Override
     public EnvironmentTestDto refresh(TestContext context, CloudbreakClient client) {
-        LOGGER.info("Refresh resource with name: {}", getName());
-        return when(environmentTestClient.describe(), key("refresh-environment-" + getName()));
+        LOGGER.info("Refresh Environment with name: {}", getName());
+        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()));
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
+        LOGGER.info("Cleaning up environment with name: {}", getName());
         if (getResponse() != null) {
             when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
             await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
         } else {
-            LOGGER.info("Response field is null for env: {}", getName());
+            LOGGER.info("Environment: {} response is null!", getName());
         }
     }
 
@@ -337,6 +337,15 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto await(EnvironmentStatus status, Duration pollingInterval) {
         return await(status, emptyRunningParameter(), pollingInterval);
+    }
+
+    public EnvironmentTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
+    public EnvironmentTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
     }
 
     @Override

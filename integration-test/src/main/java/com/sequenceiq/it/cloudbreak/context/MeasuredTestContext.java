@@ -243,6 +243,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
     public <T extends SdxTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         return wrappedTestContext.awaitForFlow(entity, runningParameter);
     }
@@ -253,7 +258,12 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+    public <T extends DistroXTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends EnvironmentTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         return wrappedTestContext.awaitForFlow(entity, runningParameter);
     }
 

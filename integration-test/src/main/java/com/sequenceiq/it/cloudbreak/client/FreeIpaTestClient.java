@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
-import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaAttachChildEnvironmentAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
@@ -39,6 +40,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient>  describe() {
         return new FreeIpaDescribeAction();
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient>  refresh() {
+        return new FreeIpaRefreshAction();
     }
 
     public Action<FreeIpaTestDto, FreeIpaClient> start() {

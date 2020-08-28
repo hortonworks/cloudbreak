@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMulti
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -33,6 +34,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> describe() {
         return new EnvironmentGetAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> refresh() {
+        return new EnvironmentRefreshAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> list() {

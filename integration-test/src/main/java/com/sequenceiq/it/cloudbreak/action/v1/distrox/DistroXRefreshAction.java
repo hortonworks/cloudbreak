@@ -20,7 +20,7 @@ public class DistroXRefreshAction implements Action<DistroXTestDto, CloudbreakCl
         testDto.setResponse(
                 client.getCloudbreakClient().distroXV1Endpoint().getByName(testDto.getName(), Collections.emptySet())
         );
-        Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());
+        Log.whenJson(LOGGER, " Distrox get response: ", testDto.getResponse());
         return testDto;
     }
 }

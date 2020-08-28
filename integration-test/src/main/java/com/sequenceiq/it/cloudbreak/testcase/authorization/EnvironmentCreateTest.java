@@ -79,7 +79,6 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .when(environmentTestClient.delete())
-                .awaitForFlow(RunningParameter.key("EnvironmentDeleteAction"))
                 .validate();
     }
 

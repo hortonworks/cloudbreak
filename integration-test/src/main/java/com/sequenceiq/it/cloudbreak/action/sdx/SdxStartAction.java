@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import static java.lang.String.format;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
 
@@ -18,10 +21,15 @@ public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, format(" Start SDX: %s ", testDto.getName()));
+        Log.when(LOGGER, format(" Starting SDX: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " SDX start request: ", testDto.getRequest());
         FlowIdentifier flowIdentifier = client.getSdxClient().sdxEndpoint().startByName(testDto.getName());
         testDto.setFlow("SDX start", flowIdentifier);
-        Log.when(LOGGER, " SDX Start have been initiated. ");
+        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+                .sdxEndpoint()
+                .getDetail(testDto.getName(), Collections.emptySet());
+        testDto.setResponse(detailedResponse);
+        Log.whenJson(LOGGER, " SDX start response: ", detailedResponse);
         return testDto;
     }
 }
