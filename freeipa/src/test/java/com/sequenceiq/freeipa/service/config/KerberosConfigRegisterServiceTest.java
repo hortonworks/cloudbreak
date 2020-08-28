@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 class KerberosConfigRegisterServiceTest {
@@ -39,6 +40,9 @@ class KerberosConfigRegisterServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
 
     @Test
     void testRegister() {
@@ -59,6 +63,7 @@ class KerberosConfigRegisterServiceTest {
         freeIpa.setDomain("testdomain.local");
         freeIpa.setAdminPassword("asdf");
         when(freeIpaService.findByStackId(anyLong())).thenReturn(freeIpa);
+        when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
 
         underTest.register(1L);
 
