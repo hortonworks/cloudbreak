@@ -347,6 +347,18 @@
           {
             "name": "tez.task.launch.cmd-opts",
             "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.grouping.split-waves",
+            "value": 1.4
+          },
+          {
+            "name": "tez.grouping.min-size",
+            "value": 268435456
+          },
+          {
+            "name": "tez.grouping.max-size",
+            "value": 268435456
           }
         ],
         "roleConfigGroups": [

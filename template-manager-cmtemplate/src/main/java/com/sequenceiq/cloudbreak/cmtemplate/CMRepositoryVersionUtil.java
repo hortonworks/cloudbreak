@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class CMRepositoryVersionUtil {
@@ -66,13 +67,15 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
-    public static boolean isRazConfigurationSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        return isRazConfigurationSupported(clouderaManagerRepoDetails.getVersion());
+    public static boolean isRazConfigurationSupportedInDatalake(ClouderaManagerRepo clouderaManagerRepoDetails, CloudPlatform cloudPlatform) {
+        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support in Datalake");
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion,
+                CloudPlatform.AWS == cloudPlatform ? CLOUDERAMANAGER_VERSION_7_2_2 : CLOUDERAMANAGER_VERSION_7_2_1);
     }
 
-    public static boolean isRazConfigurationSupported(String version) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support");
-        return isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_1);
+    public static boolean isRazConfigurationSupportedInDatahub(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support in Datahub");
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_2);
     }
 
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {

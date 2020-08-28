@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -35,7 +37,7 @@ class AwsContextServiceTest {
 
     @Test
     void addResourcesToContextTest() {
-        ArrayList<CloudResource> resources = new ArrayList<>();
+        List<CloudResource> resources = new ArrayList<>();
         resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker1").group("worker").build());
         resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker2").group("worker").build());
         resources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker3").group("worker").build());
@@ -45,14 +47,14 @@ class AwsContextServiceTest {
         resources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume1").group("worker").build());
         resources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume3").group("compute").build());
         resources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume4").group("compute").build());
-        ArrayList<Group> groups = new ArrayList<>();
-        ArrayList<CloudInstance> workerInstances = new ArrayList<>();
+        List<Group> groups = new ArrayList<>();
+        List<CloudInstance> workerInstances = new ArrayList<>();
         workerInstances.add(new CloudInstance("W1", getInstanceTemplate(1L, "worker"), mock(InstanceAuthentication.class)));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(2L, "worker"), mock(InstanceAuthentication.class)));
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(3L, "worker"), mock(InstanceAuthentication.class)));
         groups.add(new Group("worker", InstanceGroupType.CORE, workerInstances, mock(Security.class), mock(CloudInstance.class),
                 mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty()));
-        ArrayList<CloudInstance> computeInstances = new ArrayList<>();
+        List<CloudInstance> computeInstances = new ArrayList<>();
         computeInstances.add(new CloudInstance("C1", getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class)));
         computeInstances.add(new CloudInstance("C2", getInstanceTemplate(5L, "compute"), mock(InstanceAuthentication.class)));
         computeInstances.add(new CloudInstance(null, getInstanceTemplate(6L, "compute"), mock(InstanceAuthentication.class)));
@@ -73,6 +75,21 @@ class AwsContextServiceTest {
         assertEquals(2, compute1.size());
         assertTrue(compute1.stream().anyMatch(cloudResource -> "compute1".equals(cloudResource.getName())));
         assertTrue(compute1.stream().anyMatch(cloudResource -> "volume3".equals(cloudResource.getName())));
+    }
+
+    @Test
+    public void throwExceptionWhenNotEnoughInstancesInGroup() {
+        List<CloudResource> instances = List.of();
+        ResourceBuilderContext context = new ResourceBuilderContext("context", Location.location(Region.region("us-west-1")), 0);
+        List<Group> groups = new ArrayList<>();
+        List<CloudInstance> computeInstances = new ArrayList<>();
+        computeInstances.add(new CloudInstance(null, getInstanceTemplate(4L, "compute"), mock(InstanceAuthentication.class)));
+        groups.add(new Group("compute", InstanceGroupType.CORE, computeInstances, mock(Security.class), mock(CloudInstance.class),
+                mock(InstanceAuthentication.class), "admin", "ssh", 100, Optional.empty()));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
+                () -> awsContextService.addInstancesToContext(instances, context, groups));
+        assertEquals("Not found enough instances in compute group, expected 1, got 0. " +
+                "Please check the instances on your cloud provider for further details.", exception.getMessage());
     }
 
     private InstanceTemplate getInstanceTemplate(long privateId, String group) {

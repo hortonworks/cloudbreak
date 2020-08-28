@@ -69,8 +69,8 @@ class AwsMockAccountMappingServiceTest {
     void testGetUserMappings() {
         Map<String, String> userMappings = underTest.getUserMappings(REGION, credential);
         assertThat(userMappings).isNotNull();
-        AccountMappingSubject.DATA_ACCESS_AND_RANGER_AUDIT_USERS.forEach(user -> assertThat(userMappings).contains(Map.entry(user, IAM_ROLE)));
-        assertThat(userMappings).hasSize(AccountMappingSubject.DATA_ACCESS_AND_RANGER_AUDIT_USERS.size());
+        AccountMappingSubject.ALL_SPECIAL_USERS.forEach(user -> assertThat(userMappings).contains(Map.entry(user, IAM_ROLE)));
+        assertThat(userMappings).hasSize(AccountMappingSubject.ALL_SPECIAL_USERS.size());
     }
 
     @Test

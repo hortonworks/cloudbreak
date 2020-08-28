@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
@@ -445,11 +447,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
-            if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsoft Azure.");
+            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+            if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
+                validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
-            if (!isRazSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version >= 7.2.1 and not " + sdxClusterRequest.getRuntime());
+            if (!isRazSupported(sdxClusterRequest.getRuntime(), cloudPlatform)) {
+                String errorMsg =  AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
+                validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -478,14 +483,15 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     /**
-     * Ranger Raz is only on 7.2.1 and later.  If runtime is empty, then sdx-internal call was used.
+     * Ranger Raz is only on 7.2.1 and later on Microsoft Azure, and only on 7.2.2 and later on Amazon Web Services.
+     * If runtime is empty, then sdx-internal call was used.
      */
-    private boolean isRazSupported(String runtime) {
+    private boolean isRazSupported(String runtime, CloudPlatform cloudPlatform) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> "7.2.1") > -1;
+        return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
     }
 
     /**

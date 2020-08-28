@@ -306,7 +306,7 @@ public class ModelDescriptions {
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for cloud storage";
         public static final String VARIANT = "Cluster manager variant";
         public static final String CLOUD_STORAGE_LOCATIONS = "storage locations by CDP services";
-        public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on ADLSv2.";
+        public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on S3 and ADLSv2.";
     }
 
     public static class GatewayModelDescription {
