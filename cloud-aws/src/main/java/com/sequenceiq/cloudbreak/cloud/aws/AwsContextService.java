@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -25,12 +24,6 @@ public class AwsContextService {
                     .map(InstanceTemplate::getPrivateId)
                     .collect(Collectors.toList());
             List<CloudResource> groupInstances = instances.stream().filter(inst -> inst.getGroup().equals(group.getName())).collect(Collectors.toList());
-            if (ids.size() > groupInstances.size()) {
-                String message = String.format("Not found enough instances in %s group, expected %s, got %s. " +
-                                "Please check the instances on your cloud provider for further details.", group.getName(), ids.size(),
-                        groupInstances.size());
-                throw new CloudConnectorException(message);
-            }
             for (int i = 0; i < ids.size(); i++) {
                 context.addComputeResources(ids.get(i), List.of(groupInstances.get(i)));
             }
