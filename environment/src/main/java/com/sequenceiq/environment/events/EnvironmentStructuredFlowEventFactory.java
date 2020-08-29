@@ -33,7 +33,7 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
     private NodeConfig nodeConfig;
 
     @Value("${info.app.version:}")
-    private String cbVersion;
+    private String serviceVersion;
 
     @Override
     public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed) {
@@ -41,7 +41,7 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
         Environment environment = environmentOptional.orElseThrow(notFound("Environment", resourceId));
         String resourceType = CDPStructuredFlowEvent.class.getSimpleName();
         CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, environment.getId(),
-                environment.getName(), nodeConfig.getId(), cbVersion, environment.getAccountId(), environment.getResourceCrn(), environment.getCreator(),
+                environment.getName(), nodeConfig.getId(), serviceVersion, environment.getAccountId(), environment.getResourceCrn(), environment.getCreator(),
                 environment.getResourceCrn(), null);
         return new CDPStructuredFlowEvent(resourceType, operationDetails, flowDetails, null);
     }

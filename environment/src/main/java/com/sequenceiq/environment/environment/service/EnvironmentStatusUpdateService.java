@@ -1,21 +1,17 @@
 package com.sequenceiq.environment.environment.service;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
-import com.sequenceiq.notification.NotificationService;
 
 @Service
 public class EnvironmentStatusUpdateService {
@@ -24,16 +20,12 @@ public class EnvironmentStatusUpdateService {
 
     private final EnvironmentService environmentService;
 
-    private final NotificationService notificationService;
-
-    private final EnvironmentResponseConverter environmentResponseConverter;
+    private final EventSenderService eventService;
 
     public EnvironmentStatusUpdateService(EnvironmentService environmentService,
-            NotificationService notificationService,
-            EnvironmentResponseConverter environmentResponseConverter) {
+            EventSenderService eventService) {
         this.environmentService = environmentService;
-        this.notificationService = notificationService;
-        this.environmentResponseConverter = environmentResponseConverter;
+        this.eventService = eventService;
     }
 
     public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
@@ -45,8 +37,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatus(environmentStatus);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
                         String.format("Cannot update status of environment, because it does not exist: %s. ", payload.getResourceId())
@@ -63,8 +54,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatusReason(failedFlowEvent.getException().getMessage());
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-                    notificationService.send(resourceEvent, simpleResponse, context.getFlowTriggerUserCrn());
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
                         String.format("Cannot update status of environment, because it does not exist: %s. ", failedFlowEvent.getResourceId())
@@ -76,7 +66,6 @@ public class EnvironmentStatusUpdateService {
         environment.setStatus(environmentStatus);
         Environment env = environmentService.save(environment);
         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-        notificationService.send(resourceEvent, List.of(environmentStatus), simpleResponse, env.getCreator());
+        eventService.sendEventAndNotification(environmentDto, env.getCreator(), resourceEvent);
     }
 }
