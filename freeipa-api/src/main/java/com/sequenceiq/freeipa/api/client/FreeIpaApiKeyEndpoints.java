@@ -3,6 +3,9 @@ package com.sequenceiq.freeipa.api.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
+import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
@@ -56,5 +59,20 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public OperationV1Endpoint getOperationV1Endpoint() {
         return getEndpoint(OperationV1Endpoint.class);
+    }
+
+    @Override
+    public DiagnosticsV1Endpoint getDiagnosticsEndpoint() {
+        return getEndpoint(DiagnosticsV1Endpoint.class);
+    }
+
+    @Override
+    public FlowEndpoint getFlowEndpoint() {
+        return getEndpoint(FlowEndpoint.class);
+    }
+
+    @Override
+    public FlowPublicEndpoint getFlowPublicEndpoint() {
+        return getEndpoint(FlowPublicEndpoint.class);
     }
 }
