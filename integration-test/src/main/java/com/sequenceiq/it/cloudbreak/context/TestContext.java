@@ -52,7 +52,9 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
@@ -706,6 +708,24 @@ public abstract class TestContext implements ApplicationContextAware {
         SdxInternalTestDto awaitEntity = get(key);
         SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
         flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
+        return entity;
+    }
+
+    public <T extends FreeIpaDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        checkShutdown();
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        FreeIpaDiagnosticsTestDto awaitEntiry = get(key);
+        FreeIpaClient freeIpaClient = getMicroserviceClient(FreeIpaClient.class, INTERNAL_ACTOR_ACCESS_KEY);
+        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntiry, freeIpaClient);
+        return entity;
+    }
+
+    public <T extends SdxDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        checkShutdown();
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxDiagnosticsTestDto awaitEntiry = get(key);
+        SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
+        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntiry, sdxClient);
         return entity;
     }
 

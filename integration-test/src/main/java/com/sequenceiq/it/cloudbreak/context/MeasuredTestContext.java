@@ -21,7 +21,9 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
@@ -252,6 +254,16 @@ public class MeasuredTestContext extends MockedTestContext {
 
     @Override
     public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends FreeIpaDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends SdxDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         return wrappedTestContext.awaitForFlow(entity, runningParameter);
     }
 
