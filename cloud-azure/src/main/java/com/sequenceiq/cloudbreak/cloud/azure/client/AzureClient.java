@@ -142,7 +142,7 @@ public class AzureClient {
 
     public boolean resourceGroupExists(String name) {
         try {
-                return getResourceGroups().contain(name);
+            return getResourceGroups().contain(name);
         } catch (CloudException e) {
             if (e.getMessage().contains("Status code 403")) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
@@ -371,7 +371,9 @@ public class AzureClient {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
             CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+            LOGGER.debug("Downloading {} container attributes.", container.getName());
             container.downloadAttributes();
+            LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
             cloudPageBlob.downloadAttributes();
             return cloudPageBlob.getCopyState();
         } catch (URISyntaxException e) {
@@ -408,7 +410,9 @@ public class AzureClient {
         try {
             CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-            return blobClient.getContainerReference(containerName);
+            CloudBlobContainer containerReference = blobClient.getContainerReference(containerName);
+            LOGGER.debug("Blob container {} reference retrieved.", containerReference.getName());
+            return containerReference;
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't get blob container, URI is not valid", e);
         } catch (InvalidKeyException e) {
@@ -514,7 +518,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -528,9 +532,13 @@ public class AzureClient {
             VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
             return new AzureImage(customImage.id(), customImage.name(), true);
         } else {
-            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-            return new AzureImage(customImage.id(), customImage.name(), false);
+            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
+            if (createIfNotFound) {
+                VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
+                return new AzureImage(customImage.id(), customImage.name(), false);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -549,13 +557,12 @@ public class AzureClient {
             }
             LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
-            return measure(() ->
-                            azure.virtualMachineCustomImages()
-                                    .define(imageName)
-                                    .withRegion(region)
-                                    .withExistingResourceGroup(resourceGroup)
-                                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                                    .create(),
+            return measure(() -> azure.virtualMachineCustomImages()
+                    .define(imageName)
+                    .withRegion(region)
+                    .withExistingResourceGroup(resourceGroup)
+                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                    .create(),
                     LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
     }
