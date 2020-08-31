@@ -212,7 +212,9 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
-        } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) && !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+        } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
+                !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
+                internalStackV4Request == null) {
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
