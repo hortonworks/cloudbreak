@@ -9,6 +9,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -21,6 +22,10 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxUpgradeTests extends PreconditionSdxE2ETest {
+
+    @Value("${integrationtest.upgrade.pollingInterval:4000}")
+    private long pollingInterval;
+
     @Inject
     private SdxTestClient sdxTestClient;
 
@@ -58,8 +63,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .when(sdxTestClient.upgrade(), key(sdx))
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx))
-                .awaitForFlow(key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx), pollingInterval)
+                .awaitForFlow(key(sdx), pollingInterval)
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

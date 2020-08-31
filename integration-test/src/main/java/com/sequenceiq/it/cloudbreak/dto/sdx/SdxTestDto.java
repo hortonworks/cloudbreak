@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -137,8 +138,16 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Long pollingInterval) {
+        return getTestContext().await(this, status, runningParameter, Duration.of(pollingInterval, ChronoUnit.MILLIS));
+    }
+
     public SdxTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
+    }
+
+    public SdxTestDto awaitForFlow(RunningParameter runningParameter, Long pollingIntervalInMs) {
+        return getTestContext().awaitForFlow(this, runningParameter, pollingIntervalInMs);
     }
 
     public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {

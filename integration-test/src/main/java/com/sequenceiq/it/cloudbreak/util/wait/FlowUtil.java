@@ -46,6 +46,12 @@ public class FlowUtil {
         return isFlowRunning(flowEndpoint, sdxTestDto.getResponse().getCrn(), sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
     }
 
+    public WaitResult waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient, Long pollingIntervalInMs) {
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        return isFlowRunning(flowEndpoint, sdxTestDto.getResponse().getCrn(), sdxTestDto.getLastKnownFlowChainId(),
+                sdxTestDto.getLastKnownFlowId(), pollingIntervalInMs);
+    }
+
     public WaitResult waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
         FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
         return isFlowRunning(flowEndpoint,
@@ -60,11 +66,16 @@ public class FlowUtil {
     }
 
     private WaitResult isFlowRunning(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {
+        return isFlowRunning(flowEndpoint, crn, flowChainId, flowId, pollingInterval);
+    }
+
+    private WaitResult isFlowRunning(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId,
+            String flowId, Long pollingIntervalInMs) {
         WaitResult waitResult = WaitResult.SUCCESSFUL;
         boolean flowRunning = true;
         int retryCount = 0;
         while (flowRunning && retryCount < maxRetry) {
-            sleep(pollingInterval);
+            sleep(pollingIntervalInMs);
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
                     LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);

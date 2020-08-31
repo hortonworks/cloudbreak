@@ -700,6 +700,15 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
+    public <T extends SdxTestDto> T awaitForFlow(T entity, RunningParameter runningParameter, Long pollingIntervalInMs) {
+        checkShutdown();
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxTestDto awaitEntity = get(key);
+        SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
+        flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient, pollingIntervalInMs);
+        return entity;
+    }
+
     public <T extends SdxInternalTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         checkShutdown();
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
@@ -762,7 +771,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends SdxTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
-            RunningParameter runningParameter) {
+            RunningParameter runningParameter, Duration pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Datalake await should be skipped beacause of previous error. await [%s]", desiredStatus));
@@ -772,6 +781,11 @@ public abstract class TestContext implements ApplicationContextAware {
         SdxTestDto awaitEntity = get(key);
         datalakeAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
         return entity;
+    }
+
+    public <T extends SdxTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
+            RunningParameter runningParameter) {
+        return await(entity, desiredStatus, runningParameter, getPollingDurationInMills());
     }
 
     public <T extends SdxInternalTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
