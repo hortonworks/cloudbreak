@@ -74,7 +74,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1).withRecipes(recipeName)
                 .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
