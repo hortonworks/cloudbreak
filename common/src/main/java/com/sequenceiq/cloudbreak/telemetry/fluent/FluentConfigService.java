@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
@@ -39,12 +40,16 @@ public class FluentConfigService {
 
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
+    private final MeteringConfiguration meteringConfiguration;
+
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
-            AnonymizationRuleResolver anonymizationRuleResolver) {
+            AnonymizationRuleResolver anonymizationRuleResolver,
+            MeteringConfiguration meteringConfiguration) {
         this.s3ConfigGenerator = s3ConfigGenerator;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
+        this.meteringConfiguration = meteringConfiguration;
     }
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
@@ -61,6 +66,11 @@ public class FluentConfigService {
             if (telemetry.isClusterLogsCollectionEnabled()) {
                 LOGGER.debug("Set anonymization rules (only for cluster log collection)");
                 builder.withAnonymizationRules(anonymizationRuleResolver.decodeRules(telemetry.getRules()));
+            }
+            if (enabled && meteringEnabled) {
+                builder
+                        .withMeteringAppName(meteringConfiguration.getDbusAppName())
+                        .withMeteringStreamName(meteringConfiguration.getDbusAppName());
             }
         }
         if (!enabled) {

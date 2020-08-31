@@ -13,25 +13,27 @@ public class MeteringConfigServiceTest {
 
     @Before
     public void setUp() {
-        underTest = new MeteringConfigService();
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
+        underTest = new MeteringConfigService(meteringConfiguration);
     }
 
     @Test
     public void testCreateMeteringConfigs() {
         // GIVEN
         // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myCrn",
+        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myName", "myCrn",
                 "DATAHUB", "1.0.0");
         // THEN
         assertTrue(result.isEnabled());
         assertEquals("DATAHUB", result.getServiceType());
+        assertEquals("stream", result.getStreamName());
     }
 
     @Test
     public void testCreateMeteringConfigsWithLowercaseServiceType() {
         // GIVEN
         // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myCrn",
+        MeteringConfigView result = underTest.createMeteringConfigs(true, "AWS", "myName", "myCrn",
                 "datahub", "1.0.0");
         // THEN
         assertTrue(result.isEnabled());
@@ -42,7 +44,7 @@ public class MeteringConfigServiceTest {
     public void testCreateMeteringConfigsIfDisabled() {
         // GIVEN
         // WHEN
-        MeteringConfigView result = underTest.createMeteringConfigs(false, "AWS", "myCrn",
+        MeteringConfigView result = underTest.createMeteringConfigs(false, "AWS", "myName", "myCrn",
                 "DATAHUB", "1.0.0");
         // THEN
         assertFalse(result.isEnabled());

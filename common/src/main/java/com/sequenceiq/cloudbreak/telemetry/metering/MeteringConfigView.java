@@ -11,17 +11,23 @@ public class MeteringConfigView implements TelemetryConfigView {
 
     private final String clusterCrn;
 
+    private final String clusterName;
+
     private final String serviceType;
 
     private final String serviceVersion;
+
+    private final String streamName;
 
     private final String platform;
 
     private MeteringConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.clusterCrn = builder.clusterCrn;
+        this.clusterName = builder.clusterName;
         this.serviceType = builder.serviceType;
         this.serviceVersion = builder.serviceVersion;
+        this.streamName = builder.streamName;
         this.platform = builder.platform;
     }
 
@@ -33,12 +39,20 @@ public class MeteringConfigView implements TelemetryConfigView {
         return clusterCrn;
     }
 
+    public String getClusterName() {
+        return clusterName;
+    }
+
     public String getServiceType() {
         return serviceType;
     }
 
     public String getServiceVersion() {
         return serviceVersion;
+    }
+
+    public String getStreamName() {
+        return streamName;
     }
 
     public String getPlatform() {
@@ -50,8 +64,10 @@ public class MeteringConfigView implements TelemetryConfigView {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
         map.put("clusterCrn", this.clusterCrn);
+        map.put("clusterName", this.clusterName);
         map.put("serviceType", this.serviceType);
         map.put("serviceVersion", this.serviceVersion);
+        map.put("streamName", this.streamName);
         map.put("platform", this.platform);
         return map;
     }
@@ -62,9 +78,13 @@ public class MeteringConfigView implements TelemetryConfigView {
 
         private String clusterCrn;
 
+        private String clusterName;
+
         private String serviceType;
 
         private String serviceVersion;
+
+        private String streamName;
 
         private String platform;
 
@@ -82,6 +102,11 @@ public class MeteringConfigView implements TelemetryConfigView {
             return this;
         }
 
+        public MeteringConfigView.Builder withClusterName(String clusterName) {
+            this.clusterName = clusterName;
+            return this;
+        }
+
         public MeteringConfigView.Builder withServiceType(String serviceType) {
             this.serviceType = serviceType;
             return this;
@@ -89,6 +114,11 @@ public class MeteringConfigView implements TelemetryConfigView {
 
         public MeteringConfigView.Builder withServiceVersion(String serviceVersion) {
             this.serviceVersion = serviceVersion;
+            return this;
+        }
+
+        public MeteringConfigView.Builder withStreamName(String streamName) {
+            this.streamName = streamName;
             return this;
         }
 

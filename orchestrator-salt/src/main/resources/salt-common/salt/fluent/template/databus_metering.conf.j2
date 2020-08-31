@@ -21,8 +21,8 @@
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
     event_message_field              message
-    headers                          app:{{ fluent.clusterType }}
-    stream_name                      Metering
+    headers                          {{ fluent.dbusMeteringAppHeaders }}
+    stream_name                      {{ fluent.dbusMeteringStreamName }}
     partition_key                    "#{Socket.gethostname}"
     {%- if fluent.proxyUrl %}
     proxy_url                        "{{ fluent.proxyUrl }}"
