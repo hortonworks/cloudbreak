@@ -28,7 +28,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -55,9 +54,6 @@ import com.sequenceiq.freeipa.util.CrnService;
 public class FreeIpaCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationService.class);
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialConverter;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -115,13 +111,7 @@ public class FreeIpaCreationService {
 
     public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
-        Future<String> ownerFuture;
-        if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
-            ownerFuture = intermediateBuilderExecutor.submit(() ->
-                    umsClient.getMachineUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getMachineUserName());
-        } else {
-            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getEmail());
-        }
+        Future<String> ownerFuture = initiateOwnerFetching(userCrn);
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
         Stack stack = stackConverter.convert(request, accountId, ownerFuture, userCrn, credential.getCloudPlatform());
         stack.setAppVersion(appVersion);
@@ -164,6 +154,17 @@ public class FreeIpaCreationService {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);
         }
+    }
+
+    private Future<String> initiateOwnerFetching(String userCrn) {
+        Future<String> ownerFuture;
+        if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
+            ownerFuture = intermediateBuilderExecutor.submit(() ->
+                    umsClient.getMachineUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getMachineUserName());
+        } else {
+            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getEmail());
+        }
+        return ownerFuture;
     }
 
     private void fillInstanceMetadata(Stack stack) {

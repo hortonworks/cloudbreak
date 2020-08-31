@@ -148,6 +148,7 @@ public class UserSyncService {
 
     private Operation performSyncForStacks(String accountId, String actorCrn, Set<String> userCrnFilter,
             Set<String> machineUserCrnFilter, List<Stack> stacks) {
+        logAffectedStacks(stacks);
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationService
                 .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
@@ -172,6 +173,15 @@ public class UserSyncService {
         }
 
         return operation;
+    }
+
+    private void logAffectedStacks(List<Stack> stacks) {
+        String stacksAffected = stacks.stream().map(stack ->
+                "environment crn: [" + stack.getEnvironmentCrn() + ']'
+                + " resource crn: [" + stack.getResourceCrn() + ']'
+                + " resource name: [" + stack.getName() + ']')
+                .collect(Collectors.joining("; "));
+        LOGGER.info("Affected stacks: {}", stacksAffected);
     }
 
     private List<Stack> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter,

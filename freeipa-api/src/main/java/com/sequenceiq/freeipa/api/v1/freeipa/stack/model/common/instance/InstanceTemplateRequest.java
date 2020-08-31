@@ -38,4 +38,13 @@ public class InstanceTemplateRequest extends InstanceTemplateBase {
     public void setAws(AwsInstanceTemplateParameters aws) {
         this.aws = aws;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceTemplateRequest{" +
+                "InstanceTemplateBase=" + super.toString() +
+                ", attachedVolumes=" + attachedVolumes +
+                ", aws=" + aws +
+                '}';
+    }
 }

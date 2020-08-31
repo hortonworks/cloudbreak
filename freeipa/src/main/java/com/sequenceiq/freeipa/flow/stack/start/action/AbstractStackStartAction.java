@@ -8,8 +8,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -29,17 +27,11 @@ import com.sequenceiq.freeipa.flow.stack.start.StackStartEvent;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartState;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 public abstract class AbstractStackStartAction<P extends Payload> extends AbstractStackAction<StackStartState, StackStartEvent, StackStartContext, P> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStackStartAction.class);
-
     @Inject
     private StackService stackService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;

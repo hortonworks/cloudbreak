@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -52,6 +53,7 @@ public class FreeIpaHealthDetailsService {
 
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = stack.getAllInstanceMetaDataList();
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
 

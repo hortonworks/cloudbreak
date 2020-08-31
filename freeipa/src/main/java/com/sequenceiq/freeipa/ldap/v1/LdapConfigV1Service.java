@@ -4,11 +4,14 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
@@ -29,6 +32,9 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
 public class LdapConfigV1Service {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LdapConfigV1Service.class);
+
     @Inject
     private LdapConfigService ldapConfigService;
 
@@ -168,26 +174,39 @@ public class LdapConfigV1Service {
         return createLdapConfigRequest;
     }
 
-    public DescribeLdapConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName)
-            throws FreeIpaClientException {
+    public DescribeLdapConfigResponse getForCluster(String environmentCrn, String accountId, String clusterName) throws FreeIpaClientException {
         Optional<Stack> stack = stackService.findByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stack.isPresent()) {
-            Optional<LdapConfig> existingLdapConfig = ldapConfigService.find(environmentCrn, accountId, clusterName);
-            LdapConfig ldapConfig;
-            if (existingLdapConfig.isPresent()) {
-                ldapConfig = existingLdapConfig.get();
-            } else {
-                FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack.get());
-                String bindUser = "ldapbind-" + clusterName;
-                Optional<User> existinguser = freeIpaClient.userFind(bindUser);
-                User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
-                String password = FreeIpaPasswordUtil.generatePassword();
-                freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
-                ldapConfig = ldapConfigRegisterService.createLdapConfig(stack.get().getId(), user.getDn(), password, clusterName, environmentCrn);
-            }
-            return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
+            return getLdapConfigIfFreeIPAExists(environmentCrn, accountId, clusterName, stack.get());
         } else {
+            LOGGER.debug("No FreeIPA for environment, try to fetch manually registered LDAP configuration");
             return describe(environmentCrn);
         }
+    }
+
+    private DescribeLdapConfigResponse getLdapConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack)
+            throws FreeIpaClientException {
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("FreeIPA exists for environment");
+        Optional<LdapConfig> existingLdapConfig = ldapConfigService.find(environmentCrn, accountId, clusterName);
+        LdapConfig ldapConfig;
+        if (existingLdapConfig.isPresent()) {
+            LOGGER.debug("LdapConfig already exists");
+            ldapConfig = existingLdapConfig.get();
+        } else {
+            ldapConfig = createNewLdapConfig(environmentCrn, clusterName, stack);
+        }
+        return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
+    }
+
+    private LdapConfig createNewLdapConfig(String environmentCrn, String clusterName, Stack stack) throws FreeIpaClientException {
+        LOGGER.debug("Create new LDAP config for environment in FreeIPA");
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        String bindUser = "ldapbind-" + clusterName;
+        Optional<User> existinguser = freeIpaClient.userFind(bindUser);
+        User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
+        String password = FreeIpaPasswordUtil.generatePassword();
+        freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
+        return ldapConfigRegisterService.createLdapConfig(stack.getId(), user.getDn(), password, clusterName, environmentCrn);
     }
 }

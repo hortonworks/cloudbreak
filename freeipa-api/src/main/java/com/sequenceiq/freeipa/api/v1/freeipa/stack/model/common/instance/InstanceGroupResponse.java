@@ -51,4 +51,14 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     public void setMetaData(Set<InstanceMetaDataResponse> metaData) {
         this.metaData = metaData;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceGroupResponse{" +
+                "InstanceGroupBase=" + super.toString() +
+                ", instanceTemplate=" + instanceTemplate +
+                ", securityGroup=" + securityGroup +
+                ", metaData=" + metaData +
+                '}';
+    }
 }

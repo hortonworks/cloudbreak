@@ -37,4 +37,13 @@ public abstract class VolumeBase {
     public void setType(String type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "VolumeBase{" +
+                "count=" + count +
+                ", type='" + type + '\'' +
+                ", size=" + size +
+                '}';
+    }
 }
