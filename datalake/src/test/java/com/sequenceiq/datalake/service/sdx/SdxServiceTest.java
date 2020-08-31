@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
 import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +22,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,6 +47,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -90,6 +91,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
 class SdxServiceTest {
+
+    private static final Map<String, String> TAGS = Collections.singletonMap("mytag", "tagecske");
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com";
 
@@ -193,12 +196,7 @@ class SdxServiceTest {
 
     @Test
     void testCreateSdxClusterWhenClusterWithSpecifiedNameAlreadyExistShouldThrowClusterAlreadyExistBadRequestException() {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
-        sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
         SdxCluster existing = new SdxCluster();
         existing.setEnvName("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(existing));
@@ -209,13 +207,7 @@ class SdxServiceTest {
 
     @Test
     void testCreateSdxClusterWithoutCloudStorageShouldThrownBadRequestException() {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.1");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -224,22 +216,24 @@ class SdxServiceTest {
     }
 
     @Test
+    void testCreateSdxClusterWithoutCloudStorageShouldNotThrownBadRequestExceptionInCaseOfInternal() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", CUSTOM);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        stackV4Request.setCluster(clusterV4Request);
+        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request);
+    }
+
+    @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException, TransactionExecutionException {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -290,14 +284,8 @@ class SdxServiceTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        sdxClusterRequest.setEnvironment("envir");
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -315,15 +303,9 @@ class SdxServiceTest {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         setSpot(sdxClusterRequest);
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -346,14 +328,8 @@ class SdxServiceTest {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         //doNothing().when(cloudStorageLocationValidator.validate("s3a://some/dir", ));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        sdxClusterRequest.setEnvironment("envir");
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -377,12 +353,7 @@ class SdxServiceTest {
     @ParameterizedTest
     @MethodSource("startParamProvider")
     void testCreateButEnvInStoppedStatus(EnvironmentStatus environmentStatus, String exceptionMessage) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
-        sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
 
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
@@ -420,13 +391,7 @@ class SdxServiceTest {
     @ParameterizedTest
     @MethodSource("deleteInProgressParamProvider")
     void testCreateButEnvInDeleteInProgressPhase(EnvironmentStatus environmentStatus) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
-        sdxClusterRequest.setEnvironment("envir");
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tag");
-        sdxClusterRequest.addTags(tags);
-
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
@@ -542,18 +507,8 @@ class SdxServiceTest {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.1.0");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
@@ -588,19 +543,9 @@ class SdxServiceTest {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(runtime);
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -623,13 +568,7 @@ class SdxServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatformAndRuntimeDataProvider")
     void testSdxCreateRazEnabledNoEntitlement(String testCaseName, CloudPlatform cloudPlatform, String runtime) throws IOException {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(runtime);
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
@@ -642,13 +581,7 @@ class SdxServiceTest {
 
     @Test
     void testSdxCreateRazEnabledNotAwsOrAzure() throws IOException {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.2");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN);
         sdxClusterRequest.setEnableRangerRaz(true);
@@ -660,13 +593,7 @@ class SdxServiceTest {
 
     @Test
     void testSdxCreateRazEnabledNoEntitlementAndNotAwsOrAzure() throws IOException {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.2");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN);
         sdxClusterRequest.setEnableRangerRaz(true);
@@ -690,13 +617,7 @@ class SdxServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatform710DataProvider")
     void testSdxCreateRazEnabled710Runtime(String testCaseName, CloudPlatform cloudPlatform, String expectedErrorMsg) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.1.0");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
@@ -719,13 +640,7 @@ class SdxServiceTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatform720DataProvider")
     void testSdxCreateRazEnabled720Runtime(String testCaseName, CloudPlatform cloudPlatform, String expectedErrorMsg) {
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime("7.2.0");
-        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.0", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
@@ -742,19 +657,9 @@ class SdxServiceTest {
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/" + runtime + "/aws/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(runtime);
-        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
-        cloudStorage.setFileSystemType(FileSystemType.S3);
-        cloudStorage.setBaseLocation("s3a://some/dir/");
-        cloudStorage.setS3(new S3CloudStorageV1Parameters());
-        sdxClusterRequest.setCloudStorage(cloudStorage);
+        withCloudStorage(sdxClusterRequest);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -776,13 +681,7 @@ class SdxServiceTest {
     @Test
     void testSdxCreateMediumDutySdxNoEntitlement() throws IOException {
         final String runtime = "7.2.2";
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(runtime);
-        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(false);
@@ -795,13 +694,7 @@ class SdxServiceTest {
     @Test
     void testSdxCreateMediumDutySdxEnabled710Runtime() {
         final String invalidRuntime = "7.1.0";
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(invalidRuntime);
-        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
@@ -814,13 +707,7 @@ class SdxServiceTest {
     @Test
     void testSdxCreateMediumDutySdxEnabled720Runtime() {
         final String invalidRuntime = "7.2.0";
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxClusterRequest.setRuntime(invalidRuntime);
-        sdxClusterRequest.setClusterShape(MEDIUM_DUTY_HA);
-        Map<String, String> tags = new HashMap<>();
-        tags.put("mytag", "tagecske");
-        sdxClusterRequest.addTags(tags);
-        sdxClusterRequest.setEnvironment("envir");
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
@@ -909,4 +796,21 @@ class SdxServiceTest {
         return null;
     }
 
+    private SdxClusterRequest createSdxClusterRequest(String runtime, SdxClusterShape shape) {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime(runtime);
+        sdxClusterRequest.setClusterShape(shape);
+        sdxClusterRequest.addTags(TAGS);
+        sdxClusterRequest.setEnvironment("envir");
+
+        return sdxClusterRequest;
+    }
+
+    private void withCloudStorage(SdxClusterRequest sdxClusterRequest) {
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
+    }
 }
