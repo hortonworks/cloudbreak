@@ -498,6 +498,10 @@ public class AzureClient {
         handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
     }
 
+    public Completable stopVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName));
+    }
+
     public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
         return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
