@@ -30,6 +30,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,7 +48,11 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -471,7 +476,7 @@ class SdxServiceTest {
 
     @Test
     void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
-        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
+        SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         mockCBCallForDistroXClusters(Sets.newHashSet());
@@ -485,7 +490,7 @@ class SdxServiceTest {
 
     @Test
     void testDeleteSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequestBecauseSdxCanNotDeletedIfAttachedClustersAreAvailable() {
-        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
+        SdxCluster sdxCluster = getSdxCluster();
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
 
         StackViewV4Response stackViewV4Response = new StackViewV4Response();
@@ -499,7 +504,7 @@ class SdxServiceTest {
 
     @Test
     void testDeleteSdxWhenSdxHasExternalDatabaseButCrnIsMissingShouldThrowNotFoundException() {
-        SdxCluster sdxCluster = getSdxClusterForDeletionTest();
+        SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.HA);
         sdxCluster.setDatabaseCrn(null);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
@@ -825,6 +830,38 @@ class SdxServiceTest {
                 + invalidRuntime, badRequestException.getMessage());
     }
 
+    @Test
+    public void testUpdateRuntimeVersionFromStackResponse() {
+        SdxCluster sdxCluster = getSdxCluster();
+        StackV4Response stackV4Response = new StackV4Response();
+        ClusterV4Response clusterV4Response = new ClusterV4Response();
+        ClouderaManagerV4Response cm = new ClouderaManagerV4Response();
+        ClouderaManagerProductV4Response cdpResponse = new ClouderaManagerProductV4Response();
+        cdpResponse.setName("CDH");
+        cdpResponse.setVersion("7.2.1-1.32.123-123");
+        cm.setProducts(Collections.singletonList(cdpResponse));
+        clusterV4Response.setCm(cm);
+        stackV4Response.setCluster(clusterV4Response);
+
+        underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
+
+        ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(sdxClusterArgumentCaptor.capture());
+        Assert.assertEquals("7.2.1", sdxClusterArgumentCaptor.getValue().getRuntime());
+
+        cdpResponse.setVersion("7.1.0");
+
+        underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
+        verify(sdxClusterRepository, times(2)).save(sdxClusterArgumentCaptor.capture());
+        Assert.assertEquals("7.1.0", sdxClusterArgumentCaptor.getValue().getRuntime());
+
+        cdpResponse.setVersion("7.0.2-valami");
+
+        underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
+        verify(sdxClusterRepository, times(3)).save(sdxClusterArgumentCaptor.capture());
+        Assert.assertEquals("7.0.2", sdxClusterArgumentCaptor.getValue().getRuntime());
+    }
+
     private void setSpot(SdxClusterRequest sdxClusterRequest) {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
@@ -853,7 +890,7 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
     }
 
-    private SdxCluster getSdxClusterForDeletionTest() {
+    private SdxCluster getSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_ID);
         sdxCluster.setInitiatorUserCrn(USER_CRN);

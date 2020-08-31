@@ -3,10 +3,10 @@ package com.sequenceiq.datalake.flow.create.handler;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STACK_CREATION_FINISHED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,11 +22,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
 import reactor.bus.Event;
@@ -45,6 +47,9 @@ class StackCreationHandlerTest {
     private SdxStatusService sdxStatusService;
 
     @Mock
+    private SdxService sdxService;
+
+    @Mock
     private EventBus eventBus;
 
     @InjectMocks
@@ -60,11 +65,13 @@ class StackCreationHandlerTest {
         long stackId = 2L;
         StackCreationWaitRequest stackCreationWaitRequest = new StackCreationWaitRequest(stackId, userId);
         Event receivedEvent = new Event<>(stackCreationWaitRequest);
-        doNothing().when(provisionerService).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
+        StackV4Response stackV4Response = new StackV4Response();
+        when(provisionerService.waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class))).thenReturn(stackV4Response);
         stackCreationHandler.accept(receivedEvent);
         verify(provisionerService, times(1)).waitCloudbreakClusterCreation(eq(stackId), any(PollingConfig.class));
         final ArgumentCaptor<String> eventSelector = ArgumentCaptor.forClass(String.class);
         final ArgumentCaptor<Event> sentEvent = ArgumentCaptor.forClass(Event.class);
+        verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(any(), eq(stackV4Response));
         verify(eventBus, times(1)).notify(eventSelector.capture(), sentEvent.capture());
         String eventNotified = eventSelector.getValue();
         Event event = sentEvent.getValue();
