@@ -2,10 +2,13 @@ package com.sequenceiq.environment.credential.v1.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
@@ -34,7 +37,7 @@ public class CredentialV1RequestToCredentialConverter {
 
     public Credential convert(CredentialRequest source) {
         Credential credential = new Credential();
-        credential.setName(source.getName());
+        credential.setName(Strings.isNullOrEmpty(source.getName()) ? UUID.randomUUID().toString() : source.getName());
         credential.setDescription(source.getDescription());
         credential.setCloudPlatform(source.getCloudPlatform());
         credential.setVerificationStatusText(source.getVerificationStatusText());

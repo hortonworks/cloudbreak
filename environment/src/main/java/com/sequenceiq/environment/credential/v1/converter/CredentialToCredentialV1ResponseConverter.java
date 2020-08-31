@@ -8,12 +8,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
@@ -101,7 +103,7 @@ public class CredentialToCredentialV1ResponseConverter {
             return null;
         }
         Credential credential = new Credential();
-        credential.setName(source.getName());
+        credential.setName(Strings.isNullOrEmpty(source.getName()) ? UUID.randomUUID().toString() : source.getName());
         credential.setDescription(source.getDescription());
         credential.setCloudPlatform(source.getCloudPlatform());
         credential.setVerificationStatusText(source.getVerificationStatusText());
