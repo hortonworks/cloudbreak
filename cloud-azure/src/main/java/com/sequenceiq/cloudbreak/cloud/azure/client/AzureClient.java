@@ -371,7 +371,9 @@ public class AzureClient {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
             CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+            LOGGER.debug("Downloading {} container attributes.", container.getName());
             container.downloadAttributes();
+            LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
             cloudPageBlob.downloadAttributes();
             return cloudPageBlob.getCopyState();
         } catch (URISyntaxException e) {
@@ -408,7 +410,9 @@ public class AzureClient {
         try {
             CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-            return blobClient.getContainerReference(containerName);
+            CloudBlobContainer containerReference = blobClient.getContainerReference(containerName);
+            LOGGER.debug("Blob container {} reference retrieved.", containerReference.getName());
+            return containerReference;
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't get blob container, URI is not valid", e);
         } catch (InvalidKeyException e) {
@@ -514,7 +518,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -525,12 +529,15 @@ public class AzureClient {
                 .findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
-            return new AzureImage(customImage.id(), customImage.name(), true);
+            return virtualMachineCustomImage.get().id();
         } else {
-            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-            return new AzureImage(customImage.id(), customImage.name(), false);
+            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
+            if (createIfNotFound) {
+                VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
+                return customImage.id();
+            } else {
+                return null;
+            }
         }
     }
 
