@@ -78,7 +78,8 @@ public class AzureInstanceConnector implements InstanceConnector {
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm.getCloudInstance());
             if (vm.getStatus() == InstanceStatus.STARTED) {
-                doReboot(completables, vm, statuses, () -> azureClient.rebootVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()));
+                doReboot(completables, vm, statuses, () -> azureClient.stopVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId())
+                        .andThen(azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId())));
             } else if (vm.getStatus() == InstanceStatus.STOPPED) {
                 doReboot(completables, vm, statuses, () -> azureClient.startVirtualMachineAsync(resourceGroupName, vm.getCloudInstance().getInstanceId()));
             } else {
