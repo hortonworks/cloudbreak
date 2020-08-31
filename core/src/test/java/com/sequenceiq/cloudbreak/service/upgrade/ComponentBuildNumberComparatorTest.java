@@ -37,13 +37,13 @@ public class ComponentBuildNumberComparatorTest {
     }
 
     @Test
-    public void testCompareShouldReturnFalseWhenTheCurrentIsEqualWithTheNewBuildNumber() {
+    public void testCompareShouldReturnTrueWhenTheCurrentIsEqualWithTheNewBuildNumber() {
         Image currentImage = createImage("1234");
         Image newImage = createImage("1234");
 
         boolean actual = underTest.compare(currentImage, newImage, BUILD_NUMBER_KEY);
 
-        assertFalse(actual);
+        assertTrue(actual);
     }
 
     @Test
