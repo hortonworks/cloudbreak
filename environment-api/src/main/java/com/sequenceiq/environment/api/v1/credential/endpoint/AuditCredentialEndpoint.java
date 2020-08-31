@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.api.doc.credential.CredentialDescriptor
 
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -74,4 +75,18 @@ public interface AuditCredentialEndpoint {
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getAuditPrerequisitesForCloudPlatform", httpMethod = "GET")
     CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
         @QueryParam("deploymentAddress") String deploymentAddress);
+
+    @DELETE
+    @Path("name/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON,
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteAuditCredentialByNameV1", httpMethod = "DELETE")
+    CredentialResponse deleteByName(@PathParam("name") String name);
+
+    @DELETE
+    @Path("crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = CredentialOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
+            notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "deleteAuditCredentialByResourceCrnV1", httpMethod = "DELETE")
+    CredentialResponse deleteByResourceCrn(@PathParam("crn") String crn);
 }
