@@ -5,8 +5,11 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -16,6 +19,8 @@ import com.sequenceiq.freeipa.repository.ChildEnvironmentRepository;
 
 @Service
 public class ChildEnvironmentService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChildEnvironmentService.class);
 
     @Inject
     private ChildEnvironmentRepository repository;
@@ -37,6 +42,8 @@ public class ChildEnvironmentService {
 
     public void attachChildEnvironment(AttachChildEnvironmentRequest request, String accountId) {
         Stack stack = stackService.getByOwnEnvironmentCrnAndAccountIdWithLists(request.getParentEnvironmentCrn(), accountId);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.info("Attaching child [{}] environment to parent env [{}]", request.getChildEnvironmentCrn(), request.getParentEnvironmentCrn());
         ChildEnvironment childEnvironment = new ChildEnvironment();
         childEnvironment.setEnvironmentCrn(request.getChildEnvironmentCrn());
         childEnvironment.setStack(stack);
@@ -48,6 +55,8 @@ public class ChildEnvironmentService {
                 request.getParentEnvironmentCrn(), request.getChildEnvironmentCrn(), accountId)
             .orElseThrow(() -> new NotFoundException(String.format("ChildEnvironment by parent environment crn [%s] and child environment crn [%s] not found",
                             request.getParentEnvironmentCrn(), request.getChildEnvironmentCrn())));
+        MDCBuilder.buildMdcContext(childEnvironment.getStack());
+        LOGGER.info("Detaching child env: {}", childEnvironment);
         repository.delete(childEnvironment);
     }
 }

@@ -28,4 +28,12 @@ public class SecurityGroupResponse extends SecurityGroupBase {
     public void setSecurityRules(List<SecurityRuleResponse> securityRules) {
         this.securityRules = securityRules;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityGroupResponse{" +
+                "SecurityGroupBase=" + super.toString() +
+                ", securityRules=" + securityRules +
+                '}';
+    }
 }

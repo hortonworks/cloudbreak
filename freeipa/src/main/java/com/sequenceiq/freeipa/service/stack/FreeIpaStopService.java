@@ -11,12 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class FreeIpaStopService {
@@ -32,9 +32,6 @@ public class FreeIpaStopService {
     @Inject
     private StackUpdater stackUpdater;
 
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
     public void stop(String environmentCrn, String accountId) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
@@ -47,6 +44,7 @@ public class FreeIpaStopService {
     }
 
     private void triggerStackStopIfNeeded(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         if (!isStopNeeded(stack)) {
             return;
         }

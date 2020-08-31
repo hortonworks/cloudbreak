@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationRequestBuilder;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
@@ -35,15 +36,13 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
-import com.sequenceiq.freeipa.service.TlsSecurityService;
+import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthListenerTask;
 import com.sequenceiq.freeipa.service.polling.clusterproxy.ServiceEndpointHealthPollerObject;
 import com.sequenceiq.freeipa.util.ClusterProxyServiceAvailabilityChecker;
-import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.vault.FreeIpaCertVaultComponent;
 
 @Service
@@ -90,9 +89,6 @@ public class ClusterProxyService {
     private FreeIpaCertVaultComponent freeIpaCertVaultComponent;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Inject
@@ -103,9 +99,6 @@ public class ClusterProxyService {
 
     @Inject
     private SecurityConfigService securityConfigService;
-
-    @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
     private FreeIpaService freeIpaService;
@@ -130,7 +123,7 @@ public class ClusterProxyService {
 
     private Optional<ConfigRegistrationResponse> registerFreeIpa(Stack stack, List<String> instanceIdsToRegister, boolean bootstrap,
             boolean waitForGoodHealth) {
-
+        MDCBuilder.buildMdcContext(stack);
         if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping registering FreeIpa [{}]", stack);
             return Optional.empty();
@@ -197,6 +190,7 @@ public class ClusterProxyService {
     }
 
     private void deregisterFreeIpa(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
         if (!clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.debug("Cluster Proxy integration disabled. Skipping deregistering FreeIpa [{}]", stack);
             return;
@@ -274,7 +268,7 @@ public class ClusterProxyService {
         if (securityConfig != null
                 && StringUtils.isNoneBlank(securityConfig.getClientCertVaultSecret(), securityConfig.getClientKeyVaultSecret())) {
             String clientCertRef = vaultPath(securityConfig.getClientCertVaultSecret());
-            String clientKeyRef =  vaultPath(securityConfig.getClientKeyVaultSecret());
+            String clientKeyRef = vaultPath(securityConfig.getClientKeyVaultSecret());
             clientCertificate = new ClientCertificate(clientKeyRef, clientCertRef);
         }
         return clientCertificate;

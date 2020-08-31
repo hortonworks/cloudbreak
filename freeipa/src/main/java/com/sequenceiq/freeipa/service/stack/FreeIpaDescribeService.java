@@ -2,8 +2,11 @@ package com.sequenceiq.freeipa.service.stack;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -16,6 +19,8 @@ import com.sequenceiq.freeipa.service.image.ImageService;
 
 @Service
 public class FreeIpaDescribeService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDescribeService.class);
 
     @Inject
     private StackService stackService;
@@ -34,9 +39,12 @@ public class FreeIpaDescribeService {
 
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         ImageEntity image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
-        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);
+        DescribeFreeIpaResponse response = stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);
+        LOGGER.trace("FreeIPA describe response: {}", response);
+        return response;
     }
 }

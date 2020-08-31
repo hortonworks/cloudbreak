@@ -20,6 +20,7 @@ import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.client.ClusterProxyErrorRpcListener;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -30,7 +31,6 @@ import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.TlsSecurityService;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
@@ -63,9 +63,6 @@ public class FreeIpaClientFactory {
     private ClusterProxyService clusterProxyService;
 
     @Inject
-    private GatewayConfigService gatewayConfigService;
-
-    @Inject
     private StackService stackService;
 
     @Inject
@@ -84,6 +81,7 @@ public class FreeIpaClientFactory {
 
     public FreeIpaClient getFreeIpaClientByAccountAndEnvironment(String environmentCrn, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         return getFreeIpaClientForStack(stack);
     }
 
