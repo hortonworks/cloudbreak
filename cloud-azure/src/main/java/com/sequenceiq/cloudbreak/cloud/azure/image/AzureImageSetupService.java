@@ -14,6 +14,7 @@ import org.springframework.util.StringUtils;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
@@ -46,11 +47,11 @@ public class AzureImageSetupService {
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        String customImageId = client.getCustomImageId(imageResourceGroupName, image.getImageName(), cloudContext.getLocation().getRegion().getRegionName(),
+        AzureImage customImage = client.getCustomImageId(imageResourceGroupName, image.getImageName(), cloudContext.getLocation().getRegion().getRegionName(),
                 false);
-        if (!StringUtils.isEmpty(customImageId)) {
-            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!",
-                    customImageId, imageResourceGroupName);
+        if (isCustomImageAvailable(customImage)) {
+            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!", customImage.getId(),
+                    imageResourceGroupName);
             return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
         }
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
@@ -87,6 +88,10 @@ public class AzureImageSetupService {
         }
     }
 
+    private boolean isCustomImageAvailable(AzureImage customImage) {
+        return customImage != null && !StringUtils.isEmpty(customImage.getId());
+    }
+
     private boolean isCopyStatusFailed(CopyState copyState) {
         return CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus());
     }
@@ -97,9 +102,10 @@ public class AzureImageSetupService {
         String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
 
-        String customImageId = client.getCustomImageId(resourceGroupName, image.getImageName(), region, false);
-        if (!StringUtils.isEmpty(customImageId)) {
-            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!", customImageId, resourceGroupName);
+        AzureImage customImage = client.getCustomImageId(imageResourceGroupName, image.getImageName(), cloudContext.getLocation().getRegion().getRegionName(),
+                false);
+        if (isCustomImageAvailable(customImage)) {
+            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!", customImage.getId(), resourceGroupName);
             return;
         }
 

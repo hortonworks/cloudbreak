@@ -142,7 +142,7 @@ public class AzureClient {
 
     public boolean resourceGroupExists(String name) {
         try {
-                return getResourceGroups().contain(name);
+            return getResourceGroups().contain(name);
         } catch (CloudException e) {
             if (e.getMessage().contains("Status code 403")) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
@@ -518,7 +518,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
+    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -529,12 +529,13 @@ public class AzureClient {
                 .findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            return virtualMachineCustomImage.get().id();
+            VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
+            return new AzureImage(customImage.id(), customImage.name(), true);
         } else {
             LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
             if (createIfNotFound) {
                 VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-                return customImage.id();
+                return new AzureImage(customImage.id(), customImage.name(), false);
             } else {
                 return null;
             }
@@ -556,13 +557,12 @@ public class AzureClient {
             }
             LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
-            return measure(() ->
-                            azure.virtualMachineCustomImages()
-                                    .define(imageName)
-                                    .withRegion(region)
-                                    .withExistingResourceGroup(resourceGroup)
-                                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                                    .create(),
+            return measure(() -> azure.virtualMachineCustomImages()
+                    .define(imageName)
+                    .withRegion(region)
+                    .withExistingResourceGroup(resourceGroup)
+                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                    .create(),
                     LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
     }
