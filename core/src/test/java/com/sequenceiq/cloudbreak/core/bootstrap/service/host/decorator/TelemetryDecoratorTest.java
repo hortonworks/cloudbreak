@@ -109,8 +109,8 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("user"), "root");
         verify(fluentConfigService, times(1)).createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class));
-        verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
-                anyString());
+        verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(),
+                anyString(), anyString(), anyString());
     }
 
     @Test
@@ -275,7 +275,7 @@ public class TelemetryDecoratorTest {
                 anyBoolean(), anyBoolean(), any(Telemetry.class)))
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
-                anyString())).willReturn(meteringConfigView);
+                anyString(), anyString())).willReturn(meteringConfigView);
         given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),

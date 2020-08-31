@@ -60,7 +60,7 @@ public class TelemetryConverter {
         this.telemetryPublisherDefaultValue = telemetryPublisherDefaultValue;
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
-        this.meteringEnabled = configuration.isMeteringEnabled();
+        this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
         this.monitoringEnabled = configuration.isMonitoringEnabled();
         this.clusterLogsCollection = configuration.isClusterLogsCollection();
     }

@@ -296,7 +296,7 @@ fluentd_start_with_update_systemd_units:
       - file: /etc/td-agent/output.conf{% endif %}
       - file: /etc/td-agent/input_databus.conf
       - file: /etc/td-agent/filter_databus.conf
-      - file: /etc/td-agent/output_databus.conf
+      - file: /etc/td-agent/databus_metering.conf
 
   service.running:
     - enable: True
@@ -308,6 +308,7 @@ fluentd_start_with_update_systemd_units:
        - file: /etc/td-agent/input_databus.conf
        - file: /etc/td-agent/filter_databus.conf
        - file: /etc/td-agent/output_databus.conf
+       - file: /etc/td-agent/databus_metering.conf
 {% else %}
 
 fs.file-max:

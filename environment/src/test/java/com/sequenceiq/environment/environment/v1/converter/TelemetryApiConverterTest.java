@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -34,7 +35,8 @@ public class TelemetryApiConverterTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, true);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, true, true);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 

@@ -140,6 +140,19 @@
   {% set proxy_full_url = None %}
 {% endif %}
 
+{% if dbus_metering_enabled %}
+  {% if salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+    {% set dbus_metering_app_headers = 'app:' + cluster_type + ',@metering-app:' + salt['pillar.get']('fluent:dbusMeteringAppName') %}
+    {% set dbus_metering_stream_name = salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+  {% else %}
+    {% set dbus_metering_app_headers = 'app:' + cluster_type %}
+    {% set dbus_metering_stream_name = 'Metering' %}
+  {% endif %}
+{% else %}
+  {% set dbus_metering_app_headers = None %}
+  {% set dbus_metering_stream_name = None %}
+{% endif %}
+
 {% set forward_port = 24224 %}
 
 {% do fluent.update({
@@ -172,6 +185,8 @@
     "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
     "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
+    "dbusMeteringAppHeaders": dbus_metering_app_headers,
+    "dbusMeteringStreamName": dbus_metering_stream_name,
     "dbusMonitoringEnabled": dbus_monitoring_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
