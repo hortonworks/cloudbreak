@@ -204,18 +204,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         sdxCluster.setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
-        } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) && !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
-            throw new BadRequestException("Cloud storage parameter is required.");
         }
-
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request);
         sdxCluster.setRuntime(runtimeVersion);
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);

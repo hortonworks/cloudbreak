@@ -53,7 +53,6 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
 
         testContext
                 .given(SdxTestDto.class)
-                    .withCloudStorage()
                     .withExternalDatabase(database)
                     .withSpotPercentage(100)
                 .when(sdxTestClient.create(), key(sdx))
