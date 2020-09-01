@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -149,6 +151,9 @@ public class StackCreatorService {
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
@@ -178,7 +183,6 @@ public class StackCreatorService {
                 determineBlueprint(stackRequest, workspace),
                 LOGGER,
                 "Stack request converted to stack took {} ms for stack {}", stackName);
-
             Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
 
             savedStack = transactionService.required(() -> {
@@ -224,6 +228,7 @@ public class StackCreatorService {
                 StatedImage imgFromCatalog = measure(() -> getImageCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
+                validateStackVersion(stackRequest, imgFromCatalog.getImage());
                 Stack newStack = measure(() -> stackService.create(
                             stack, platformString, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
                             LOGGER,
@@ -231,7 +236,7 @@ public class StackCreatorService {
                         );
 
                 try {
-                    LOGGER.info("Create cluster enity in the database {} ms with name {}.", stackName);
+                    LOGGER.info("Create cluster entity in the database {} ms with name {}.", stackName);
                     long clusterSaveStart = System.currentTimeMillis();
                     createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
                     LOGGER.info("Cluster save took {} ms", System.currentTimeMillis() - clusterSaveStart);
@@ -270,6 +275,10 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private void validateStackVersion(StackV4Request stackRequest, Image image) {
+        stackRuntimeVersionValidator.validate(stackRequest, image);
     }
 
     private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {

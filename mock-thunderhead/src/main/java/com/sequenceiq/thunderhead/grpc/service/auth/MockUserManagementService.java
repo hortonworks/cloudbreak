@@ -220,6 +220,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
 
+    private static final String CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE = "CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE";
+
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
@@ -301,6 +303,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.hbase.cloudstorage.enable}")
     private boolean enableHbaseCloudStorage;
+
+    @Value("${auth.mock.differentdatahubversionthandatalake.enabled}")
+    private boolean enableDifferentDataHubVersionThanDataLake;
 
     private String cbLicense;
 
@@ -601,6 +606,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableHbaseCloudStorage) {
             builder.addEntitlements(createEntitlement(CDP_SDX_HBASE_CLOUD_STORAGE));
+        }
+        if (enableDifferentDataHubVersionThanDataLake) {
+            builder.addEntitlements(createEntitlement(CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

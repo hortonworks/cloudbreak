@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
@@ -138,6 +139,10 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, false},
                 {"CDP_SDX_HBASE_CLOUD_STORAGE == true", CDP_SDX_HBASE_CLOUD_STORAGE,
                         (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, true},
+                {"CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE == false", CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE,
+                        (EntitlementCheckFunction) EntitlementService::isDifferentDataHubAndDataLakeVersionAllowed, false},
+                {"CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE == true", CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE,
+                        (EntitlementCheckFunction) EntitlementService::isDifferentDataHubAndDataLakeVersionAllowed, true},
         };
     }
 
