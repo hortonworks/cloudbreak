@@ -21,6 +21,7 @@
           "kafka-KAFKA_BROKER-BASE",
           "solr-SOLR_SERVER-BASE",
           "ranger-RANGER_ADMIN-BASE",
+          "solr-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
           "kafka-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
