@@ -86,6 +86,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
 
+    @VisibleForTesting
+    static final String CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE = "CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -171,6 +174,10 @@ public class EntitlementService {
 
     public boolean isInternalRepositoryForUpgradeAllowed(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
+    }
+
+    public boolean isDifferentDataHubAndDataLakeVersionAllowed(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE);
     }
 
     public boolean umsUserSyncModelGenerationEnabled(String actorCrn, String accountId) {
