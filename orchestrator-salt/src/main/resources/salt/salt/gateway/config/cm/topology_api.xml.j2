@@ -135,6 +135,10 @@
                 <name>{{ aclsauthz_prefix ~ "webhdfs.acl" }}</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "hbasejars.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
