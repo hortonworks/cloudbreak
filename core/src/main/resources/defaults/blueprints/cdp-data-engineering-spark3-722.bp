@@ -278,7 +278,19 @@
           "yarn-NODEMANAGER-COMPUTE",
           "yarn-GATEWAY-BASE"
         ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "spark3_on_yarn-GATEWAY-BASE",
+          "livy_for_spark3-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE"
+        ]
       }
+
     ]
   }
 }
