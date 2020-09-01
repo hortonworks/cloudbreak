@@ -74,9 +74,6 @@ public class FreeIpaClientFactory {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    @Inject
-    private ClusterProxyServiceAvailabilityChecker clusterProxyServiceAvailabilityChecker;
-
     public FreeIpaClient getFreeIpaClientForStackId(Long stackId) throws FreeIpaClientException {
         LOGGER.debug("Retrieving stack for stack id {}", stackId);
 
@@ -99,7 +96,7 @@ public class FreeIpaClientFactory {
     }
 
     private boolean useLegacyClusterProxyRegistration(Stack stack) {
-        return !clusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack);
+        return !ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack);
     }
 
     private FreeIpaClient getFreeIpaClient(Stack stack, boolean withPing, boolean forceCheckUnreachable, Optional<String> freeIpaFqdn)
