@@ -60,24 +60,24 @@ public class AltusMachineUserServiceTest {
     public void testCreateMachineUserAndGenerateKeys() {
         // GIVEN
         Optional<AltusCredential> altusCredential = Optional.of(new AltusCredential("accessKey", "secretKey".toCharArray()));
-        when(altusIAMService.generateMachineUserWithAccessKey(any(), any(), anyBoolean())).thenReturn(altusCredential);
+        when(altusIAMService.generateMachineUserWithAccessKey(any(), any(), any(), anyBoolean())).thenReturn(altusCredential);
 
         // WHEN
         underTest.generateDatabusMachineUserForFluent(stack, telemetry);
 
         // THEN
         assertEquals("secretKey", new String(altusCredential.get().getPrivateKey()));
-        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any(), anyBoolean());
+        verify(altusIAMService, times(1)).generateMachineUserWithAccessKey(any(), any(), any(), anyBoolean());
     }
 
     @Test
     public void testCleanupMachineUser() {
         // GIVEN
-        doNothing().when(altusIAMService).clearMachineUser(any(), any(), anyBoolean());
+        doNothing().when(altusIAMService).clearMachineUser(any(), any(), any(), anyBoolean());
         // WHEN
         underTest.clearFluentMachineUser(stack, telemetry);
 
         // THEN
-        verify(altusIAMService, times(1)).clearMachineUser(any(), any(), anyBoolean());
+        verify(altusIAMService, times(1)).clearMachineUser(any(), any(), any(), anyBoolean());
     }
 }

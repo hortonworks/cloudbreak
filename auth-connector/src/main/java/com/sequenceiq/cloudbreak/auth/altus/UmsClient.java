@@ -222,17 +222,17 @@ public class UmsClient {
         return users;
     }
 
-    public MachineUser getMachineUser(String requestId, String userCrn) {
-        return getMachineUserForUser(requestId, userCrn, userCrn);
+    public MachineUser getMachineUser(String requestId, String userCrn, String accountId) {
+        return getMachineUserForUser(requestId, userCrn, accountId, userCrn);
     }
 
-    public MachineUser getMachineUserForUser(String requestId, String userCrn, String machineUserName) {
+    public MachineUser getMachineUserForUser(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         Crn crn = Crn.fromString(userCrn);
         List<MachineUser> machineUsers = newStub(requestId).listMachineUsers(
                 ListMachineUsersRequest.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setAccountId(accountId)
                         .addMachineUserNameOrCrn(machineUserName)
                         .build()
         ).getMachineUserList();
@@ -282,7 +282,7 @@ public class UmsClient {
      * @param userCrn         actor useridentifier
      * @param machineUserName machine user name that will be created
      */
-    public Optional<String> createMachineUser(String requestId, String userCrn, String machineUserName) {
+    public Optional<String> createMachineUser(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
@@ -290,7 +290,7 @@ public class UmsClient {
         try {
             UserManagementProto.CreateMachineUserResponse response = newStub(requestId).createMachineUser(
                     UserManagementProto.CreateMachineUserRequest.newBuilder()
-                            .setAccountId(Crn.fromString(userCrn).getAccountId())
+                            .setAccountId(accountId)
                             .setMachineUserName(machineUserName)
                             .build());
             LOGGER.info("Machine user created: {}.", response.getMachineUser().getCrn());
@@ -387,7 +387,7 @@ public class UmsClient {
      * @param machineUserCrn machine user identifier
      * @param roleCrn        role identifier
      */
-    public void assignMachineUserRole(String requestId, String userCrn, String machineUserCrn, String roleCrn) {
+    public void assignMachineUserRole(String requestId, String userCrn, String accountId, String machineUserCrn, String roleCrn) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserCrn);
@@ -396,11 +396,11 @@ public class UmsClient {
             newStub(requestId).assignRole(
                     UserManagementProto.AssignRoleRequest.newBuilder()
                             .setActor(UserManagementProto.Actor.newBuilder()
-                                    .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                    .setAccountId(accountId)
                                     .setMachineUserNameOrCrn(machineUserCrn)
                                     .build())
                             .setAssignee(UserManagementProto.Assignee.newBuilder()
-                                    .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                    .setAccountId(accountId)
                                     .setMachineUserNameOrCrn(machineUserCrn)
                                     .build())
                             .setRoleNameOrCrn(roleCrn)
@@ -554,8 +554,8 @@ public class UmsClient {
      * @param machineUserName the machine user name
      * @return key creation response
      */
-    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName) {
-        return createAccessPrivateKeyPair(requestId, userCrn, machineUserName,
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String accountId, String machineUserName) {
+        return createAccessPrivateKeyPair(requestId, userCrn, accountId, machineUserName,
                 UserManagementProto.AccessKeyType.Value.UNSET);
     }
 
@@ -568,13 +568,13 @@ public class UmsClient {
      * @param accessKeyType   accessKeyType
      * @return key creation response
      */
-    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName,
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String accountId, String machineUserName,
             UserManagementProto.AccessKeyType.Value accessKeyType) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
-        builder.setAccountId(Crn.fromString(userCrn).getAccountId())
+        builder.setAccountId(accountId)
                 .setMachineUserNameOrCrn(machineUserName)
                 .setType(accessKeyType);
         if (!UserManagementProto.AccessKeyType.Value.UNSET.equals(accessKeyType)) {
@@ -591,12 +591,11 @@ public class UmsClient {
      * @param machineUserName machine user that owns the access keys
      * @return access key CRNs
      */
-    public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String machineUserName) {
+    public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         List<String> accessKeys = new ArrayList<>();
-        String accountId = Crn.fromString(userCrn).getAccountId();
         UserManagementProto.ListAccessKeysRequest.Builder listAccessKeysRequestBuilder =
                 UserManagementProto.ListAccessKeysRequest.newBuilder()
                         .setAccountId(accountId)

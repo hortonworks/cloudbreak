@@ -110,7 +110,7 @@ public class UmsAuthenticationServiceTest {
                 .setCrn(crn)
                 .build();
 
-        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), any())).thenReturn(machineUser);
+        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), anyString(), any())).thenReturn(machineUser);
         CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, "principal");
 
         assertEquals("machineUserId", cloudbreakUser.getUserId());

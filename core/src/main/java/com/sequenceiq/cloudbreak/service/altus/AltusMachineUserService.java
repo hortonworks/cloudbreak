@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
@@ -27,9 +28,11 @@ public class AltusMachineUserService {
      */
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
         if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
-            return altusIAMService.generateMachineUserWithAccessKey(
-                    getFluentDatabusMachineUserName(stack), stack.getCreator().getUserCrn(),
-                    telemetry.isUseSharedAltusCredentialEnabled());
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> altusIAMService.generateMachineUserWithAccessKey(
+                    getFluentDatabusMachineUserName(stack),
+                    ThreadBasedUserCrnProvider.getUserCrn(),
+                    Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                    telemetry.isUseSharedAltusCredentialEnabled()));
         }
         return Optional.empty();
     }
@@ -40,8 +43,12 @@ public class AltusMachineUserService {
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
         if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
-            String userCrn = stack.getCreator().getUserCrn();
-            altusIAMService.clearMachineUser(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> altusIAMService.clearMachineUser(
+                            machineUserName,
+                            ThreadBasedUserCrnProvider.getUserCrn(),
+                            Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                            telemetry.isUseSharedAltusCredentialEnabled()));
         }
     }
 

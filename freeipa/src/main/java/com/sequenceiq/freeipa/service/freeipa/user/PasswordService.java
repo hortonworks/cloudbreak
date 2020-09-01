@@ -180,14 +180,17 @@ public class PasswordService {
             case USER:
                 return umsClient.getUserDetails(actorCrn, userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
             case MACHINE_USER:
-                return umsClient.getMachineUserDetails(actorCrn, userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
+                return umsClient.getMachineUserDetails(actorCrn,
+                        userCrn,
+                        Crn.fromString(actorCrn).getAccountId(),
+                        MDCUtils.getRequestId()).getWorkloadUsername();
             default:
                 throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
         }
     }
 
     private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String userCrn,
-        String password, Optional<Instant> expirationInstant) {
+            String password, Optional<Instant> expirationInstant) {
         SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, userCrn, password, expirationInstant);
         freeIpaFlowManager.notify(request);
         return request;
