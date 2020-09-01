@@ -38,6 +38,7 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
         sdxDatabaseRequest.setCreate(false);
         testContext.given(SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
+                .withCloudStorage(getCloudStorageRequest(testContext))
                 .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
                 .withRuntimeVersion(commonClusterManagerProperties().getRuntimeVersion())
                 .withImageCatalogNameOnly(commonCloudProperties().getImageValidation().getSourceCatalogName())

@@ -208,6 +208,22 @@ class SdxServiceTest {
     }
 
     @Test
+    void testCreateSdxClusterWithoutCloudStorageShouldThrownBadRequestException() {
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxClusterRequest.setRuntime("7.2.1");
+        sdxClusterRequest.setClusterShape(LIGHT_DUTY);
+        Map<String, String> tags = new HashMap<>();
+        tags.put("mytag", "tagecske");
+        sdxClusterRequest.addTags(tags);
+        sdxClusterRequest.setEnvironment("envir");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals("Cloud storage parameter is required.", badRequestException.getMessage());
+    }
+
+    @Test
     void testCreateNOTInternalSdxClusterFromLightDutyTemplateShouldTriggerSdxCreationFlow() throws IOException, TransactionExecutionException {
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/runtime/7.1.0/aws/light_duty.json");
@@ -219,6 +235,11 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -298,6 +319,11 @@ class SdxServiceTest {
         sdxClusterRequest.setClusterShape(LIGHT_DUTY);
         sdxClusterRequest.setEnvironment("envir");
         setSpot(sdxClusterRequest);
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -570,6 +596,11 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -719,6 +750,11 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
+        cloudStorage.setFileSystemType(FileSystemType.S3);
+        cloudStorage.setBaseLocation("s3a://some/dir/");
+        cloudStorage.setS3(new S3CloudStorageV1Parameters());
+        sdxClusterRequest.setCloudStorage(cloudStorage);
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
             SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
@@ -748,7 +784,6 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        long id = 10L;
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -768,7 +803,6 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        long id = 10L;
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -788,7 +822,6 @@ class SdxServiceTest {
         sdxClusterRequest.addTags(tags);
         sdxClusterRequest.setEnvironment("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
-        long id = 10L;
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
