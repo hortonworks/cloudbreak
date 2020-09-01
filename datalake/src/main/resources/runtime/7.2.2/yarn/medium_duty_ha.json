@@ -38,7 +38,7 @@
           "memory": 16384
         }
       },
-      "nodeCount": 2,
+      "nodeCount": 1,
       "type": "CORE"
     }
   ]
