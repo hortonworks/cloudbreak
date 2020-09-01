@@ -58,9 +58,6 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private UserSyncStatusToUserSyncStatusResponseConverter userSyncStatusConverter;
 
-    @Inject
-    private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
-
     public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
@@ -111,7 +108,7 @@ public class StackToDescribeFreeIpaResponseConverter {
     }
 
     private void decoreateFreeIpaServerResponseWithLoadBalancedHost(Stack stack, FreeIpaServerResponse freeIpaServerResponse, FreeIpa freeIpa) {
-        if (Objects.nonNull(freeIpaServerResponse) && balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
+        if (Objects.nonNull(freeIpaServerResponse) && BalancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
             freeIpaServerResponse.setFreeIpaHost(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
             freeIpaServerResponse.setFreeIpaPort(stack.getGatewayport());
         }
