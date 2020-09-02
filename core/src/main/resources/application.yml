@@ -125,6 +125,7 @@ cb:
     contextPath: /redbeams
   runtimes:
     latest: "7.2.2"
+    upgradeSupported: "7.1.0"
 
   host.discovery.custom.hostname.enabled: false
 

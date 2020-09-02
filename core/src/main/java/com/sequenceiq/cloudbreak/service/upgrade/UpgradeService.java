@@ -88,6 +88,9 @@ public class UpgradeService {
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
+    @Inject
+    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
+
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
@@ -124,6 +127,7 @@ public class UpgradeService {
     public FlowIdentifier upgradeCluster(Long workspaceId, NameOrCrn stackNameOrCrn, String imageId) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
+        clusterUpgradeAvailabilityService.checkUpgradeSupported(stack);
         return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), imageId);
     }
 
