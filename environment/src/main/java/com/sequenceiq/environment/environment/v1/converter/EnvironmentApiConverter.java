@@ -174,7 +174,7 @@ public class EnvironmentApiConverter {
         if (Objects.isNull(azureEnvironmentParameters)) {
             return ParametersDto.builder()
                     .withAzureParameters(AzureParametersDto.builder()
-                            .withResourceGroup(buildResourceGroupDto())
+                            .withResourceGroup(buildDefaultResourceGroupDto())
                             .build())
                     .build();
         }
@@ -205,20 +205,15 @@ public class EnvironmentApiConverter {
                                 .map(AzureEnvironmentParameters::getResourceGroup)
                                 .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage()))
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
-                                .orElse(
-                                        buildResourceGroupDto())
+                                .orElse(buildDefaultResourceGroupDto())
                 ).build();
 
     }
 
     @NotNull
-    private AzureResourceGroupDto buildResourceGroupDto() {
-        ResourceGroupUsagePattern resourceGroupUsagePattern = azureSingleResourceGroupDeploymentEnabled()
-                ? ResourceGroupUsagePattern.USE_SINGLE
-                : ResourceGroupUsagePattern.USE_MULTIPLE;
+    private AzureResourceGroupDto buildDefaultResourceGroupDto() {
         return AzureResourceGroupDto.builder()
-                .withResourceGroupUsagePattern(resourceGroupUsagePattern)
-                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                 .build();
     }
 
@@ -226,9 +221,7 @@ public class EnvironmentApiConverter {
         return AzureResourceGroupDto.builder()
                 .withName(azureResourceGroup.getName())
                 .withResourceGroupUsagePattern(resourceGroupUsageToResourceGroupUsagePattern(azureResourceGroup.getResourceGroupUsage()))
-                .withResourceGroupCreation(StringUtils.hasText(azureResourceGroup.getName())
-                        ? ResourceGroupCreation.USE_EXISTING
-                        : ResourceGroupCreation.CREATE_NEW)
+                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                 .build();
     }
 

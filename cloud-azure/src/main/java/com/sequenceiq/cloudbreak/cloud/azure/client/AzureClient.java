@@ -152,10 +152,6 @@ public class AzureClient {
         }
     }
 
-    public boolean isResourceGroupEmpty(String name) {
-        return handleAuthException(() -> azure.genericResources().listByResourceGroup(name).isEmpty());
-    }
-
     public void deleteResourceGroup(String name) {
         handleAuthException(() -> azure.resourceGroups().deleteByName(name));
     }

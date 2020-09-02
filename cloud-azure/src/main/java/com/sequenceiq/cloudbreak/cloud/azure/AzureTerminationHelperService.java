@@ -110,16 +110,6 @@ public class AzureTerminationHelperService {
             List<String> securityGroupIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
             azureUtils.deleteSecurityGroups(client, securityGroupIds);
             deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
-
-            // deleting images
-            List<String> imageIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_MANAGED_IMAGE);
-            azureUtils.deleteImages(client, imageIds);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_MANAGED_IMAGE);
-
-            // deleting storage account
-            List<String> accountIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_STORAGE);
-            azureUtils.deleteStorageAccounts(client, accountIds);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_STORAGE);
         }
 
         LOGGER.debug("All the necessary resources have been deleted successfully");
