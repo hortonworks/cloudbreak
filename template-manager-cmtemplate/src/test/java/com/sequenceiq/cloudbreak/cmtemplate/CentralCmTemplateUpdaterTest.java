@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -91,7 +92,8 @@ public class CentralCmTemplateUpdaterTest {
 
     @Before
     public void setUp() {
-        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider());
+        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider(),
+                new HbaseCloudStorageServiceConfigProvider());
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
@@ -100,6 +102,15 @@ public class CentralCmTemplateUpdaterTest {
         RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.HIVE);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
         when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);
+
+        List<StorageLocationView> locations = new ArrayList<>();
+        StorageLocation hbaseRootDir = new StorageLocation();
+        hbaseRootDir.setProperty("hbase.rootdir");
+        hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(hbaseRootDir));
+        S3FileSystemConfigurationsView fileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         clouderaManagerRepo = new ClouderaManagerRepo();

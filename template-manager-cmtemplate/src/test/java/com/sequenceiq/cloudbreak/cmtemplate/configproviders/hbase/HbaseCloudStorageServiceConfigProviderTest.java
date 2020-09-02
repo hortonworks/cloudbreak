@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     private final HbaseCloudStorageServiceConfigProvider underTest = new HbaseCloudStorageServiceConfigProvider();
 
     @Test
-    public void testGetHbaseStorageServiceConfigs() {
+    public void testGetHbaseStorageServiceConfigsWhenAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -44,7 +43,20 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     @Test
-    public void testGetHbaseServiceConfigsWhenNoStorageConfigured() {
+    public void testGetHbaseStorageServiceConfigsWhenDataLake() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+
+        assertEquals(1, serviceConfigs.size());
+        assertEquals("hdfs_rootdir", serviceConfigs.get(0).getName());
+        assertEquals("s3a://bucket/cluster1/hbase", serviceConfigs.get(0).getValue());
+    }
+
+    @Test
+    public void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -54,13 +66,23 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     @Test
-    public void testIsConfigurationNotNeededWhenDatalake() {
+    public void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithDataLake() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, true);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
+        assertEquals(0, serviceConfigs.size());
+    }
+
+    @Test
+    public void testConfigurationNeededWhenDatalake() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
         boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
-        assertFalse(configurationNeeded);
+        assertTrue(configurationNeeded);
     }
 
     @Test
