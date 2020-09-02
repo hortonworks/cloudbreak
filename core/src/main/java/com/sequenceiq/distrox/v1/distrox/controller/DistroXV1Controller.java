@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
@@ -56,6 +57,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
@@ -105,6 +107,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private VmLogsToVmLogsResponseConverter vmlogsConverter;
+
+    @Inject
+    private ClusterDiagnosticsService clusterDiagnosticsService;
 
     @Override
     @DisableCheckPermissions
@@ -445,6 +450,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public VmLogsResponse getVmLogs() {
         LOGGER.debug("collectDiagnostics called");
         return vmlogsConverter.convert(vmLogsService.getVmLogs());
+    }
+
+    @Override
+    @CheckPermissionByResourceObject
+    public FlowIdentifier collectCmDiagnostics(@ResourceObject @Valid CmDiagnosticsCollectionV1Request request) {
+        String userCrn = crnService.getCloudbreakUser().getUserCrn();
+        LOGGER.debug("collectCmDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
+        return diagnosticsTriggerService.startCmDiagnostics(request, request.getStackCrn(), userCrn);
+    }
+
+    @Override
+    @DisableCheckPermissions
+    public List<String> getCmRoles(String stackCrn) {
+        return clusterDiagnosticsService.getClusterComponents(stackCrn);
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {

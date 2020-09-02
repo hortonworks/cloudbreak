@@ -1,14 +1,18 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.docs.DiagnosticsOperationDescriptions;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
@@ -36,4 +40,18 @@ public interface DiagnosticsV4Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
             nickname = "getStackCmVmLogs")
     VmLogsResponse getVmLogs();
+
+    @POST
+    @Path("cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
+            nickname = "collectCmDiagnostics")
+    FlowIdentifier collectCmDiagnostics(CmDiagnosticsCollectionRequest request);
+
+    @GET
+    @Path("cm/{stackCrn}/roles")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
+            nickname = "getCmRoles")
+    List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +43,14 @@ public class DiagnosticsFlowService {
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
+    public void init(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+        LOGGER.debug("Diagnostics init will be called only on the primary gateway address");
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
+        Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
+        init(stackId, parameters, hosts, new HashSet<>());
+    }
+
     public void init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -63,6 +73,14 @@ public class DiagnosticsFlowService {
         telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
     }
 
+    public void upload(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+        LOGGER.debug("Diagnostics upload will be called only on the primary gateway address");
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
+        Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
+        upload(stackId, parameters, hosts, new HashSet<>());
+    }
+
     public void upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -72,6 +90,14 @@ public class DiagnosticsFlowService {
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
+    }
+
+    public void cleanup(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+        LOGGER.debug("Diagnostics cleanup will be called only on the primary gateway address");
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
+        Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
+        cleanup(stackId, parameters, hosts, new HashSet<>());
     }
 
     public void cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
@@ -99,7 +125,7 @@ public class DiagnosticsFlowService {
     boolean filterNodes(Node node, Set<String> hosts, Set<String> hostGroups) {
         boolean result = true;
         if (CollectionUtils.isNotEmpty(hosts)) {
-            result = hosts.contains(node.getHostname());
+            result = hosts.contains(node.getHostname()) || hosts.contains(node.getPrivateIp()) || hosts.contains(node.getPublicIp());
         }
         if (result && CollectionUtils.isNotEmpty(hostGroups)) {
             result = hostGroups.contains(node.getHostGroup());
