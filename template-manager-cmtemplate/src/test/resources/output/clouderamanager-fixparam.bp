@@ -89,6 +89,12 @@
     {
       "refName": "hbase",
       "serviceType": "HBASE",
+      "serviceConfigs": [
+        {
+          "name": "hdfs_rootdir",
+          "value": "s3a://bucket/cluster1/hbase"
+        }
+      ],
       "roleConfigGroups": [
         {
           "refName": "hbase-REGIONSERVER-BASE",
