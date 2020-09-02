@@ -66,6 +66,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsOperationDescriptions;
+import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -336,4 +337,18 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
             nickname = "getDistroxCmVmLogsV4")
     VmLogsResponse getVmLogs();
+
+    @POST
+    @Path("diagnostics/cm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
+            nickname = "collectDistroxCmBasedDiagnosticsV1")
+    FlowIdentifier collectCmDiagnostics(@Valid CmDiagnosticsCollectionV1Request request);
+
+    @GET
+    @Path("diagnostics/cm/{stackCrn}/roles")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
+            nickname = "getDistroxCmRoles")
+    List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
 }
