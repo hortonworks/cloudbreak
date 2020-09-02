@@ -25,7 +25,6 @@ public enum EnvironmentStatus {
     CLUSTER_DEFINITION_CLEANUP_PROGRESS("Cleaning up cluster definitions"),
 
     UMS_RESOURCE_DELETE_IN_PROGRESS("User resources deletion in progress"),
-    PREREQUISITES_DELETE_IN_PROGRESS("Prerequisites deletion in progress"),
 
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS("Deleting Role Mappings"),
     S3GUARD_TABLE_DELETE_IN_PROGRESS("Deleting DynamoDB table"),

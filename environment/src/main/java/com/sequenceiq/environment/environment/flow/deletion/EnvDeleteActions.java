@@ -5,7 +5,6 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PREREQUISITES_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
@@ -206,7 +205,7 @@ public class EnvDeleteActions {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto envDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.PREREQUISITES_DELETE_IN_PROGRESS,
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.UMS_RESOURCE_DELETE_IN_PROGRESS,
                                 ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED, EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE);
                 EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
                         .withEnvironmentDto(envDto)
@@ -214,25 +213,6 @@ public class EnvDeleteActions {
                         .withId(payload.getResourceId())
                         .build();
                 sendEvent(context, DELETE_UMS_RESOURCE_EVENT.selector(), environmentDeletionDto);
-            }
-        };
-    }
-
-    @Bean(name = "PREREQUISITES_DELETE_STARTED_STATE")
-    public Action<?, ?> prerequisitesDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.PREREQUISITES_DELETE_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_PREREQUISITES_DELETION_STARTED, EnvDeleteState.PREREQUISITES_DELETE_STARTED_STATE);
-                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
-                        .withEnvironmentDto(envDto)
-                        .withForceDelete(payload.isForceDelete())
-                        .withId(payload.getResourceId())
-                        .build();
-                sendEvent(context, DELETE_PREREQUISITES_EVENT.selector(), environmentDeletionDto);
             }
         };
     }

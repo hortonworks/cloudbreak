@@ -92,21 +92,6 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenCreateNewResourceGroupThenNoError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW).build())
-                        .build())
-                .build();
-
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     public void testWhenUseExistingResourceGroupAndExistsThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -170,6 +155,27 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenUseExistingResourceGroupAndEmptyNameThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. If you specify to use a single resource group for your resources then please provide the name of the resource group to use.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
     public void testWhenUseExistingResourceGroupAndNotExistsThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -196,7 +202,7 @@ public class AzureParameterValidatorTest {
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
                         .build())
                 .build();

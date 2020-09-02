@@ -57,29 +57,21 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.build();
         }
         if (!singleResourceGroupDeploymentEnabled) {
-            if (Objects.nonNull(azureParametersDto.getAzureResourceGroupDto())
-                    && USE_SINGLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
-                return validationResultBuilder.error(
-                        "You specified to use a single resource group for all of your resources, but that feature is currently disabled").build();
-            } else {
-                return validationResultBuilder.build();
-            }
+            return validateNoEntitlement(validationResultBuilder, azureParametersDto);
         }
 
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();
-        if (Objects.isNull(azureResourceGroupDto)
-                || !USE_EXISTING.equals(azureResourceGroupDto.getResourceGroupCreation())) {
+        if (Objects.isNull(azureResourceGroupDto)) {
             return validationResultBuilder.build();
         }
         if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
-            if (StringUtils.isNotBlank(azureResourceGroupDto.getName())) {
-                return validationResultBuilder.error(
-                        String.format("You specified to use multiple resource groups for your resources, " +
-                                        "but then the single resource group name '%s' cannot not be specified.",
-                        azureResourceGroupDto.getName())).build();
-            } else {
-                return validationResultBuilder.build();
-            }
+            return validateResourceGroupUsageMultiple(validationResultBuilder, azureResourceGroupDto);
+        }
+        if (USE_EXISTING.equals(azureResourceGroupDto.getResourceGroupCreation()) && StringUtils.isBlank(azureResourceGroupDto.getName())) {
+            return validationResultBuilder.error(
+                    String.format("If you specify to use a single resource group for your resources then please " +
+                                    "provide the name of the resource group to use.",
+                            azureResourceGroupDto.getName())).build();
         }
 
         LOGGER.debug("Using single, existing resource group {}", azureResourceGroupDto.getName());
@@ -90,6 +82,27 @@ public class AzureParameterValidator implements ParameterValidator {
                     String.format("Resource group '%s' does not exist or insufficient permission to access it.", azureResourceGroupDto.getName()));
         }
         return validationResultBuilder.build();
+    }
+
+    private ValidationResult validateResourceGroupUsageMultiple(ValidationResultBuilder validationResultBuilder, AzureResourceGroupDto azureResourceGroupDto) {
+        if (StringUtils.isNotBlank(azureResourceGroupDto.getName())) {
+            return validationResultBuilder.error(
+                    String.format("You specified to use multiple resource groups for your resources, " +
+                                    "but then the single resource group name '%s' cannot not be specified.",
+                    azureResourceGroupDto.getName())).build();
+        } else {
+            return validationResultBuilder.build();
+        }
+    }
+
+    private ValidationResult validateNoEntitlement(ValidationResultBuilder validationResultBuilder, AzureParametersDto azureParametersDto) {
+        if (Objects.nonNull(azureParametersDto.getAzureResourceGroupDto())
+                && USE_SINGLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
+            return validationResultBuilder.error(
+                    "You specified to use a single resource group for all of your resources, but that feature is currently disabled").build();
+        } else {
+            return validationResultBuilder.build();
+        }
     }
 
     @Override
