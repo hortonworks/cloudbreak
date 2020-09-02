@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.ArrayList;
@@ -44,9 +46,23 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
         boolean datalakeCluster = source.getSharedServiceConfigs()
                 .map(SharedServiceConfigsView::isDatalakeCluster)
                 .orElse(false);
-
+        String cdhVersion = getCdhVersion(source);
+        boolean is722OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_2);
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
-                && !datalakeCluster;
+                && (!datalakeCluster || is722OrNewer);
+    }
+
+    private String getCdhVersion(TemplatePreparationObject source) {
+        if (source.getBlueprintView() == null) {
+            return "";
+        }
+
+        if (source.getBlueprintView().getProcessor() == null) {
+            return "";
+        }
+
+        return source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
     }
 }
