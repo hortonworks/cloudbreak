@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -33,15 +35,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -109,6 +114,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
     @Mock
     private ClusterApi clusterApi;
 
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     private boolean lockComponents;
 
     private Map<String, String> activatedParcels;
@@ -117,6 +125,10 @@ public class ClusterUpgradeAvailabilityServiceTest {
     public void setUp() {
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         activatedParcels = new HashMap<>();
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion(V_7_0_3);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        ReflectionTestUtils.setField(underTest, "upgradeSupportedVersion", V_7_0_3);
     }
 
     @Test
@@ -454,10 +466,13 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private Stack createStack(StackStatus stackStatus) {
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
         Stack stack = new Stack();
         stack.setId(2L);
         stack.setCloudPlatform("AWS");
         stack.setStackStatus(stackStatus);
+        stack.setCluster(cluster);
         return stack;
     }
 
