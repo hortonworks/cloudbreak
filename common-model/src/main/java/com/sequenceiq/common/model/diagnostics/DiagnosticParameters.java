@@ -55,6 +55,7 @@ public class DiagnosticParameters {
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
         parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
         parameters.put("additionalLogs", additionalLogs);
+        parameters.put("mode", null);
         Map<String, Object> fileCollector = new HashMap<>();
         fileCollector.put(FILECOLLECTOR_ROOT, parameters);
         return fileCollector;

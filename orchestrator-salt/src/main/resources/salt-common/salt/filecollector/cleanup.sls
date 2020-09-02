@@ -9,4 +9,6 @@ filecollector_clean_dirs:
 {% else %}
         - cdp-telemetry utils clean -d /var/lib/filecollector/ -p tmp/**
         - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.gz
+{% if filecollector.mode == "CLOUDERA_MANAGER" %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.zip{% endif %}
 {% endif %}

@@ -41,13 +41,15 @@ public class DiagnosticsDataToParameterConverter {
             awsBuilder.withS3Bucket(s3Config.getBucket());
             awsBuilder.withS3Location(Paths.get(s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
             awsBuilder.withS3Region(region);
-        } else {
+        } else if (logging.getAdlsGen2() != null) {
             AzureDiagnosticParametersBuilder azureBuilder = AzureDiagnosticParameters.builder();
             builder = azureBuilder;
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
             azureBuilder.withAdlsv2StorageAccount(adlsGen2Config.getAccount());
             azureBuilder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
             azureBuilder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+        } else {
+            builder = DiagnosticParameters.builder();
         }
         builder.withDestination(request.getDestination());
         builder.withDescription(request.getDescription());

@@ -125,4 +125,6 @@ public interface ClusterApi {
     ClusterStatusService clusterStatusService();
 
     ClusterDecomissionService clusterDecomissionService();
+
+    ClusterDiagnosticsService clusterDiagnosticsService();
 }
