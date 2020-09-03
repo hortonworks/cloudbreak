@@ -80,6 +80,7 @@ warning_metering_systemd:
   cmd.run:
     - name: echo "Warning - Metering won't be installed/used as it requires systemd"
 {% endif %}
+{% else %}
 warning_metering_os:
   cmd.run:
     - name: echo "Warning - Metering is not supported on this OS ({{ os }})"
