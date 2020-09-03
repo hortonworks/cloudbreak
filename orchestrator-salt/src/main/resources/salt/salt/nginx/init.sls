@@ -20,6 +20,7 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/saltapi.conf
+    - template: jinja
 
 /etc/nginx/sites-enabled/ssl-locations.d/saltboot.conf:
   file.managed:
