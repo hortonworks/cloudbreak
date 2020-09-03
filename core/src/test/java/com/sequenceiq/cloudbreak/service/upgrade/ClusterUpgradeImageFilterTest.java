@@ -278,6 +278,35 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
+    public void testFilterShouldReturnReasonMessageWhenTheCmVersionIsLowerButStackIsGreater() {
+        Image lowerCMVersion = createImageWithLowerCmVersion();
+        List<Image> availableImages = List.of(lowerCMVersion);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
+
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, lowerCMVersion, "cm", "cm-build-number")).thenReturn(false);
+
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
+
+        assertEquals(0, actual.getAvailableImages().getCdhImages().size());
+    }
+
+    @Test
+    public void testFilterShouldReturnReasonMessageWhenTheCmVersionIsGreaterButStackIsLower() {
+        Image image = createImageWithGreaterCmVersionButLowerStackVersion();
+        List<Image> availableImages = List.of(image);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
+
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, "cm", "cm-build-number")).thenReturn(true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, "stack", "cdh-build-number")).thenReturn(false);
+
+        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
+
+        assertEquals(0, actual.getAvailableImages().getCdhImages().size());
+    }
+
+    @Test
     public void testFilterShouldReturnTheProperImageWhenTheCurrentImageIsAlsoAvailable() {
         Image imageWithSameId = createImageWithCurrentImageId();
         List<Image> availableImages = List.of(properImage, imageWithSameId);
@@ -376,6 +405,12 @@ public class ClusterUpgradeImageFilterTest {
     private Image createImageWithLowerCmVersion() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                getParcels(), null, null);
+    }
+
+    private Image createImageWithGreaterCmVersionButLowerStackVersion() {
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
+                Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 getParcels(), null, null);
     }
 
