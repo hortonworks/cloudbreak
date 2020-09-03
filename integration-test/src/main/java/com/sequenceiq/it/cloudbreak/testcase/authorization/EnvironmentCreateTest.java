@@ -65,11 +65,11 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("EnvironmentGetAction"));
         testFreeipaCreation(testContext, mockedTestContext);
         testContext
@@ -100,15 +100,15 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 //testing unathorized freeipa calls for the environment
                 .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("FreeIpaDescribeAction"))
                 .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/stopEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("FreeIpaStopAction"))
                 .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/startEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("FreeIpaStartAction"));
     }
 
