@@ -72,8 +72,6 @@ import freemarker.template.Configuration;
 @RunWith(Parameterized.class)
 public class AzureTemplateBuilderTest {
 
-    private static final String V16 = "1.16";
-
     private static final String USER_ID = "horton@hortonworks.com";
 
     private static final Long WORKSPACE_ID = 1L;
@@ -81,8 +79,6 @@ public class AzureTemplateBuilderTest {
     private static final String CORE_CUSTOM_DATA = "CORE";
 
     private static final String GATEWAY_CUSTOM_DATA = "GATEWAY";
-
-    private static final String CUSTOM_IMAGE_NAME = "cloudbreak-image.vhd";
 
     private static final String LATEST_TEMPLATE_PATH = "templates/arm-v2.ftl";
 
@@ -137,8 +133,6 @@ public class AzureTemplateBuilderTest {
     private final Map<String, String> tags = new HashMap<>();
 
     private final String templatePath;
-
-    private final Map<String, String> defaultTags = new HashMap<>();
 
     public AzureTemplateBuilderTest(String templatePath) {
         this.templatePath = templatePath;
@@ -214,11 +208,11 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, userDefinedTags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+        String templateString = azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                 AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -248,12 +242,12 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
-        String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+        String templateString = azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                 AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -277,13 +271,13 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -307,13 +301,13 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -338,7 +332,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -346,7 +340,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -366,7 +360,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -374,7 +368,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -394,7 +388,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -402,7 +396,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -422,7 +416,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -430,7 +424,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -452,7 +446,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
 
@@ -460,7 +454,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -483,7 +477,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -491,7 +485,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -517,7 +511,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -525,7 +519,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -549,7 +543,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -557,7 +551,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -579,7 +573,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -587,7 +581,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -609,7 +603,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -617,7 +611,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -640,7 +634,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(Collections.emptyMap());
@@ -648,7 +642,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -671,7 +665,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -679,7 +673,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -702,7 +696,7 @@ public class AzureTemplateBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -710,7 +704,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -744,7 +738,7 @@ public class AzureTemplateBuilderTest {
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -752,7 +746,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
-                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, cloudContext, cloudStack,
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);

@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAcco
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -74,26 +73,6 @@ public class AzureStorage {
             return ArmAttachedStorageOption.SINGLE;
         }
         return ArmAttachedStorageOption.valueOf(attachedStorageOption);
-    }
-
-    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
-        return getCustomImage(client, ac, stack, stack.getImage().getImageName());
-    }
-
-    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
-        String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
-        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
-        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
-        String region = ac.getCloudContext().getLocation().getRegion().value();
-        return getCustomImage(imageBlobUri, imageResourceGroupName, region, client);
-    }
-
-    private AzureImage getCustomImage(String vhd, String imageResourceGroupName, String region, AzureClient client) {
-        AzureImage image = client.getCustomImageId(imageResourceGroupName, vhd, region, true);
-        String customImageId = image.getId();
-        LOGGER.debug("Custom image id: {}", customImageId);
-        return image;
     }
 
     public String getImageStorageName(AzureCredentialView acv, CloudContext cloudContext, CloudStack cloudStack) {

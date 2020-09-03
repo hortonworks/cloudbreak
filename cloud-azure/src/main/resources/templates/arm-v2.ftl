@@ -3,6 +3,10 @@
     "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
+        "managedImageName": {
+            "type": "string",
+            "defaultValue" : "${image_name}"
+        },
         "userImageStorageAccountName": {
             "type": "string",
             "defaultValue" : "${storage_account_name}"
@@ -92,6 +96,24 @@
       "sshKeyPath" : "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
   	},
     "resources": [
+            {
+                "type": "Microsoft.Compute/images",
+                "apiVersion": "2019-12-01",
+                "name": "[parameters('managedImageName')]",
+                "location": "[parameters('region')]",
+                "properties": {
+                    "storageProfile": {
+                        "osDisk": {
+                            "osType": "Linux",
+                            "osState": "Generalized",
+                            "blobUri": "[variables('userImageName')]",
+                            "caching": "None",
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "hyperVGeneration": "V1"
+                }
+            },
             <#list igs as group>
                 <#if !isUpscale && group.availabilitySetName?? && group.availabilitySetName?has_content>
             {
@@ -309,6 +331,7 @@
                     <#if !isUpscale && instance.availabilitySetName?? && instance.availabilitySetName?has_content>
                        "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",
                     </#if>
+                       "[concat('Microsoft.Compute/images/',parameters('managedImageName'))]",
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                    ],
                    "tags": {
@@ -368,7 +391,7 @@
                                <#if instance.customImageId?? && instance.customImageId?has_content>
                                "id": "${instance.customImageId}"
                                <#else>
-                               "id": "${customImageId}"
+                               "id": "[resourceId('Microsoft.Compute/images', parameters('managedImageName'))]"
                                </#if>
                            }
                        },

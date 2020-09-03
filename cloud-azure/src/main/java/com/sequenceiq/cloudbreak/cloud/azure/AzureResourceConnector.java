@@ -19,6 +19,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -75,6 +76,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureTerminationHelperService azureTerminationHelperService;
 
+    @Inject
+    private AzureTemplateDeploymentService azureTemplateDeploymentService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -84,31 +88,15 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        AzureImage image = azureStorage.getCustomImage(client, ac, stack);
-        if (!image.getAlreadyExists()) {
-            LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
-            CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
-            azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
-        }
-        String customImageId = image.getId();
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                cloudContext, stack, AzureInstanceTemplateOperation.PROVISION);
-
-        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
         boolean resourcesPersisted = false;
         try {
             List<CloudResource> instances;
-            if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
-                Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
-                LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
-                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
-            } else {
-                Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment for launch as it exists: {}", templateDeployment.exportTemplate().template());
-                instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
-            }
+            Deployment templateDeployment =
+                    azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.PROVISION);
+            LOGGER.info("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
+            instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
             resourcesPersisted = true;
             String networkName = azureUtils.getCustomNetworkId(stack.getNetwork());
             List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());

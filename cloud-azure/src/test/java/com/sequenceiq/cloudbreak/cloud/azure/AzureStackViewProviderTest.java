@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -74,8 +73,7 @@ public class AzureStackViewProviderTest {
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         Network network = mock(Network.class);
-        AzureImage image = new AzureImage("id", "name", true);
-        when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
+
         List<Group> groups = createScaledGroups();
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,9 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 @Component
@@ -40,31 +37,13 @@ class AzureStackViewProvider {
     private AzureStorage azureStorage;
 
     AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
-        Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         Network network = cloudStack.getNetwork();
         Map<String, Long> availableIPs = getNumberOfAvailableIPsInSubnets(client, network);
         return new AzureStackView(ac.getCloudContext().getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView,
                 ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
-                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(network), availableIPs),
-                customImageNamePerInstance);
-    }
-
-    private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
-        AzureClient client = ac.getParameter(AzureClient.class);
-        Map<String, String> imageNameMap = new HashMap<>();
-        Map<String, String> customImageNamePerInstance = new HashMap<>();
-        for (Group group : cloudStack.getGroups()) {
-            for (CloudInstance instance : group.getInstances()) {
-                String imageId = instance.getTemplate().getImageId();
-                if (StringUtils.isNotBlank(imageId)) {
-                    String imageCustomName = imageNameMap.computeIfAbsent(
-                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
-                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
-                }
-            }
-        }
-        return customImageNamePerInstance;
+                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(network), availableIPs)
+        );
     }
 
     private Map<String, Long> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {

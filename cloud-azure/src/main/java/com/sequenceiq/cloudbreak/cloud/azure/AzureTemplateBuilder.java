@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureDatabaseServerView;
@@ -25,10 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -78,7 +77,7 @@ public class AzureTemplateBuilder {
     @Inject
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
-    public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
+    public String build(String stackName, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
             CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
@@ -90,17 +89,19 @@ public class AzureTemplateBuilder {
             model.put("credential", azureInstanceCredentialView);
             String rootDiskStorage = azureStorage.getImageStorageName(armCredentialView, cloudContext, cloudStack);
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
+            String region = cloudContext.getLocation().getRegion().value();
 
             // needed for pre 1.16.5 templates
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
 
-            model.put("customImageId", customImageId);
+            model.put("customImageId", "");
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", AzureStorage.IMAGES_CONTAINER);
             model.put("storage_container_name", azureStorage.getDiskContainerName(cloudContext));
             model.put("storage_vhd_name", imageName);
+            model.put("image_name", CustomVMImageNameProvider.get(region, imageName));
             model.put("stackname", stackName);
-            model.put("region", cloudContext.getLocation().getRegion().value());
+            model.put("region", region);
             model.put("subnet1Prefix", network.getSubnet().getCidr());
             model.put("groups", armStack.getGroups());
             model.put("igs", armStack.getInstanceGroups());
@@ -187,7 +188,7 @@ public class AzureTemplateBuilder {
         }
     }
 
-    public String buildParameters(CloudCredential credential, Network network, Image image) {
+    public String buildParameters() {
         try {
             return freeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplateParametersPath, "UTF-8"), new HashMap<>());
         } catch (IOException | TemplateException e) {

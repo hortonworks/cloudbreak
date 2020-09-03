@@ -81,6 +81,6 @@ public class AzureVirtualMachineTypeProviderTest {
                 Collections.emptyList(), null, Collections.emptyMap(), null, null);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null);
         return new AzureInstanceView(null, 0, cloudInstance, null, null, null,
-                null, null, false, null, 0, null, null);
+                null, null, false, null, 0, null);
     }
 }

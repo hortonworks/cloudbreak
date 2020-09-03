@@ -21,6 +21,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -90,6 +91,9 @@ public class AzureResourceConnectorTest {
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
 
+    @Mock
+    private AzureTemplateDeploymentService azureTemplateDeploymentService;
+
     private List<CloudResource> instances;
 
     private List<Group> groups;
@@ -105,25 +109,24 @@ public class AzureResourceConnectorTest {
         CloudResource cloudResource = mock(CloudResource.class);
         instances = List.of(cloudResource);
         network = new Network(new Subnet("0.0.0.0/16"));
-        AzureImage image = new AzureImage("id", "name", true);
         when(stack.getGroups()).thenReturn(groups);
         when(stack.getNetwork()).thenReturn(network);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
         when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
-        when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureCloudResourceService.getDeploymentCloudResources(deployment)).thenReturn(instances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME)).thenReturn(instances);
         when(azureStackViewProvider.getAzureStack(any(), eq(stack), eq(client), eq(ac))).thenReturn(azureStackView);
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.PROVISION))
+                .thenReturn(deployment);
     }
 
     @Test
     public void testWhenTemplateDeploymentDoesNotExistsThenComputeResourceServiceBuildsTheTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
-        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
 
