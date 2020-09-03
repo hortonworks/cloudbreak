@@ -71,11 +71,11 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/describeEnvironment on resource crn:cdp.*")
+                        RunningParameter.expectedMessage("You have no right to perform the action")
                                 .withKey("EnvironmentGetAction"))
                 .validate();
         testContext
