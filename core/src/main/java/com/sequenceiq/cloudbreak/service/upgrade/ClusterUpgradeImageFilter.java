@@ -129,7 +129,7 @@ public class ClusterUpgradeImageFilter {
         return image -> {
             boolean result = lockComponents ? (permitLockedComponentsUpgrade(image, activatedParcels))
                     : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
-                    || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
+                    && permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
 
             if (lockComponents) {
                 setReason(result, "There is at least one activated parcel for which we cannot find image with matching version. "
