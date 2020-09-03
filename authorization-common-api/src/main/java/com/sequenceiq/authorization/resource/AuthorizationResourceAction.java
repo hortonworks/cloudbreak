@@ -1,5 +1,12 @@
 package com.sequenceiq.authorization.resource;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.ws.rs.NotFoundException;
+
 public enum AuthorizationResourceAction {
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),
     EDIT_CREDENTIAL("environments/editCredential", AuthorizationResourceType.CREDENTIAL),
@@ -77,6 +84,9 @@ public enum AuthorizationResourceAction {
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
     DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
 
+    private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
+            .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));
+
     private final String right;
 
     private final AuthorizationResourceType authorizationResourceType;
@@ -92,5 +102,15 @@ public enum AuthorizationResourceAction {
 
     public AuthorizationResourceType getAuthorizationResourceType() {
         return authorizationResourceType;
+    }
+
+    public static AuthorizationResourceAction getByRight(String right) {
+        List<AuthorizationResourceAction> result = BY_RIGHT.get(right);
+        if (result == null || result.isEmpty()) {
+            throw new NotFoundException(String.format("Action not found by right %s", right));
+        } else if (result.size() > 1) {
+            throw new NotFoundException(String.format("Multiple results found by right %s, thus we cannot lookup for action!", right));
+        }
+        return result.get(0);
     }
 }
