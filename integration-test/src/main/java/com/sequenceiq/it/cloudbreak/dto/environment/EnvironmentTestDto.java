@@ -37,6 +37,8 @@ import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+import com.sequenceiq.it.cloudbreak.context.Clue;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -48,7 +50,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 @Prototype
 public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
-        implements Searchable, Assignable {
+        implements Searchable, Assignable, Investigable {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -386,5 +388,13 @@ public class EnvironmentTestDto
             throw new IllegalStateException("You have tried to assign to a Dto that hasn't been created and therefore has no Response object.");
         }
         return getResponse().getCrn();
+    }
+
+    @Override
+    public Clue investigate() {
+        if (getResponse() == null) {
+            return null;
+        }
+        return new Clue("Environment", null, getResponse(), false);
     }
 }

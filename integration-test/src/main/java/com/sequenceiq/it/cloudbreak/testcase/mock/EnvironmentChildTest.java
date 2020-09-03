@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -142,22 +143,30 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
             when = "a delete multiple request is sent for both environments",
             then = "the child and parent environments should be deleted")
     public void testDeleteChildAndParentEnvironment(MockedTestContext testContext) {
+        String parentEnvName = testContext.get(EnvironmentTestDto.class).getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                     .withParentEnvironment()
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT))
+                .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(environmentTestClient.deleteMultipleByNames(
-                        testContext.get(EnvironmentTestDto.class).getName(),
+                        parentEnvName,
                         testContext.get(CHILD_ENVIRONMENT).getName()
                 ))
-                .await(EnvironmentStatus.ARCHIVED)
-                .when(environmentTestClient.list())
-                .then(this::checkEnvIsNotListedByNameAndParentName)
+                .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT))
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.ARCHIVED)
-                .when(environmentTestClient.list())
-                .then(this::checkEnvIsNotListedByNameAndParentName)
+                .then((testContext1, testDto, client) -> {
+                    SimpleEnvironmentResponses envs = client.getEnvironmentClient().environmentV1Endpoint().list();
+                    if (envs.getResponses().stream().anyMatch(env -> env.getName().equals(parentEnvName))) {
+                        throw new TestFailException("Parent env was not deleted");
+                    }
+                    String childEnvName = testContext.get(CHILD_ENVIRONMENT).getName();
+                    if (envs.getResponses().stream().anyMatch(env -> env.getName().equals(childEnvName))) {
+                        throw new TestFailException("Child env was not deleted");
+                    }
+                    return testDto;
+                })
                 .validate();
     }
 
