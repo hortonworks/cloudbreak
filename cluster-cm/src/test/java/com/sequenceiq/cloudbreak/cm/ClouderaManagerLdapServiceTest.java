@@ -26,7 +26,6 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -55,12 +54,6 @@ public class ClouderaManagerLdapServiceTest {
 
     @Mock
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
-
-    @Mock
-    private GrpcUmsClient umsClient;
-
-    @Mock
-    private ClouderaManagerLicenseService licenseService;
 
     @Mock
     private ApiClient apiClient;
@@ -112,12 +105,15 @@ public class ClouderaManagerLdapServiceTest {
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "NO_ROLE_LIMITED_CLUSTER_ADMIN");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
+        ReflectionTestUtils.setField(underTest, "dashboardUserRole", "ROLE_DASHBOARD_USER");
         LdapView ldapConfig = getLdapConfig();
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(TestConstants.CRN, "");
         ApiAuthRoleMetadataList apiAuthRoleMetadataList = new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_LIMITED_CLUSTER_ADMIN").uuid("uuid").role("ROLE_LIMITED_CLUSTER_ADMIN"));
         apiAuthRoleMetadataList.addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_ADMIN").uuid("uuid").role("ROLE_ADMIN"));
+        apiAuthRoleMetadataList.addItemsItem(
+                new ApiAuthRoleMetadata().displayName("ROLE_DASHBOARD_USER").uuid("uuid").role("ROLE_DASHBOARD_USER"));
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
         when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
         // WHEN
@@ -138,6 +134,7 @@ public class ClouderaManagerLdapServiceTest {
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_LIMITED_CLUSTER_ADMIN");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
+        ReflectionTestUtils.setField(underTest, "dashboardUserRole", "ROLE_DASHBOARD_USER");
         LdapView ldapConfig = getLdapConfig();
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(TestConstants.CRN, "");
         ApiAuthRoleMetadataList apiAuthRoleMetadataList = new ApiAuthRoleMetadataList().addItemsItem(
@@ -164,6 +161,7 @@ public class ClouderaManagerLdapServiceTest {
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_CONFIGURATOR_2");
         ReflectionTestUtils.setField(underTest, "userRole", "ROLE_USER");
+        ReflectionTestUtils.setField(underTest, "dashboardUserRole", "ROLE_DASHBOARD_USER");
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList().addItemsItem(
                 new ApiAuthRoleMetadata().displayName("role").uuid("uuid").role("NO_ROLE_ADMIN")));
