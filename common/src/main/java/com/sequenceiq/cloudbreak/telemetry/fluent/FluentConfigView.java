@@ -43,6 +43,10 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final boolean monitoringEnabled;
 
+    private final String meteringAppName;
+
+    private final String meteringStreamName;
+
     private final TelemetryClusterDetails clusterDetails;
 
     private final String user;
@@ -87,6 +91,8 @@ public class FluentConfigView implements TelemetryConfigView {
         this.cloudLoggingServiceEnabled = builder.cloudLoggingServiceEnabled;
         this.clusterLogsCollection = builder.clusterLogsCollection;
         this.meteringEnabled = builder.meteringEnabled;
+        this.meteringAppName = builder.meteringAppName;
+        this.meteringStreamName = builder.meteringStreamName;
         this.monitoringEnabled = builder.monitoringEnabled;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
@@ -197,6 +203,14 @@ public class FluentConfigView implements TelemetryConfigView {
         return meteringEnabled;
     }
 
+    public String getMeteringAppName() {
+        return meteringAppName;
+    }
+
+    public String getMeteringStreamName() {
+        return meteringStreamName;
+    }
+
     public boolean isMonitoringEnabled() {
         return monitoringEnabled;
     }
@@ -212,6 +226,8 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
+        map.put("dbusMeteringAppName", this.meteringAppName);
+        map.put("dbusMeteringStreamName", this.meteringStreamName);
         map.put("dbusMonitoringEnabled", this.monitoringEnabled);
         map.put("dbusClusterLogsCollection", this.clusterLogsCollection);
         map.put("dbusClusterLogsCollectionDisableStop", DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT);
@@ -261,6 +277,10 @@ public class FluentConfigView implements TelemetryConfigView {
         private boolean clusterLogsCollection;
 
         private boolean meteringEnabled;
+
+        private String meteringAppName;
+
+        private String meteringStreamName;
 
         private boolean monitoringEnabled;
 
@@ -413,6 +433,16 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withMeteringEnabled(boolean meteringEnabled) {
             this.meteringEnabled = meteringEnabled;
+            return this;
+        }
+
+        public Builder withMeteringAppName(String meteringAppName) {
+            this.meteringAppName = meteringAppName;
+            return this;
+        }
+
+        public Builder withMeteringStreamName(String meteringStreamName) {
+            this.meteringStreamName = meteringStreamName;
             return this;
         }
 

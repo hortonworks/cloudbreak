@@ -3,4 +3,5 @@ metering:
   clusterCrn:
   serviceType:
   serviceVersion:
+  streamName:
   platform:

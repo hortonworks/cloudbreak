@@ -20,7 +20,11 @@
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
           "solr-SOLR_SERVER-BASE",
-          "ranger-RANGER_ADMIN-BASE"
+          "ranger-RANGER_ADMIN-BASE",
+          "hdfs-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "hive-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE"
         ]
       },
       {
@@ -36,11 +40,16 @@
           "knox-KNOX_GATEWAY-BASE",
           "atlas-ATLAS_SERVER-BASE",
           "hbase-REGIONSERVER-BASE",
-          "hbase-MASTER-BASE"
+          "hbase-MASTER-BASE",
+          "solr-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "hive-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE"
         ]
       },
       {
-        "cardinality": 2,
+        "cardinality": 1,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
           "knox-IDBROKER-BASE"
@@ -186,6 +195,11 @@
             ],
             "refName": "solr-SOLR_SERVER-BASE",
             "roleType": "SOLR_SERVER"
+          },
+          {
+            "base": true,
+            "refName": "solr-GATEWAY-BASE",
+            "roleType": "GATEWAY"
           }
         ],
         "serviceConfigs": [
@@ -373,6 +387,11 @@
         "refName": "hive",
         "displayName": "Hive Metastore",
         "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "hive-GATEWAY-BASE",
+            "roleType": "GATEWAY"
+          },
           {
             "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",

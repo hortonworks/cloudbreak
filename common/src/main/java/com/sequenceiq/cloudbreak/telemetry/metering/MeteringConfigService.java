@@ -6,14 +6,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class MeteringConfigService {
 
-    public MeteringConfigView createMeteringConfigs(boolean enabled, String platform, String clusterCrn, String serviceType,
+    private final MeteringConfiguration meteringConfiguration;
+
+    public MeteringConfigService(MeteringConfiguration meteringConfiguration) {
+        this.meteringConfiguration = meteringConfiguration;
+    }
+
+    public MeteringConfigView createMeteringConfigs(boolean enabled, String platform, String clusterCrn, String clusterName, String serviceType,
             String serviceVersion) {
         MeteringConfigView.Builder builder = new MeteringConfigView.Builder();
         if (enabled) {
             builder.withPlatform(platform)
                     .withClusterCrn(clusterCrn)
+                    .withClusterName(clusterName)
                     .withServiceType(StringUtils.upperCase(serviceType))
-                    .withServiceVersion(serviceVersion);
+                    .withServiceVersion(serviceVersion)
+                    .withStreamName(meteringConfiguration.getDbusStreamName());
         }
         return builder
                 .withEnabled(enabled)

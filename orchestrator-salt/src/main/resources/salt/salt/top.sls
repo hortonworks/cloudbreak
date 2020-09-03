@@ -33,6 +33,7 @@ base:
     - cloudera.repo
     - cloudera.manager
     - cloudera.agent
+    - gateway.cm
 
   'G@roles:manager_agent':
     - cloudera.repo
@@ -50,9 +51,10 @@ base:
     - match: grain
     - postgresql
 
+  # The reason why we need gateway and knox is becuse the knox role is not applied if the CM template does have Knox in it, and CB injects it automatically
   'G@roles:gateway or G@roles:knox':
     - match: compound
-    - gateway.cm
+    - gateway.knox
 
   'recipes:pre-cloudera-manager-start':
     - match: grain

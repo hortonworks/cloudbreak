@@ -2,13 +2,18 @@
 {%- from 'nodes/settings.sls' import host with context %}
 # CONFIGURED BY SALT - do not edit
 [Event]
+ServiceVersion = {{ metering.serviceVersion }}{% if metering.version > 1 %}
+ServiceType = "{{ metering.serviceType }}"
+MeteredResourceName = {{ metering.clusterName }}
+MeteredResourceCRN = {{ salt['pillar.get']('tags:Cloudera-Resource-Name') }}
+CreatorCRN = {{ salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') }}
+EnvironmentCRN = {{ salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') }}{% else %}
+ServiceType = "DATAHUB"
 ClusterCRN = {{ metering.clusterCrn }}
+WorkloadCRN = {{ metering.clusterCrn }}{% endif %}
 InstanceID = {{ host.instance_id }}
 InstanceType = {{ host.instance_type }}
 InstanceIP = {{ host.private_address }}
-ServiceType = {{ metering.serviceType }}
-ServiceVersion = {{ metering.serviceVersion }}
-WorkloadCRN = {{ metering.clusterCrn }}
 
 [Output]
 Path = /var/log/metering/heartbeats.json
