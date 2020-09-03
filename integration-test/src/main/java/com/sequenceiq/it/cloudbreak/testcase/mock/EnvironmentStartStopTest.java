@@ -58,17 +58,14 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it")
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        setUpFreeIpaRouteStubbing(mockedTestContext);
+        setUpFreeIpaRouteStubbing(testContext);
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
-                .withCatalog(mockedTestContext
-                .getImageCatalogMockServerSetup()
-                        .getFreeIpaImageCatalogUrl())
+                .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
@@ -82,15 +79,16 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .given("dx1", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, key("dx1"))
                 .given("dx2", DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key("dx2"))
+                .await(STACK_AVAILABLE, key("dx2"));
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
                 .validate();
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }
 }
