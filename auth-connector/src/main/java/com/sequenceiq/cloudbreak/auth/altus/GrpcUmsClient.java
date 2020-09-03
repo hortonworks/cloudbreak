@@ -260,6 +260,11 @@ public class GrpcUmsClient {
                 String errMessage = String.format("Machine user with name %s is not found yet", machineUserName);
                 LOGGER.debug(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
+            } else if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot create machinue user '%s' for '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserName, userCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
             } else {
                 throw ex;
             }
@@ -495,11 +500,21 @@ public class GrpcUmsClient {
      * @param roleCrn        role that will be assigned
      * @param requestId      id for the request
      */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public void assignMachineUserRole(String userCrn, String machineUserCrn, String roleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.assignMachineUserRole(requestId.orElse(UUID.randomUUID().toString()),
                     userCrn, machineUserCrn, roleCrn);
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot assign role '%s' to machine user '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserCrn, roleCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
         }
     }
 
@@ -528,6 +543,7 @@ public class GrpcUmsClient {
      * @param accessKeyType  algorithm type used for the access key
      * @return access / private key holder object
      */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential generateAccessSecretKeyPair(String actorCrn, String machineUserCrn,
             Optional<String> requestId, UserManagementProto.AccessKeyType.Value accessKeyType) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -536,6 +552,15 @@ public class GrpcUmsClient {
             CreateAccessKeyResponse accessKeyResponse = client.createAccessPrivateKeyPair(
                     requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn, accessKeyType);
             return new AltusCredential(accessKeyResponse.getAccessKey().getAccessKeyId(), accessKeyResponse.getPrivateKey().toCharArray());
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot generate access key pair for machine user '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
         }
     }
 
