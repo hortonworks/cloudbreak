@@ -77,7 +77,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(filterCurrentImage(currentImage))
                 .filter(filterNonCmImages())
                 .filter(filterIgnoredCmVersion())
-                .filter(filterPreviousImagesForOsUpgrades(currentImage, lockComponents))
+                .filter(filterPreviousImages(currentImage, lockComponents))
                 .filter(validateCmAndStackVersion(currentImage, lockComponents, activatedParcels))
                 .filter(validateCloudPlatform(cloudPlatform))
                 .filter(validateOsVersion(currentImage))
@@ -87,10 +87,9 @@ public class ClusterUpgradeImageFilter {
         return new ImageFilterResult(new Images(null, images, null), getReason(images));
     }
 
-    private Predicate<Image> filterPreviousImagesForOsUpgrades(Image currentImage, boolean lockComponents) {
+    private Predicate<Image> filterPreviousImages(Image currentImage, boolean lockComponents) {
         return image -> {
-            boolean result = !lockComponents
-                    || filterPreviousImages(currentImage, image);
+            boolean result = filterPreviousImages(currentImage, image);
             setReason(result, "There are no newer images available than " + currentImage.getDate() + ".");
             return result;
         };
@@ -98,8 +97,8 @@ public class ClusterUpgradeImageFilter {
 
     private boolean filterPreviousImages(Image currentImage, Image image) {
         return Objects.nonNull(image.getCreated())
-        && Objects.nonNull(currentImage.getCreated())
-        && image.getCreated() >= currentImage.getCreated();
+                && Objects.nonNull(currentImage.getCreated())
+                && image.getCreated() >= currentImage.getCreated();
     }
 
     private Predicate<Image> filterCurrentImage(Image currentImage) {
@@ -130,7 +129,7 @@ public class ClusterUpgradeImageFilter {
         return image -> {
             boolean result = lockComponents ? (permitLockedComponentsUpgrade(image, activatedParcels))
                     : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
-                            || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
+                    || permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
 
             if (lockComponents) {
                 setReason(result, "There is at least one activated parcel for which we cannot find image with matching version. "
