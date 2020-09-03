@@ -83,12 +83,12 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
-                                .withKey("SdxDescribeInternalAction"))
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datalake/describeDetailedDatalake on " +
+                                "crn:cdp:datalake:.*").withKey("SdxDescribeInternalAction"))
                 .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
-                                .withKey("SdxDescribeInternalAction"))
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datalake/describeDetailedDatalake on " +
+                                "crn:cdp:datalake:.*").withKey("SdxDescribeInternalAction"))
                 .validate();
     }
 
