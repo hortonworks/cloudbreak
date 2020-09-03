@@ -25,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -225,7 +227,7 @@ public class CleanupUtil extends CleanupClientUtil {
 
     private void deleteResources(List<String> foundResources, String resourceNameType) {
         List<Path> fileList = new ArrayList<>();
-        List<String> deletedCredentials = new ArrayList<>();
+        MultiValueMap<String, String> deletedResources = new LinkedMultiValueMap<>();
         AtomicBoolean e2eCleanupFailed = new AtomicBoolean(false);
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(outputDirectory))) {
@@ -253,17 +255,20 @@ public class CleanupUtil extends CleanupClientUtil {
                         case "distroxName":
                         case "stackName":
                             deleteDistrox(getCloudbreakClient(), resourceName);
+                            deletedResources.add(resourceNameType, resourceName);
                             break;
                         case "sdxName":
                             deleteSdx(getSdxClient(), resourceName);
+                            deletedResources.add(resourceNameType, resourceName);
                             break;
                         case "credentialName":
                             deleteCredential(getEnvironmentClient(), resourceName);
+                            deletedResources.add(resourceNameType, resourceName);
                             e2eCleanupFailed.set(true);
-                            deletedCredentials.add(resourceName);
                             break;
                         default:
                             deleteEnvironment(getEnvironmentClient(), resourceName);
+                            deletedResources.add(resourceNameType, resourceName);
                             break;
                     }
                 } else {
@@ -271,7 +276,7 @@ public class CleanupUtil extends CleanupClientUtil {
                 }
             });
         });
-        validateE2ECleanup(e2eCleanupFailed, deletedCredentials);
+        validateE2ECleanup(e2eCleanupFailed, deletedResources);
     }
 
     private void deleteEnvironments(EnvironmentClient environmentClient, List<String> environmentNames) {
@@ -369,10 +374,14 @@ public class CleanupUtil extends CleanupClientUtil {
         }
     }
 
-    private void validateE2ECleanup(AtomicBoolean e2eCleanupFailed, List<String> credentialNames) {
+    private void validateE2ECleanup(AtomicBoolean e2eCleanupFailed, MultiValueMap<String, String> resourceNames) {
         if (e2eCleanupFailed.get()) {
-            LOG.error("End To End cleanup have been failed, because of credential(s) '{}' found left behind!", credentialNames);
-            throw new RuntimeException(String.format("End To End cleanup have been failed, because of credential(s) '%s' found left behind!", credentialNames));
+            resourceNames
+                    .forEach((type, names) ->
+                            LOG.error("End To End cleanup have been failed, because of resource '{}' with name(s) '{}' found left behind!", type, names)
+                    );
+            throw new RuntimeException(String.format("End To End cleanup have been failed, because of '%d' resource(s) found left behind!",
+                    resourceNames.size()));
         } else {
             LOG.info("End To End cleanup have been success, because of cannot found any resource left behind!");
         }
