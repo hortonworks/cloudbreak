@@ -2,7 +2,7 @@
   "name": "7.2.2 - Data Engineering Spark3 for AWS",
   "description": "",
   "type": "DATAENGINEERING",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
