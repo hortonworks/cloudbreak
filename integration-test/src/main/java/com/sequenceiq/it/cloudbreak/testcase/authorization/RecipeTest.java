@@ -49,19 +49,19 @@ public class RecipeTest extends AbstractIntegrationTest {
                 })
                 .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
-                                .withKey("RecipeGetAction"))
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/useSharedResource " +
+                                "on crn:cdp:datahub:.*").withKey("RecipeGetAction"))
                 .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
-                                .withKey("RecipeGetAction"))
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/useSharedResource " +
+                                "on crn:cdp:datahub:.*").withKey("RecipeGetAction"))
                 .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/deleteRecipe on crn:cdp:datahub:.*")
                                 .withKey("RecipeDeleteAction"))
                 .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform the action")
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/deleteRecipe on crn:cdp:datahub:.*")
                                 .withKey("RecipeDeleteAction"))
                 .when(recipeTestClient.deleteV4())
                 .when(recipeTestClient.listV4())

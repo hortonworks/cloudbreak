@@ -64,7 +64,10 @@ public class UmsResourceAuthorizationService {
         List<Boolean> rightCheckResults = umsClient.hasRights(userCrn, userCrn, rightCheckList, getRequestId());
         LOGGER.info("Right check results: {}", rightCheckResults);
         if (rightCheckResults.stream().noneMatch(Boolean::booleanValue)) {
-            throw new AccessDeniedException("You have no right to perform the action");
+            String rightResultsAsString = rightCheckList.stream()
+                    .map(rightCheck -> rightCheck.getRight() + " on " + rightCheck.getResource())
+                    .collect(Collectors.joining(","));
+            throw new AccessDeniedException(String.format("You have no right to perform any of these actions: %s", rightResultsAsString));
         }
     }
 

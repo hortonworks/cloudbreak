@@ -60,7 +60,7 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .when(credentialTestClient.get(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class, RunningParameter.key("CredentialGetAction")
-                        .withExpectedMessage("You have no right to perform the action"))
+                        .withExpectedMessage("You have no right to perform any of these actions: environments/describeCredential on crn:cdp:environments:.*"))
                 .validate();
     }
 
