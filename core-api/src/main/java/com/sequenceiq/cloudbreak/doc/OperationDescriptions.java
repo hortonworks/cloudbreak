@@ -128,7 +128,8 @@ public class OperationDescriptions {
         public static final String CLOUD_STORAGE_MATRIX = "returns supported cloud storage for stack version";
         public static final String CUSTOM_PARAMETERS = "returns custom parameters";
         public static final String NOTIFICATION_TEST = "Trigger a new notification to the notification system could be validated from the begins";
-        public static final String CHECK_RIGHT = "Checking rights from UI";
+        public static final String CHECK_RIGHT_IN_ACCOUNT = "Checking rights from UI in account";
+        public static final String CHECK_RIGHT_BY_CRN = "Checking rights from UI by resource CRN";
         public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via stack's name";
     }
 
