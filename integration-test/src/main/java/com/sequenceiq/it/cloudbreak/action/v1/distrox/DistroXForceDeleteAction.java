@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +20,10 @@ public class DistroXForceDeleteAction implements Action<DistroXTestDto, Cloudbre
         client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .deleteByName(testDto.getName(), true);
+        testDto.setResponse(
+                client.getCloudbreakClient()
+                        .distroXV1Endpoint()
+                        .getByName(testDto.getName(), new HashSet<>()));
         Log.when(LOGGER, " Stack deletion was successful.");
         return testDto;
     }

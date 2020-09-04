@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformAccessConfigsResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -68,11 +67,6 @@ public class PlatformAccessConfigsTestDto extends AbstractCloudbreakTestDto<Obje
     public PlatformAccessConfigsTestDto withAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

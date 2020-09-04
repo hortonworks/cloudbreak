@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.v4.kerberos;
 
 import static java.lang.String.format;
 
+import javax.ws.rs.NotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,11 +18,18 @@ public class KerberosDeleteAction implements Action<KerberosTestDto, FreeIpaClie
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosDeleteAction.class);
 
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.whenJson(LOGGER, format(" Kerberos delete:%n"), testDto.getName());
+        Log.whenJson(LOGGER, format(" Kerberos config delete: %n"), testDto.getName());
         client.getFreeIpaClient()
                 .getKerberosConfigV1Endpoint()
                 .delete(testDto.getName());
-        Log.when(LOGGER, String.format(" Kerberos config was deleted successfully for environment " + testDto.getName()));
+        try {
+            testDto.setResponse(
+                    client.getFreeIpaClient()
+                            .getKerberosConfigV1Endpoint()
+                            .describe(testDto.getName()));
+        } catch (NotFoundException e) {
+            Log.when(LOGGER, String.format(" Kerberos config was deleted successfully for environment %s", testDto.getName()));
+        }
         return testDto;
     }
 }

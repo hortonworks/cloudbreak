@@ -21,6 +21,11 @@ public class FreeIpaDeleteAction implements Action<FreeIpaTestDto, FreeIpaClient
         client.getFreeIpaClient()
                 .getFreeIpaV1Endpoint()
                 .delete(testDto.getRequest().getEnvironmentCrn(), false);
+        testDto.setResponse(
+                client.getFreeIpaClient()
+                        .getFreeIpaV1Endpoint()
+                        .describe(testDto.getRequest().getEnvironmentCrn())
+        );
         Log.when(LOGGER, String.format(" FreeIPA deleted successfully. FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }

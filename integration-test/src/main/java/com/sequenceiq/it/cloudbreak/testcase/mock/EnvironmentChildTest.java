@@ -3,6 +3,8 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static java.util.Objects.isNull;
 
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -10,9 +12,9 @@ import javax.ws.rs.BadRequestException;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -145,28 +147,22 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
     public void testDeleteChildAndParentEnvironment(MockedTestContext testContext) {
         String parentEnvName = testContext.get(EnvironmentTestDto.class).getName();
         testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsListedByNameAndParentName)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT))
                 .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT))
-                .when(environmentTestClient.deleteMultipleByNames(
-                        parentEnvName,
-                        testContext.get(CHILD_ENVIRONMENT).getName()
-                ))
+                .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT))
+                .when(environmentTestClient.list())
+                .then(this::checkEnvIsListedByNameAndParentName)
+                .when(environmentTestClient.deleteMultipleByNames(parentEnvName, testContext.get(CHILD_ENVIRONMENT).getName()))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT))
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.ARCHIVED)
-                .then((testContext1, testDto, client) -> {
-                    SimpleEnvironmentResponses envs = client.getEnvironmentClient().environmentV1Endpoint().list();
-                    if (envs.getResponses().stream().anyMatch(env -> env.getName().equals(parentEnvName))) {
-                        throw new TestFailException("Parent env was not deleted");
-                    }
-                    String childEnvName = testContext.get(CHILD_ENVIRONMENT).getName();
-                    if (envs.getResponses().stream().anyMatch(env -> env.getName().equals(childEnvName))) {
-                        throw new TestFailException("Child env was not deleted");
-                    }
-                    return testDto;
-                })
+                .when(environmentTestClient.list())
+                .then(checkEnvsAreNotListedByName(List.of(parentEnvName, testContext.get(CHILD_ENVIRONMENT).getName())))
                 .validate();
     }
 
@@ -239,5 +235,24 @@ public class EnvironmentChildTest extends AbstractIntegrationTest {
                         MockVerification.verify(HttpMethod.POST, ITResponse.FREEIPA_ROOT + "/session/json")
                                 .bodyContains(method)
                                 .exactTimes(times));
+    }
+
+    private Assertion<EnvironmentTestDto, EnvironmentClient> checkEnvsAreNotListedByName(List<String> environmentNames) {
+        return (testContext, environmentTestDto, environmentClient) -> {
+            Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environmentTestDto.getResponseSimpleEnvSet();
+            if (isNull(simpleEnvironmentV4Respons)) {
+                throw new TestFailException("Environment list response is missing.");
+            }
+            List<String> listedEnvironmentNames = simpleEnvironmentV4Respons.stream()
+                    .filter(response -> !response.getEnvironmentStatus().equals(EnvironmentStatus.ARCHIVED))
+                    .map(EnvironmentBaseResponse::getName)
+                    .collect(Collectors.toList());
+            environmentNames.forEach(environmentName -> {
+                if (listedEnvironmentNames.contains(environmentName)) {
+                    throw new TestFailException(String.format("'%s' environment has not been deleted.", environmentName));
+                }
+            });
+            return environmentTestDto;
+        };
     }
 }

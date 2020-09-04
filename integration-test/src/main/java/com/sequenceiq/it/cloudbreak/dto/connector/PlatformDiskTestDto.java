@@ -1,10 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.connector;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformDisksV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class PlatformDiskTestDto extends AbstractCloudbreakTestDto<Object, PlatformDisksV4Response, PlatformDiskTestDto> {
@@ -16,11 +15,6 @@ public class PlatformDiskTestDto extends AbstractCloudbreakTestDto<Object, Platf
     @Override
     public PlatformDiskTestDto valid() {
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

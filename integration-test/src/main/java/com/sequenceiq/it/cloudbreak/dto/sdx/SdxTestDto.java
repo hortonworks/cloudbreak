@@ -70,7 +70,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     @Override
     public SdxTestDto valid() {
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withEnvironment(getTestContext().get(EnvironmentTestDto.class).getName())
+                .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags())
                 .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
@@ -214,31 +214,34 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     public SdxTestDto withEnvironment() {
         EnvironmentTestDto environment = getTestContext().given(EnvironmentTestDto.class);
         if (environment == null) {
-            throw new IllegalArgumentException("Environment does not exist!");
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
         }
-        return withEnvironment(environment.getName());
+        return withEnvironmentName(environment.getResponse().getName());
     }
 
-    public SdxTestDto withEnvironment(String environmentName) {
-        getRequest().setEnvironment(environmentName);
-        return this;
+    public SdxTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
+        EnvironmentTestDto environment = getTestContext().get(environmentClass.getSimpleName());
+        if (environment == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
+        }
+        return withEnvironmentName(environment.getResponse().getName());
     }
 
-    public SdxTestDto withEnvironmentKey(String environmentKey) {
-        getRequest().setEnvironment(getTestContext().get(environmentKey).getName());
-        return this;
+    private SdxTestDto withEnvironmentDto(EnvironmentTestDto environmentTestDto) {
+        return withEnvironmentName(environmentTestDto.getResponse().getName());
     }
 
-    public SdxTestDto withEnvironment(Class<EnvironmentTestDto> environmentKey) {
-        return withEnvironment(key(environmentKey.getSimpleName()));
-    }
-
-    public SdxTestDto withEnvironment(RunningParameter environmentKey) {
+    public SdxTestDto withEnvironmentKey(RunningParameter environmentKey) {
         EnvironmentTestDto env = getTestContext().get(environmentKey.getKey());
         if (env == null) {
-            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
         }
-        return withEnvironment(env.getResponse().getName());
+        return withEnvironmentName(env.getResponse().getName());
+    }
+
+    public SdxTestDto withEnvironmentName(String environmentName) {
+        getRequest().setEnvironment(environmentName);
+        return this;
     }
 
     public SdxTestDto withName(String name) {

@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class CloudStorageMatrixTestDto extends AbstractCloudbreakTestDto<Object, CloudStorageSupportedV4Response, CloudStorageMatrixTestDto> {
@@ -32,11 +31,6 @@ public class CloudStorageMatrixTestDto extends AbstractCloudbreakTestDto<Object,
     @Override
     public CloudStorageMatrixTestDto valid() {
         return withStackVersion("3.1");
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

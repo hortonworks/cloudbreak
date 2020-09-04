@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformVmtypesV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class PlatformVmTypesTestDto extends AbstractCloudbreakTestDto<Object, PlatformVmtypesV4Response, PlatformVmTypesTestDto> {
@@ -68,11 +67,6 @@ public class PlatformVmTypesTestDto extends AbstractCloudbreakTestDto<Object, Pl
     public PlatformVmTypesTestDto withAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

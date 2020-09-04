@@ -44,6 +44,8 @@ public class CleanupUtil extends CleanupClientUtil {
 
     private final Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> clients = new HashMap<>();
 
+    private final MultiValueMap<String, String> deletedResources = new LinkedMultiValueMap<>();
+
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
@@ -227,7 +229,6 @@ public class CleanupUtil extends CleanupClientUtil {
 
     private void deleteResources(List<String> foundResources, String resourceNameType) {
         List<Path> fileList = new ArrayList<>();
-        MultiValueMap<String, String> deletedResources = new LinkedMultiValueMap<>();
         AtomicBoolean e2eCleanupFailed = new AtomicBoolean(false);
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(Paths.get(outputDirectory))) {

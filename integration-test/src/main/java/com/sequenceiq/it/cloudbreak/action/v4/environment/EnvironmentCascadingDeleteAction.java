@@ -20,6 +20,7 @@ public class EnvironmentCascadingDeleteAction implements Action<EnvironmentTestD
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true, false);
+        testDto.setResponseSimpleEnv(delete);
         Log.whenJson(LOGGER, " Environment cascading delete response: ", delete);
         return testDto;
     }

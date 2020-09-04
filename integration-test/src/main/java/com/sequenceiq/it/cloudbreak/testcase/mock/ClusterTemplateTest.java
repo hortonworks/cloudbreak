@@ -73,7 +73,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given(stackTemplate, StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
@@ -262,7 +262,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
 
         testContext
                 .given(stackTemplate, StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withName(name)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
@@ -359,7 +359,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given("placementSettings", PlacementSettingsTestDto.class)
                 .withRegion(MockCloudProvider.LONDON)
                 .given("stackTemplate", StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withPlacement("placementSettings")
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())

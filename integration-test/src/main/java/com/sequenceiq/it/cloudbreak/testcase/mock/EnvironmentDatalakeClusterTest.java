@@ -68,7 +68,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given("placement", PlacementSettingsTestDto.class)
 
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
 
                 .when(stackTestClient.createV4())
@@ -100,7 +100,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .given(LdapTestDto.class)
@@ -146,7 +146,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withName(dlName)
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList);
@@ -159,7 +159,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .validate();
