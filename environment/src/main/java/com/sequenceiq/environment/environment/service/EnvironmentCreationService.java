@@ -127,7 +127,7 @@ public class EnvironmentCreationService {
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
-                "Provisioning in Microsoft Azure is not enabled for this account.");
+                "Provisioning in " + creationDto.getCloudPlatform() + " is not enabled for this account.");
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
         ValidationResult validationResult = validationBuilder.build();

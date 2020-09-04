@@ -60,7 +60,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements N
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpNetworkConnector.class);
 
-    @Value("${cb.gcp.subnet.ha.different.az.min:2}")
+    @Value("${cb.gcp.subnet.ha.different.az.min:1}")
     private int minSubnetCountInDifferentAz;
 
     @Value("${cb.gcp.subnet.ha.different.az.max:3}")
