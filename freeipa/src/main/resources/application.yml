@@ -76,7 +76,7 @@ freeipa:
     lockout-duration: 10
   operation:
     cleanup:
-      timeout-millis: 1800000
+      timeout-millis: 3600000
       initial-delay-millis: 60000
       fixed-delay-millis: 60000
   max:
