@@ -144,6 +144,7 @@ public class StackToCloudStackConverter {
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status) {
+        LOGGER.debug("Instance metadata is {}", instanceMetaData);
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
         String name = instanceGroup.getGroupName();

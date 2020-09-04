@@ -187,11 +187,12 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
+        String hostname = null;
         if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
-            return cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+            hostname = cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+            LOGGER.debug("Setting FreeIPA hostname to {}", hostname);
         }
-
-        return buildableResource.get(0).getName();
+        return hostname;
     }
 
     private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {
