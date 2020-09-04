@@ -1,17 +1,19 @@
 package com.sequenceiq.periscope.repository;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.periscope.api.model.ClusterState;
-import com.sequenceiq.periscope.domain.Cluster;
+import java.util.List;
+import java.util.Optional;
+
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.domain.Cluster;
 
 @EntityType(entityClass = Cluster.class)
 @Transactional(Transactional.TxType.REQUIRED)
@@ -68,4 +70,12 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")
     void deallocateClustersOfNode(@Param("periscopeNodeId") String periscopeNodeId);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.lastEvaluated = :lastEvaluated WHERE c.id = :clusterId")
+    void setClusterLastEvaluated(@Param("clusterId") Long clusterId, @Param("lastEvaluated") Long lastEvaluated);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.lastScalingActivity = :lastScalingActivity WHERE c.id = :clusterId")
+    void setClusterLastScalingActivity(@Param("clusterId") Long clusterId, @Param("lastScalingActivity") Long lastScalingActivity);
 }
