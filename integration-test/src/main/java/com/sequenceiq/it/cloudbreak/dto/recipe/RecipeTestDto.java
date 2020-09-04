@@ -1,9 +1,12 @@
 package com.sequenceiq.it.cloudbreak.dto.recipe;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
@@ -12,10 +15,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
-import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -25,17 +29,20 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     private RecipeViewV4Responses simpleResponses;
 
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
+        LOGGER.info("Cleaning up recipe with name: {}", getName());
         try {
-            cloudbreakClient.getCloudbreakClient().recipeV4Endpoint().deleteByName(cloudbreakClient.getWorkspaceId(), getName());
+            when(recipeTestClient.deleteV4(), key("delete-recipe-" + getName()).withSkipOnFail(false));
         } catch (WebApplicationException ignore) {
-            LOGGER.info("Something happend.");
+            LOGGER.warn("Something went wrong during {} recipe delete, because of: {}", getName(), ignore.getMessage(), ignore);
         }
     }
 

@@ -5,10 +5,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class RepoConfigValidationTestDto extends AbstractCloudbreakTestDto<RepoConfigValidationV4Request, RepoConfigValidationV4Response,
@@ -58,11 +57,6 @@ public class RepoConfigValidationTestDto extends AbstractCloudbreakTestDto<RepoC
     @Override
     public RepoConfigValidationTestDto valid() {
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

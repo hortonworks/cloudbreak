@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.dto.credential;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.Collection;
 
 import javax.inject.Inject;
@@ -98,8 +100,12 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("CLEAN UP :: Deleting credential with name: [{}]", getName());
-        when(credentialTestClient.delete()).withName(getName());
+        LOGGER.info("Cleaning up credential with name: {}", getName());
+        if (getResponse() != null) {
+            when(credentialTestClient.delete(), key("delete-credential-" + getName()).withSkipOnFail(false));
+        } else {
+            LOGGER.info("Credential: {} response is null!", getName());
+        }
     }
 
     @Override

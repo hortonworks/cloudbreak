@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -513,6 +514,10 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto> T get(String key) {
+        if (!resources.containsKey(key) || resources.get(key) == null) {
+            throw new NoSuchElementException(
+                String.format("Key: '%s' has been provided but it has no result in the Test Context's Resources map", key));
+        }
         return (T) resources.get(key);
     }
 

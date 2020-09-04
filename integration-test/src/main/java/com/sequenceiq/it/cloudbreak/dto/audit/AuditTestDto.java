@@ -3,10 +3,9 @@ package com.sequenceiq.it.cloudbreak.dto.audit;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class AuditTestDto extends AbstractCloudbreakTestDto<Object, AuditEventV4Response, AuditTestDto> {
@@ -21,11 +20,6 @@ public class AuditTestDto extends AbstractCloudbreakTestDto<Object, AuditEventV4
 
     public AuditTestDto(TestContext testContext) {
         super(null, testContext);
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
     }
 
     public AuditTestDto valid() {

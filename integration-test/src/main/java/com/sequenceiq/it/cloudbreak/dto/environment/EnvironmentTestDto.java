@@ -243,7 +243,7 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withParentEnvironment() {
-        CloudbreakTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
+        EnvironmentTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
         return withParentEnvironment(parentEnvDto);
     }
 
@@ -385,7 +385,7 @@ public class EnvironmentTestDto
     @Override
     public String getCrn() {
         if (getResponse() == null) {
-            throw new IllegalStateException("You have tried to assign to a Dto that hasn't been created and therefore has no Response object.");
+            throw new IllegalStateException("Environment response hasn't been set, therefore 'getCrn' cannot be fulfilled.");
         }
         return getResponse().getCrn();
     }

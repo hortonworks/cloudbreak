@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.v4.ldap;
 
+import javax.ws.rs.NotFoundException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,14 @@ public class LdapDeleteAction implements Action<LdapTestDto, FreeIpaClient> {
         client.getFreeIpaClient()
             .getLdapConfigV1Endpoint()
             .delete(testDto.getName());
-        Log.when(LOGGER, String.format(" LDAP config was deleted successfully for environment %s", testDto.getName()));
+        try {
+            testDto.setResponse(
+                    client.getFreeIpaClient()
+                            .getLdapConfigV1Endpoint()
+                            .describe(testDto.getName()));
+        } catch (NotFoundException e) {
+            Log.when(LOGGER, String.format(" LDAP config was deleted successfully for environment %s", testDto.getName()));
+        }
         return testDto;
     }
 }

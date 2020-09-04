@@ -64,7 +64,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
         String newStack = resourcePropertyProvider().getName();
         testContext
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(newStack, StackTestDto.class)
@@ -84,7 +84,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withCluster(setResources(testContext, testContext.get(RedbeamsDatabaseTestDto.class).getName(),
                         null, null))
                 .when(stackTestClient.createV4())
@@ -102,7 +102,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(NEW_CREDENTIAL_KEY, CredentialTestDto.class)

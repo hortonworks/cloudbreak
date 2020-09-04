@@ -78,7 +78,7 @@ public class AuditTest extends AbstractIntegrationTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .given("stackTemplate", StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withName(clusterTemplateName)
                 .when(clusterTemplateTestClient.createV4(), key(clusterTemplateName))

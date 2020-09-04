@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.stack;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.util.List;
@@ -68,14 +67,18 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public StackTestDtoBase<StackTestDto> valid() {
-        return super.valid().withEnvironment(EnvironmentTestDto.class);
+        return super.valid().withEnvironmentClass(EnvironmentTestDto.class);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(stackTestClient.forceDeleteV4(), withoutLogError());
-        await(STACK_DELETED);
+        LOGGER.info("Cleaning up stack with name: {}", getName());
+        if (getResponse() != null) {
+            when(stackTestClient.forceDeleteV4(), key("delete-stack-" + getName()).withSkipOnFail(false));
+            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Stack: {} response is null!", getName());
+        }
     }
 
     @Override

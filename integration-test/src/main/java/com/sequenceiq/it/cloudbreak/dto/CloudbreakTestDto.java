@@ -30,7 +30,7 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
     CloudPlatform getCloudPlatform();
 
     default void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.warn("Did not clean up resource ({}): name={}", getClass().getSimpleName(), getName());
+        LOGGER.warn(String.format("Cleanup WARN: 'cleanUp' is not implemented for TestDto: %s with name: %s", getClass().getSimpleName(), getName()));
     }
 
     default CloudbreakTestDto refresh() {
