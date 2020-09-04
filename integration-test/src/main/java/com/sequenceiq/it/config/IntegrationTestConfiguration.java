@@ -12,11 +12,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
@@ -26,6 +28,8 @@ import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
 @Configuration
 @ComponentScan("com.sequenceiq.it")
 @EnableConfigurationProperties
+@EnableRetry
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class IntegrationTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestConfiguration.class);
