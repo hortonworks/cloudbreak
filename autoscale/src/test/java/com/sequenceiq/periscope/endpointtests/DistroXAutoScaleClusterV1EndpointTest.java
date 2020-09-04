@@ -163,42 +163,39 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint
+        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
-
-        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
 
         distroXAutoscaleClusterRequest.setEnableAutoscaling(false);
-        distroXAutoScaleClusterV1Endpoint
+        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
-        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
         assertFalse("Autoscaling should be disabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
     }
 
     @Test
     public void testEnableAutoscaleForClusterCrn() {
-        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
-        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
+        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
 
-        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disable());
-        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
+        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disable());
         assertFalse("Autoscaling should be disabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
 
-        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
-        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
+        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
     }
 
     @Test
     public void testEnableAutoscaleForClusterName() {
-        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.enable());
-        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
+        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
+                distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.enable());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
 
-        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.disable());
-        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
+        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.disable());
         assertFalse("Autoscaling should be disabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
     }
 
@@ -210,10 +207,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint
+        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
-        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
 
         assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
@@ -228,9 +223,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
 
         assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
@@ -245,9 +239,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
         assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
         distroXAutoScaleClusterV1Endpoint.deleteAlertsForClusterCrn(TEST_CLUSTER_CRN);
@@ -263,9 +256,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
         assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
@@ -280,9 +272,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
 
         assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
         assertTrue("Autoscaling should be enabled", xAutoscaleClusterResponse.isAutoscalingEnabled());
@@ -297,11 +288,9 @@ public class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
-                distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
         assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
-
 
         distroXAutoScaleClusterV1Endpoint.deleteAlertsForClusterName(TEST_CLUSTER_NAME);
         xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
