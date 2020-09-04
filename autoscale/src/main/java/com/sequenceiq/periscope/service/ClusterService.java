@@ -201,6 +201,14 @@ public class ClusterService {
         return cluster;
     }
 
+    public void setLastEvaluated(Long clusterId, Long lastEvaluated) {
+        clusterRepository.setClusterLastEvaluated(clusterId, lastEvaluated);
+    }
+
+    public void setLastScalingActivity(Long clusterId, Long lastScalingActivity) {
+        clusterRepository.setClusterLastScalingActivity(clusterId, lastScalingActivity);
+    }
+
     public List<Cluster> findAllByPeriscopeNodeId(String nodeId) {
         return clusterRepository.findAllByPeriscopeNodeId(nodeId);
     }

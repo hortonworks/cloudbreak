@@ -42,7 +42,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
                 monitored.setLastEvaluated(System.currentTimeMillis());
                 save(monitored);
             } catch (RejectedExecutionException ignore) {
-
+                LOGGER.info("Error in processing monitor: {}", monitored, ignore);
             }
         }
     }
@@ -64,7 +64,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
 
     protected abstract List<M> getMonitored();
 
-    protected abstract M save(M monitored);
+    protected abstract void save(M monitored);
 
     protected RejectedThreadService getRejectedThreadService() {
         return rejectedThreadService;
