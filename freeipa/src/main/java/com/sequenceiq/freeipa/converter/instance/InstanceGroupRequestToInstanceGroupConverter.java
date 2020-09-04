@@ -49,7 +49,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
         for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
-            instanceMetaData.setDiscoveryFQDN(hostname + "%d." + domain);
+            instanceMetaData.setDiscoveryFQDN(hostname + String.format("%d.", i) + domain);
             instanceMetaDataSet.add(instanceMetaData);
         }
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);
