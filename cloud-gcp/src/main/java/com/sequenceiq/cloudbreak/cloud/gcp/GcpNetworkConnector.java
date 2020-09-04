@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
-import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -56,7 +55,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
-public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements NetworkConnector, DefaultNetworkConnector {
+public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpNetworkConnector.class);
 
