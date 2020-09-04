@@ -51,12 +51,10 @@ periscope:
   entitlementCheckEnabled: false
   enabledAutoscaleMonitors:
     time-monitor:
-      enabled: true
+      enabled: false
     load-monitor:
-      enabled: true
-    cluster-manager-host-health-monitor:
-      enabled: true
-    prometheus-monitor:
+      enabled: false
+    cluster-status-monitor:
       enabled: false
 
 cb:
