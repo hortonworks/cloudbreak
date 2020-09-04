@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import com.sequenceiq.sdx.api.model.UpdateUserRangerCloudIdentityRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
@@ -293,6 +295,13 @@ public class SdxController implements SdxEndpoint {
             throw new IllegalArgumentException("Azure group mappings is unsupported");
         }
         return rangerCloudIdentityService.setAzureCloudIdentityMapping(envCrn, request.getAzureUserMapping());
+    }
+
+    @Override
+    @InternalOnly
+    public RangerCloudIdentitySyncStatus updateUserRangerCloudIdentity(String envCrn, UpdateUserRangerCloudIdentityRequest request) {
+        Optional<String> azureUserValue = Optional.ofNullable(request.getAzureUserValue());
+        return rangerCloudIdentityService.updateAzureUserMapping(envCrn, request.getUser(), azureUserValue);
     }
 
     @Override

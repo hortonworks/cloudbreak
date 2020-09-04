@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncStatusListener
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.UpdateUserRangerCloudIdentityRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,29 @@ public class CloudIdentitySyncService {
         if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
             LOGGER.info("Syncing Azure Object IDs for stack = {}", stack);
             syncAzureObjectIds(stack, umsUsersState, warnings);
+        }
+    }
+
+    public void updateUserCloudIdentity(Stack stack, String user, List<CloudIdentity> cloudIdentities, BiConsumer<String, String> warnings) {
+        if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
+            LOGGER.info("Updating Azure Object ID for user = {} in stack = {}", user, stack);
+            updateUserAzureObjectId(stack, user, cloudIdentities, warnings);
+        }
+    }
+
+    private void updateUserAzureObjectId(Stack stack, String user, List<CloudIdentity> cloudIdentities, BiConsumer<String, String> warnings) {
+        Optional<String> azureObjectId = getOptionalAzureObjectId(cloudIdentities);
+        UpdateUserRangerCloudIdentityRequest updateRequest = new UpdateUserRangerCloudIdentityRequest();
+        updateRequest.setUser(user);
+        updateRequest.setAzureUserValue(azureObjectId.orElse(null));
+        String envCrn = stack.getEnvironmentCrn();
+        try {
+            LOGGER.debug("Updating user ranger cloud identity value: {}", updateRequest);
+            RangerCloudIdentitySyncStatus syncStatus = sdxEndpoint.updateUserRangerCloudIdentity(envCrn, updateRequest);
+            checkSyncStatus(syncStatus, envCrn, warnings);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to update user ranger cloud identity value for env = {}", envCrn, e);
+            warnings.accept(envCrn, "Failed to udpate cloud identity value");
         }
     }
 

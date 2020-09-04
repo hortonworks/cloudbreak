@@ -47,6 +47,10 @@ public class ClouderaManagerRangerUtil {
     private static final MapJoiner CLOUD_IDENTITY_CONFIG_MAP_JOINER =
             Joiner.on(";").withKeyValueSeparator("=");
 
+    private static final Boolean MERGE_EXISTING_MAPPING = true;
+
+    private static final Boolean REPLACE_EXISTING_MAPPINNG = false;
+
     @Inject
     private ClouderaManagerProxiedClientFactory clouderaManagerProxiedClientFactory;
 
@@ -149,19 +153,40 @@ public class ClouderaManagerRangerUtil {
         return userMappingMap;
     }
 
-    public Optional<ApiCommand> setAzureCloudIdentityMapping(String stackCrn, Map<String, String> requestedAzureUserMapping) throws ApiException {
+    public Optional<ApiCommand> setAzureCloudIdentityMapping(String stackCrn, Map<String, String> requestedAzureUserMapping) throws ApiException  {
+        return setAzureCloudIdentityMapping(stackCrn, requestedAzureUserMapping, REPLACE_EXISTING_MAPPINNG);
+    }
+
+    public Optional<ApiCommand> updateAzureCloudIdentityMapping(String stackCrn, String user, Optional<String> updatedMappingValue) throws ApiException  {
+        Map<String, String> updatedEntry = new HashMap<>();
+        updatedEntry.put(user, updatedMappingValue.orElse(null));
+        return setAzureCloudIdentityMapping(stackCrn, updatedEntry, MERGE_EXISTING_MAPPING);
+    }
+
+    // Sets the requested Azure user mapping into the CM instance. Note that a null entry value in mapping indicates that the entry
+    // should be removed from CM if it exists.
+    private Optional<ApiCommand> setAzureCloudIdentityMapping(String stackCrn, Map<String, String> requestedAzureUserMapping, boolean merge)
+            throws ApiException {
         ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
         String clusterName = getClusterName(client);
         String rangerUserSyncRoleName = getRangerUserSyncRoleName(client, clusterName);
         RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
 
-        Map<String, String> existingMappingStr = getExistingAzureUserMapping(rolesResourceApi, clusterName, rangerUserSyncRoleName);
+        Map<String, String> existingMapping = getExistingAzureUserMapping(rolesResourceApi, clusterName, rangerUserSyncRoleName);
+
+        Map<String, String> mappingToSet;
+        if (merge) {
+            mappingToSet = getMergedMapping(existingMapping, requestedAzureUserMapping);
+        } else {
+            mappingToSet = new HashMap<>(requestedAzureUserMapping);
+        }
+        removeNullEntries(mappingToSet);
 
         // We only want to go through with the operation when ONE of the following conditions are met
         // 1) When the requested azure user mapping is different than the existing one
         // 2) When the role is stale. This is for the rare case when we previously were able to set the role and
         //    failed before trigerring refresh. This ensures that we trigger refresh in the subsequent call.
-        boolean operationRequired = !existingMappingStr.equals(requestedAzureUserMapping) ||
+        boolean operationRequired = !existingMapping.equals(mappingToSet) ||
                 isRoleStale(rolesResourceApi, clusterName, rangerUserSyncRoleName);
 
         if (!operationRequired) {
@@ -170,13 +195,23 @@ public class ClouderaManagerRangerUtil {
         } else {
             LOGGER.info("Existing azure cloud mappings are different (or role is stale), setting mapping and trigerring role refresh");
             ApiConfigList configList = new ApiConfigList();
-            configList.addItemsItem(newCloudIdentityConfig(AZURE_USER_MAPPING, requestedAzureUserMapping));
+            configList.addItemsItem(newCloudIdentityConfig(AZURE_USER_MAPPING, mappingToSet));
             rolesResourceApi.updateRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME,
                     "Updating Azure Cloud Identity Mapping through Cloudbreak",
                     configList);
             ApiCommand command = triggerRoleRefresh(client, clusterName, RANGER_SERVICE_NAME, rangerUserSyncRoleName);
             return Optional.of(command);
         }
+    }
+
+    private void removeNullEntries(Map<String, String> map) {
+        map.entrySet().removeIf(entry -> entry.getValue() == null);
+    }
+
+    private Map<String, String> getMergedMapping(Map<String, String> existingMapping, Map<String, String> requestedAzureUserMapping) {
+        Map<String, String> updatedMapping = new HashMap<>(existingMapping);
+        requestedAzureUserMapping.forEach(updatedMapping::put);
+        return updatedMapping;
     }
 
     public ApiCommand getApiCommand(String stackCrn, long commandId) throws ApiException {

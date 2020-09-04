@@ -207,4 +207,56 @@ class ClouderaManagerRangerUtilTest {
         assertFalse(result);
     }
 
+    @Test
+    public void testUpdateAzureCloudIdentityMapping() throws ApiException {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        when(clouderaManagerApiFactory.getRoleCommandsResourceApi(any())).thenReturn(roleCommandsResourceApi);
+        setupCluster();
+        setupRangerUserSyncRole();
+        setupRoleRefreshResponse(true);
+        setupExistingAzureUserMapping("user01=val01;user02=val02");
+
+        Optional<ApiCommand> apiCommand = underTest.updateAzureCloudIdentityMapping("stackCrn", "user02", Optional.of("val02-updated"));
+
+        assertTrue(apiCommand.isPresent());
+
+        ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
+        verify(roleCommandsResourceApi, times(1)).refreshCommand(any(), any(), any());
+
+        ApiConfig expectedAzureUserMappingConfig = new ApiConfig();
+        expectedAzureUserMappingConfig.setName("ranger_usersync_azure_user_mapping");
+        expectedAzureUserMappingConfig.setValue("user01=val01;user02=val02-updated");
+
+        ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
+        assertThat(apiConfigList.getItems(), hasItems(expectedAzureUserMappingConfig));
+    }
+
+    @Test
+    public void testUpdateAzureCloudIdentityMappingDelete() throws ApiException {
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(any())).thenReturn(rolesResourceApi);
+        when(clouderaManagerApiFactory.getRoleCommandsResourceApi(any())).thenReturn(roleCommandsResourceApi);
+        setupCluster();
+        setupRangerUserSyncRole();
+        setupRoleRefreshResponse(true);
+        setupExistingAzureUserMapping("user01=val01;user02=val02");
+
+        Optional<ApiCommand> apiCommand = underTest.updateAzureCloudIdentityMapping("stackCrn", "user02", Optional.empty());
+
+        assertTrue(apiCommand.isPresent());
+
+        ArgumentCaptor<ApiConfigList> apiConfigListCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
+        verify(rolesResourceApi, times(1)).updateRoleConfig(eq(CLUSTER), eq(RANGER_USER_SYNC_ROLE), anyString(), anyString(), apiConfigListCaptor.capture());
+        verify(roleCommandsResourceApi, times(1)).refreshCommand(any(), any(), any());
+
+        ApiConfig expectedAzureUserMappingConfig = new ApiConfig();
+        expectedAzureUserMappingConfig.setName("ranger_usersync_azure_user_mapping");
+        expectedAzureUserMappingConfig.setValue("user01=val01");
+
+        ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
+        assertThat(apiConfigList.getItems(), hasItems(expectedAzureUserMappingConfig));
+    }
+
 }

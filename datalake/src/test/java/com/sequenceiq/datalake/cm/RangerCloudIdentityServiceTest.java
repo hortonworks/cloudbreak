@@ -113,6 +113,16 @@ class RangerCloudIdentityServiceTest {
         verify(clouderaManagerRangerUtil, never()).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping));
     }
 
+    @Test
+    public void testUpdateAzureUserMappingSuccessSync() throws ApiException {
+        ApiCommand apiCommand = mock(ApiCommand.class);
+        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getSuccess()).thenReturn(true);
+        SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
+        testSetAzureCloudIdentityMapping(Optional.of(apiCommand), RangerCloudIdentitySyncState.SUCCESS);
+    }
+
     private void testSetAzureCloudIdentityMapping(Optional<ApiCommand> apiCommand, RangerCloudIdentitySyncState expectedStatus) throws ApiException {
         SdxCluster cluster = mock(SdxCluster.class);
         when(cluster.getStackCrn()).thenReturn("stack-crn");
@@ -125,6 +135,19 @@ class RangerCloudIdentityServiceTest {
 
         assertEquals(expectedStatus, status.getState());
         verify(clouderaManagerRangerUtil, times(1)).setAzureCloudIdentityMapping(eq("stack-crn"), eq(userMapping));
+    }
+
+    private void testUpdateAzureCloudIdentityMapping(Optional<ApiCommand> apiCommand, RangerCloudIdentitySyncState expectedStatus) throws ApiException {
+        SdxCluster cluster = mock(SdxCluster.class);
+        when(cluster.getStackCrn()).thenReturn("stack-crn");
+        when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(cluster));
+        when(clouderaManagerRangerUtil.isCloudIdMappingSupported(any())).thenReturn(true);
+        when(clouderaManagerRangerUtil.setAzureCloudIdentityMapping(any(), any())).thenReturn(apiCommand);
+
+        RangerCloudIdentitySyncStatus status = underTest.updateAzureUserMapping("env-crn", "user", Optional.of("user-value"));
+
+        assertEquals(expectedStatus, status.getState());
+        verify(clouderaManagerRangerUtil, times(1)).updateAzureCloudIdentityMapping(eq("stack-crn"), "user", Optional.of("user-value"));
     }
 
 }

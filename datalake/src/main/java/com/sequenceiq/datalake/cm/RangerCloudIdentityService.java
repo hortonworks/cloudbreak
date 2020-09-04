@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Callable;
 
 @Service
 public class RangerCloudIdentityService {
@@ -40,23 +41,39 @@ public class RangerCloudIdentityService {
         return status;
     }
 
-    private RangerCloudIdentitySyncStatus setAzureCloudIdentityMapping(String envCrn, SdxCluster sdxCluster, Map<String, String> azureUserMapping) {
-        String stackCrn = sdxCluster.getStackCrn();
-        LOGGER.info("Updating azure cloud id mappings for envCrn = {}, datalake stack crn = {}", envCrn, stackCrn);
+    private RangerCloudIdentitySyncStatus toRangerCloudIdentitySyncStatus(Optional<ApiCommand> apiCommand) {
+        if (apiCommand.isEmpty()) {
+            return newSyncStatus(RangerCloudIdentitySyncState.SUCCESS, "Sucessfully synced, no role refresh required");
+        } else {
+            return toRangerCloudIdentitySyncStatus(apiCommand.get());
+        }
+    }
+
+    private RangerCloudIdentitySyncStatus runSyncOperationOnSupportedCM(SdxCluster sdxCluster, Callable<Optional<ApiCommand>> cmOperation) {
         try {
             if (!clouderaManagerRangerUtil.isCloudIdMappingSupported(sdxCluster.getStackCrn())) {
                 return newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE,
                         "The datalake does not support cloud identity sync. Sync request is ignored.");
             }
-            Optional<ApiCommand> apiCommand = clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping);
-            if (apiCommand.isEmpty()) {
-                return newSyncStatus(RangerCloudIdentitySyncState.SUCCESS, "Sucessfully synced, no role refresh required");
-            }
-            return toRangerCloudIdentitySyncStatus(apiCommand.get());
-        } catch (ApiException e) {
-            LOGGER.error("Encountered api exception", e);
-            return newSyncStatus(RangerCloudIdentitySyncState.FAILED, "Encountered cloudera manager api exception");
+            Optional<ApiCommand> apiCommand = cmOperation.call();
+            return toRangerCloudIdentitySyncStatus(apiCommand);
+        } catch (Exception e) {
+            LOGGER.error("Encountered exception running sync operation on CM", e);
+            return newSyncStatus(RangerCloudIdentitySyncState.FAILED, "Encountered exception running sync operation on CM");
         }
+    }
+
+    private RangerCloudIdentitySyncStatus setAzureCloudIdentityMapping(String envCrn, SdxCluster sdxCluster, Map<String, String> azureUserMapping) {
+        String stackCrn = sdxCluster.getStackCrn();
+        LOGGER.info("Setting azure cloud id mappings for envCrn = {}, datalake stack crn = {}", envCrn, stackCrn);
+        return runSyncOperationOnSupportedCM(sdxCluster, () -> clouderaManagerRangerUtil.setAzureCloudIdentityMapping(stackCrn, azureUserMapping));
+    }
+
+    private RangerCloudIdentitySyncStatus updateAzureUserMapping(String envCrn, SdxCluster sdxCluster, String user, Optional<String> azureUserValue) {
+        String stackCrn = sdxCluster.getStackCrn();
+        LOGGER.info("Updating azure cloud id mappings for envCrn = {}, user = {}, value = {} for datalake stack crn = {}", envCrn, user,
+                azureUserValue, stackCrn);
+        return runSyncOperationOnSupportedCM(sdxCluster, () -> clouderaManagerRangerUtil.updateAzureCloudIdentityMapping(stackCrn, user, azureUserValue));
     }
 
     private Optional<SdxCluster> getSdxCluster(String envCrn) {
@@ -76,7 +93,7 @@ public class RangerCloudIdentityService {
         return sdxStatusEntity.getStatus().equals(DatalakeStatusEnum.RUNNING);
     }
 
-    public Optional<RangerCloudIdentitySyncStatus> checkIfUnapplicable(Optional<SdxCluster> sdxCluster) {
+    private Optional<RangerCloudIdentitySyncStatus> checkIfUnapplicable(Optional<SdxCluster> sdxCluster) {
         if (sdxCluster.isEmpty()) {
             return Optional.of(newSyncStatus(RangerCloudIdentitySyncState.NOT_APPLICABLE, "No datalakes associated with the environment."));
         } else if (!isDatalakeRunning(sdxCluster.get())) {
@@ -84,6 +101,11 @@ public class RangerCloudIdentityService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public RangerCloudIdentitySyncStatus updateAzureUserMapping(String envCrn, String user, Optional<String> azureUserValue) {
+        Optional<SdxCluster> sdxCluster = getSdxCluster(envCrn);
+        return checkIfUnapplicable(sdxCluster).orElseGet(() -> updateAzureUserMapping(envCrn, sdxCluster.get(), user, azureUserValue));
     }
 
     public RangerCloudIdentitySyncStatus setAzureCloudIdentityMapping(String envCrn, Map<String, String> azureUserMapping) {

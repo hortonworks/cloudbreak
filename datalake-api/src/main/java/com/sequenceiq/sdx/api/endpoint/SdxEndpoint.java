@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.sdx.api.model.UpdateUserRangerCloudIdentityRequest;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -206,6 +207,13 @@ public interface SdxEndpoint {
     @ApiOperation(value = "Set ranger cloud identity mapping", produces = MediaType.APPLICATION_JSON, nickname = "setRangerCloudIdentityMapping")
     RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn String envCrn,
             @NotNull @Valid SetRangerCloudIdentityMappingRequest request);
+
+    @POST
+    @Path("/envcrn/{envCrn}/ranger_user_cloud_identity")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Update ranger cloud id mapping for a single user", produces = MediaType.APPLICATION_JSON, nickname = "updateUserRangerCloudIdentity")
+    RangerCloudIdentitySyncStatus updateUserRangerCloudIdentity(@PathParam("envCrn") @ValidCrn String envCrn,
+                                                                @NotNull @Valid UpdateUserRangerCloudIdentityRequest request);
 
     @GET
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_sync_status")

@@ -14,6 +14,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncState;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.UpdateUserRangerCloudIdentityRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -129,6 +130,39 @@ class CloudIdentitySyncServiceTest {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.toString());
         cloudIdentitySyncService.syncCloudIdentities(stack, mock(UmsUsersState.class), mock(BiConsumer.class));
         verify(sdxEndpoint, never()).setRangerCloudIdentityMapping(any(), any());
+    }
+
+    @Test
+    void testUpdateAzureUserIdentity() {
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
+        when(stack.getEnvironmentCrn()).thenReturn("envcrn");
+
+        cloudIdentitySyncService.updateUserCloudIdentity(stack, "user01", List.of(newAzureObjectId("azure-oid-01")), mock(BiConsumer.class));
+
+        UpdateUserRangerCloudIdentityRequest expectedRequest = new UpdateUserRangerCloudIdentityRequest();
+        expectedRequest.setUser("user01");
+        expectedRequest.setAzureUserValue("azure-oid-01");
+        verify(sdxEndpoint, times(1)).updateUserRangerCloudIdentity(eq("envcrn"), eq(expectedRequest));
+    }
+
+    @Test
+    void testUpdateAwsUserIdentity() {
+        // aws cloud identites is unsupported, should no-op
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.toString());
+        cloudIdentitySyncService.updateUserCloudIdentity(stack, "user01", List.of(), mock(BiConsumer.class));
+        verify(sdxEndpoint, never()).setRangerCloudIdentityMapping(any(), any());
+    }
+
+    @Test
+    void testUpdateUserIdentityFailed() {
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
+        when(stack.getEnvironmentCrn()).thenReturn("envcrn");
+        RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
+        status.setState(RangerCloudIdentitySyncState.FAILED);
+        when(sdxEndpoint.updateUserRangerCloudIdentity(any(), any())).thenReturn(status);
+
+        cloudIdentitySyncService.updateUserCloudIdentity(stack, "user01", List.of(newAzureObjectId("azure-oid-01")), mock(BiConsumer.class));
+        verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
     }
 
 }
