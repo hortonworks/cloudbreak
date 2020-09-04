@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
@@ -250,7 +251,11 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName()))
+                .map(ig -> {
+                    FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
+                    return instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName(),
+                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain());
+                })
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);
