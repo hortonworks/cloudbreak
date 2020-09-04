@@ -127,6 +127,7 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     private CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, String imageName, String environmentCrn) {
+        LOGGER.debug("Instance metadata is {}", instanceMetaData);
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String name = instanceGroup.getGroupName();
         Template template = instanceGroup.getTemplate();
@@ -318,11 +319,13 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     }
 
     public Map<String, Object> buildCloudInstanceParameters(String environmentCrn, InstanceMetaData instanceMetaData) {
-        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
+        String hostName = instanceMetaData == null ? null : instanceMetaData.getDiscoveryFQDN();
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
         String instanceName = instanceMetaData == null ? null : instanceMetaData.getInstanceName();
         Map<String, Object> params = new HashMap<>();
         if (hostName != null) {
+            hostName = getFreeIpaHostname(instanceMetaData, hostName);
+            LOGGER.debug("Setting FreeIPA hostname to {}", hostName);
             params.put(CloudInstance.DISCOVERY_NAME, hostName);
         }
         if (subnetId != null) {
@@ -340,6 +343,13 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             params.put(RESOURCE_GROUP_USAGE_PARAMETER, resourceGroupUsage.name());
         }
         return params;
+    }
+
+    private String getFreeIpaHostname(InstanceMetaData instanceMetaData, String hostName) {
+        if (hostName.contains("%d.")) {
+            hostName = String.format(hostName, instanceMetaData.getPrivateId());
+        }
+        return hostName;
     }
 
     private Map<String, String> buildCloudStackParameters(String environmentCrn) {

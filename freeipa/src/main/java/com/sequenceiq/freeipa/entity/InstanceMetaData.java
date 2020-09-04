@@ -16,6 +16,8 @@ import com.sequenceiq.freeipa.entity.util.InstanceLifeCycleConverter;
 import com.sequenceiq.freeipa.entity.util.InstanceMetadataTypeConverter;
 import com.sequenceiq.freeipa.entity.util.InstanceStatusConverter;
 
+import java.util.StringJoiner;
+
 @Entity
 public class InstanceMetaData {
     @Id
@@ -251,5 +253,19 @@ public class InstanceMetaData {
 
     public void setLifeCycle(InstanceLifeCycle lifeCycle) {
         this.lifeCycle = lifeCycle;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InstanceMetaData.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("privateId=" + privateId)
+                .add("privateIp='" + privateIp + "'")
+                .add("publicIp='" + publicIp + "'")
+                .add("instanceId='" + instanceId + "'")
+                .add("discoveryFQDN='" + discoveryFQDN + "'")
+                .add("instanceName='" + instanceName + "'")
+                .add("instanceStatus='" + instanceStatus + "'")
+                .toString();
     }
 }
