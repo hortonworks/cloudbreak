@@ -81,4 +81,37 @@ public class CustomAmazonWaiterProvider {
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }
+
+    public Waiter<DescribeDBInstancesRequest> getDbInstanceModifyWaiter(AmazonRDS rdsClient) {
+        return new WaiterBuilder<DescribeDBInstancesRequest, DescribeDBInstancesResult>()
+                .withSdkFunction(new DescribeDBInstancesFunction(rdsClient))
+                .withAcceptors(new WaiterAcceptor<DescribeDBInstancesResult>() {
+                    @Override
+                    public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
+                        return describeDBInstancesResult.getDBInstances().stream().allMatch(instance -> "avaialble".equals(instance.getDBInstanceStatus()));
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.SUCCESS;
+                    }
+                }, new WaiterAcceptor<DescribeDBInstancesResult>() {
+                    @Override
+                    public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
+                        return describeDBInstancesResult.getDBInstances().stream()
+                                .anyMatch(instance ->
+                                        "failed".equals(instance.getDBInstanceStatus())
+                                                || "deleted".equals(instance.getDBInstanceStatus())
+                                );
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.FAILURE;
+                    }
+                })
+                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
+                        new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
+                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+    }
 }
