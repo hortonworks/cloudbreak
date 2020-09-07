@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
@@ -122,19 +121,11 @@ public class ClusterCreationEnvironmentValidator {
         boolean platformAutoTls = isAutoTlsSupportedByCloudPlatform(stack, parentEnvironmentCloudPlatform);
         Optional<Boolean> requestedAutoTlsOptional = ofNullable(clusterRequest.getCm())
                 .map(ClouderaManagerV4Request::getEnableAutoTls);
-        boolean effectiveAutoTls = platformAutoTls;
         if (requestedAutoTlsOptional.isPresent()) {
             boolean requestedAutoTls = requestedAutoTlsOptional.get();
-            if (!platformAutoTls || !requestedAutoTls) {
-                if (platformAutoTls) {
-                    effectiveAutoTls = false;
-                } else if (requestedAutoTls) {
-                    resultBuilder.error(String.format("AutoTLS is not supported by '%s' platform!", stack.getCloudPlatform()));
-                }
+            if (!platformAutoTls && requestedAutoTls) {
+                resultBuilder.error(String.format("AutoTLS is not supported by '%s' platform!", stack.getCloudPlatform()));
             }
-        }
-        if (effectiveAutoTls) {
-            validateKerberosConfig(stack, resultBuilder);
         }
     }
 
@@ -145,12 +136,10 @@ public class ClusterCreationEnvironmentValidator {
         return platformParameters.isAutoTlsSupported();
     }
 
-    private void validateKerberosConfig(Stack stack, ValidationResultBuilder resultBuilder) {
-        Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
-        boolean freeipa = kerberosConfig.map(kc -> KerberosType.FREEIPA == kc.getType()).orElse(Boolean.FALSE);
-        if (!freeipa) {
-            resultBuilder.error("FreeIPA is not available in your environment!");
-        }
+    public boolean hasFreeIpaKerberosConfig(Stack stack) {
+        return kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName())
+                .map(kc -> KerberosType.FREEIPA == kc.getType())
+                .orElse(Boolean.FALSE);
     }
 
     private void validateDatalakeConfig(Stack stack, ValidationResultBuilder resultBuilder, User user, boolean distroxRequest) {

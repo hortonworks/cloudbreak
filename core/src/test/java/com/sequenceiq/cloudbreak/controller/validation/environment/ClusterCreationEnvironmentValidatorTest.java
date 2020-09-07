@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -87,13 +88,11 @@ class ClusterCreationEnvironmentValidatorTest {
 
     @BeforeEach
     void setUp() {
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
-        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
-        when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
-        when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
-        when(connector.parameters()).thenReturn(platformParameters);
-        when(connector.displayNameToRegion(any())).thenReturn("region1");
-        when(platformParameters.isAutoTlsSupported()).thenReturn(true);
+        lenient().when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
+        lenient().when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
+        lenient().when(connector.parameters()).thenReturn(platformParameters);
+        lenient().when(connector.displayNameToRegion(any())).thenReturn("region1");
+        lenient().when(platformParameters.isAutoTlsSupported()).thenReturn(true);
         ReflectionTestUtils.setField(underTest, "validateDatalakeAvailability", true);
     }
 
@@ -402,22 +401,12 @@ class ClusterCreationEnvironmentValidatorTest {
     void testAutoTlsWithFreeIpa() {
         // GIVEN
         Stack stack = getStack();
-        User user = getUser();
-        ClusterV4Request clusterRequest = new ClusterV4Request();
-        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
-        cmRequest.setEnableAutoTls(true);
-        clusterRequest.setCm(cmRequest);
-        DetailedEnvironmentResponse environment = getEnvironmentResponse();
-        when(platformParameters.isAutoTlsSupported()).thenReturn(true);
         KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
         when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
-        when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
         // WHEN
-        ValidationResult actualResult = underTest.validate(clusterRequest, stack, environment, user, true);
+        boolean result = underTest.hasFreeIpaKerberosConfig(stack);
         // THEN
-        assertTrue(actualResult.hasError());
-        assertEquals(1, actualResult.getErrors().size());
-        assertTrue(actualResult.getErrors().contains("FreeIPA is not available in your environment!"));
+        assertFalse(result);
     }
 
     @Test
@@ -435,8 +424,6 @@ class ClusterCreationEnvironmentValidatorTest {
         ArgumentCaptor<Platform> argumentCaptor = ArgumentCaptor.forClass(Platform.class);
         when(cloudPlatformConnectors.get(argumentCaptor.capture(), any())).thenReturn(connector);
         when(platformParameters.isAutoTlsSupported()).thenReturn(true);
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.ACTIVE_DIRECTORY).build();
-        when(kerberosConfigService.get(any(), any())).thenReturn(Optional.of(kerberosConfig));
         when(sdxClientService.getByEnvironmentCrn(any())).thenReturn(Arrays.asList(new SdxClusterResponse()));
         // WHEN
         underTest.validate(clusterRequest, stack, environment, user, true);
