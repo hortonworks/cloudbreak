@@ -112,23 +112,47 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Override
     public void deleteNetworkWithSubnets(NetworkDeletionRequest networkDeletionRequest) {
-        if (!networkDeletionRequest.isExisting()) {
-            try {
-                AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
-                if (resourceGroupExists(azureClient, networkDeletionRequest)) {
-                    azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
-                    azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
-                }
-            } catch (CloudException e) {
-                LOGGER.warn("Deletion error, cloud exception happened: ", e);
-                if (e.body() != null && e.body().details() != null) {
-                    String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                    throw new CloudConnectorException(String.format("Network deletion failed, status code %s, error message: %s, details: %s",
-                            e.body().code(), e.body().message(), details));
-                } else {
-                    throw new CloudConnectorException(String.format("Network deletion failed: '%s', please go to Azure Portal for detailed message", e));
-                }
+        if (StringUtils.isEmpty(networkDeletionRequest.getResourceGroup())) {
+            LOGGER.debug("The deletable network does not contain a valid resource group name, it is null or empty!");
+            return;
+        }
+        if (networkDeletionRequest.isExisting()) {
+            LOGGER.debug("The network was provided by the user, deleting nothing.");
+            return;
+        }
+
+        if (networkDeletionRequest.isSingleResourceGroup()) {
+            deleteResources(networkDeletionRequest);
+        } else {
+            deleteNetworkResourceGroup(networkDeletionRequest);
+        }
+    }
+
+    private void deleteResources(NetworkDeletionRequest networkDeletionRequest) {
+        if (StringUtils.isEmpty(networkDeletionRequest.getNetworkId())) {
+            LOGGER.debug("The deletable network does not contain a valid network id, it is null or empty!");
+            return;
+        }
+        try {
+            LOGGER.debug("Deleting network id and deployment, preserving the resource group");
+            AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
+            azureClient.deleteNetworkInResourceGroup(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getNetworkId());
+            azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+        } catch (CloudException e) {
+            throw azureUtils.convertToCloudConnectorException(e, "Network and template deployment deletion");
+        }
+    }
+
+    private void deleteNetworkResourceGroup(NetworkDeletionRequest networkDeletionRequest) {
+        try {
+            LOGGER.debug("Deleting network resource group");
+            AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
+            if (resourceGroupExists(azureClient, networkDeletionRequest)) {
+                azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+                azureClient.deleteResourceGroup(networkDeletionRequest.getResourceGroup());
             }
+        } catch (CloudException e) {
+            throw azureUtils.convertToCloudConnectorException(e, "Network resource group deletion");
         }
     }
 
@@ -151,10 +175,6 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     private boolean resourceGroupExists(AzureClient azureClient, NetworkDeletionRequest networkDeletionRequest) {
-        if (StringUtils.isEmpty(networkDeletionRequest.getResourceGroup())) {
-            LOGGER.debug("The deletable network does not contain a valid resource group name, it is null or empty!");
-            return false;
-        }
         if (azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup()) == null) {
             LOGGER.debug("No resource group found on cloud provider (Azure) with name: \"{}\"", networkDeletionRequest.getResourceGroup());
             return false;

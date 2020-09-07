@@ -499,4 +499,15 @@ public class AzureUtils {
             return true;
         });
     }
+
+    public CloudConnectorException convertToCloudConnectorException(CloudException e, String actionDescription) {
+        LOGGER.warn("{} failed, cloud exception happened: ", actionDescription, e);
+        if (e.body() != null && e.body().details() != null) {
+            String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+            return new CloudConnectorException(String.format("%s failed, status code %s, error message: %s, details: %s",
+                    actionDescription, e.body().code(), e.body().message(), details));
+        } else {
+            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+        }
+    }
 }
