@@ -102,7 +102,7 @@ public class ScalingHandlerTest {
         underTest.onApplicationEvent(scalingEventMock);
 
         verify(rejectedThreadService).remove(AUTOSCALE_CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService).setLastScalingActivity(eq(AUTOSCALE_CLUSTER_ID), anyLong());
         verify(executorService).submit(runnableMock);
     }
 
@@ -127,7 +127,7 @@ public class ScalingHandlerTest {
 
         verify(historyService, times(1)).createEntry(
                 eq(ScalingStatus.SUCCESS), anyString(), eq(2), eq(0), eq(scalingPolicyMock));
-        verify(clusterService, never()).save(cluster);
+        verify(clusterService, never()).setLastScalingActivity(eq(AUTOSCALE_CLUSTER_ID), anyLong());
         verify(applicationContext, never()).getBean("ScalingRequest");
     }
 
@@ -172,7 +172,7 @@ public class ScalingHandlerTest {
         underTest.onApplicationEvent(scalingEventMock);
 
         verify(rejectedThreadService).remove(AUTOSCALE_CLUSTER_ID);
-        verify(clusterService).save(cluster);
+        verify(clusterService).setLastScalingActivity(eq(AUTOSCALE_CLUSTER_ID), anyLong());
         verify(executorService).submit(runnableMock);
     }
 

@@ -189,6 +189,12 @@ public enum ResourceEvent {
     STACK_DIAGNOSTICS_CLEANUP_RUNNING("stack.diagnostics.cleanup.running"),
     STACK_DIAGNOSTICS_COLLECTION_FINISHED("stack.diagnostics.collection.finished"),
     STACK_DIAGNOSTICS_COLLECTION_FAILED("stack.diagnostics.collection.failed"),
+    STACK_CM_DIAGNOSTICS_INIT_RUNNING("stack.cm.diagnostics.init.running"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_RUNNING("stack.cm.diagnostics.collection.running"),
+    STACK_CM_DIAGNOSTICS_UPLOAD_RUNNING("stack.cm.diagnostics.upload.running"),
+    STACK_CM_DIAGNOSTICS_CLEANUP_RUNNING("stack.cm.diagnostics.cleanup.running"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_FINISHED("stack.cm.diagnostics.collection.finished"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_FAILED("stack.cm.diagnostics.collection.failed"),
 
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),
