@@ -63,7 +63,7 @@
           "size": 50
         }
       },
-      "nodeCount": 1,
+      "nodeCount": 2,
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []

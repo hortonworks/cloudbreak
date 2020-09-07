@@ -170,6 +170,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
 
+    @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    private IdBroker idBroker;
+
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
 
@@ -733,6 +736,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
+    }
+
+    public IdBroker getIdBroker() {
+        return idBroker;
+    }
+
+    public void setIdBroker(IdBroker idBroker) {
+        this.idBroker = idBroker;
     }
 
     @Override

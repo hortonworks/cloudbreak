@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -178,6 +179,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
+            IdBroker idbroker =  cluster.getIdBroker();
             String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
 
@@ -199,6 +201,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
+                    .withIdBroker(idbroker)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))

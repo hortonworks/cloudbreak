@@ -67,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -125,6 +126,9 @@ public class ClusterService {
     @Inject
     private UsageLoggingUtil usageLoggingUtil;
 
+    @Inject
+    private IdBrokerService idBrokerService;
+
     public Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
         Cluster savedCluster;
         try {
@@ -132,6 +136,9 @@ public class ClusterService {
             savedCluster = repository.save(cluster);
             if (savedCluster.getGateway() != null) {
                 gatewayService.save(savedCluster.getGateway());
+            }
+            if (savedCluster.getIdBroker() != null) {
+                idBrokerService.save(savedCluster.getIdBroker());
             }
             LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -45,6 +49,7 @@ import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
@@ -77,6 +82,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
+        generateIdBrokerSignKeys(cluster, workspace);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCloudStorage());
             cluster.setFileSystem(fileSystem);
@@ -107,6 +113,23 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 gateway.setCluster(cluster);
             }
         }
+    }
+
+    private void generateIdBrokerSignKeys(Cluster cluster, Workspace workspace) {
+        IdBroker idBroker = new IdBroker();
+
+        KeyPair identityKey = PkiUtil.generateKeypair();
+        KeyPair signKey = PkiUtil.generateKeypair();
+        X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
+
+        idBroker.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
+        idBroker.setSignPub(PkiUtil.convert(identityKey.getPublic()));
+        idBroker.setSignCert(PkiUtil.convert(cert));
+        idBroker.setMasterSecret(PasswordUtil.generatePassword());
+
+        cluster.setIdBroker(idBroker);
+        idBroker.setCluster(cluster);
+        idBroker.setWorkspace(workspace);
     }
 
     private void convertAttributes(ClusterV4Request source, Cluster cluster) {

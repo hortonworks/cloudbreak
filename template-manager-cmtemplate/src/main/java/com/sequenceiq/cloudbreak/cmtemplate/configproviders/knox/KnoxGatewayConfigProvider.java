@@ -42,11 +42,17 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_PATH = "gateway_path";
 
-    private static final String SIGNING_KEYSTORE_NAME = "gateway_signing_keystore_name";
+    private static final String GATEWAY_SIGNING_KEYSTORE_NAME = "gateway_signing_keystore_name";
 
-    private static final String SIGNING_KEYSTORE_TYPE = "gateway_signing_keystore_type";
+    private static final String GATEWAY_SIGNING_KEYSTORE_TYPE = "gateway_signing_keystore_type";
 
-    private static final String SIGNING_KEY_ALIAS = "gateway_signing_key_alias";
+    private static final String GATEWAY_SIGNING_KEY_ALIAS = "gateway_signing_key_alias";
+
+    private static final String IDBROKER_SIGNING_KEYSTORE_NAME = "idbroker_gateway_signing_keystore_name";
+
+    private static final String IDBROKER_SIGNING_KEYSTORE_TYPE = "idbroker_gateway_signing_keystore_type";
+
+    private static final String IDBROKER_SIGNING_KEY_ALIAS = "idbroker_gateway_signing_key_alias";
 
     private static final String SIGNING_JKS = "signing.jks";
 
@@ -88,16 +94,20 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                 config.add(config(GATEWAY_CM_AUTO_DISCOVERY_ENABLED, "false"));
                 if (gateway != null) {
                     config.add(config(GATEWAY_PATH, gateway.getPath()));
-                    config.add(config(SIGNING_KEYSTORE_NAME, SIGNING_JKS));
-                    config.add(config(SIGNING_KEYSTORE_TYPE, JKS));
-                    config.add(config(SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
+                    config.add(config(GATEWAY_SIGNING_KEYSTORE_NAME, SIGNING_JKS));
+                    config.add(config(GATEWAY_SIGNING_KEYSTORE_TYPE, JKS));
+                    config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
                     config.add(getGatewayWhitelistConfig(source));
                 }
                 return config;
             case KnoxRoles.IDBROKER:
                 return List.of(
-                    config(IDBROKER_MASTER_SECRET, masterSecret),
-                    config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup)
+                    config(IDBROKER_MASTER_SECRET, source.getIdBroker().getMasterSecret()),
+                    config(IDBROKER_GATEWAY_ADMIN_GROUPS, adminGroup),
+                    config(IDBROKER_SIGNING_KEYSTORE_NAME, SIGNING_JKS),
+                    config(IDBROKER_SIGNING_KEYSTORE_TYPE, JKS),
+                    config(IDBROKER_SIGNING_KEY_ALIAS, SIGNING_IDENTITY)
+
                 );
             default:
                 return List.of();
