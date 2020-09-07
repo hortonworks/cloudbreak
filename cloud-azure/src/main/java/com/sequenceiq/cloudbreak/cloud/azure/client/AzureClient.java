@@ -626,6 +626,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.networks().deleteByIdsAsync(networkIds));
     }
 
+    public void deleteNetworkInResourceGroup(String resourceGroup, String networkId) {
+        handleAuthException(() -> azure.networks().deleteByResourceGroup(resourceGroup, networkId));
+    }
+
     public Observable<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
         return handleAuthException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
     }
