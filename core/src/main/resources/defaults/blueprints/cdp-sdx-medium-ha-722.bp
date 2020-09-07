@@ -48,7 +48,7 @@
         ]
       },
       {
-        "cardinality": 1,
+        "cardinality": 2,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
           "knox-IDBROKER-BASE"
