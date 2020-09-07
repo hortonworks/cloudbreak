@@ -45,6 +45,7 @@ class GrainPropertiesService {
         Optional.ofNullable(addGatewayAddress(gatewayConfigs)).ifPresent(grainPropertiesList::add);
         Optional.ofNullable(addNameNodeRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
         Optional.ofNullable(addKnoxRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addIdBrokerRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
         Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
         return grainPropertiesList;
     }
@@ -74,6 +75,14 @@ class GrainPropertiesService {
         Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, KnoxRoles.KNOX_GATEWAY);
         knoxServiceLocations.getOrDefault(KnoxRoles.KNOX_GATEWAY, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "knox"));
+        return grainProperties.getProperties().isEmpty() ? null : grainProperties;
+    }
+
+    private GrainProperties addIdBrokerRoleForHosts(Cluster cluster) {
+        GrainProperties grainProperties = new GrainProperties();
+        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, KnoxRoles.IDBROKER);
+        knoxServiceLocations.getOrDefault(KnoxRoles.IDBROKER, List.of())
+                .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "idbroker"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 

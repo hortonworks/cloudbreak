@@ -74,6 +74,11 @@ base:
     - match: grain
     - ldap.init
 
+  'roles:idbroker':
+    - match: grain
+    - idbroker.init
+    - idbroker.settings
+
   'roles:smartsense_agent_update':
     - match: grain
     - smartsense

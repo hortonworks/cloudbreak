@@ -56,6 +56,10 @@ base:
     - match: compound
     - gateway.knox
 
+  'G@roles:idbroker':
+    - match: compound
+    - idbroker
+
   'recipes:pre-cloudera-manager-start':
     - match: grain
     - recipes.pre-cloudera-manager-start

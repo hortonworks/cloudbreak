@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -82,6 +83,8 @@ public class TemplatePreparationObject {
 
     private final Optional<DatalakeView> datalakeView;
 
+    private final IdBroker idBroker;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -106,6 +109,7 @@ public class TemplatePreparationObject {
         stackType = builder.stackType;
         virtualGroupRequest = builder.virtualGroupRequest;
         datalakeView = builder.datalakeView;
+        idBroker = builder.idBroker;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -199,6 +203,10 @@ public class TemplatePreparationObject {
         return datalakeView;
     }
 
+    public IdBroker getIdBroker() {
+        return idBroker;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -240,6 +248,8 @@ public class TemplatePreparationObject {
         private VirtualGroupRequest virtualGroupRequest;
 
         private Optional<DatalakeView> datalakeView;
+
+        private IdBroker idBroker;
 
         public static Builder builder() {
             return new Builder();
@@ -365,6 +375,11 @@ public class TemplatePreparationObject {
 
         public Builder withDataLakeView(DatalakeView dataLakeView) {
             this.datalakeView = Optional.ofNullable(dataLakeView);
+            return this;
+        }
+
+        public Builder withIdBroker(IdBroker idBroker) {
+            this.idBroker = idBroker;
             return this;
         }
 

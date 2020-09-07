@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -142,16 +143,24 @@ public class KnoxGatewayConfigProviderTest {
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
         gateway.setTopologies(Set.of(topology));
+
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withIdBroker(idBroker)
+                .build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
 
         assertEquals(
                 List.of(
-                        config("idbroker_master_secret", gateway.getKnoxMasterSecret()),
-                        config("idbroker_gateway_knox_admin_groups", "")
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", ""),
+                        config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                        config("idbroker_gateway_signing_keystore_type", "JKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
@@ -177,14 +186,21 @@ public class KnoxGatewayConfigProviderTest {
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
         TemplatePreparationObject source = Builder.builder()
                 .withGeneralClusterConfigs(gcc)
-                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withIdBroker(idBroker)
+                .build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
-                        config("idbroker_master_secret", gcc.getPassword()),
-                        config("idbroker_gateway_knox_admin_groups", "")
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", ""),
+                        config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                        config("idbroker_gateway_signing_keystore_type", "JKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );
@@ -205,19 +221,27 @@ public class KnoxGatewayConfigProviderTest {
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
+
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
 
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withLdapConfig(ldapConfig)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
-                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, "")).build();
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withIdBroker(idBroker)
+                .build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
 
         assertEquals(
             List.of(
-                config("idbroker_master_secret", gateway.getKnoxMasterSecret()),
-                config("idbroker_gateway_knox_admin_groups", "knox_admins")
+                config("idbroker_master_secret", "supersecret"),
+                config("idbroker_gateway_knox_admin_groups", "knox_admins"),
+                    config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                    config("idbroker_gateway_signing_keystore_type", "JKS"),
+                    config("idbroker_gateway_signing_key_alias", "signing-identity")
             ),
             underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
         );

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -155,6 +157,12 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private SdxClientService sdxClientService;
 
+    @Inject
+    private IdBrokerService idBrokerService;
+
+    @Inject
+    private IdBrokerConverterUtil idBrokerConverterUtil;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -178,6 +186,12 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             if (gateway != null) {
                 gatewaySignKey = gateway.getSignKey();
             }
+            IdBroker idbroker =  idBrokerService.getByCluster(cluster);
+            if (idbroker == null) {
+                idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster, cluster.getWorkspace());
+                idBrokerService.save(idbroker);
+            }
+            cluster.setIdBroker(idbroker);
             String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
 
@@ -199,6 +213,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
+                    .withIdBroker(idbroker)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
