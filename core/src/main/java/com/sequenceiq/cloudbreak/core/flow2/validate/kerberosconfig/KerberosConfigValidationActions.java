@@ -1,0 +1,98 @@
+package com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig;
+
+import java.util.Map;
+import java.util.Optional;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
+import org.springframework.statemachine.action.Action;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
+import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.Flow;
+import com.sequenceiq.flow.core.FlowParameters;
+
+@Configuration
+public class KerberosConfigValidationActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigValidationActions.class);
+
+    @Inject
+    private ClusterCreationEnvironmentValidator clusterCreationEnvironmentValidator;
+
+    @Inject
+    private StackUpdaterService stackUpdaterService;
+
+    @Inject
+    private StackService stackService;
+
+    @Bean(name = "VALIDATE_KERBEROS_CONFIG_STATE")
+    public Action<?, ?> kerberosConfigValidationAction() {
+        return new AbstractStackCreationAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                Cluster cluster = context.getStack().getCluster();
+                if (cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) {
+                    boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(context.getStack());
+                    if (!hasFreeIpaKerberosConfig) {
+                        throw new IllegalStateException("Kerberos config validation failed on freeipa");
+                    }
+                }
+                sendEvent(context, KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FINISHED_EVENT.selector(), payload);
+            }
+
+            @Override
+            protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "VALIDATE_KERBEROS_CONFIG_FAILED_STATE")
+    public Action<?, ?> kerberosConfigValidationFailureAction() {
+        return new AbstractStackFailureAction<KerberosConfigValidationState, KerberosConfigValidationEvent>() {
+
+            @Override
+            protected StackFailureContext createFlowContext(FlowParameters flowParameters,
+                    StateContext<KerberosConfigValidationState, KerberosConfigValidationEvent> stateContext, StackFailureEvent payload) {
+                Flow flow = getFlow(flowParameters.getFlowId());
+                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
+                MDCBuilder.buildMdcContext(stackView);
+                flow.setFlowFailed(payload.getException());
+                return new StackFailureContext(flowParameters, stackView);
+            }
+
+            @Override
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
+                stackUpdaterService.updateStatus(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
+                        ResourceEvent.KERBEROS_CONFIG_VALIDATION_FAILED, payload.getException().getMessage());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackFailureContext context) {
+                return new StackEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT.selector(), context.getStackView().getId());
+            }
+        };
+    }
+}

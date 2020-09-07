@@ -299,6 +299,8 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED("cluster.externaldatabase.creation.failed"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED("cluster.externaldatabase.creation.finished"),
 
+    KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
+
     STACK_RETRY_FLOW_START("retry.flow.start"),
 
     MAINTENANCE_MODE_VALIDATION_STARTED("maintenance.mode.validation.started"),
