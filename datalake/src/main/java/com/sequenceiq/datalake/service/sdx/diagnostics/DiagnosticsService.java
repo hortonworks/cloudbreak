@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.diagnostics;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -54,7 +56,23 @@ public class DiagnosticsService {
         return flowIdentifier;
     }
 
+    public FlowIdentifier collectCmDiagnostics(CmDiagnosticsCollectionRequest request) {
+        String userId = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster cluster = sdxService.getByCrn(userId, request.getStackCrn());
+        StackV4Response stackV4Response = sdxService.getDetail(cluster.getClusterName(), new HashSet<>(), cluster.getAccountId());
+        diagnosticsCollectionValidator.validate(request, stackV4Response);
+        Map<String, Object> properties = diagnosticsParamsConverter.convertFromCmRequest(request);
+        SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerCmDiagnosticsCollection(event);
+        LOGGER.debug("Start CM based diagnostics collection with flow pollable identifier: {}", flowIdentifier.getPollableId());
+        return flowIdentifier;
+    }
+
     public VmLogsResponse getVmLogs() {
         return diagnosticsV4Endpoint.getVmLogs();
+    }
+
+    public List<String> getCmRoles(String stackCrn) {
+        return diagnosticsV4Endpoint.getCmRoles(stackCrn);
     }
 }

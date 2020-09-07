@@ -49,9 +49,9 @@ public class CmDiagnosticsDataToParameterConverter {
                 .withTicketNumber(request.getTicket())
                 .withRoles(request.getRoles())
                 .withBundleSizeBytes(request.getBundleSizeBytes())
-                .withIncludeInfoLog(request.getIncludeInfoLog())
                 .withEnableMonitorMetricsCollection(request.getEnableMonitorMetricsCollection())
-                .withUpdatePackage(request.getUpdatePackage());
+                .withUpdatePackage(request.getUpdatePackage())
+                .withSkipValidation(request.getSkipValidation());
         return builder.build();
     }
 }
