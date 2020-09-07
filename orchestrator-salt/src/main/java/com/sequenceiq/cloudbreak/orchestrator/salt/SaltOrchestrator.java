@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -412,7 +411,7 @@ SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            getRolesBeforeHighstateMagicWithRetry(sc);
+            retry.testWith2SecDelayMax5Times(() -> getRolesBeforeHighstateMagic(sc));
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
@@ -428,12 +427,16 @@ SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Run services on nodes finished: {}", allNodes);
     }
 
-    @Retryable
-    private void getRolesBeforeHighstateMagicWithRetry(SaltConnector sc) {
-        // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
-        // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
-        Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
-        LOGGER.info("Roles before highstate: " + roles);
+    private void getRolesBeforeHighstateMagic(SaltConnector sc) {
+        try {
+            // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
+            // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
+            Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
+            LOGGER.info("Roles before highstate: " + roles);
+        } catch (RuntimeException e) {
+            LOGGER.info("Can't get roles before highstate", e);
+            throw new Retry.ActionFailedException("Can't get roles before highstate: " + e.getMessage());
+        }
     }
 
     private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> serverHostname)
