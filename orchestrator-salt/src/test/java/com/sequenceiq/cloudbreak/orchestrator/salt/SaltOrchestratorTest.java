@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SaltOrchestrator.class, SaltStates.class})
@@ -100,6 +101,9 @@ public class SaltOrchestratorTest {
 
     @Mock
     private SaltService saltService;
+
+    @Mock
+    private Retry retry;
 
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
