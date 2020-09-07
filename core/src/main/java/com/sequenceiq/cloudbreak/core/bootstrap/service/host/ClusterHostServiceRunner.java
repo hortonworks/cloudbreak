@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -300,7 +301,7 @@ public class ClusterHostServiceRunner {
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
-
+        saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
@@ -566,6 +567,7 @@ public class ClusterHostServiceRunner {
         gateway.put("ssotype", SSOType.NONE);
 
         Gateway clusterGateway = cluster.getGateway();
+
         if (clusterGateway != null) {
             gateway.put("path", clusterGateway.getPath());
             gateway.put("ssotype", clusterGateway.getSsoType());
@@ -607,6 +609,19 @@ public class ClusterHostServiceRunner {
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void saveIdBrokerPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        IdBroker clusterIdBroker = cluster.getIdBroker();
+        Map<String, Object> idbroker = new HashMap<>();
+
+        if (clusterIdBroker != null) {
+            idbroker.put("signpub", clusterIdBroker.getSignPub());
+            idbroker.put("signcert", clusterIdBroker.getSignCert());
+            idbroker.put("signkey", clusterIdBroker.getSignKey());
+            idbroker.put("mastersecret", clusterIdBroker.getMasterSecret());
+        }
+        servicePillar.put("idbroker", new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker)));
     }
 
     private void addGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
