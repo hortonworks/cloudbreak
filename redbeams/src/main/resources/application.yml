@@ -29,7 +29,7 @@ management:
 
 redbeams:
   schema.migration.auto: true
-  cloudbreak.url: http://127.0.0.1:8080
+  cloudbreak.url: http://localhost:9091
   cert.dir: /certs/
   client.id: redbeams
   structuredevent:
@@ -51,6 +51,9 @@ redbeams:
   environment:
     url: http://localhost:8088
     contextPath: /environmentservice
+  sdx:
+    url: http://localhost:8086
+    contextPath: /dl
   intermediate.threadpool:
     core.size: 40
     capacity.size: 4000

@@ -2,12 +2,18 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -42,6 +48,19 @@ public class SdxClusterConverter {
         sdxClusterResponse.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
         sdxClusterResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
         sdxClusterResponse.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
+        sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
         return sdxClusterResponse;
+    }
+
+    private Map<String, String> getTags(Json tag) {
+        try {
+            if (tag != null && tag.getValue() != null) {
+                return tag.get(new TypeReference<Map<String, String>>() { });
+            } else {
+                return new HashMap<>();
+            }
+        } catch (Exception e) {
+            throw new BadRequestException("Cannot convert tags", e);
+        }
     }
 }

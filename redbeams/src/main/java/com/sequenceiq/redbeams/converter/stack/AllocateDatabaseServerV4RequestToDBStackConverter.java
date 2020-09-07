@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,9 +20,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -54,6 +57,8 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -112,6 +117,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private AccountTagService accountTagService;
 
+    @Inject
+    private SdxEndpoint sdxEndpoint;
+
+    @Inject
+    private DistroXV1Endpoint distroXV1Endpoint;
+
     @PostConstruct
     public void initSupportedPlatforms() {
         if (dbServiceSupportedPlatforms.isEmpty()) {
@@ -124,7 +135,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         CrnUser user = crnUserDetailsService.loadUserByUsername(ownerCrnString);
 
         DetailedEnvironmentResponse environment = environmentService.getByCrn(source.getEnvironmentCrn());
-
         DBStack dbStack = new DBStack();
         dbStack.setOwnerCrn(ownerCrn);
         dbStack.setUserName(user.getEmail());
@@ -149,12 +159,14 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
         dbStack.setResourceCrn(crnService.createCrn(dbStack));
-        dbStack.setTags(getTags(dbStack, environment));
+        dbStack.setTags(getTags(dbStack, source.getClusterCrn(), environment));
         return dbStack;
     }
 
-    private Json getTags(DBStack dbStack, DetailedEnvironmentResponse environment) {
+    private Json getTags(DBStack dbStack, String clusterCrn, DetailedEnvironmentResponse environment) {
         boolean internalTenant = entitlementService.internalTenant(dbStack.getOwnerCrn().toString(), dbStack.getAccountId());
+
+        Map<String, String> resultTags = getUserTagsForCluster(clusterCrn);
 
         CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
                 .builder()
@@ -166,11 +178,36 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 .withIsInternalTenant(internalTenant)
                 .withUserName(dbStack.getUserName())
                 .withAccountTags(accountTagService.list())
+                .withUserDefinedTags(resultTags)
                 .build();
 
         Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
+        Map<String, String> environmentUserTags = Objects.requireNonNullElse(environment.getTags().getUserDefined(), new HashMap<>());
+        environmentUserTags.forEach((k, v) -> resultTags.merge(k, v, (oldValue, newValue) -> newValue));
 
-        return new Json(new StackTags(environment.getTags().getUserDefined(), new HashMap<>(), defaultTags));
+        return new Json(new StackTags(resultTags, new HashMap<>(), defaultTags));
+    }
+
+    private Map<String, String> getUserTagsForCluster(String clusterCrn) {
+        Crn crn = Crn.fromString(clusterCrn);
+        Map<String, String> userDefinedTags = new HashMap<>();
+        try {
+            switch (crn.getService()) {
+                case DATALAKE:
+                    SdxClusterResponse sdxCluster = sdxEndpoint.getByCrn(clusterCrn);
+                    userDefinedTags = sdxCluster.getTags();
+                    break;
+                case DATAHUB:
+                    StackV4Response distroxCluster = distroXV1Endpoint.getByCrn(clusterCrn, Set.of());
+                    userDefinedTags = distroxCluster.getTags().getUserDefined();
+                    break;
+                default:
+                    break;
+            }
+        } catch (javax.ws.rs.NotFoundException ignore) {
+            // ignored because of Integration Tests that do not create real cluster
+        }
+        return Objects.requireNonNullElse(userDefinedTags, new HashMap<>());
     }
 
     private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {
