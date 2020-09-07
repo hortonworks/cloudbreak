@@ -50,6 +50,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.authorization",
         "com.sequenceiq.statuschecker",
         "com.sequenceiq.environment.client",
+        "com.sequenceiq.sdx.client",
         "com.sequenceiq.cloudbreak.client",
         "com.sequenceiq.cloudbreak.service",
         "com.sequenceiq.cloudbreak.ha.service",

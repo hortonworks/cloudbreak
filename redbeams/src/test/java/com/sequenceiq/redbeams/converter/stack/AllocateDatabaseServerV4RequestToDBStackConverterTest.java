@@ -30,17 +30,21 @@ import org.mockito.Mock;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.MappableBase;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
@@ -64,12 +68,15 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final String OWNER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:external/bob@cloudera.com";
 
     private static final String ENVIRONMENT_CRN = "myenv";
+
+    private static final String CLUSTER_CRN = "crn:cdp:datahub:us-west-1:cloudera:stack:id";
 
     private static final String ENVIRONMENT_NAME = "myenv-amazing-env";
 
@@ -140,6 +147,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Mock
     private AccountTagService accountTagService;
 
+    @Mock
+    private SdxEndpoint sdxEndpoint;
+
+    @Mock
+    private DistroXV1Endpoint distroXV1Endpoint;
+
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
 
@@ -185,6 +198,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Test
     public void testConversionWhenOptionalElementsAreProvided() throws IOException {
         setupAllocateRequest(true);
+        setupTagsResponse();
 
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
@@ -195,7 +209,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
-
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
         assertEquals(allocateRequest.getName(), dbStack.getName());
@@ -224,8 +237,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(databaseServerRequest.getRootUserPassword(), dbStack.getDatabaseServer().getRootPassword());
         assertEquals(1, dbStack.getDatabaseServer().getAttributes().getMap().size());
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
-
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
+        assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
+
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator).get(networkRequest);
         verify(subnetListerService, never()).listSubnets(any(), any());
@@ -235,13 +249,22 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(passwordGeneratorService, never()).generatePassword(any());
     }
 
+    private void setupTagsResponse() {
+        StackV4Response distroxResponse = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of("DistroXKey1", "DistroXValue1"));
+        distroxResponse.setTags(tags);
+        when(distroXV1Endpoint.getByCrn(CLUSTER_CRN, Set.of())).thenReturn(distroxResponse);
+    }
+
     private CrnUser getCrnUser() {
         return new CrnUser("", "", "", USER_EMAIL, "", "");
     }
 
     @Test
-    public void testConversionWhenOptionalElementsGenerated() {
+    public void testConversionWhenOptionalElementsGenerated() throws IOException {
         setupAllocateRequest(false);
+        setupTagsResponse();
 
         List<CloudSubnet> cloudSubnets = List.of(
                 new CloudSubnet("subnet-1", "", "az-a", ""),
@@ -281,6 +304,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
         assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), hasSize(1));
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
+        assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
+
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetListerService).listSubnets(any(), any());
@@ -323,6 +348,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private void setupAllocateRequest(boolean provideOptionalFields) {
 
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        allocateRequest.setClusterCrn(CLUSTER_CRN);
         if (provideOptionalFields) {
             allocateRequest.setName("myallocation");
             AwsNetworkV4Parameters awsNetworkV4Parameters = new AwsNetworkV4Parameters();

@@ -85,11 +85,12 @@ dependencies {
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   }
   compile project(':authorization-common')
-  
+
   implementation project(':flow')
   implementation project(':cloud-reactor')
   implementation project(':cloud-reactor-api')
   implementation project(':environment-api')
+  implementation project(':datalake-api')
   implementation project(':status-checker')
 
   compile project(':cloud-common')
@@ -119,7 +120,7 @@ bootRun {
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
-} 
+}
 
 springBoot {
   mainClassName = 'com.sequenceiq.redbeams.RedbeamsApplication'

@@ -64,9 +64,9 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
         LOGGER.debug("External database: {} for stack {}", externalDatabase.name(), stack.getName());
         Selectable result;
         try {
+            String resourceCrn = null;
             if (externalDatabase == DatabaseAvailabilityType.NONE) {
                 LOGGER.info("External database for stack {} is not requested.", stack.getName());
-                result = new CreateExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_WAIT_SUCCESS_EVENT.event(), stack.getName(), null);
             } else {
                 LOGGER.debug("Updating stack {} status from {} to {}",
                         stack.getName(), stack.getStatus().name(), DetailedStackStatus.EXTERNAL_DATABASE_CREATION_IN_PROGRESS.name());
@@ -80,9 +80,9 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
                         stack.getName(), stack.getStatus().name(), DetailedStackStatus.PROVISION_REQUESTED.name());
                 stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.PROVISION_REQUESTED,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED, "External database creation finished");
-                result = new CreateExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_WAIT_SUCCESS_EVENT.event(),
-                        stack.getName(), stack.getCluster().getDatabaseServerCrn());
+                resourceCrn = stack.getCluster().getDatabaseServerCrn();
             }
+            result = new CreateExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_WAIT_SUCCESS_EVENT.event(), stack.getName(), resourceCrn);
         } catch (UserBreakException e) {
             LOGGER.info("Database polling exited before timeout. Cause: ", e);
             result = createFailedEvent(stack, e);
