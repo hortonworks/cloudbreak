@@ -57,6 +57,9 @@ public class EntitlementService {
     static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
     @VisibleForTesting
+    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
+
+    @VisibleForTesting
     static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
     @VisibleForTesting
@@ -122,6 +125,10 @@ public class EntitlementService {
 
     public boolean azureSingleResourceGroupDeploymentEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
+    }
+
+    public boolean azureSingleResourceGroupDedicatedStorageAccountEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT);
     }
 
     public boolean fastEbsEncryptionEnabled(String actorCrn, String accountId) {

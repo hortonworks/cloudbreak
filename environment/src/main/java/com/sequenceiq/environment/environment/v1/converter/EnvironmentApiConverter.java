@@ -231,6 +231,8 @@ public class EnvironmentApiConverter {
                 return ResourceGroupUsagePattern.USE_SINGLE;
             case MULTIPLE:
                 return ResourceGroupUsagePattern.USE_MULTIPLE;
+            case SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
+                return ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
             default:
                 throw new RuntimeException("Unknown usage pattern: %s" + resourceGroupUsage);
         }

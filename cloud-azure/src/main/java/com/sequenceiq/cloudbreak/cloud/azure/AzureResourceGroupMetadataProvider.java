@@ -42,14 +42,18 @@ public class AzureResourceGroupMetadataProvider {
     }
 
     public Boolean useSingleResourceGroup(CloudStack cloudStack) {
-        String resourceGroupUsageParameter = cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER);
-        return ResourceGroupUsage.SINGLE.name().equals(resourceGroupUsageParameter) ? Boolean.TRUE : Boolean.FALSE;
+        return ResourceGroupUsage.SINGLE == getResourceGroupUsage(cloudStack) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public Boolean useSingleResourceGroup(DatabaseStack cloudStack) {
+    public ResourceGroupUsage getResourceGroupUsage(CloudStack cloudStack) {
+        String resourceGroupUsageParameter = cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER);
+        return ResourceGroupUsage.valueOf(resourceGroupUsageParameter);
+    }
+
+    public ResourceGroupUsage getResourceGroupUsage(DatabaseStack cloudStack) {
         String resourceGroupUsageParameter = cloudStack.getDatabaseServer().getParameters()
-                .getOrDefault(RESOURCE_GROUP_USAGE_PARAMETER, "").toString();
-        return ResourceGroupUsage.SINGLE.name().equals(resourceGroupUsageParameter) ? Boolean.TRUE : Boolean.FALSE;
+                .getOrDefault(RESOURCE_GROUP_USAGE_PARAMETER, ResourceGroupUsage.MULTIPLE.name()).toString();
+        return ResourceGroupUsage.valueOf(resourceGroupUsageParameter);
     }
 
     public String getImageResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {

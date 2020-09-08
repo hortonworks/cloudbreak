@@ -116,7 +116,7 @@ public class AzureSetup implements Setup {
             LOGGER.debug("Multiple RG mode is active, checking existence of resource group {}", resourceGroupName);
             ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
             if (resourceGroup != null) {
-                throw new BadRequestException("Resourcegroup name already exists: " + resourceGroup.name());
+                throw new BadRequestException("Resource group name already exists: " + resourceGroup.name());
             }
         }
     }

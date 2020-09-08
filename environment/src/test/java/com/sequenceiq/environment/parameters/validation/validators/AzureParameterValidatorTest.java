@@ -171,7 +171,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. If you specify to use a single resource group for your resources then please provide the name of the resource group to use.",
+        assertEquals("1. If you use a single resource group for your resources then please provide the name of that resource group.",
                 validationResult.getFormattedErrors());
     }
 
@@ -201,9 +201,7 @@ public class AzureParameterValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
-                                .withName("myResourceGroup").build())
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -217,7 +215,7 @@ public class AzureParameterValidatorTest {
         assertFalse(validationResult.hasError());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(entitlementService, times(1)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(entitlementService, times(0)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
     }
 
     @Test

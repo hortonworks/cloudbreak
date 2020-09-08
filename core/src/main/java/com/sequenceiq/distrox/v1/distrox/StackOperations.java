@@ -10,6 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -234,7 +235,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
             boolean osUpgrade = upgradeService.isOsUpgrade(request);
             UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName,
                     osUpgrade);
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
+            if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
+                clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
+            }
             Stack stack = getStackByName(stackName);
             MDCBuilder.buildMdcContext(stack);
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));

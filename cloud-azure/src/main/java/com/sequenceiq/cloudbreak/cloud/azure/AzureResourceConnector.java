@@ -222,9 +222,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        Boolean singleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
+        ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
 
-        if (singleResourceGroup) {
+        if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
             azureTerminationHelperService.terminate(ac, stack, resources);
             return check(ac, Collections.emptyList());
         } else {
