@@ -891,6 +891,13 @@ public abstract class TestContext implements ApplicationContextAware {
         if (!exceptionMap.isEmpty()) {
             List<Clue> clues = resources.values().stream()
                     .filter(Investigable.class::isInstance)
+                    .peek(cloudbreakTestDto -> {
+                        try {
+                            cloudbreakTestDto.refresh();
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to refresh {}, continue with using its last known state.", cloudbreakTestDto, e);
+                        }
+                    })
                     .map(Investigable.class::cast)
                     .map(Investigable::investigate)
                     .filter(Objects::nonNull)

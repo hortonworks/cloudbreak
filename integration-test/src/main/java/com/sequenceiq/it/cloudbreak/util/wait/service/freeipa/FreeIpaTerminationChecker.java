@@ -38,7 +38,7 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             LOGGER.warn("No freeIpa found with environmentCrn '{}'! It has been deleted successfully.", environmentCrn, e);
         } catch (Exception e) {
             LOGGER.error("FreeIpa termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("FreeIpa termination failed: %s", e.getMessage()));
+            throw new TestFailException("FreeIpa termination failed", e);
         }
         return true;
     }
@@ -52,8 +52,7 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
                     "statusReason: '%s'", freeIpa.getCrn(), environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, freeIpa termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, freeIpa termination failed: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, freeIpa termination failed", e);
         }
     }
 

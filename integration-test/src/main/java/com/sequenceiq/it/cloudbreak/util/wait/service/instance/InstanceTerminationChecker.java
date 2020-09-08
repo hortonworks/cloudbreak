@@ -59,7 +59,7 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
             LOGGER.warn("{} instance group is not present, may this was deleted.", hostGroup, e);
         } catch (Exception e) {
             LOGGER.error("'{}' instance group deletion has been failed, because of: {}", hostGroup, e.getMessage(), e);
-            throw new TestFailException(String.format("'%s' instance group deletion has been failed, because of: %s", hostGroup, e.getMessage()));
+            throw new TestFailException(String.format("'%s' instance group deletion has been failed", hostGroup), e);
         }
         return true;
     }
@@ -91,7 +91,7 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
             }
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out! Failed to get instance status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out! Failed to get instance status: %s", e.getMessage()));
+            throw new TestFailException("Wait operation timed out! Failed to get instance status", e);
         }
     }
 

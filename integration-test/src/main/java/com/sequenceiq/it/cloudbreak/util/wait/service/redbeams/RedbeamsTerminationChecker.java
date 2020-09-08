@@ -41,7 +41,7 @@ public class RedbeamsTerminationChecker<T extends RedbeamsWaitObject> extends Ex
             LOGGER.warn("No DatabaseServerConfig found with crn '{}'", crn, e);
         } catch (Exception e) {
             LOGGER.error("Redbeams termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Redbeams termination failed: ", e.getMessage()));
+            throw new TestFailException("Redbeams termination failed", e);
         }
         return true;
     }
@@ -55,8 +55,7 @@ public class RedbeamsTerminationChecker<T extends RedbeamsWaitObject> extends Ex
                     "statusReason: '%s'", redbeams.getName(), crn, redbeams.getStatus(), redbeams.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, redbeams termination failed. Also failed to get redbeams status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, redbeams termination failed. Also failed to get redbeams status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, redbeams termination failed. Also failed to get redbeams status", e);
         }
     }
 

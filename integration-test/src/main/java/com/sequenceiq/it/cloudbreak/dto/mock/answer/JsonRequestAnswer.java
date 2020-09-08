@@ -26,7 +26,7 @@ public class JsonRequestAnswer<S> extends AbstractRequestWithBodyHandler<S, Json
             return JsonUtil.readTree(request.body());
         } catch (IOException e) {
             LOGGER.error("Could not parse json from request body", e);
-            throw new TestFailException("Could not parse json from request body");
+            throw new TestFailException("Could not parse json from request body", e);
         }
     }
 }

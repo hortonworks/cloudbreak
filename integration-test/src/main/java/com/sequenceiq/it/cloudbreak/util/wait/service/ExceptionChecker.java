@@ -12,7 +12,7 @@ public abstract class ExceptionChecker<T> implements StatusChecker<T> {
     @Override
     public void handleException(Exception e) {
         LOGGER.error("Failing with exception", e);
-        throw new TestFailException(e.getMessage());
+        throw new TestFailException(e.getMessage(), e);
     }
 
 }

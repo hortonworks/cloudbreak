@@ -42,7 +42,7 @@ public class FreeIpaAwait implements Await<FreeIpaTestDto, Status> {
             } else {
                 waitForFreeIpaStatus(new FreeIpaOperationChecker<>(), client, environmentCrn, testContext, desiredStatus,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, null);
+                entity.refresh();
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
