@@ -40,7 +40,7 @@ public class EnvironmentFailedChecker<T extends EnvironmentWaitObject> extends E
             LOGGER.warn("No environment found with crn '{}'", crn, e);
         } catch (Exception e) {
             LOGGER.error("Failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get environment status: %s", e.getMessage()));
+            throw new TestFailException("Failed to get environment status", e);
         }
         return false;
     }
@@ -56,8 +56,7 @@ public class EnvironmentFailedChecker<T extends EnvironmentWaitObject> extends E
                     + "statusReason: '%s'", name, crn, status, environment.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, failed to get environment status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, failed to get environment status", e);
         }
     }
 

@@ -33,7 +33,7 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
         LOGGER.warn("Did not clean up resource ({}): name={}", getClass().getSimpleName(), getName());
     }
 
-    default CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
+    default CloudbreakTestDto refresh() {
         LOGGER.warn("It is not refreshable resource: {}", getName());
         return this;
     }

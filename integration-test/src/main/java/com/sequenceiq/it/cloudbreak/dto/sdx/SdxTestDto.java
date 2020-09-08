@@ -123,7 +123,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     @Override
-    public SdxTestDto refresh(TestContext testContext, CloudbreakClient cloudbreakClient) {
+    public SdxTestDto refresh() {
         LOGGER.info("Refresh SDX with name: {}", getName());
         return when(sdxTestClient.refresh(), key("refresh-sdx-" + getName()));
     }

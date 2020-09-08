@@ -56,7 +56,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             cloudBlobContainer = createCloudBlobClient().getContainerReference(containerName);
         } catch (URISyntaxException | StorageException e) {
             LOGGER.error("The Storage Container is not exist: [{}]\n", containerName, e);
-            throw new TestFailException("The Storage Container is not exist: [" + containerName + "]\n" + e);
+            throw new TestFailException("The Storage Container is not exist: [" + containerName + "]", e);
         }
 
         return cloudBlobContainer;
@@ -224,7 +224,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                         + " at Base Location: " + baseLocation);
             } else {
                 LOGGER.error("Azure Adls Gen2 Blob Container delete cannot be succeed!", e);
-                throw new TestFailException("Azure Adls Gen2 Blob Container delete cannot be succeed!" + e);
+                throw new TestFailException("Azure Adls Gen2 Blob Container delete cannot be succeed!", e);
             }
         } finally {
             createCloudBlobContainer(containerName);
@@ -252,7 +252,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             }
         } catch (StorageException | URISyntaxException e) {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
-            throw new TestFailException(String.format("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned the error: %s", e));
+            throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
         }
 
         return sdxTestDto;
@@ -310,7 +310,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             }
         } catch (StorageException | URISyntaxException e) {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
-            throw new TestFailException(String.format("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned the error: %s", e));
+            throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
         }
     }
 
@@ -356,7 +356,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
             }
         } catch (StorageException | URISyntaxException e) {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);
-            throw new TestFailException(String.format("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned the error: %s", e));
+            throw new TestFailException("Azure Adls Gen 2 Blob couldn't process the call.", e);
         }
     }
 }

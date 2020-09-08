@@ -296,7 +296,7 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public EnvironmentTestDto refresh(TestContext context, CloudbreakClient client) {
+    public EnvironmentTestDto refresh() {
         LOGGER.info("Refresh Environment with name: {}", getName());
         return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()));
     }

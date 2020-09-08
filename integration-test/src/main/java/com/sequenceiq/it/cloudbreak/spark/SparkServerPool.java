@@ -90,7 +90,7 @@ public class SparkServerPool {
             }
         } catch (InterruptedException e) {
             LOGGER.error("Can't pop spark server", e);
-            throw new TestFailException("Can't take spark server from pool");
+            throw new TestFailException("Can't take spark server from pool", e);
         }
         LOGGER.info("POP chosen one: {}", sparkServer);
         LOGGER.info("POP state: {}", sparkServer.getEndpoint());
@@ -124,7 +124,7 @@ public class SparkServerPool {
                 servers.add(sparkServer);
             } catch (Exception e) {
                 LOGGER.error("Can't add spark server", e);
-                throw new TestFailException("Can't add spark server");
+                throw new TestFailException("Can't add spark server", e);
             }
         }
     }

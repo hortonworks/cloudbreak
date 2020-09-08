@@ -81,7 +81,7 @@ public class ClouderaManagerUtil {
             }
         } catch (Exception e) {
             LOGGER.error("Can't get users' list at: {} or test user is not valid with {}", cmClient.getBasePath(), userDetails);
-            throw new TestFailException("Can't get users' list at: " + cmClient.getBasePath() + " or test user is not valid with " + userDetails);
+            throw new TestFailException("Can't get users' list at: " + cmClient.getBasePath() + " or test user is not valid with " + userDetails, e);
         }
         return stackTestDto;
     }

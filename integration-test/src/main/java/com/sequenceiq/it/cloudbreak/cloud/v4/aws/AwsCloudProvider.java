@@ -346,7 +346,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 return olderImage.getUuid();
             } catch (Exception e) {
                 LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
-                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!");
+                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
             }
         } else {
             Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
@@ -376,7 +376,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                 return baseImage.getUuid();
             } catch (Exception e) {
                 LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
-                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog, because of " + e);
+                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
             }
         } else {
             Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));

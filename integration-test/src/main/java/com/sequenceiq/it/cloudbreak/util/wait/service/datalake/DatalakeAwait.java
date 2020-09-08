@@ -43,7 +43,7 @@ public class DatalakeAwait implements Await<SdxTestDto, SdxClusterStatusResponse
             } else {
                 waitForDatalakeStatus(new DatalakeOperationChecker<>(), client, name, testContext, desiredStatus,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, null);
+                entity.refresh();
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

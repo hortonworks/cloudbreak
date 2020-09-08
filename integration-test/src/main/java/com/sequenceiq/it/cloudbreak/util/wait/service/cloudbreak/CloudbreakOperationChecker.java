@@ -54,7 +54,7 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
             }
         } catch (Exception e) {
             LOGGER.error("Failed to get cluster status or statusReason: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get cluster status or statusReason: %s", e.getMessage()));
+            throw new TestFailException("Failed to get cluster status or statusReason", e);
         }
         return false;
     }
@@ -74,7 +74,7 @@ public class CloudbreakOperationChecker<T extends CloudbreakWaitObject> extends 
                     + "statusReason: '%s'", name, actualStatuses, actualStatusReasons));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out! Failed to get cluster status or statusReason: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out! Failed to get cluster status or statusReason: %s", e.getMessage()));
+            throw new TestFailException("Wait operation timed out! Failed to get cluster status or statusReason", e);
         }
     }
 

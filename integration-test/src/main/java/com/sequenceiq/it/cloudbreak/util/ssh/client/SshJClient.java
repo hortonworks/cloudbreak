@@ -81,7 +81,7 @@ public class SshJClient {
             return cmdOut;
         } catch (Exception e) {
             LOGGER.error("SSH fail on [{}] while executing command [{}]. {}", instanceIP, command, e.getMessage());
-            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "]. " + e.getMessage());
+            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + command + "].", e);
         }
     }
 

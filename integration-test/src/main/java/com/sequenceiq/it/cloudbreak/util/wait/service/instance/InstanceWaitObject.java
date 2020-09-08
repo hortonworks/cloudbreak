@@ -62,7 +62,7 @@ public class InstanceWaitObject {
             return testContext.getSdxClient().getSdxClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
         } catch (Exception e) {
             LOGGER.error("Instance groups cannot be determined, because of: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Instance groups cannot be determined, because of: %s", e.getMessage()));
+            throw new TestFailException("Instance groups cannot be determined", e);
         }
     }
 

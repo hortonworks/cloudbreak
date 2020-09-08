@@ -41,7 +41,7 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             LOGGER.warn("No environment found with crn '{}'", crn, e);
         } catch (Exception e) {
             LOGGER.error("Environment termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Environment termination failed: %s", e.getMessage()));
+            throw new TestFailException("Environment termination failed", e);
         }
         return true;
     }
@@ -55,8 +55,7 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
                     "statusReason: '%s'", environment.getName(), crn, environment.getEnvironmentStatus(), environment.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, environment termination failed. Also failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, environment termination failed. Also failed to get environment status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, environment termination failed. Also failed to get environment status", e);
         }
     }
 
