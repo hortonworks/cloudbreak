@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
 @Component
 public class HbaseCloudStorageServiceConfigProvider implements CmTemplateComponentConfigProvider {
@@ -40,7 +41,12 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        boolean datalakeCluster = source.getSharedServiceConfigs()
+                .map(SharedServiceConfigsView::isDatalakeCluster)
+                .orElse(false);
+
         return source.getFileSystemConfigurationView().isPresent()
-                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
+                && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
+                && !datalakeCluster;
     }
 }
