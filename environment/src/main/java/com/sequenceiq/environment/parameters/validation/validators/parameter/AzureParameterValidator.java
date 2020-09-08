@@ -3,7 +3,6 @@ package com.sequenceiq.environment.parameters.validation.validators.parameter;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.USE_EXISTING;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
-import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;
 
 import java.util.Objects;
 
@@ -48,30 +47,28 @@ public class AzureParameterValidator implements ParameterValidator {
     @Override
     public ValidationResult validate(EnvironmentDto environmentDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder) {
 
-        boolean singleResourceGroupDeploymentEnabled =
-                entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, environmentDto.getAccountId());
-
-        LOGGER.debug("ParametersDto: {}, featureSwitch: {}", parametersDto, singleResourceGroupDeploymentEnabled);
+        LOGGER.debug("ParametersDto: {}", parametersDto);
         AzureParametersDto azureParametersDto = parametersDto.azureParametersDto();
         if (Objects.isNull(azureParametersDto)) {
             return validationResultBuilder.build();
-        }
-        if (!singleResourceGroupDeploymentEnabled) {
-            return validateNoEntitlement(validationResultBuilder, azureParametersDto);
         }
 
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();
         if (Objects.isNull(azureResourceGroupDto)) {
             return validationResultBuilder.build();
         }
+
+        ValidationResult validationResult = validateEntitlement(validationResultBuilder, azureResourceGroupDto, environmentDto.getAccountId());
+        if (validationResult.hasError()) {
+            return validationResult;
+        }
+
         if (USE_MULTIPLE.equals(azureResourceGroupDto.getResourceGroupUsagePattern())) {
             return validateResourceGroupUsageMultiple(validationResultBuilder, azureResourceGroupDto);
         }
         if (USE_EXISTING.equals(azureResourceGroupDto.getResourceGroupCreation()) && StringUtils.isBlank(azureResourceGroupDto.getName())) {
-            return validationResultBuilder.error(
-                    String.format("If you specify to use a single resource group for your resources then please " +
-                                    "provide the name of the resource group to use.",
-                            azureResourceGroupDto.getName())).build();
+            return validationResultBuilder.error("If you use a single resource group for your resources then please " +
+                                    "provide the name of that resource group.").build();
         }
 
         LOGGER.debug("Using single, existing resource group {}", azureResourceGroupDto.getName());
@@ -94,16 +91,31 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.build();
         }
     }
+    //CHECKSTYLE:OFF:FallThroughCheck
+    private ValidationResult validateEntitlement(ValidationResultBuilder validationResultBuilder, AzureResourceGroupDto azureResourceGroupDto,
+            String accountId) {
 
-    private ValidationResult validateNoEntitlement(ValidationResultBuilder validationResultBuilder, AzureParametersDto azureParametersDto) {
-        if (Objects.nonNull(azureParametersDto.getAzureResourceGroupDto())
-                && USE_SINGLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
-            return validationResultBuilder.error(
-                    "You specified to use a single resource group for all of your resources, but that feature is currently disabled").build();
-        } else {
-            return validationResultBuilder.build();
+        switch (azureResourceGroupDto.getResourceGroupUsagePattern()) {
+            case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
+                if (!entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+                    LOGGER.info("Invalid request, singleResourceGroupDedicatedStorageAccountEnabled entitlement turned off for account {}", accountId);
+                    return validationResultBuilder.error(
+                            "You specified to use a single resource group with dedicated storage account for the images, "
+                                    + "but that feature is currently disabled").
+                            build();
+                }
+            case USE_SINGLE:
+                if (!entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+                    LOGGER.info("Invalid request, singleResourceGroupDeploymentEnabled entitlement turned off for account {}", accountId);
+                    return validationResultBuilder.error(
+                            "You specified to use a single resource group for all of your resources, "
+                                    + "but that feature is currently disabled").build();
+                }
+            default:
+                return validationResultBuilder.build();
         }
     }
+    //CHECKSTYLE:ON
 
     @Override
     public CloudPlatform getcloudPlatform() {

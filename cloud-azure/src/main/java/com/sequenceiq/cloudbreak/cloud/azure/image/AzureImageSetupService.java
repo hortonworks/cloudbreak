@@ -105,7 +105,8 @@ public class AzureImageSetupService {
         AzureImage customImage = client.getCustomImageId(imageResourceGroupName, image.getImageName(), cloudContext.getLocation().getRegion().getRegionName(),
                 false);
         if (isCustomImageAvailable(customImage)) {
-            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!", customImage.getId(), resourceGroupName);
+            LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
+                    customImage.getId(), imageResourceGroupName);
             return;
         }
 

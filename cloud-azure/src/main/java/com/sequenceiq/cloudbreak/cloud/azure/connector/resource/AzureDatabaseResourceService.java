@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
+import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -64,15 +65,15 @@ public class AzureDatabaseResourceService {
 
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
-        Boolean useSingleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
+        ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
         String template = azureTemplateBuilder.build(cloudContext, stack);
 
         if (!client.resourceGroupExists(resourceGroupName)) {
-            if (useSingleResourceGroup) {
-                LOGGER.warn("Resource group with {} does not exist", resourceGroupName);
-                throw new CloudConnectorException(String.format("Resource group with %s does not exist!", resourceGroupName));
+            if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
+                LOGGER.warn("Resource group with name {} does not exist", resourceGroupName);
+                throw new CloudConnectorException(String.format("Resource group with name %s does not exist!", resourceGroupName));
             } else {
-                LOGGER.debug("Resource group with {} does not exist, creating it now..", resourceGroupName);
+                LOGGER.debug("Resource group with name {} does not exist, creating it now..", resourceGroupName);
                 String region = ac.getCloudContext().getLocation().getRegion().value();
                 client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
@@ -128,7 +129,7 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        return azureResourceGroupMetadataProvider.useSingleResourceGroup(stack)
+        return (azureResourceGroupMetadataProvider.getResourceGroupUsage(stack) != ResourceGroupUsage.MULTIPLE)
                 ? deleteDatabaseServer(resources, cloudContext, force, client, persistenceNotifier)
                 : deleteResourceGroup(resources, cloudContext, force, client, persistenceNotifier, stack);
     }

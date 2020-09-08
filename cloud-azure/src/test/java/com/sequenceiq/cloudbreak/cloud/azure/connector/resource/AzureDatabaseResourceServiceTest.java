@@ -28,6 +28,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
+import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -100,7 +101,7 @@ class AzureDatabaseResourceServiceTest {
     void shouldReturnDeletedDbServerWhenTerminateDatabaseServerAndSingleResourceGroup() {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
-        when(azureResourceGroupMetadataProvider.useSingleResourceGroup(any(DatabaseStack.class))).thenReturn(true);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.SINGLE);
         when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
@@ -125,7 +126,7 @@ class AzureDatabaseResourceServiceTest {
     void shouldReturnDeletedResourceGroupWhenTerminateDatabaseServerAndMultipleResourceGroups() {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
         DatabaseStack databaseStack = mock(DatabaseStack.class);
-        when(azureResourceGroupMetadataProvider.useSingleResourceGroup(any(DatabaseStack.class))).thenReturn(false);
+        when(azureResourceGroupMetadataProvider.getResourceGroupUsage(any(DatabaseStack.class))).thenReturn(ResourceGroupUsage.MULTIPLE);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
         when(azureUtils.deleteResourceGroup(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(

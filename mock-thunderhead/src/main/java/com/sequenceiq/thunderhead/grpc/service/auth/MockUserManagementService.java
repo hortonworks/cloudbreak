@@ -200,6 +200,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
+    private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
+
     private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
     private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
@@ -266,6 +268,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.single.resourcegroup.enable}")
     private boolean enableAzureSingleResourceGroupDeployment;
+
+    @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
+    private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
 
     @Value("${auth.mock.fastebsencryption.enable}")
     private boolean enableFastEbsEncryption;
@@ -558,6 +563,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureSingleResourceGroupDeployment) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
+        }
+        if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
         }
         if (enableFastEbsEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));

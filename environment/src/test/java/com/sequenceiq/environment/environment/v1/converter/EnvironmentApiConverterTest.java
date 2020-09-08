@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -88,9 +87,6 @@ public class EnvironmentApiConverterTest {
 
     @Mock
     private NetworkRequestToDtoConverter networkRequestToDtoConverter;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @BeforeAll
     static void before() {
@@ -189,7 +185,6 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
 
         EnvironmentCreationDto actual = underTest.initCreationDto(request);
 
@@ -219,7 +214,6 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
 
         EnvironmentCreationDto actual = underTest.initCreationDto(request);
 

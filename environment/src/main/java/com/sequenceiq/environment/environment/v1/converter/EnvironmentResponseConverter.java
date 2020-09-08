@@ -191,6 +191,8 @@ public class EnvironmentResponseConverter {
                 return ResourceGroupUsage.SINGLE;
             case USE_MULTIPLE:
                 return ResourceGroupUsage.MULTIPLE;
+            case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
+                return ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
                 default:
                     throw new RuntimeException("Unknown resource group usage pattern: %s" + resourceGroupUsagePattern);
         }
