@@ -34,7 +34,7 @@ public class AwsRdsModifyService {
     @Inject
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
-    public void disableDeleteProtection (AuthenticatedContext ac, DatabaseStack dbStack) throws ExecutionException, TimeoutException, InterruptedException {
+    public void disableDeleteProtection(AuthenticatedContext ac, DatabaseStack dbStack) throws ExecutionException, TimeoutException, InterruptedException {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);

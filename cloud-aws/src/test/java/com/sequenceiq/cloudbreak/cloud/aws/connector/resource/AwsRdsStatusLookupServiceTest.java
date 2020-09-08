@@ -143,34 +143,32 @@ public class AwsRdsStatusLookupServiceTest {
     }
 
     @Test
-    public void isDeleteProtectonEnabledTest() {
+    public void isDeleteProtectionEnabledTest() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
         when(describeDBInstancesResult.getDBInstances()).thenReturn(Arrays.asList(dbInstance));
         when(dbInstance.getDeletionProtection()).thenReturn(true);
 
-        boolean result = victim.isDeleteProtectonEnabled(authenticatedContext, dbStack);
+        boolean result = victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
         assertEquals(true, result);
 
         when(dbInstance.getDeletionProtection()).thenReturn(true);
 
-        result = victim.isDeleteProtectonEnabled(authenticatedContext, dbStack);
-        when(dbInstance.getDeletionProtection()).thenReturn(false);
+        result = victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
+        when(result).thenReturn(false);
 
     }
 
     @Test(expected = CloudConnectorException.class)
-    public void isDeleteProtectonEnabledShouldThrowCloudConnectorExceptionInCaseOfDBInstanceNotFoundException() {
+    public void isDeleteProtectionEnabledShouldThrowCloudConnectorExceptionInCaseOfDBInstanceNotFoundException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
-
-        boolean result = victim.isDeleteProtectonEnabled(authenticatedContext, dbStack);
-
+        victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
         fail("Exception should be been thrown");
     }
 
     @Test(expected = CloudConnectorException.class)
-    public void isDeleteProtectonEnabledShouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
+    public void isDeleteProtectionEnabledShouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
 
-        victim.isDeleteProtectonEnabled(authenticatedContext, dbStack);
+        victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
     }
 }

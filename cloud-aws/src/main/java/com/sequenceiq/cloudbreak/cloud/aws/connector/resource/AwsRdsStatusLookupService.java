@@ -49,7 +49,7 @@ public class AwsRdsStatusLookupService {
                 .get();
     }
 
-    public boolean isDeleteProtectonEnabled(AuthenticatedContext ac, DatabaseStack dbStack) {
+    public boolean isDeleteProtectionEnabled(AuthenticatedContext ac, DatabaseStack dbStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
