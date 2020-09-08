@@ -274,7 +274,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
+    public CloudbreakTestDto refresh() {
         return when(freeIpaTestClient.describe(), key("refresh-freeipa-" + getName()));
     }
 

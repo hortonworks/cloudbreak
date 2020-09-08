@@ -90,7 +90,7 @@ public class SshJClientActions extends SshJClient {
                         .filter(outputValue -> outputValue.strip().startsWith("/")).count());
             } catch (Exception e) {
                 LOGGER.error("SSH fail on [{}] while getting info for [{}] file", instanceIP, filePath);
-                throw new TestFailException(" SSH fail on [" + instanceIP + "] while getting info for [" + filePath + "] file.");
+                throw new TestFailException(" SSH fail on [" + instanceIP + "] while getting info for [" + filePath + "] file.", e);
             }
         });
 
@@ -124,7 +124,7 @@ public class SshJClientActions extends SshJClient {
             }
         } catch (Exception e) {
             LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIP, checkInternetCommand);
-            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + checkInternetCommand + "].");
+            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + checkInternetCommand + "].", e);
         }
     }
 }

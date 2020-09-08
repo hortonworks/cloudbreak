@@ -46,7 +46,7 @@ public class EnvironmentOperationChecker<T extends EnvironmentWaitObject> extend
             }
         } catch (Exception e) {
             LOGGER.error("Environment has been failed. Also failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Environment has been failed. Also failed to get environment status: ", e.getMessage()));
+            throw new TestFailException("Environment has been failed. Also failed to get environment status", e);
         }
         return false;
     }
@@ -65,8 +65,7 @@ public class EnvironmentOperationChecker<T extends EnvironmentWaitObject> extend
                     + "statusReason: '%s'", name, crn, status, environment.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, environment has been failed. Also failed to get environment status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, environment has been failed. Also failed to get environment status: ",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, environment has been failed. Also failed to get environment status", e);
         }
     }
 

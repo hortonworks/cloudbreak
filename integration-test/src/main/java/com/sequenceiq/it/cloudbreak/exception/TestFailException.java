@@ -6,4 +6,8 @@ public class TestFailException extends RuntimeException {
         super(message);
     }
 
+    public TestFailException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }

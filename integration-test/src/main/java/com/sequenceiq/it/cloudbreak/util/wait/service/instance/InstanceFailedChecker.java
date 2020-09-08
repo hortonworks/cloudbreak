@@ -60,7 +60,7 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
             LOGGER.warn("No instance group found with name '{}'", hostGroup, e);
         } catch (Exception e) {
             LOGGER.error("Failed to get instance group status: '{}', because of {}", hostGroup, e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get instance group status: '%s', because of %s", hostGroup, e.getMessage()));
+            throw new TestFailException(String.format("Failed to get instance group status: '%s'", hostGroup), e);
         }
         return false;
     }
@@ -84,7 +84,7 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
                     "statusReason: '%s'", instanceGroupName, instanceStatus, hostStatusReason));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out! Failed to get instance status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out! Failed to get instance status: %s", e.getMessage()));
+            throw new TestFailException("Wait operation timed out! Failed to get instance status", e);
         }
     }
 

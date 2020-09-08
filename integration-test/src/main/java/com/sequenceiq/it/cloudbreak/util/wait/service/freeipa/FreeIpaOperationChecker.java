@@ -48,7 +48,7 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
             }
         } catch (Exception e) {
             LOGGER.error("FreeIpa creation failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("FreeIpa creation failed. Also failed to get freeIpa status: %s", e.getMessage()));
+            throw new TestFailException("FreeIpa creation failed. Also failed to get freeIpa status", e);
         }
         return false;
     }
@@ -66,8 +66,7 @@ public class FreeIpaOperationChecker<T extends FreeIpaWaitObject> extends Except
                     + "statusReason: '%s'", freeIpa.getName(), freeIpa.getCrn(), environmentCrn, freeIpa.getStatus(), freeIpa.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, freeIpa has been failed. Also failed to get freeIpa status", e);
         }
     }
 

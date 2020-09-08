@@ -50,7 +50,7 @@ public class RedbeamsOperationChecker<T extends RedbeamsWaitObject> extends Exce
             }
         } catch (Exception e) {
             LOGGER.error("Redbeams has been failed. Also failed to get redbeams status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Redbeams has been failed. Also failed to get redbeams status: %s", e.getMessage()));
+            throw new TestFailException("Redbeams has been failed. Also failed to get redbeams status", e);
         }
         return false;
     }
@@ -69,8 +69,7 @@ public class RedbeamsOperationChecker<T extends RedbeamsWaitObject> extends Exce
                     + "statusReason: '%s'", name, crn, status, redbeams.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, redbeams has been failed. Also failed to get redbeams status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, redbeams has been failed. Also failed to get redbeams status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, redbeams has been failed. Also failed to get redbeams status", e);
         }
     }
 
