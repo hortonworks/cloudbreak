@@ -118,7 +118,7 @@ public class CustomAmazonWaiterProvider {
                 .withAcceptors(new WaiterAcceptor<DescribeDBInstancesResult>() {
                     @Override
                     public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
-                        return describeDBInstancesResult.getDBInstances().stream().allMatch(instance -> "avaialble".equals(instance.getDBInstanceStatus()));
+                        return describeDBInstancesResult.getDBInstances().stream().allMatch(instance -> "available".equals(instance.getDBInstanceStatus()));
                     }
 
                     @Override

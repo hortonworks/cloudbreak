@@ -121,7 +121,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
-        if(awsRdsStatusLookupService.isDeleteProtectonEnabled(ac, stack)) {
+        if (awsRdsStatusLookupService.isDeleteProtectionEnabled(ac, stack)) {
             LOGGER.debug("Delete protection is enabled for DB: {}, Disabling it", stack.getDatabaseServer().getServerId());
             awsRdsModifyService.disableDeleteProtection(ac, stack);
         }

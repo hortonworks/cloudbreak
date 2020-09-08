@@ -40,7 +40,7 @@ public class AwsRdsModifyServiceTest {
     private static final String REGION = "region";
 
     private static final String DB_INSTANCE_IDENTIFIER = "dbInstance";
-    
+
     @Mock
     private AwsClient awsClient;
 
