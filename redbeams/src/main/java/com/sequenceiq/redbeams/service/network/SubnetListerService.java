@@ -35,6 +35,7 @@ public class SubnetListerService {
 
         switch (cloudPlatform) {
             case AWS:
+            case GCP:
             case MOCK:
                 // IDs in metas are fine as is
                 return new ArrayList<>(environmentNetworkResponse.getCbSubnets().values());

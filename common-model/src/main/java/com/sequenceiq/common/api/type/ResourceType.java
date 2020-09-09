@@ -42,6 +42,7 @@ public enum ResourceType {
     GCP_FIREWALL_IN,
     GCP_FIREWALL_INTERNAL,
     GCP_INSTANCE,
+    GCP_DATABASE,
 
     //AZURE
     AZURE_INSTANCE,

@@ -16,6 +16,9 @@ public class GcpDatabaseServerParameterSetter implements DatabaseServerParameter
     @Value("${sdx.db.gcp.nonha.backupretentionperiod}")
     int backupRetentionPeriodNonHa;
 
+    @Value("${sdx.db.gcp.engineversion}")
+    private String engineVersion;
+
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
         GcpDatabaseServerV4Parameters parameters = new GcpDatabaseServerV4Parameters();
@@ -26,6 +29,7 @@ public class GcpDatabaseServerParameterSetter implements DatabaseServerParameter
         } else {
             throw new IllegalArgumentException(availabilityType + " database availability type is not supported on Azure.");
         }
+        parameters.setEngineVersion(engineVersion);
         request.setGcp(parameters);
     }
 

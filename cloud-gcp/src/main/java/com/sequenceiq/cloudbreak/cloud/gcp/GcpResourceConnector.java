@@ -60,8 +60,8 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getDBStackTemplate() {
+        return  "";
     }
 
     @Override
@@ -132,5 +132,10 @@ public class GcpResourceConnector extends AbstractResourceConnector {
             }
         }
         return result;
+    }
+
+    @Override
+    public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        return List.of();
     }
 }
