@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,14 +36,12 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
@@ -59,19 +56,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 class UserSyncServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    private static final String NOT_CRN = "not:a:crn:";
-
-    private static final String OTHER_CRN = "crn:cdp:environments:us-west-1:"
-            + ACCOUNT_ID + ":database:" + UUID.randomUUID().toString();
-
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
             + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
-
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:"
-            + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
-
-    private static final String MACHINE_USER_CRN = "crn:cdp:iam:us-west-1:"
-            + ACCOUNT_ID + ":machineUser:" + UUID.randomUUID().toString();
 
     private static final int MAX_SUBJECTS_PER_REQUEST = 10;
 
@@ -87,65 +73,15 @@ class UserSyncServiceTest {
     @Mock
     UserSyncStatusService userSyncStatusService;
 
+    @Mock
+    UserSyncRequestValidator userSyncRequestValidator;
+
     @InjectMocks
     UserSyncService underTest;
 
     @BeforeEach
     void setUp() {
         underTest.maxSubjectsPerRequest = MAX_SUBJECTS_PER_REQUEST;
-    }
-
-    @Test
-    void testValidateParameters() {
-        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(ENV_CRN), Set.of(USER_CRN), Set.of(MACHINE_USER_CRN));
-    }
-
-    @Test
-    void testValidateParametersBadEnv() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(OTHER_CRN), Set.of(), Set.of());
-        });
-    }
-
-    @Test
-    void testValidateParametersBadUser() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(OTHER_CRN), Set.of());
-        });
-    }
-
-    @Test
-    void testValidateParametersBadMachineUser() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), Set.of(), Set.of(OTHER_CRN));
-        });
-    }
-
-    @Test
-    void testValidateParametersWrongAccount() {
-        String differentAccount = UUID.randomUUID().toString();
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN), Set.of(), Set.of());
-        });
-    }
-
-    @Test
-    void testValidateCrnFilter() {
-        underTest.validateCrnFilter(Set.of(ENV_CRN), Crn.ResourceType.ENVIRONMENT);
-    }
-
-    @Test
-    void testValidateCrnFilterNotCrn() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateCrnFilter(Set.of(NOT_CRN), Crn.ResourceType.ENVIRONMENT);
-        });
-    }
-
-    @Test
-    void testValidateCrnFilterWrongResourceType() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateCrnFilter(Set.of(ENV_CRN), Crn.ResourceType.USER);
-        });
     }
 
     @Test
@@ -252,12 +188,12 @@ class UserSyncServiceTest {
             assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             return null;
         })
-                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
+                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), anyBoolean());
 
         spyService.synchronizeUsers("accountId", "actorCrn",
                 Set.of(), Set.of(), Set.of());
 
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), anySet(), anySet(), anyBoolean());
+        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), anyBoolean());
     }
 
     @Test
