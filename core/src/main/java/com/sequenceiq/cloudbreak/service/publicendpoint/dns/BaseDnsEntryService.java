@@ -56,7 +56,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         Map<String, String> result = new HashMap<>();
         if (stack.getCluster() != null && manageCertificateAndDnsInPem()) {
             LOGGER.info("Modifying DNS entries for {} on stack '{}'", logName(), stack.getName());
-            Map<String, String> ipsByFqdn = getBrokerIpsByFqdn(stack);
+            Map<String, String> ipsByFqdn = getCandidateIpsByFqdn(stack);
             if (!CollectionUtils.isEmpty(candidateAddressesByFqdn)) {
                 LOGGER.info("Modifying DNS entries for {} on stack '{}', whitelist of candidates for the update: '{}'", logName(), stack.getName(),
                         String.join(",", candidateAddressesByFqdn.keySet()));
@@ -69,7 +69,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         return result;
     }
 
-    private Map<String, String> getBrokerIpsByFqdn(Stack stack) {
+    private Map<String, String> getCandidateIpsByFqdn(Stack stack) {
         Map<String, List<String>> componentLocation = getComponentLocation(stack);
         final Set<InstanceMetaData> runningInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
         final InstanceMetaData primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
