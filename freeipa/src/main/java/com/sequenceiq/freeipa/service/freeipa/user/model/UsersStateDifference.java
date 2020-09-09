@@ -89,6 +89,18 @@ public class UsersStateDifference {
                 calculateGroupMembershipToRemove(umsState, ipaState));
     }
 
+    public static UsersStateDifference forDeletedUser(String deletedUser, Collection<String> groupsToRemove) {
+        Multimap<String, String> groupMembershipsToRemove = HashMultimap.create();
+        groupMembershipsToRemove.putAll(deletedUser, groupsToRemove);
+        return new UsersStateDifference(
+                ImmutableSet.of(),
+                ImmutableSet.of(),
+                ImmutableSet.of(),
+                ImmutableSet.of(deletedUser),
+                ImmutableMultimap.of(),
+                ImmutableMultimap.copyOf(groupMembershipsToRemove));
+    }
+
     public static ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, UsersState ipaState) {
         ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getUsers(), ipaState.getUsers())
                 .stream()
