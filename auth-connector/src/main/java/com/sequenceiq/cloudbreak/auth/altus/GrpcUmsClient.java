@@ -209,28 +209,34 @@ public class GrpcUmsClient {
      * Retrieves list of all machine users from UMS.
      *
      * @param accountId the account Id
+     * @param includeInternal whether to include internal machine users
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    public List<MachineUser> listAllMachineUsers(String actorCrn, String accountId, Optional<String> requestId) {
-        return listMachineUsers(actorCrn, accountId, null, requestId);
+    public List<MachineUser> listAllMachineUsers(
+            String actorCrn, String accountId, boolean includeInternal, Optional<String> requestId) {
+        return listMachineUsers(actorCrn, accountId, null, includeInternal, requestId);
     }
 
     /**
      * Retrieves machine user list from UMS.
      *
      * @param accountId       the account Id
-     * @param requestId       an optional request Id
      * @param machineUserCrns machine users to list. if null or empty then all machine users will be listed
+     * @param includeInternal whether to include internal machine users
+     * @param requestId       an optional request Id
      * @return the user associated with this user CRN
      */
-    public List<MachineUser> listMachineUsers(String actorCrn, String accountId, List<String> machineUserCrns, Optional<String> requestId) {
+    public List<MachineUser> listMachineUsers(
+            String actorCrn, String accountId, List<String> machineUserCrns, boolean includeInternal, Optional<String> requestId) {
+
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
-            List<MachineUser> users = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()), accountId, machineUserCrns);
-            LOGGER.debug("{} Users found for account {}", users.size(), accountId);
-            return users;
+            List<MachineUser> machineUsers = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()),
+                    accountId, machineUserCrns, includeInternal);
+            LOGGER.debug("{} Machine users found for account {}", machineUsers.size(), accountId);
+            return machineUsers;
         }
     }
 

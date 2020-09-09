@@ -43,6 +43,8 @@ public class UmsUsersStateProvider {
 
     private static final String ADMIN_FREEIPA_GROUP = "admins";
 
+    private static final boolean INCLUDE_INTERNAL_MACHINE_USERS = true;
+
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
@@ -153,9 +155,11 @@ public class UmsUsersStateProvider {
     private List<MachineUser> getMachineUsers(String actorCrn, String accountId, Optional<String> requestIdOptional,
         boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId, requestIdOptional);
+            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId,
+                    INCLUDE_INTERNAL_MACHINE_USERS, requestIdOptional);
         } else if (!machineUserCrns.isEmpty()) {
-            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns), requestIdOptional);
+            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns),
+                    INCLUDE_INTERNAL_MACHINE_USERS, requestIdOptional);
         } else {
             return List.of();
         }
