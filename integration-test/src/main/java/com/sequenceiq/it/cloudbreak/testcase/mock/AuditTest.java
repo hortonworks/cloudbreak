@@ -75,6 +75,7 @@ public class AuditTest extends AbstractIntegrationTest {
             then = "and audit record must be available in the database")
     public void createValidClusterTemplateThenAuditRecordMustBeAvailableForTheResource(MockedTestContext testContext) {
         String clusterTemplateName = resourcePropertyProvider().getName();
+
         testContext
                 .given(EnvironmentTestDto.class)
                 .given("stackTemplate", StackTemplateTestDto.class)
