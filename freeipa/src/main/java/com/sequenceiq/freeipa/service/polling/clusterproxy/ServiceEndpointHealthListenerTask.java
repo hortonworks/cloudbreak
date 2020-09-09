@@ -44,7 +44,16 @@ public class ServiceEndpointHealthListenerTask implements StatusCheckerTask<Serv
 
     @Override
     public void handleTimeout(ServiceEndpointHealthPollerObject clusterProxyHealthPollerObject) {
-        throw new CloudbreakServiceException("Operation timed out. Failed to check cluster proxy endpoint health.");
+        String clusterIdentifer = clusterProxyHealthPollerObject.getClusterIdentifier();
+        String errorMessage;
+        try {
+            ClusterProxyRegistrationClient client = clusterProxyHealthPollerObject.getClient();
+            errorMessage = client.readConfig(clusterIdentifer).toString();
+        } catch (Exception e) {
+            errorMessage = String.format("Failed to check cluster proxy endpoint health for %s, error: %s", clusterIdentifer, e.getMessage());
+            LOGGER.error(errorMessage);
+        }
+        throw new CloudbreakServiceException("Operation timed out. Failed to check cluster proxy endpoint health. " + errorMessage);
     }
 
     @Override
