@@ -328,7 +328,7 @@ public class ClusterRepairService {
 
     private void setStackStatusAndMarkDeletableVolumes(ManualClusterRepairMode repairMode, boolean deleteVolumes, Stack stack,
             Map<HostGroupName, Set<InstanceMetaData>> nodesToRepair) {
-        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode)) {
+        if (!ManualClusterRepairMode.DRY_RUN.equals(repairMode) && !nodesToRepair.isEmpty()) {
             LOGGER.info("Repair mode is not a dry run, {}", repairMode);
             Predicate<Resource> updateVolumesPredicate = inInstances(nodesToRepair.values()
                     .stream()

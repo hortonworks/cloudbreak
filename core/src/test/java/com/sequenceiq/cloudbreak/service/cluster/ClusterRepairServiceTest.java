@@ -12,7 +12,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -168,7 +168,7 @@ public class ClusterRepairServiceTest {
         Result result = underTest.repairWithDryRun(stack.getId());
 
         assertTrue(result.isSuccess());
-        verifyZeroInteractions(stackUpdater, flowManager, resourceService);
+        verifyNoInteractions(stackUpdater, flowManager, resourceService);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class ClusterRepairServiceTest {
         Result result = underTest.repairWithDryRun(stack.getId());
 
         assertTrue(result.isSuccess());
-        verifyZeroInteractions(stackUpdater, flowManager, resourceService);
+        verifyNoInteractions(stackUpdater, flowManager, resourceService);
     }
 
     @Test
@@ -212,7 +212,7 @@ public class ClusterRepairServiceTest {
         Result result = underTest.repairWithDryRun(stack.getId());
 
         assertFalse(result.isSuccess());
-        verifyZeroInteractions(stackUpdater, flowManager, resourceService);
+        verifyNoInteractions(stackUpdater, flowManager, resourceService);
     }
 
     @Test
@@ -233,7 +233,7 @@ public class ClusterRepairServiceTest {
         Result result = underTest.repairWithDryRun(stack.getId());
 
         assertFalse(result.isSuccess());
-        verifyZeroInteractions(stackUpdater, flowManager, resourceService);
+        verifyNoInteractions(stackUpdater, flowManager, resourceService);
     }
 
     @Test
@@ -285,7 +285,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
 
@@ -295,7 +294,7 @@ public class ClusterRepairServiceTest {
 
         assertEquals("Could not trigger cluster repair for stack 1 because node list is incorrect", exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, "hostGroup1");
-        verifyZeroInteractions(stackUpdater);
+        verifyNoInteractions(stackUpdater);
     }
 
     @Test
@@ -325,7 +324,7 @@ public class ClusterRepairServiceTest {
                 exception.getMessage());
         verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                 expectedErrorMessage);
-        verifyZeroInteractions(stackUpdater);
+        verifyNoInteractions(stackUpdater);
     }
 
     private void verifyEventArguments(ResourceEvent resourceEvent, String messageAssert) {
