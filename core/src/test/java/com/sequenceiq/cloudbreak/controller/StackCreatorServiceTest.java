@@ -85,6 +85,10 @@ public class StackCreatorServiceTest {
 
     private static final String STACK_VERSION = "STACK_VERSION";
 
+    private static final String AWS_PLATFORM = "AWS";
+
+    private static final String YARN_PLATFORM = "YARN";
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -280,29 +284,51 @@ public class StackCreatorServiceTest {
     }
 
     @Test
-    public void testShouldUseBaseImageShouldReturnFalseWhenCmRequestIsNotPresent() {
+    public void testShouldUseBaseCMImageShouldReturnFalseWhenCmRequestIsNotPresentAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
 
-        boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, AWS_PLATFORM);
 
         assertFalse(actual);
     }
 
     @Test
-    public void testShouldUseBaseShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresent() {
+    public void testShouldUseBaseCMImageShouldReturnTrueWhenCmRequestIsNotPresentAndPlatformIsYarn() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+
+        boolean actual = underTest.shouldUseBaseCMImage(clusterV4Request, YARN_PLATFORM);
+
+        assertTrue(actual);
+    }
+
+    @Test
+    public void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
         cmRequest.setRepository(cmRepoRequest);
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, AWS_PLATFORM);
 
         assertTrue(base);
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProducts() {
+    public void testShouldUseBaseCMImageShouldReturnTrueWithCMImageWithCmRepoAndImageIsNotPresentAndPlatformIsYarn() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
+        ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
+        cmRequest.setRepository(cmRepoRequest);
+        clusterV4Request.setCm(cmRequest);
+
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, YARN_PLATFORM);
+
+        assertTrue(base);
+    }
+
+    @Test
+    public void testShouldUseBaseCMImageWithProductsAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -313,13 +339,30 @@ public class StackCreatorServiceTest {
         cmRequest.setProducts(List.of(cdpRequest));
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, AWS_PLATFORM);
 
         assertTrue(base);
     }
 
     @Test
-    public void testShouldUseBaseCMImageWithProductsAndCmRepo() {
+    public void testShouldUseBaseCMImageWithProductsAndPlatformIsYarn() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
+        ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
+        cdpRequest.setName("CDP");
+        cdpRequest.setParcel("parcel");
+        cdpRequest.setVersion("version");
+        cdpRequest.setCsd(List.of("csd"));
+        cmRequest.setProducts(List.of(cdpRequest));
+        clusterV4Request.setCm(cmRequest);
+
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, YARN_PLATFORM);
+
+        assertTrue(base);
+    }
+
+    @Test
+    public void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsNotYarn() {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
         ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
@@ -332,7 +375,26 @@ public class StackCreatorServiceTest {
         cmRequest.setRepository(cmRepoRequest);
         clusterV4Request.setCm(cmRequest);
 
-        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request);
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, AWS_PLATFORM);
+
+        assertTrue(base);
+    }
+
+    @Test
+    public void testShouldUseBaseCMImageWithProductsAndCmRepoAndPlatformIsYarn() {
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        ClouderaManagerV4Request cmRequest = new ClouderaManagerV4Request();
+        ClouderaManagerProductV4Request cdpRequest = new ClouderaManagerProductV4Request();
+        cdpRequest.setName("CDP");
+        cdpRequest.setParcel("parcel");
+        cdpRequest.setVersion("version");
+        cdpRequest.setCsd(List.of("csd"));
+        cmRequest.setProducts(List.of(cdpRequest));
+        ClouderaManagerRepositoryV4Request cmRepoRequest = new ClouderaManagerRepositoryV4Request();
+        cmRequest.setRepository(cmRepoRequest);
+        clusterV4Request.setCm(cmRequest);
+
+        boolean base = underTest.shouldUseBaseCMImage(clusterV4Request, YARN_PLATFORM);
 
         assertTrue(base);
     }

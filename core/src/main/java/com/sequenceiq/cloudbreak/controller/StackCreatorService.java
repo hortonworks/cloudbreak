@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -430,7 +431,7 @@ public class StackCreatorService {
         if (clusterRequest == null) {
             return null;
         }
-        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest);
+        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest, platformString);
         boolean baseImageEnabled = imageCatalogService.baseImageEnabled();
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         CloudbreakUser cbUser = restRequestThreadLocalService.getCloudbreakUser();
@@ -460,9 +461,9 @@ public class StackCreatorService {
         });
     }
 
-    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
+    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest, String platformString) {
         ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
-        return hasCmParcelInfo(cmRequest);
+        return hasCmParcelInfo(cmRequest) || CloudPlatform.YARN.equalsIgnoreCase(platformString);
     }
 
     private boolean hasCmParcelInfo(ClouderaManagerV4Request cmRequest) {
