@@ -17,21 +17,32 @@ public enum RightV4 {
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),
     DH_DELETE(AuthorizationResourceAction.DELETE_DATAHUB),
-    // legacy
-    DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
-    DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
-    SDX_READ(AuthorizationResourceAction.DATALAKE_READ),
-    SDX_WRITE(AuthorizationResourceAction.DATALAKE_WRITE),
-    ENVIRONMENT_READ(AuthorizationResourceAction.ENVIRONMENT_READ),
-    ENVIRONMENT_WRITE(AuthorizationResourceAction.ENVIRONMENT_WRITE);
+    DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ, true),
+    DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE, true),
+    SDX_READ(AuthorizationResourceAction.DATALAKE_READ, true),
+    SDX_WRITE(AuthorizationResourceAction.DATALAKE_WRITE, true),
+    ENVIRONMENT_READ(AuthorizationResourceAction.ENVIRONMENT_READ, true),
+    ENVIRONMENT_WRITE(AuthorizationResourceAction.ENVIRONMENT_WRITE, true);
 
     private static final Map<AuthorizationResourceAction, RightV4> BY_ACTION = Stream.of(RightV4.values())
             .collect(Collectors.toUnmodifiableMap(RightV4::getAction, Function.identity()));
 
     private AuthorizationResourceAction action;
 
+    private boolean legacyRight;
+
+    RightV4(AuthorizationResourceAction action, boolean legacyRight) {
+        this.action = action;
+        this.legacyRight = legacyRight;
+    }
+
     RightV4(AuthorizationResourceAction action) {
         this.action = action;
+        this.legacyRight = false;
+    }
+
+    public boolean isLegacyRight() {
+        return legacyRight;
     }
 
     public AuthorizationResourceAction getAction() {

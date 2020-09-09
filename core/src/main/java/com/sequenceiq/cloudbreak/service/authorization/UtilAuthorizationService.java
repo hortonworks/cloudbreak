@@ -40,7 +40,8 @@ public class UtilAuthorizationService {
                 .collect(Collectors.toList());
         List<Boolean> results = callHasRightsBasedOnEntitlement(userCrn, rightChecks);
         return new CheckRightV4Response(rightReq.getRights().stream()
-                .map(rightV4 -> new CheckRightV4SingleResponse(rightV4, results.get(rightReq.getRights().indexOf(rightV4))))
+                .map(rightV4 -> new CheckRightV4SingleResponse(rightV4,
+                        rightV4.isLegacyRight() ? Boolean.TRUE : results.get(rightReq.getRights().indexOf(rightV4))))
                 .collect(Collectors.toList()));
     }
 
@@ -67,9 +68,11 @@ public class UtilAuthorizationService {
             if (!getResourceRightSingleResponse(response, rightCheck).isPresent()) {
                 response.getResponses().add(new CheckResourceRightV4SingleResponse(rightCheck.getResource(), Lists.newArrayList()));
             }
+            RightV4 rightV4ByAction = RightV4.getByAction(AuthorizationResourceAction.getByRight(rightCheck.getRight()));
+            Boolean result = rightV4ByAction.isLegacyRight() ? Boolean.TRUE : results.get(rightChecks.indexOf(rightCheck));
             CheckRightV4SingleResponse singleResponse = new CheckRightV4SingleResponse(
-                    RightV4.getByAction(AuthorizationResourceAction.getByRight(rightCheck.getRight())),
-                    results.get(rightChecks.indexOf(rightCheck)));
+                    rightV4ByAction,
+                    result);
             getResourceRightSingleResponse(response, rightCheck).get().getRights().add(singleResponse);
         });
         return response;
