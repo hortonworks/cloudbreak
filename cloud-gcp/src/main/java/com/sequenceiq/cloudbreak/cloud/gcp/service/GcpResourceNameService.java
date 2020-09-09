@@ -55,6 +55,9 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
             case GCP_ATTACHED_DISKSET:
                 resourceName = attachedDiskResourceName(parts);
                 break;
+            case GCP_DATABASE:
+                resourceName = deploymentTemplateName(parts);
+                break;
             default:
                 throw new IllegalStateException("Unsupported resource type: " + resourceType);
         }
@@ -70,6 +73,18 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = appendHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
+    }
+
+    private String deploymentTemplateName(Object[] parts) {
+        checkArgs(2, parts);
+        String deploymentName;
+        String stackName = String.valueOf(parts[0]);
+        String stackId = String.valueOf(parts[1]);
+        deploymentName = normalize(stackName);
+        deploymentName = adjustPartLength(deploymentName);
+        deploymentName = appendHash(deploymentName, stackId);
+        deploymentName = adjustBaseLength(deploymentName, maxResourceNameLength);
+        return deploymentName;
     }
 
     private String instanceName(Object[] parts) {

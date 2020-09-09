@@ -382,6 +382,14 @@ cb:
     disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
     stopStart.batch.size: 10
     create.batch.size: 5
+    externaldatabase:
+      engineversion: 10
+      ha:
+        retentionperiod: 30
+        georedundantbackup: true
+      nonha:
+        retentionperiod: 7
+        georedundantbackup: false
 
   nginx:
     port: 9443

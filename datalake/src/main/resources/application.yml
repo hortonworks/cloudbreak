@@ -47,6 +47,7 @@ sdx:
         backupretentionperiod: 7
         georedundantbackup: false
     gcp:
+      engineversion: 10
       ha:
         backupretentionperiod: 30
       nonha:

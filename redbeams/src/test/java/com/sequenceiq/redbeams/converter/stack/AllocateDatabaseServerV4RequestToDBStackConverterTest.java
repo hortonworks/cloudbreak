@@ -230,7 +230,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(providerParameterCalculator).get(networkRequest);
         verify(subnetListerService, never()).listSubnets(any(), any());
         verify(subnetChooserService, never()).chooseSubnets(anyList(), any(), any());
-        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any());
+        verify(networkParameterAdder, never()).addSubnetIds(any(), any(), any(), any());
         verify(userGeneratorService, never()).generateUserName();
         verify(passwordGeneratorService, never()).generatePassword(any());
     }
@@ -267,7 +267,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
         when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
-        when(networkParameterAdder.addSubnetIds(any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
+        when(networkParameterAdder.addSubnetIds(any(), any(), any(), any())).thenReturn(SUBNET_ID_REQUEST_PARAMETERS);
         when(userGeneratorService.generateUserName()).thenReturn(USERNAME);
         when(passwordGeneratorService.generatePassword(any())).thenReturn(PASSWORD);
 
@@ -285,7 +285,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetListerService).listSubnets(any(), any());
         verify(subnetChooserService).chooseSubnets(anyList(), any(), any());
-        verify(networkParameterAdder).addSubnetIds(any(), any(), any());
+        verify(networkParameterAdder).addSubnetIds(any(), any(), any(), any());
         verify(userGeneratorService).generateUserName();
         verify(passwordGeneratorService).generatePassword(any());
     }

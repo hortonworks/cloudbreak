@@ -23,7 +23,7 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
 
     private static final String BACKUP_RETENTION_DAYS = "backupRetentionDays";
 
-    private static final String DB_VERSION = "dbVersion";
+    private static final String ENGINE_VERSION = "engineVersion";
 
     @Min(value = 7, message = "backupRetentionDays must be 7 or higher")
     @ApiModelProperty(GcpDatabaseServerModelDescriptions.BACKUP_RETENTION_DAYS)
@@ -31,7 +31,7 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
 
     @Pattern(regexp = "\\d+(?:\\.\\d)?")
     @ApiModelProperty(GcpDatabaseServerModelDescriptions.DB_VERSION)
-    private String dbVersion;
+    private String engineVersion;
 
     public Integer getBackupRetentionDays() {
         return backupRetentionDays;
@@ -41,19 +41,19 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
         this.backupRetentionDays = backupRetentionDays;
     }
 
-    public String getDbVersion() {
-        return dbVersion;
+    public String getEngineVersion() {
+        return engineVersion;
     }
 
-    public void setDbVersion(String dbVersion) {
-        this.dbVersion = dbVersion;
+    public void setEngineVersion(String engineVersion) {
+        this.engineVersion = engineVersion;
     }
 
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
         putIfValueNotNull(map, BACKUP_RETENTION_DAYS, backupRetentionDays);
-        putIfValueNotNull(map, DB_VERSION, dbVersion);
+        putIfValueNotNull(map, ENGINE_VERSION, engineVersion);
         return map;
     }
 
@@ -67,6 +67,6 @@ public class GcpDatabaseServerV4Parameters extends MappableBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         backupRetentionDays = getInt(parameters, BACKUP_RETENTION_DAYS);
-        dbVersion = getParameterOrNull(parameters, DB_VERSION);
+        engineVersion = getParameterOrNull(parameters, ENGINE_VERSION);
     }
 }

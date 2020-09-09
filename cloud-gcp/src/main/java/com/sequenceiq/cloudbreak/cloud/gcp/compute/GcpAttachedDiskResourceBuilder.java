@@ -233,7 +233,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             boolean finished = operationIds.isEmpty() || operationIds.stream()
                     .allMatch(operationId -> {
                         try {
-                            Operation operation = getGcpResourceChecker().check(context, operationId);
+                            Operation operation = getResourceChecker().check(context, operationId);
                             return operation == null || GcpStackUtil.isOperationFinished(operation);
                         } catch (Exception e) {
                             CloudContext cloudContext = auth.getCloudContext();
