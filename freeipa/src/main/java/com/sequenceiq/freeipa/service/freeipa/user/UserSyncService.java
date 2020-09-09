@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +17,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.ImmutableCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,8 +32,6 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -50,7 +48,6 @@ import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.Group;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -75,6 +72,7 @@ public class UserSyncService {
     private enum LogEvent {
         FULL_USER_SYNC,
         PARTIAL_USER_SYNC,
+        USER_SYNC_DELETE,
         RETRIEVE_FULL_UMS_STATE,
         RETRIEVE_PARTIAL_UMS_STATE,
         RETRIEVE_FULL_IPA_STATE,
@@ -132,26 +130,30 @@ public class UserSyncService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private UserSyncRequestValidator userSyncRequestValidator;
+
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
-        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
-        return performSyncForStacks(accountId, actorCrn, userCrnFilter, machineUserCrnFilter, stacks);
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
+        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
+        return performSyncForStacks(accountId, actorCrn, userSyncFilter, stacks);
     }
 
     public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, AuthorizationResourceAction action) {
-        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+            UserSyncRequestFilter userSyncFilter, AuthorizationResourceAction action) {
+        List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
         commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns);
-        return performSyncForStacks(accountId, actorCrn, userCrnFilter, machineUserCrnFilter, stacks);
+        return performSyncForStacks(accountId, actorCrn, userSyncFilter, stacks);
     }
 
-    private Operation performSyncForStacks(String accountId, String actorCrn, Set<String> userCrnFilter,
-            Set<String> machineUserCrnFilter, List<Stack> stacks) {
+    private Operation performSyncForStacks(String accountId, String actorCrn,  UserSyncRequestFilter userSyncFilter, List<Stack> stacks) {
         logAffectedStacks(stacks);
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationService
-                .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userCrnFilter, machineUserCrnFilter));
+                .startOperation(accountId, OperationType.USER_SYNC, environmentCrns, union(userSyncFilter.getUserCrnFilter(),
+                        userSyncFilter.getMachineUserCrnFilter()));
 
         String operationId = operation.getOperationId();
         OperationState operationState = operation.getStatus();
@@ -160,7 +162,7 @@ public class UserSyncService {
         if (operationState == OperationState.RUNNING) {
             tryWithOperationCleanup(operationId, accountId, () ->
                     ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
-                        boolean fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+                        boolean fullSync = userSyncFilter.isFullSync();
                         if (fullSync) {
                             stacks.forEach(stack -> {
                                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
@@ -168,7 +170,7 @@ public class UserSyncService {
                                 userSyncStatusService.save(userSyncStatus);
                             });
                         }
-                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync);
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter, fullSync);
                     }));
         }
 
@@ -184,11 +186,9 @@ public class UserSyncService {
         LOGGER.info("Affected stacks: {}", stacksAffected);
     }
 
-    private List<Stack> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
-        validateParameters(accountId, actorCrn, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
-        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, userCrns {}, and machineUserCrns {}",
-                accountId, environmentCrnFilter, userCrnFilter, machineUserCrnFilter);
+    private List<Stack> getStacksForSync(String accountId, String actorCrn, Set<String> environmentCrnFilter, UserSyncRequestFilter userSyncRequestFilter) {
+        userSyncRequestValidator.validateParameters(accountId, actorCrn, environmentCrnFilter, userSyncRequestFilter);
+        LOGGER.debug("Synchronizing users in account {} for environmentCrns {}, user sync filter {}", accountId, environmentCrnFilter, userSyncRequestFilter);
 
         List<Stack> stacks = stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(environmentCrnFilter, accountId);
         if (stacks.isEmpty()) {
@@ -200,13 +200,11 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
-
+    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
+        boolean fullSync) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(
-                    operationId, accountId, actorCrn, stacks, userCrnFilter, machineUserCrnFilter, fullSync));
+            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, fullSync));
         } finally {
             MDCBuilder.removeOperationId();
         }
@@ -230,8 +228,8 @@ public class UserSyncService {
         }
     }
 
-    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean fullSync) {
+    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
+        boolean fullSync) {
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
@@ -243,19 +241,28 @@ public class UserSyncService {
 
             LogEvent logUserSyncEvent = fullSync ? LogEvent.FULL_USER_SYNC : LogEvent.PARTIAL_USER_SYNC;
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
-            LogEvent logRetrieveUmsEvent = fullSync ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
-            LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
-            Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
-                    .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userCrnFilter, machineUserCrnFilter, requestId);
-            LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
+
+            Map<String, Future<SyncStatusDetail>> statusFutures;
+
+            if (userSyncFilter.getDeletedWorkloadUser().isEmpty()) {
+                LogEvent logRetrieveUmsEvent = fullSync ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
+                LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
+                Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
+                        .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter.getUserCrnFilter(),
+                                userSyncFilter.getMachineUserCrnFilter(), requestId);
+                LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
+                statusFutures = stacks.stream()
+                        .collect(Collectors.toMap(Stack::getEnvironmentCrn,
+                                stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, fullSync,
+                                        operationId, accountId)));
+            } else {
+                String deletedWorkloadUser = userSyncFilter.getDeletedWorkloadUser().get();
+                statusFutures = stacks.stream()
+                        .collect(Collectors.toMap(Stack::getEnvironmentCrn, stack -> asyncSynchronizeStackForDeleteUser(stack, deletedWorkloadUser)));
+            }
 
             List<SuccessDetails> success = new ArrayList<>();
             List<FailureDetails> failure = new ArrayList<>();
-
-            Map<String, Future<SyncStatusDetail>> statusFutures = stacks.stream()
-                    .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                            stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, fullSync,
-                                    operationId, accountId)));
 
             statusFutures.forEach((envCrn, statusFuture) -> {
                 try {
@@ -308,6 +315,10 @@ public class UserSyncService {
 
     }
 
+    private Future<SyncStatusDetail> asyncSynchronizeStackForDeleteUser(Stack stack, String deletedWorkloadUser) {
+        return asyncTaskExecutor.submit(() -> internalSynchronizeStackForDeleteUser(stack, deletedWorkloadUser));
+    }
+
     private SyncStatusDetail internalSynchronizeStack(Stack stack, UmsUsersState umsUsersState, boolean fullSync) {
         MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
@@ -344,14 +355,48 @@ public class UserSyncService {
                 LOGGER.debug("Finished {}.", LogEvent.SYNC_CLOUD_IDENTITIES);
             }
 
-            if (warnings.isEmpty()) {
-                return SyncStatusDetail.succeed(environmentCrn);
-            } else {
-                return SyncStatusDetail.fail(environmentCrn, "Synchronization completed with warnings.", warnings);
-            }
+            return toSyncStatusDetail(environmentCrn, warnings);
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
+        }
+    }
+
+    private SyncStatusDetail internalSynchronizeStackForDeleteUser(Stack stack, String deletedWorkloadUser) {
+        MDCBuilder.buildMdcContext(stack);
+        String environmentCrn = stack.getEnvironmentCrn();
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+        try {
+            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+
+            LOGGER.debug("Starting {} for environment {} and deleted user {} ...", LogEvent.USER_SYNC_DELETE, environmentCrn, deletedWorkloadUser);
+
+            LOGGER.debug("Starting {} ...", LogEvent.RETRIEVE_PARTIAL_IPA_STATE);
+            UsersState ipaUserState = getIpaStateForUser(freeIpaClient, deletedWorkloadUser);
+            LOGGER.debug("Finished {}, found {} users and {} groups.", LogEvent.RETRIEVE_PARTIAL_IPA_STATE, ipaUserState.getUsers().size(),
+                    ipaUserState.getGroups().size());
+
+            if (!ipaUserState.getUsers().isEmpty()) {
+                ImmutableCollection<String> groupsToRemove = ipaUserState.getGroupMembership().get(deletedWorkloadUser);
+                UsersStateDifference usersStateDifference = UsersStateDifference.forDeletedUser(deletedWorkloadUser, groupsToRemove);
+                LOGGER.debug("Starting {} ...", LogEvent.APPLY_DIFFERENCE_TO_IPA);
+                applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient, usersStateDifference, warnings::put);
+                LOGGER.debug("Finished {}.", LogEvent.APPLY_DIFFERENCE_TO_IPA);
+            }
+
+            LOGGER.debug("Finished {} for environment {} and deleted user {} ...", LogEvent.USER_SYNC_DELETE, environmentCrn, deletedWorkloadUser);
+            return toSyncStatusDetail(environmentCrn, warnings);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
+            return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
+        }
+    }
+
+    private SyncStatusDetail toSyncStatusDetail(String environmentCrn, Multimap<String, String> warnings) {
+        if (warnings.isEmpty()) {
+            return SyncStatusDetail.succeed(environmentCrn);
+        } else {
+            return SyncStatusDetail.fail(environmentCrn, "Synchronization completed with warnings.", warnings);
         }
     }
 
@@ -360,6 +405,11 @@ public class UserSyncService {
             throws FreeIpaClientException {
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
                 freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
+    }
+
+    @VisibleForTesting
+    UsersState getIpaStateForUser(FreeIpaClient freeIpaClient, String workloadUserName) throws FreeIpaClientException {
+                return freeIpaUsersStateProvider.getFilteredFreeIpaStateFromUserNames(freeIpaClient, Set.of(workloadUserName));
     }
 
     @VisibleForTesting
@@ -525,43 +575,6 @@ public class UserSyncService {
             LOGGER.warn("Client is not usable for further usage");
             throw e;
         }
-    }
-
-    @VisibleForTesting
-    void validateParameters(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
-        requireNonNull(accountId, "accountId must not be null");
-        requireNonNull(actorCrn, "actorCrn must not be null");
-        requireNonNull(environmentCrnFilter, "environmentCrnFilter must not be null");
-        requireNonNull(userCrnFilter, "userCrnFilter must not be null");
-        requireNonNull(machineUserCrnFilter, "machineUserCrnFilter must not be null");
-        validateCrnFilter(environmentCrnFilter, Crn.ResourceType.ENVIRONMENT);
-        validateCrnFilter(userCrnFilter, Crn.ResourceType.USER);
-        validateCrnFilter(machineUserCrnFilter, Crn.ResourceType.MACHINE_USER);
-        validateSameAccount(accountId, Iterables.concat(environmentCrnFilter, userCrnFilter, machineUserCrnFilter));
-    }
-
-    private void validateSameAccount(String accountId, Iterable<String> crns) {
-        crns.forEach(crnString -> {
-            Crn crn = Crn.safeFromString(crnString);
-            if (!accountId.equals(crn.getAccountId())) {
-                throw new BadRequestException(String.format("Crn %s is not in the expected account %s", crnString, accountId));
-            }
-        });
-    }
-
-    @VisibleForTesting
-    void validateCrnFilter(Set<String> crnFilter, Crn.ResourceType resourceType) {
-        crnFilter.forEach(crnString -> {
-            try {
-                Crn crn = Crn.safeFromString(crnString);
-                if (crn.getResourceType() != resourceType) {
-                    throw new BadRequestException(String.format("Crn %s is not of expected type %s", crnString, resourceType));
-                }
-            } catch (CrnParseException e) {
-                throw new BadRequestException(e.getMessage(), e);
-            }
-        });
     }
 
     private Set<String> union(Collection<String> collection1, Collection<String> collection2) {

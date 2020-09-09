@@ -1,11 +1,13 @@
 package com.sequenceiq.freeipa.controller;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -80,10 +82,10 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
-        return checkOperationRejected(
-                operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)));
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
+        Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
+                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
     @Override
@@ -94,9 +96,11 @@ public class UserV1Controller implements UserV1Endpoint {
 
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(nullToEmpty(request.getUsers()),
+                nullToEmpty(request.getMachineUsers()),
+                Optional.ofNullable(request.getDeletedWorkloadUser()));
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
-                nullToEmpty(request.getEnvironments()), nullToEmpty(request.getUsers()),
-                nullToEmpty(request.getMachineUsers()), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                nullToEmpty(request.getEnvironments()), userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 

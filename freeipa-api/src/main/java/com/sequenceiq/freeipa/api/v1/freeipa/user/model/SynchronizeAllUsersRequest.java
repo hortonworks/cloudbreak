@@ -18,6 +18,9 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_USER_CRNS)
     private Set<String> users = new HashSet<>();
 
+    @ApiModelProperty(value = UserModelDescriptions.DELETED_WORKLOAD_USER)
+    private String deletedWorkloadUser;
+
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ACCOUNT_ID)
     private String accountId;
 
@@ -53,11 +56,20 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
         this.accountId = accountId;
     }
 
+    public String getDeletedWorkloadUser() {
+        return deletedWorkloadUser;
+    }
+
+    public void setDeletedWorkloadUser(String deletedWorkloadUser) {
+        this.deletedWorkloadUser = deletedWorkloadUser;
+    }
+
     @Override
     public String toString() {
         return "SynchronizeAllUsersRequest{"
                 + "machineUsers=" + machineUsers
                 + ", users=" + users
+                + ", deletedWorkloadUser=" + deletedWorkloadUser
                 + ", accountId=" + accountId
                 + ", " + super.fieldsToString()
                 + '}';
