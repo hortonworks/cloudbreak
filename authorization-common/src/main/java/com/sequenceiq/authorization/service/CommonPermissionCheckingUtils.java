@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
@@ -84,14 +86,17 @@ public class CommonPermissionCheckingUtils {
     }
 
     public void checkPermissionForUserOnResource(Map<String, AuthorizationResourceAction> resourcesWithActions, String userCrn) {
+        Set<String> removableDefaultResourceCrns = Sets.newHashSet();
         for (Map.Entry<String, AuthorizationResourceAction> resourceAndAction : resourcesWithActions.entrySet()) {
             String resourceCrn = resourceAndAction.getKey();
             AuthorizationResourceAction action = resourceAndAction.getValue();
             DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action));
             if (defaultResourceChecker != null && defaultResourceChecker.isDefault(resourceCrn)) {
                 throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
+                removableDefaultResourceCrns.add(resourceCrn);
             }
         }
+        removableDefaultResourceCrns.stream().forEach(resourceCrn -> resourcesWithActions.remove(resourceCrn));
         umsResourceAuthorizationService.checkIfUserHasAtLeastOneRight(userCrn, resourcesWithActions);
     }
 
