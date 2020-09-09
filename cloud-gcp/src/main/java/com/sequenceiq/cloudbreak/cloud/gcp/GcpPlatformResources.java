@@ -144,10 +144,13 @@ public class GcpPlatformResources implements PlatformResources {
                 compute.subnetworks().list(projectId, region.value()).execute() :
                 new SubnetworkList().setItems(Collections.singletonList(compute.subnetworks().get(projectId, region.value(), subnetId).execute()));
         // GCP VPCs are global. Subnets have a global scope in region. So picking the first availability zone in the region for subnet.
-        String zone = compute.regions().get(projectId, region.value()).execute().getZones().stream().findFirst().orElse(null);
-        if (zone != null) {
-            zone = zone.substring(zone.lastIndexOf('/') + 1);
-        }
+        String zone = compute.regions().get(projectId, region.value())
+                .execute()
+                .getZones()
+                .stream()
+                .findFirst()
+                .map(tmpZone -> tmpZone.substring(tmpZone.lastIndexOf('/') + 1))
+                .orElse(null);
         LOGGER.debug("Zone chosen for the subnets is {}", zone);
         for (Network network : networkList.getItems()) {
             Map<String, Object> properties = new HashMap<>();
