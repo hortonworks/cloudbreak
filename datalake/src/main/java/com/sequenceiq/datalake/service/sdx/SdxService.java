@@ -700,6 +700,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     @Override
+    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return Optional.of(getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn).getEnvCrn());
+    }
+
+    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.DATALAKE;
     }
