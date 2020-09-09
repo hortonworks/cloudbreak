@@ -612,6 +612,7 @@ public class ModelDescriptions {
 
     public static class RepairClusterRequest {
         public static final String HOSTGROUPS = "List of hostgroups where the failed nodes will be repaired";
+        public static final String RESTART_SERVICES = "If true, the services will be restarted after repair";
         public static final String REMOVE_ONLY = "If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and "
                 + "new nodes will be started.";
         public static final String NODES = "Object consisting of deleteVolumes flag and a list of node IDs which will "

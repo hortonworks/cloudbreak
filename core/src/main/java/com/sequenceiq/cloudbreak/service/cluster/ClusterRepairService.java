@@ -114,19 +114,19 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, repairableHostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, true, repairableHostGroups);
     }
 
-    public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly) {
+    public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, hostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, restartServices, hostGroups);
     }
 
-    public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly) {
+    public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, nodeIds);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, restartServices, nodeIds);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
@@ -342,7 +342,7 @@ public class ClusterRepairService {
     }
 
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
-            RepairValidation> repairValidationResult, boolean removeOnly, Set<String> recoveryMessageArgument) {
+            RepairValidation> repairValidationResult, boolean removeOnly, boolean restartServices, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
             eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                     repairValidationResult.getError().getValidationErrors());
@@ -350,7 +350,7 @@ public class ClusterRepairService {
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
-                        removeOnly);
+                        removeOnly, restartServices);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;

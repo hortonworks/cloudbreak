@@ -78,7 +78,7 @@ public class SdxStatusService {
         try {
             transactionService.required(() -> {
                 SdxStatusEntity previous = getActualStatusForSdx(sdxCluster);
-                if (statusChangeIsValid(previous)) {
+                if (statusChangeIsValid(previous, status)) {
                     SdxStatusEntity sdxStatusEntity = createStatusEntity(status, statusReason, sdxCluster);
                     if (DELETED.equals(status)) {
                         setDeletedTime(sdxCluster);
@@ -123,8 +123,16 @@ public class SdxStatusService {
         return sdxStatusEntity;
     }
 
-    private boolean statusChangeIsValid(SdxStatusEntity currentStatus) {
-        return !(currentStatus != null && DELETED.equals(currentStatus.getStatus()));
+    private boolean statusChangeIsValid(SdxStatusEntity currentStatus, DatalakeStatusEnum newStatus) {
+        if (currentStatus != null) {
+            if (DELETED.equals(currentStatus.getStatus())) {
+                return false;
+            }
+            if (currentStatus.getStatus() != null && currentStatus.getStatus().isDeleteInProgressOrCompleted() && !newStatus.isDeleteInProgressOrCompleted()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public List<SdxStatusEntity> findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(Collection<DatalakeStatusEnum> datalakeStatusEnums,

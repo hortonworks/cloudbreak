@@ -148,9 +148,9 @@ public class ClusterRepairServiceTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
 
-        underTest.repairHostGroups(1L, Set.of("hostGroup1"), false);
+        underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
 
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false));
     }
 
     @Test
@@ -267,13 +267,13 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
 
-        underTest.repairNodes(1L, Set.of("instanceId1"), false, false);
+        underTest.repairNodes(1L, Set.of("instanceId1"), false, false, false);
         verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false));
     }
 
     @Test
@@ -289,7 +289,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false);
+            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
         });
 
         assertEquals("Could not trigger cluster repair for stack 1 because node list is incorrect", exception.getMessage());
@@ -315,7 +315,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1, host2));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false);
+            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
         });
 
         String expectedErrorMessage =

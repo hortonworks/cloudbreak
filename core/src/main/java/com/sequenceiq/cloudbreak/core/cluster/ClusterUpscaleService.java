@@ -94,21 +94,33 @@ public class ClusterUpscaleService {
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
     }
 
-    public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
+    public void installServicesOnNewHosts(Long stackId, String hostGroupName, Boolean repair, Boolean restartServices) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
-        LOGGER.debug("Start installing Ambari services");
+        LOGGER.debug("Start installing CM services");
         HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
                 .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
         Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
         recipeEngine.executePostAmbariStartRecipes(stack, hostGroup.getRecipes());
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
+        if (shouldRestartServices(repair, restartServices, stack)) {
+            try {
+                LOGGER.info("Trying to restart services");
+                connector.restartAll();
+            } catch (RuntimeException e) {
+                LOGGER.info("Restart services failed", e);
+            }
+        }
         runningInstanceMetaDataSet.stream()
                 .filter(instanceMetaData -> upscaledHosts.contains(instanceMetaData.getDiscoveryFQDN()))
                 .forEach(instanceMetaData -> {
                     instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
                     instanceMetaDataService.save(instanceMetaData);
                 });
+    }
+
+    private boolean shouldRestartServices(Boolean repair, Boolean restartServices, Stack stack) {
+        return repair && restartServices && stack.getNotTerminatedInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {

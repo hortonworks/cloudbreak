@@ -19,6 +19,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final boolean singleNodeCluster;
 
+    private final boolean restartServices;
+
     private final ClusterManagerType clusterManagerType;
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType) {
@@ -27,17 +29,19 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         singleMasterGateway = false;
         kerberosSecured = false;
         singleNodeCluster = false;
+        restartServices = false;
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
             Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
-            ClusterManagerType clusterManagerType) {
+            boolean restartServices, ClusterManagerType clusterManagerType) {
         super(selector, stackId, instanceGroup, adjustment, hostNames, accepted);
         this.scalingType = scalingType;
         singleMasterGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
+        this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
     }
 
@@ -55,6 +59,10 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     public boolean isSingleNodeCluster() {
         return singleNodeCluster;
+    }
+
+    public boolean isRestartServices() {
+        return restartServices;
     }
 
     public ClusterManagerType getClusterManagerType() {
