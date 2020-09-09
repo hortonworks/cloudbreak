@@ -233,7 +233,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 syncPollingScheduler.schedule(task);
             }
         } catch (Exception e) {
-            LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+            LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
         }
     }
 
@@ -247,7 +247,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 syncPollingScheduler.schedule(task);
             }
         } catch (Exception e) {
-            LOGGER.debug("Skipping resource creation: {}", e.getMessage());
+            LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
         }
     }
 
