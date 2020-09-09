@@ -97,7 +97,9 @@ public class CommonPermissionCheckingUtils {
             }
         }
         removableDefaultResourceCrns.stream().forEach(resourceCrn -> resourcesWithActions.remove(resourceCrn));
-        umsResourceAuthorizationService.checkIfUserHasAtLeastOneRight(userCrn, resourcesWithActions);
+        if (!resourcesWithActions.isEmpty()) {
+            umsResourceAuthorizationService.checkIfUserHasAtLeastOneRight(userCrn, resourcesWithActions);
+        }
     }
 
     public void checkPermissionForUserOnResource(AuthorizationResourceAction action, String userCrn, String resourceCrn) {
