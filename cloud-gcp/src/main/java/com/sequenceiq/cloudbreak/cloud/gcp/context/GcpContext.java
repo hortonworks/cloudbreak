@@ -14,8 +14,15 @@ public class GcpContext extends ResourceBuilderContext {
 
     private static final String NO_PUBLIC_IP = "noPublicIp";
 
-    public GcpContext(String name, Location location, String projectId, String serviceAccountId, Compute compute, boolean noPublicIp,
-            int parallelResourceRequest, boolean build) {
+    public GcpContext(
+        String name,
+        Location location,
+        String projectId,
+        String serviceAccountId,
+        Compute compute,
+        boolean noPublicIp,
+        int parallelResourceRequest,
+        boolean build) {
         super(name, location, parallelResourceRequest, build);
         putParameter(PROJECT_ID, projectId);
         putParameter(SERVICE_ACCOUNT_ID, serviceAccountId);

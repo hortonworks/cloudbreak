@@ -259,11 +259,18 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
             DBStack dbStack) {
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<String> chosenSubnetIds = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack).stream()
+        List<CloudSubnet> choosenSubnet = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack);
+
+        List<String> chosenSubnetIds = choosenSubnet
+                .stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
+        List<String> choosenAzs = choosenSubnet
+                .stream()
+                .map(CloudSubnet::getAvailabilityZone)
+                .collect(Collectors.toList());
 
-        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, cloudPlatform);
+        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, choosenAzs, cloudPlatform);
     }
 
     private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,

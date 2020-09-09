@@ -89,9 +89,9 @@ environment:
       schema: public
       cert.file: database.crt
       ssl: false
-  enabledplatforms: AWS, AZURE, YARN
-  enabledParentPlatforms: AWS, MOCK
-  enabledChildPlatforms: YARN, MOCK
+  enabledplatforms: AWS,AZURE,YARN,GCP
+  enabledParentPlatforms: AWS,MOCK
+  enabledChildPlatforms: YARN,MOCK
   tunnel:
     default: DIRECT
   admin.group.default.prefix: cdp_

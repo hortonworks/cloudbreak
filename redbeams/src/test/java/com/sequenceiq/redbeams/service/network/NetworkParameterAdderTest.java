@@ -27,7 +27,7 @@ public class NetworkParameterAdderTest {
         Map<String, Object> parameters = new HashMap<>();
         List<String> subnetIds = List.of("subnet1", "subnet2");
 
-        parameters = underTest.addSubnetIds(parameters, subnetIds, CloudPlatform.AWS);
+        parameters = underTest.addSubnetIds(parameters, subnetIds, List.of(), CloudPlatform.AWS);
 
         assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.SUBNET_ID, String.join(",", subnetIds)));
     }

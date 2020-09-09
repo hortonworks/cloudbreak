@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.gcp;
+package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 
 import java.io.IOException;
 
@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 
 @Component
-public class GcpResourceChecker {
+public class GcpComputeResourceChecker {
 
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     public Operation check(GcpContext context,  String operationId) throws IOException {
@@ -24,32 +24,14 @@ public class GcpResourceChecker {
         }
         try {
             Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
-            checkError(execute);
+            checkComputeOperationError(execute);
             return execute;
         } catch (GoogleJsonResponseException e) {
-            if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                Location location = context.getLocation();
-                try {
-                    Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, location.getRegion()).execute();
-                    checkError(execute);
-                    return execute;
-                } catch (GoogleJsonResponseException e1) {
-                    if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                        Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
-                                location.getAvailabilityZone()).execute();
-                        checkError(execute);
-                        return execute;
-                    } else {
-                        throw e1;
-                    }
-                }
-            } else {
-                throw e;
-            }
+            return handleException(context, operationId, e);
         }
     }
 
-    private void checkError(Operation execute) {
+    protected void checkComputeOperationError(Operation execute) {
         if (execute.getError() != null) {
             String msg = null;
             StringBuilder error = new StringBuilder();
@@ -60,6 +42,28 @@ public class GcpResourceChecker {
                 msg = error.toString();
             }
             throw new CloudConnectorException(msg);
+        }
+    }
+
+    protected Operation handleException(GcpContext context, String operationId, GoogleJsonResponseException e) throws IOException {
+        if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
+            Location location = context.getLocation();
+            try {
+                Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, location.getRegion()).execute();
+                checkComputeOperationError(execute);
+                return execute;
+            } catch (GoogleJsonResponseException e1) {
+                if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
+                    Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
+                            location.getAvailabilityZone()).execute();
+                    checkComputeOperationError(execute);
+                    return execute;
+                } else {
+                    throw e1;
+                }
+            }
+        } else {
+            throw e;
         }
     }
 }

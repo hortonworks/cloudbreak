@@ -1,5 +1,5 @@
 {
-  "instanceType": "e2-standard-4",
+  "instanceType": "db-custom-2-13312",
   "vendor": "postgres",
   "volumeSize": 100
 }
