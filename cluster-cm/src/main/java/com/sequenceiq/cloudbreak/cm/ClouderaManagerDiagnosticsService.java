@@ -98,7 +98,6 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
         args.setComments(parameters.getComments());
         args.setTicketNumber(parameters.getTicketNumber());
         args.setBundleSizeBytes(parameters.getBundleSizeBytes() == null ? new BigDecimal(Long.MAX_VALUE) : parameters.getBundleSizeBytes());
-        args.setIncludeInfoLog(parameters.getIncludeInfoLog());
         args.setEnableMonitorMetricsCollection(parameters.getEnableMonitorMetricsCollection());
         if (CollectionUtils.isNotEmpty(parameters.getRoles())) {
             args.setRoles(parameters.getRoles());

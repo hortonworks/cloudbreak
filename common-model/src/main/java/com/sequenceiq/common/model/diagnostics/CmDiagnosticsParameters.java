@@ -20,6 +20,8 @@ public class CmDiagnosticsParameters implements Serializable {
 
     private Boolean updatePackage;
 
+    private Boolean skipValidation;
+
     private String ticketNumber;
 
     private String comments;
@@ -29,8 +31,6 @@ public class CmDiagnosticsParameters implements Serializable {
     private Date startTime;
 
     private Date endTime;
-
-    private Boolean includeInfoLog;
 
     private String clusterName;
 
@@ -99,14 +99,6 @@ public class CmDiagnosticsParameters implements Serializable {
 
     public void setEndTime(Date endTime) {
         this.endTime = endTime;
-    }
-
-    public Boolean getIncludeInfoLog() {
-        return includeInfoLog;
-    }
-
-    public void setIncludeInfoLog(Boolean includeInfoLog) {
-        this.includeInfoLog = includeInfoLog;
     }
 
     public String getClusterName() {
@@ -189,11 +181,20 @@ public class CmDiagnosticsParameters implements Serializable {
         this.updatePackage = updatePackage;
     }
 
+    public Boolean getSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(Boolean skipValidation) {
+        this.skipValidation = skipValidation;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("destination", destination.toString());
         parameters.put("mode", CM_DIAGNOSTICS_MODE);
         parameters.put("updatePackage", updatePackage);
+        parameters.put("skipValidation", skipValidation);
         parameters.put("s3_bucket", s3Bucket);
         parameters.put("s3_location", s3Location);
         parameters.put("s3_region", s3Region);
@@ -257,11 +258,6 @@ public class CmDiagnosticsParameters implements Serializable {
             return this;
         }
 
-        public CmDiagnosticsParametersBuilder withIncludeInfoLog(Boolean includeInfoLog) {
-            this.diagnosticParameters.setIncludeInfoLog(includeInfoLog);
-            return this;
-        }
-
         public CmDiagnosticsParametersBuilder withEnableMonitorMetricsCollection(
                 Boolean enableMonitorMetricsCollection) {
             this.diagnosticParameters.setEnableMonitorMetricsCollection(enableMonitorMetricsCollection);
@@ -300,6 +296,11 @@ public class CmDiagnosticsParameters implements Serializable {
 
         public CmDiagnosticsParametersBuilder withUpdatePackage(Boolean updatePackage) {
             this.diagnosticParameters.setUpdatePackage(updatePackage);
+            return this;
+        }
+
+        public CmDiagnosticsParametersBuilder withSkipValidation(Boolean skipValidation) {
+            this.diagnosticParameters.setSkipValidation(skipValidation);
             return this;
         }
 
