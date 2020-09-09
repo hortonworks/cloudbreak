@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
@@ -45,8 +46,22 @@ public class SdxDiagnosticsFlowService {
         return diagnosticsV4Endpoint.collectDiagnostics(request);
     }
 
+    public FlowIdentifier startCmDiagnosticsCollection(Map<String, Object> properties) {
+        LOGGER.debug("Start CM based diagnostic collection for SDX");
+        CmDiagnosticsCollectionRequest request = diagnosticsParamsConverter.convertToCmRequest(properties);
+        return diagnosticsV4Endpoint.collectCmDiagnostics(request);
+    }
+
     public void waitForDiagnosticsCollection(Long sdxId, PollingConfig pollingConfig, FlowIdentifier flowIdentifier) {
-        LOGGER.debug("Start polling diagnostics collection for SDX stack id '{}'", sdxId);
+        waitForDiagnosticsCollection(sdxId, pollingConfig, flowIdentifier, false);
+    }
+
+    public void waitForDiagnosticsCollection(Long sdxId, PollingConfig pollingConfig, FlowIdentifier flowIdentifier, boolean cmBundle) {
+        String startPollingMessage = cmBundle ? String.format("Start polling CM based diagnostics collection for SDX stack id '%s'", sdxId)
+                : String.format("Start polling diagnostics collection for SDX stack id '%s'", sdxId);
+        String failedMessage = cmBundle ? "Cm based diagnostic collection flow failed in Cloudbreak."
+                : "Diagnostic collection flow failed in Cloudbreak.";
+        LOGGER.debug(startPollingMessage);
         sdxService.getById(sdxId);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
@@ -54,7 +69,7 @@ public class SdxDiagnosticsFlowService {
                 .run(() -> {
                     List<FlowLogResponse> flowLogs = flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId());
                     if (hasFlowFailed(flowLogs)) {
-                        return AttemptResults.breakFor("Diagnostic collection flow failed in Cloudbreak.");
+                        return AttemptResults.breakFor(failedMessage);
                     }
                     if (!flowLogs.isEmpty() && flowLogs.get(0).getFinalized()) {
                         return AttemptResults.justFinish();
