@@ -21,6 +21,9 @@ public class SdxEventParameterFactory implements EventParameterFactory {
         String userCrn;
         try {
             userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            if (userCrn == null) {
+                userCrn = sdxService.getById(stackId).getInitiatorUserCrn();
+            }
         } catch (RuntimeException ex) {
             userCrn = sdxService.getById(stackId).getInitiatorUserCrn();
         }

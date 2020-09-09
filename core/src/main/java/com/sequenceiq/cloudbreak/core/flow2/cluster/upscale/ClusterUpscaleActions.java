@@ -80,6 +80,7 @@ public class ClusterUpscaleActions {
                 variables.put(KERBEROS_SECURED, payload.isKerberosSecured());
                 variables.put(SINGLE_NODE_CLUSTER, payload.isSingleNodeCluster());
                 variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
+                variables.put(RESTART_SERVICES, payload.isRestartServices());
                 if (payload.isSinglePrimaryGateway()) {
                     variables.put(HOST_NAME, getMasterHostname(payload));
                 }
@@ -164,7 +165,8 @@ public class ClusterUpscaleActions {
                             new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroupName());
                     sendEvent(context, result.selector(), result);
                 } else {
-                    UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
+                    UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName(),
+                            context.isRepair(), context.isRestartServices());
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -354,7 +356,8 @@ public class ClusterUpscaleActions {
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName());
+                UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroupName(),
+                        context.isRepair(), context.isRestartServices());
                 return new UpscaleClusterResult(request);
             }
         };
@@ -425,6 +428,10 @@ public class ClusterUpscaleActions {
 
         static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
 
+        static final String RESTART_SERVICES = "RESTART_SERVICES";
+
+        static final String REPAIR = "REPAIR";
+
         @Inject
         private StackService stackService;
 
@@ -443,8 +450,8 @@ public class ClusterUpscaleActions {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
             MDCBuilder.buildMdcContext(stack.getClusterView());
-            return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables),
-                    isSinglePrimaryGateway(variables), getPrimaryGatewayHostName(variables), getClusterManagerType(variables));
+            return new ClusterUpscaleContext(flowParameters, stack, getHostgroupName(variables), getAdjustment(variables), isSinglePrimaryGateway(variables),
+                    getPrimaryGatewayHostName(variables), getClusterManagerType(variables), isRepair(variables), isRestartServices(variables));
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -469,6 +476,14 @@ public class ClusterUpscaleActions {
 
         Boolean isKerberosSecured(Map<Object, Object> variables) {
             return (Boolean) variables.get(KERBEROS_SECURED);
+        }
+
+        Boolean isRepair(Map<Object, Object> variables) {
+            return (Boolean) variables.get(REPAIR);
+        }
+
+        Boolean isRestartServices(Map<Object, Object> variables) {
+            return (Boolean) variables.get(RESTART_SERVICES);
         }
 
         Boolean isSingleNodeCluster(Map<Object, Object> variables) {

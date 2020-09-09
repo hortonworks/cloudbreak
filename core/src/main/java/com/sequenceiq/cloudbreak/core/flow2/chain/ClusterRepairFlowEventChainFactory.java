@@ -102,14 +102,15 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             Repair repair = repairConfig.getSinglePrimaryGateway().get();
             flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
             flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), true,
-                    isKerberosSecured(event.getStackId())));
+                    event.isRestartServices(), isKerberosSecured(event.getStackId())));
         } else if (repairConfig.isChangePGW()) {
             flowTriggers.add(changePrimaryGatewayEvent(event));
         }
         for (Repair repair : repairConfig.getRepairs()) {
             flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
             if (!event.isRemoveOnly()) {
-                flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false, false));
+                flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false,
+                        event.isRestartServices(), false));
             }
         }
         if (!event.isRemoveOnly() && (repairConfig.getSinglePrimaryGateway().isPresent() || repairConfig.isChangePGW())
@@ -150,13 +151,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
-                                                                boolean singlePrimaryGateway, boolean kerberosSecured) {
+                                                                boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
         Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
-                kerberosSecured, event.accepted(), singleNodeCluster, cmType).setRepair();
+                kerberosSecured, event.accepted(), singleNodeCluster, restartServices, cmType).setRepair();
     }
 
     private boolean isKerberosSecured(Long stackId) {

@@ -68,11 +68,15 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            PollingResult orchestratorRemovalPollingResult =
-                    removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames), hostOrchestrator, allGatewayConfigs);
-            if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
-                LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
+            if (stack.getPrimaryGatewayInstance().isReachable()) {
+                List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+                PollingResult orchestratorRemovalPollingResult =
+                        removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames), hostOrchestrator, allGatewayConfigs);
+                if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
+                    LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
+                }
+            } else {
+                LOGGER.warn("Primary gateway is not reachable, can't remove hosts from orchestrator");
             }
             result = new RemoveHostsSuccess(request.getResourceId(), request.getHostGroupName(), hostNames);
         } catch (Exception e) {

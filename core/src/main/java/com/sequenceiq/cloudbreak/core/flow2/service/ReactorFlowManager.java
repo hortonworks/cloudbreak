@@ -233,9 +233,9 @@ public class ReactorFlowManager {
         reactorNotifier.notify(stackId, selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
     }
 
-    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
+    public FlowIdentifier triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly, boolean restartServices) {
         return reactorNotifier.notify(stackId, FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT,
-                new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly));
+                new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly, restartServices));
     }
 
     public FlowIdentifier triggerStackImageUpdate(Long stackId, String newImageId, String imageCatalogName, String imageCatalogUrl) {

@@ -116,7 +116,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerClusterTermination(stack, true, USER_CRN);
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
-        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true);
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false);
         underTest.triggerEphemeralUpdate(STACK_ID);
         underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);

@@ -646,4 +646,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
+
+    @Override
+    public void restartAll() {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        try {
+            restartServices(clustersResourceApi);
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.info("Could not restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
 }

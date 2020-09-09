@@ -25,6 +25,9 @@ public class ClusterRepairV4Request {
     @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
 
+    @ApiModelProperty(RepairClusterRequest.RESTART_SERVICES)
+    private boolean restartServices;
+
     public List<String> getHostGroups() {
         return hostGroups;
     }
@@ -47,6 +50,14 @@ public class ClusterRepairV4Request {
 
     public void setNodes(ClusterRepairNodesV4Request nodes) {
         this.nodes = nodes;
+    }
+
+    public boolean isRestartServices() {
+        return restartServices;
+    }
+
+    public void setRestartServices(boolean restartServices) {
+        this.restartServices = restartServices;
     }
 
     @Override

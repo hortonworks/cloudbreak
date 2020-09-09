@@ -23,10 +23,12 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
 
     private final boolean singleNodeCluster;
 
+    private final boolean restartServices;
+
     private final ClusterManagerType clusterManagerType;
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Set<String> hostNames, boolean singlePrimaryGateway,
-            boolean kerberosSecured, boolean singleNodeCluster, ClusterManagerType clusterManagerType) {
+            boolean kerberosSecured, boolean singleNodeCluster, boolean restartServices, ClusterManagerType clusterManagerType) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
         this.adjustment = adjustment;
@@ -34,11 +36,12 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         this.singlePrimaryGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
+        this.restartServices = restartServices;
         this.clusterManagerType = clusterManagerType;
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment) {
-        this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false, ClusterManagerType.CLOUDERA_MANAGER);
+        this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false, false, ClusterManagerType.CLOUDERA_MANAGER);
     }
 
     public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<AcceptResult> accepted) {
@@ -49,6 +52,7 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         singlePrimaryGateway = false;
         kerberosSecured = false;
         singleNodeCluster = false;
+        restartServices = false;
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
@@ -75,6 +79,10 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
 
     public boolean isSingleNodeCluster() {
         return singleNodeCluster;
+    }
+
+    public boolean isRestartServices() {
+        return restartServices;
     }
 
     public ClusterManagerType getClusterManagerType() {

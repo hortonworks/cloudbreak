@@ -11,13 +11,16 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final boolean removeOnly;
 
+    private final boolean restartServices;
+
     private final Long stackId;
 
-    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
+    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly, boolean restartServices) {
         super(stackId);
         this.failedNodesMap = failedNodesMap;
         this.removeOnly = removeOnly;
         this.stackId = stackId;
+        this.restartServices = restartServices;
     }
 
     public Map<String, List<String>> getFailedNodesMap() {
@@ -26,6 +29,10 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     public boolean isRemoveOnly() {
         return removeOnly;
+    }
+
+    public boolean isRestartServices() {
+        return restartServices;
     }
 
     public Long getStackId() {

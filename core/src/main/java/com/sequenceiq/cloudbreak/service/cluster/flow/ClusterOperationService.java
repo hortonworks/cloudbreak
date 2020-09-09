@@ -320,7 +320,7 @@ public class ClusterOperationService {
         try {
             boolean hasAutoRecoverableNodes = !autoRecoveryNodesMap.isEmpty();
             if (hasAutoRecoverableNodes) {
-                flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
+                flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false, false);
                 updateChangedHosts(cluster, autoRecoveryHostMetadata.keySet(), Set.of(SERVICES_HEALTHY), InstanceStatus.WAITING_FOR_REPAIR,
                         CLUSTER_AUTORECOVERY_REQUESTED);
             }

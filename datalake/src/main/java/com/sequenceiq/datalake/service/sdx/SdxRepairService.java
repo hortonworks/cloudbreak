@@ -110,6 +110,7 @@ public class SdxRepairService {
     private ClusterRepairV4Request createRepairRequest(SdxRepairSettings sdxRepairSettings) {
         ClusterRepairV4Request repairRequest = new ClusterRepairV4Request();
         repairRequest.setHostGroups(sdxRepairSettings.getHostGroupNames());
+        repairRequest.setRestartServices(true);
         return repairRequest;
     }
 
