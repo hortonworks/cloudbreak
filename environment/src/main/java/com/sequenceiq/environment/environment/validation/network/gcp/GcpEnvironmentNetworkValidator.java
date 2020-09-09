@@ -35,7 +35,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     @Override
     public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResult.ValidationResultBuilder resultBuilder) {
         if (environmentDto == null || networkDto == null) {
-            LOGGER.warn("EnvironmentDto or NetworkDto. Neither them can be null!");
+            LOGGER.warn("Either EnvironmentDto or NetworkDto is null. Neither them can be null.");
             resultBuilder.error("Internal validation error");
             return;
         }

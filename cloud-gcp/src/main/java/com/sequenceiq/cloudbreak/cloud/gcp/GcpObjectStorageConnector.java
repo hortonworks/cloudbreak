@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import org.springframework.stereotype.Service;
+
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
@@ -12,7 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
-import org.springframework.stereotype.Service;
 
 @Service
 public class GcpObjectStorageConnector implements ObjectStorageConnector {
@@ -35,7 +36,7 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
-        // TODO: The following check is naive, beefup
+        // TODO: CB-8678 The following check is naive, beefup
         Storage storage = GcpStackUtil.buildStorage(request.getCredential(), request.getCredential().getName());
         for (StorageLocationBase location : request.getCloudStorageRequest().getLocations()) {
             try {

@@ -26,18 +26,18 @@ public class ClusterTemplateCloudPlatformValidator {
 
     public boolean isClusterTemplateCloudPlatformValid(String cloudPlatform, String accountId) {
         return isPlatformEnabled(cloudPlatform)
-                && (notACloudPlatformWhichIsEntitlementSpecific(cloudPlatform) || isAzureOrGCPEntitlementEnabledForTheAccount(cloudPlatform, accountId));
+                && (notCloudEntitlementRequiredPlatform(cloudPlatform) || isCloudEntitlementEnabeledForTheAccount(cloudPlatform, accountId));
     }
 
     public boolean isPlatformEnabled(String cloudPlatform) {
         return enabledPlatforms.contains(cloudPlatform) || CollectionUtils.isEmpty(enabledPlatforms);
     }
 
-    private boolean notACloudPlatformWhichIsEntitlementSpecific(String cloudPlatform) {
+    private boolean notCloudEntitlementRequiredPlatform(String cloudPlatform) {
         return !AZURE.name().equalsIgnoreCase(cloudPlatform) && !GCP.name().equalsIgnoreCase(cloudPlatform);
     }
 
-    private boolean isAzureOrGCPEntitlementEnabledForTheAccount(String cloudPlatform, String accountId) {
+    private boolean isCloudEntitlementEnabeledForTheAccount(String cloudPlatform, String accountId) {
         return (AZURE.name().equalsIgnoreCase(cloudPlatform) && entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, accountId))
                 || (GCP.name().equalsIgnoreCase(cloudPlatform) && entitlementService.gcpEnabled(INTERNAL_ACTOR_CRN, accountId));
     }

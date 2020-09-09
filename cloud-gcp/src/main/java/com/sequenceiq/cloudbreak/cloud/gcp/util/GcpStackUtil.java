@@ -92,6 +92,8 @@ public final class GcpStackUtil {
 
     private static final int MIN_PATH_PARTS = 3;
 
+    private static final int FIRST = 1;
+
     private GcpStackUtil() {
     }
 
@@ -259,7 +261,7 @@ public final class GcpStackUtil {
     public static String getBucketName(String objectStorageLocation) {
         String[] parts = createParts(objectStorageLocation);
         if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
-            return parts[1];
+            return parts[FIRST];
         } else {
             LOGGER.debug("No bucket found in object storage location.");
             return EMPTY_BUCKET;
