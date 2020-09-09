@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -97,12 +99,12 @@ public class FreeIpaCleanupServiceTest {
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(true);
-        when(freeIpaV1Endpoint.cleanup(any(CleanupRequest.class))).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(any(CleanupRequest.class), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
         victim.cleanup(stack);
 
-        verify(freeIpaV1Endpoint).cleanup(any());
+        verify(freeIpaV1Endpoint).internalCleanup(any(), anyString());
     }
 
     @Test
@@ -130,7 +132,7 @@ public class FreeIpaCleanupServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
-        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
         victim.cleanup(stack);
@@ -157,7 +159,7 @@ public class FreeIpaCleanupServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
-        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, new Exception("message"));
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
@@ -184,7 +186,7 @@ public class FreeIpaCleanupServiceTest {
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
-        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
         victim.cleanupOnScale(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
@@ -210,7 +212,7 @@ public class FreeIpaCleanupServiceTest {
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
-        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
         victim.cleanupOnRecover(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
@@ -236,7 +238,7 @@ public class FreeIpaCleanupServiceTest {
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
-        when(freeIpaV1Endpoint.cleanup(captor.capture())).thenReturn(operationStatus);
+        when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
         victim.cleanupDnsOnly(stack, Set.of("asdf", "qwer"), Set.of("1.1.1.1", "1.1.1.2"));
@@ -274,6 +276,13 @@ public class FreeIpaCleanupServiceTest {
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         stack.setName(STACK_NAME);
         stack.setCloudPlatform(CLOUD_PLATFORM);
+        stack.setResourceCrn(Crn.builder()
+                .setPartition(Crn.Partition.CDP)
+                .setAccountId("accountId")
+                .setService(Crn.Service.FREEIPA)
+                .setResource("resource")
+                .setResourceType(Crn.ResourceType.CLUSTER)
+                .build().toString());
         return stack;
     }
 }

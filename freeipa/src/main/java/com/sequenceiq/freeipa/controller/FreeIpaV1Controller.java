@@ -16,9 +16,12 @@ import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
@@ -54,6 +57,7 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 @AuthorizationResource
+@InternalReady
 public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaV1Controller.class);
@@ -185,6 +189,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @CheckPermissionByResourceObject
     public OperationStatus cleanup(@ResourceObject @Valid CleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
+        return internalCleanup(request, accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public OperationStatus internalCleanup(@Valid CleanupRequest request, @AccountId String accountId) {
         return cleanupService.cleanup(accountId, request);
     }
 

@@ -15,6 +15,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
@@ -113,6 +114,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.CLEANUP, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "cleanupV1")
     OperationStatus cleanup(@Valid CleanupRequest request);
+
+    @POST
+    @Path("internal_cleanup")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_CLEANUP, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "internalCleanupV1")
+    OperationStatus internalCleanup(@Valid CleanupRequest request, @QueryParam("accountId") @AccountId String accountId);
 
     @PUT
     @Path("start")
