@@ -56,10 +56,10 @@ public class S3ClientActions extends S3Client {
                 } while (objectListing.isTruncated());
             } catch (AmazonServiceException e) {
                 LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
-                throw new TestFailException(String.format("Amazon S3 couldn't process the call. So it has been returned the error: %s", e));
+                throw new TestFailException("Amazon S3 couldn't process the call.", e);
             } catch (SdkClientException e) {
                 LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
-                throw new TestFailException(String.format("Amazon S3 response could not been parsed, because of: %s", e));
+                throw new TestFailException("Amazon S3 response could not been parsed", e);
             } finally {
                 s3Client.shutdown();
             }
@@ -118,10 +118,10 @@ public class S3ClientActions extends S3Client {
                 }
             } catch (AmazonServiceException e) {
                 LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
-                throw new TestFailException(String.format("Amazon S3 couldn't process the call. So it has been returned the error: %s", e));
+                throw new TestFailException("Amazon S3 couldn't process the call.", e);
             } catch (SdkClientException e) {
                 LOGGER.error("Amazon S3 response could not been parsed, because of error!", e);
-                throw new TestFailException(String.format("Amazon S3 response could not been parsed, because of: %s", e));
+                throw new TestFailException("Amazon S3 response could not been parsed", e);
             } finally {
                 s3Client.shutdown();
             }

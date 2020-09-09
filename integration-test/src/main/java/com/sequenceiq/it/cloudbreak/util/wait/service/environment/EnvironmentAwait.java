@@ -42,11 +42,11 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
             } else if (desiredStatus.equals(CREATE_FAILED)) {
                 waitForEnvironmentStatus(new EnvironmentFailedChecker<>(), client, crn, testContext, desiredStatus,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, null);
+                entity.refresh();
             } else {
                 waitForEnvironmentStatus(new EnvironmentOperationChecker<>(), client, crn, testContext, desiredStatus,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, null);
+                entity.refresh();
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

@@ -46,11 +46,11 @@ public class CloudbreakAwait implements Await<CloudbreakTestDto, Status> {
             } else if (desiredStatuses.equals(STACK_FAILED)) {
                 waitForCloudbreakStatuses(new CloudbreakFailedChecker<>(), client, name, testContext, desiredStatuses,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, client);
+                entity.refresh();
             } else {
                 waitForCloudbreakStatuses(new CloudbreakOperationChecker<>(), client, name, testContext, desiredStatuses,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, client);
+                entity.refresh();
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

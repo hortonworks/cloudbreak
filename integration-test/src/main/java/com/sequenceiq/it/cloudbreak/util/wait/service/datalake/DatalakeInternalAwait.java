@@ -42,7 +42,7 @@ public class DatalakeInternalAwait implements Await<SdxInternalTestDto, SdxClust
             } else {
                 waitForDatalakeStatus(new DatalakeOperationChecker<>(), client, name, testContext, desiredStatus,
                         pollingInterval, maxRetry);
-                entity.refresh(testContext, null);
+                entity.refresh();
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {

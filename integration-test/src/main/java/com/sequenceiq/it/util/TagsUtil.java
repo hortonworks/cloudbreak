@@ -79,8 +79,7 @@ public class TagsUtil {
             softAssert.assertAll();
         } catch (NullPointerException e) {
             LOGGER.error("Tag validation is not possible, because of response: {} throws: {}!", response, e.getMessage(), e);
-            throw new TestFailException(String.format(" Tag validation is not possible, because of response: %s throws: %s ", response,
-                    e.getMessage()));
+            throw new TestFailException(String.format(" Tag validation is not possible, because of response: %s", response), e);
         }
     }
 
