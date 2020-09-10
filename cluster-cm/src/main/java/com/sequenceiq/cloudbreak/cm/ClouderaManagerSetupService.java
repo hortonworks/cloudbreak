@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
@@ -104,9 +103,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerKerberosService kerberosService;
-
-    @Inject
-    private ClouderaManagerConfigService clouderaManagerConfigService;
 
     @Inject
     private ClouderaManagerMgmtLaunchService clouderaManagerMgmtLaunchService;
@@ -242,7 +238,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             if (prewarmed) {
                 refreshParcelRepos(clouderaManagerResourceApi);
             }
-            clouderaManagerConfigService.setCdpEnvironmentIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_0_2, apiClient);
             installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
             clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
             clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);

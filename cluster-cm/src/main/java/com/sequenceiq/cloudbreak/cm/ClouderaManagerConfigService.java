@@ -16,7 +16,6 @@ import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -35,29 +34,6 @@ public class ClouderaManagerConfigService {
 
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
-
-    public void setCdpEnvironmentIfCmVersionAtLeast(Versioned versionAtLeast, ApiClient apiClient) {
-
-        try {
-            ClouderaManagerResourceApi resourceApiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
-            if (isVersionAtLeast(versionAtLeast, resourceApiInstance)) {
-                setCdpEnvironment(resourceApiInstance);
-            }
-        } catch (ApiException e) {
-            LOGGER.debug("Failed to set cdp_environment on CM", e);
-            throw new ClouderaManagerOperationFailedException("Failed to set cdp_environment to PUBLIC_CLOUD on CM", e);
-        }
-    }
-
-    private void setCdpEnvironment(ClouderaManagerResourceApi resourceApiInstance) throws ApiException {
-        ApiConfigList apiConfigListResponse = resourceApiInstance.updateConfig("",
-                new ApiConfigList().addItemsItem(
-                        new ApiConfig()
-                                .name("cdp_environment")
-                                .value("PUBLIC_CLOUD")
-                ));
-        LOGGER.debug("Response of setting cdp_environment: {}", apiConfigListResponse);
-    }
 
     private boolean isVersionAtLeast(Versioned requiredVersion, ClouderaManagerResourceApi resourceApiInstance) throws ApiException {
         ApiVersionInfo versionInfo = resourceApiInstance.getVersion();
@@ -93,12 +69,12 @@ public class ClouderaManagerConfigService {
     }
 
     private void modifyKnoxAutorestart(ApiClient client, String clusterName, boolean autorestart) {
-            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-            LOGGER.info("Try to modify Knox auto restart to {}", autorestart);
-            getKnoxServiceName(clusterName, servicesResourceApi)
-                    .ifPresentOrElse(
-                            modifyKnoxAutorestart(clusterName, servicesResourceApi, autorestart),
-                            () -> LOGGER.info("KNOX service name is missing, skip modifying the autorestart property."));
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        LOGGER.info("Try to modify Knox auto restart to {}", autorestart);
+        getKnoxServiceName(clusterName, servicesResourceApi)
+                .ifPresentOrElse(
+                        modifyKnoxAutorestart(clusterName, servicesResourceApi, autorestart),
+                        () -> LOGGER.info("KNOX service name is missing, skip modifying the autorestart property."));
     }
 
     private Consumer<String> modifyKnoxAutorestart(String clusterName, ServicesResourceApi servicesResourceApi, boolean autorestart) {

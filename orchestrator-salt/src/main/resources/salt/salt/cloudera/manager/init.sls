@@ -30,6 +30,18 @@ setup_missed_cm_heartbeat:
     - text: setsettings MISSED_HB_BAD {{ cloudera_manager.settings.missed_heartbeat_interval }}
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
+add_settings_file_to_cfm_server_args:
+  file.replace:
+    - name: /etc/default/cloudera-scm-server
+    - pattern: "CMF_SERVER_ARGS=.*"
+{% if salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD\"" /etc/default/cloudera-scm-server
+{% else %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
+{% endif %}
+
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 add_ldap_settings_to_cm:
@@ -41,13 +53,6 @@ add_ldap_settings_to_cm:
     - context:
         ldap: {{ cloudera_manager.ldap }}
     - unless: grep "AUTH_BACKEND_ORDER" /etc/cloudera-scm-server/cm.settings
-
-cloudera_manager_setup_ldap:
-  file.replace:
-    - name: /etc/default/cloudera-scm-server
-    - pattern: "CMF_SERVER_ARGS=.*"
-    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
-    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
 
 {% endif %}
 

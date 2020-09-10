@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
@@ -501,12 +502,13 @@ public class ClusterHostServiceRunner {
     }
 
     public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
-        boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
+        String cmVersion = clouderaManagerRepo.getVersion();
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
                         "heartbeat_interval", cmHeartbeatInterval,
                         "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                        "deterministic_uid_gid", deterministicUidGid)))));
+                        "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
+                        "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1))))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
