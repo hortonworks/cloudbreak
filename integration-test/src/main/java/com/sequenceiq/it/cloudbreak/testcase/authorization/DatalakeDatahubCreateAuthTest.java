@@ -57,7 +57,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     public void testCreateEnvironment(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String envKey = "sdxEnvKey";
         String clouderaManager = "cm";
         String cluster = "cmcluster";
 
@@ -66,11 +65,15 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .given(envKey, EnvironmentTestDto.class)
+                .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(UmsTestDto.class).assignTarget(envKey).withDatahubCreator()
-                .when(environmentTestClient.assignDatahubCreatorRole(AuthUserKeys.ENV_CREATOR_B))
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .withDatahubCreator()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .withEnvironmentUser()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
@@ -78,7 +81,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
-                .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
