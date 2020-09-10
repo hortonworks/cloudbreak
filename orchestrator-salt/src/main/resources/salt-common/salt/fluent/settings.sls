@@ -141,7 +141,7 @@
 {% endif %}
 
 {% if dbus_metering_enabled %}
-  {% if salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+  {% if "metering_prewarmed_v2" in grains.get('roles', []) and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
     {% set dbus_metering_app_headers = 'app:' + cluster_type + ',@metering-app:' + salt['pillar.get']('fluent:dbusMeteringAppName') %}
     {% set dbus_metering_stream_name = salt['pillar.get']('fluent:dbusMeteringStreamName') %}
   {% else %}
