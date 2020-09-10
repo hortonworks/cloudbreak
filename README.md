@@ -12,7 +12,7 @@ As of now this document focuses on setting up your development environment on ma
 
 As a prerequisite, you need to have Java 11 installed. You can choose from many options, including the Oracle JDK, Oracle OpenJDK, or an OpenJDK from any of several providers. For help in choosing your JDK, consult [Java is Still Free](https://medium.com/@javachampions/java-is-still-free-2-0-0-6b9aa8d6d244).
 
-You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/). Please allocate at least 5 CPU and 8GB Memory to the process.
+You'll need Docker. For Mac, use [Docker Desktop for Mac](https://docs.docker.com/docker-for-mac/install/). Please allocate at least 6 CPU and 12 GB Memory to the process. (Depends on that how many service running in your IntelliJ and in Docker containers)
 
 ## Cloudbreak Deployer
 
@@ -44,6 +44,11 @@ export CB_INSTANCE_NODE_ID=5743e6ed-3409-420b-b08b-f688f2fc5db1
 export PUBLIC_IP=localhost
 export VAULT_AUTO_UNSEAL=true
 export DPS_VERSION=2.0.0.0-142
+```
+
+If you want to save some memory then some of the service can be skipped in local runs like:
+```
+export CB_LOCAL_DEV_LIST=periscope,distrox-api,jaeger,environments2-api,datalake-api
 ```
 
 If you are using AWS, then also add the following lines, substituting your control plane AWS account id, and the AWS credentials that you have created for the CB role.
