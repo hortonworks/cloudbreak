@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -83,6 +84,8 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
+
+    private static final String STACK_AUTHENTICATION = "stackAuthentication";
 
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
@@ -180,8 +183,10 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withClouderaManager(clouderaManager)
                 .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(MASTER).withNodeCount(1)
                 .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(IDBROKER).withNodeCount(1)
+                .given(STACK_AUTHENTICATION, StackAuthenticationTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM).withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
+                    .withStackAuthentication(STACK_AUTHENTICATION)
                 .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
