@@ -46,7 +46,7 @@ public interface DiagnosticsV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,
             nickname = "collectCmDiagnostics")
-    FlowIdentifier collectCmDiagnostics(CmDiagnosticsCollectionRequest request);
+    FlowIdentifier collectCmDiagnostics(@Valid CmDiagnosticsCollectionRequest request);
 
     @GET
     @Path("cm/{stackCrn}/roles")
