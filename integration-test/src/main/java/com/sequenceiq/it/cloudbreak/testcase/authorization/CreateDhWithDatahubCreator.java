@@ -80,8 +80,12 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .validate();
         testContext
                 .given(EnvironmentTestDto.class)
-                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName()).withDatahubCreator()
-                .when(environmentTestClient.assignDatahubCreatorRole(AuthUserKeys.ENV_CREATOR_B))
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .withDatahubCreator()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .withEnvironmentUser()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
