@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetId
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
@@ -42,6 +45,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -782,5 +786,30 @@ public class UmsClient {
             assignee.setUserIdOrCrn(userCrn);
         }
         return assignee.build();
+    }
+
+    /**
+     * Retrieves user sync state model from the UMS.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param rightsChecksList   list of mapping from resources to lists of rights to check. Lists are used to
+     *                           preserve order.
+     * @return the user sync state model
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String requestId, String accountId, List<Pair<String, List<String>>> rightsChecksList) {
+        List<RightsCheck> rightsChecks = rightsChecksList.stream()
+                .map(pair ->
+                    RightsCheck.newBuilder()
+                            .setResourceCrn(pair.getKey())
+                            .addAllRight(pair.getValue())
+                            .build())
+                .collect(Collectors.toList());
+        GetUserSyncStateModelRequest request = GetUserSyncStateModelRequest.newBuilder()
+                .setAccountId(accountId)
+                .addAllRightsCheck(rightsChecks)
+                .build();
+        return newStub(requestId).getUserSyncStateModel(request);
     }
 }

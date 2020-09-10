@@ -9,7 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EventGenerationIds;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Descriptors;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -21,13 +21,15 @@ public class UmsEventGenerationIdsProvider {
     private GrpcUmsClient grpcUmsClient;
 
     public UmsEventGenerationIds getEventGenerationIds(String accountId, Optional<String> requestId) {
-        GetEventGenerationIdsResponse response = grpcUmsClient.getEventGenerationIds(INTERNAL_ACTOR_CRN, accountId, requestId);
+        EventGenerationIds eventGenerationIds =
+                grpcUmsClient.getEventGenerationIds(INTERNAL_ACTOR_CRN, accountId, requestId)
+                .getEventGenerationIds();
 
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();
         Map<String, String> eventGenerationIdsMap = Maps.newHashMap();
-        for (Descriptors.FieldDescriptor fd : response.getDescriptorForType().getFields()) {
-            if (Descriptors.FieldDescriptor.Type.STRING.equals(fd.getType()) && response.hasField(fd)) {
-                eventGenerationIdsMap.put(fd.getName(), (String) response.getField(fd));
+        for (Descriptors.FieldDescriptor fd : eventGenerationIds.getDescriptorForType().getFields()) {
+            if (Descriptors.FieldDescriptor.Type.STRING.equals(fd.getType()) && eventGenerationIds.hasField(fd)) {
+                eventGenerationIdsMap.put(fd.getName(), (String) eventGenerationIds.getField(fd));
             }
         }
         umsEventGenerationIds.setEventGenerationIds(eventGenerationIdsMap);

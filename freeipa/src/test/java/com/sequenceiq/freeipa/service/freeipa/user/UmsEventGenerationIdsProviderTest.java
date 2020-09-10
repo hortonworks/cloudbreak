@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EventGenerationIds;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
@@ -30,18 +31,22 @@ class UmsEventGenerationIdsProviderTest {
     // Test for known fields at the time of implementation. This enum should be updated when the GetEventGenerationIdsResponse
     // is changed
     enum EventMapping {
-        LAST_ROLE_ASSIGNMENT_EVENT_ID("lastRoleAssignmentEventId", GetEventGenerationIdsResponse::getLastRoleAssignmentEventId),
-        LAST_RESOURCE_ROLE_ASSIGNMENT_EVENT_ID("lastResourceRoleAssignmentEventId", GetEventGenerationIdsResponse::getLastResourceRoleAssignmentEventId),
-        LAST_GROUP_MEMBERSHIP_CHANGED_EVENT_ID("lastGroupMembershipChangedEventId", GetEventGenerationIdsResponse::getLastGroupMembershipChangedEventId),
-        LAST_ACTOR_DELETED_EVENT_ID("lastActorDeletedEventId", GetEventGenerationIdsResponse::getLastActorDeletedEventId),
+        LAST_ROLE_ASSIGNMENT_EVENT_ID("lastRoleAssignmentEventId",
+                EventGenerationIds::getLastRoleAssignmentEventId),
+        LAST_RESOURCE_ROLE_ASSIGNMENT_EVENT_ID("lastResourceRoleAssignmentEventId",
+                EventGenerationIds::getLastResourceRoleAssignmentEventId),
+        LAST_GROUP_MEMBERSHIP_CHANGED_EVENT_ID("lastGroupMembershipChangedEventId",
+                EventGenerationIds::getLastGroupMembershipChangedEventId),
+        LAST_ACTOR_DELETED_EVENT_ID("lastActorDeletedEventId",
+                EventGenerationIds::getLastActorDeletedEventId),
         LAST_ACTOR_WORKLOAD_CREDENTIALS_CHANGED_EVENT_ID("lastActorWorkloadCredentialsChangedEventId",
-                GetEventGenerationIdsResponse::getLastActorWorkloadCredentialsChangedEventId);
+                EventGenerationIds::getLastActorWorkloadCredentialsChangedEventId);
 
         private String eventName;
 
-        private Function<GetEventGenerationIdsResponse, String> converter;
+        private Function<EventGenerationIds, String> converter;
 
-        EventMapping(String eventName, Function<GetEventGenerationIdsResponse, String> converter) {
+        EventMapping(String eventName, Function<EventGenerationIds, String> converter) {
             this.eventName = eventName;
             this.converter = converter;
         }
@@ -50,7 +55,7 @@ class UmsEventGenerationIdsProviderTest {
             return eventName;
         }
 
-        public Function<GetEventGenerationIdsResponse, String> getConverter() {
+        public Function<EventGenerationIds, String> getConverter() {
             return converter;
         }
     }
@@ -66,18 +71,18 @@ class UmsEventGenerationIdsProviderTest {
         GetEventGenerationIdsResponse response = createGetEventGenerationIdsResponse();
         when(grpcUmsClient.getEventGenerationIds(any(), any(), any())).thenReturn(response);
 
-        UmsEventGenerationIds umsEventGenerationIds = underTest.getEventGenerationIds(ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));
+        UmsEventGenerationIds umsEventGenerationIds =
+                underTest.getEventGenerationIds(ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));
 
         for (EventMapping eventMapping : EventMapping.values()) {
-            assertEquals(eventMapping.getConverter().apply(response), umsEventGenerationIds.getEventGenerationIds().get(eventMapping.getEventName()));
+            assertEquals(eventMapping.getConverter().apply(response.getEventGenerationIds()),
+                    umsEventGenerationIds.getEventGenerationIds().get(eventMapping.getEventName()));
         }
     }
 
     GetEventGenerationIdsResponse createGetEventGenerationIdsResponse() {
-
-        GetEventGenerationIdsResponse.Builder builder = GetEventGenerationIdsResponse.newBuilder();
-
-        Arrays.stream(GetEventGenerationIdsResponse.Builder.class.getMethods())
+        EventGenerationIds.Builder builder = EventGenerationIds.newBuilder();
+        Arrays.stream(EventGenerationIds.Builder.class.getMethods())
                 .filter(m -> m.getName().startsWith("set"))
                 .filter(m -> !m.getName().endsWith("Bytes"))
                 .filter(m -> !m.getName().endsWith("Field"))
@@ -90,6 +95,8 @@ class UmsEventGenerationIdsProviderTest {
                     }
                 });
 
-        return builder.build();
+        return GetEventGenerationIdsResponse.newBuilder()
+                .setEventGenerationIds(builder)
+                .build();
     }
 }

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -31,6 +32,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Creat
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
@@ -145,7 +147,7 @@ public class GrpcUmsClient {
      * @param actorCrn  the CRN of the actor
      * @param userCrn   the CRN of the user
      * @param requestId an optional request Id
-     * @return the user associated with this user CRN
+     * @return the workload credentials associated with this user CRN
      */
     public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -776,6 +778,24 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
             return client.getEventGenerationIds(requestId.orElse(UUID.randomUUID().toString()), accountId);
+        }
+    }
+
+    /**
+     * Retrieves user sync state model from UMS.
+     *
+     * @param accountId        the account Id
+     * @param requestId        an optional request Id
+     * @param rightsChecksList list of mapping from resources to lists of rights to check. Lists are used to
+     *                         preserve order.
+     * @return the user associated with this user CRN
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String actorCrn, String accountId, List<Pair<String, List<String>>> rightsChecksList, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, requestId);
+            return client.getUserSyncStateModel(requestId.orElse(UUID.randomUUID().toString()), accountId, rightsChecksList);
         }
     }
 

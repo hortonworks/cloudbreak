@@ -68,6 +68,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
 
+    @VisibleForTesting
+    static final String CDP_UMS_USER_SYNC_MODEL_GENERATION = "CDP_UMS_USER_SYNC_MODEL_GENERATION";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -141,6 +144,10 @@ public class EntitlementService {
 
     public boolean isInternalRepositoryForUpgradeAllowed(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
+    }
+
+    public boolean umsUserSyncModelGenerationEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_UMS_USER_SYNC_MODEL_GENERATION);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

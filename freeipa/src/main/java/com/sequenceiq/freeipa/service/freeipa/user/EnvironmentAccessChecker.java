@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,16 +42,8 @@ public class EnvironmentAccessChecker {
         this.grpcUmsClient = requireNonNull(grpcUmsClient, "grpcUmsClient is null");
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
-        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
 
-        rightChecks = List.of(
-                RightCheck.newBuilder()
-                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ACCESS_ENVIRONMENT, INTERNAL_ACTOR_CRN, accountId))
-                        .setResource(environmentCrn)
-                        .build(),
-                RightCheck.newBuilder()
-                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ADMIN_FREEIPA, INTERNAL_ACTOR_CRN, accountId))
-                        .build());
+        rightChecks = createRightCheck(umsRightProvider, environmentCrn);
     }
 
     public EnvironmentAccessRights hasAccess(String memberCrn, Optional<String> requestId) {
@@ -73,5 +66,19 @@ public class EnvironmentAccessChecker {
             }
 
         }
+    }
+
+    @VisibleForTesting
+    static List<RightCheck> createRightCheck(UmsRightProvider umsRightProvider, String environmentCrn) {
+        String accountId = Crn.safeFromString(environmentCrn).getAccountId();
+
+        return List.of(
+                RightCheck.newBuilder()
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ACCESS_ENVIRONMENT, INTERNAL_ACTOR_CRN, accountId))
+                        .setResource(environmentCrn)
+                        .build(),
+                RightCheck.newBuilder()
+                        .setRight(umsRightProvider.getRight(AuthorizationResourceAction.ADMIN_FREEIPA, INTERNAL_ACTOR_CRN, accountId))
+                        .build());
     }
 }
