@@ -307,6 +307,12 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
+    public StackTestDtoBase<T> withStackAuthentication(String key) {
+        StackAuthenticationTestDto stackAuthentication = getTestContext().get(key);
+        getRequest().setAuthentication(stackAuthentication.getRequest());
+        return this;
+    }
+
     public StackTestDtoBase<T> withUserDefinedTags(Map<String, String> tags) {
         if (getRequest().getTags() == null) {
             getRequest().setTags(new TagsV4Request());
