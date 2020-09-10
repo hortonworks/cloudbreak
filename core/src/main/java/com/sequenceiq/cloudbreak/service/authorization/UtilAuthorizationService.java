@@ -38,7 +38,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = rightReq.getRights().stream()
                 .map(rightV4 -> createRightCheckObject(umsRightProvider.getRight(rightV4.getAction()), null))
                 .collect(Collectors.toList());
-        List<Boolean> results = callHasRightsBasedOnEntitlement(userCrn, rightChecks);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, MDCUtils.getRequestId());
         return new CheckRightV4Response(rightReq.getRights().stream()
                 .map(rightV4 -> new CheckRightV4SingleResponse(rightV4, results.get(rightReq.getRights().indexOf(rightV4))))
                 .collect(Collectors.toList()));
@@ -50,15 +50,8 @@ public class UtilAuthorizationService {
         checkResourceRightsV4Request.getResourceRights().stream()
                 .forEach(resourceRightsV4 -> resourceRightsV4.getRights().stream()
                     .forEach(rightV4 ->  rightChecks.add(createRightCheckObject(rightV4.getAction().getRight(), resourceRightsV4.getResourceCrn()))));
-        List<Boolean> results = callHasRightsBasedOnEntitlement(userCrn, rightChecks);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, MDCUtils.getRequestId());
         return generateResponse(rightChecks, results);
-    }
-
-    private List<Boolean> callHasRightsBasedOnEntitlement(String userCrn, List<AuthorizationProto.RightCheck> rightChecks) {
-        if (grpcUmsClient.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
-            return grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, MDCUtils.getRequestId());
-        }
-        return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
     }
 
     private CheckResourceRightsV4Response generateResponse(List<AuthorizationProto.RightCheck> rightChecks, List<Boolean> results) {
