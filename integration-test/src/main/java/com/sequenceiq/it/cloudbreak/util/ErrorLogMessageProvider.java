@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,10 +29,18 @@ public class ErrorLogMessageProvider {
             LOGGER.error("Exception during test: " + msg, ex);
             messageBuilder.append(msg).append(": ")
                     .append(ResponseUtil.getErrorMessage(ex))
+                    .append(System.lineSeparator())
+                    .append(getStackTrace(ex))
                     .append(System.lineSeparator());
         });
         addCluesToMessage(messageBuilder, clues);
         return messageBuilder.toString().replace("%", "%%");
+    }
+
+    private String getStackTrace(Exception ex) {
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
     }
 
     void addCluesToMessage(StringBuilder builder, List<Clue> clues) {

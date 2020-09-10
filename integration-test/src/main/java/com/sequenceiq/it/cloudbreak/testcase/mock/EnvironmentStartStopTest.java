@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -97,7 +96,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.STOPPED);
         // mock stopped freeipa server_conncheck response
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
         testContext
                 // await stopped freeipa
                 .given(FreeIpaTestDto.class)

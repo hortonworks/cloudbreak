@@ -90,7 +90,6 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private boolean shouldRemoveFreeIpa(Environment environment) {
         return Objects.nonNull(environment)
-                && (environment.isCreateFreeIpa() || Objects.nonNull(environment.getParentEnvironment()))
                 && freeIpaExistsForEnvironment(environment);
     }
 
