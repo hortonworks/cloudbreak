@@ -51,21 +51,7 @@ public class UtilAuthorizationServiceTest {
     }
 
     @Test
-    public void testCheckRightIfEntitlementDisabled() {
-        when(grpcUmsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.FALSE);
-
-        CheckRightV4Request rightReq = new CheckRightV4Request();
-        rightReq.setRights(Lists.newArrayList(RightV4.ENV_CREATE, RightV4.DISTROX_READ));
-        CheckRightV4Response rightResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getRightResult(rightReq));
-
-        rightResult.getResponses().stream().forEach(checkRightV4SingleResponse -> assertTrue(checkRightV4SingleResponse.getResult()));
-
-        verify(grpcUmsClient, times(0)).hasRights(anyString(), anyString(), any(), any());
-    }
-
-    @Test
-    public void testCheckRightIfEntitlementEnabled() {
-        when(grpcUmsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
+    public void testCheckRight() {
         when(grpcUmsClient.hasRights(anyString(), anyString(), any(), any())).thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.FALSE));
 
         CheckRightV4Request rightReq = new CheckRightV4Request();
@@ -85,23 +71,7 @@ public class UtilAuthorizationServiceTest {
     }
 
     @Test
-    public void testCheckResourceRightIfEntitlementDisabled() {
-        when(grpcUmsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.FALSE);
-
-        CheckResourceRightsV4Request rightReq = new CheckResourceRightsV4Request();
-        rightReq.setResourceRights(Lists.newArrayList(createResourceRightV4("envCrn", RightV4.ENV_STOP, RightV4.ENV_START),
-                createResourceRightV4("dhCrn", RightV4.DH_START, RightV4.DH_STOP)));
-        CheckResourceRightsV4Response rightResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getResourceRightsResult(rightReq));
-
-        rightResult.getResponses().stream().forEach(checkResourceRightV4SingleResponse -> checkResourceRightV4SingleResponse.getRights().stream()
-                .forEach(checkRightV4SingleResponse -> assertTrue(checkRightV4SingleResponse.getResult())));
-
-        verify(grpcUmsClient, times(0)).hasRights(anyString(), anyString(), any(), any());
-    }
-
-    @Test
-    public void testCheckResourceRightIfEntitlementEnabled() {
-        when(grpcUmsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
+    public void testCheckResourceRight() {
         when(grpcUmsClient.hasRights(anyString(), anyString(), any(), any()))
                 .thenReturn(Lists.newArrayList(Boolean.TRUE, Boolean.FALSE, Boolean.FALSE, Boolean.TRUE));
 
