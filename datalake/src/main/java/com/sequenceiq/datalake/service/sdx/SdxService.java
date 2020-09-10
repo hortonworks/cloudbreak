@@ -134,6 +134,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     @Inject
     private EntitlementService entitlementService;
 
+    public String getStackCrnByClusterCrn(String crn) {
+        return sdxClusterRepository.findStackCrnByClusterCrn(crn)
+                .orElseThrow(notFound("SdxCluster", crn));
+    }
+
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
         List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, resourceIds);
