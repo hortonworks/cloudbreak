@@ -107,6 +107,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         checkCloudPlatform(CloudPlatform.AWS);
 
         createDefaultUser(testContext);
+        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
@@ -116,6 +117,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .withSecurityAccess();
         createEnvironmentWithNetworkAndFreeIpa(testContext);
+        createDefaultImageCatalog(testContext);
 
         testContext
                 .given("childtelemetry", TelemetryTestDto.class)
