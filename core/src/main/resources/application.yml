@@ -124,7 +124,7 @@ cb:
     url: http://localhost:8087
     contextPath: /redbeams
   runtimes:
-    latest: "7.2.2"
+    latest: "7.2.3"
     upgradeSupported: "7.1.0"
 
   host.discovery.custom.hostname.enabled: false
@@ -322,6 +322,21 @@ cb:
         7.2.2 - Data Discovery and Exploration=cdp-dde-722;
         7.2.2 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-722;
         7.2.2 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-722;
+        7.2.3 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-723;
+        7.2.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-723;
+        7.2.3 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-723;
+        7.2.3 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-723;
+        7.2.3 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-723;
+        7.2.3 - Data Mart: Apache Impala, Hue=cdp-data-mart-723;
+        7.2.3 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-723;
+        7.2.3 - Operational Database: Apache HBase, Phoenix=cdp-opdb-723;
+        7.2.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-723;
+        7.2.3 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-723;
+        7.2.3 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-723;
+        7.2.3 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-723;
+        7.2.3 - Data Discovery and Exploration=cdp-dde-723;
+        7.2.3 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-723;
+        7.2.3 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-723;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws

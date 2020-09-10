@@ -1,12 +1,18 @@
 {
-  "description": "7.2.2 - Data Engineering Spark3",
+  "description": "7.2.3 - Data Engineering",
   "blueprint": {
-    "cdhVersion": "7.2.2",
-    "displayName": "dataengineering_spark3",
+    "cdhVersion": "7.2.3",
+    "displayName": "dataengineering",
     "services": [
       {
         "refName": "zookeeper",
         "serviceType": "ZOOKEEPER",
+        "serviceConfigs": [
+          {
+            "name": "service_config_suppression_server_count_validator",
+            "value": "true"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "zookeeper-SERVER-BASE",
@@ -113,7 +119,7 @@
               },
               {
                 "name": "resourcemanager_capacity_scheduler_configuration",
-                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property><property><name>yarn.scheduler.capacity.per-node-heartbeat.maximum-offswitch-assignments</name><value>4</value></property></configuration>"
+                "value": "<configuration><property><name>yarn.scheduler.capacity.root.queues</name><value>default</value></property><property><name>yarn.scheduler.capacity.root.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.default.capacity</name><value>100</value></property><property><name>yarn.scheduler.capacity.root.acl_submit_applications</name><value> </value></property><property><name>yarn.scheduler.capacity.root.acl_administer_queue</name><value> </value></property><property><name>yarn.scheduler.capacity.root.default.acl_submit_applications</name><value>*</value></property><property><name>yarn.scheduler.capacity.root.default.minimum-user-limit-percent</name><value>100</value></property><property><name>yarn.scheduler.capacity.maximum-am-resource-percent</name><value>0.33</value></property><property><name>yarn.scheduler.capacity.node-locality-delay</name><value>0</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.maximum-threads</name><value>1</value></property><property><name>yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms</name><value>10</value></property></configuration>"
               }
             ]
           },
@@ -154,40 +160,24 @@
         ]
       },
       {
-        "refName": "spark3_on_yarn",
-        "serviceType": "SPARK3_ON_YARN",
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
         "roleConfigGroups": [
           {
-            "refName": "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-            "roleType": "SPARK3_YARN_HISTORY_SERVER",
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
             "base": true
           },
           {
-            "refName": "spark3_on_yarn-GATEWAY-BASE",
+            "refName": "spark_on_yarn-GATEWAY-BASE",
             "roleType": "GATEWAY",
             "base": true,
             "configs": [
               {
-                "name": "spark3-conf/spark-defaults.conf_client_config_safety_valve",
+                "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
                 "value": "spark.hadoop.fs.s3a.ssl.channel.mode=openssl"
               }
             ]
-          }
-        ]
-      },
-      {
-        "refName": "livy_for_spark3",
-        "serviceType": "LIVY_FOR_SPARK3",
-        "roleConfigGroups": [
-          {
-            "refName": "livy_for_spark3-GATEWAY-BASE",
-            "roleType": "GATEWAY",
-            "base": true
-          },
-          {
-            "refName": "livy_for_spark3-LIVY_SERVER-BASE",
-            "roleType": "LIVY_SERVER_FOR_SPARK3",
-            "base": true
           }
         ]
       },
@@ -315,6 +305,120 @@
         ]
       },
       {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "livy",
+        "serviceType": "LIVY",
+        "roleConfigGroups": [
+          {
+            "refName": "livy-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "livy-LIVY_SERVER-BASE",
+            "roleType": "LIVY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "zeppelin",
+        "serviceType": "ZEPPELIN",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "spark_on_yarn_service",
+            "ref": "spark_on_yarn"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "zeppelin-ZEPPELIN_SERVER-BASE",
+            "roleType": "ZEPPELIN_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "das",
+        "serviceType": "DAS",
+        "roleConfigGroups": [
+          {
+            "refName": "das-DAS_WEBAPP",
+            "roleType": "DAS_WEBAPP",
+            "base": true,
+            "configs": [
+              {
+                "name": "data_analytics_studio_admin_users",
+                "value": "*"
+              }
+            ]
+          },
+          {
+            "refName": "das-DAS_EVENT_PROCESSOR",
+            "roleType": "DAS_EVENT_PROCESSOR",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "oozie",
+        "serviceType": "OOZIE",
+        "roleConfigGroups": [
+          {
+            "refName": "oozie-OOZIE_SERVER-BASE",
+            "roleType": "OOZIE_SERVER",
+            "configs": [
+              {
+                "name": "oozie_config_safety_valve",
+                "value": "<property><name>oozie.service.HadoopAccessorService.nameNode.whitelist</name><value></value></property>"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "sqoop",
+        "serviceType": "SQOOP_CLIENT",
+        "roleConfigGroups": [
+          {
+            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [ ],
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "queuemanager",
         "serviceType": "QUEUEMANAGER",
         "serviceConfigs": [
@@ -347,16 +451,23 @@
           "hdfs-SECONDARYNAMENODE-BASE",
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
           "hive_on_tez-HIVESERVER2-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "spark3_on_yarn-GATEWAY-BASE",
-          "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
-          "livy_for_spark3-GATEWAY-BASE",
-          "livy_for_spark3-LIVY_SERVER-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "livy-LIVY_SERVER-BASE",
+          "zeppelin-ZEPPELIN_SERVER-BASE",
+          "oozie-OOZIE_SERVER-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
+          "zookeeper-SERVER-BASE",
+          "das-DAS_WEBAPP",
+          "das-DAS_EVENT_PROCESSOR",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
           "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-GATEWAY-BASE"
@@ -369,12 +480,11 @@
           "hdfs-DATANODE-BASE",
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "spark3_on_yarn-GATEWAY-BASE",
-          "livy_for_spark3-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "livy-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER",
-          "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE"
         ]
       },
@@ -384,11 +494,23 @@
         "roleConfigGroupsRefNames": [
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
           "hive_on_tez-GATEWAY-BASE",
-          "spark3_on_yarn-GATEWAY-BASE",
-          "livy_for_spark3-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE",
+          "yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "gateway",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
+          "hms-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "livy-GATEWAY-BASE",
           "yarn-GATEWAY-BASE"
         ]
       }

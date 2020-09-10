@@ -3,12 +3,12 @@
 # CONFIGURED BY SALT - do not edit
 [Event]
 ServiceVersion = {{ metering.serviceVersion }}{% if metering.version > 1 %}
-ServiceType = "{{ metering.serviceType }}"
+ServiceType = {{ metering.serviceType }}
 MeteredResourceName = {{ metering.clusterName }}
 MeteredResourceCRN = {{ salt['pillar.get']('tags:Cloudera-Resource-Name') }}
 CreatorCRN = {{ salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') }}
 EnvironmentCRN = {{ salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') }}{% else %}
-ServiceType = "DATAHUB"
+ServiceType = DATAHUB
 ClusterCRN = {{ metering.clusterCrn }}
 WorkloadCRN = {{ metering.clusterCrn }}{% endif %}
 InstanceID = {{ host.instance_id }}
