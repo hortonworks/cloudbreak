@@ -415,8 +415,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
         GetRightsResponse.Builder rightsBuilder = GetRightsResponse.newBuilder()
-                .addRoleAssignment(roleAssignment)
-                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateWorkloadGroupName(ENV_ACCESS_RIGHT));
+                .addRoleAssignment(roleAssignment);
         workloadGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         userGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         return rightsBuilder.build();

@@ -31,6 +31,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Creat
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
@@ -145,7 +146,7 @@ public class GrpcUmsClient {
      * @param actorCrn  the CRN of the actor
      * @param userCrn   the CRN of the user
      * @param requestId an optional request Id
-     * @return the user associated with this user CRN
+     * @return the workload credentials associated with this user CRN
      */
     public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -776,6 +777,25 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
             return client.getEventGenerationIds(requestId.orElse(UUID.randomUUID().toString()), accountId);
+        }
+    }
+
+    /**
+     * Retrieves user sync state model from UMS.
+     *
+     * @param accountId        the account Id
+     * @param requestId        an optional request Id
+     * @param rightsChecks     list of rights checks for resources. a List is used to preserve order.
+     * @return the user sync state for this account and rights checks
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String actorCrn, String accountId,
+            List<UserManagementProto.RightsCheck> rightsChecks, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, requestId);
+
+            return client.getUserSyncStateModel(requestId.orElse(UUID.randomUUID().toString()), accountId, rightsChecks);
         }
     }
 

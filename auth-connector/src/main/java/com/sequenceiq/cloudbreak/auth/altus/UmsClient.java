@@ -26,6 +26,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetId
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
@@ -42,6 +44,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
@@ -781,5 +784,22 @@ public class UmsClient {
             assignee.setUserIdOrCrn(userCrn);
         }
         return assignee.build();
+    }
+
+    /**
+     * Retrieves user sync state model from the UMS.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param rightsChecks       list of rights checks for resources. A List is used to preserve order.
+     * @return the user sync state model
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String requestId, String accountId, List<RightsCheck> rightsChecks) {
+        GetUserSyncStateModelRequest request = GetUserSyncStateModelRequest.newBuilder()
+                .setAccountId(accountId)
+                .addAllRightsCheck(rightsChecks)
+                .build();
+        return newStub(requestId).getUserSyncStateModel(request);
     }
 }

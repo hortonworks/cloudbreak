@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIP
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_UMS_USER_SYNC_MODEL_GENERATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.LOCAL_DEV;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -124,6 +125,10 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, true},
                 {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE == false", CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE,
                         (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, false},
+                {"CDP_UMS_USER_SYNC_MODEL_GENERATION == false", CDP_UMS_USER_SYNC_MODEL_GENERATION,
+                        (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, false},
+                {"CDP_UMS_USER_SYNC_MODEL_GENERATION == true", CDP_UMS_USER_SYNC_MODEL_GENERATION,
+                        (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, true},
         };
     }
 
