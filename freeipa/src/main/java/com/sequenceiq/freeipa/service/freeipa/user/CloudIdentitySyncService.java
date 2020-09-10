@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.configuration.CloudIdSyncConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncPollerObject;
 import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncStatusListenerTask;
@@ -27,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -53,7 +51,7 @@ public class CloudIdentitySyncService {
     @Inject
     private CloudIdSyncStatusListenerTask cloudIdSyncStatusListenerTask;
 
-    public void syncCloudIdentites(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
+    public void syncCloudIdentities(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
         LOGGER.info("Syncing cloud identities for stack = {}", stack);
         if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
             LOGGER.info("Syncing Azure Object IDs for stack = {}", stack);
@@ -82,7 +80,7 @@ public class CloudIdentitySyncService {
     }
 
     private Map<String, String> getAzureUserMapping(UmsUsersState umsUsersState) {
-        Map<String, List<CloudIdentity>> userCloudIdentites = getUserCloudIdentitiesToSync(umsUsersState);
+        Map<String, List<CloudIdentity>> userCloudIdentites = umsUsersState.getUserToCloudIdentityMap();
         Map<String, String> userToAzureObjectIdMap = getAzureObjectIdMap(userCloudIdentites);
         Map<String, String> servicePrincipalObjectIdMap = getAzureObjectIdMap(umsUsersState.getServicePrincipalCloudIdentities());
 
@@ -165,19 +163,4 @@ public class CloudIdentitySyncService {
             return Optional.of(azureObjectId);
         }
     }
-
-    private Map<String, List<CloudIdentity>> getUserCloudIdentitiesToSync(UmsUsersState umsUsersState) {
-        Map<String, List<CloudIdentity>> allUserCloudIdentites = umsUsersState.getUserToCloudIdentityMap();
-        Set<String> userFilter = usersWithEnvironmentAccess(umsUsersState);
-        return allUserCloudIdentites.entrySet().stream()
-                .filter(entry -> userFilter.contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Set<String> usersWithEnvironmentAccess(UmsUsersState umsUsersState) {
-        return umsUsersState.getUsersState().getUsers().stream()
-                .map(FmsUser::getName)
-                .collect(Collectors.toSet());
-    }
-
 }

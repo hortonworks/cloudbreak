@@ -45,6 +45,10 @@ public class UsersState {
                 + '}';
     }
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     public static class Builder {
         private Set<FmsGroup> fmsGroups = new HashSet<>();
 

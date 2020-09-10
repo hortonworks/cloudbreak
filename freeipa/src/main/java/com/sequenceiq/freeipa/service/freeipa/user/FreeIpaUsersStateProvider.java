@@ -5,7 +5,6 @@ import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_UNMANAGED_GROUPS;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,13 +45,8 @@ public class FreeIpaUsersStateProvider {
         return builder.build();
     }
 
-    public UsersState getFilteredFreeIpaState(FreeIpaClient freeIpaClient, Set<FmsUser> users) throws FreeIpaClientException {
-        LOGGER.debug("Retrieving users with user ids [{}] from FreeIPA", users);
-        Set<String> userNames = users.stream().map(FmsUser::getName).collect(Collectors.toSet());
-        return getFilteredFreeIpaStateFromUserNames(freeIpaClient, userNames);
-    }
-
-    public UsersState getFilteredFreeIpaStateFromUserNames(FreeIpaClient freeIpaClient, Set<String> userNames) throws FreeIpaClientException {
+    public UsersState getFilteredFreeIpaState(FreeIpaClient freeIpaClient, Set<String> userNames)
+            throws FreeIpaClientException {
         LOGGER.debug("Retrieving users with user names [{}] from FreeIPA", userNames);
         UsersState.Builder builder = new UsersState.Builder();
 

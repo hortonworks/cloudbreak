@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import com.google.common.collect.ImmutableCollection;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsUsersStateProviderDispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -100,7 +102,7 @@ public class UserSyncService {
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Inject
-    private UmsUsersStateProvider umsUsersStateProvider;
+    private UmsUsersStateProviderDispatcher umsUsersStateProviderDispatcher;
 
     @Inject
     private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
@@ -247,7 +249,7 @@ public class UserSyncService {
             if (userSyncFilter.getDeletedWorkloadUser().isEmpty()) {
                 LogEvent logRetrieveUmsEvent = fullSync ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
                 LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
-                Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProvider
+                Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
                         .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter.getUserCrnFilter(),
                                 userSyncFilter.getMachineUserCrnFilter(), requestId);
                 LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
@@ -351,7 +353,7 @@ public class UserSyncService {
             // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
             if (fullSync && entitlementService.cloudIdentityMappingEnabled(INTERNAL_ACTOR_CRN, stack.getAccountId())) {
                 LOGGER.debug("Starting {} ...", LogEvent.SYNC_CLOUD_IDENTITIES);
-                cloudIdentitySyncService.syncCloudIdentites(stack, umsUsersState, warnings::put);
+                cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
                 LOGGER.debug("Finished {}.", LogEvent.SYNC_CLOUD_IDENTITIES);
             }
 
@@ -404,12 +406,13 @@ public class UserSyncService {
     UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
             throws FreeIpaClientException {
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
-                freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, umsUsersState.getRequestedWorkloadUsers());
+                freeIpaUsersStateProvider.getFilteredFreeIpaState(
+                        freeIpaClient, umsUsersState.getRequestedWorkloadUsernames());
     }
 
     @VisibleForTesting
     UsersState getIpaStateForUser(FreeIpaClient freeIpaClient, String workloadUserName) throws FreeIpaClientException {
-                return freeIpaUsersStateProvider.getFilteredFreeIpaStateFromUserNames(freeIpaClient, Set.of(workloadUserName));
+                return freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, Set.of(workloadUserName));
     }
 
     @VisibleForTesting

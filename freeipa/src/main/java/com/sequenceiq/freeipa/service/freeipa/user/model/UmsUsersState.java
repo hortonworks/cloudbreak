@@ -22,7 +22,7 @@ public class UmsUsersState {
 
     private final ImmutableMap<String, WorkloadCredential> usersWorkloadCredentialMap;
 
-    private final ImmutableSet<FmsUser> requestedWorkloadUsers;
+    private final ImmutableSet<String> requestedWorkloadUsernames;
 
     private final ImmutableSet<FmsGroup> workloadAdministrationGroups;
 
@@ -30,15 +30,22 @@ public class UmsUsersState {
 
     private final ImmutableList<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities;
 
-    private UmsUsersState(UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<FmsUser> requestedWorkloadUsers,
-        Collection<FmsGroup> workloadAdministrationGroups, Map<String, List<CloudIdentity>> userToCloudIdentityMap,
-        List<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities) {
+    private UmsUsersState(
+            UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap,
+            Collection<String> requestedWorkloadUsernames, Collection<FmsGroup> workloadAdministrationGroups,
+            Map<String, List<CloudIdentity>> userToCloudIdentityMap,
+            Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities) {
         this.usersState = requireNonNull(usersState, "UsersState is null");
-        this.usersWorkloadCredentialMap = ImmutableMap.copyOf(requireNonNull(usersWorkloadCredentialMap, "workload credential map is null"));
-        this.requestedWorkloadUsers = ImmutableSet.copyOf(requireNonNull(requestedWorkloadUsers, "requested workload users is null"));
-        this.workloadAdministrationGroups = ImmutableSet.copyOf(requireNonNull(workloadAdministrationGroups, "workloadAdministrationGroups is null"));
-        this.userToCloudIdentityMap = ImmutableMap.copyOf(requireNonNull(userToCloudIdentityMap, "userToCloudIdentityMap is null"));
-        this.servicePrincipalCloudIdentities = ImmutableList.copyOf(requireNonNull(servicePrincipalCloudIdentities, "servicePrincipalCloudIdentities is null"));
+        this.usersWorkloadCredentialMap = ImmutableMap.copyOf(
+                requireNonNull(usersWorkloadCredentialMap, "workload credential map is null"));
+        this.requestedWorkloadUsernames = ImmutableSet.copyOf(
+                requireNonNull(requestedWorkloadUsernames, "requested workload usernames is null"));
+        this.workloadAdministrationGroups = ImmutableSet.copyOf(
+                requireNonNull(workloadAdministrationGroups, "workloadAdministrationGroups is null"));
+        this.userToCloudIdentityMap = ImmutableMap.copyOf(
+                requireNonNull(userToCloudIdentityMap, "userToCloudIdentityMap is null"));
+        this.servicePrincipalCloudIdentities = ImmutableList.copyOf(
+                requireNonNull(servicePrincipalCloudIdentities, "servicePrincipalCloudIdentities is null"));
     }
 
     public UsersState getUsersState() {
@@ -49,8 +56,8 @@ public class UmsUsersState {
         return usersWorkloadCredentialMap;
     }
 
-    public ImmutableSet<FmsUser> getRequestedWorkloadUsers() {
-        return requestedWorkloadUsers;
+    public ImmutableSet<String> getRequestedWorkloadUsernames() {
+        return requestedWorkloadUsernames;
     }
 
     public ImmutableSet<FmsGroup> getWorkloadAdministrationGroups() {
@@ -65,18 +72,22 @@ public class UmsUsersState {
         return servicePrincipalCloudIdentities;
     }
 
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
     public static class Builder {
         private UsersState usersState;
 
         private Map<String, WorkloadCredential> workloadCredentialMap = new HashMap<>();
 
-        private Set<FmsUser> requestedWorkloadUsers = new HashSet<>();
+        private Set<String> requestedWorkloadUsernames = new HashSet<>();
 
         private Collection<FmsGroup> workloadAdministrationGroups = Set.of();
 
         private Map<String, List<CloudIdentity>> userToCloudIdentityMap = new HashMap<>();
 
-        private List<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities = new ArrayList<>();
+        private Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities = new ArrayList<>();
 
         public Builder setUsersState(UsersState usersState) {
             this.usersState = usersState;
@@ -88,8 +99,13 @@ public class UmsUsersState {
             return this;
         }
 
-        public Builder addRequestedWorkloadUsers(FmsUser user) {
-            requestedWorkloadUsers.add(user);
+        public Builder addRequestedWorkloadUsername(String username) {
+            requestedWorkloadUsernames.add(username);
+            return this;
+        }
+
+        public Builder addAllRequestedWorkloadUsernames(Collection<String> usernames) {
+            requestedWorkloadUsernames.addAll(usernames);
             return this;
         }
 
@@ -103,14 +119,14 @@ public class UmsUsersState {
             return this;
         }
 
-        public Builder addServicePrincipalCloudIdentities(List<ServicePrincipalCloudIdentities> cloudIdentities) {
+        public Builder addServicePrincipalCloudIdentities(Collection<ServicePrincipalCloudIdentities> cloudIdentities) {
             servicePrincipalCloudIdentities.addAll(cloudIdentities);
             return this;
         }
 
         public UmsUsersState build() {
-            return new UmsUsersState(usersState, workloadCredentialMap, requestedWorkloadUsers, workloadAdministrationGroups, userToCloudIdentityMap,
-                    servicePrincipalCloudIdentities);
+            return new UmsUsersState(usersState, workloadCredentialMap, requestedWorkloadUsernames,
+                    workloadAdministrationGroups, userToCloudIdentityMap, servicePrincipalCloudIdentities);
         }
     }
 
