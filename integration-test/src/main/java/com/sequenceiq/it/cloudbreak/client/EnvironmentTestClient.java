@@ -83,7 +83,7 @@ public class EnvironmentTestClient {
         return new EnvironmentChangeSecurityAccessAction();
     }
 
-    public Action<UmsTestDto, UmsClient> assignDatahubCreatorRole(String userKey) {
+    public Action<UmsTestDto, UmsClient> assignResourceRole(String userKey) {
         return new AssignUmsRoleAction(userKey);
     }
 }
