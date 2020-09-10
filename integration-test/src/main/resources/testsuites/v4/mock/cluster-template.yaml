@@ -1,0 +1,5 @@
+name: "mock-cluster-template-tests"
+tests:
+  - name: "ClusterTemplateTest mock testcases"
+    classes:
+      - com.sequenceiq.it.cloudbreak.testcase.mock.ClusterTemplateTest
