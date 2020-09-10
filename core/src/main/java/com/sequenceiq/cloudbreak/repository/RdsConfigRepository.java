@@ -58,4 +58,8 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.workspace.id = :workspaceId "
             + "AND r.name in :names AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByNameInAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT rc FROM Stack s LEFT JOIN s.cluster c LEFT JOIN c.rdsConfigs rc " +
+            "WHERE s.resourceCrn = :stackCrn AND rc.type = :databaseType AND rc.status = 'DEFAULT'")
+    Optional<RDSConfig> findByStackIdAndType(@Param("stackCrn") String stackCrn, @Param("databaseType") String databaseType);
 }

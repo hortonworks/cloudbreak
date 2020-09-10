@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -53,6 +54,11 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
 
     public RDSConfig get(Long id) {
         return rdsConfigRepository.findById(id).orElseThrow(notFound("RDS configuration", id));
+    }
+
+    public RDSConfig getByStackCrnAndType(String stackCrn, DatabaseType databaseType) {
+        return rdsConfigRepository.findByStackIdAndType(stackCrn, databaseType.name())
+                .orElseThrow(() -> new NotFoundException("Not found " + databaseType + " type rds configuration for stack " + stackCrn));
     }
 
     @Override
