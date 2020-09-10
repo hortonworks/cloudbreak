@@ -21,8 +21,8 @@ auth:
     sshpublickey.file: key.pub
     raz.enable: true
     freeipadlebsencryption.enable: true
-    azure.single.resourcegroup.enable: false
-    azure.single.resourcegroup.dedicated.storage.account.enable: false
+    azure.single.resourcegroup.enable: true
+    azure.single.resourcegroup.dedicated.storage.account.enable: true
     fastebsencryption.enable: true
     cloudidentitymappinng.enable: true
     mediumdutysdx.enable: true
