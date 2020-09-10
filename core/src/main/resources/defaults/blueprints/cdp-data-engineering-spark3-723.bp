@@ -90,7 +90,7 @@
         "serviceConfigs": [
           {
             "name": "yarn_admin_acl",
-            "value": "yarn,hdfs,mapred"
+            "value": "yarn,hive,hdfs,mapred"
           }
         ],
         "roleConfigGroups": [
@@ -192,6 +192,51 @@
         ]
       },
       {
+        "refName": "tez",
+        "serviceType": "TEZ",
+        "serviceConfigs": [
+          {
+            "name": "yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "tez.am.container.reuse.non-local-fallback.enabled",
+            "value": "true"
+          },
+          {
+            "name": "tez.am.container.reuse.locality.delay-allocation-millis",
+            "value": "0"
+          },
+          {
+            "name": "tez.am.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.task.launch.cmd-opts",
+            "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.grouping.split-waves",
+            "value": 1.4
+          },
+          {
+            "name": "tez.grouping.min-size",
+            "value": 268435456
+          },
+          {
+            "name": "tez.grouping.max-size",
+            "value": 268435456
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "hms",
         "serviceType": "HIVE",
         "displayName": "Hive Metastore",
@@ -205,6 +250,67 @@
             "refName": "hms-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE",
             "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hive_on_tez",
+        "serviceType": "HIVE_ON_TEZ",
+        "displayName": "Hive",
+        "serviceConfigs": [
+          {
+            "name": "hms_connector",
+            "ref": "hms"
+          },
+          {
+            "name": "tez_service",
+            "ref": "tez"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "mapreduce_yarn_service",
+            "ref": "yarn"
+          },
+          {
+            "name": "tez_container_size",
+            "value": "4096"
+          },
+          {
+            "name": "tez_auto_reducer_parallelism",
+            "value": "false"
+          },
+          {
+            "name": "hive_service_config_safety_valve",
+            "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property>"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hive_on_tez-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "hive_on_tez-HIVESERVER2-BASE",
+            "roleType": "HIVESERVER2",
+            "base": true,
+            "configs": [
+              {
+                "name": "hive_server2_transport_mode",
+                "value": "http"
+              },
+              {
+                "name": "hiveserver2_mv_files_thread",
+                "value": 20
+              },
+              {
+                "name": "hiveserver2_load_dynamic_partitions_thread_count",
+                "value": 20
+              }
+            ]
           }
         ]
       },
@@ -241,7 +347,10 @@
           "hdfs-SECONDARYNAMENODE-BASE",
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
           "hms-HIVEMETASTORE-BASE",
+          "hive_on_tez-HIVESERVER2-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "livy_for_spark3-GATEWAY-BASE",
@@ -260,6 +369,8 @@
           "hdfs-DATANODE-BASE",
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER",
@@ -273,6 +384,8 @@
         "roleConfigGroupsRefNames": [
           "hdfs-GATEWAY-BASE",
           "hms-GATEWAY-BASE",
+          "tez-GATEWAY-BASE",
+          "hive_on_tez-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "yarn-NODEMANAGER-COMPUTE",
