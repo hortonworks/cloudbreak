@@ -57,6 +57,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -911,6 +912,33 @@ public abstract class TestContext implements ApplicationContextAware {
                         entity, entity.getName(), e.getMessage()));
             }
             getExceptionMap().put("Sdx diagnostics await for flow " + entity, e);
+        }
+        return entity;
+    }
+
+    public <T extends SdxCMDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, "Sdx CM based diagnostics await for flow should be skipped because of previous error.");
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        SdxDiagnosticsTestDto awaitEntity = get(key);
+        Log.await(LOGGER, String.format(" Sdx CM based diagnostics await for flow %s ", entity));
+        try {
+            if (awaitEntity == null) {
+                throw new RuntimeException("Sdx CM based diagnostics key provided but no result in resource map, key=" + key);
+            }
+            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
+            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
+        } catch (Exception e) {
+            if (runningParameter.isLogError()) {
+                LOGGER.error("Sdx CM based diagnostics await for flow '{}' is failed for: '{}', because of {}",
+                        entity, entity.getName(), e.getMessage(), e);
+                Log.await(LOGGER, String.format(" Sdx CM based diagnostics await for flow '%s' is failed for '%s', because of %s",
+                        entity, entity.getName(), e.getMessage()));
+            }
+            getExceptionMap().put("Sdx CM based diagnostics await for flow " + entity, e);
         }
         return entity;
     }
