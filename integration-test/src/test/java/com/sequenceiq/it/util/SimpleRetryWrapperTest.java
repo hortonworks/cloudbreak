@@ -5,7 +5,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class SimpleRetryUtilTest {
+class SimpleRetryWrapperTest {
+
+    private static final String NAME = "test";
 
     private static final int RETRY_WAIT_SECONDS = 0;
 
@@ -15,10 +17,11 @@ class SimpleRetryUtilTest {
     void shouldSucceed() {
         int expectedResult = 5;
         AtomicInteger tries = new AtomicInteger();
-        Integer result = SimpleRetryUtil.retry(RETRY_TIMES, RETRY_WAIT_SECONDS, () -> {
+
+        Integer result = SimpleRetryWrapper.create(() -> {
             tries.incrementAndGet();
             return expectedResult;
-        });
+        }).withName(NAME).withRetryTimes(RETRY_TIMES).withRetryWaitSeconds(RETRY_WAIT_SECONDS).run();
 
         Assertions.assertThat(result).isEqualTo(expectedResult);
         Assertions.assertThat(tries.get()).isEqualTo(1);
@@ -29,11 +32,11 @@ class SimpleRetryUtilTest {
         AtomicInteger tries = new AtomicInteger();
         RuntimeException exception = new RuntimeException("failure");
 
-        Assertions.assertThatThrownBy(() -> SimpleRetryUtil.retry(RETRY_TIMES, RETRY_WAIT_SECONDS, () -> {
+        Assertions.assertThatThrownBy(() -> SimpleRetryWrapper.create(() -> {
             tries.incrementAndGet();
             throw exception;
-        }))
-                .hasMessage("Failed to run command 5 times.")
+        }).withName(NAME).withRetryTimes(RETRY_TIMES).withRetryWaitSeconds(RETRY_WAIT_SECONDS).run())
+                .hasMessage("Failed to run [test] action 5 times.")
                 .hasCause(exception);
 
         Assertions.assertThat(tries.get()).isEqualTo(RETRY_TIMES);
@@ -45,12 +48,12 @@ class SimpleRetryUtilTest {
         RuntimeException exception = new RuntimeException("failure");
         int expectedResult = 5;
 
-        int result = SimpleRetryUtil.retry(RETRY_TIMES, RETRY_WAIT_SECONDS, () -> {
+        int result = SimpleRetryWrapper.create(() -> {
             if (tries.incrementAndGet() == 1) {
                 throw exception;
             }
             return expectedResult;
-        });
+        }).withName(NAME).withRetryTimes(RETRY_TIMES).withRetryWaitSeconds(RETRY_WAIT_SECONDS).run();
 
         Assertions.assertThat(result).isEqualTo(expectedResult);
         Assertions.assertThat(tries.get()).isEqualTo(2);

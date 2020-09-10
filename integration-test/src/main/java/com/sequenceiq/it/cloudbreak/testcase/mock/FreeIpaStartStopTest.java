@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -56,7 +55,7 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
                 .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED);

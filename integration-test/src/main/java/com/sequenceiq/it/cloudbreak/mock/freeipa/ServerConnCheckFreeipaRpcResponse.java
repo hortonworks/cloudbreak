@@ -25,7 +25,7 @@ public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<B
         messages.add(message);
     }
 
-    public ServerConnCheckFreeipaRpcResponse(Boolean result, List<RPCMessage> messages) {
+    private ServerConnCheckFreeipaRpcResponse(Boolean result, List<RPCMessage> messages) {
         this.result = result;
         this.messages = messages;
     }
@@ -43,5 +43,11 @@ public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<B
     @Override
     protected List<RPCMessage> getMessages() {
         return messages;
+    }
+
+    public static ServerConnCheckFreeipaRpcResponse unreachable() {
+        RPCMessage rpcMessage = new RPCMessage();
+        rpcMessage.setMessage("Unreachable mock");
+        return new ServerConnCheckFreeipaRpcResponse(false, List.of(rpcMessage));
     }
 }
