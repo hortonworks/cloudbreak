@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -110,6 +111,7 @@ public class AzureClientActions {
 
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         return instanceIds.stream()
+                .filter(StringUtils::isNotEmpty)
                 .map(id -> azure.virtualMachines().getByResourceGroup(getResourceGroupName(id), id))
                 .collect(Collectors.toMap(VirtualMachine::id, VirtualMachine::tags));
     }
