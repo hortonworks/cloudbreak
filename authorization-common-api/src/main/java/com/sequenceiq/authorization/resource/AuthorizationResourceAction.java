@@ -15,6 +15,7 @@ public enum AuthorizationResourceAction {
     STOP_ENVIRONMENT("environments/stopEnvironment", AuthorizationResourceType.ENVIRONMENT),
     DELETE_CREDENTIAL("environments/deleteCredential", AuthorizationResourceType.CREDENTIAL),
     DESCRIBE_CREDENTIAL("environments/describeCredential", AuthorizationResourceType.CREDENTIAL),
+    DESCRIBE_CREDENTIAL_ON_ENVIRONMENT("environments/describeCredential", AuthorizationResourceType.ENVIRONMENT),
     DELETE_ENVIRONMENT("environments/deleteCdpEnvironment", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_ENVIRONMENT("environments/describeEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ACCESS_ENVIRONMENT("environments/accessEnvironment", AuthorizationResourceType.ENVIRONMENT),

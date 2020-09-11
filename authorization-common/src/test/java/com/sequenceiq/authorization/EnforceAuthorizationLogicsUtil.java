@@ -44,8 +44,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -53,8 +51,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.EnvironmentCrn;
-import com.sequenceiq.authorization.annotation.EnvironmentName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -82,8 +78,6 @@ public class EnforceAuthorizationLogicsUtil {
             ImmutableMap.<Class<? extends Annotation>, Function<Method, Optional<String>>>builder()
                     .put(CheckPermissionByResourceCrn.class, stringParam(ResourceCrn.class))
                     .put(CheckPermissionByResourceName.class, stringParam(ResourceName.class))
-                    .put(CheckPermissionByEnvironmentCrn.class, stringParam(EnvironmentCrn.class))
-                    .put(CheckPermissionByEnvironmentName.class, stringParam(EnvironmentName.class))
                     .put(CheckPermissionByResourceCrnList.class, anyCollectionFrom(ResourceCrnList.class, list(String.class), set(String.class)))
                     .put(CheckPermissionByResourceNameList.class, anyCollectionFrom(ResourceNameList.class, list(String.class), set(String.class)))
                     .put(DisableCheckPermissions.class, noRestriction())
