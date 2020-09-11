@@ -35,8 +35,8 @@ public class AwsSdxSpotInstanceTest extends AbstractE2ETest {
         checkCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithNetworkAndFreeIpa(testContext);
         initializeDefaultBlueprints(testContext);
+        createEnvironmentWithNetworkAndFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
