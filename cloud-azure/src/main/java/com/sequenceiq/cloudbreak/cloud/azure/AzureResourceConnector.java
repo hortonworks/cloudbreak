@@ -130,8 +130,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         } finally {
             if (!resourcesPersisted) {
                 Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
-                persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                if (templateDeployment != null && templateDeployment.exportTemplate() != null) {
+                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
+                    persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                }
             }
         }
 

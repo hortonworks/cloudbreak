@@ -94,8 +94,10 @@ public class AzureDatabaseResourceService {
             throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
         } finally {
             deployment = client.getTemplateDeployment(resourceGroupName, stackName);
-            List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
-            cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            if (deployment != null) {
+                List<CloudResource> cloudResources = azureCloudResourceService.getDeploymentCloudResources(deployment);
+                cloudResources.forEach(cloudResource -> persistenceNotifier.notifyAllocation(cloudResource, cloudContext));
+            }
         }
 
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
