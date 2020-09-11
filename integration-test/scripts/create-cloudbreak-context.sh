@@ -4,7 +4,6 @@
 
 date
 echo -e "\n\033[1;96m--- Create cloudbreak context\033[0m\n"
-./cbd init
 cp $INTEGCB_LOCATION/Profile_template $INTEGCB_LOCATION/Profile
 cp docker-compose_template.yml docker-compose.yml
 ./scripts/fill_public_ip.sh
