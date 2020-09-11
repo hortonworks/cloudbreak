@@ -112,6 +112,7 @@ public class KerberosDetailService {
 
         boolean supportedOnCloudPlatform = CloudPlatform.AWS.name().equals(cloudPlatform)
                 || CloudPlatform.AZURE.name().equals(cloudPlatform)
+                || CloudPlatform.GCP.name().equals(cloudPlatform)
                 || yarnChildEnvironment;
 
         return supportedOnCloudPlatform
