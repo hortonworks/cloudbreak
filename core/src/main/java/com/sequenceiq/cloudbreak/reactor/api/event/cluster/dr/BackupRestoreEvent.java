@@ -11,20 +11,25 @@ public class BackupRestoreEvent extends StackEvent {
 
     private final String backupId;
 
-    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId) {
-        this (null, stackId, backupLocation, backupId);
+    private final String userCrn;
+
+    public BackupRestoreEvent(Long stackId, String backupLocation, String backupId, String userCrn) {
+        this (null, stackId, backupLocation, backupId, userCrn);
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId) {
+    public BackupRestoreEvent(String selector, Long stackId, String backupLocation, String backupId, String userCrn) {
         super(selector, stackId);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.userCrn = userCrn;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId) {
+    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation,
+            String backupId, String userCrn) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
+        this.userCrn = userCrn;
     }
 
     public String getBackupLocation() {
@@ -33,5 +38,9 @@ public class BackupRestoreEvent extends StackEvent {
 
     public String getBackupId() {
         return backupId;
+    }
+
+    public String getUserCrn() {
+        return userCrn;
     }
 }

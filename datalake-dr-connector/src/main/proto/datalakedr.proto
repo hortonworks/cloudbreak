@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package datalakedr;
+
+option java_package = "com.cloudera.thunderhead.service.datalakedr";
+option java_outer_classname = "datalakeDRProto";
+
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service datalakeDR {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  /**
+   * Backup datalake
+   */
+  rpc BackupDatalake (BackupDatalakeRequest) returns (BackupDatalakeResponse) {
+  }
+
+  /**
+   * Restore datalake
+   */
+  rpc RestoreDatalake (RestoreDatalakeRequest) returns (RestoreDatalakeResponse) {
+  }
+
+  /**
+   * Get the status datalake backup
+   */
+  rpc BackupDatalakeStatus (BackupDatalakeStatusRequest) returns (BackupDatalakeStatusResponse) {
+  }
+
+  /**
+   * Get the status datalake restore
+   */
+  rpc RestoreDatalakeStatus (RestoreDatalakeStatusRequest) returns (RestoreDatalakeStatusResponse) {
+  }
+
+  /**
+   * List the Backup's of a datalake
+   */
+  rpc ListDatalakeBackups (ListDatalakeBackupRequest) returns (ListDatalakeBackupResponse) {
+  }
+
+}
+
+/**
+* Request to backup datalake
+*/
+message BackupDatalakeRequest {
+  string datalakeName = 1; // The name of the datalake that has to be backed-up.
+  string backupName = 2; // The name of the backup being performed.
+  string backupLocation = 3; // Location where the data has to be backed-up.
+}
+
+/**
+* Response to datalake backup request
+*/
+message BackupDatalakeResponse {
+  string backupName = 1; // Name of the backup
+  string accountId = 2; // Account Id
+  string userCrn = 3; // User who performed the back-up operation.
+  string backupId = 4; // Unique identifier for the back-up.
+  string internalState = 5; // The current operation in progress.
+  string overallState = 6; // The final result of the backup operation.
+  string startTimestamp = 7; // Timestamp when the operation is started.
+  string endTimestamp = 8; // Timestamp when the operation is complete.
+  string backupLocation = 9; // Location where back-up is exported.
+  string failureReason = 10; // Reason for the failure.
+}
+
+/**
+* Request to restore datalake
+*/
+message RestoreDatalakeRequest {
+  string datalakeName = 1; // The name of the datalake that has to be restored.
+  string backupName = 2; // The name of the backup from which restore has to performed.
+  string backupId = 3; // Unique identifier for the back-up.
+  bool includeDatabase = 4; // When set to true would trigger database restore.
+  bool force = 5; // When set to true will restore even if the backups is in a failed state.
+}
+
+/**
+* Response to datalake restore request
+*/
+message RestoreDatalakeResponse {
+  string accountId = 1; // Account Id
+  string backupId = 2;
+  string restoreId = 3; // Unique identifier for the restore.
+  string userCrn = 4; // User who performed the back-up operation.
+  string internalState = 5; // The current operation in progress.
+  string overallState = 6; // The final result of the backup operation.
+  string startTimestamp = 7; // Timestamp when the operation is started.
+  string endTimestamp = 8; // Timestamp when the operation is complete.
+  string backupLocation = 9; // Location where back-up is exported.
+  string failureReason = 10; // Reason for the failure.
+}
+
+/**
+* Request to get datalake backup status.
+*/
+message BackupDatalakeStatusRequest {
+  string datalakeName = 1; // The name of the datalake.
+  string backupId = 2; // Id of the backup operation performed.
+  string backupName = 3; // Name of the backup operation performed.
+}
+
+/**
+* Response to datalake backup status request
+*/
+message BackupDatalakeStatusResponse {
+  string backupName = 1; // Name of the backup
+  string accountId = 2; // Account Id
+  string userCrn = 3; // User who performed the back-up operation.
+  string backupId = 4; // Unique identifier for the back-up.
+  string internalState = 5; // The current operation in progress.
+  string overallState = 6; // The final result of the backup operation.
+  string startTimestamp = 7; // Timestamp when the operation is started.
+  string endTimestamp = 8; // Timestamp when the operation is complete.
+  string backupLocation = 9; // Location where back-up is exported.
+  string failureReason = 10; // Reason for the failure.
+}
+
+/**
+* Request to get datalake restore status.
+*/
+message RestoreDatalakeStatusRequest {
+  string datalakeName = 1; // The name of the datalake.
+  string restoreId = 2; // Id of the restore operation performed.
+  string backupName = 3; // Name of the backup used to perform restore.
+}
+
+/**
+* Response to datalake backup status request
+*/
+message RestoreDatalakeStatusResponse {
+  string accountId = 1; // Account Id
+  string restoreId = 2; // Unique identifier for the restore.
+  string backupId = 3; // Unique identifier of the back-up used to perform restore.
+  string userCrn = 4; // User who performed the back-up operation.
+  string internalState = 5; // The current operation in progress.
+  string overallState = 6; // The final result of the backup operation.
+  string startTimestamp = 7; // Timestamp when the operation is started.
+  string endTimestamp = 8; // Timestamp when the operation is complete.
+  string backupLocation = 9; // Location where back-up is exported.
+  string failureReason = 10; // Reason for the failure.
+}
+
+
+/**
+* Response to datalake backup status request
+*/
+message DatalakeBackupInfo {
+  string backupName = 1; // Name of the backup
+  string accountId = 2; // Account Id
+  string userCrn = 3; // User who performed the back-up operation.
+  string backupId = 4; // Unique identifier for the back-up.
+  string internalState = 5; // The current operation in progress.
+  string overallState = 6; // The final result of the backup operation.
+  string startTimestamp = 7; // Timestamp when the operation is started.
+  string endTimestamp = 8; // Timestamp when the operation is complete.
+  string backupLocation = 9; // Location where back-up is exported.
+  string failureReason = 10; // Reason for the failure.
+}
+
+/**
+* Request to list the backup's available for a datalake
+*/
+message ListDatalakeBackupRequest {
+  string datalakeName = 1; // The name of the datalake that has to be backed-up.
+}
+
+/**
+* Response for a request to list the backup's available for a datalake
+*/
+message ListDatalakeBackupResponse {
+  repeated DatalakeBackupInfo datalake_info = 1; //
+}

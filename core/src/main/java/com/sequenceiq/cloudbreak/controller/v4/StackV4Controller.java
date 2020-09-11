@@ -317,7 +317,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, accountId);
         return new BackupV4Response(flowIdentifier);
     }
 
@@ -326,7 +326,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public BackupV4Response backupDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
             @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, initiatorUserCrn);
         return new BackupV4Response(flowIdentifier);
     }
 

@@ -123,7 +123,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, "asdf");
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
-        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
+        underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, null);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
 
         int count = 0;

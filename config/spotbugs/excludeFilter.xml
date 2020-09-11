@@ -62,4 +62,7 @@
     <Match>
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
+    <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.datalakedr.*"/>
+    </Match>
 </FindBugsFilter>

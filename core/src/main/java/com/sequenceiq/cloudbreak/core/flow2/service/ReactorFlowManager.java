@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_REISSUE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupEvent.DATABASE_BACKUP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.backup.DatabaseBackupEvent.DATABASE_BACKUP_IN_PROGRESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreEvent.DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
@@ -273,9 +273,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId) {
-        String selector = DATABASE_BACKUP_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId, location, backupId));
+    public FlowIdentifier triggerDatalakeDatabaseBackup(Long stackId, String location, String backupId, String userCrn) {
+        String selector = DATABASE_BACKUP_IN_PROGRESS_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new DatabaseBackupTriggerEvent(selector, stackId, location, backupId, userCrn));
     }
 
     public FlowIdentifier triggerDatalakeDatabaseRestore(Long stackId, String location, String backupId) {

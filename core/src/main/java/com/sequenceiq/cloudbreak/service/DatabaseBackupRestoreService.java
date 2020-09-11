@@ -42,11 +42,11 @@ public class DatabaseBackupRestoreService {
         }
     }
 
-    public FlowIdentifier backupDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId) {
+    public FlowIdentifier backupDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId, String userCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Initiating database backup flow for stack {}", stack.getId());
-        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId);
+        return flowManager.triggerDatalakeDatabaseBackup(stack.getId(), location, backupId, userCrn);
     }
 
     public FlowIdentifier restoreDatabase(Long workspaceId, NameOrCrn nameOrCrn, String location, String backupId) {

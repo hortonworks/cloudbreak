@@ -4,11 +4,14 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static java.util.Collections.singletonMap;
 
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.backup.DatabaseBackupHandler;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -17,6 +20,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 
 @Component
 public class BackupRestoreSaltConfigGenerator {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
+
     // these values are tightly coupled to the `postgresql/disaster_recovery.sls` salt pillar in `orchestrator-salt`
     public static final String POSTGRESQL_DISASTER_RECOVERY_PILLAR_PATH = "/postgresql/disaster_recovery.sls";
 
@@ -29,7 +34,11 @@ public class BackupRestoreSaltConfigGenerator {
     public static final String RANGER_ADMIN_GROUP_KEY = "ranger_admin_group";
 
     public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, Stack stack) throws URISyntaxException {
+        LOGGER.info("HER location " + location);
+        LOGGER.info("HER backupId " + backupId);
+        LOGGER.info("HER rangerAdminGroup " + rangerAdminGroup);
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
+        LOGGER.info("HER fullLocation " + fullLocation);
 
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 

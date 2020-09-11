@@ -88,9 +88,9 @@ public class DatabaseBackupRestoreServiceTest {
         when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any())).thenReturn(FlowIdentifier.notTriggered());
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), any())).thenReturn(FlowIdentifier.notTriggered());
 
-        service.backupDatabase(WORKSPACE_ID, ofName, null, null);
+        service.backupDatabase(WORKSPACE_ID, ofName, null, null, null);
     }
 
     @Test

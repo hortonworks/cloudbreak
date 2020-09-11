@@ -251,6 +251,7 @@ dependencies {
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
   compile project(':audit-connector')
+  compile project(':datalake-dr-connector')
   runtime group: 'activation',                    name: 'activation'
 
   testCompile project(path: ':core-model', configuration: 'tests')

@@ -11,7 +11,7 @@ public class DatabaseBackupFailedEvent extends BackupRestoreEvent {
     private DetailedStackStatus detailedStatus;
 
     public DatabaseBackupFailedEvent(Long stackId, Exception exception, DetailedStackStatus detailedStatus) {
-        super(stackId, null, null);
+        super(stackId, null, null, null);
         this.exception = exception;
         this.detailedStatus = detailedStatus;
     }
