@@ -36,6 +36,8 @@ env
 TRACE=1 ./cbd regenerate
 ./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake
 
+docker ps --format ‘{{.Image}}’
+
 date
 if [ $? -ne 0 ]; then
     echo ERROR: Failed to bring up all the necessary services! Process is about to terminate.

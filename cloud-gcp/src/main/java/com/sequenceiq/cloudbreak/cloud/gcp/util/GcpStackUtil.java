@@ -34,7 +34,6 @@ import com.google.api.services.compute.Compute.ZoneOperations;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
-import com.google.api.services.deploymentmanager.DeploymentManager;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.OperationError;
 import com.google.api.services.storage.Storage;
@@ -286,21 +285,6 @@ public final class GcpStackUtil {
             return new SQLAdmin.Builder(
                     httpTransport, JSON_FACTORY, null)
                     .setApplicationName(name)
-                    .setHttpRequestInitializer(credential)
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Storage access.", e);
-        }
-        return null;
-    }
-
-    public static DeploymentManager buildDeploymentTemplate(CloudCredential gcpCredential) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new DeploymentManager.Builder(
-                    httpTransport, JSON_FACTORY, null)
-                    .setApplicationName(gcpCredential.getName())
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
