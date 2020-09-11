@@ -28,7 +28,13 @@
           {
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              }
+            ]
           },
           {
             "refName": "hdfs-FAILOVERCONTROLLER-BASE",

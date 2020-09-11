@@ -29,7 +29,11 @@
             "refName": "hdfs-NAMENODE-BASE",
             "roleType": "NAMENODE",
             "base": true,
-	    "configs": [
+            "configs": [
+              {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              },
               {
                 "name": "role_config_suppression_fs_trash_interval_minimum_validator",
                 "value": "true"
