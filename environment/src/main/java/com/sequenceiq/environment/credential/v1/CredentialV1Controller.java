@@ -14,15 +14,11 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByEnvironmentName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.EnvironmentCrn;
-import com.sequenceiq.authorization.annotation.EnvironmentName;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -86,16 +82,16 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByEnvironmentCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public CredentialResponse getByEnvironmentCrn(@TenantAwareParam @EnvironmentCrn String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL_ON_ENVIRONMENT)
+    public CredentialResponse getByEnvironmentCrn(@TenantAwareParam @ResourceCrn String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT);
         return credentialConverter.convert(credential);
     }
 
     @Override
-    @CheckPermissionByEnvironmentName(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
-    public CredentialResponse getByEnvironmentName(@EnvironmentName String environmentName) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL_ON_ENVIRONMENT)
+    public CredentialResponse getByEnvironmentName(@ResourceName String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentNameAndAccountId(environmentName, accountId, ENVIRONMENT);
         return credentialConverter.convert(credential);

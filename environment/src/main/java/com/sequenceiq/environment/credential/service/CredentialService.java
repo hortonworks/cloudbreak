@@ -367,18 +367,6 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Override
-    public String getResourceCrnByEnvironmentName(String environmentName) {
-        return getByEnvironmentNameAndAccountId(environmentName, ThreadBasedUserCrnProvider.getAccountId(),
-                ENVIRONMENT).getResourceCrn();
-    }
-
-    @Override
-    public String getResourceCrnByEnvironmentCrn(String environmentCrn) {
-        return getByEnvironmentCrnAndAccountId(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(),
-            ENVIRONMENT).getResourceCrn();
-    }
-
-    @Override
     public List<String> getResourceCrnsInAccount() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return repository.findAllResourceCrnsByAccountId(accountId, ENVIRONMENT);
