@@ -5,6 +5,8 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -46,8 +48,9 @@ public class AzureResourceGroupMetadataProvider {
     }
 
     public ResourceGroupUsage getResourceGroupUsage(CloudStack cloudStack) {
-        String resourceGroupUsageParameter = cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER);
-        return ResourceGroupUsage.valueOf(resourceGroupUsageParameter);
+        return Optional.ofNullable(cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER))
+                .map(ResourceGroupUsage::valueOf)
+                .orElse(ResourceGroupUsage.MULTIPLE);
     }
 
     public ResourceGroupUsage getResourceGroupUsage(DatabaseStack cloudStack) {
