@@ -17,6 +17,8 @@ public enum RightV4 {
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),
     DH_DELETE(AuthorizationResourceAction.DELETE_DATAHUB),
+    SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
+    CHANGE_CRED(AuthorizationResourceAction.CHANGE_CREDENTIAL),
     // legacy
     DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
     DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
