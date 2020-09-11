@@ -53,7 +53,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultImageCatalog(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
     }
