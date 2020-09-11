@@ -31,7 +31,6 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
         checkCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultImageCatalog(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
         createDatalake(testContext);
