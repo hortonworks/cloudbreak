@@ -42,7 +42,6 @@ public class MDCBuilderTest {
         assertEquals("dummyName", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
         assertEquals("credCrn", MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
         assertNull(MDC.get(LoggerContextKey.TENANT.toString()));
-        assertNull(MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
     }
 
     public void buildMDCContext() {
