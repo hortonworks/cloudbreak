@@ -38,7 +38,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -353,7 +352,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
-        decoratePillarWithClouderaManagerRepo(cluster.getId(), servicePillar, licenseOpt);
+        decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
@@ -437,7 +436,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
+    public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
         Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
@@ -452,16 +451,9 @@ public class ClusterHostServiceRunner {
         return licenseOpt;
     }
 
-    @VisibleForTesting
-    void decoratePillarWithClouderaManagerRepo(Long clusterId, Map<String, SaltPillarProperties> servicePillar, Optional<String> license)
-            throws CloudbreakOrchestratorFailedException {
-        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
-        if (clouderaManagerRepo == null) {
-            throw new CloudbreakOrchestratorFailedException("Cloudera Manager repository details are missing.");
-        }
+    public void decoratePillarWithClouderaManagerRepo(ClouderaManagerRepo repo, Map<String, SaltPillarProperties> servicePillar, Optional<String> license) {
         servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                singletonMap("cloudera-manager", createCMRepoPillar(clouderaManagerRepo, license))));
-
+                singletonMap("cloudera-manager", createCMRepoPillar(repo, license))));
     }
 
     private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> license) {
