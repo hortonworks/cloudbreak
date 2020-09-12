@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static java.util.Collections.singletonMap;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -88,8 +88,8 @@ public class ClusterManagerUpgradeService {
     private SaltConfig createSaltConfig(Cluster cluster) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
-        servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                singletonMap("cloudera-manager", singletonMap("repo", clouderaManagerRepo))));
+        Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(cluster.getStack().getId(), servicePillar);
+        clusterHostServiceRunner.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, license);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo);
         return new SaltConfig(servicePillar);
     }
