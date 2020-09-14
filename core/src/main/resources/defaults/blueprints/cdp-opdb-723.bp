@@ -226,10 +226,6 @@
               {
                 "name": "node_manager_java_heapsize",
                 "value": "536870912"
-              },
-              {
-                "name": "yarn_nodemanager_resource_memory_mb",
-                "value": "3584"
               }
             ],
             "base": true
