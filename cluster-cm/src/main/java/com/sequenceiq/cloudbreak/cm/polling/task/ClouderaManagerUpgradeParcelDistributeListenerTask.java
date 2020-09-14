@@ -12,10 +12,10 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerUpgradeParcelDistributeListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerUpgradeParcelDistributeListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerUpgradeParcelDistributeListenerTask.class);
 
@@ -33,7 +33,7 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
 
         ApiClient apiClient = pollerObject.getApiClient();
         ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
@@ -50,12 +50,12 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to distribute parcel in time.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
         return "Successfully distributed CDP Runtime parcel.";
     }
 

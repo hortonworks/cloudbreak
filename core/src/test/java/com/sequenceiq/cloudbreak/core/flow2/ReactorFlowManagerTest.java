@@ -27,6 +27,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
@@ -125,6 +126,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
+        underTest.triggerClusterCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

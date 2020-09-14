@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -8,8 +10,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,20 +24,34 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.api.swagger.BatchResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
+import com.cloudera.api.swagger.model.ApiBatchRequest;
+import com.cloudera.api.swagger.model.ApiBatchResponse;
+import com.cloudera.api.swagger.model.ApiBatchResponseElement;
+import com.cloudera.api.swagger.model.ApiClusterRef;
+import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiEcho;
+import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,6 +76,8 @@ ClouderaManagerSecurityServiceTest {
 
     private final ClouderaManagerLdapService ldapService = mock(ClouderaManagerLdapService.class);
 
+    private final ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider = mock(ClouderaManagerPollingServiceProvider.class);
+
     private final ApiClient apiClient = mock(ApiClient.class);
 
     @InjectMocks
@@ -75,6 +95,7 @@ ClouderaManagerSecurityServiceTest {
         ReflectionTestUtils.setField(underTest, "securityConfigProvider", securityConfigProvider);
         ReflectionTestUtils.setField(underTest, "kerberosService", kerberosService);
         ReflectionTestUtils.setField(underTest, "ldapService", ldapService);
+        ReflectionTestUtils.setField(underTest, "clouderaManagerPollingServiceProvider", clouderaManagerPollingServiceProvider);
     }
 
     @Test
@@ -263,6 +284,103 @@ ClouderaManagerSecurityServiceTest {
         verify(newUsersResourceApi).deleteUser2(ADMIN);
     }
 
+    @Test
+    public void testRotateHostCertificates() throws Exception {
+        // GIVEN
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+        ApiHostList hostList = createApiHostList();
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostList);
+        ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
+        // WHEN
+        underTest.rotateHostCertificates();
+        // THEN no exception
+        Assert.assertEquals(2, batchRequestArgumentCaptor.getValue().getItems().size());
+    }
+
+    @Test
+    public void testRotateHostCertificatesWhenBatchExecuteFailed() throws Exception {
+        // GIVEN
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+        ApiHostList hostList = createApiHostList();
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostList);
+        ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, false));
+        // WHEN
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates());
+        // THEN exception
+    }
+
+    @Test
+    public void testRotateHostCertificatesWhenPollingCancelled() throws Exception {
+        // GIVEN
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+        ApiHostList hostList = createApiHostList();
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostList);
+        ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
+        when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
+                .thenReturn(PollingResult.EXIT);
+        // WHEN
+        assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates());
+        // THEN exception
+    }
+
+    @Test
+    public void testRotateHostCertificatesWhenPollingTimedOut() throws Exception {
+        // GIVEN
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+        ApiHostList hostList = createApiHostList();
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostList);
+        ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
+        when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
+        when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
+                .thenReturn(PollingResult.TIMEOUT);
+        // WHEN
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates());
+        // THEN exception
+    }
+
+    @Test
+    public void testRotateHostCertificatesWhenCMApiCallFailed() throws Exception {
+        // GIVEN
+        initTestInput("user");
+        when(clouderaManagerApiClientProvider.getClouderaManagerClient(clientConfig, GATEWAY_PORT, stack.getCluster().getCloudbreakAmbariUser(),
+                stack.getCluster().getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
+        HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
+        when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
+        when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+        when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenThrow(new ApiException());
+        // WHEN
+        assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates());
+        // THEN exception
+    }
+
     private Stack createStack(String userName) {
         Stack stack = new Stack();
         stack.setGatewayPort(GATEWAY_PORT);
@@ -290,4 +408,20 @@ ClouderaManagerSecurityServiceTest {
         return apiUser2List;
     }
 
+    private ApiHostList createApiHostList() {
+        ApiHostList apiHostList = new ApiHostList();
+        ApiClusterRef clusterRef = new ApiClusterRef();
+        ApiHost apiHost1 = new ApiHost().hostId("1").clusterRef(clusterRef);
+        ApiHost apiHost2 = new ApiHost().hostId("2").clusterRef(clusterRef);
+        apiHostList.items(List.of(apiHost1, apiHost2));
+        return apiHostList;
+    }
+
+    private ApiBatchResponse createApiBatchResponse(ApiHostList hostList, boolean success) {
+        List<ApiBatchResponseElement> responseElements = hostList.getItems().stream().map(req -> {
+            ApiCommand apiCommand = new ApiCommand().active(Boolean.FALSE).id(BigDecimal.ONE).hostRef(new ApiHostRef().hostId(req.getHostId()));
+            return new ApiBatchResponseElement().response(JsonUtil.writeValueAsStringSilent(apiCommand));
+        }).collect(Collectors.toList());
+        return new ApiBatchResponse().success(success).items(responseElements);
+    }
 }

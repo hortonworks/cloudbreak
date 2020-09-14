@@ -11,6 +11,18 @@ install-cloudera-manager-agent:
     - unless:
       - rpm -q cloudera-manager-daemons cloudera-manager-agent
 
+{% if cloudera_manager.settings.cloudera_scm_sudo_access == True %}
+
+/etc/sudoers.d/cloudera-scm:
+  file.managed:
+    - contents:
+      - cloudera-scm ALL=(ALL) NOPASSWD:ALL
+    - user: root
+    - group: root
+    - mode: 440
+
+{% endif %}
+
 {%- if not salt['pkg.version']('python-psycopg2') and not salt['pkg.version']('python2-psycopg2') %}
 install-psycopg2:
   cmd.run:
@@ -66,3 +78,4 @@ set_service_uids:
     - require:
         - file: /opt/cloudera/cm-agent/service/inituids
 {% endif %}
+

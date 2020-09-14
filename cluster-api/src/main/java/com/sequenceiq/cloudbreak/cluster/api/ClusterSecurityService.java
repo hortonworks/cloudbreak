@@ -39,4 +39,6 @@ public interface ClusterSecurityService {
     String getKeystorePassword();
 
     String getMasterKey();
+
+    void rotateHostCertificates() throws CloudbreakException;
 }

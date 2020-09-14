@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
+import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -95,6 +96,9 @@ public class ClouderaManagerApiFactory {
     @Inject
     private Function<ApiClient, ExternalAccountsResourceApi> externalAccountsResourceApiFactory;
 
+    @Inject
+    private Function<ApiClient, BatchResourceApi> batchResourceApiFactory;
+
     public ClouderaManagerResourceApi getClouderaManagerResourceApi(ApiClient apiClient) {
         return clouderaManagerResourceApiFactory.apply(apiClient);
     }
@@ -177,5 +181,9 @@ public class ClouderaManagerApiFactory {
 
     public ExternalAccountsResourceApi getExternalAccountsResourceApi(ApiClient client) {
         return externalAccountsResourceApiFactory.apply(client);
+    }
+
+    public BatchResourceApi getBatchResourceApi(ApiClient client) {
+        return batchResourceApiFactory.apply(client);
     }
 }

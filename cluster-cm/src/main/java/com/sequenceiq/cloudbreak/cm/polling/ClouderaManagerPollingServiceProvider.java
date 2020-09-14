@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +16,9 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandListCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplateListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerCollectDiagnosticsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
@@ -58,7 +61,10 @@ public class ClouderaManagerPollingServiceProvider {
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
     @Inject
-    private PollingService<ClouderaManagerPollerObject> clouderaManagerCommandPollerObjectPollingService;
+    private PollingService<ClouderaManagerCommandPollerObject> clouderaManagerCommandPollerObjectPollingService;
+
+    @Inject
+    private PollingService<ClouderaManagerCommandListPollerObject> clouderaManagerCommandListPollerObjectPollingService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -204,22 +210,38 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerCollectDiagnosticsListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
+    public PollingResult startPollingCommandList(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, String commandName) {
+        LOGGER.debug("Waiting for Cloudera Manager to finish the following commands: {}. [Server address: {}]", commandIds, stack.getClusterManagerIp());
+        return pollCommandListWithTimeListener(stack, apiClient, commandIds, POLL_FOR_ONE_HOUR,
+                new ClouderaManagerBatchCommandsListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, commandName));
+    }
+
+    private PollingResult pollCommandListWithTimeListener(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, long maximumWaitTimeInSeconds,
+            AbstractClouderaManagerCommandListCheckerTask<ClouderaManagerCommandListPollerObject> listenerTask) {
+        ClouderaManagerCommandListPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandListPollerObject(stack, apiClient, commandIds);
+        return clouderaManagerCommandListPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
+                listenerTask,
+                clouderaManagerCommandPollerObject,
+                POLL_INTERVAL,
+                maximumWaitTimeInSeconds);
+    }
+
     private PollingResult pollCommandWithTimeListener(Stack stack, ApiClient apiClient, BigDecimal commandId, long maximumWaitTimeInSeconds,
-            AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> listenerTask) {
-        ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClient, commandId);
+            AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> listenerTask) {
+        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
                 listenerTask,
-                clouderaManagerPollerObject,
+                clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
                 maximumWaitTimeInSeconds);
     }
 
     private PollingResult pollCommandWithAttemptListener(Stack stack, ApiClient apiClient, BigDecimal commandId, int numAttempts,
-            AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> listenerTask) {
-        ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClient, commandId);
+            AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> listenerTask) {
+        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
         return clouderaManagerCommandPollerObjectPollingService.pollWithAttemptSingleFailure(
                 listenerTask,
-                clouderaManagerPollerObject,
+                clouderaManagerCommandPollerObject,
                 POLL_INTERVAL,
                 numAttempts);
     }

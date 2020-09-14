@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -482,7 +483,8 @@ public class ClusterHostServiceRunner {
                         "heartbeat_interval", cmHeartbeatInterval,
                         "missed_heartbeat_interval", cmMissedHeartbeatInterval,
                         "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
-                        "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1))))));
+                        "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
+                        "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo))))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {

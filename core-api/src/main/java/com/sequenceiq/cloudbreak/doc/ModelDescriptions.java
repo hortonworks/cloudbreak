@@ -307,6 +307,7 @@ public class ModelDescriptions {
         public static final String VARIANT = "Cluster manager variant";
         public static final String CLOUD_STORAGE_LOCATIONS = "storage locations by CDP services";
         public static final String ENABLE_RANGER_RAZ = "Enables Ranger Raz for the cluster on S3 and ADLSv2.";
+        public static final String CERTIFICATE_ROTATION_TYPE = "the type of the certificate rotation";
     }
 
     public static class GatewayModelDescription {

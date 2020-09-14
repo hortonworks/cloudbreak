@@ -14,10 +14,10 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiEcho;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);
 
@@ -31,7 +31,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         try {
             ToolsResourceApi toolsResourceApi = clouderaManagerApiPojoFactory.getToolsResourceApi(pollerObject.getApiClient());
             String testMessage = "test";
@@ -59,12 +59,12 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to check Cloudera Manager startup.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject pollerObject) {
+    public String successMessage(ClouderaManagerCommandPollerObject pollerObject) {
         return "Cloudera Manager startup finished with success result.";
     }
 }

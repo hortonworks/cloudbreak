@@ -11,12 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatterUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -58,22 +57,12 @@ public class ClusterCertificateRenewService {
     void certificateRenewalFailed(StackView stackView, Exception exception) {
         if (stackView.getClusterView() != null) {
             Long stackId = stackView.getId();
-            String errorMessage = getErrorMessageFromException(exception);
+            String errorMessage = ExceptionMessageFormatterUtil.getErrorMessageFromException(exception);
             clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorMessage);
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
             flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CERTIFICATE_RENEWAL_FAILED, errorMessage);
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");
-        }
-    }
-
-    private String getErrorMessageFromException(Exception exception) {
-        boolean transactionRuntimeException = exception instanceof TransactionService.TransactionRuntimeExecutionException;
-        if (transactionRuntimeException && exception.getCause() != null && exception.getCause().getCause() != null) {
-            return exception.getCause().getCause().getMessage();
-        } else {
-            return exception instanceof CloudbreakException && exception.getCause() != null
-                    ? exception.getCause().getMessage() : exception.getMessage();
         }
     }
 }

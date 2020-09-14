@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,23 +15,35 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.BatchResourceApi;
+import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.UsersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiAuthRoleRef;
+import com.cloudera.api.swagger.model.ApiBatchRequest;
+import com.cloudera.api.swagger.model.ApiBatchRequestElement;
+import com.cloudera.api.swagger.model.ApiBatchResponse;
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
+import com.cloudera.api.swagger.model.HTTPMethod;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -57,6 +71,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Inject
     private ClouderaManagerDeregisterService clouderaManagerDeregisterService;
+
+    @Inject
+    private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
     private final Stack stack;
 
@@ -313,6 +330,25 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         return securityConfigProvider.getMasterKey(stack.getCluster());
     }
 
+    @Override
+    public void rotateHostCertificates() throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        try {
+            ApiClient client = getClient(stack.getGatewayPort(), user, password, clientConfig);
+            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+            BatchResourceApi batchResourceApi = clouderaManagerApiFactory.getBatchResourceApi(client);
+            ApiHostList hostList = hostsResourceApi.readHosts(null, null, "SUMMARY");
+            ApiBatchRequest batchRequest = createHostCertsBatchRequest(hostList);
+            ApiBatchResponse apiBatchResponse = batchResourceApi.execute(batchRequest);
+            processHostCertsBatchResponse(client, apiBatchResponse);
+        } catch (ApiException | ClouderaManagerClientInitException e) {
+            LOGGER.warn("Can't rotate the host certificates", e);
+            throw new CloudbreakException("Can't rotate the host certificates due to: " + e.getMessage());
+        }
+    }
+
     private void createNewUser(UsersResourceApi usersResourceApi, List<ApiAuthRoleRef> authRoles, String userName, String password, ApiUser2List userList)
             throws ApiException {
         if (checkUserExists(userList, userName)) {
@@ -337,6 +373,36 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
                     gatewayPort, user, password, ClouderaManagerApiClientProvider.API_V_31);
         } else {
             return getDefaultClient(gatewayPort, clientConfig);
+        }
+    }
+
+    private ApiBatchRequest createHostCertsBatchRequest(ApiHostList hostList) {
+        List<ApiBatchRequestElement> batchRequestElements = hostList.getItems().stream()
+                .filter(host -> host.getClusterRef() != null)
+                .map(host -> new ApiBatchRequestElement()
+                        .method(HTTPMethod.POST)
+                        .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + host.getHostId() + "/commands/generateHostCerts")
+                        .body("{}")
+                        .acceptType("application/json")
+                        .contentType("application/json"))
+                .collect(Collectors.toList());
+        ApiBatchRequest batchRequest = new ApiBatchRequest().items(batchRequestElements);
+        return batchRequest;
+    }
+
+    private void processHostCertsBatchResponse(ApiClient client, ApiBatchResponse apiBatchResponse) {
+        if (apiBatchResponse.getSuccess()) {
+            List<BigDecimal> ids = apiBatchResponse.getItems().stream()
+                    .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
+                    .collect(Collectors.toList());
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCommandList(stack, client, ids, "Rotate host certificates");
+            if (PollingResult.isExited(pollingResult)) {
+                throw new CancellationException("Cluster was terminated during rotation of host certificates");
+            } else if (PollingResult.isTimeout(pollingResult)) {
+                throw new ClouderaManagerOperationFailedException("Timeout while Cloudera Manager rotates the host certificates.");
+            }
+        } else {
+            throw new ClouderaManagerOperationFailedException("Host certificates rotation batch operation failed: " + apiBatchResponse);
         }
     }
 }

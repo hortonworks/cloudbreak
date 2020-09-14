@@ -26,7 +26,7 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -252,12 +252,12 @@ public class ClouderaManagerHostStatusCheckerTest {
         return instanceMetaData;
     }
 
-    private ClouderaManagerPollerObject getPollerObject(InstanceMetaData... instanceMetaDatas) {
+    private ClouderaManagerCommandPollerObject getPollerObject(InstanceMetaData... instanceMetaDatas) {
         Stack stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaDatas));
         stack.setInstanceGroups(Set.of(instanceGroup));
-        return new ClouderaManagerPollerObject(stack, new ApiClient(), BigDecimal.ONE);
+        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), BigDecimal.ONE);
     }
 
 }
