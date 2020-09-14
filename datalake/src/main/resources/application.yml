@@ -52,6 +52,8 @@ sdx:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
 
+  paywall.url: "https://archive.cloudera.com/p/cdp-public/"
+
 altus:
   idbmms:
     host: localhost

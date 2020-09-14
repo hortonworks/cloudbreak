@@ -7,12 +7,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +28,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
@@ -29,6 +39,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
@@ -84,6 +96,12 @@ public class SdxRuntimeUpgradeServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private GrpcUmsClient umsClient;
+
+    @Mock
+    private RestClientFactory restClientFactory;
+
     @InjectMocks
     private SdxRuntimeUpgradeService underTest;
 
@@ -101,6 +119,7 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxCluster = getValidSdxCluster();
         sdxUpgradeRequest = getFullSdxUpgradeRequest();
+        ReflectionTestUtils.setField(underTest, "paywallUrl", "https://archive.coudera.com/p/cdp-public/");
     }
 
     @Test
@@ -126,6 +145,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(ANOTHER_IMAGE_ID);
@@ -169,6 +189,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -195,7 +216,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
@@ -277,6 +298,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -381,6 +403,142 @@ public class SdxRuntimeUpgradeServiceTest {
         assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 1)));
         assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 2)));
         assertTrue(upgradeV4Response.getUpgradeCandidates().stream().anyMatch(imageInfoV4Response -> imageInfoV4Response.getImageId().equals(IMAGE_ID + 3)));
+    }
+
+    @Test
+    public void testTriggerUpgradeWithValidPaywallLicense() {
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+
+        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
+        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        Client clientMock = mock(Client.class);
+        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
+        WebTarget targetMock = mock(WebTarget.class);
+        when(clientMock.target(anyString())).thenReturn(targetMock);
+        Builder requestMock = mock(Builder.class);
+        when(targetMock.request()).thenReturn(requestMock);
+        Response mockResponse = mock(Response.class);
+        when(requestMock.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(HttpStatus.OK.value());
+
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2);
+        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+
+        sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
+
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+    }
+
+    @Test
+    public void testTriggerUpgradeWithInvalidPaywallLicenseShouldThrowBadRequest() {
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+
+        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
+        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        Client clientMock = mock(Client.class);
+        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
+        WebTarget targetMock = mock(WebTarget.class);
+        when(clientMock.target(anyString())).thenReturn(targetMock);
+        Builder requestMock = mock(Builder.class);
+        when(targetMock.request()).thenReturn(requestMock);
+        Response mockResponse = mock(Response.class);
+        when(requestMock.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(HttpStatus.UNAUTHORIZED.value());
+
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2);
+        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+
+        sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
+        } catch (BadRequestException e) {
+            String errorMessage = "The Cloudera Manager license is not valid to authenticate to paywall, "
+                    + "please contact a Cloudera administrator to update it.";
+            assertEquals(errorMessage, e.getMessage());
+        }
+
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+    }
+
+    @Test
+    public void testTriggerUpgradeWhenPaywallProbeFailsShouldThrowBadRequest() {
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+        when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
+        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+
+        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
+        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        Client clientMock = mock(Client.class);
+        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
+        WebTarget targetMock = mock(WebTarget.class);
+        when(clientMock.target(anyString())).thenReturn(targetMock);
+        Builder requestMock = mock(Builder.class);
+        when(targetMock.request()).thenReturn(requestMock);
+        when(requestMock.get()).thenThrow(new ProcessingException("Failed to send request"));
+
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setCreated(1);
+        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
+        lastImageInfo.setImageId(IMAGE_ID_LAST);
+        lastImageInfo.setCreated(2);
+        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+
+        sdxUpgradeRequest.setLockComponents(false);
+        sdxUpgradeRequest.setImageId(null);
+        sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
+        } catch (BadRequestException e) {
+            String errorMessage = "The Cloudera Manager license is not valid to authenticate to paywall, "
+                    + "please contact a Cloudera administrator to update it.";
+            assertEquals(errorMessage, e.getMessage());
+        }
+
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
     }
 
     @Test

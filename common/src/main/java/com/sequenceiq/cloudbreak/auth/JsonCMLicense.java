@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
+package com.sequenceiq.cloudbreak.auth;
 
 import java.util.StringJoiner;
 
