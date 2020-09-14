@@ -27,8 +27,13 @@ public class FreeIpaDiagnosticsTestDto extends BaseDiagnosticsTestDto<Diagnostic
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
+    public FreeIpaDiagnosticsTestDto withFreeIpa() {
+        return withFreeIpa(null);
+    }
+
     public FreeIpaDiagnosticsTestDto withFreeIpa(String freeIpa) {
-        FreeIpaTestDto freeIpaTestDto = getTestContext().given(freeIpa, FreeIpaTestDto.class);
+        FreeIpaTestDto freeIpaTestDto = freeIpa == null ? getTestContext().given(FreeIpaTestDto.class)
+                : getTestContext().given(freeIpa, FreeIpaTestDto.class);
         getRequest().setEnvironmentCrn(freeIpaTestDto.getResponse().getEnvironmentCrn());
         this.freeIpaCrn = freeIpaTestDto.getResponse().getCrn();
         return this;

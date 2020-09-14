@@ -31,8 +31,13 @@ public class SdxDiagnosticsTestDto extends BaseDiagnosticsTestDto<DiagnosticsCol
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
+    public SdxDiagnosticsTestDto withSdx() {
+        return withSdx(null);
+    }
+
     public SdxDiagnosticsTestDto withSdx(String sdx) {
-        SdxTestDto sdxTestDto = getTestContext().given(sdx, SdxTestDto.class);
+        SdxTestDto sdxTestDto = sdx == null ? getTestContext().given(SdxTestDto.class)
+                : getTestContext().given(sdx, SdxTestDto.class);
         getRequest().setStackCrn(sdxTestDto.getResponse().getCrn());
         return this;
     }

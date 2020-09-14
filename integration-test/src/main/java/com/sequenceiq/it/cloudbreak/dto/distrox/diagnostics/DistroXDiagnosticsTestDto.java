@@ -24,8 +24,13 @@ public class DistroXDiagnosticsTestDto extends BaseDiagnosticsTestDto<Diagnostic
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
+    public DistroXDiagnosticsTestDto withDistroX() {
+        return withDistroX(null);
+    }
+
     public DistroXDiagnosticsTestDto withDistroX(String distroX) {
-        DistroXTestDto distroXTestDto = getTestContext().given(distroX, DistroXTestDto.class);
+        DistroXTestDto distroXTestDto = distroX == null ? getTestContext().given(DistroXTestDto.class)
+                : getTestContext().given(distroX, DistroXTestDto.class);
         getRequest().setStackCrn(distroXTestDto.getResponse().getCrn());
         return this;
     }

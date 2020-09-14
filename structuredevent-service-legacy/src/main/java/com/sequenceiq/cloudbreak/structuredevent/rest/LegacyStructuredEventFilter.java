@@ -361,14 +361,17 @@ public class LegacyStructuredEventFilter implements WriterInterceptor, Container
     private InputStream logInboundEntity(StringBuilder content, InputStream stream, Charset charset) throws IOException {
         if (contentLogging) {
             if (!stream.markSupported()) {
-                stream = new BufferedInputStream(stream);
+                stream = new BufferedInputStream(stream, MAX_CONTENT_LENGTH + 1);
             }
             stream.mark(MAX_CONTENT_LENGTH + 1);
-            String entityString = IOUtils.toString(stream, charset);
-            if (entityString.length() > MAX_CONTENT_LENGTH) {
-                entityString = entityString.substring(0, MAX_CONTENT_LENGTH) + "...more...";
+            byte[] entity = new byte[MAX_CONTENT_LENGTH + 1];
+            int entitySize = IOUtils.read(stream, entity);
+            if (entitySize != -1) {
+                content.append(new String(entity, 0, Math.min(entitySize, MAX_CONTENT_LENGTH), charset));
+                if (entitySize > MAX_CONTENT_LENGTH) {
+                    content.append("...more...");
+                }
             }
-            content.append(entityString);
             content.append('\n');
             stream.reset();
         }
