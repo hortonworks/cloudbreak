@@ -17,10 +17,10 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerCollectDiagnosticsListenerTask.class);
 
@@ -29,7 +29,7 @@ public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractCloud
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
         if (apiCommand.getActive()) {
@@ -47,12 +47,12 @@ public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractCloud
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject clouderaManagerPollerObject) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to collect diagnostics.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject clouderaManagerPollerObject) {
+    public String successMessage(ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject) {
         return "Cloudera Manager diagnostics collection finished with success result.";
     }
 

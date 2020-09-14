@@ -108,6 +108,10 @@ public interface ClusterApi {
         clusterModificationService().restartAll();
     }
 
+    default void rotateHostCertificates() throws CloudbreakException {
+        clusterSecurityService().rotateHostCertificates();
+    }
+
     default ClusterStatus getStatus(boolean blueprintPresent) {
         return clusterStatusService().getStatus(blueprintPresent).getClusterStatus();
     }

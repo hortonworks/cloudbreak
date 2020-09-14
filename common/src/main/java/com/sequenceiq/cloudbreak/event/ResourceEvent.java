@@ -291,6 +291,10 @@ public enum ResourceEvent {
     CLUSTER_CERTIFICATE_REDEPLOY("cluster.certificate.redeploy"),
     CLUSTER_CERTIFICATE_RENEWAL_FINISHED("cluster.certificate.renewal.finished"),
     CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed"),
+    CLUSTER_CERTIFICATES_ROTATION_STARTED("cluster.certificates.rotation.started"),
+    CLUSTER_HOST_CERTIFICATES_ROTATION("cluster.host.certificates.rotation"),
+    CLUSTER_CERTIFICATES_ROTATION_FINISHED("cluster.certificates.rotation.finished"),
+    CLUSTER_CERTIFICATES_ROTATION_FAILED("cluster.certificates.rotation.failed"),
 
     CLUSTER_EXTERNAL_DATABASE_DELETION_STARTED("cluster.externaldatabase.deletion.started"),
     CLUSTER_EXTERNAL_DATABASE_DELETION_FAILED("cluster.externaldatabase.deletion.failed"),

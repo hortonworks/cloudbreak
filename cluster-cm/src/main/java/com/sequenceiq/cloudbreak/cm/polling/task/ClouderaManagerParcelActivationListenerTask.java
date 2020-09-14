@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
 
@@ -42,7 +42,7 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
         Stack stack = pollerObject.getStack();
         List<ClouderaManagerProduct> clouderaManagerProducts = getClouderaManagerProductsFromStack(stack);
@@ -130,12 +130,12 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to deploy client configurations.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
         return "Cloudera Manager deployed client configurations finished with success result.";
     }
 

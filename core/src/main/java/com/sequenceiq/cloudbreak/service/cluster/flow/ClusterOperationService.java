@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
@@ -515,5 +516,9 @@ public class ClusterOperationService {
 
     public FlowIdentifier updatePillarConfiguration(Stack stack) {
         return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+    }
+
+    public FlowIdentifier rotateClusterCertificates(Stack stack, CertificatesRotationV4Request certificatesRotationV4Request) {
+        return flowManager.triggerClusterCertificatesRotation(stack.getId(), certificatesRotationV4Request);
     }
 }

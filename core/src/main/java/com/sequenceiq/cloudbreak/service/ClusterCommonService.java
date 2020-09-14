@@ -19,9 +19,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
@@ -272,13 +274,22 @@ public class ClusterCommonService {
     public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, Long workspaceId) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        if (!stack.isAvailable()) {
-            throw new BadRequestException(String.format(
-                "Stack '%s' is currently in '%s' state. Updates to the Pillar Configuration can "
-                    + "only be made when the underlying stack is 'AVAILABLE'.",
-                stack.getName(),
-                stack.getStatus()));
-        }
+        validateOperationOnStack(stack, "Updates to the Pillar Configuration");
         return clusterOperationService.updatePillarConfiguration(stack);
+    }
+
+    public CertificatesRotationV4Response rotateClusterCertificates(NameOrCrn nameOrCrn, Long workspaceId,
+            CertificatesRotationV4Request certificatesRotationV4Request) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
+        validateOperationOnStack(stack, "Certificates rotation");
+        return new CertificatesRotationV4Response(clusterOperationService.rotateClusterCertificates(stack, certificatesRotationV4Request));
+    }
+
+    private void validateOperationOnStack(Stack stack, String operationDescription) {
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. %s can only be made when the underlying stack is 'AVAILABLE'.",
+                    stack.getName(), stack.getStatus(), operationDescription));
+        }
     }
 }

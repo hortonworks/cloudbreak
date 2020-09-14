@@ -16,11 +16,11 @@ import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelStatusListenerTask.class);
 
     private Map<String, String> parcelVersions;
@@ -35,7 +35,7 @@ public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaMan
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
         Stack stack = pollerObject.getStack();
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
@@ -69,12 +69,12 @@ public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaMan
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Parcels are not in the proper state.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
         return String.format("Cloudera Manager parcels %s are in the proper state [%s]", parcelVersions, parcelStatus);
     }
 

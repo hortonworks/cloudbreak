@@ -12,10 +12,10 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelsApiListenerTask.class);
 
@@ -25,7 +25,7 @@ public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManag
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject, CommandsResourceApi commandsResourceApi) {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) {
         try {
             boolean parcelsAvailable = pollParcels(pollerObject);
             LOGGER.debug("Polling for parcel's availability returned: {}", parcelsAvailable);
@@ -37,18 +37,18 @@ public class ClouderaManagerParcelsApiListenerTask extends AbstractClouderaManag
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to start Parcels API.");
     }
 
-    private boolean pollParcels(ClouderaManagerPollerObject pollerObject) throws ApiException {
+    private boolean pollParcels(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiPojoFactory.getParcelsResourceApi(pollerObject.getApiClient());
         ApiParcelList apiParcelList = parcelsResourceApi.readParcels(pollerObject.getStack().getName(), "");
         return Objects.nonNull(apiParcelList) && CollectionUtils.isNotEmpty(apiParcelList.getItems());
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
         return "Parcels API is finally available";
     }
 

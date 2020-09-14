@@ -36,7 +36,7 @@ import com.cloudera.api.swagger.model.ApiServiceRef;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -75,7 +75,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     public void testPollingWithFiveInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(ID);
-        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         when(commandsResourceApi.readCommand(id)).thenAnswer(new Http500Answer(FIVE));
 
         for (int i = 0; i < FIVE; i++) {
@@ -91,7 +91,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     public void testPollingWithSixInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(1);
-        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         when(commandsResourceApi.readCommand(id)).thenAnswer(new Http500Answer(SIX));
 
         expectedEx.expect(ClouderaManagerOperationFailedException.class);
@@ -108,7 +108,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     public void testPollingWithFiveSocketExceptions() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(ID);
-        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("timeout");
         ApiException apiException0 = new ApiException(socketTimeoutException);
         SocketException socketException = new SocketException("Network is unreachable (connect failed)");
@@ -129,7 +129,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     public void testPollingWithThreeInternalServerErrorAndThreeSocketExceptions() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(1);
-        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         SocketException socketException = new SocketException("Network is unreachable (connect failed)");
         ApiException socketApiException = new ApiException(socketException);
         ApiException internalServerError = new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "error");
@@ -154,7 +154,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
         stackStatus.setStatus(Status.UPDATE_IN_PROGRESS);
         stack.setStackStatus(stackStatus);
         BigDecimal id = new BigDecimal(1);
-        ClouderaManagerPollerObject pollerObject = new ClouderaManagerPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         ConnectException connectException = new ConnectException("Connect failed.");
         ApiException apiException = new ApiException(connectException);
         ApiException[] exceptions = new ApiException[TEN];

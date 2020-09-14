@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 
 import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.AuthRolesResourceApi;
+import com.cloudera.api.swagger.BatchResourceApi;
 import com.cloudera.api.swagger.CdpResourceApi;
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -138,6 +139,11 @@ public class CmClientConfig {
         return this::externalAccountsResourceApi;
     }
 
+    @Bean
+    public Function<ApiClient, BatchResourceApi> batchResourceApiFactory() {
+        return this::batchResourceApi;
+    }
+
     // prototype bean declarations:
     // CHECKSTYLE:OFF
     @Bean
@@ -264,6 +270,12 @@ public class CmClientConfig {
     @Scope(value = "prototype")
     public ExternalAccountsResourceApi externalAccountsResourceApi(ApiClient apiClient) {
         return new ExternalAccountsResourceApi(apiClient);
+    }
+
+    @Bean
+    @Scope(value = "prototype")
+    public BatchResourceApi batchResourceApi(ApiClient apiClient) {
+        return new BatchResourceApi(apiClient);
     }
     // CHECKSTYLE:ON
 }

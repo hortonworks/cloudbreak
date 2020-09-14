@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClouderaManagerRefreshServiceConfigsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerPollerObject> {
+public class ClouderaManagerRefreshServiceConfigsListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     public ClouderaManagerRefreshServiceConfigsListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             CloudbreakEventService cloudbreakEventService) {
@@ -13,12 +13,12 @@ public class ClouderaManagerRefreshServiceConfigsListenerTask extends AbstractCl
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerPollerObject toolsResourceApi) {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
         throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to refresh cluster configs.");
     }
 
     @Override
-    public String successMessage(ClouderaManagerPollerObject toolsResourceApi) {
+    public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
         return "Successfully refreshed cluster configs.";
     }
 
