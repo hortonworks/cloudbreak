@@ -8,8 +8,6 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.CMLicenseUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -58,7 +57,6 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -456,10 +454,10 @@ public class ClusterHostServiceRunner {
                 singletonMap("cloudera-manager", createCMRepoPillar(repo, license))));
     }
 
-    private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> license) {
+    private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> licenseOpt) {
         Map<String, Object> pillarValues = new HashMap<>();
         pillarValues.put("repo", clouderaManagerRepo);
-        parseLicense(license).ifPresent(jsonLicense -> {
+        licenseOpt.flatMap(CMLicenseUtil::parseLicense).ifPresent(jsonLicense -> {
             String username = jsonLicense.getPaywallUsername();
             String password = jsonLicense.getPaywallPassword();
             if (isNotEmpty(username) && isNotEmpty(password)) {
@@ -468,22 +466,6 @@ public class ClusterHostServiceRunner {
             }
         });
         return pillarValues;
-    }
-
-    private Optional<JsonCMLicense> parseLicense(Optional<String> licenseOpt) {
-        Optional<JsonCMLicense> result = Optional.empty();
-        if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
-            String license = licenseOpt.get();
-            try {
-                String json = '{' + substringBeforeLast(substringAfter(license, "{"), "}") + '}';
-                JsonCMLicense jsonCMLicense = JsonUtil.readValue(json, JsonCMLicense.class);
-                result = Optional.of(jsonCMLicense);
-                LOGGER.info("Parsed CM licence: {}", jsonCMLicense);
-            } catch (IOException e) {
-                LOGGER.warn("Cannot parse CM license, paywall authentication will not work", e);
-            }
-        }
-        return result;
     }
 
     private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
