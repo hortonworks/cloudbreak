@@ -410,6 +410,36 @@ class SdxServiceTest {
         assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
     }
 
+    static Object[][] failedParamProvider() {
+        return new Object[][]{
+                {EnvironmentStatus.CREATE_FAILED},
+                {EnvironmentStatus.DELETE_FAILED},
+                {EnvironmentStatus.UPDATE_FAILED},
+                {EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("failedParamProvider")
+    void testCreateButEnvInFailedPhase(EnvironmentStatus environmentStatus) {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
+        detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
+        detailedEnvironmentResponse.setCrn(Crn.builder()
+                .setService(Crn.Service.ENVIRONMENTS)
+                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+                .setResource(UUID.randomUUID().toString())
+                .setAccountId(UUID.randomUUID().toString())
+                .build().toString());
+        detailedEnvironmentResponse.setEnvironmentStatus(environmentStatus);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+        assertEquals("The environment is in failed phase. Please fix the environment or create a new one first!", badRequestException.getMessage());
+    }
+
     @Test
     void testListSdxClustersWhenEnvironmentNameProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());

@@ -266,6 +266,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             throw new BadRequestException("The environment is stopped. Please start the environment first!");
         } else if (environment.getEnvironmentStatus().isStartInProgress()) {
             throw new BadRequestException("The environment is starting. Please wait until finished!");
+        } else if (environment.getEnvironmentStatus().isFailed()) {
+            throw new BadRequestException("The environment is in failed phase. Please fix the environment or create a new one first!");
         }
     }
 
