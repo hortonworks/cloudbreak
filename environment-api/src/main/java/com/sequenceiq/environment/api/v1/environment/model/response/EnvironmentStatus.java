@@ -94,7 +94,8 @@ public enum EnvironmentStatus {
     private static final Set<EnvironmentStatus> FAILED_STATUSES = Set.of(
             CREATE_FAILED,
             DELETE_FAILED,
-            UPDATE_FAILED
+            UPDATE_FAILED,
+            FREEIPA_DELETED_ON_PROVIDER_SIDE
     );
 
     private static final Set<EnvironmentStatus> STOP_IN_PROGRESS_OR_STOPPED_STATUSES = Set.of(
