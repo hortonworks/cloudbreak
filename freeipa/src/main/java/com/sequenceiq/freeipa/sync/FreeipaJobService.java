@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class FreeipaJobService {
@@ -18,11 +18,7 @@ public class FreeipaJobService {
     private AutoSyncConfig autoSyncConfig;
 
     @Inject
-    private JobService jobService;
-
-    public void deleteAll() {
-        jobService.deleteAll();
-    }
+    private StatusCheckerJobService jobService;
 
     public void schedule(Stack stack) {
         if (autoSyncConfig.isEnabled()) {

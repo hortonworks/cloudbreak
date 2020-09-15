@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.flow.core.PayloadConverter;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class ClusterTerminationActions {
@@ -34,7 +34,7 @@ public class ClusterTerminationActions {
     private ClusterTerminationFlowService clusterTerminationFlowService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {

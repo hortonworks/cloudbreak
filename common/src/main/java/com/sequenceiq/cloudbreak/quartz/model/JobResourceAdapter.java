@@ -1,4 +1,4 @@
-package com.sequenceiq.statuschecker.model;
+package com.sequenceiq.cloudbreak.quartz.model;
 
 import java.util.Optional;
 

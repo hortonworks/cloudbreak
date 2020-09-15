@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
-import com.sequenceiq.statuschecker.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class DBStackJobAdapter extends JobResourceAdapter<DBStack> {
 

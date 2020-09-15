@@ -18,7 +18,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 
 @Component
 public class EnvironmentStatusCheckerJob extends StatusCheckerJob {

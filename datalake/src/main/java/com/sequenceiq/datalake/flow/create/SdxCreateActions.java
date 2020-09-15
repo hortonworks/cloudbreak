@@ -38,7 +38,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class SdxCreateActions {
@@ -52,7 +52,7 @@ public class SdxCreateActions {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Inject
     private SdxMetricService metricService;

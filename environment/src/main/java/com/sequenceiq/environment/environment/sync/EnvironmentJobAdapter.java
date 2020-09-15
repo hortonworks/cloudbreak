@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
-import com.sequenceiq.statuschecker.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class EnvironmentJobAdapter extends JobResourceAdapter<Environment> {
 

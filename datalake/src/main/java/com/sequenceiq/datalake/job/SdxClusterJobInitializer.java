@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.projection.SdxClusterIdView;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.statuschecker.model.JobInitializer;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class SdxClusterJobInitializer implements JobInitializer {
@@ -17,11 +17,10 @@ public class SdxClusterJobInitializer implements JobInitializer {
     private SdxClusterRepository sdxClusterRepository;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Override
     public void initJobs() {
-        jobService.deleteAll();
         sdxClusterRepository.findAllAliveView().stream()
                 .map(this::convertToSdx)
                 .forEach(s -> jobService.schedule(new SdxClusterJobAdapter(s)));

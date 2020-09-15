@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class RescheduleStatusCheckChainFactory implements FlowEventChainFactory<RescheduleStatusCheckTriggerEvent> {
@@ -23,7 +23,7 @@ public class RescheduleStatusCheckChainFactory implements FlowEventChainFactory<
     private StackService stackService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Override
     public String initEvent() {

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.statuschecker.model.JobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 
 @Component
 public class EnvironmentJobInitializer implements JobInitializer {
@@ -26,7 +26,6 @@ public class EnvironmentJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        environmentJobService.deleteAll();
         List<Environment> environments = environmentService.findAllForAutoSync();
         for (Environment environment : environments) {
             environmentJobService.schedule(environment);

@@ -50,6 +50,7 @@ dependencies {
   compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
+  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
   compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
   compile group: 'javax.servlet',                         name: 'javax.servlet-api',              version: '4.0.1'
   compile group: 'javax.transaction',                     name: 'javax.transaction-api',          version: '1.3'
