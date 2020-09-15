@@ -65,4 +65,4 @@ include 'structuredevent-service-cdp'
 include 'structuredevent-api-cdp'
 include 'auth-internal'
 include 'auth-internal-api'
-
+include 'datalake-dr-connector'
