@@ -62,4 +62,5 @@ include 'environment-common'
 include 'audit-connector'
 include 'structuredevent-service'
 include 'structuredevent-service-legacy'
+include 'datalake-dr-connector'
 
