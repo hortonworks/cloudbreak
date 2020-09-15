@@ -72,7 +72,7 @@ find_and_distribute_latest_jdbc_driver() {
 
 # https://issues.apache.org/jira/browse/AMBARI-14627
 silent_security_setup() {
-  ambari-server setup-security --security-option=encrypt-passwords --master-key='{{ security_master_key }}' --master-key-persist=true
+  echo -e '\n\n' | ambari-server setup-security --security-option=encrypt-passwords --master-key='{{ security_master_key }}' --master-key-persist=true
 }
 
 read_tarballs() {
