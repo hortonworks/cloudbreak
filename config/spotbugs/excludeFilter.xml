@@ -30,9 +30,6 @@
         <Class name="~.*EncryptionConverter$"/>
     </Match>
     <Match>
-        <Class name="~com\.sequenceiq\.cloudbreak\.audit\.converter\.AuditEventDetailsProto.*"/>
-    </Match>
-    <Match>
         <Package name="~org\.apache\.cb\.yarn.*"/>
     </Match>
     <Match>
