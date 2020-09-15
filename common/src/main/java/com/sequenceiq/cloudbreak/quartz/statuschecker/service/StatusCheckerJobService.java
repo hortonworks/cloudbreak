@@ -1,4 +1,4 @@
-package com.sequenceiq.statuschecker.service;
+package com.sequenceiq.cloudbreak.quartz.statuschecker.service;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -25,28 +25,28 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.statuschecker.configuration.StatusCheckerProperties;
-import com.sequenceiq.statuschecker.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 @Service
-public class JobService {
+public class StatusCheckerJobService {
 
-    public static final String JOB_GROUP = "datalake-jobs";
+    private static final String JOB_GROUP = "status-checker-jobs";
 
-    public static final String TRIGGER_GROUP = "datalake-triggers";
+    private static final String TRIGGER_GROUP = "status-checker-triggers";
 
-    public static final String LOCAL_ID = "localId";
+    private static final String LOCAL_ID = "localId";
 
-    public static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
+    private static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerJobService.class);
 
     private static final int RANDOM_DELAY = 120;
 
     private static final Random RANDOM = new SecureRandom();
 
     @Inject
-    private StatusCheckerProperties properties;
+    private StatusCheckerConfig properties;
 
     @Inject
     private Scheduler scheduler;

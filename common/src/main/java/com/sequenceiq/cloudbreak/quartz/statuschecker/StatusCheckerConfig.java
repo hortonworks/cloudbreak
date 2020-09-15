@@ -1,16 +1,16 @@
-package com.sequenceiq.statuschecker.configuration;
+package com.sequenceiq.cloudbreak.quartz.statuschecker;
 
 import javax.annotation.PostConstruct;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-public class StatusCheckerProperties {
+@Configuration
+public class StatusCheckerConfig {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerProperties.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerConfig.class);
 
     @Value("${statuschecker.intervalsec:180}")
     private int intervalInSeconds;

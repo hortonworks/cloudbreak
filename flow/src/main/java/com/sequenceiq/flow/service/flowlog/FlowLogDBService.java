@@ -230,6 +230,11 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(id);
     }
 
+    @Override
+    public int purgeFinalizedFlowLogs() {
+        return flowLogRepository.purgeFinalizedFlowLogs();
+    }
+
     public List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId) {
         return flowLogRepository.findAllByFlowIdOrderByCreatedDesc(flowId);
     }

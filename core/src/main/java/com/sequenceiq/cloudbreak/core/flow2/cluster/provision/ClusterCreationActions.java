@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class ClusterCreationActions {
@@ -54,7 +54,7 @@ public class ClusterCreationActions {
     private ClusterCreationService clusterCreationService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;

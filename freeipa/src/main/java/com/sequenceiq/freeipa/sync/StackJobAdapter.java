@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
-import com.sequenceiq.statuschecker.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class StackJobAdapter extends JobResourceAdapter<Stack> {
 

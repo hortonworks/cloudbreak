@@ -6,7 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.statuschecker.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class SdxClusterJobAdapter extends JobResourceAdapter<SdxCluster> {
 

@@ -20,7 +20,6 @@ import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.ha.NodeConfig;
-import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Service
 public class RestartFlowService {
@@ -31,9 +30,6 @@ public class RestartFlowService {
 
     @Inject
     private FlowLogService flowLogService;
-
-    @Inject
-    private FlowChainLogService flowChainLogService;
 
     @Inject
     private Flow2Handler flow2Handler;
@@ -49,18 +45,6 @@ public class RestartFlowService {
         stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
         stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
         return stackIdsUnderOperation;
-    }
-
-    public void purgeTerminatedResourceFlowLogs() throws TransactionService.TransactionExecutionException {
-        transactionService.required(() -> {
-            LOGGER.debug("Cleaning deleted stack's flowlog");
-            int purgedTerminatedStackLogs = serviceFlowLogComponent.purgeTerminatedResourceLogs();
-            LOGGER.debug("Deleted flowlog count: {}", purgedTerminatedStackLogs);
-            LOGGER.debug("Cleaning orphan flowchainlogs");
-            int purgedOrphanFLowChainLogs = flowChainLogService.purgeOrphanFLowChainLogs();
-            LOGGER.debug("Deleted flowchainlog count: {}", purgedOrphanFLowChainLogs);
-            return null;
-        });
     }
 
     public Set<Long> findTerminatingStacksByCloudbreakNodeId(String id) {

@@ -1,4 +1,4 @@
-package com.sequenceiq.statuschecker.job;
+package com.sequenceiq.cloudbreak.quartz.statuschecker.job;
 
 import org.springframework.scheduling.quartz.QuartzJobBean;
 

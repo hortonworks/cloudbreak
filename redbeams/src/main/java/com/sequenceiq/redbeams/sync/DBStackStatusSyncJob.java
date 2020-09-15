@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-import com.sequenceiq.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 
 public class DBStackStatusSyncJob extends StatusCheckerJob {
 

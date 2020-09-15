@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackStatusCheckerJobTest {
@@ -58,7 +58,7 @@ public class StackStatusCheckerJobTest {
     private StackStatusCheckerJob underTest;
 
     @Mock
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Mock
     private StackService stackService;

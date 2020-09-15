@@ -26,7 +26,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-import com.sequenceiq.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {

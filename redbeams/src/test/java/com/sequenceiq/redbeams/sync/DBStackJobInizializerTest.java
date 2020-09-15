@@ -1,18 +1,18 @@
 package com.sequenceiq.redbeams.sync;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import java.util.Set;
-
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
-
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 public class DBStackJobInizializerTest {
 
@@ -39,7 +39,6 @@ public class DBStackJobInizializerTest {
 
         victim.initJobs();
 
-        verify(dbStackJobService).deleteAll();
         verify(dbStackJobService).schedule(dbStack);
     }
 }

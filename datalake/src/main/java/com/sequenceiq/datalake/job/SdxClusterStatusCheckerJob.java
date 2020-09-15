@@ -20,8 +20,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
@@ -38,7 +38,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
