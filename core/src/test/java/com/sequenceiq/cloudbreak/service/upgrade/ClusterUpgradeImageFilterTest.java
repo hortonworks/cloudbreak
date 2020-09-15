@@ -84,6 +84,9 @@ public class ClusterUpgradeImageFilterTest {
     @Mock
     private EntitlementDrivenPackageLocationFilter entitlementDrivenPackageLocationFilter;
 
+    @Mock
+    private ImageCreationBasedFilter imageCreationBasedFilter;
+
     private Image currentImage;
 
     private Image properImage;
@@ -100,6 +103,7 @@ public class ClusterUpgradeImageFilterTest {
         Predicate<Image> predicate = mock(Predicate.class);
         when(predicate.test(any())).thenReturn(Boolean.TRUE);
         when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class))).thenReturn(predicate);
+        when(imageCreationBasedFilter.filterPreviousImages(any(Image.class), any())).thenReturn(predicate);
     }
 
     @Test
@@ -175,32 +179,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
-    }
-
-    @Test
-    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBeforeAndLockComponents() {
-        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
-        lockComponents = true;
-
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
-
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
-
-        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no newer images available than " + DATE + ".", actual.getReason());
-    }
-
-    @Test
-    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBefore() {
-        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
-
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
-
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
-
-        assertEquals(0, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
