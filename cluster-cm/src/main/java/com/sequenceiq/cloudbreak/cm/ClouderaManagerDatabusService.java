@@ -31,9 +31,10 @@ public class ClouderaManagerDatabusService {
      */
     AltusCredential createMachineUserAndGenerateKeys(Stack stack) {
         String userCrn = stack.getCreator().getUserCrn();
+        String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
         String machineUserName = getWAMachineUserName(userCrn, stack);
         String builtInDbusRoleCrn = umsClient.getBuiltInDatabusRoleCrn();
-        return umsClient.createMachineUserAndGenerateKeys(machineUserName, userCrn, builtInDbusRoleCrn);
+        return umsClient.createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, builtInDbusRoleCrn);
     }
 
     /**
@@ -43,9 +44,10 @@ public class ClouderaManagerDatabusService {
     void cleanUpMachineUser(Stack stack) {
         try {
             String userCrn = stack.getCreator().getUserCrn();
+            String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
             String machineUserName = getWAMachineUserName(userCrn, stack);
             String builtInDbusRoleCrn = umsClient.getBuiltInDatabusRoleCrn();
-            umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, userCrn, builtInDbusRoleCrn);
+            umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, userCrn, accountId, builtInDbusRoleCrn);
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
