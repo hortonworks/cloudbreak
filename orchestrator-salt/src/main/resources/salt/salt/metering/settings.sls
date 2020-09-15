@@ -26,6 +26,19 @@
     {% set version = 1 %}
 {% endif %}
 
+{% if salt['pillar.get']('tags:Cloudera-External-Resource-Name') %}
+   {% set metered_cluster_crn = salt['pillar.get']('tags:Cloudera-External-Resource-Name') %}
+{% elif salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+    {% set metered_cluster_crn = salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+{% else %}
+    {% set metered_cluster_crn = cluster_crn %}
+{% endif %}
+{% if salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
+   {% set metered_cluster_name = salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
+{% else %}
+   {% set metered_cluster_name = cluster_name %}
+{% endif %}
+
 {% do metering.update({
     "is_systemd" : is_systemd,
     "enabled": metering_enabled,
@@ -33,5 +46,7 @@
     "clusterName": cluster_name,
     "serviceType": service_type,
     "serviceVersion": service_version,
-    "version": version
+    "version": version,
+    "meteredClusterCrn": metered_cluster_crn,
+    "meteredClusterName": metered_cluster_name
 }) %}
