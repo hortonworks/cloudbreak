@@ -9,6 +9,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -28,8 +30,14 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String RANGER_ADMIN_GROUP_KEY = "ranger_admin_group";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreSaltConfigGenerator.class);
+
     public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, Stack stack) throws URISyntaxException {
+        LOGGER.info("HER location " + location);
+        LOGGER.info("HER backupId " + backupId);
+        LOGGER.info("HER rangerAdminGroup " + rangerAdminGroup);
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
+        LOGGER.info("HER fullLocation " + fullLocation);
 
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 

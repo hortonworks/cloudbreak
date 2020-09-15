@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBackupFailedEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatalakeBackupFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBackupRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBackupSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.FullBackupInProgressEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -59,7 +59,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new DatabaseBackupFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
+        return new DatalakeBackupFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
     }
 
     @Override
@@ -79,10 +79,10 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup, stack);
             hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
 
-            result = new DatabaseBackupSuccess(stackId);
+            result = new FullBackupInProgressEvent(stackId, request.getBackupId(), request.getUserCrn());
         } catch (Exception e) {
             LOGGER.error("Database backup event failed", e);
-            result = new DatabaseBackupFailedEvent(stackId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
+            result = new DatalakeBackupFailedEvent(stackId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
         }
         return result;
     }

@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.FullRestoreInProgressEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatalakeRestoreFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -59,7 +59,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new DatabaseRestoreFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_RESTORE_FAILED);
+        return new DatalakeRestoreFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_RESTORE_FAILED);
     }
 
     @Override
@@ -79,10 +79,10 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup, stack);
             hostOrchestrator.restoreDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
 
-            result = new DatabaseRestoreSuccess(stackId);
+            result = new FullRestoreInProgressEvent(stackId, request.getBackupId(), request.getUserCrn());
         } catch (Exception e) {
             LOGGER.error("Database restore event failed", e);
-            result = new DatabaseRestoreFailedEvent(stackId, e, DetailedStackStatus.DATABASE_RESTORE_FAILED);
+            result = new DatalakeRestoreFailedEvent(stackId, e, DetailedStackStatus.DATABASE_RESTORE_FAILED);
         }
         return result;
     }

@@ -4,20 +4,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.BackupRestoreEvent;
 
-public class DatabaseRestoreFailedEvent extends BackupRestoreEvent {
+public class DatalakeRestoreFailedEvent extends BackupRestoreEvent {
 
     private Exception exception;
 
     private DetailedStackStatus detailedStatus;
 
-    public DatabaseRestoreFailedEvent(Long stackId, Exception exception, DetailedStackStatus detailedStatus) {
-        super(stackId, null, null);
+    public DatalakeRestoreFailedEvent(Long stackId, Exception exception, DetailedStackStatus detailedStatus) {
+        super(stackId, null, null, null);
         this.exception = exception;
         this.detailedStatus = detailedStatus;
     }
 
-    public static DatabaseRestoreFailedEvent from(StackEvent event, Exception exception, DetailedStackStatus detailedStatus) {
-        return new DatabaseRestoreFailedEvent(event.getResourceId(), exception, detailedStatus);
+    public static DatalakeRestoreFailedEvent from(StackEvent event, Exception exception, DetailedStackStatus detailedStatus) {
+        return new DatalakeRestoreFailedEvent(event.getResourceId(), exception, detailedStatus);
     }
 
     public Exception getException() {

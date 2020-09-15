@@ -317,7 +317,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public BackupV4Response backupDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, null);
         return new BackupV4Response(flowIdentifier);
     }
 
@@ -326,7 +326,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public BackupV4Response backupDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
             @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.backupClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, initiatorUserCrn);
         return new BackupV4Response(flowIdentifier);
     }
 
@@ -335,7 +335,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public RestoreV4Response restoreDatabaseByName(Long workspaceId, String name, String backupLocation, String backupId,
             @AccountId String accountId) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, null);
         return new RestoreV4Response(flowIdentifier);
     }
 
@@ -344,7 +344,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     public RestoreV4Response restoreDatabaseByNameInternal(Long workspaceId, String name, String backupLocation, String backupId,
             @InitiatorUserCrn String initiatorUserCrn) {
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
-                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
+                restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId, initiatorUserCrn);
         return new RestoreV4Response(flowIdentifier);
     }
 }

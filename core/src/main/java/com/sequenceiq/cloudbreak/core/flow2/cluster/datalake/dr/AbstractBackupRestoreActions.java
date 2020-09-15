@@ -21,7 +21,7 @@ public abstract class AbstractBackupRestoreActions<P extends BackupRestoreEvent>
     @Override
     protected BackupRestoreContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
             P payload) {
-        return BackupRestoreContext.from(flowParameters, payload, payload.getBackupLocation(), payload.getBackupId());
+        return BackupRestoreContext.from(flowParameters, payload, payload.getBackupLocation(), payload.getBackupId(), payload.getUserCrn());
     }
 
     @Override
