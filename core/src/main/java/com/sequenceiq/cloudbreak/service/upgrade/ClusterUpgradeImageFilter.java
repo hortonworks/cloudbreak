@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,7 +55,8 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private EntitlementDrivenPackageLocationFilter packageLocationFilter;
 
-    private String reason;
+    @Inject
+    private ImageCreationBasedFilter creationBasedFilter;
 
     ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents,
             Map<String, String> activatedParcels) {
@@ -73,69 +75,58 @@ public class ClusterUpgradeImageFilter {
 
     private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform,
             boolean lockComponents, Map<String, String> activatedParcels) {
+        MutableObject<String> reason = new MutableObject<>();
         List<Image> images = availableImages.stream()
-                .filter(filterCurrentImage(currentImage))
-                .filter(filterNonCmImages())
-                .filter(filterIgnoredCmVersion())
-                .filter(filterPreviousImages(currentImage, lockComponents))
-                .filter(validateCmAndStackVersion(currentImage, lockComponents, activatedParcels))
-                .filter(validateCloudPlatform(cloudPlatform))
-                .filter(validateOsVersion(currentImage))
+                .filter(filterCurrentImage(currentImage, reason))
+                .filter(filterNonCmImages(reason))
+                .filter(filterIgnoredCmVersion(reason))
+                .filter(creationBasedFilter.filterPreviousImages(currentImage, reason))
+                .filter(validateCmAndStackVersion(currentImage, lockComponents, activatedParcels, reason))
+                .filter(validateCloudPlatform(cloudPlatform, reason))
+                .filter(validateOsVersion(currentImage, reason))
                 .filter(packageLocationFilter.filterImage(currentImage))
                 .collect(Collectors.toList());
 
-        return new ImageFilterResult(new Images(null, images, null), getReason(images));
+        return new ImageFilterResult(new Images(null, images, null), getReason(images, reason));
     }
 
-    private Predicate<Image> filterPreviousImages(Image currentImage, boolean lockComponents) {
+    private String getReason(Collection<Image> images, MutableObject<String> reason) {
+        return images.isEmpty() ? reason.getValue() : null;
+    }
+
+    private Predicate<Image> filterCurrentImage(Image currentImage, MutableObject<String> reason) {
         return image -> {
-            boolean result = filterPreviousImages(currentImage, image);
-            setReason(result, "There are no newer images available than " + currentImage.getDate() + ".");
-            return result;
+            reason.setValue("There are no newer compatible images available.");
+            return !image.getUuid().equals(currentImage.getUuid());
         };
     }
 
-    private boolean filterPreviousImages(Image currentImage, Image image) {
-        return Objects.nonNull(image.getCreated())
-                && Objects.nonNull(currentImage.getCreated())
-                && image.getCreated() >= currentImage.getCreated();
-    }
-
-    private Predicate<Image> filterCurrentImage(Image currentImage) {
+    private Predicate<Image> filterIgnoredCmVersion(MutableObject<String> reason) {
         return image -> {
-            boolean result = !image.getUuid().equals(currentImage.getUuid());
-            setReason(result, "There are no newer compatible images available.");
-            return result;
+            reason.setValue("There are no eligible images with supported Cloudera Manager or CDP version.");
+            return !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
         };
     }
 
-    private Predicate<Image> filterIgnoredCmVersion() {
+    private Predicate<Image> filterNonCmImages(MutableObject<String> reason) {
         return image -> {
-            boolean result = !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
-            setReason(result, "There are no eligible images with supported Cloudera Manager or CDP version.");
-            return result;
+            reason.setValue("There are no eligible images to upgrade available with Cloudera Manager packages.");
+            return isNotEmpty(image.getPackageVersions().get(CM_PACKAGE_KEY));
         };
     }
 
-    private Predicate<Image> filterNonCmImages() {
-        return image -> {
-            boolean result = isNotEmpty(image.getPackageVersions().get(CM_PACKAGE_KEY));
-            setReason(result, "There are no eligible images to upgrade available with Cloudera Manager packages.");
-            return result;
-        };
-    }
-
-    private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels) {
+    private Predicate<Image> validateCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels,
+            MutableObject<String> reason) {
         return image -> {
             boolean result = lockComponents ? (permitLockedComponentsUpgrade(image, activatedParcels))
                     : (permitCmAndStackUpgrade(currentImage, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
                     && permitCmAndStackUpgrade(currentImage, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY));
 
             if (lockComponents) {
-                setReason(result, "There is at least one activated parcel for which we cannot find image with matching version. "
+                reason.setValue("There is at least one activated parcel for which we cannot find image with matching version. "
                         + "Activated parcel(s): " + activatedParcels);
             } else {
-                setReason(result, "There is no proper Cloudera Manager or CDP version to upgrade.");
+                reason.setValue("There is no proper Cloudera Manager or CDP version to upgrade.");
             }
             return result;
         };
@@ -173,35 +164,21 @@ public class ClusterUpgradeImageFilter {
         return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, versionKey, buildNumberKey);
     }
 
-    private Predicate<Image> validateCloudPlatform(String cloudPlatform) {
+    private Predicate<Image> validateCloudPlatform(String cloudPlatform, MutableObject<String> reason) {
         return image -> {
-            boolean result = image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
-            if (!result) {
-                reason = String.format("There are no eligible images to upgrade for %s cloud platform.", cloudPlatform);
-            }
-            return result;
+            reason.setValue(String.format("There are no eligible images to upgrade for %s cloud platform.", cloudPlatform));
+            return image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform));
         };
     }
 
-    private Predicate<Image> validateOsVersion(Image currentImage) {
+    private Predicate<Image> validateOsVersion(Image currentImage, MutableObject<String> reason) {
         return image -> {
-            boolean result = isOsVersionsMatch(currentImage, image);
-            setReason(result, "There are no eligible images to upgrade with the same OS version.");
-            return result;
+            reason.setValue("There are no eligible images to upgrade with the same OS version.");
+            return isOsVersionsMatch(currentImage, image);
         };
     }
 
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
-    }
-
-    private String getReason(List<Image> images) {
-        return images.isEmpty() ? reason : null;
-    }
-
-    private void setReason(boolean result, String reasonText) {
-        if (!result) {
-            reason = reasonText;
-        }
     }
 }
