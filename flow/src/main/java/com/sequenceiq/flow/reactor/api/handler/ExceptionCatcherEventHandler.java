@@ -20,7 +20,7 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
     @Inject
     private EventBus eventBus;
 
-    protected abstract Selectable defaultFailureEvent(Long resourceId, Exception e);
+    protected abstract Selectable defaultFailureEvent(Long resourceId, Exception e, Event<T> event);
 
     protected abstract Selectable doAccept(HandlerEvent event);
 
@@ -36,7 +36,7 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
             }
         } catch (Exception e) {
             LOGGER.error("Something unexpected happened in handler {}", handlerName, e);
-            Selectable failureEvent = defaultFailureEvent(event.getData().getResourceId(), e);
+            Selectable failureEvent = defaultFailureEvent(event.getData().getResourceId(), e, event);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
     }

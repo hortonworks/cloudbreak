@@ -26,6 +26,8 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateD
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
+import reactor.bus.Event;
+
 @Component
 public class UpdateDnsSoaRecordsHandler extends ExceptionCatcherEventHandler<UpdateDnsSoaRecordsRequest> {
 
@@ -35,15 +37,14 @@ public class UpdateDnsSoaRecordsHandler extends ExceptionCatcherEventHandler<Upd
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new DownscaleFailureEvent(DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT.selector(),
-                resourceId, "Downscale Update DNS SOA Records", Set.of(), Map.of(), e);
-    }
-
-    @Override
     public String selector() {
         return EventSelectorUtil.selector(UpdateDnsSoaRecordsRequest.class);
     }
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpdateDnsSoaRecordsRequest> event) {
+        return new DownscaleFailureEvent(DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT.selector(),
+                resourceId, "Downscale Update DNS SOA Records", Set.of(), Map.of(), e);    }
 
     @Override
     protected Selectable doAccept(HandlerEvent event) {

@@ -24,6 +24,8 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.Coll
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesResponse;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
+import reactor.bus.Event;
+
 @Component
 public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHandler<CollectAdditionalHostnamesRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectAdditionalHostnamesHandler.class);
@@ -32,14 +34,14 @@ public class CollectAdditionalHostnamesHandler extends ExceptionCatcherEventHand
     private FreeIpaClientFactory freeIpaClientFactory;
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new DownscaleFailureEvent(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT.event(),
-                resourceId, "Downscale Collect Additional Hostnames", Set.of(), Map.of(), e);
+    public String selector() {
+        return EventSelectorUtil.selector(CollectAdditionalHostnamesRequest.class);
     }
 
     @Override
-    public String selector() {
-        return EventSelectorUtil.selector(CollectAdditionalHostnamesRequest.class);
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<CollectAdditionalHostnamesRequest> event) {
+        return new DownscaleFailureEvent(DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_FAILED_EVENT.event(),
+                resourceId, "Downscale Collect Additional Hostnames", Set.of(), Map.of(), e);
     }
 
     @Override

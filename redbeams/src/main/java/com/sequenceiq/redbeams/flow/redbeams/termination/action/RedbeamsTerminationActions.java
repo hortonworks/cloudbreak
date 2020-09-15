@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.action;
 
+import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.redbeams.flow.redbeams.termination.RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,6 +70,11 @@ public class RedbeamsTerminationActions {
                 return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(),
                         context.getDBStack());
             }
+
+            @Override
+            protected Object getFailurePayload(TerminateDatabaseServerSuccess payload, Optional<RedbeamsContext> flowContext, Exception ex) {
+                return new RedbeamsFailureEvent(payload.getResourceId(), ex, payload.isForced());
+            }
         };
     }
 
@@ -87,6 +95,11 @@ public class RedbeamsTerminationActions {
                 return new TerminateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
                         context.getDatabaseStack(), force);
             }
+
+            @Override
+            protected Object getFailurePayload(RedbeamsEvent payload, Optional<RedbeamsContext> flowContext, Exception ex) {
+                return new RedbeamsFailureEvent(payload.getResourceId(), ex, payload.isForced());
+            }
         };
     }
 
@@ -106,24 +119,27 @@ public class RedbeamsTerminationActions {
                 metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, Optional.of(context.getDBStack()));
                 dbStackService.delete(context.getDBStack().getId());
 
-                return new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
+                return new RedbeamsEvent(REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
+            }
+
+            @Override
+            protected Object getFailurePayload(DeregisterDatabaseServerSuccess payload, Optional<RedbeamsContext> flowContext, Exception ex) {
+                return null;
             }
         };
     }
 
     @Bean(name = "REDBEAMS_TERMINATION_FAILED_STATE")
-    public Action<?, ?> terminateFailed() {
+    public Action<?, ?> failedAction() {
         return new AbstractRedbeamsTerminationAction<>(RedbeamsFailureEvent.class) {
 
             // A lot here - some of this could go into some sort of failure handler class
             // compare to core StackCreationService::handleStackCreationFailure
 
             @Override
-            protected void prepareExecution(RedbeamsFailureEvent payload, Map<Object, Object> variables) {
-
+            protected void doExecute(RedbeamsContext context, RedbeamsFailureEvent payload, Map<Object, Object> variables) {
                 Exception failureException = payload.getException();
                 LOGGER.info("Error during database stack termination flow:", failureException);
-
                 if (failureException instanceof CancellationException || ExceptionUtils.getRootCause(failureException) instanceof CancellationException) {
                     LOGGER.debug("The flow has been cancelled");
                 } else {
@@ -132,13 +148,14 @@ public class RedbeamsTerminationActions {
                     Optional<DBStack> dbStack = dbStackStatusUpdater.updateStatus(payload.getResourceId(), DetailedDBStackStatus.DELETE_FAILED, errorReason);
                     metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FAILED, dbStack);
                 }
-
+                sendEvent(context, REDBEAMS_TERMINATION_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
             @Override
             protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-                                                        StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext,
-                                                        RedbeamsFailureEvent payload) {
+                StateContext<RedbeamsTerminationState,
+                RedbeamsTerminationEvent> stateContext,
+                RedbeamsFailureEvent payload) {
 
                 Flow flow = getFlow(flowParameters.getFlowId());
                 flow.setFlowFailed(payload.getException());
@@ -151,8 +168,8 @@ public class RedbeamsTerminationActions {
             }
 
             @Override
-            protected Selectable createRequest(RedbeamsContext context) {
-                return new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_FAILURE_HANDLED_EVENT.event(), 0L);
+            protected Object getFailurePayload(RedbeamsFailureEvent payload, Optional<RedbeamsContext> flowContext, Exception ex) {
+                return payload;
             }
         };
     }

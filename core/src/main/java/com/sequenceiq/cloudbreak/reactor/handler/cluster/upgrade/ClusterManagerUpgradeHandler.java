@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManage
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<ClusterManagerUpgradeRequest> {
 
@@ -28,7 +30,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterManagerUpgradeRequest> event) {
         return new ClusterUpgradeFailedEvent(resourceId, e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
     }
 

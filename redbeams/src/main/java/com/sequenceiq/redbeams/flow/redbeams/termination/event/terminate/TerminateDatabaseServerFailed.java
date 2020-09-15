@@ -7,8 +7,8 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
  */
 public class TerminateDatabaseServerFailed extends RedbeamsFailureEvent {
 
-    public TerminateDatabaseServerFailed(Long resourceId, Exception exception) {
-        super(resourceId, exception);
+    public TerminateDatabaseServerFailed(Long resourceId, Exception exception, boolean force) {
+        super(resourceId, exception, force);
     }
 
     @Override

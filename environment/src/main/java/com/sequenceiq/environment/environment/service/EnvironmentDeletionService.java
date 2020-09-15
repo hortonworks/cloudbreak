@@ -78,9 +78,7 @@ public class EnvironmentDeletionService {
         if (cascading) {
             reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
         } else {
-            if (!forced) {
-                checkIsEnvironmentDeletable(environment);
-            }
+            checkIsEnvironmentDeletable(environment);
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;

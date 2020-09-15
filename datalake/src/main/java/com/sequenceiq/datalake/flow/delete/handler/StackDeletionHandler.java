@@ -20,6 +20,8 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDeletionWaitRequest> {
 
@@ -40,8 +42,8 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxDeletionFailedEvent(resourceId, null, e);
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StackDeletionWaitRequest> event) {
+        return new SdxDeletionFailedEvent(resourceId, null, e, event.getData().isForced());
     }
 
     @Override
@@ -57,14 +59,17 @@ public class StackDeletionHandler extends ExceptionCatcherEventHandler<StackDele
             response = new StackDeletionSuccessEvent(sdxId, userId, stackDeletionWaitRequest.isForced());
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Deletion polling exited before timeout. Cause: ", userBreakException);
-            response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException);
+            response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException, stackDeletionWaitRequest.isForced());
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Deletion poller stopped for stack: {}", sdxId);
-            response = new SdxDeletionFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake stack deletion timed out after " + durationInMinutes + " minutes"));
+            response = new SdxDeletionFailedEvent(
+                    sdxId,
+                    userId,
+                    new PollerStoppedException("Datalake stack deletion timed out after " + durationInMinutes + " minutes"),
+                    stackDeletionWaitRequest.isForced());
         } catch (PollerException exception) {
             LOGGER.error("Deletion polling failed for stack: {}", sdxId);
-            response = new SdxDeletionFailedEvent(sdxId, userId, exception);
+            response = new SdxDeletionFailedEvent(sdxId, userId, exception, stackDeletionWaitRequest.isForced());
         }
         return response;
     }

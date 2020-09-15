@@ -9,6 +9,11 @@ public class RedbeamsFailureEvent extends RedbeamsEvent {
         this.exception = exception;
     }
 
+    public RedbeamsFailureEvent(Long resourceId, Exception exception, boolean force) {
+        super(resourceId, force);
+        this.exception = exception;
+    }
+
     public RedbeamsFailureEvent(String selector, Long resourceId, Exception exception) {
         super(selector, resourceId);
         this.exception = exception;

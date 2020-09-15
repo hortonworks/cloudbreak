@@ -10,6 +10,8 @@ import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLas
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskTriggerEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherEventHandler<HelloWorldFirstStepLongLastingTaskTriggerEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(HelloWorldFirstStepLongLastingTaskHandler.class);
@@ -20,7 +22,7 @@ public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherE
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<HelloWorldFirstStepLongLastingTaskTriggerEvent> event) {
         return new HelloWorldFirstStepLongLastingTaskFailureResponse(resourceId, e);
     }
 

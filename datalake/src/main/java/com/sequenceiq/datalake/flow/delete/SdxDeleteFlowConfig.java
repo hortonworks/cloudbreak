@@ -1,5 +1,11 @@
 package com.sequenceiq.datalake.flow.delete;
 
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.RDS_WAIT_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteState.SDX_DELETION_FAILED_STATE;
@@ -18,25 +24,35 @@ import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 @Component
 public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteState, SdxDeleteEvent> implements RetryableFlowConfiguration<SdxDeleteEvent> {
 
-    private static final List<Transition<SdxDeleteState, SdxDeleteEvent>> TRANSITIONS = new Transition.Builder<SdxDeleteState, SdxDeleteEvent>()
-            .defaultFailureEvent(SdxDeleteEvent.SDX_DELETE_FAILED_EVENT)
-            .from(INIT_STATE)
-            .to(SDX_DELETION_START_STATE)
-            .event(SdxDeleteEvent.SDX_DELETE_EVENT).noFailureEvent()
-            .from(SDX_DELETION_START_STATE)
-            .to(SDX_STACK_DELETION_IN_PROGRESS_STATE)
-            .event(SdxDeleteEvent.SDX_STACK_DELETION_IN_PROGRESS_EVENT).defaultFailureEvent()
-            .from(SDX_STACK_DELETION_IN_PROGRESS_STATE)
-            .to(SDX_DELETION_WAIT_RDS_STATE)
-            .event(SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT).defaultFailureEvent()
+    private static final List<Transition<SdxDeleteState, SdxDeleteEvent>> TRANSITIONS =
+            new Transition.Builder<SdxDeleteState, SdxDeleteEvent>()
+                .defaultFailureEvent(SDX_DELETE_FAILED_EVENT)
 
-            .from(SDX_DELETION_WAIT_RDS_STATE)
-            .to(SDX_DELETION_FINISHED_STATE)
-            .event(SdxDeleteEvent.RDS_WAIT_SUCCESS_EVENT).defaultFailureEvent()
+                .from(INIT_STATE)
+                .to(SDX_DELETION_START_STATE)
+                .event(SDX_DELETE_EVENT)
+                .noFailureEvent()
 
-            .from(SDX_DELETION_FINISHED_STATE)
-            .to(FINAL_STATE)
-            .event(SdxDeleteEvent.SDX_DELETE_FINALIZED_EVENT).defaultFailureEvent()
+                .from(SDX_DELETION_START_STATE)
+                .to(SDX_STACK_DELETION_IN_PROGRESS_STATE)
+                .event(SDX_STACK_DELETION_IN_PROGRESS_EVENT)
+                .defaultFailureEvent()
+
+                .from(SDX_STACK_DELETION_IN_PROGRESS_STATE)
+                .to(SDX_DELETION_WAIT_RDS_STATE)
+                .event(SDX_STACK_DELETION_SUCCESS_EVENT)
+                .defaultFailureEvent()
+
+                .from(SDX_DELETION_WAIT_RDS_STATE)
+                .to(SDX_DELETION_FINISHED_STATE)
+                .event(RDS_WAIT_SUCCESS_EVENT)
+                .defaultFailureEvent()
+
+                .from(SDX_DELETION_FINISHED_STATE)
+                .to(FINAL_STATE)
+                .event(SDX_DELETE_FINALIZED_EVENT)
+                .defaultFailureEvent()
+
             .build();
 
     private static final FlowEdgeConfig<SdxDeleteState, SdxDeleteEvent> EDGE_CONFIG =
@@ -54,7 +70,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
     @Override
     public SdxDeleteEvent[] getInitEvents() {
         return new SdxDeleteEvent[]{
-                SdxDeleteEvent.SDX_DELETE_EVENT
+                SDX_DELETE_EVENT
         };
     }
 

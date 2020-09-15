@@ -21,6 +21,8 @@ import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHandler<DatalakeDatabaseBackupWaitRequest> {
 
@@ -41,7 +43,7 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatalakeDatabaseBackupWaitRequest> event) {
         return new DatalakeDatabaseBackupFailedEvent(resourceId, null, e);
     }
 

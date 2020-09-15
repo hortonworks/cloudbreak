@@ -19,6 +19,8 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWaitRequest> {
 
@@ -37,7 +39,7 @@ public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWa
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxStartWaitRequest> event) {
         return new SdxStartFailedEvent(resourceId, null, e);
     }
 

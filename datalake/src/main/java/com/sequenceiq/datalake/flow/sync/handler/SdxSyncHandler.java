@@ -39,6 +39,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequest> {
 
@@ -66,7 +68,7 @@ public class SdxSyncHandler extends ExceptionCatcherEventHandler<SdxSyncWaitRequ
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxSyncWaitRequest> event) {
         return new SdxSyncFailedEvent(resourceId, null, e);
     }
 
