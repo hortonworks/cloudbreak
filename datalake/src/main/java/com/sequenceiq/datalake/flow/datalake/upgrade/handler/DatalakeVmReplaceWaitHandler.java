@@ -19,6 +19,8 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<DatalakeVmReplaceWaitRequest> {
 
@@ -37,7 +39,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatalakeVmReplaceWaitRequest> event) {
         return new DatalakeUpgradeFailedEvent(resourceId, null, e);
     }
 

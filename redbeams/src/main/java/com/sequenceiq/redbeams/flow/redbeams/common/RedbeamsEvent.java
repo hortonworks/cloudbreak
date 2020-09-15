@@ -4,12 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 
-public class RedbeamsEvent implements Selectable, Acceptable {
+public class RedbeamsEvent implements Selectable, Acceptable, Payload {
     private final String selector;
 
     private final Long resourceId;

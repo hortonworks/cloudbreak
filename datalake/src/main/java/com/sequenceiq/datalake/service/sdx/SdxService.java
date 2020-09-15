@@ -658,8 +658,15 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         if (!forced && sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
             throw new BadRequestException(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()));
         }
-        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
-        if (!attachedDistroXClusters.isEmpty()) {
+        Collection<StackViewV4Response> attachedDistroXClusters = null;
+        try {
+            attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
+        } catch (Exception ex) {
+            if (!forced) {
+                throw ex;
+            }
+        }
+        if (attachedDistroXClusters != null && !attachedDistroXClusters.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before SDX deletion [%s]",
                     String.join(", ", attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.toList()))));
         }

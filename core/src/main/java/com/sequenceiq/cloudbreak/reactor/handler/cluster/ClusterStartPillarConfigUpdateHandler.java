@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarCon
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class ClusterStartPillarConfigUpdateHandler extends ExceptionCatcherEventHandler<ClusterStartPillarConfigUpdateRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStartPillarConfigUpdateHandler.class);
@@ -27,7 +29,7 @@ public class ClusterStartPillarConfigUpdateHandler extends ExceptionCatcherEvent
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ClusterStartPillarConfigUpdateRequest> event) {
         return new PillarConfigUpdateFailed(resourceId, e);
     }
 

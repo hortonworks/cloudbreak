@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -465,6 +466,21 @@ class SdxServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.deleteSdx(USER_CRN, "sdx-cluster-name", false));
         assertEquals("The following Data Hub cluster(s) must be terminated before SDX deletion [existingDistroXCluster]", badRequestException.getMessage());
+    }
+
+    @Test
+    void testDeleteSdxWhenSdxHasAttachedDataHubsAndExceptionHappensWhenGettingDatahubsAndForceDeleteShouldInitiateSdxDeletionFlow() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        doThrow(new NotFoundException("nope")).when(distroxService).getAttachedDistroXClusters(anyString());
+
+        underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
     }
 
     @Test

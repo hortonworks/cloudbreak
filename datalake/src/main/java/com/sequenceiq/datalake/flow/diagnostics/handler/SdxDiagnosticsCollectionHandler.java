@@ -21,6 +21,8 @@ import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandler<SdxDiagnosticsWaitRequest> {
 
@@ -34,6 +36,11 @@ public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandle
 
     @Inject
     private SdxDiagnosticsFlowService diagnosticsFlowService;
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxDiagnosticsWaitRequest> event) {
+        return new SdxDiagnosticsFailedEvent(resourceId, null, null, e);
+    }
 
     @Override
     protected Selectable doAccept(HandlerEvent event) {
@@ -67,11 +74,6 @@ public class SdxDiagnosticsCollectionHandler extends ExceptionCatcherEventHandle
     @Override
     public String selector() {
         return "SdxDiagnosticsWaitRequest";
-    }
-
-    @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxDiagnosticsFailedEvent(resourceId, null, null, e);
     }
 
 }

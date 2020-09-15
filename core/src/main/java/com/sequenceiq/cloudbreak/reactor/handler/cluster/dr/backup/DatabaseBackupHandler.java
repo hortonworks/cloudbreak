@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<DatabaseBackupRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseBackupHandler.class);
@@ -58,7 +60,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatabaseBackupRequest> event) {
         return new DatabaseBackupFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
     }
 

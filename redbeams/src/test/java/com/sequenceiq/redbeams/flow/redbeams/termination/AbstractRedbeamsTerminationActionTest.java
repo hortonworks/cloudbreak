@@ -20,13 +20,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
-import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
+import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -45,7 +45,7 @@ public class AbstractRedbeamsTerminationActionTest {
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
     @InjectMocks
-    private AbstractRedbeamsTerminationAction underTest = new TestAction(TestPayload.class);
+    private AbstractRedbeamsTerminationAction underTest = new TestAction(RedbeamsEvent.class);
 
     private DBStack dbStack;
 
@@ -88,7 +88,7 @@ public class AbstractRedbeamsTerminationActionTest {
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
 
-        RedbeamsContext ctx = underTest.createFlowContext(flowParameters, stateContext, new TestPayload());
+        RedbeamsContext ctx = underTest.createFlowContext(flowParameters, stateContext, new RedbeamsEvent(1L));
 
         assertEquals(dbStack.getId(), ctx.getCloudContext().getId());
         assertEquals(dbStack.getName(), ctx.getCloudContext().getName());
@@ -104,15 +104,8 @@ public class AbstractRedbeamsTerminationActionTest {
         assertEquals(databaseStack, ctx.getDatabaseStack());
     }
 
-    private static class TestPayload implements Payload {
-        @Override
-        public Long getResourceId() {
-            return 1L;
-        }
-    }
-
-    private static class TestAction extends AbstractRedbeamsTerminationAction<TestPayload> {
-        TestAction(Class<TestPayload> payloadClass) {
+    private static class TestAction extends AbstractRedbeamsTerminationAction<RedbeamsEvent> {
+        TestAction(Class<RedbeamsEvent> payloadClass) {
             super(payloadClass);
         }
     }

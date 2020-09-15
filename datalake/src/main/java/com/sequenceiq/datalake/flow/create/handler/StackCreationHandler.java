@@ -25,6 +25,8 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
 
@@ -51,7 +53,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StackCreationWaitRequest> event) {
         return new SdxCreateFailedEvent(resourceId, null, e);
     }
 

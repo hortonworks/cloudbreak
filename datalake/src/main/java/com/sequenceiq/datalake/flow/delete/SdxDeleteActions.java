@@ -76,7 +76,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxDeleteStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }
@@ -98,7 +98,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxDeleteStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }
@@ -120,7 +120,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(StackDeletionSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }

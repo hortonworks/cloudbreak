@@ -6,6 +6,8 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 class ExceptionCatcherEventHandlerTestHelper extends ExceptionCatcherEventHandler<Payload> {
 
@@ -18,7 +20,7 @@ class ExceptionCatcherEventHandlerTestHelper extends ExceptionCatcherEventHandle
     private Selectable sendEventObject;
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<Payload> event) {
         return failureEvent;
     }
 
