@@ -176,6 +176,26 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenUseExistingResourceGroupAndEmptyResourceGroupUsageThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. If you have provided the resource group name for your resources then please provide the resource group usage pattern too.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
     public void testWhenUseExistingResourceGroupAndNotExistsThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -238,6 +258,30 @@ public class AzureParameterValidatorTest {
 
         assertTrue(validationResult.hasError());
         assertEquals("1. You specified to use a single resource group for all of your resources, but that feature is currently disabled",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWhenDedicatedStorageAccountFeatureTurnedOffAndUseSingleThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString(), anyString())).thenReturn(false);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
     }
 

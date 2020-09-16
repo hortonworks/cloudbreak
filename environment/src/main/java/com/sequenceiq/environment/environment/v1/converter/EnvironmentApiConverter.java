@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -21,7 +20,6 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -77,22 +75,18 @@ public class EnvironmentApiConverter {
 
     private final NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
-    private final EntitlementService entitlementService;
-
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
             TunnelConverter tunnelConverter,
             AccountTelemetryService accountTelemetryService,
             CredentialService credentialService,
             FreeIpaConverter freeIpaConverter,
-            NetworkRequestToDtoConverter networkRequestToDtoConverter,
-            EntitlementService entitlementService) {
+            NetworkRequestToDtoConverter networkRequestToDtoConverter) {
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
         this.tunnelConverter = tunnelConverter;
         this.credentialService = credentialService;
         this.freeIpaConverter = freeIpaConverter;
         this.networkRequestToDtoConverter = networkRequestToDtoConverter;
-        this.entitlementService = entitlementService;
     }
 
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
@@ -203,7 +197,8 @@ public class EnvironmentApiConverter {
                 .withResourceGroup(
                         Optional.ofNullable(azureEnvironmentParameters)
                                 .map(AzureEnvironmentParameters::getResourceGroup)
-                                .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage()))
+                                .filter(resourceGroup -> Objects.nonNull(resourceGroup.getResourceGroupUsage())
+                                        || !StringUtils.isEmpty(resourceGroup.getName()))
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
                                 .orElse(buildDefaultResourceGroupDto())
                 ).build();
@@ -226,15 +221,19 @@ public class EnvironmentApiConverter {
     }
 
     private ResourceGroupUsagePattern resourceGroupUsageToResourceGroupUsagePattern(ResourceGroupUsage resourceGroupUsage) {
-        switch (resourceGroupUsage) {
-            case SINGLE:
-                return ResourceGroupUsagePattern.USE_SINGLE;
-            case MULTIPLE:
-                return ResourceGroupUsagePattern.USE_MULTIPLE;
-            case SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
-                return ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
-            default:
-                throw new RuntimeException("Unknown usage pattern: %s" + resourceGroupUsage);
+        if (Objects.nonNull(resourceGroupUsage)) {
+            switch (resourceGroupUsage) {
+                case SINGLE:
+                    return ResourceGroupUsagePattern.USE_SINGLE;
+                case MULTIPLE:
+                    return ResourceGroupUsagePattern.USE_MULTIPLE;
+                case SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
+                    return ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
+                default:
+                    throw new RuntimeException("Unknown usage pattern: %s" + resourceGroupUsage);
+            }
+        } else {
+            return null;
         }
     }
 
@@ -321,16 +320,5 @@ public class EnvironmentApiConverter {
         features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
         features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
         return features;
-    }
-
-    private boolean azureSingleResourceGroupDeploymentEnabled() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        boolean azureSingleResourceGroupDeploymentEnabled =
-                entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, accountId);
-        LOGGER.debug("Azure Single Resource Group deployment model is {}, generating default value accordingly!",
-                azureSingleResourceGroupDeploymentEnabled
-                        ? "enabled"
-                        : "disabled");
-        return azureSingleResourceGroupDeploymentEnabled;
     }
 }

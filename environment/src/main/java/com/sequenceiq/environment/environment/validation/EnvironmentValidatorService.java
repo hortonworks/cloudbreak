@@ -104,7 +104,7 @@ public class EnvironmentValidatorService {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String cloudPlatform = credentialService.getCloudPlatformByCredential(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
-                "Environment request is not for AWS.");
+                "Environment request is not for cloud platform AWS.");
 
         resultBuilder.ifError(() -> StringUtils.isBlank(Optional.ofNullable(environmentRequest.getAws())
                 .map(AwsEnvironmentParameters::getS3guard)

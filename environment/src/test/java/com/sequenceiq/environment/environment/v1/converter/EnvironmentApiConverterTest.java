@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -221,6 +222,35 @@ public class EnvironmentApiConverterTest {
 
         assertEquals(ResourceGroupUsagePattern.USE_SINGLE,
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
+        assertEquals("myResourceGroup",
+                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+    }
+
+    @Test
+    void testAzureSingleRgEnabledAndAzureRequestWithoutUsageAndWithName() {
+        EnvironmentRequest request = createEnvironmentRequest(AZURE);
+        request.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(
+                        AzureResourceGroup.builder()
+                                .withName("myResourceGroup")
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+
+        assertNull(actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
         assertEquals("myResourceGroup",
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
     }
