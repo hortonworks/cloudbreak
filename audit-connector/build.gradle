@@ -17,8 +17,6 @@ dependencies {
     compile project(':grpc-common')
     compile project(':auth-connector')
     compile project(':structuredevent-model')
-    compile project(':structuredevent-service-cdp')
-    compile project(':structuredevent-service-legacy')
     compile project(':flow')
 
     implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: '2.0.3.RELEASE'

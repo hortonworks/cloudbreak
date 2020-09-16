@@ -20,4 +20,5 @@ dependencies {
     compile project(':structuredevent-model')
     compile project(':workspace')
     compile project(':cloud-reactor')
+    compile project(':audit-connector')
 }
