@@ -72,6 +72,14 @@
       "AllowedPattern" : "ami-[a-z0-9]*",
       "ConstraintDescription" : "must follow pattern: ami-xxxxxxxx"
     },
+    <#if availabilitySetNeeded>
+    "AvailabilitySet" : {
+        "Description" : "Availability set name",
+        "Type" : "String",
+        "MinLength": "1",
+        "MaxLength": "50"
+    },
+    </#if>
 
     "RootDeviceName" : {
       "Description" : "Name of the root device that comes with the AMI",
