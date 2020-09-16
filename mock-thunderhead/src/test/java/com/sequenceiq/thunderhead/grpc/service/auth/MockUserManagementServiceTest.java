@@ -27,9 +27,11 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
-import com.sequenceiq.thunderhead.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.internal.testing.StreamRecorder;
 
@@ -40,6 +42,8 @@ public class MockUserManagementServiceTest {
     private static final String VALID_LICENSE = "License file content";
 
     private static final String SAMPLE_SSH_PUBLIC_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGHA5cmj5+agIalPxw85jFrrZcSh3dl06ukeqKu6JVQm nobody@example.com";
+
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -166,7 +170,7 @@ public class MockUserManagementServiceTest {
         Account account = res.getAccount();
         List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
         assertThat(entitlements).contains("CDP_AZURE", "CDP_GCP", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
-                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV");
+                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
     static Object[][] conditionalEntitlementDataProvider() {
@@ -190,14 +194,28 @@ public class MockUserManagementServiceTest {
                 {"razEnabled false", "razEnabled", false, "CDP_RAZ", false},
                 {"razEnabled true", "razEnabled", true, "CDP_RAZ", true},
 
+                {"mediumDutySdxEnabled false", "mediumDutySdxEnabled", false, "CDP_MEDIUM_DUTY_SDX", false},
+                {"mediumDutySdxEnabled true", "mediumDutySdxEnabled", true, "CDP_MEDIUM_DUTY_SDX", true},
+
                 {"enableFreeIpaDlEbsEncryption false", "enableFreeIpaDlEbsEncryption", false, "CDP_FREEIPA_DL_EBS_ENCRYPTION", false},
                 {"enableFreeIpaDlEbsEncryption true", "enableFreeIpaDlEbsEncryption", true, "CDP_FREEIPA_DL_EBS_ENCRYPTION", true},
 
                 {"enableAzureSingleResourceGroupDeployment false", "enableAzureSingleResourceGroupDeployment", false, "CDP_AZURE_SINGLE_RESOURCE_GROUP", false},
                 {"enableAzureSingleResourceGroupDeployment true", "enableAzureSingleResourceGroupDeployment", true, "CDP_AZURE_SINGLE_RESOURCE_GROUP", true},
 
+                {"enableAzureSingleResourceGroupDedicatedStorageAccount false", "enableAzureSingleResourceGroupDedicatedStorageAccount", false,
+                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", false},
+                {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
+                        "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
+
                 {"enableFastEbsEncryption false", "enableFastEbsEncryption", false, "CDP_CB_FAST_EBS_ENCRYPTION", false},
                 {"enableFastEbsEncryption true", "enableFastEbsEncryption", true, "CDP_CB_FAST_EBS_ENCRYPTION", true},
+
+                {"enableCloudIdentityMappinng false", "enableCloudIdentityMappinng", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
+                {"enableCloudIdentityMappinng true", "enableCloudIdentityMappinng", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
+
+                {"enableInternalRepositoryForUpgrade false", "enableInternalRepositoryForUpgrade", false, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", false},
+                {"enableInternalRepositoryForUpgrade true", "enableInternalRepositoryForUpgrade", true, "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", true},
         };
     }
 
@@ -224,6 +242,36 @@ public class MockUserManagementServiceTest {
         } else {
             assertThat(entitlements).doesNotContain(entitlementName);
         }
+    }
+
+    @Test
+    void getAccountTestIncludesIds() {
+        ReflectionTestUtils.setField(underTest, "cbLicense", VALID_LICENSE);
+        underTest.initializeWorkloadPasswordPolicy();
+
+        GetAccountRequest req = GetAccountRequest.newBuilder()
+                .setAccountId(ACCOUNT_ID)
+                .build();
+        StreamRecorder<GetAccountResponse> observer = StreamRecorder.create();
+
+        underTest.getAccount(req, observer);
+
+        assertThat(observer.getValues().size()).isEqualTo(1);
+        GetAccountResponse res = observer.getValues().get(0);
+        assertThat(res.hasAccount()).isTrue();
+        Account account = res.getAccount();
+        assertThat(account.getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(account.getExternalAccountId()).isEqualTo("external-" + ACCOUNT_ID);
+    }
+
+    @Test
+    void listTermsTest() {
+        ListTermsRequest req = ListTermsRequest.getDefaultInstance();
+        StreamRecorder<ListTermsResponse> observer = StreamRecorder.create();
+
+        underTest.listTerms(req, observer);
+
+        assertThat(observer.getValues().size()).isEqualTo(1);
     }
 
 }

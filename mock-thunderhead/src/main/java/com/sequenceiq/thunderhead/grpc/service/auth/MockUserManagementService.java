@@ -85,10 +85,12 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
@@ -126,16 +128,16 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
-import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
-import com.sequenceiq.thunderhead.model.AltusToken;
-import com.sequenceiq.thunderhead.util.CrnHelper;
-import com.sequenceiq.thunderhead.util.IniUtil;
-import com.sequenceiq.thunderhead.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
+import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
+import com.sequenceiq.thunderhead.model.AltusToken;
+import com.sequenceiq.thunderhead.util.CrnHelper;
+import com.sequenceiq.thunderhead.util.IniUtil;
+import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -209,6 +211,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
 
     private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
+
+    // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
+    private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
@@ -590,7 +595,10 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
+                                .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .setPasswordPolicy(workloadPasswordPolicy)
+                                .setAccountId(request.getAccountId())
+                                .setExternalAccountId("external-" + request.getAccountId())
                                 .build())
                         .build());
         responseObserver.onCompleted();
@@ -600,6 +608,14 @@ public class MockUserManagementService extends UserManagementImplBase {
         return Entitlement.newBuilder()
                 .setEntitlementName(entitlementName)
                 .build();
+    }
+
+    @Override
+    public void listTerms(ListTermsRequest request, StreamObserver<ListTermsResponse> responseObserver) {
+        responseObserver.onNext(
+                ListTermsResponse.newBuilder().build()
+        );
+        responseObserver.onCompleted();
     }
 
     @Override
