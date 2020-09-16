@@ -48,7 +48,7 @@
       },
       {
         "nodeCount": 3,
-        "name": "zookeeper",
+        "name": "zk",
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
