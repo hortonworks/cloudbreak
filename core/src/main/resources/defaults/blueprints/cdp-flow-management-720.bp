@@ -269,7 +269,7 @@
     ],
     "hostTemplates": [
       {
-        "refName": "zookeeper",
+        "refName": "zk",
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "zookeeper-SERVER-BASE"
