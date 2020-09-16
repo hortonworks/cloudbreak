@@ -45,9 +45,6 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',    version: opentracingSpringJaegerStarterVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
 
   runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
   runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'

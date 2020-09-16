@@ -200,9 +200,6 @@ dependencies {
   compile group: 'io.springfox',                       name: 'springfox-core'
   compile group: 'io.springfox',                       name: 'springfox-swagger-ui'
 
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-spring-jaeger-starter',       version: opentracingSpringJaegerStarterVersion
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-jaxrs2',                      version: opentracingJaxrs2Version
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-jdbc',                        version: opentracingJdbcVersion
   compile group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
