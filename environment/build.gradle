@@ -45,6 +45,7 @@ dependencies {
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")
+    implementation     project(":structuredevent-model")
     implementation     project(":structuredevent-service-cdp")
     implementation     project(':status-checker')
 

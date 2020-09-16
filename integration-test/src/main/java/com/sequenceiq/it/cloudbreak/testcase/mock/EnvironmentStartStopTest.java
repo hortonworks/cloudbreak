@@ -11,8 +11,9 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentListStructuredEventAssertions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.assertion.audit.EnvironmentAuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -51,6 +52,9 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private EnvironmentListStructuredEventAssertions environmentListStructuredEventAssertions;
+
+    @Inject
+    private EnvironmentAuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -130,6 +134,10 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
                 .when(environmentTestClient.delete())
                 .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
+                .then(auditGrpcServiceAssertion::create)
+                .then(auditGrpcServiceAssertion::delete)
+                .then(auditGrpcServiceAssertion::start)
+                .then(auditGrpcServiceAssertion::stop)
                 .then(environmentListStructuredEventAssertions::checkCreateEvents)
                 .then(environmentListStructuredEventAssertions::checkStopEvents)
                 .then(environmentListStructuredEventAssertions::checkStartEvents)

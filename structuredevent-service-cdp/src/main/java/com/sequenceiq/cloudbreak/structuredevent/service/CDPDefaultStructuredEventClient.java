@@ -23,7 +23,12 @@ public class CDPDefaultStructuredEventClient {
         for (CDPStructuredEventSenderService structuredEventSenderService : structuredEventServices) {
             LOGGER.trace("Send event {} with eventsender {}", structuredEvent, structuredEventSenderService.getClass());
             if (structuredEventSenderService.isEnabled()) {
-                structuredEventSenderService.create(structuredEvent);
+                try {
+                    structuredEventSenderService.create(structuredEvent);
+                } catch (Exception e) {
+                    LOGGER.warn("Cannot create structured event with '{}'. Error: {}", structuredEventSenderService.getClass().getSimpleName(),
+                            e.getMessage(), e);
+                }
             }
         }
     }

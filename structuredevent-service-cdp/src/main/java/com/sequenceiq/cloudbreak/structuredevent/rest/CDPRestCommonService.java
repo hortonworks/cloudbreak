@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 
@@ -29,14 +30,14 @@ public class CDPRestCommonService {
 
     public static final List<String> CRNS_PATHS = List.of("crns");
 
-    public Map<String, String> addClusterCrnAndNameIfPresent(RestCallDetails restCallDetails, Map<String, String> restParams, String nameField,
-            String crnField) {
+    public Map<String, String> addClusterCrnAndNameIfPresent(RestCallDetails restCallDetails, CDPOperationDetails operationDetails,
+            Map<String, String> restParams, String nameField, String crnField) {
         Map<String, String> params = new HashMap<>();
         RestRequestDetails restRequest = restCallDetails.getRestRequest();
         Json requestJson = getJson(restRequest.getBody());
         Json responseJson = getJson(restCallDetails.getRestResponse().getBody());
-        String resourceCrn = getCrn(requestJson, responseJson, restRequest, restParams, crnField);
-        String name = getName(requestJson, responseJson, restRequest, restParams, nameField);
+        String resourceCrn = getCrn(requestJson, responseJson, operationDetails, restParams, crnField);
+        String name = getName(requestJson, responseJson, operationDetails, restParams, nameField);
 
         checkNameOrCrnProvided(restRequest, resourceCrn, name);
 
@@ -50,18 +51,26 @@ public class CDPRestCommonService {
         return params;
     }
 
-    private String getName(Json requestJson, Json responseJson, RestRequestDetails request, Map<String, String> restParams, String nameField) {
-        if (StringUtils.isEmpty(restParams.get(nameField))) {
+    private String getName(Json requestJson, Json responseJson, CDPOperationDetails operationDetails, Map<String, String> restParams, String nameField) {
+        String name = restParams.get(nameField);
+        if (StringUtils.isEmpty(name) && operationDetails != null) {
+            name = operationDetails.getResourceName();
+        }
+        if (StringUtils.isEmpty(name)) {
             return getResourceId(requestJson, responseJson, NAME_PATHS, NAMES_PATHS, restParams, "name");
         }
-        return restParams.get(nameField);
+        return name;
     }
 
-    private String getCrn(Json requestJson, Json responseJson, RestRequestDetails request, Map<String, String> restParams, String crnField) {
-        if (StringUtils.isEmpty(restParams.get(crnField))) {
+    private String getCrn(Json requestJson, Json responseJson, CDPOperationDetails operationDetails, Map<String, String> restParams, String crnField) {
+        String crn = restParams.get(crnField);
+        if (StringUtils.isEmpty(crn) && operationDetails != null) {
+            crn = operationDetails.getResourceCrn();
+        }
+        if (StringUtils.isEmpty(crn)) {
             return getResourceId(requestJson, responseJson, RESOURCE_CRN_PATHS, CRNS_PATHS, restParams, "crn");
         }
-        return restParams.get(crnField);
+        return crn;
     }
 
     private String getResourceId(Json requestJson, Json responseJson, List<String> paths, List<String> pluralPaths, Map<String, String> restParams,

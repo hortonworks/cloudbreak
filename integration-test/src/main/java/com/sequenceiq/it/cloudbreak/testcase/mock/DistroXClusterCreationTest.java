@@ -19,7 +19,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
-import com.sequenceiq.it.cloudbreak.assertion.audit.AuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -74,7 +74,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
+    private DatahubAuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -112,10 +112,10 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
                 .then(DistroXClusterCreationTest::distroxServiceTypeTagExists)
-                .then(auditGrpcServiceAssertion::distroxCreate)
+                .then(auditGrpcServiceAssertion::create)
                 .when(distroXClient.forceDelete(), withoutLogError())
                 .await(STACK_DELETED)
-                .then(auditGrpcServiceAssertion::distroxDelete)
+                .then(auditGrpcServiceAssertion::delete)
                 .validate();
     }
 

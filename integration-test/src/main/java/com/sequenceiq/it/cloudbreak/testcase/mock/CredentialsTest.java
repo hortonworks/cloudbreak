@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.audit.CredentialAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.credential.CredentialTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -20,6 +21,9 @@ public class CredentialsTest extends AbstractIntegrationTest {
     @Inject
     private CredentialTestAssertion credentialTestAssertion;
 
+    @Inject
+    private CredentialAuditGrpcServiceAssertion credentialAuditGrpcServiceAssertion;
+
     @Override
     protected void setupTest(TestContext testContext) {
 
@@ -29,8 +33,8 @@ public class CredentialsTest extends AbstractIntegrationTest {
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "valid create environment request is sent, then a valid force delete request is sent",
-            then = "the environment should be deleted")
+            when = "create/modify/delete a credential;",
+            then = "validate the events")
     public void testCredentialEvents(TestContext testContext) {
         createDefaultUser(testContext);
         testContext
@@ -39,6 +43,9 @@ public class CredentialsTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.modify())
                 .when(credentialTestClient.delete())
                 .then(credentialTestAssertion.checkStructuredEvents())
+                .then(credentialAuditGrpcServiceAssertion::create)
+                .then(credentialAuditGrpcServiceAssertion::delete)
+                .then(credentialAuditGrpcServiceAssertion::modify)
                 .validate();
     }
 }

@@ -213,7 +213,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
                 String serviceId = authenticatedUserService.getServiceAccountId();
                     cloudbreakUser = new CloudbreakUser(serviceId, serviceId, serviceId, serviceId, serviceId);
             }
-            Map<String, String> params = restCommonService.addClusterCrnAndNameIfPresent(restCall, restParams, RESOURCE_NAME, RESOURCE_CRN);
+            Map<String, String> params = restCommonService.addClusterCrnAndNameIfPresent(restCall, null, restParams, RESOURCE_NAME, RESOURCE_CRN);
             fetchDataFromDbIfNeed(params);
             restParams.putAll(params);
             CDPOperationDetails cdpOperationDetails = createCDPOperationDetails(restParams, requestTime, cloudbreakUser);
@@ -298,7 +298,8 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
                 cbVersion,
                 StringUtils.isNotEmpty(cloudbreakUser.getTenant()) ? cloudbreakUser.getTenant() : ThreadBasedUserCrnProvider.getAccountId(),
                 resourceCrn,
-                cloudbreakUser.getUserCrn(),
+                StringUtils.isNotEmpty(cloudbreakUser.getUserCrn()) ? cloudbreakUser.getUserCrn() : ThreadBasedUserCrnProvider.getUserCrn(),
+//                cloudbreakUser.getUserCrn(),
                 null,
                 resourceEvent);
 
