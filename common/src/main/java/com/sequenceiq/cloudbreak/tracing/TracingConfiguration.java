@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.tracing;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +20,7 @@ import io.opentracing.contrib.jaxrs2.client.ClientSpanDecorator;
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerSpanDecorator;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
+import io.opentracing.contrib.jdbc.TracingDriver;
 import io.opentracing.util.GlobalTracer;
 
 @Configuration
@@ -25,9 +28,19 @@ public class TracingConfiguration {
 
     private final Tracer tracer;
 
+    @Value("${opentracing.jdbc.enabled:true}")
+    private boolean jdbcEnabled;
+
     public TracingConfiguration(Tracer tracer) {
         this.tracer = tracer;
         GlobalTracer.registerIfAbsent(tracer);
+    }
+
+    @PostConstruct
+    public void initTracingProperties() {
+        TracingDriver.setTraceEnabled(jdbcEnabled);
+        TracingDriver.setInterceptorProperty(true);
+        TracingDriver.setInterceptorMode(true);
     }
 
     @Bean
