@@ -70,8 +70,8 @@ public class AuditGrpcServiceAssertion {
         if (restEvents.isEmpty()) {
             throw new TestFailException("Rest audit log must contains only 1 item but has " + restEvents.size());
         }
-        if (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0) {
-            throw new TestFailException("Flow audit log must contains only 1 item but has " + restEvents.size());
+        if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
+            throw new TestFailException("Flow audit log must contains minimum 2 items but has " + flowEvents.size());
         }
     }
 }
