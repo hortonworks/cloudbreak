@@ -180,16 +180,16 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     private SecurityGroupRequest mapSecurityGroupRequest(InstanceGroupV4Request request) {
         SecurityGroupRequest securityGroup = new SecurityGroupRequest();
         securityGroup.setSecurityRules(request.getSecurityGroup().getSecurityRules()
-            .stream()
-            .map(sgreq -> {
-                SecurityRuleRequest rule = new SecurityRuleRequest();
-                rule.setModifiable(sgreq.isModifiable());
-                rule.setPorts(sgreq.getPorts());
-                rule.setProtocol(sgreq.getProtocol());
-                rule.setSubnet(sgreq.getSubnet());
-                return rule;
-            })
-            .collect(Collectors.toList()));
+                .stream()
+                .map(sgreq -> {
+                    SecurityRuleRequest rule = new SecurityRuleRequest();
+                    rule.setModifiable(sgreq.isModifiable());
+                    rule.setPorts(sgreq.getPorts());
+                    rule.setProtocol(sgreq.getProtocol());
+                    rule.setSubnet(sgreq.getSubnet());
+                    return rule;
+                })
+                .collect(Collectors.toList()));
         securityGroup.setSecurityGroupIds(request.getSecurityGroup().getSecurityGroupIds());
         return securityGroup;
     }
@@ -198,15 +198,15 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         InstanceTemplateRequest template = new InstanceTemplateRequest();
         template.setInstanceType(request.getTemplate().getInstanceType());
         template.setAttachedVolumes(request.getTemplate().getAttachedVolumes()
-            .stream()
-            .map(volreq -> {
-                VolumeRequest volumeRequest = new VolumeRequest();
-                volumeRequest.setCount(volreq.getCount());
-                volumeRequest.setSize(volreq.getSize());
-                volumeRequest.setType(volreq.getType());
-                return volumeRequest;
-            })
-            .collect(Collectors.toSet()));
+                .stream()
+                .map(volreq -> {
+                    VolumeRequest volumeRequest = new VolumeRequest();
+                    volumeRequest.setCount(volreq.getCount());
+                    volumeRequest.setSize(volreq.getSize());
+                    volumeRequest.setType(volreq.getType());
+                    return volumeRequest;
+                })
+                .collect(Collectors.toSet()));
         Optional.ofNullable(request.getTemplate().getAws())
                 .map(AwsInstanceTemplateV4Parameters::getSpot)
                 .map(AwsInstanceTemplateV4SpotParameters::getPercentage)
@@ -321,7 +321,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         if (getResponse() == null) {
             return null;
         }
-        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("FreeIpa", null, getResponse(), hasSpotTermination);

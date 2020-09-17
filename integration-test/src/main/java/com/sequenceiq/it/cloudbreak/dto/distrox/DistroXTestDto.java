@@ -286,7 +286,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
                 null);
-        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("DistroX", auditEvents, getResponse(), hasSpotTermination);

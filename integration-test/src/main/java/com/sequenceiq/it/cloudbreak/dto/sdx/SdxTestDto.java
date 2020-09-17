@@ -300,7 +300,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());
-        boolean hasSpotTermination = getResponse().getStackV4Response().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);
