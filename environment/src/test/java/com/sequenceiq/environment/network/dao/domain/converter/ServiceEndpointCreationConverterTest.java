@@ -3,7 +3,7 @@ package com.sequenceiq.environment.network.dao.domain.converter;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 
 public class ServiceEndpointCreationConverterTest {
     private final ServiceEndpointCreationConverter serviceEndpointCreationConverter = new ServiceEndpointCreationConverter();

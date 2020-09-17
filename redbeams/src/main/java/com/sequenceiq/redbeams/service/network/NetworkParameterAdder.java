@@ -3,11 +3,16 @@ package com.sequenceiq.redbeams.service.network;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
+import com.sequenceiq.common.model.EndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 
 @Service
@@ -28,12 +33,26 @@ public class NetworkParameterAdder {
     static final String SUBNET_ID = "subnetId";
 
     @VisibleForTesting
+    static final String ENDPOINT_TYPE = "endpointType";
+
+    @VisibleForTesting
+    static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
+
+    @VisibleForTesting
     static final String AVAILABILITY_ZONE = "availabilityZone";
 
     // These constants must match those in AzureNetworkView
-
     @VisibleForTesting
     static final String SUBNETS = "subnets";
+
+    @Inject
+    private ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter;
+
+    @Inject
+    private SubnetListerService subnetListerService;
+
+    @Inject
+    private SubnetChooserService subnetChooserService;
 
     public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
@@ -52,7 +71,8 @@ public class NetworkParameterAdder {
         return parameters;
     }
 
-    public Map<String, Object> addParameters(Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform) {
+    public Map<String, Object> addParameters(
+            Map<String, Object> parameters, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform, DBStack dbStack) {
         switch (cloudPlatform) {
             case AWS:
                 parameters.put(VPC_CIDR, environmentResponse.getNetwork().getNetworkCidr());
@@ -60,8 +80,12 @@ public class NetworkParameterAdder {
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
                 break;
             case AZURE:
-                // oddly, nothing to pass on yet
-                //parameters.put(VPC_ID, environmentResponse.getNetwork().getAzure().getNetworkId());
+                EndpointType endpointType
+                        = serviceEndpointCreationToEndpointTypeConverter.convert(environmentResponse.getNetwork().getServiceEndpointCreation());
+                parameters.put(ENDPOINT_TYPE, endpointType);
+                if (EndpointType.USE_PRIVATE_ENDPOINT == endpointType) {
+                    parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
+                }
                 break;
             case GCP:
                 // oddly, nothing to pass on yet
@@ -73,5 +97,16 @@ public class NetworkParameterAdder {
                 throw new RedbeamsException(String.format("Support for cloud platform %s not yet added", cloudPlatform.name()));
         }
         return parameters;
+    }
+
+    private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse detailedEnvironmentResponse, DBStack dbStack) {
+        String subscriptionId = subnetListerService.getAzureSubscriptionId(detailedEnvironmentResponse.getCrn());
+        return subnetChooserService.chooseSubnetForPrivateEndpoint(
+                detailedEnvironmentResponse.getNetwork().getSubnetMetas().values(), dbStack, detailedEnvironmentResponse.getNetwork().isExistingNetwork())
+                .stream()
+                .findFirst()
+                .map(csn -> subnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
+                .map(sn -> sn.getId()).orElseThrow(() -> new RedbeamsException("It is not possible to create private endpoints for database: " +
+                        "there are no subnets with privateEndpointNetworkPolicies disabled"));
     }
 }

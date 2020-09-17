@@ -221,10 +221,11 @@ public class AzureDnsZoneService {
         String deploymentName = generateDeploymentName(enabledPrivateEndpointServices, suffix);
 
         try {
-            if (azureClient.templateDeploymentExists(resourceGroup, deploymentName)) {
-                LOGGER.debug("Deleting already existing deployment {}", deploymentName);
-                azureClient.deleteTemplateDeployment(resourceGroup, deploymentName);
-            }
+            // TODO: this code seems to create trouble when parallel creating many environments in a fresh RG
+//            if (azureClient.templateDeploymentExists(resourceGroup, deploymentName)) {
+//                LOGGER.debug("Deleting already existing deployment {}", deploymentName);
+//                azureClient.deleteTemplateDeployment(resourceGroup, deploymentName);
+//            }
             String template = azureNetworkDnsZoneTemplateBuilder.build(parameters);
             String parametersMapAsString = new Json(Map.of()).getValue();
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.common.model.EndpointType.USE_PRIVATE_ENDPOINT;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +66,7 @@ public class AzureNetworkTemplateBuilder {
         model.put("resourceGroupName", resourceGroupName);
         model.put("noPublicIp", networkRequest.isNoPublicIp());
         model.put("noFirewallRules", false);
+        model.put("usePrivateEndpoints", USE_PRIVATE_ENDPOINT.equals(networkRequest.getEndpointType()));
         return model;
     }
 }

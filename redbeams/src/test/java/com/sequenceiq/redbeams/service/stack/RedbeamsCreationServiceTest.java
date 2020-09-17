@@ -95,7 +95,7 @@ class RedbeamsCreationServiceTest {
     private CloudConnector<Object> connector;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
         dbStack = new DBStack();
         // this wouldn't really be set before launchDatabaseServer is called
         dbStack.setId(DB_STACK_ID);

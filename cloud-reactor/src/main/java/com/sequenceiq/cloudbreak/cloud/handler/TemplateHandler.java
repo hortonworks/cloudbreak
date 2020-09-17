@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateResult;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 
 import reactor.bus.Event;
@@ -36,7 +36,7 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
             if (connector != null) {
                 template = connector.resources().getStackTemplate();
             }
-        } catch (TemplatingDoesNotSupportedException ignored) {
+        } catch (TemplatingNotSupportedException ignored) {
         }
         GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request.getResourceId(), template);
         request.getResult().onNext(getPlatformTemplateResult);

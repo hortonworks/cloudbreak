@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -22,13 +22,13 @@ public class OpenStackNativeResourceConnector extends AbstractResourceConnector 
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getStackTemplate() throws TemplatingNotSupportedException {
+        throw new TemplatingNotSupportedException();
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getDBStackTemplate() throws TemplatingNotSupportedException {
+        throw new TemplatingNotSupportedException();
     }
 
     @Override

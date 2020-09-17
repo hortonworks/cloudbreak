@@ -50,7 +50,6 @@ public class SubnetListerService {
         }
     }
 
-    @VisibleForTesting
     String getAzureSubscriptionId(String environmentCrn) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         LOGGER.info("Found credential {} for environment {}", credential.getName(), environmentCrn);
@@ -63,7 +62,7 @@ public class SubnetListerService {
     }
 
     @VisibleForTesting
-    static CloudSubnet expandAzureResourceId(CloudSubnet meta, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
+    CloudSubnet expandAzureResourceId(CloudSubnet meta, DetailedEnvironmentResponse environmentResponse, String subscriptionId) {
 
         StringBuilder expandedId = new StringBuilder("/subscriptions/");
         expandedId.append(subscriptionId);

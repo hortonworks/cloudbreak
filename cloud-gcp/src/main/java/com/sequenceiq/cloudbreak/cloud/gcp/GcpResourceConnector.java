@@ -15,7 +15,7 @@ import org.springframework.util.StringUtils;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -55,13 +55,13 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getStackTemplate() throws TemplatingNotSupportedException {
+        throw new TemplatingNotSupportedException();
     }
 
     @Override
-    public String getDBStackTemplate() {
-        return  "";
+    public String getDBStackTemplate() throws TemplatingNotSupportedException {
+        return "";
     }
 
     @Override

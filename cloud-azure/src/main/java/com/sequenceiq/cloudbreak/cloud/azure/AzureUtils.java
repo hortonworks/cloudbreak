@@ -424,8 +424,28 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteGenericResources(AzureClient azureClient, Collection<String> genericResourceIds) {
+        LOGGER.info("Delete generic resources: {}", genericResourceIds);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeleteGenericResources = new ArrayList<>();
+        for (String resourceId : genericResourceIds) {
+            deleteCompletables.add(azureClient.deleteGenericResourceByIdAsync(resourceId)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened on azure during generic delete: {}", resourceId, throwable);
+                        failedToDeleteGenericResources.add(resourceId);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.mergeDelayError(deleteCompletables).await();
+        if (!failedToDeleteGenericResources.isEmpty()) {
+            LOGGER.error("Can't delete every resource: {}", failedToDeleteGenericResources);
+            throw new CloudbreakServiceException("Can't delete every generic resource: " + failedToDeleteGenericResources);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deleteDatabaseServer(AzureClient azureClient, String databaseServerId, boolean cancelException) {
-        return handleDeleteErrors(azureClient::deleteDatabaseServer, "DatabaseServer", databaseServerId, cancelException);
+        return handleDeleteErrors(azureClient::deleteGenericResourceById, "DatabaseServer", databaseServerId, cancelException);
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)

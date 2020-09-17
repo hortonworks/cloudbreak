@@ -23,7 +23,7 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -222,12 +222,12 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getStackTemplate() throws TemplatingNotSupportedException {
+        throw new TemplatingNotSupportedException();
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
+    public String getDBStackTemplate() throws TemplatingNotSupportedException {
         //throw new TemplatingDoesNotSupportedException();
         return "BestDbStackTemplateInTheWorld";
     }

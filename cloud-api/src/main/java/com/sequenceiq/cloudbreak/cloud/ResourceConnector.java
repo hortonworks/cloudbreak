@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -221,15 +221,15 @@ public interface ResourceConnector<R> {
      * Gets the Cloud platform related stack template
      *
      * @return the platform related stack template
-     * @throws TemplatingDoesNotSupportedException if template not supported by provider
+     * @throws TemplatingNotSupportedException if template not supported by provider
      */
-    String getStackTemplate() throws TemplatingDoesNotSupportedException;
+    String getStackTemplate() throws TemplatingNotSupportedException;
 
     /**
      * Gets the cloud platform related database stack template.
      *
      * @return the platform related database stack template
-     * @throws TemplatingDoesNotSupportedException if templating is not supported by provider
+     * @throws TemplatingNotSupportedException if templating is not supported by provider
      */
-    String getDBStackTemplate() throws TemplatingDoesNotSupportedException;
+    String getDBStackTemplate() throws TemplatingNotSupportedException;
 }

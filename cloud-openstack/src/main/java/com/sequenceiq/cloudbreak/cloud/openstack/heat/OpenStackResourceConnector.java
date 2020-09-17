@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -373,8 +373,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
-        throw new TemplatingDoesNotSupportedException();
+    public String getDBStackTemplate() throws TemplatingNotSupportedException {
+        throw new TemplatingNotSupportedException();
     }
 
     @Override

@@ -5,11 +5,12 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CloudSubnet implements Serializable {
+public class CloudSubnet extends DynamicModel implements Serializable {
 
     private String id;
 
@@ -155,6 +156,7 @@ public class CloudSubnet implements Serializable {
                 + ", privateSubnet=" + privateSubnet
                 + ", mapPublicIpOnLaunch=" + mapPublicIpOnLaunch
                 + ", igwAvailable=" + igwAvailable
+                + ", parameters=" + getParameters()
                 + '}';
     }
 }

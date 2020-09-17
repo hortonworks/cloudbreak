@@ -1,15 +1,24 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.common.model.EndpointType;
 
 public class AzureNetworkView {
 
     @VisibleForTesting
     static final String SUBNETS = "subnets";
+
+    @VisibleForTesting
+    static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
+
+    @VisibleForTesting
+    static final String ENDPOINT_TYPE = "endpointType";
 
     private String networkId;
 
@@ -28,6 +37,10 @@ public class AzureNetworkView {
 
     public String getSubnets() {
         return network.getStringParameter(SUBNETS);
+    }
+
+    public List<String> getSubnetList() {
+        return Arrays.asList(network.getStringParameter(SUBNETS).split(","));
     }
 
     public String getNetworkId() {
@@ -82,5 +95,13 @@ public class AzureNetworkView {
     @Override
     public int hashCode() {
         return Objects.hash(networkId, resourceGroupName, existingNetwork, network);
+    }
+
+    public EndpointType getEndpointType() {
+        return EndpointType.safeValueOf(network.getStringParameter(ENDPOINT_TYPE));
+    }
+
+    public String getSubnetIdForPrivateEndpoint() {
+        return network.getStringParameter(SUBNET_FOR_PRIVATE_ENDPOINT);
     }
 }

@@ -87,6 +87,9 @@ public class AzurePlatformResources implements PlatformResources {
     @Inject
     private AzureRegionProvider azureRegionProvider;
 
+    @Inject
+    private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
+
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
@@ -137,7 +140,10 @@ public class AzurePlatformResources implements PlatformResources {
     private CloudNetwork convertToCloudNetwork(Network network) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-            subnets.add(new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix()));
+            CloudSubnet cloudSubnet = new CloudSubnet(subnet.getKey(), subnet.getKey(), null, subnet.getValue().addressPrefix());
+            azureCloudSubnetParametersService.addPrivateEndpointNetworkPolicies(cloudSubnet, subnet.getValue().inner().privateEndpointNetworkPolicies());
+            subnets.add(cloudSubnet);
+            LOGGER.debug("Mapping azure subnet '{}' to cloudSubnet: {}", subnet.getKey(), cloudSubnet);
         }
         Map<String, Object> properties = new HashMap<>();
         properties.put("addressSpaces", network.addressSpaces());

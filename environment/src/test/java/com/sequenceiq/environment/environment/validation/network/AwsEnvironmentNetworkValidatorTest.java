@@ -120,7 +120,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringRequestWhenNetworkHasCidr() {
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, "1.2.3.4/16", 1, RegistrationType.CREATE_NEW);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
         EnvironmentDto environmentDto = new EnvironmentDto();
