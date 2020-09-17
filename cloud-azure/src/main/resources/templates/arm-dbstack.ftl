@@ -1,5 +1,5 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2014-04-01-preview/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
         "dbServerName": {
@@ -78,15 +78,6 @@
                 "description": "The administrator login name for the database server."
             }
         },
-        "adminPassword": {
-            "type": "securestring",
-            "defaultValue" : "${adminPassword}",
-            "minLength": 8,
-            "maxLength": 128,
-            "metadata": {
-                "description": "The administrator password for the database server."
-            }
-        },
         "sslEnforcement": {
             "type": "bool",
             "defaultValue": ${(sslEnforcement!true)?c},
@@ -131,6 +122,15 @@
                 "description": "batchsize of resource creation."
             }
         },
+        "adminPassword": {
+            "type": "securestring",
+            "defaultValue" : "${adminPassword}",
+            "minLength": 8,
+            "maxLength": 128,
+            "metadata": {
+                "description": "The administrator password for the database server."
+            }
+        },
         "subnets": {
             "type": "string",
             "defaultValue": "${subnets}",
@@ -150,48 +150,106 @@
             "metadata": {
                 "description": "User defined tags to be attached to the resource."
             }
+        },
+        "privateEndpointName": {
+            "defaultValue": "${privateEndpointName}",
+            "type": "String"
         }
     },
     "variables": {
-        "subnetList": "[split(parameters('subnets'),',')]",
-        "apiVersionMSSql":"2015-05-01-preview",
         "apiVersion":"2017-12-01",
         "sslEnforcementString":"[if(parameters('sslEnforcement'), 'Enabled', 'Disabled')]",
         "geoRedundantBackupString":"[if(parameters('geoRedundantBackup'), 'Enabled', 'Disabled')]",
-        "storageAutoGrowString":"[if(parameters('storageAutoGrow'), 'Enabled', 'Disabled')]"
-
+        "storageAutoGrowString":"[if(parameters('storageAutoGrow'), 'Enabled', 'Disabled')]",
+        "subnetList": "[split(parameters('subnets'),',')]"
     },
     "resources": [
-        {
-            "name": "[parameters('dbServerName')]",
-            "type": "Microsoft.DBforPostgreSQL/servers",
-            "apiVersion": "[variables('apiVersion')]",
-            "sku": {
-                "name": "[parameters('skuName')]",
-                "tier": "[parameters('skuTier')]",
-                <#if skuCapacity??>
-                "capacity": "[parameters('skuCapacity')]",
-                </#if>
-                "size": "[parameters('skuSizeMB')]",
-                "family": "[parameters('skuFamily')]"
+            {
+                "name": "[parameters('dbServerName')]",
+                "type": "Microsoft.DBforPostgreSQL/servers",
+                "apiVersion": "[variables('apiVersion')]",
+                "sku": {
+                    "name": "[parameters('skuName')]",
+                    "tier": "[parameters('skuTier')]",
+                    <#if skuCapacity??>
+                    "capacity": "[parameters('skuCapacity')]",
+                    </#if>
+                    "size": "[parameters('skuSizeMB')]",
+                    "family": "[parameters('skuFamily')]"
+                },
+                "tags": "[parameters('serverTags')]",
+                "properties": {
+                    "version": "[parameters('dbVersion')]",
+                    "administratorLogin": "[parameters('adminLoginName')]",
+                    "administratorLoginPassword": "[parameters('adminPassword')]",
+                    "sslEnforcement": "[variables('sslEnforcementString')]",
+                    "storageProfile": {
+                        "backupRetentionDays": "[parameters('backupRetentionDays')]",
+                        "geoRedundantBackup": "[variables('geoRedundantBackupString')]",
+                        "storageMB": "[parameters('skuSizeMB')]",
+                        "storageAutoGrow": "[variables('storageAutoGrowString')]"
+                    },
+                    "createMode": "Default"
+                    <#if usePrivateEndpoints>
+                    ,"publicNetworkAccess": "Disabled"
+                    </#if>
+                },
+                "location": "[parameters('location')]",
+                "resources": []
             },
+    <#if usePrivateEndpoints>
+        {
+            "type": "Microsoft.Network/privateEndpoints",
+            "apiVersion": "2020-05-01",
+            "name": "${privateEndpointName}",
+            "location": "westus",
+            "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
+            ],
             "tags": "[parameters('serverTags')]",
             "properties": {
-                "version": "[parameters('dbVersion')]",
-                "administratorLogin": "[parameters('adminLoginName')]",
-                "administratorLoginPassword": "[parameters('adminPassword')]",
-                "sslEnforcement": "[variables('sslEnforcementString')]",
-                "storageProfile": {
-                    "backupRetentionDays": "[parameters('backupRetentionDays')]",
-                    "geoRedundantBackup": "[variables('geoRedundantBackupString')]",
-                    "storageMB": "[parameters('skuSizeMB')]",
-                    "storageAutoGrow": "[variables('storageAutoGrowString')]"
+                "privateLinkServiceConnections": [
+                    {
+                        "name": "${privateEndpointName}",
+                        "properties": {
+                            "privateLinkServiceId": "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]",
+                            "groupIds": [
+                                "postgresqlServer"
+                            ],
+                            "privateLinkServiceConnectionState": {
+                                "status": "Approved",
+                                "description": "Auto-approved",
+                                "actionsRequired": "None"
+                            }
+                        }
+                    }
+                ],
+                "manualPrivateLinkServiceConnections": [],
+                "subnet": {
+                    "id": "${subnetIdForPrivateEndpoint}"
                 },
-                "createMode": "Default"
-            },
-            "location": "[parameters('location')]",
-            "resources": []
+                "customDnsConfigs": []
+            }
         },
+        {
+            "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+            "apiVersion": "2020-05-01",
+            "name": "[concat('${privateEndpointName}', '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', '${privateEndpointName}') ]"
+            ],
+            "properties": {
+                "privateDnsZoneConfigs": [
+                    {
+                        "name": "dns-${privateEndpointName}",
+                        "properties": {
+                            "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
+                        }
+                    }
+                ]
+            }
+        }
+    <#else>
         {
             "name": "[concat(parameters('dbServerName'), '/vnet-rule-for-postgres', copyIndex())]",
             "type": "Microsoft.DBforPostgreSQL/servers/virtualNetworkRules",
@@ -210,11 +268,12 @@
                 "batchSize": "[parameters('batchSize')]"
             }
         }
+        </#if>
     ],
     "outputs": {
-        "databaseServerFQDN": {
-            "type": "string",
-            "value": "[reference(parameters('dbServerName')).fullyQualifiedDomainName]"
-        }
+     "databaseServerFQDN": {
+         "type": "string",
+         "value": "[reference(parameters('dbServerName')).fullyQualifiedDomainName]"
+     }
     }
 }

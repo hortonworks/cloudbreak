@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.model.EndpointType;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -99,6 +100,7 @@ public class AzureNetworkTemplateBuilderTest {
                 .withNoPublicIp(false)
                 .withStackName(STACK_NAME)
                 .withResourceGroup(RG_NAME)
+                .withEndpointType(EndpointType.USE_PRIVATE_ENDPOINT)
                 .build();
     }
 

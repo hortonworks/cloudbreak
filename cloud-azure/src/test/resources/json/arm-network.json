@@ -54,6 +54,7 @@
                         "name": "subnet0",
                         "properties": {
                             "addressPrefix": "[parameters('subnet0Prefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled",
                             "serviceEndpoints": [
                                 {
                                     "service": "Microsoft.Sql"
@@ -68,6 +69,7 @@
                         "name": "subnet1",
                         "properties": {
                             "addressPrefix": "[parameters('subnet1Prefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled",
                             "serviceEndpoints": [
                                 {
                                     "service": "Microsoft.Sql"
@@ -82,6 +84,7 @@
                         "name": "subnet2",
                         "properties": {
                             "addressPrefix": "[parameters('subnet2Prefix')]",
+                            "privateEndpointNetworkPolicies": "Disabled",
                             "serviceEndpoints": [
                                 {
                                     "service": "Microsoft.Sql"

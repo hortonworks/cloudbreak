@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,13 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
+import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
@@ -34,8 +36,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private final CloudNetworkService cloudNetworkService;
 
-    public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService) {
+    private final AzureCloudSubnetParametersService azureCloudSubnetParametersService;
+
+    public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService, AzureCloudSubnetParametersService azureCloudSubnetParametersService) {
         this.cloudNetworkService = cloudNetworkService;
+        this.azureCloudSubnetParametersService = azureCloudSubnetParametersService;
     }
 
     @Override
@@ -45,8 +50,9 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             resultBuilder.error("Internal validation error");
             return;
         }
-        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(),
-                cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto));
+        Map<String, CloudSubnet> cloudNetworks = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
+        checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
+        checkPrivateEndpointNetworkPolicies(networkDto, cloudNetworks, resultBuilder);
         checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
     }
 
@@ -89,6 +95,18 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                         subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
                 LOGGER.info(message);
                 resultBuilder.error(message);
+            }
+        }
+    }
+
+    private void checkPrivateEndpointNetworkPolicies(NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
+        if (ENABLED_PRIVATE_ENDPOINT.equals(networkDto.getServiceEndpointCreation())) {
+            if (cloudNetworks.values().stream().noneMatch(azureCloudSubnetParametersService::isPrivateEndpointNetworkPoliciesDisabled)) {
+                String errorMessage = String.format("It is not possible to create private endpoints: existing network with id '%s' in resource group '%s' " +
+                                "has no subnet with privateEndpointNetworkPolicies disabled.",
+                        networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName());
+                LOGGER.warn(errorMessage);
+                resultBuilder.error(errorMessage);
             }
         }
     }

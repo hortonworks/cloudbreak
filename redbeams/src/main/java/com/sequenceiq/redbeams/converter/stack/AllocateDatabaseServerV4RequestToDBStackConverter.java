@@ -282,7 +282,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 ? providerParameterCalculator.get(source).asMap()
                 : getSubnetsFromEnvironment(environmentResponse, cloudPlatform, dbStack);
 
-        networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform);
+        networkParameterAdder.addParameters(parameters, environmentResponse, cloudPlatform, dbStack);
 
         if (parameters != null) {
             try {

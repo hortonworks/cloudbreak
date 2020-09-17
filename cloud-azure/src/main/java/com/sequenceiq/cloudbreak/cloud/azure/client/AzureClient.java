@@ -735,7 +735,7 @@ public class AzureClient {
         return azure.subscriptions().list();
     }
 
-    public void deleteDatabaseServer(String databaseServerId) {
+    public void deleteGenericResourceById(String databaseServerId) {
         handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
     }
 
@@ -803,4 +803,13 @@ public class AzureClient {
     private void handleAuthException(Runnable function) {
         azureAuthExceptionHandler.handleAuthException(function);
     }
+
+    public Completable deleteGenericResourceByIdAsync(String databaseServerId) {
+        return handleAuthException(() -> azure.genericResources().deleteByIdAsync(databaseServerId));
+    }
+
+    public void deletePrivateDnsZone(String privateDnsZoneId) {
+        handleAuthException(() -> azure.dnsZones().deleteById(privateDnsZoneId));
+    }
+
 }

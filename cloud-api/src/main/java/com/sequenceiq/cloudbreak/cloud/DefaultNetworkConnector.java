@@ -41,6 +41,11 @@ public interface DefaultNetworkConnector extends NetworkConnector {
     }
 
     @Override
+    default SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
+        return new SubnetSelectionResult(new ArrayList<>(subnetMetas));
+    }
+
+    @Override
     default void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest) {
         LOGGER.info("No cloud provider specific resources exist on this cloud platform!");
     }

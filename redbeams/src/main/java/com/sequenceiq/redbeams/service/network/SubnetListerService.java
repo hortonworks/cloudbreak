@@ -50,7 +50,6 @@ public class SubnetListerService {
         }
     }
 
-    @VisibleForTesting
     String getAzureSubscriptionId(String environmentCrn) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         LOGGER.info("Found credential {} for environment {}", credential.getName(), environmentCrn);

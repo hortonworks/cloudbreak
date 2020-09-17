@@ -11,7 +11,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.redbeams",
         "com.sequenceiq.flow",
         "com.sequenceiq.cloudbreak.ha.repository"})
-@SpringBootApplication(scanBasePackages = {"com.sequenceiq.redbeams",
+@SpringBootApplication(scanBasePackages = {
+        "com.sequenceiq.redbeams",
         "com.sequenceiq.authorization",
         "com.sequenceiq.cloudbreak.altus",
         "com.sequenceiq.cloudbreak.auth",
@@ -57,7 +58,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.ha.service",
         "com.sequenceiq.cloudbreak.tracing",
         "com.sequenceiq.cloudbreak.tag",
-        "com.sequenceiq.cloudbreak.filter"},
+        "com.sequenceiq.cloudbreak.filter",
+        "com.sequenceiq.cloudbreak.common"
+},
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
 

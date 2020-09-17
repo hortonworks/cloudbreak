@@ -53,6 +53,11 @@ public class OpenStackHeatNetworkConnector implements NetworkConnector {
     }
 
     @Override
+    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
+        throw new OpenStackResourceException("CDP does not support Openstack.");
+    }
+
+    @Override
     public Platform platform() {
         return OpenStackConstants.OPENSTACK_PLATFORM;
     }

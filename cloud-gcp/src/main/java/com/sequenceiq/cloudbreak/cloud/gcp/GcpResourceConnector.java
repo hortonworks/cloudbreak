@@ -60,8 +60,8 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public String getDBStackTemplate() {
-        return  "";
+    public String getDBStackTemplate() throws TemplatingDoesNotSupportedException {
+        return "";
     }
 
     @Override

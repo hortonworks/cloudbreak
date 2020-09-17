@@ -32,6 +32,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.environment.v1.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -67,8 +68,11 @@ class NetworkCreationRequestFactoryTest {
 
     private final NetworkTagProvider networkTagProvider = mock(NetworkTagProvider.class);
 
+    private final ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter
+            = mock(ServiceEndpointCreationToEndpointTypeConverter.class);
+
     private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(Collections.emptyList(),
-            credentialToCloudCredentialConverter, defaultSubnetCidrProvider, networkTagProvider);
+            credentialToCloudCredentialConverter, defaultSubnetCidrProvider, networkTagProvider, serviceEndpointCreationToEndpointTypeConverter);
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {

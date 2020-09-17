@@ -211,6 +211,11 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
+    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
+        return azureSubnetSelectorService.selectForPrivateEndpoint(subnetMetas);
+    }
+
+    @Override
     public void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
         if (request.isPrivateEndpointsEnabled()) {
             LOGGER.debug("Private endpoints are enabled, checking the presence of DNS Zones and Network links..");

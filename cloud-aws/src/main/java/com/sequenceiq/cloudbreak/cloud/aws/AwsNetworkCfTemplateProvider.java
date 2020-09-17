@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.common.model.EndpointType.USE_SERVICE_ENDPOINT;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -83,13 +85,13 @@ public class AwsNetworkCfTemplateProvider {
     }
 
     private List<AwsServiceEndpointView> createInterfaceServiceEndpointsIfNeeded(NetworkCreationRequest networkCreationRequest, List<SubnetRequest> subnets) {
-        if (networkCreationRequest.isServiceEndpointsEnabled() && CollectionUtils.isNotEmpty(interfaceServices)) {
+        if (USE_SERVICE_ENDPOINT.equals(networkCreationRequest.getEndpointType()) && CollectionUtils.isNotEmpty(interfaceServices)) {
             List<AwsServiceEndpointView> interfaceServiceEndpoints = createInterfaceServiceEndpoints(networkCreationRequest, subnets);
             LOGGER.debug("The following interface service endpoints will be created in the new vpc: {}", interfaceServiceEndpoints);
             return interfaceServiceEndpoints;
         } else {
             LOGGER.debug("No interface service endpoints will be created in the new vpc. serviceEndpointCreation: {}, interfaceServices: {}",
-                    networkCreationRequest.isServiceEndpointsEnabled(), interfaceServices);
+                    networkCreationRequest.getEndpointType(), interfaceServices);
             return List.of();
         }
     }

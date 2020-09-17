@@ -315,7 +315,6 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Override
     public String getDBStackTemplate() {
-        return azureTemplateBuilder.getDBTemplateString();
+        return azureDatabaseResourceService.getDBStackTemplate();
     }
-
 }

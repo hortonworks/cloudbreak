@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.service.network;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -39,5 +40,11 @@ public class SubnetChooserService {
             throw new BadRequestException(subnetSelectionResult.getErrorMessage());
         }
         return subnetSelectionResult.getResult();
+    }
+
+    public List<CloudSubnet> chooseSubnetForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, DBStack dbStack) {
+        NetworkConnector networkConnector = cloudPlatformConnectors.get(new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant()))
+                .networkConnector();
+        return networkConnector.chooseSubnetsForPrivateEndpoint(subnetMetas).getResult();
     }
 }

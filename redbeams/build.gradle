@@ -41,11 +41,11 @@ sonarqube {
 }
 
 dependencies {
-  compile           group: 'com.squareup.okhttp3',       name: 'okhttp',                     version: okhttpVersion
+  implementation           group: 'com.squareup.okhttp3',       name: 'okhttp',                     version: okhttpVersion
 
-  compile            group: 'org.yaml',                  name: 'snakeyaml'
+  implementation            group: 'org.yaml',                  name: 'snakeyaml'
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
-  compile            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.9.12'
+  implementation            group: 'net.bytebuddy',             name: 'byte-buddy', version: '1.9.12'
 
   implementation     group: 'com.google.guava',          name: 'guava'
   implementation     group: 'com.google.code.gson',      name: 'gson'
@@ -105,7 +105,7 @@ dependencies {
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   }
-  compile project(':authorization-common')
+  implementation project(':authorization-common')
 
   implementation project(':flow')
   implementation project(':cloud-reactor')
@@ -114,13 +114,13 @@ dependencies {
   implementation project(':datalake-api')
   implementation project(':status-checker')
 
-  compile project(':cloud-common')
-  compile project(':secret-engine')
-  compile project(':common')
-  compile project(':auth-connector')
-  compile project(':core-api')
-  compile project(':redbeams-api')
-  compile project(':template-manager-tag')
+  implementation project(':cloud-common')
+  implementation project(':secret-engine')
+  implementation project(':common')
+  implementation project(':auth-connector')
+  implementation project(':core-api')
+  implementation project(':redbeams-api')
+  implementation project(':template-manager-tag')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws')
