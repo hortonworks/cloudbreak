@@ -46,6 +46,8 @@ public class CredentialConverter {
                 .azure(getIfNotNull(source.getAzure(), this::azure))
                 .crn(source.getCrn())
                 .description(source.getDescription())
+                .account(source.getAccountId())
+                .creator(source.getCreator())
                 .name(source.getName())
                 .cloudPlatform(source.getCloudPlatform());
         getAttributesSecret(source, builder);

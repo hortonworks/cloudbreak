@@ -32,6 +32,9 @@ public class CredentialResponse extends CredentialBase implements ResourceCrnAwa
     @ApiModelProperty(CredentialModelDescription.CREATOR)
     private String creator;
 
+    @ApiModelProperty(CredentialModelDescription.ACCOUNT_IDENTIFIER)
+    private String accountId;
+
     @ApiModelProperty(CredentialModelDescription.CREATED)
     private Long created;
 
@@ -84,6 +87,14 @@ public class CredentialResponse extends CredentialBase implements ResourceCrnAwa
 
     public void setType(CredentialType type) {
         this.type = type;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override

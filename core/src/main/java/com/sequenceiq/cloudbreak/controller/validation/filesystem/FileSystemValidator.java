@@ -39,7 +39,7 @@ public class FileSystemValidator {
     @Inject
     private CloudStorageConverter cloudStorageConverter;
 
-    public void validateCloudStorage(String platform, CloudCredential cloudCredential, CloudStorageBase cloudStorageRequest,
+    public void validate(String platform, CloudCredential cloudCredential, CloudStorageBase cloudStorageRequest,
             String userId, Long workspaceId) {
         if (cloudStorageRequest == null) {
             return;

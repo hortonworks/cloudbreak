@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -43,7 +42,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -51,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.SharedServiceValidator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -80,9 +79,6 @@ public class StackDecorator {
 
     @Inject
     private TemplateDecorator templateDecorator;
-
-    @Inject
-    private TemplateValidator templateValidator;
 
     @Inject
     private ConverterUtil converterUtil;
@@ -237,8 +233,6 @@ public class StackDecorator {
                     String region = placement != null ? placement.getRegion() : subject.getRegion();
 
                     CdpResourceType cdpResourceType = cdpResourceTypeProvider.fromStackType(request.getType());
-                    templateValidator.validateTemplateRequest(credential, template, region, availabilityZone, subject.getPlatformVariant(),
-                            cdpResourceType);
                     template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant(),
                             cdpResourceType);
                     template.setWorkspace(subject.getWorkspace());

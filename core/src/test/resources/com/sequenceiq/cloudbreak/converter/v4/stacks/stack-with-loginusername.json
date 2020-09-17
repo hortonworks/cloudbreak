@@ -1,5 +1,6 @@
 {
   "name": "mystack",
+  "environmentCrn": "crn",
   "image": {
     "catalog": "aws-catalog",
     "id": "aws-image"

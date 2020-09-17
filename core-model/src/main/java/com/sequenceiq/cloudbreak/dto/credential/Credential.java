@@ -12,6 +12,10 @@ public class Credential implements Serializable {
 
     private final String crn;
 
+    private final String creator;
+
+    private final String account;
+
     private final String name;
 
     private final String description;
@@ -30,6 +34,8 @@ public class Credential implements Serializable {
         azure = builder.azure;
         attributes = builder.attributes;
         cloudPlatform = builder.cloudPlatform;
+        creator = builder.creator;
+        account = builder.account;
     }
 
     public String getCrn() {
@@ -60,6 +66,14 @@ public class Credential implements Serializable {
         return new Builder();
     }
 
+    public String getCreator() {
+        return creator;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
     public String cloudPlatform() {
         if (aws != null) {
             return "AWS";
@@ -84,6 +98,10 @@ public class Credential implements Serializable {
 
         private String cloudPlatform;
 
+        private String creator;
+
+        private String account;
+
         public Builder crn(String crn) {
             this.crn = crn;
             return this;
@@ -96,6 +114,16 @@ public class Credential implements Serializable {
 
         public Builder description(String description) {
             this.description = description;
+            return this;
+        }
+
+        public Builder creator(String creator) {
+            this.creator = creator;
+            return this;
+        }
+
+        public Builder account(String account) {
+            this.account = account;
             return this;
         }
 

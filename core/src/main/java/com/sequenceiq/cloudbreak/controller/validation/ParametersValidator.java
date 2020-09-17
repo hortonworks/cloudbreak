@@ -12,9 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.OperationException;
 
 import reactor.bus.EventBus;
 
@@ -29,8 +28,8 @@ public class ParametersValidator {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public ParametersValidationRequest triggerValidate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, String userId,
-            Long workspaceId) {
+    public ParametersValidationRequest validate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, String userId,
+            Long workspaceId, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (parameters == null || parameters.isEmpty()) {
             return null;
         }
@@ -41,18 +40,18 @@ public class ParametersValidator {
         return request;
     }
 
-    public void waitResult(ParametersValidationRequest parametersValidationRequest) {
+    public void waitResult(ParametersValidationRequest parametersValidationRequest, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (parametersValidationRequest != null) {
             try {
                 ParametersValidationResult result = parametersValidationRequest.await();
                 LOGGER.info("Parameter validation result: {}", result);
                 Exception exception = result.getErrorDetails();
                 if (exception != null) {
-                    throw new BadRequestException(result.getStatusReason(), exception);
+                    validationBuilder.error(result.getStatusReason());
                 }
             } catch (InterruptedException e) {
                 LOGGER.error("Error while sending the parameters validation request", e);
-                throw new OperationException(e);
+                validationBuilder.error(e.getMessage());
             }
         }
     }

@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import java.util.Arrays;
@@ -136,15 +137,23 @@ public class ClusterService {
         Cluster savedCluster;
         try {
             long start = System.currentTimeMillis();
-            savedCluster = repository.save(cluster);
+            savedCluster =  measure(() -> repository.save(cluster),
+                    LOGGER,
+                    "Cluster repository save {} ms");
             if (savedCluster.getGateway() != null) {
-                gatewayService.save(savedCluster.getGateway());
+                measure(() ->  gatewayService.save(savedCluster.getGateway()),
+                        LOGGER,
+                        "gatewayService repository save {} ms");
             }
             if (savedCluster.getIdBroker() != null) {
-                idBrokerService.save(savedCluster.getIdBroker());
+                measure(() ->  idBrokerService.save(savedCluster.getIdBroker()),
+                        LOGGER,
+                        "idBrokerService repository save {} ms");
             }
             LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            clusterComponentConfigProvider.store(components, savedCluster);
+            measure(() ->  clusterComponentConfigProvider.store(components, savedCluster),
+                    LOGGER,
+                    "clusterComponentConfigProvider repository save {} ms");
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg, ex);

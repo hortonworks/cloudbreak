@@ -129,7 +129,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .withEnvironmentCrn("")
                 .when(stackTestClient.createV4(), RunningParameter.key("badRequest"))
                 .expect(BadRequestException.class, RunningParameter.key("badRequest")
-                        .withExpectedMessage("1. Environment CRN cannot be null or empty."))
+                        .withExpectedMessage("Environment CRN cannot be null or empty."))
                 .validate();
     }
 

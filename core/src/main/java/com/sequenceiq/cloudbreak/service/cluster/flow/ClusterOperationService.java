@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NO
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,15 +44,12 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -64,7 +62,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -115,9 +112,6 @@ public class ClusterOperationService {
     private UsageLoggingUtil usageLoggingUtil;
 
     @Inject
-    private StatusToPollGroupConverter statusToPollGroupConverter;
-
-    @Inject
     private UpdateHostsValidator updateHostsValidator;
 
     @Inject
@@ -145,43 +139,30 @@ public class ClusterOperationService {
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster().getName()));
         }
+        long start = System.currentTimeMillis();
         return transactionService.required(() -> {
             setWorkspace(cluster, stack.getWorkspace());
             cluster.setEnvironmentCrn(stack.getEnvironmentCrn());
 
-            long start = System.currentTimeMillis();
-            if (clusterService.findByNameAndWorkspace(cluster.getName(), stack.getWorkspace()).isPresent()) {
-                throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
-            }
-            LOGGER.debug("Cluster name collision check took {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
             if (Status.CREATE_FAILED.equals(stack.getStatus())) {
                 throw new BadRequestException("Stack creation failed, cannot create cluster.");
             }
-
-            start = System.currentTimeMillis();
-            LOGGER.debug("Host group constrainst saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-
-            start = System.currentTimeMillis();
             if (cluster.getFileSystem() != null) {
                 cluster.setFileSystem(fileSystemConfigService.createWithMdcContextRestore(cluster.getFileSystem(), cluster.getWorkspace(), user));
             }
-            LOGGER.debug("Filesystem config saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
             removeGatewayIfNotSupported(cluster, components);
 
             cluster.setStack(stack);
             stack.setCluster(cluster);
 
-            Cluster savedCluster = clusterService.saveClusterAndComponent(cluster, components, stackName);
-            usageLoggingUtil.logClusterRequestedUsageEvent(cluster);
-            if (stack.isAvailable()) {
-                flowManager.triggerClusterInstall(stack.getId());
-                InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
-                if (InMemoryStateStore.getStack(stack.getId()) == null) {
-                    InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
-                }
-            }
+            Cluster savedCluster = measure(() -> clusterService.saveClusterAndComponent(cluster, components, stackName),
+                    LOGGER,
+                    "saveClusterAndComponent {} ms");
+            measure(() -> usageLoggingUtil.logClusterRequestedUsageEvent(cluster),
+                    LOGGER,
+                    "logClusterRequestedUsageEvent {} ms");
+            LOGGER.info("cluster saved {} ms", System.currentTimeMillis() - start);
             return savedCluster;
         });
     }

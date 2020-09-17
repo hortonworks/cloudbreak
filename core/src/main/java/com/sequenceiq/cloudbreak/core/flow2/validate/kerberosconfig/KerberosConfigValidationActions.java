@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -22,9 +25,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -46,11 +52,15 @@ public class KerberosConfigValidationActions {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private KerberosConfigService kerberosConfigService;
+
     @Bean(name = "VALIDATE_KERBEROS_CONFIG_STATE")
     public Action<?, ?> kerberosConfigValidationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                decorateStackWithCustomDomainIfAdOrIpaJoinable(context.getStack());
                 Cluster cluster = context.getStack().getCluster();
                 if (cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) {
                     boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(context.getStack());
@@ -64,6 +74,16 @@ public class KerberosConfigValidationActions {
             @Override
             protected Object getFailurePayload(StackEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
+            }
+
+            private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
+                KerberosConfig kerberosConfig = measure(() -> kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null),
+                        LOGGER,
+                        "kerberosConfigService get {} ms");
+                if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain())) {
+                    stack.setCustomDomain(kerberosConfig.getDomain());
+                    stackService.save(stack);
+                }
             }
         };
     }

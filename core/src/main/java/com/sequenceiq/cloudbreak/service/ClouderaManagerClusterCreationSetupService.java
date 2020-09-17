@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,13 +72,32 @@ public class ClouderaManagerClusterCreationSetupService {
             List<Component> stackCdhRepoConfig,
             Optional<Component> stackImageComponent) throws IOException, CloudbreakImageCatalogException {
         List<ClusterComponent> components = new ArrayList<>();
+        long start = System.currentTimeMillis();
         String blueprintCdhVersion = blueprintUtils.getCDHStackVersion(JsonUtil.readTree(cluster.getBlueprint().getBlueprintText()));
-        Optional<ClouderaManagerRepositoryV4Request> cmRepoRequest = Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getRepository);
+        LOGGER.debug("blueprintUtils.getCDHStackVersion took {} ms", System.currentTimeMillis() - start);
+
+        Optional<ClouderaManagerRepositoryV4Request> cmRepoRequest = measure(() ->
+                Optional.ofNullable(request.getCm()).map(ClouderaManagerV4Request::getRepository),
+                LOGGER,
+                "ClouderaManagerV4Request::getRepository {} ms");
+
+        start = System.currentTimeMillis();
         String osType = getOsType(stackImageComponent);
         String imageCatalogName = getImageCatalogName(stackImageComponent);
+        LOGGER.debug("getImageCatalogName took {} ms", System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
         ClusterComponent cmRepoConfig = getCmRepoConfiguration(cluster, stackClouderaManagerRepoConfig, components, blueprintCdhVersion, cmRepoRequest, osType);
+        LOGGER.debug("getCmRepoConfiguration took {} ms", System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
         checkCmStackRepositories(cmRepoConfig, stackImageComponent.get());
+        LOGGER.debug("checkCmStackRepositories took {} ms", System.currentTimeMillis() - start);
+
+        start = System.currentTimeMillis();
         addProductComponentsToCluster(request, cluster, stackCdhRepoConfig, components, blueprintCdhVersion, osType, imageCatalogName);
+        LOGGER.debug("addProductComponentsToCluster took {} ms", System.currentTimeMillis() - start);
+
         return components;
     }
 
