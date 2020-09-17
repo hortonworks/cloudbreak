@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -24,9 +25,11 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRepairWaitHandler.class);
 
-    private static final int SLEEP_TIME_IN_SEC = 20;
+    @Value("${sdx.stack.repair.sleeptime_sec:20}")
+    private int sleepTimeInSec;
 
-    private static final int DURATION_IN_MINUTES = 40;
+    @Value("${sdx.stack.repair.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxRepairService repairService;
@@ -49,7 +52,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
         Selectable response;
         try {
             LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             repairService.waitCloudbreakClusterRepair(sdxId, pollingConfig);
             response = new SdxRepairSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -58,7 +61,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Repair poller stopped for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("Datalake repair timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Repair polling failed for stack: {}", sdxId);
             response = new SdxRepairFailedEvent(sdxId, userId, exception);
