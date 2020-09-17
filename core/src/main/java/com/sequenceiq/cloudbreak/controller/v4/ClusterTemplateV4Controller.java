@@ -14,6 +14,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -112,7 +113,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByCrn(crn, workspaceId));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
-            environmentServiceDecorator.prepareEnvironment(response);
+            if (!StringUtils.isEmpty(response.getEnvironmentCrn())) {
+                environmentServiceDecorator.prepareEnvironment(response);
+            } else {
+                LOGGER.warn("Skipping response decoration with environment name. Environment CRN was empty.");
+            }
             return response;
         } catch (TransactionExecutionException cse) {
             LOGGER.warn("Unable to find cluster definition due to {}", cse.getMessage());
