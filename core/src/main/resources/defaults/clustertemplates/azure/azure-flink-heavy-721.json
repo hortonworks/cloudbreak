@@ -2,7 +2,7 @@
   "name": "7.2.1 - Streaming Analytics Heavy Duty for Azure",
   "description": "",
   "type": "STREAMING",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
