@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.common.model.CredentialType;
 
@@ -24,7 +25,7 @@ public interface CredentialConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @return the status respone of method call
      */
-    CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext);
+    CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext);
 
 
     /**

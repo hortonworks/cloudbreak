@@ -190,7 +190,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
         credential.setResourceCrn(credentialCrn);
         credential.setCreator(creatorUserCrn);
         credential.setAccountId(accountId);
-        Credential verifiedCredential = credentialAdapter.verify(credential, accountId).getCredential();
+        Credential verifiedCredential = credentialAdapter.verify(credential, accountId, Boolean.TRUE).getCredential();
         if (verifiedCredential.getVerificationStatusText() != null) {
             throw new BadRequestException(verifiedCredential.getVerificationStatusText());
         }

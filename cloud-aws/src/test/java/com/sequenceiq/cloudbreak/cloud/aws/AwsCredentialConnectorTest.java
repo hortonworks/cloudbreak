@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsCredentialConnector.ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.SdkBaseException;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialViewProvider;
@@ -24,8 +26,10 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 
 public class AwsCredentialConnectorTest {
+    private static final CredentialVerificationContext CREDENTIAL_VERIFICATION_CONTEXT = new CredentialVerificationContext(Boolean.FALSE);
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -79,7 +83,7 @@ public class AwsCredentialConnectorTest {
         Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
 
         doThrow(sdkException).when(awsCredentialVerifier).validateAws(credentialView);
-        CloudCredentialStatus result = underTest.verify(authenticatedContext);
+        CloudCredentialStatus result = underTest.verify(authenticatedContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         assertNotNull(result);
         assertEquals(CredentialStatus.FAILED, result.getStatus());
@@ -95,7 +99,7 @@ public class AwsCredentialConnectorTest {
         String roleArn = "someRoleArn";
         when(credentialView.getRoleArn()).thenReturn(roleArn);
 
-        CloudCredentialStatus result = underTest.verify(authenticatedContext);
+        CloudCredentialStatus result = underTest.verify(authenticatedContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         assertNotNull(result);
         assertEquals(CredentialStatus.VERIFIED, result.getStatus());
@@ -105,4 +109,55 @@ public class AwsCredentialConnectorTest {
         verify(awsCredentialVerifier, times(1)).validateAws(credentialView);
     }
 
+    @Test
+    public void testVerifyIfRoleBasedCredentialVerificationShouldFailWhenItIsCredentialCreationAndRoleIsAssumableWithoutExternalId()
+            throws AwsPermissionMissingException {
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+
+        CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
+
+        assertNotNull(result);
+        assertEquals(CredentialStatus.FAILED, result.getStatus());
+        assertEquals(AwsConfusedDeputyException.class, result.getException().getClass());
+
+        verify(awsCredentialVerifier, times(0)).validateAws(any());
+        verify(awsCredentialVerifier, times(0)).validateAws(credentialView);
+    }
+
+    @Test
+    public void testVerifyIfRoleBasedCredentialVerificationShouldReturnVerifiedStatusWhenItIsCredentialCreationAndRoleIsNotAssumableWithoutExternalId()
+            throws AwsPermissionMissingException {
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+        AmazonClientException amazonClientException = new AmazonClientException(ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR);
+        when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
+
+        CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
+
+        assertNotNull(result);
+        assertEquals(CredentialStatus.VERIFIED, result.getStatus());
+        assertNull(result.getException());
+
+        verify(awsCredentialVerifier, times(1)).validateAws(any());
+        verify(awsCredentialVerifier, times(1)).validateAws(credentialView);
+    }
+
+    @Test
+    public void testVerifyIfRoleBasedCredentialVerificationShouldReturnFailedStatusWhenItIsCredentialCreationAndRoleAssumeFailsWithoutExternalId()
+            throws AwsPermissionMissingException {
+        String roleArn = "someRoleArn";
+        when(credentialView.getRoleArn()).thenReturn(roleArn);
+        AmazonClientException amazonClientException = new AmazonClientException("Something unexpected happened");
+        when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
+
+        CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
+
+        assertNotNull(result);
+        assertEquals(CredentialStatus.FAILED, result.getStatus());
+        assertEquals(amazonClientException, result.getException());
+
+        verify(awsCredentialVerifier, times(0)).validateAws(any());
+        verify(awsCredentialVerifier, times(0)).validateAws(credentialView);
+    }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRe
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 
 import reactor.bus.Event;
 
@@ -40,7 +42,7 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
             CloudCredentialStatus cloudCredentialStatus;
             try {
                 ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-                cloudCredentialStatus = connector.credentials().verify(ac);
+                cloudCredentialStatus = connector.credentials().verify(ac, createVerificationContext(request));
             } catch (CredentialVerificationException e) {
                 String errorMessage = e.getMessage();
                 LOGGER.info(errorMessage, e);
@@ -57,6 +59,11 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
         } catch (RuntimeException e) {
             request.getResult().onNext(new CredentialVerificationResult(e.getMessage(), e, request.getResourceId()));
         }
+    }
+
+    @NotNull
+    private CredentialVerificationContext createVerificationContext(CredentialVerificationRequest request) {
+        return new CredentialVerificationContext(request.isCreationVerification());
     }
 
 }

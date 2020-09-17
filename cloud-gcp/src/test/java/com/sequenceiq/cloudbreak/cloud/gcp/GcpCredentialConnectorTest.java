@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GcpCredentialConnectorTest {
@@ -45,6 +46,8 @@ public class GcpCredentialConnectorTest {
     private static final Map<String, Object> GCP_PARAMETERS = new HashMap<>();
 
     private static final Map<String, Object> GCP_JSON = new HashMap<>();
+
+    private static final CredentialVerificationContext CREDENTIAL_VERIFICATION_CONTEXT = new CredentialVerificationContext(Boolean.FALSE);
 
     static {
         GCP_JSON.put("credentialJson", "");
@@ -93,7 +96,7 @@ public class GcpCredentialConnectorTest {
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         doThrow(new BadRequestException(expectionReasonMessage)).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
-        CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -110,7 +113,7 @@ public class GcpCredentialConnectorTest {
         AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
 
-        CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.VERIFIED, status.getStatus());
@@ -127,7 +130,7 @@ public class GcpCredentialConnectorTest {
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
-        CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -144,7 +147,7 @@ public class GcpCredentialConnectorTest {
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
-        CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
@@ -161,7 +164,7 @@ public class GcpCredentialConnectorTest {
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
-        CloudCredentialStatus status = underTest.verify(authContext);
+        CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
