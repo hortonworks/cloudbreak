@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.cloudbreak.util.Benchmark.mutliCheckedMeasure;
+import static com.sequenceiq.cloudbreak.util.Benchmark.multiCheckedMeasure;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -34,11 +33,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
@@ -73,16 +69,10 @@ public class ClusterCreationSetupService {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private BlueprintService blueprintService;
-
-    @Inject
     private RdsConfigValidator rdsConfigValidator;
 
     @Inject
     private ClusterCreationEnvironmentValidator environmentValidator;
-
-    @Inject
-    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private StackUtil stackUtil;
@@ -103,12 +93,18 @@ public class ClusterCreationSetupService {
         if (credential == null) {
             credential = stackUtil.getCloudCredential(stack);
         }
-        fileSystemValidator.validateCloudStorage(stack.cloudPlatform(), credential, request.getCloudStorage(),
+        fileSystemValidator.validate(stack.cloudPlatform(), credential, request.getCloudStorage(),
                 stack.getCreator().getUserId(), stack.getWorkspace().getId());
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
-        ValidationResult environmentValidationResult = environmentValidator.validate(request, stack, environment, user, distroxRequest);
-        if (environmentValidationResult.hasError()) {
-            throw new BadRequestException(environmentValidationResult.getFormattedErrors());
+        ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
+
+        environmentValidator.validateRdsConfigNames(request.getDatabases(), resultBuilder, stack.getWorkspace().getId());
+        environmentValidator.validateProxyConfig(request.getProxyConfigCrn(), resultBuilder);
+        String parentEnvironmentCloudPlatform = environment.getParentEnvironmentCloudPlatform();
+        environmentValidator.validateAutoTls(request, stack, resultBuilder, parentEnvironmentCloudPlatform);
+        ValidationResult build = resultBuilder.build();
+        if (build.hasError()) {
+            throw new BadRequestException(build.getFormattedErrors());
         }
     }
 
@@ -132,11 +128,12 @@ public class ClusterCreationSetupService {
         clusterStub.setStack(stack);
         clusterStub.setWorkspace(stack.getWorkspace());
 
-        Cluster cluster = clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack, parentEnvironmentCloudPlatform);
+        Cluster cluster =  measure(() ->
+                clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack, parentEnvironmentCloudPlatform),
+                LOGGER,
+                "Cluster decorator {} ms for stack {}", stackName);
 
-        decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
-
-        List<ClusterComponent> components = mutliCheckedMeasure(
+        List<ClusterComponent> components = multiCheckedMeasure(
                 (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageCatalogException>) () -> {
                     if (blueprint != null) {
                         Set<Component> allComponent = componentConfigProviderService.getAllComponentsByStackIdAndType(stack.getId(),
@@ -152,21 +149,12 @@ public class ClusterCreationSetupService {
 
                         Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
                                 && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
-                        if (blueprintService.isClouderaManagerTemplate(blueprint)) {
-                            return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
-                                    request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
-                        }
+                        return clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(
+                                request, cluster, stackCmRepoConfig, stackCdhRepoConfig, stackImageComponent);
                     }
                     return Collections.emptyList();
                 }, LOGGER, "Cluster components saved in {} ms for stack {}", stackName);
 
         return clusterOperationService.create(stack, cluster, components, user);
-    }
-
-    private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain())) {
-            stack.setCustomDomain(kerberosConfig.getDomain());
-        }
     }
 }

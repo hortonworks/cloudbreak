@@ -4,7 +4,7 @@
     "availabilityZone": "string",
     "region": "string"
   },
-  "environmentCrn": "string",
+  "environmentCrn": "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:d5133dd5-7d17-4d56-9dff-1d9291c673bc",
   "platformVariant": "string",
   "ambariVersion": "string",
   "hdpVersion": "string",

@@ -218,7 +218,7 @@ public class CreateFreeIpaRequestToStackConverter {
             // userdefined tags comming from environment service
             return new Json(new StackTags(userDefined, new HashMap<>(), getDefaultTags(stack, userCrn, userName)));
         } catch (Exception ignored) {
-            throw new BadRequestException("Failed to convert dynamic tags.");
+            throw new BadRequestException("Failed to convert dynamic tags: " + ignored.getMessage(), ignored);
         }
     }
 

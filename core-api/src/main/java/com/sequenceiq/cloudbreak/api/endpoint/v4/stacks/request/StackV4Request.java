@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Reque
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.cloudbreak.validation.DatalakeCrn;
+import com.sequenceiq.cloudbreak.validation.ValidEnvironmentCrn;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 
@@ -41,8 +42,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class StackV4Request extends StackV4Base implements TaggableRequest {
 
-    @Valid
-    @NotNull
+    @ValidEnvironmentCrn
     @ApiModelProperty(value = StackModelDescription.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
