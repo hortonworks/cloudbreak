@@ -109,7 +109,7 @@ public class YcloudHybridCloudTest extends AbstractIntegrationTest {
 
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT))
+                .when(environmentTestClient.delete(), RunningParameter.key(CHILD_ENVIRONMENT))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT))
                 .validate();
 

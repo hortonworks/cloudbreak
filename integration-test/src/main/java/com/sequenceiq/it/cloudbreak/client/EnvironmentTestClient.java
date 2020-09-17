@@ -8,7 +8,6 @@ import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.ums.AssignUmsRoleAction;
-import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCascadingDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeAuthenticationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeCredentialAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeSecurityAccessAction;
@@ -48,8 +47,8 @@ public class EnvironmentTestClient {
         return new EnvironmentDeleteAction();
     }
 
-    public Action<EnvironmentTestDto, EnvironmentClient> cascadingDelete() {
-        return new EnvironmentCascadingDeleteAction();
+    public Action<EnvironmentTestDto, EnvironmentClient> delete(boolean cascade, boolean force) {
+        return new EnvironmentDeleteAction(cascade, force);
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> deleteByName() {
