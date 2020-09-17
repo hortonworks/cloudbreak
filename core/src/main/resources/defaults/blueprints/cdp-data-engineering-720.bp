@@ -7,12 +7,6 @@
       {
         "refName": "zookeeper",
         "serviceType": "ZOOKEEPER",
-        "serviceConfigs": [
-          {
-            "name": "service_config_suppression_server_count_validator",
-            "value": "true"
-          }
-        ],
         "roleConfigGroups": [
           {
             "refName": "zookeeper-SERVER-BASE",
