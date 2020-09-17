@@ -8,7 +8,7 @@ collector:
     - path: {{ logfile["path"] }}
       folderPrefix: logs
       label: "{{ logfile["label"] }}"{% endif %}{% endfor %}
-    - path: /var/log/td-agent/td-agent.log*
+    - path: /var/log/td-agent/td-agent.log
       label: fluentd
       folderPrefix: logs
       useFullPath: false
