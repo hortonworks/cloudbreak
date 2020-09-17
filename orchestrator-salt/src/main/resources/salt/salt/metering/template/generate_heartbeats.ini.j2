@@ -4,8 +4,8 @@
 [Event]
 ServiceVersion = {{ metering.serviceVersion }}{% if metering.version > 1 %}
 ServiceType = {{ metering.serviceType }}
-MeteredResourceName = {{ metering.clusterName }}
-MeteredResourceCRN = {{ salt['pillar.get']('tags:Cloudera-Resource-Name') }}
+MeteredResourceName = {{ metering.meteredClusterName }}
+MeteredResourceCRN = {{ metering.meteredClusterCrn }}
 CreatorCRN = {{ salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') }}
 EnvironmentCRN = {{ salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') }}{% else %}
 ServiceType = DATAHUB
