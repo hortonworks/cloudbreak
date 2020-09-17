@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -289,7 +290,7 @@ class CredentialServiceTest {
     void testCreate() {
         when(repository.findByNameAndAccountId(eq(CREDENTIAL_NAME), eq(ACCOUNT_ID), anyCollection(), any()))
                 .thenReturn(Optional.empty());
-        when(credentialAdapter.verify(any(), anyString())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
+        when(credentialAdapter.verify(any(), anyString(), anyBoolean())).thenAnswer(i -> new CredentialVerification(i.getArgument(0), true));
         when(repository.save(any())).thenAnswer(i -> i.getArgument(0));
         credentialServiceUnderTest.create(CREDENTIAL, ACCOUNT_ID, USER_ID, ENVIRONMENT);
         verify(credentialValidator).validateCredentialCloudPlatform(eq(PLATFORM), eq(USER_ID));

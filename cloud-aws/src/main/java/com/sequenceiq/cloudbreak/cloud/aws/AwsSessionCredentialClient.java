@@ -55,6 +55,19 @@ public class AwsSessionCredentialClient {
                 .withRoleArn(awsCredential.getRoleArn())
                 .withRoleSessionName(roleSessionName);
         LOGGER.debug("Trying to assume role with role arn {}", awsCredential.getRoleArn());
+        return getAwsSessionCredentialsAndAssumeRole(awsCredential, assumeRoleRequest);
+    }
+
+    public AwsSessionCredentials retrieveSessionCredentialsWithoutExternalId(AwsCredentialView awsCredential) {
+        AssumeRoleRequest assumeRoleRequest = new AssumeRoleRequest()
+                .withDurationSeconds(DEFAULT_SESSION_CREDENTIALS_DURATION)
+                .withRoleArn(awsCredential.getRoleArn())
+                .withRoleSessionName(roleSessionName);
+        LOGGER.debug("Trying to assume role with role arn {} and without external ID", awsCredential.getRoleArn());
+        return getAwsSessionCredentialsAndAssumeRole(awsCredential, assumeRoleRequest);
+    }
+
+    private AwsSessionCredentials getAwsSessionCredentialsAndAssumeRole(AwsCredentialView awsCredential, AssumeRoleRequest assumeRoleRequest) {
         try {
             AssumeRoleResult result = awsSecurityTokenServiceClient(awsCredential).assumeRole(assumeRoleRequest);
             Credentials credentialsResponse = result.getCredentials();

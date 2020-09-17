@@ -68,13 +68,17 @@ public class ServiceProviderCredentialAdapter {
     private RequestProvider requestProvider;
 
     public CredentialVerification verify(Credential credential, String accountId) {
+        return verify(credential, accountId, Boolean.FALSE);
+    }
+
+    public CredentialVerification verify(Credential credential, String accountId, boolean creationVerification) {
         boolean changed = false;
         credential = credentialPrerequisiteService.decorateCredential(credential);
         CloudContext cloudContext =
                 new CloudContext(credential.getId(), credential.getName(), credential.getCloudPlatform(), TEMP_USER_ID, accountId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-        CredentialVerificationRequest request = requestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential);
+        CredentialVerificationRequest request = requestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential, creationVerification);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
