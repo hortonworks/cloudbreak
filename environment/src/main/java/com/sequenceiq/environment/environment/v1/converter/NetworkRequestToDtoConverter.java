@@ -12,7 +12,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;

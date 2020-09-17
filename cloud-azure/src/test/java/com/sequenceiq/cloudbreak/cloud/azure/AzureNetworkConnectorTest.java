@@ -346,6 +346,7 @@ public class AzureNetworkConnectorTest {
         underTest.getNetworkCidr(network, credential);
     }
 
+    @Test
     public void testSelectSubnetsThenSubnetSelectorIsCalled() {
         underTest.chooseSubnets(List.of(), SubnetSelectionParameters.builder().build());
 

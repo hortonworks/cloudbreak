@@ -56,6 +56,9 @@
                              "name": "subnet${subnet.index}",
                              "properties": {
                                  "addressPrefix": "[parameters('subnet${subnet.index}Prefix')]",
+                                 <#if usePrivateEndpoints>
+                                 "privateEndpointNetworkPolicies": "Disabled",
+                                 </#if>
                                  "serviceEndpoints": [
                                      {
                                          "service": "Microsoft.Sql"

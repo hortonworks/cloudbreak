@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 
 import java.util.List;
@@ -20,8 +21,9 @@ import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -48,7 +50,10 @@ public class AzureDatabaseResourceService {
     private static final String DATABASE_SERVER_FQDN = "databaseServerFQDN";
 
     @Inject
-    private AzureTemplateBuilder azureTemplateBuilder;
+    private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
+
+    @Inject
+    private AzureDatabaseTemplateProvider azureDatabaseTemplateProvider;
 
     @Inject
     private AzureUtils azureUtils;
@@ -66,7 +71,7 @@ public class AzureDatabaseResourceService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
-        String template = azureTemplateBuilder.build(cloudContext, stack);
+        String template = azureDatabaseTemplateBuilder.build(cloudContext, stack);
 
         if (!client.resourceGroupExists(resourceGroupName)) {
             if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
@@ -132,7 +137,7 @@ public class AzureDatabaseResourceService {
         AzureClient client = ac.getParameter(AzureClient.class);
 
         return (azureResourceGroupMetadataProvider.getResourceGroupUsage(stack) != ResourceGroupUsage.MULTIPLE)
-                ? deleteDatabaseServer(resources, cloudContext, force, client, persistenceNotifier)
+                ? deleteResources(resources, cloudContext, force, client, persistenceNotifier)
                 : deleteResourceGroup(resources, cloudContext, force, client, persistenceNotifier, stack);
     }
 
@@ -150,24 +155,34 @@ public class AzureDatabaseResourceService {
                 .build(), ResourceStatus.DELETED));
     }
 
-    private List<CloudResourceStatus> deleteDatabaseServer(List<CloudResource> resources, CloudContext cloudContext, boolean force,
+    private List<CloudResourceStatus> deleteResources(List<CloudResource> resources, CloudContext cloudContext, boolean force,
             AzureClient client, PersistenceNotifier persistenceNotifier) {
-        LOGGER.debug("Deleting database server");
-        Optional<CloudResource> dbServerResourceOptional = resources.stream().filter(r -> AZURE_DATABASE.equals(r.getType())).findFirst();
-        if (dbServerResourceOptional.isEmpty()) {
-            LOGGER.warn("Azure database id not found in database, deleting nothing");
-            return List.of();
-        }
-        String databaseServerId = dbServerResourceOptional.get().getReference();
-        Optional<String> errorMessage = azureUtils.deleteDatabaseServer(client, databaseServerId, force);
-        if (errorMessage.isEmpty()) {
-            deleteResources(resources, cloudContext, persistenceNotifier);
-        }
 
-        return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
+        // TODO simplify after final form of template is reached
+
+        List<CloudResource> azureGenericResources = findResources(resources, List.of(AZURE_PRIVATE_ENDPOINT));
+        LOGGER.debug("Deleting dns zone groups and azure private endpoints {}", azureGenericResources);
+        azureUtils.deleteGenericResources(client, azureGenericResources.stream().map(CloudResource::getReference).collect(Collectors.toList()));
+        azureGenericResources.forEach(cr -> persistenceNotifier.notifyDeletion(cr, cloudContext));
+
+        return findResources(resources, List.of(AZURE_DATABASE)).stream()
+                .map(r -> deleteDatabaseServerAndNotify(r, cloudContext, client, persistenceNotifier, force))
+                .collect(Collectors.toList());
+    }
+
+    private CloudResourceStatus deleteDatabaseServerAndNotify(
+            CloudResource cloudResource, CloudContext cloudContext, AzureClient client, PersistenceNotifier persistenceNotifier, boolean force) {
+        LOGGER.debug("Deleting postgres server {}", cloudResource.getReference());
+        azureUtils.deleteDatabaseServer(client, cloudResource.getReference(), force);
+        persistenceNotifier.notifyDeletion(cloudResource, cloudContext);
+        return new CloudResourceStatus(CloudResource.builder()
                 .type(AZURE_DATABASE)
-                .name(databaseServerId)
-                .build(), ResourceStatus.DELETED));
+                .name(cloudResource.getReference())
+                .build(), ResourceStatus.DELETED);
+    }
+
+    private List<CloudResource> findResources(List<CloudResource> resources, List<ResourceType> resourceTypes) {
+        return resources.stream().filter(r -> resourceTypes.contains(r.getType())).collect(Collectors.toList());
     }
 
     private void deleteResources(List<CloudResource> cloudResourceList, CloudContext cloudContext, PersistenceNotifier persistenceNotifier) {
@@ -193,5 +208,8 @@ public class AzureDatabaseResourceService {
             throw new CloudConnectorException(e);
         }
     }
-}
 
+    public String getDBStackTemplate() {
+        return azureDatabaseTemplateProvider.getDBTemplateString();
+    }
+}

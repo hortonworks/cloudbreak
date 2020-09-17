@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -8,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -22,8 +24,6 @@ import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-
-import java.util.Optional;
 
 @Service
 public class RedbeamsCreationService {
@@ -114,7 +114,7 @@ public class RedbeamsCreationService {
                 throw new RedbeamsException("No database stack template is available for platform variant " + platformVariant);
             }
             dbStack.setTemplate(template);
-        } catch (TemplatingDoesNotSupportedException e) {
+        } catch (TemplatingNotSupportedException e) {
             throw new RedbeamsException("Failed to retrieve database stack template for cloud platform", e);
         }
 

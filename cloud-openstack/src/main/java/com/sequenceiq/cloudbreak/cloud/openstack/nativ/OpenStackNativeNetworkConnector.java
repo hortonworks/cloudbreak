@@ -48,6 +48,11 @@ public class OpenStackNativeNetworkConnector implements NetworkConnector {
     }
 
     @Override
+    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
+        return null;
+    }
+
+    @Override
     public Platform platform() {
         return OpenStackConstants.OPENSTACK_PLATFORM;
     }

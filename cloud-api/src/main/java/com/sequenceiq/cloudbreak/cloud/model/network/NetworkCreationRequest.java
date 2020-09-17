@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.common.model.EndpointType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
@@ -41,7 +42,7 @@ public class NetworkCreationRequest {
 
     private final boolean privateSubnetEnabled;
 
-    private final boolean serviceEndpointsEnabled;
+    private final EndpointType endpointType;
 
     private final Map<String, String> tags;
 
@@ -59,7 +60,7 @@ public class NetworkCreationRequest {
         noPublicIp = builder.noPublicIp;
         stackName = builder.stackName;
         privateSubnetEnabled = builder.privateSubnetEnabled;
-        serviceEndpointsEnabled = builder.serviceEndpointsEnabled;
+        endpointType = builder.endpointType;
         userName = builder.userName;
         creatorCrn = builder.creatorCrn;
         tags = builder.tags;
@@ -118,8 +119,8 @@ public class NetworkCreationRequest {
         return privateSubnetEnabled;
     }
 
-    public boolean isServiceEndpointsEnabled() {
-        return serviceEndpointsEnabled;
+    public EndpointType getEndpointType() {
+        return endpointType;
     }
 
     public String getUserName() {
@@ -167,7 +168,7 @@ public class NetworkCreationRequest {
 
         private boolean privateSubnetEnabled;
 
-        private boolean serviceEndpointsEnabled;
+        private EndpointType endpointType;
 
         private String creatorCrn;
 
@@ -240,8 +241,8 @@ public class NetworkCreationRequest {
             return this;
         }
 
-        public Builder withServiceEndpointsEnabled(boolean serviceEndpointsEnabled) {
-            this.serviceEndpointsEnabled = serviceEndpointsEnabled;
+        public Builder withEndpointType(EndpointType endpointType) {
+            this.endpointType = endpointType;
             return this;
         }
 

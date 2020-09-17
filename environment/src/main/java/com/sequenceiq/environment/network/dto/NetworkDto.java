@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
 public class NetworkDto {

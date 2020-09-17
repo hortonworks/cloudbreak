@@ -15,7 +15,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;

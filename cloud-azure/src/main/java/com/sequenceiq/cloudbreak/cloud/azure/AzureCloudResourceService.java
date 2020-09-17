@@ -116,8 +116,14 @@ public class AzureCloudResourceService {
             case "Microsoft.Network/virtualNetworks":
                 cloudResourceBuilder.type(ResourceType.AZURE_NETWORK);
                 break;
+            case "Microsoft.Network/privateEndpoints":
+                cloudResourceBuilder.type(ResourceType.AZURE_PRIVATE_ENDPOINT);
+                break;
             case "Microsoft.DBforPostgreSQL/servers":
                 cloudResourceBuilder.type(ResourceType.AZURE_DATABASE);
+                break;
+            case "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies":
+                cloudResourceBuilder.type(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY);
                 break;
             case "Microsoft.Compute/images":
                 cloudResourceBuilder.type(ResourceType.AZURE_MANAGED_IMAGE);

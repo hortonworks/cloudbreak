@@ -26,8 +26,8 @@ public class NetworkTestUtils {
     private NetworkTestUtils() {
     }
 
-    public static NetworkDto getNetworkDto(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr,
-            Integer numberOfSubnets, RegistrationType registrationType) {
+    public static NetworkDto.Builder getNetworkDtoBuilder(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId,
+            String networkCidr, Integer numberOfSubnets, RegistrationType registrationType) {
         return NetworkDto.builder()
                 .withId(1L)
                 .withName("networkName")
@@ -38,23 +38,18 @@ public class NetworkTestUtils {
                 .withNetworkCidr(networkCidr)
                 .withNetworkId(networkId)
                 .withSubnetMetas(getSubnetMetas(numberOfSubnets))
-                .withRegistrationType(registrationType)
+                .withRegistrationType(registrationType);
+    }
+
+    public static NetworkDto getNetworkDto(AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr,
+            Integer numberOfSubnets, RegistrationType registrationType) {
+        return getNetworkDtoBuilder(azureParams, awsParams, yarnParams, networkId, networkCidr, numberOfSubnets, registrationType)
                 .build();
     }
 
     public static NetworkDto getNetworkDto(
             AzureParams azureParams, AwsParams awsParams, YarnParams yarnParams, String networkId, String networkCidr, Integer numberOfSubnets) {
-        return NetworkDto.builder()
-                .withId(1L)
-                .withName("networkName")
-                .withResourceCrn("aResourceCRN")
-                .withAzure(azureParams)
-                .withAws(awsParams)
-                .withYarn(yarnParams)
-                .withNetworkCidr(networkCidr)
-                .withNetworkId(networkId)
-                .withSubnetMetas(getSubnetMetas(numberOfSubnets))
-                .build();
+        return getNetworkDto(azureParams, awsParams, yarnParams, networkId, networkCidr, numberOfSubnets, RegistrationType.EXISTING);
     }
 
     public static Set<CloudNetwork> getCloudNetworks(int quantity) {
@@ -101,12 +96,10 @@ public class NetworkTestUtils {
     public static AzureParams getAzureParams(boolean noPublicIp, boolean withNetworkId, boolean withResourceGroupName) {
         AzureParams.Builder builder = AzureParams.builder();
         if (withNetworkId) {
-            builder
-                    .withNetworkId("aNetworkId");
+            builder.withNetworkId("aNetworkId");
         }
         if (withResourceGroupName) {
-            builder
-                    .withResourceGroupName("aResourceGroupId");
+            builder.withResourceGroupName("aResourceGroupId");
         }
         return builder
                 .withNoPublicIp(noPublicIp)

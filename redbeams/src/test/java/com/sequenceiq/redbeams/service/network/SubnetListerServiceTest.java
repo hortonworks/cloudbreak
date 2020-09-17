@@ -102,8 +102,8 @@ public class SubnetListerServiceTest {
 
         assertEquals(2, subnets.size());
         Set<String> ids = subnets.stream().map(CloudSubnet::getId).collect(Collectors.toSet());
-        assertTrue(ids.contains(SubnetListerService.expandAzureResourceId(subnet1, detailedEnvironmentResponse, SUBSCRIPTION_ID).getId()));
-        assertTrue(ids.contains(SubnetListerService.expandAzureResourceId(subnet2, detailedEnvironmentResponse, SUBSCRIPTION_ID).getId()));
+        assertTrue(ids.contains(formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, SUBNET_ID_1)));
+        assertTrue(ids.contains(formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, SUBNET_ID_2)));
     }
 
     @Test
@@ -111,10 +111,14 @@ public class SubnetListerServiceTest {
         when(environmentNetworkResponse.getAzure().getResourceGroupName()).thenReturn(RESOURCE_GROUP);
         when(environmentNetworkResponse.getAzure().getNetworkId()).thenReturn(NETWORK_ID);
 
-        CloudSubnet expandedSubnet = SubnetListerService.expandAzureResourceId(subnet1, detailedEnvironmentResponse, SUBSCRIPTION_ID);
+        CloudSubnet expandedSubnet = underTest.expandAzureResourceId(subnet1, detailedEnvironmentResponse, SUBSCRIPTION_ID);
 
-        String expectedId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s",
-            SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, subnet1.getId());
+        String expectedId = formatAzureResourceId(SUBSCRIPTION_ID, RESOURCE_GROUP, NETWORK_ID, subnet1.getId());
         assertEquals(expectedId, expandedSubnet.getId());
+    }
+
+    private String formatAzureResourceId(String subscription, String resourceGroup, String networkId, String subnetId) {
+        return String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s",
+                subscription, resourceGroup, networkId, subnetId);
     }
 }
