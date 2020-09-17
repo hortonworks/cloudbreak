@@ -206,7 +206,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Set<Blueprint> getAllAvailableInWorkspace(Workspace workspace) {
-        updateDefaultBlueprintCollection(workspace);
+        //updateDefaultBlueprintCollection(workspace);
         return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 

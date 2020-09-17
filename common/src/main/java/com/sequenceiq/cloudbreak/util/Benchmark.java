@@ -12,28 +12,28 @@ public class Benchmark {
     public static void measure(Runnable callback, Logger logger, String message, Object... params) {
         long start = System.currentTimeMillis();
         callback.run();
-        logDuration(logger, message, start, params);
+        logDuration(logger, "[MEASURE] " + message, start, params);
     }
 
     public static <T> T measure(Supplier<T> callback, Logger logger, String message, Object... params) {
         long start = System.currentTimeMillis();
         T resp = callback.get();
-        logDuration(logger, message, start, params);
+        logDuration(logger, "[MEASURE] " + message, start, params);
         return resp;
     }
 
     public static <T, E extends Exception> T checkedMeasure(SingleCheckedSupplier<T, E> callback, Logger logger, String message, Object... params) throws E {
         long start = System.currentTimeMillis();
         T resp = callback.get();
-        logDuration(logger, message, start, params);
+        logDuration(logger, "[MEASURE] " + message, start, params);
         return resp;
     }
 
-    public static <T, E extends Exception, X extends Exception> T mutliCheckedMeasure(MultiCheckedSupplier<T, E, X> callback, Logger logger, String message,
-            Object... params) throws E, X {
+    public static <T, E extends Exception, X extends Exception> T multiCheckedMeasure(MultiCheckedSupplier<T, E, X> callback, Logger logger, String message,
+        Object... params) throws E, X {
         long start = System.currentTimeMillis();
         T resp = callback.get();
-        logDuration(logger, message, start, params);
+        logDuration(logger, "[MEASURE] " + message, start, params);
         return resp;
     }
 

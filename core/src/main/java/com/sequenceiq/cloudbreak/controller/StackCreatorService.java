@@ -1,74 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.ParametersValidator;
-import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
-import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
-import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
-import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
-import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
-import com.sequenceiq.cloudbreak.validation.Validator;
-import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
+import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
-import javax.inject.Inject;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -85,10 +20,68 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
-import static com.sequenceiq.common.api.type.CdpResourceType.fromStackType;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
+import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class StackCreatorService {
@@ -97,9 +90,6 @@ public class StackCreatorService {
 
     @Inject
     private StackDecorator stackDecorator;
-
-    @Inject
-    private FileSystemValidator fileSystemValidator;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -120,13 +110,7 @@ public class StackCreatorService {
     private ConverterUtil converterUtil;
 
     @Inject
-    private TemplateValidator templateValidator;
-
-    @Inject
     private SharedServiceConfigProvider sharedServiceConfigProvider;
-
-    @Inject
-    private Validator<StackV4Request> stackRequestValidator;
 
     @Inject
     private TransactionService transactionService;
@@ -135,16 +119,7 @@ public class StackCreatorService {
     private StackUnderOperationService stackUnderOperationService;
 
     @Inject
-    private ParametersValidator parametersValidator;
-
-    @Inject
     private BlueprintService blueprintService;
-
-    @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
-    private CredentialClientService credentialClientService;
 
     @Inject
     @Qualifier("cloudbreakListeningScheduledExecutorService")
@@ -163,118 +138,112 @@ public class StackCreatorService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
+    private StackViewService stackViewService;
+
+    @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private CredentialConverter credentialConverter;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
-        blueprintService.updateDefaultBlueprintCollection(workspace.getId());
-        LOGGER.info("Validate Stack request.");
-        ValidationResult validationResult = stackRequestValidator.validate(stackRequest);
-        if (validationResult.getState() == State.ERROR) {
-            LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-
-        validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId());
-
         String stackName = stackRequest.getName();
-        LOGGER.info("Check that stack with {} name does not exist.", stackName);
-        ensureStackDoesNotExists(stackRequest.getName(), workspace);
 
-        Stack stackStub = measure(() -> converterUtil.convert(stackRequest, Stack.class),
-                LOGGER, "Stack request converted to stack in {} ms for stack {}", stackName);
+        measure(() ->
+                validateRecipeExistenceOnInstanceGroups(stackRequest.getInstanceGroups(), workspace.getId()),
+                LOGGER,
+                "Check that recipes do exist took {} ms");
+
+        measure(() ->
+                ensureStackDoesNotExists(stackName, workspace),
+                LOGGER,
+                "Stack does not exist check took {} ms");
+
+        Stack stackStub = measure(() ->
+                converterUtil.convert(stackRequest, Stack.class),
+                LOGGER,
+                "Stack request converted to stack took {} ms for stack {}", stackName);
         stackStub.setWorkspace(workspace);
         stackStub.setCreator(user);
+        String platformString = stackStub.getCloudPlatform().toLowerCase();
 
         MDCBuilder.buildMdcContext(stackStub);
-
-        String platformString = stackStub.getCloudPlatform().toLowerCase();
-        LOGGER.info("Determine blueprint for stack with {} name ", stackName);
-        Blueprint blueprint = determineBlueprint(stackRequest, workspace);
-        checkSharedServiceVersion(stackRequest, blueprint);
-        LOGGER.info("Determine image for stack with {} name ", stackName);
-        Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
-
         Stack savedStack;
         try {
-            savedStack = transactionService.required(() -> {
-                LOGGER.info("Decorate stack with {} name ", stackName);
-                Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
+            Blueprint blueprint = measure(() ->
+                determineBlueprint(stackRequest, workspace),
+                LOGGER,
+                "Stack request converted to stack took {} ms for stack {}", stackName);
 
-                LOGGER.info("Get credential from environment service with {} environmentCrn.", stack.getEnvironmentCrn());
-                Credential credential = ThreadBasedUserCrnProvider
-                        .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
+            Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
+
+            savedStack = transactionService.required(() -> {
+                Stack stack = measure(() ->
+                        stackDecorator.decorate(stackStub, stackRequest, user, workspace),
+                        LOGGER,
+                        "Decorate Stack with data took {} ms");
+
+                DetailedEnvironmentResponse environment =  measure(() ->
+                        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                                environmentClientService.getByCrn(stack.getEnvironmentCrn())),
+                        LOGGER,
+                        "Get Environment from Environment service took {} ms");
+                Credential credential = credentialConverter.convert(environment.getCredential());
                 CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
-                LOGGER.info("Validate Stack parameter for {} name.", stackName);
-                ParametersValidationRequest parametersValidationRequest = parametersValidator.triggerValidate(stackRequest.getCloudPlatform().name(),
-                        cloudCredential, stack.getParameters(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
-                    LOGGER.info("Validate orchestrator for {} name.", stackName);
-                    stackService.validateOrchestrator(stack.getOrchestrator());
+                    measure(() -> stackService.validateOrchestrator(stack.getOrchestrator()),
+                            LOGGER,
+                            "Validate orchestrator took {} ms");
                 }
-
-                measure(() -> {
-                    for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                        LOGGER.info("Validate template for {} name with {} instanceGroup.", stackName, instanceGroup.toString());
-                        StackType type = stack.getType();
-                        templateValidator.validateTemplateRequest(credential,
-                                instanceGroup.getTemplate(),
-                                stack.getRegion(),
-                                stack.getAvailabilityZone(),
-                                stack.getPlatformVariant(),
-                                fromStackType(type == null ? null : type.name()));
-                    }
-                }, LOGGER, "Stack's instance templates have been validated in {} ms for stack {}", stackName);
-
-                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stackRequest.getEnvironmentCrn());
                 stack.setUseCcm(environment.getTunnel().useCcm());
                 stack.setTunnel(environment.getTunnel());
 
                 if (stackRequest.getCluster() != null) {
-                    LOGGER.info("Cluster not null so creating cluster for stack name {}.", stackName);
-                    StackValidationV4Request stackValidationRequest = measure(() -> converterUtil.convert(stackRequest, StackValidationV4Request.class),
-                            LOGGER, "Stack validation request has been created in {} ms for stack {}", stackName);
 
-                    StackValidation stackValidation = measure(() -> converterUtil.convert(stackValidationRequest, StackValidation.class),
-                            LOGGER, "Stack validation object has been created in {} ms for stack {}", stackName);
+                    measure(() -> setStackType(stack, blueprint),
+                        LOGGER,
+                        "Set stacktype for stack object took {} ms");
 
-                    LOGGER.info("Validate Datalake related properties for stack {}.", stackName);
-                    setStackTypeAndValidateDatalake(stack, blueprint);
-
-                    stackService.validateStack(stackValidation);
-
-                    LOGGER.info("Validate Filesystem for stack {}.", stackName);
-                    fileSystemValidator.validateFileSystem(stackValidation.getCredential().cloudPlatform(), cloudCredential,
-                            stackValidationRequest.getFileSystem(), stack.getCreator().getUserId(), stack.getWorkspace().getId());
-
-                    clusterCreationService.validate(stackRequest.getCluster(), cloudCredential, stack, user, workspace,
-                            environment, distroxRequest);
+                    measure(() -> clusterCreationService.validate(
+                            stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment, distroxRequest),
+                            LOGGER,
+                            "Validate cluster rds and autotls took {} ms");
                 }
 
-                LOGGER.info("Fill up instanceMetadata for stack {}.", stackName);
-                fillInstanceMetadata(stack);
+                measure(() -> fillInstanceMetadata(stack),
+                        LOGGER,
+                        "Fill up instance metadata took {} ms");
 
-                parametersValidator.waitResult(parametersValidationRequest);
 
-                LOGGER.info("Get image catalog for stack {}.", stackName);
-                StatedImage imgFromCatalog = getImageCatalog(imgFromCatalogFuture);
-                Stack newStack = stackService.create(stack, platformString, imgFromCatalog, user, workspace,
-                        Optional.ofNullable(stackRequest.getResourceCrn()));
+                StatedImage imgFromCatalog = measure(() -> getImageCatalog(imgFromCatalogFuture),
+                        LOGGER,
+                        "Select the correct image took {} ms");
+                Stack newStack = measure(() -> stackService.create(
+                            stack, platformString, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
+                            LOGGER,
+                        "Save the remaining stack data took {} ms"
+                        );
 
                 try {
-                    LOGGER.info("Create cluster enity in the database with name {}.", stackName);
+                    LOGGER.info("Create cluster enity in the database {} ms with name {}.", stackName);
+                    long clusterSaveStart = System.currentTimeMillis();
                     createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
+                    LOGGER.info("Cluster save took {} ms", System.currentTimeMillis() - clusterSaveStart);
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                LOGGER.info("Shared service preparation if required with name {}.", stackName);
-                Stack withSharedServicesIfNeeded = prepareSharedServiceIfNeed(newStack);
-                assignOwnerRoleOnDataHub(user, stackRequest, newStack);
+                Stack withSharedServicesIfNeeded = measure(() -> prepareSharedServiceIfNeed(newStack),
+                        LOGGER,
+                        "Shared service preparation if required took {} ms with name {}.", stackName);
+                measure(() -> assignOwnerRoleOnDataHub(user, stackRequest, newStack),
+                        LOGGER,
+                        "assignOwnerRoleOnDataHub to stack took {} ms with name {}.", stackName);
                 return withSharedServicesIfNeeded;
             });
         } catch (TransactionExecutionException e) {
@@ -288,11 +257,14 @@ public class StackCreatorService {
         }
 
         StackV4Response response = measure(() -> converterUtil.convert(savedStack, StackV4Response.class),
-                LOGGER, "Stack response has been created in {} ms for stack {}", savedStack.getName());
+                LOGGER, "Stack response has been created for stack took {} ms with name {}", stackName);
 
         LOGGER.info("Generated stack response after creation: {}", JsonUtil.writeValueAsStringSilentSafe(response));
 
-        FlowIdentifier flowIdentifier = flowManager.triggerProvisioning(savedStack.getId());
+        FlowIdentifier flowIdentifier = measure(() ->
+                flowManager.triggerProvisioning(savedStack.getId()),
+                LOGGER,
+                "Stack triggerProvisioning took {} ms with name {}", stackName);
         response.setFlowIdentifier(flowIdentifier);
 
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
@@ -301,20 +273,9 @@ public class StackCreatorService {
     }
 
     private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {
+        // TODO grpc call
         if (StackType.WORKLOAD.equals(stackRequest.getType())) {
             grpcUmsClient.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), newStack.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
-        }
-    }
-
-    private void checkSharedServiceVersion(StackV4Request stackRequest, Blueprint blueprint) {
-        if (blueprint != null && stackRequest.getSharedService() != null && stackRequest.getSharedService().getRuntimeVersion() != null) {
-            String sharedServiceRuntimeVersion = stackRequest.getSharedService().getRuntimeVersion();
-            if (!sharedServiceRuntimeVersion.equals(blueprint.getStackVersion())) {
-                String errorMessage = String.format("Given stack version (%s) does not match with shared context's runtime version (%s)",
-                        blueprint.getStackVersion(), sharedServiceRuntimeVersion);
-                LOGGER.error(errorMessage);
-                throw new BadRequestException(errorMessage);
-            }
         }
     }
 
@@ -358,16 +319,9 @@ public class StackCreatorService {
         }
     }
 
-    private void setStackTypeAndValidateDatalake(Stack stack, Blueprint blueprint) {
+    private void setStackType(Stack stack, Blueprint blueprint) {
         if (blueprintService.isDatalakeBlueprint(blueprint)) {
             stack.setType(StackType.DATALAKE);
-            if (stack.getEnvironmentCrn() != null) {
-                LOGGER.info("Get datalake count in environment {}", stack.getEnvironmentCrn());
-                Long datalakesInEnv = datalakeResourcesService.countDatalakeResourcesInEnvironment(stack.getEnvironmentCrn());
-                if (datalakesInEnv >= 1L) {
-                    throw new BadRequestException("Only 1 Data Lake / Environment is allowed.");
-                }
-            }
         } else if (stack.getType() == null) {
             stack.setType(StackType.WORKLOAD);
         }
@@ -406,15 +360,14 @@ public class StackCreatorService {
     }
 
     private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
-        try {
-            stackService.getIdByNameInWorkspace(stackName, workspace.getId());
-        } catch (NotFoundException e) {
-            return;
+        Optional<StackView> byName = stackViewService.findByName(stackName, workspace.getId());
+        if (byName.isPresent()) {
+            throw new BadRequestException("Cluster already exists: " + stackName);
         }
-        throw new BadRequestException("Cluster already exists: " + stackName);
     }
 
     private Blueprint determineBlueprint(StackV4Request stackRequest, Workspace workspace) {
+        //blueprintService.updateDefaultBlueprintCollection(workspace.getId());
         if (stackRequest.getCluster() == null) {
             return null;
         }

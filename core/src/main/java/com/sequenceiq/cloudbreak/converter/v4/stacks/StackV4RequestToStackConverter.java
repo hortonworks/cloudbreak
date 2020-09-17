@@ -129,18 +129,16 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environment = null;
+        if (source.getEnvironmentCrn() != null) {
+            environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
+                    LOGGER, "Environment responded in {} ms for stack {}", source.getName());
+        }
         if (isTemplate(source)) {
-            if (source.getEnvironmentCrn() != null) {
-                environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
-                        LOGGER, "Environment responded in {} ms for stack {}", source.getName());
-                updateCustomDomainOrKerberos(source, stack);
-                updateCloudPlatformAndRelatedFields(source, stack, environment);
-            }
+            updateCustomDomainOrKerberos(source, stack);
+            updateCloudPlatformAndRelatedFields(source, stack, environment);
             convertAsStackTemplate(source, stack, environment);
             setNetworkAsTemplate(source, stack);
         } else {
-            environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
-                    LOGGER, "Environment responded in {} ms for stack {}", source.getName());
             convertAsStack(source, stack);
             updateCloudPlatformAndRelatedFields(source, stack, environment);
             setNetworkIfApplicable(source, stack, environment);
@@ -368,7 +366,14 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
 
     private com.sequenceiq.cloudbreak.domain.stack.Component getImageComponent(StackV4Request source, Stack stack) {
         ImageSettingsV4Request imageSettings = source.getImage();
-        Image image = new Image(null, null, imageSettings.getOs(), null, null, imageSettings.getCatalog(), imageSettings.getId(), null);
+        Image image = new Image(null,
+                null,
+                imageSettings.getOs(),
+                null,
+                null,
+                imageSettings.getCatalog(),
+                imageSettings.getId(),
+                null);
         return new com.sequenceiq.cloudbreak.domain.stack.Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), Json.silent(image), stack);
     }
 

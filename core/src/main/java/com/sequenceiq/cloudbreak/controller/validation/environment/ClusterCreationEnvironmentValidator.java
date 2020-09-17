@@ -61,35 +61,26 @@ public class ClusterCreationEnvironmentValidator {
     @Inject
     private SdxClientService sdxClientService;
 
-    public ValidationResult validate(ClusterV4Request clusterRequest, Stack stack,
-        DetailedEnvironmentResponse environment, User user, boolean distroxRequest) {
-        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+    public void validate(Stack stack, DetailedEnvironmentResponse environment, User user, boolean distroxRequest,
+        ValidationResult.ValidationResultBuilder validationBuilder) {
         String regionName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .displayNameToRegion(stack.getRegion());
         String displayName = cloudPlatformConnectors.getDefault(platform(stack.cloudPlatform()))
                 .regionToDisplayName(stack.getRegion());
-        String parentEnvironmentCloudPlatform = null;
         if (environment != null) {
-            parentEnvironmentCloudPlatform = environment.getParentEnvironmentCloudPlatform();
             if (!CollectionUtils.isEmpty(environment.getRegions().getNames())
                     && environment.getRegions()
                     .getNames()
                     .stream()
                     .noneMatch(region -> region.equals(regionName) || region.equals(displayName))) {
-                resultBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
+                validationBuilder.error(String.format("[%s] region is not enabled in [%s] environment. Enabled regions: [%s]", stack.getRegion(),
                         environment.getName(), environment.getRegions().getNames().stream().sorted().collect(Collectors.joining(","))));
             }
         }
-
-        Long workspaceId = stack.getWorkspace().getId();
-        validateRdsConfigNames(clusterRequest.getDatabases(), resultBuilder, workspaceId);
-        validateProxyConfig(clusterRequest.getProxyConfigCrn(), resultBuilder);
-        validateAutoTls(clusterRequest, stack, resultBuilder, parentEnvironmentCloudPlatform);
-        validateDatalakeConfig(stack, resultBuilder, user, distroxRequest);
-        return resultBuilder.build();
+        validateDatalakeConfig(stack, validationBuilder, user, distroxRequest);
     }
 
-    private void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
+    public void validateRdsConfigNames(Set<String> rdsConfigNames, ValidationResultBuilder resultBuilder, Long workspaceId) {
         if (!ofNullable(rdsConfigNames).orElse(Set.of()).isEmpty()) {
             Set<String> foundDatabaseNames = rdsConfigService.getByNamesForWorkspaceId(rdsConfigNames, workspaceId).stream()
                     .map(RDSConfig::getName)
@@ -103,7 +94,7 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateProxyConfig(String resourceCrn, ValidationResultBuilder resultBuilder) {
+    public void validateProxyConfig(String resourceCrn, ValidationResultBuilder resultBuilder) {
         if (StringUtils.isNotEmpty(resourceCrn)) {
             try {
                 proxyConfigDtoService.getByCrn(resourceCrn);
@@ -113,7 +104,7 @@ public class ClusterCreationEnvironmentValidator {
         }
     }
 
-    private void validateAutoTls(
+    public void validateAutoTls(
             ClusterV4Request clusterRequest,
             Stack stack,
             ValidationResultBuilder resultBuilder,

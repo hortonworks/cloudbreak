@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
@@ -49,8 +49,8 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
-    public void validateTemplateRequest(Credential credential, Template value, String region, String availabilityZone,
-        String variant, CdpResourceType stackType) {
+    public void validate(Credential credential, Template value, String region, String availabilityZone,
+        String variant, CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
@@ -59,7 +59,7 @@ public class TemplateValidator {
                 new HashMap<>());
 
         if (StringUtils.isEmpty(value.getInstanceType())) {
-            validateCustomInstanceType(value);
+            validateCustomInstanceType(value, validationBuilder);
         } else {
             VmType vmType = null;
             Platform platform = Platform.platform(value.cloudPlatform());
@@ -73,17 +73,21 @@ public class TemplateValidator {
                     }
                 }
                 if (vmType == null) {
-                    throw new BadRequestException(
-                            String.format("The '%s' instance type isn't supported by '%s' platform", value.getInstanceType(), platform.value()));
+                    validationBuilder.error(
+                            String.format("The '%s' instance type isn't supported by '%s' platform",
+                                    value.getInstanceType(),
+                                    platform.value()));
+
                 }
             }
 
-            validateVolumeTemplates(value, vmType, platform);
-            validateMaximumVolumeSize(value, vmType);
+            validateVolumeTemplates(value, vmType, platform, validationBuilder);
+            validateMaximumVolumeSize(value, vmType, validationBuilder);
         }
     }
 
-    private void validateVolumeTemplates(Template value, VmType vmType, Platform platform) {
+    private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
+        ValidationResult.ValidationResultBuilder validationBuilder) {
         for (VolumeTemplate volumeTemplate : value.getVolumeTemplates()) {
             VolumeParameterType volumeParameterType = null;
             Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
@@ -91,16 +95,16 @@ public class TemplateValidator {
                 Map<String, VolumeParameterType> map = disks.get(platform);
                 volumeParameterType = map.get(volumeTemplate.getVolumeType());
                 if (volumeParameterType == null) {
-                    throw new BadRequestException(
+                    validationBuilder.error(
                             String.format("The '%s' volume type isn't supported by '%s' platform", volumeTemplate.getVolumeType(), platform.value()));
                 }
             }
 
-            validateVolume(volumeTemplate, vmType, platform, volumeParameterType);
+            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder);
         }
     }
 
-    private void validateCustomInstanceType(Template template) {
+    private void validateCustomInstanceType(Template template, ValidationResult.ValidationResultBuilder validationBuilder) {
         Map<String, Object> params = template.getAttributes().getMap();
         Platform platform = Platform.platform(template.cloudPlatform());
         PlatformParameters pps = platformParameters.get().get(platform);
@@ -109,28 +113,29 @@ public class TemplateValidator {
             if (BooleanUtils.isTrue(customInstanceType)) {
                 if (params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS) == null
                         || params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY) == null) {
-                    throw new BadRequestException(String.format("Missing 'cpus' or 'memory' param for custom instancetype on %s platform",
+                    validationBuilder.error(String.format("Missing 'cpus' or 'memory' param for custom instancetype on %s platform",
                             template.cloudPlatform()));
                 }
             } else {
-                throw new BadRequestException(String.format("Custom instancetype is not supported on %s platform", template.cloudPlatform()));
+                validationBuilder.error(String.format("Custom instancetype is not supported on %s platform", template.cloudPlatform()));
             }
         }
     }
 
-    private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType) {
-        validateVolumeType(value, platform);
-        validateVolumeCount(value, vmType, volumeParameterType);
-        validateVolumeSize(value, vmType, volumeParameterType);
+    private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform,
+        VolumeParameterType volumeParameterType, ValidationResult.ValidationResultBuilder validationBuilder) {
+        validateVolumeType(value, platform, validationBuilder);
+        validateVolumeCount(value, vmType, volumeParameterType, validationBuilder);
+        validateVolumeSize(value, vmType, volumeParameterType, validationBuilder);
     }
 
-    private void validateMaximumVolumeSize(Template value, VmType vmType) {
+    private void validateMaximumVolumeSize(Template value, VmType vmType, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (vmType != null) {
             Object maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
             if (maxSize != null) {
                 int fullSize = value.getVolumeTemplates().stream().mapToInt(volume -> volume.getVolumeSize() * volume.getVolumeCount()).sum();
                 if (Integer.parseInt(maxSize.toString()) < fullSize) {
-                    throw new BadRequestException(
+                    validationBuilder.error(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",
                                     value.cloudPlatform(), fullSize, maxSize));
                 }
@@ -138,42 +143,44 @@ public class TemplateValidator {
         }
     }
 
-    private void validateVolumeType(VolumeTemplate value, Platform platform) {
+    private void validateVolumeType(VolumeTemplate value, Platform platform, ValidationResult.ValidationResultBuilder validationBuilder) {
         DiskType diskType = DiskType.diskType(value.getVolumeType());
         Map<Platform, Collection<DiskType>> diskTypes = cloudParameterService.getDiskTypes().getDiskTypes();
         if (diskTypes.containsKey(platform) && !diskTypes.get(platform).isEmpty()) {
             if (!diskTypes.get(platform).contains(diskType)) {
-                throw new BadRequestException(String.format("The '%s' platform does not support '%s' volume type", platform.value(), diskType.value()));
+                validationBuilder.error(String.format("The '%s' platform does not support '%s' volume type", platform.value(), diskType.value()));
             }
         }
     }
 
-    private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType) {
+    private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
+        ValidationResult.ValidationResultBuilder validationBuilder) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
                 if (value.getVolumeCount() > config.maximumNumber()) {
-                    throw new BadRequestException(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
+                    validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
                 } else if (value.getVolumeCount() < config.minimumNumber()) {
-                    throw new BadRequestException(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
+                    validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
                 }
             } else {
-                throw new BadRequestException(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
+                validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
         }
     }
 
-    private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType) {
+    private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
+        ValidationResult.ValidationResultBuilder validationBuilder) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
                 if (value.getVolumeSize() > config.maximumSize()) {
-                    throw new BadRequestException(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
+                    validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
                 } else if (value.getVolumeSize() < config.minimumSize()) {
-                    throw new BadRequestException(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
+                    validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }
             } else {
-                throw new BadRequestException(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
+                validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
             }
         }
     }

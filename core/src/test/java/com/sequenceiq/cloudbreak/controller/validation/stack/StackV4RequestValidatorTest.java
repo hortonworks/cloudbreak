@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
+import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,25 +15,21 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
-import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateV4RequestValidator;
+import com.sequenceiq.cloudbreak.controller.validation.template.InstanceTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
@@ -58,7 +55,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
             + " an LDAP configuration or its name/id to the Cluster request";
 
     @Spy
-    private final InstanceTemplateV4RequestValidator templateRequestValidator = new InstanceTemplateV4RequestValidator();
+    private final InstanceTemplateValidator templateRequestValidator = new InstanceTemplateValidator();
 
     @Mock
     private BlueprintService blueprintService;
@@ -67,7 +64,7 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @InjectMocks
-    private StackV4RequestValidator underTest;
+    private StackValidator underTest;
 
     @Mock
     private Blueprint blueprint;
@@ -94,79 +91,77 @@ public class StackV4RequestValidatorTest extends StackRequestValidatorTestBase {
     @Test
     public void testWithZeroRootVolumeSize() {
         assertNotNull(templateRequestValidator);
-        StackV4Request stackRequest = stackRequestWithRootVolumeSize(0);
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.ERROR, validationResult.getState());
+        Stack stackRequest = stackRequestWithRootVolumeSize(0);
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        underTest.validate(stackRequest, builder);
+        assertEquals(ERROR, builder.build().getState());
     }
 
     @Test
     public void testWithNegativeRootVolumeSize() {
-        StackV4Request stackRequest = stackRequestWithRootVolumeSize(-1);
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.ERROR, validationResult.getState());
+        Stack stackRequest = stackRequestWithRootVolumeSize(-1);
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        underTest.validate(stackRequest, builder);
+        assertEquals(ERROR, builder.build().getState());
     }
 
     @Test
     public void testNullValueIsAllowedForRootVolumeSize() {
-        StackV4Request stackRequest = stackRequestWithRootVolumeSize(null);
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.VALID, validationResult.getState());
+        Stack stackRequest = stackRequestWithRootVolumeSize(null);
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        underTest.validate(stackRequest, builder);
+        assertEquals(VALID, builder.build().getState());
     }
 
     @Test
     public void testWithPositiveRootVolumeSize() {
-        StackV4Request stackRequest = stackRequestWithRootVolumeSize(1);
-        ValidationResult validationResult = underTest.validate(stackRequest);
-        assertEquals(State.VALID, validationResult.getState());
+        Stack stackRequest = stackRequestWithRootVolumeSize(1);
+        ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
+
+        underTest.validate(stackRequest, builder);
+        assertEquals(VALID, builder.build().getState());
     }
 
-    private StackV4Request stackRequest() {
-        InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
-        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest);
-        ClusterV4Request clusterRequest = getCluster();
-        return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
+    private Stack stackRequest() {
+        Template templateRequest = new Template();
+        InstanceGroup instanceGroupRequest = getInstanceGroupV4Request(templateRequest);
+        Cluster clusterRequest = getCluster();
+        return getStackV4Request(Sets.newHashSet(instanceGroupRequest), clusterRequest);
     }
 
-    private StackV4Request stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
-        InstanceTemplateV4Request templateRequest = new InstanceTemplateV4Request();
-        templateRequest.setRootVolume(getRootVolume(rootVolumeSize));
-        InstanceGroupV4Request instanceGroupRequest = getInstanceGroupV4Request(templateRequest);
-        ClusterV4Request clusterRequest = getCluster();
-        return getStackV4Request(Collections.singletonList(instanceGroupRequest), clusterRequest);
+    private Stack stackRequestWithRootVolumeSize(Integer rootVolumeSize) {
+        Template templateRequest = new Template();
+        templateRequest.setRootVolumeSize(rootVolumeSize);
+        InstanceGroup instanceGroup = getInstanceGroupV4Request(templateRequest);
+        Cluster clusterRequest = getCluster();
+        return getStackV4Request(Sets.newHashSet(instanceGroup), clusterRequest);
     }
 
-    private VolumeV4Request getRootVolume(Integer size) {
-        VolumeV4Request root = new VolumeV4Request();
-        root.setSize(size);
-        return root;
-    }
-
-    private InstanceGroupV4Request getInstanceGroupV4Request(InstanceTemplateV4Request templateRequest) {
-        InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
-        instanceGroupRequest.setName("master");
+    private InstanceGroup getInstanceGroupV4Request(Template templateRequest) {
+        InstanceGroup instanceGroupRequest = new InstanceGroup();
+        instanceGroupRequest.setGroupName("master");
         instanceGroupRequest.setTemplate(templateRequest);
         return instanceGroupRequest;
     }
 
-    private ClusterV4Request getCluster() {
-        ClusterV4Request clusterRequest = new ClusterV4Request();
-        clusterRequest.setBlueprintName(TEST_BP_NAME);
+    private Cluster getCluster() {
+        Cluster clusterRequest = new Cluster();
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(TEST_BP_NAME);
+        clusterRequest.setBlueprint(blueprint);
         return clusterRequest;
     }
 
-    private StackV4Request getStackV4Request(List<InstanceGroupV4Request> instanceGroupRequests, ClusterV4Request clusterRequest) {
-        StackV4Request stackRequest = new StackV4Request();
+    private Stack getStackV4Request(Set<InstanceGroup> instanceGroupRequests, Cluster clusterRequest) {
+        Stack stackRequest = new Stack();
         stackRequest.setCluster(clusterRequest);
         stackRequest.setInstanceGroups(instanceGroupRequests);
         stackRequest.setEnvironmentCrn("envCrn");
-        stackRequest.setPlacement(new PlacementSettingsV4Request());
+        stackRequest.setRegion("region");
         return stackRequest;
-    }
-
-    private RDSConfig rdsConfig(DatabaseType type) {
-        RDSConfig rds = new RDSConfig();
-        rds.setType(type.name());
-        return rds;
     }
 
 }
