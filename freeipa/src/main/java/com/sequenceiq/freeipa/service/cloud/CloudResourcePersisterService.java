@@ -76,11 +76,6 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         return notification;
     }
 
-    @Override
-    public ResourceNotification retrieve(ResourceNotification data) {
-        return null;
-    }
-
     private Stack findStackById(Long stackId) {
         return stackService.getStackById(stackId);
     }

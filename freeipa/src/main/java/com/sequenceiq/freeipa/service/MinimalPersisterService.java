@@ -25,11 +25,6 @@ public class MinimalPersisterService implements Persister<ResourceNotification> 
     }
 
     @Override
-    public ResourceNotification retrieve(ResourceNotification data) {
-        return null;
-    }
-
-    @Override
     public ResourceNotification delete(ResourceNotification data) {
         return new ResourceNotification(data.getCloudResource(), data.getCloudContext(), data.getType());
     }

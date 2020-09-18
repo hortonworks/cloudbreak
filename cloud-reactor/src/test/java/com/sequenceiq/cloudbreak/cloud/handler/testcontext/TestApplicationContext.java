@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -103,6 +104,9 @@ public class TestApplicationContext {
 
     @Mock
     private Persister<?> persister;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @Mock
     private Tracer tracer;
@@ -203,4 +207,8 @@ public class TestApplicationContext {
         return persister;
     }
 
+    @Bean
+    public ResourceRetriever getResourceRetrieval() {
+        return resourceRetriever;
+    }
 }

@@ -6,6 +6,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachChecker;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
@@ -33,6 +35,11 @@ public class AzurePollTaskFactory {
     public PollTask<Boolean> storageAccountCheckerTask(AuthenticatedContext authenticatedContext,
             StorageAccountCheckerContext storageAccountCheckerContext) {
         return createPollTask(StorageAccountChecker.NAME, authenticatedContext, storageAccountCheckerContext);
+    }
+
+    public PollTask<Boolean> managedImageCreationCheckerTask(AuthenticatedContext authenticatedContext,
+            AzureManagedImageCreationCheckerContext azureManagedImageCreationCheckerContext) {
+        return createPollTask(AzureManagedImageCreationCheckerTask.NAME, authenticatedContext, azureManagedImageCreationCheckerContext);
     }
 
     @SuppressWarnings("unchecked")

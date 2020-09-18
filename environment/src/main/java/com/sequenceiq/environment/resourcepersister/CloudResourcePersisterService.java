@@ -69,11 +69,6 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         return notification;
     }
 
-    @Override
-    public ResourceNotification retrieve(ResourceNotification data) {
-        return null;
-    }
-
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
         if (persistedResource != null) {
             resource.setId(persistedResource.getId());

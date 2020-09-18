@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @EntityType(entityClass = Resource.class)
@@ -30,5 +31,9 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND (r.resourceType NOT LIKE '%INSTANCE%' OR r.resourceType NOT LIKE '%DISK%')")
     Set<Resource> findAllByStackIdNotInstanceOrDisk(@Param("stackId") Long stackId);
+
+    @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceStatus = :status AND r.resourceType = :type")
+    Optional<Resource> findByResourceReferenceAndStatusAndType(@Param("resourceReference") String resourceReference, @Param("status") CommonStatus status,
+            @Param("type") ResourceType type);
 
 }

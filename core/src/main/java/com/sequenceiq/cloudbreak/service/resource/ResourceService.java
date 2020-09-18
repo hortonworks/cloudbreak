@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -66,5 +67,9 @@ public class ResourceService {
 
     public Iterable<Resource> saveAll(Iterable<Resource> resources) {
         return repository.saveAll(resources);
+    }
+
+    public Optional<Resource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
+        return repository.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
     }
 }
