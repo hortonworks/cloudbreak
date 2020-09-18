@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -61,7 +60,6 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
         }
     }
 
-    @NotNull
     private CredentialVerificationContext createVerificationContext(CredentialVerificationRequest request) {
         return new CredentialVerificationContext(request.isCreationVerification());
     }

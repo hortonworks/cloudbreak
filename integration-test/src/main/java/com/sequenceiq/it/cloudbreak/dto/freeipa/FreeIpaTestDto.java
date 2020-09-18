@@ -112,6 +112,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return FREEIPA_RESOURCE_NAME;
     }
 
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
     public FreeIpaTestDto withTelemetry(String telemetry) {
         TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
         getRequest().setTelemetry(telemetryTestDto.getRequest());

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.ldap;
 import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -26,6 +27,9 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     private LdapConfigRepository ldapConfigRepository;
 
     @Inject
+    private LdapConfigWithArchivedRepository ldapConfigWithArchivedRepository;
+
+    @Inject
     private LdapConfigValidator ldapConfigValidator;
 
     @Inject
@@ -47,6 +51,10 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
         String accountId = crnService.getCurrentAccountId();
         return ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn)
                 .orElseThrow(notFound("LdapConfig for environment", environmentCrn));
+    }
+
+    public List<LdapConfigWithArchived> findAllByEnvironmentAndAccountId(String environmentCrn, String accountId) {
+        return ldapConfigWithArchivedRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
     }
 
     public Optional<LdapConfig> find(String environmentCrn, String accountId, String clusterName) {

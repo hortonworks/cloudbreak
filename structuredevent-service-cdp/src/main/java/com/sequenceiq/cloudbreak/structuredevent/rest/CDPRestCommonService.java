@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.ID_TYPE;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_TYPE;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -8,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -30,14 +33,22 @@ public class CDPRestCommonService {
 
     public static final List<String> CRNS_PATHS = List.of("crns");
 
-    public Map<String, String> addClusterCrnAndNameIfPresent(RestCallDetails restCallDetails, CDPOperationDetails operationDetails,
+    @Inject
+    private Map<String, CustomCrnOrNameProvider> customCrnOrNameProviders;
+
+    public Map<String, String> collectCrnAndNameIfPresent(RestCallDetails restCallDetails, CDPOperationDetails operationDetails,
             Map<String, String> restParams, String nameField, String crnField) {
         Map<String, String> params = new HashMap<>();
         RestRequestDetails restRequest = restCallDetails.getRestRequest();
         Json requestJson = getJson(restRequest.getBody());
         Json responseJson = getJson(restCallDetails.getRestResponse().getBody());
-        String resourceCrn = getCrn(requestJson, responseJson, operationDetails, restParams, crnField);
-        String name = getName(requestJson, responseJson, operationDetails, restParams, nameField);
+        Map<String, String> copyRestParams = new HashMap<>(restParams);
+        CustomCrnOrNameProvider customCrnOrNameProvider = customCrnOrNameProviders.get(restParams.get(RESOURCE_TYPE) + "CustomCrnOrNameProvider");
+        if (customCrnOrNameProvider != null) {
+            copyRestParams.putAll(customCrnOrNameProvider.provide(restCallDetails, operationDetails, restParams, nameField, crnField));
+        }
+        String resourceCrn = getCrn(requestJson, responseJson, operationDetails, copyRestParams, crnField);
+        String name = getName(requestJson, responseJson, operationDetails, copyRestParams, nameField);
 
         checkNameOrCrnProvided(restRequest, resourceCrn, name);
 

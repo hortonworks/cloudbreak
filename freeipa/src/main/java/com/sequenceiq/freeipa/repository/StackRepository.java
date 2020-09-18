@@ -7,15 +7,18 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 
 @Transactional(Transactional.TxType.REQUIRED)
-public interface StackRepository extends JpaRepository<Stack, Long> {
+@EntityType(entityClass = Stack.class)
+public interface StackRepository extends AccountAwareResourceRepository<Stack, Long> {
 
     @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
     List<Stack> findAllRunning();
@@ -37,6 +40,9 @@ public interface StackRepository extends JpaRepository<Stack, Long> {
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.terminated = -1")
     Optional<Stack> findByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
+
+    @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn")
+    Optional<Stack> findByEnvironmentCrnAndAccountIdEvenIfTerminated(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")

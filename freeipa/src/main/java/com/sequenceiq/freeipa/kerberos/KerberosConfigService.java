@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.kerberos;
 import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -24,6 +25,9 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     @Inject
     private KerberosConfigRepository kerberosConfigRepository;
+
+    @Inject
+    private KerberosConfigWithArchivedRepository kerberosConfigWithArchivedRepository;
 
     @Inject
     private CrnService crnService;
@@ -48,6 +52,10 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public Optional<KerberosConfig> find(String environmentCrn, String accountId, String clusterName) {
         return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+    }
+
+    public List<KerberosConfigWithArchived> findAllInEnvironment(String environmentCrn, String accountId) {
+        return kerberosConfigWithArchivedRepository.findAllByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
     }
 
     public void delete(String environmentCrn) {

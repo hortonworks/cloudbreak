@@ -95,11 +95,6 @@ public class CDPStructuredEventEntity implements AccountAwareResource {
     }
 
     @Override
-    public String getCreator() {
-        return null;
-    }
-
-    @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }

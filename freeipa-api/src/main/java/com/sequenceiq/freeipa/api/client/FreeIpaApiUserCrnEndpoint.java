@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.api.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
+import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
@@ -73,5 +74,10 @@ public class FreeIpaApiUserCrnEndpoint extends AbstractUserCrnServiceEndpoint im
     @Override
     public FlowPublicEndpoint getFlowPublicEndpoint() {
         return getEndpoint(FlowPublicEndpoint.class);
+    }
+
+    @Override
+    public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
+        return getEndpoint(CDPStructuredEventV1Endpoint.class);
     }
 }

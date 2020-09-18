@@ -41,6 +41,11 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
         return getRequest().getEnvironmentCrn();
     }
 
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
     public LdapTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(EnvironmentTestDto.class)

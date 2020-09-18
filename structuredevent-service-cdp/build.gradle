@@ -15,6 +15,7 @@ jar {
 
 dependencies {
     compile group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
     compile project(':cloud-reactor')
     compile project(':structuredevent-model')
