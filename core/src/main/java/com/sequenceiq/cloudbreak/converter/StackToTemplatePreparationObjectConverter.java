@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -72,6 +71,7 @@ import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -266,9 +266,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Credential credential, Stack source, FileSystem fileSystem) throws IOException {
         BaseFileSystemConfigurationsView fileSystemConfigurationView = null;
         if (source.getCluster().getFileSystem() != null) {
-            Collection<Resource> stackResources = resourceService.getAllByStackId(source.getId());
-            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source, stackResources,
-                    credential.getAttributes(), cmCloudStorageConfigProvider.getConfigQueryEntries());
+            fileSystemConfigurationView = fileSystemConfigurationProvider.fileSystemConfiguration(fileSystem, source,
+                    (ResourceType r) -> resourceService.findByStackIdAndType(source.getId(), r), credential.getAttributes(),
+                    cmCloudStorageConfigProvider.getConfigQueryEntries());
         }
         return fileSystemConfigurationView;
     }

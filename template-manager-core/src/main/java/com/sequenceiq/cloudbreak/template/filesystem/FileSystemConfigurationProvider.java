@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.template.filesystem;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -27,20 +28,15 @@ public class FileSystemConfigurationProvider {
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
     public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, Stack stack,
-            Collection<Resource> stackResources, Json credentialAttributes,
+            Function<ResourceType, Collection<Resource>> resourceFuction, Json credentialAttributes,
             ConfigQueryEntries configQueryEntries) throws IOException {
         Optional<Resource> resource = Optional.empty();
         if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
-            resource = getResourceByType(stackResources, ResourceType.ARM_TEMPLATE);
+            Collection<Resource> stackResources = resourceFuction.apply(ResourceType.ARM_TEMPLATE);
+            resource = stackResources.stream().findFirst();
         }
         return fileSystemConfiguration(fileSystem, stack.getId(), stack.getUuid(), credentialAttributes,
                 stack.getPlatformVariant(), resource, configQueryEntries);
-    }
-
-    private Optional<Resource> getResourceByType(Collection<Resource> stackResources, ResourceType type) {
-        return stackResources.stream()
-                .filter(res -> type.equals(res.getResourceType()))
-                .findFirst();
     }
 
     public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, StackV4Request request,

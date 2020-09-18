@@ -7,6 +7,10 @@ set -ex
 : ${INTEGRATIONTEST_SUITEFILES:=${INTEGRATIONTEST_SUITE_FILES}${ADDITIONAL_SUITEFILES+,$ADDITIONAL_SUITEFILES}}
 : ${INTEGRATIONTEST_TESTSUITE_POLLINGINTERVAL:=1000}
 : ${INTEGCB_LOCATION?"integcb location"}
+: ${CPUS_FOR_CLOUDBREAK=8.0}
+: ${CPUS_FOR_SERVICES=4.0}
+: ${MEMORY_FOR_CLOUDBREAK=4096M}
+: ${CPUS_FOR_SERVICES=2048M}
 
 date
 echo -e "\n\033[1;96m--- Kill running cbd containers\033[0m\n"
@@ -16,7 +20,7 @@ cd ..
 
 date
 echo -e "\n\033[1;96m--- Kill running test container\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose down
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility down
 
 date
 echo -e "\n\033[1;96m--- Create docker network\033[0m\n"
@@ -24,7 +28,7 @@ docker network create cbreak_default || true
 
 date
 echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
-$INTEGCB_LOCATION/.deps/bin/docker-compose up -d thunderhead-mock
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up -d thunderhead-mock
 
 date
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
@@ -113,7 +117,7 @@ if [[ "$CIRCLECI" ]]; then
     export DOCKER_CLIENT_TIMEOUT=120
     export COMPOSE_HTTP_TIMEOUT=120
 
-    $INTEGCB_LOCATION/.deps/bin/docker-compose up test | tee test.out
+    $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up test | tee test.out
     echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
     echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"

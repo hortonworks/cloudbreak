@@ -47,7 +47,6 @@ public enum DatalakeStatusEnum {
         return EXTERNAL_DATABASE_DELETION_IN_PROGRESS.equals(this)
                 || STACK_DELETED.equals(this)
                 || STACK_DELETION_IN_PROGRESS.equals(this)
-                || DELETED_ON_PROVIDER_SIDE.equals(this)
                 || DELETE_REQUESTED.equals(this)
                 || DELETED.equals(this);
     }
