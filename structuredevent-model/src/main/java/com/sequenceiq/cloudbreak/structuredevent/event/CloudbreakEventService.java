@@ -16,6 +16,12 @@ public interface CloudbreakEventService {
 
     String ENVIRONMENT_RESOURCE_TYPE = "environment";
 
+    String FREEIPA_RESOURCE_TYPE = "freeipa";
+
+    String KERBEROS_RESOURCE_TYPE = "kerberos";
+
+    String LDAP_RESOURCE_TYPE = "ldaps";
+
     String CREDENTIAL_RESOURCE_TYPE = "credential";
 
     String LEGACY_RESOURCE_TYPE = "stacks";

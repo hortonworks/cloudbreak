@@ -65,6 +65,16 @@ public class StackService implements ResourceBasedCrnProvider {
                 .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
 
+    public Stack getByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
+        return findByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] has never existed", environmentCrn)));
+    }
+
+    public Optional<Stack> findByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
+        return stackRepository.findByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId)
+                .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
+    }
+
     public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Collection<String> environmentCrns, String accountId) {
         if (environmentCrns.isEmpty()) {
             return getAllByAccountId(accountId);

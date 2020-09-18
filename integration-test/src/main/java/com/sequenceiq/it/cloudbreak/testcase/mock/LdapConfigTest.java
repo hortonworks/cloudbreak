@@ -8,6 +8,7 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.it.cloudbreak.assertion.ldap.LdapListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -22,6 +23,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
 
     @Inject
     private LdapTestClient ldapTestClient;
+
+    @Inject
+    private LdapListStructuredEventAssertions ldapListStructuredEventAssertions;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -48,6 +52,9 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                     assertNotNull(entity.getResponse());
                     return entity;
                 })
+                .when(ldapTestClient.deleteV1())
+                .then(ldapListStructuredEventAssertions::checkCreateEvents)
+                .then(ldapListStructuredEventAssertions::checkDeleteEvents)
                 .validate();
     }
 

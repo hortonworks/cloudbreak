@@ -69,6 +69,6 @@ public class EnvironmentRestResourceAuditEventConverter implements CDPRestResour
 
     @Override
     public Map<String, String> requestParameters(CDPStructuredRestCallEvent structuredEvent) {
-        return restCommonService.addClusterCrnAndNameIfPresent(structuredEvent.getRestCall(), structuredEvent.getOperation(), Collections.emptyMap(), "", "");
+        return restCommonService.collectCrnAndNameIfPresent(structuredEvent.getRestCall(), structuredEvent.getOperation(), Collections.emptyMap(), "", "");
     }
 }

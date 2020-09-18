@@ -7,7 +7,6 @@ import static org.mockito.Mockito.doThrow;
 
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,7 +97,6 @@ class SdxDiagnosticsCollectionHandlerTest {
         Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
     }
 
-    @NotNull
     private Event<SdxDiagnosticsWaitRequest> initEvent() {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
         SdxDiagnosticsWaitRequest request = new SdxDiagnosticsWaitRequest(1L, "userId", Map.of(), flowIdentifier);

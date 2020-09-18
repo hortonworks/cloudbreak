@@ -41,6 +41,11 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
     }
 
     @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
+    @Override
     public int order() {
         return 500;
     }
@@ -85,7 +90,7 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
     }
 
     public KerberosTestDto withActiveDirectoryDescriptor() {
-        getRequest().setActiveDirectory(getTestContext().get(ActiveDirectoryKerberosDescriptorTestDto.class).getRequest());
+        getRequest().setActiveDirectory(getTestContext().given(ActiveDirectoryKerberosDescriptorTestDto.class).getRequest());
         return this;
     }
 

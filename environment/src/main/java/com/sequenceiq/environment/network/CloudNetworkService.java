@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -123,7 +122,6 @@ public class CloudNetworkService {
                 .collect(toMap(getNetworkIdentifier(cloudPlatform), Function.identity()));
     }
 
-    @NotNull
     private Function<? super CloudSubnet, ? extends String> getNetworkIdentifier(String cloudPlatform) {
         return isGcp(cloudPlatform) ? CloudSubnet::getName : CloudSubnet::getId;
     }

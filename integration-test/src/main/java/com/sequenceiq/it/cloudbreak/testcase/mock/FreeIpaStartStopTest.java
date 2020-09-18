@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -28,6 +29,9 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
+
+    @Inject
+    private FreeIpaListStructuredEventAssertions freeIpaListStructuredEventAssertions;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -63,6 +67,12 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
+                .when(freeIpaTestClient.delete())
+                .await(Status.DELETE_COMPLETED)
+                .when(freeIpaListStructuredEventAssertions::checkCreateEvents)
+                .when(freeIpaListStructuredEventAssertions::checkDeleteEvents)
+                .when(freeIpaListStructuredEventAssertions::checkStartEvents)
+                .when(freeIpaListStructuredEventAssertions::checkStopEvents)
                 .validate();
     }
 }

@@ -5,8 +5,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.cloudera.thunderhead.service.audit.AuditProto;
 import com.sequenceiq.cloudbreak.audit.AuditClient;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
@@ -85,7 +83,6 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         }
     }
 
-    @NotNull
     private List<AuditProto.CdpAuditEvent> filterFlowEvents(List<AuditProto.CdpAuditEvent> cdpAuditEvents, T testDto, String eventName) {
         return cdpAuditEvents.stream()
                 .filter(cdpAuditEvent -> cdpAuditEvent.getCdpServiceEvent().getResourceCrnList().contains(testDto.getCrn())
@@ -93,7 +90,6 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
                 .collect(Collectors.toList());
     }
 
-    @NotNull
     private List<AuditProto.CdpAuditEvent> filterRestEvents(List<AuditProto.CdpAuditEvent> cdpAuditEvents, T testDto, String eventName) {
         return cdpAuditEvents.stream().filter(cdpAuditEvent -> {
             String requestParameters = cdpAuditEvent.getApiRequestEvent().getRequestParameters();
@@ -102,27 +98,22 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         }).collect(Collectors.toList());
     }
 
-    @NotNull
     protected String getStopEventName() {
         throw new UnsupportedOperationException("Cannot check stop event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    @NotNull
     protected String getDeleteEventName() {
         throw new UnsupportedOperationException("Cannot check delete event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    @NotNull
     protected String getStartEventName() {
         throw new UnsupportedOperationException("Cannot check start event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    @NotNull
     protected String getCreateEventName() {
         throw new UnsupportedOperationException("Cannot check create event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    @NotNull
     protected String getModifyEventName() {
         throw new UnsupportedOperationException("Cannot check modify event for " + getClass().getSimpleName() + " because it is not supported");
     }

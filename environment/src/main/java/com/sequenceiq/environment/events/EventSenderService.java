@@ -3,13 +3,13 @@ package com.sequenceiq.environment.events;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static java.lang.String.format;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.Gson;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationDetails;
@@ -63,7 +63,6 @@ public class EventSenderService {
         notificationService.send(resourceEvent, payload, userCrn);
     }
 
-    @NotNull
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload) {
         String resourceType = resource.getClass().getSimpleName().toLowerCase();
         String resourceCrn = resource.getResourceCrn();
@@ -77,7 +76,7 @@ public class EventSenderService {
                 serviceVersion,
                 resource.getAccountId(),
                 resourceCrn,
-                resource.getCreator(),
+                ThreadBasedUserCrnProvider.getUserCrn(),
                 resourceCrn,
                 resourceEvent.name());
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
@@ -85,7 +84,6 @@ public class EventSenderService {
         return new CDPStructuredNotificationEvent(operationDetails, notificationDetails);
     }
 
-    @NotNull
     private CDPStructuredNotificationEvent createStructureEventForMissingEnvironment(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
         String resourceType = payload.getClass().getSimpleName().toLowerCase();
         String resourceCrn = payload.getResourceCrn();

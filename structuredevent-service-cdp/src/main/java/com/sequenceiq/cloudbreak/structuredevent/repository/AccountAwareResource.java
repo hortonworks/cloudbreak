@@ -10,8 +10,6 @@ public interface AccountAwareResource {
 
     String getName();
 
-    String getCreator();
-
     void setAccountId(String accountId);
 
     default String getResourceName() {
