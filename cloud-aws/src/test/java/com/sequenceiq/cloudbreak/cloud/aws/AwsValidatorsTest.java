@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -45,6 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
+
+import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
@@ -71,6 +74,9 @@ public class AwsValidatorsTest {
 
     @SpyBean
     private AwsClient awsClient;
+
+    @MockBean
+    private Tracer tracer;
 
     private AuthenticatedContext authenticatedContext;
 

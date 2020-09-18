@@ -47,6 +47,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.service.Retry;
 
+import io.opentracing.Tracer;
+import io.opentracing.contrib.aws.TracingRequestHandler;
+
 @Component
 public class AwsClient {
 
@@ -68,6 +71,9 @@ public class AwsClient {
 
     @Inject
     private Retry retry;
+
+    @Inject
+    private Tracer tracer;
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
@@ -105,11 +111,15 @@ public class AwsClient {
     }
 
     public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider, ClientConfiguration clientConfiguration) {
-        return new AmazonEC2Client(awsSessionCredentialProvider, clientConfiguration);
+        AmazonEC2Client client = new AmazonEC2Client(awsSessionCredentialProvider, clientConfiguration);
+        client.addRequestHandler(new TracingRequestHandler(tracer));
+        return client;
     }
 
     public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials, ClientConfiguration clientConfiguration) {
-        return new AmazonEC2Client(basicAWSCredentials, clientConfiguration);
+        AmazonEC2Client client = new AmazonEC2Client(basicAWSCredentials, clientConfiguration);
+        client.addRequestHandler(new TracingRequestHandler(tracer));
+        return client;
     }
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
@@ -128,6 +138,7 @@ public class AwsClient {
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return AmazonIdentityManagementClientBuilder.standard()
+                .withRequestHandlers(new TracingRequestHandler(tracer))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
@@ -136,6 +147,7 @@ public class AwsClient {
 
     public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         return AWSKMSClientBuilder.standard()
+                .withRequestHandlers(new TracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(regionName)
                 .build();
@@ -146,6 +158,7 @@ public class AwsClient {
                 new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
                 new AmazonCloudFormationClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
+        client.addRequestHandler(new TracingRequestHandler(tracer));
         return client;
     }
 
@@ -162,6 +175,7 @@ public class AwsClient {
                 new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
                 new AmazonAutoScalingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
+        client.addRequestHandler(new TracingRequestHandler(tracer));
         return client;
     }
 
@@ -171,6 +185,7 @@ public class AwsClient {
 
     public AmazonS3 createS3Client(AwsCredentialView awsCredential) {
         return AmazonS3ClientBuilder.standard()
+                .withRequestHandlers(new TracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
@@ -179,6 +194,7 @@ public class AwsClient {
 
     public AmazonDynamoDB createDynamoDbClient(AwsCredentialView awsCredential, String region) {
         return AmazonDynamoDBClientBuilder.standard()
+                .withRequestHandlers(new TracingRequestHandler(tracer))
                 .withClientConfiguration(getDynamoDbClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(region)
@@ -187,6 +203,7 @@ public class AwsClient {
 
     public AmazonRDS createRdsClient(AwsCredentialView awsCredentialView, String region) {
         return AmazonRDSClientBuilder.standard()
+                .withRequestHandlers(new TracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredentialView))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(region)
@@ -241,12 +258,12 @@ public class AwsClient {
 
     public void validateEnvironmentForRoleAssuming(AwsCredentialView awsCredential, boolean awsAccessKeyAvailable, boolean awsSecretAccessKeyAvailable) {
         String accessKeyString = awsEnvironmentVariableChecker.getAwsAccessKeyString(awsCredential);
-        String secretAccesKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential);
+        String secretAccessKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential);
 
         if (awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
-            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accessKeyString, secretAccesKeyString));
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accessKeyString, secretAccessKeyString));
         } else if (awsSecretAccessKeyAvailable && !awsAccessKeyAvailable) {
-            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", secretAccesKeyString, accessKeyString));
+            throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", secretAccessKeyString, accessKeyString));
         } else if (!awsAccessKeyAvailable) {
             try {
                 try (InstanceProfileCredentialsProvider provider = getInstanceProfileProvider()) {
@@ -257,7 +274,7 @@ public class AwsClient {
                 }
             } catch (AmazonClientException ignored) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accessKeyString, secretAccesKeyString));
+                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accessKeyString, secretAccessKeyString));
                 sb.append("or an instance profile role should be available.");
                 LOGGER.info(sb.toString());
                 throw new CredentialVerificationException(sb.toString());
