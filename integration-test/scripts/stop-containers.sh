@@ -4,7 +4,7 @@
 
 echo -e "\n\033[1;96m--- Stop cbd containers"
 cd $INTEGCB_LOCATION;
-.deps/bin/docker-compose stop;
+.deps/bin/docker-compose --compatibility stop;
 echo -e "\n\033[1;96m--- Save Cloudbreak log to cloudbreak.log file"
 docker logs cbreak_cloudbreak_1 &> ../cloudbreak.log;
 echo -e "\n\033[1;96m--- Save FreeIPA log to freeipa.log file"

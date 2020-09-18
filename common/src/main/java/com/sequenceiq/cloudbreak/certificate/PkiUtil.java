@@ -82,10 +82,29 @@ public class PkiUtil {
 
     private static final Integer MAX_CACHE_SIZE = 200;
 
-    private static final Map<String, RSAKeyParameters> CACHE =
+    private static final KeyPairGenerator KEY_GEN;
+
+    static {
+        try {
+            KEY_GEN = KeyPairGenerator.getInstance("RSA");
+            KEY_GEN.initialize(KEY_SIZE, new SecureRandom());
+        } catch (Exception e) {
+            throw new PkiException("Failed to generate PK for the cluster!", e);
+        }
+    }
+
+    private static final Map<String, RSAKeyParameters> RSA_KEY_PARAMS_CACHE =
             Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
+                    return size() > MAX_CACHE_SIZE;
+                }
+            });
+
+    private static final Map<RSAKeyParameters, Signer> PSS_SIGNER_CACHE =
+            Collections.synchronizedMap(new LinkedHashMap<>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<RSAKeyParameters, Signer> eldest) {
                     return size() > MAX_CACHE_SIZE;
                 }
             });
@@ -103,7 +122,7 @@ public class PkiUtil {
     }
 
     public static String generateSignature(String privateKeyPem, byte[] data) {
-        RSAKeyParameters rsaKeyParameters = CACHE.get(privateKeyPem);
+        RSAKeyParameters rsaKeyParameters = RSA_KEY_PARAMS_CACHE.get(privateKeyPem);
 
         if (rsaKeyParameters == null) {
             try (PEMParser pEMParser = new PEMParser(new StringReader(clarifyPemKey(privateKeyPem)))) {
@@ -118,15 +137,22 @@ public class PkiUtil {
                 RSAPrivateKeySpec privKeySpec = factory.getKeySpec(kp.getPrivate(), RSAPrivateKeySpec.class);
                 rsaKeyParameters = new RSAKeyParameters(true, privKeySpec.getModulus(), privKeySpec.getPrivateExponent());
 
-                CACHE.put(privateKeyPem, rsaKeyParameters);
+                RSA_KEY_PARAMS_CACHE.put(privateKeyPem, rsaKeyParameters);
             } catch (NoSuchAlgorithmException | IOException | InvalidKeySpecException e) {
                 throw new SecurityException(e);
             }
         }
 
-        Signer signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
-        signer.init(true, rsaKeyParameters);
-        signer.update(data, 0, data.length);
+        Signer signer = PSS_SIGNER_CACHE.get(rsaKeyParameters);
+
+        if (signer == null) {
+            signer = new PSSSigner(new RSAEngine(), new SHA256Digest(), SALT_LENGTH);
+            signer.init(true, rsaKeyParameters);
+            signer.update(data, 0, data.length);
+
+            PSS_SIGNER_CACHE.put(rsaKeyParameters, signer);
+        }
+
         try {
             byte[] signature = signer.generateSignature();
             return BaseEncoding.base64().encode(signature);
@@ -136,14 +162,7 @@ public class PkiUtil {
     }
 
     public static KeyPair generateKeypair() {
-        try {
-            KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
-            keyGen.initialize(KEY_SIZE, new SecureRandom());
-            return keyGen.generateKeyPair();
-
-        } catch (Exception e) {
-            throw new PkiException("Failed to generate PK for the cluster!", e);
-        }
+        return KEY_GEN.generateKeyPair();
     }
 
     public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey) {

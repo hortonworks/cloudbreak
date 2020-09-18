@@ -78,6 +78,10 @@ services:
       - INTEGRATIONTEST_OUTPUTDIR=/it
       - INTEGRATIONTEST_DEFAULTPRIVATEKEYFILE
     image: openjdk:11-jdk
+    deploy:
+      resources:
+        limits:
+          memory: "4096M"
   swagger-diff:
     networks:
       cbreak_default: {}

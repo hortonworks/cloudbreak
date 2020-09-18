@@ -9,11 +9,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -182,10 +182,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     private CloudResource generateResource(String name, CloudContext cloudContext, String group, ResourceType type, String instanceId) {
-        String generatedRandom = new Random().ints(97, 123)
-                .limit(100000)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
+        String generatedRandom = RandomStringUtils.random(100);
         Map<String, Object> params = new HashMap<>();
         params.put("generated", generatedRandom);
         CloudResource resource = new Builder()
