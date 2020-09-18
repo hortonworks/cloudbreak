@@ -126,7 +126,7 @@ public class DefaultModel extends MockModel {
         });
     }
 
-    public void terminateInstance(Map<String, CloudVmMetaDataStatus> instanceMap, String instanceId) {
+    public void terminateInstance(String instanceId) {
         CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
         InstanceTemplate oldTemplate = vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getTemplate();
         InstanceTemplate newTemplate = new InstanceTemplate("medium", "group", oldTemplate.getPrivateId(),
@@ -138,6 +138,14 @@ public class DefaultModel extends MockModel {
         instanceMap.put(instanceId, cloudVmMetaDataStatus);
     }
 
+    public void stopInstance(String instanceId) {
+        CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
+        CloudVmInstanceStatus currentInstance = vmMetaDataStatus.getCloudVmInstanceStatus();
+        CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STOPPED);
+        CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, vmMetaDataStatus.getMetaData());
+        instanceMap.put(instanceId, newVmMetaData);
+    }
+
     public void stopAllInstances() {
         modifyInstances(InstanceStatus.STOPPED);
     }
@@ -146,12 +154,11 @@ public class DefaultModel extends MockModel {
         modifyInstances(InstanceStatus.STARTED);
     }
 
-    private void modifyInstances(InstanceStatus started) {
+    private void modifyInstances(InstanceStatus instanceStatus) {
         for (Map.Entry<String, CloudVmMetaDataStatus> entry : instanceMap.entrySet()) {
             CloudVmMetaDataStatus currentVmMeta = entry.getValue();
             CloudVmInstanceStatus currentInstance = currentVmMeta.getCloudVmInstanceStatus();
-            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), started);
-            CloudInstanceMetaData currentInstanceMeta = currentVmMeta.getMetaData();
+            CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), instanceStatus);
             CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, currentVmMeta.getMetaData());
             entry.setValue(newVmMetaData);
         }
