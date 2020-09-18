@@ -10,7 +10,6 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DbConnectionParamsV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -18,7 +17,6 @@ import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 
 @Controller
 @InternalOnly
-@InternalReady
 public class DatabaseConfigV4Controller implements DatabaseConfigV4Endpoint {
 
     @Inject

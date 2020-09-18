@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.auth.security.internal;
+package com.sequenceiq.cloudbreak.auth;
 
 import java.lang.reflect.Parameter;
 import java.util.Arrays;

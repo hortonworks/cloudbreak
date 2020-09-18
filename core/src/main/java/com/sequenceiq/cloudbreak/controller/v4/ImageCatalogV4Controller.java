@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ImageCatalog.class)
-@InternalReady
 @AuthorizationResource
 public class ImageCatalogV4Controller extends NotificationController implements ImageCatalogV4Endpoint {
 
