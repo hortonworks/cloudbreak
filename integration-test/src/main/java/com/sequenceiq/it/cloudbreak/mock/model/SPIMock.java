@@ -54,7 +54,7 @@ public class SPIMock extends AbstractModelMock {
         Map<String, CloudVmMetaDataStatus> instanceMap = getDefaultModel().getInstanceMap();
         postMockProviderMetadataStatus(instanceMap);
         postMockProviderInstanceStatus(instanceMap);
-        postMockProviderTerminateInstance(instanceMap);
+        postMockProviderTerminateInstance();
         getMockProviderStopStatus();
         getMockProviderStartStatus();
         postMockProviderStartInstance(getDefaultModel());
@@ -89,11 +89,11 @@ public class SPIMock extends AbstractModelMock {
         });
     }
 
-    private void postMockProviderTerminateInstance(Map<String, CloudVmMetaDataStatus> instanceMap) {
+    private void postMockProviderTerminateInstance() {
         dynamicRouteStack.post(MOCK_ROOT + TERMINATE_INSTANCES, (request, response) -> {
             List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() {
             }.getType());
-            cloudInstances.forEach(cloudInstance -> getDefaultModel().terminateInstance(instanceMap, cloudInstance.getInstanceId()));
+            cloudInstances.forEach(cloudInstance -> getDefaultModel().terminateInstance(cloudInstance.getInstanceId()));
             return null;
         });
     }
