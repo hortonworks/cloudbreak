@@ -18,7 +18,6 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
@@ -34,7 +33,6 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 @AuthorizationResource
-@InternalReady
 @Transactional(TxType.NEVER)
 public class ProxyController extends NotificationController implements ProxyEndpoint {
 

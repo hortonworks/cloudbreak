@@ -17,7 +17,7 @@ public class InternalApiAspects {
     @Inject
     private InternalCrnModifier internalCrnModifier;
 
-    @Pointcut("within(@com.sequenceiq.cloudbreak.auth.security.internal.InternalReady *)")
+    @Pointcut("within(@org.springframework.stereotype.Controller *)")
     public void allEndpoints() {
     }
 

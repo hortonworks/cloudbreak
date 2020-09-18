@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.auth.security.internal;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -16,18 +15,19 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
+import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class InternalCrnModifierTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
@@ -53,7 +53,7 @@ public class InternalCrnModifierTest {
     @InjectMocks
     private InternalCrnModifier underTest;
 
-    @Before
+    @BeforeEach
     public void before() {
         when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
     }
@@ -72,7 +72,7 @@ public class InternalCrnModifierTest {
         });
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 
     @Test
@@ -89,11 +89,12 @@ public class InternalCrnModifierTest {
         });
 
         verify(reflectionUtil, times(0)).getParameter(any(), any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButThereIsNoResourceCrnParameter() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
@@ -108,11 +109,12 @@ public class InternalCrnModifierTest {
         });
 
         verify(reflectionUtil, times(1)).proceed(any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotString() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(2));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
@@ -127,11 +129,12 @@ public class InternalCrnModifierTest {
         });
 
         verify(reflectionUtil, times(1)).proceed(any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternalButResourceCrnParameterIsNotCrn() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of("not_crn"));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
@@ -146,11 +149,12 @@ public class InternalCrnModifierTest {
         });
 
         verify(reflectionUtil, times(1)).proceed(any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 
     @Test
     public void testModificationIfUserCrnIsInternal() {
+        when(reflectionUtil.getParameter(any(), any(), eq(AccountId.class))).thenReturn(Optional.empty());
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(STACK_CRN));
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
@@ -169,6 +173,6 @@ public class InternalCrnModifierTest {
         verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
         assertEquals("1234", newUserCaptor.getValue().getTenant());
         verify(reflectionUtil, times(1)).proceed(any(), any());
-        assertTrue("Assertation must happen!", assertationHappened.get());
+        assertTrue(assertationHappened.get());
     }
 }

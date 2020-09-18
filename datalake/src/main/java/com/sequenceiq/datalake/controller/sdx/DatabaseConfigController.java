@@ -8,13 +8,11 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.DatabaseConfigV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DbConnectionParamsV4Response;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.endpoint.DatabaseConfigEndpoint;
 
 @Controller
-@InternalReady
 @InternalOnly
 public class DatabaseConfigController implements DatabaseConfigEndpoint {
 

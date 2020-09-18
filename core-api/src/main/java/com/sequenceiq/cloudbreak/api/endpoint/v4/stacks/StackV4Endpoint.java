@@ -76,7 +76,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Res
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -111,7 +110,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CREATE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "postStackInWorkspaceV4Internal")
     StackV4Response postInternal(@PathParam("workspaceId") Long workspaceId, @Valid StackV4Request request,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("{name}")
@@ -139,7 +138,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DELETE_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteStackInWorkspaceV4Internal")
     void deleteInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") boolean forced,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/sync")
@@ -177,7 +176,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = STOP_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "stopStackInWorkspaceV4Internal")
     FlowIdentifier putStopInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/start")
@@ -192,7 +191,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = START_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startStackInWorkspaceV4Internal")
     FlowIdentifier putStartInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/scaling")
@@ -216,7 +215,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairStackInWorkspaceV4Internal")
     FlowIdentifier repairClusterInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid ClusterRepairV4Request clusterRepairRequest, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid ClusterRepairV4Request clusterRepairRequest, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/upgrade")
@@ -232,7 +231,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = UPGRADE_CLUSTER_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_UPGRADE_NOTES,
             nickname = "upgradeOsInWorkspaceV4Internal")
     FlowIdentifier upgradeOsInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("{name}/check_for_upgrade")
@@ -264,7 +263,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CHECK_IMAGE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "changeImageStackInWorkspaceV4Internal")
     FlowIdentifier changeImageInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid StackImageChangeV4Request stackImageChangeRequest, @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @Valid StackImageChangeV4Request stackImageChangeRequest, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @DELETE
     @Path("{name}/cluster")
@@ -356,7 +355,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = STACK_UPGRADE_INTERNAL, nickname = "upgradeClusterByNameInternal")
     FlowIdentifier upgradeClusterByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name, String imageId,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/salt_update")
@@ -395,7 +394,7 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_BACKUP_INTERNAL, nickname = "databaseBackupInternal")
     BackupV4Response backupDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("{name}/database_restore")
@@ -411,5 +410,5 @@ public interface StackV4Endpoint {
     @ApiOperation(value = DATABASE_RESTORE_INTERNAL, nickname = "databaseRestoreInternal")
     RestoreV4Response restoreDatabaseByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation, @QueryParam("backupId") String backupId,
-            @InitiatorUserCrn @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

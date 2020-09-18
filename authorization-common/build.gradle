@@ -20,6 +20,7 @@ jar {
 }
 
 dependencies {
+  compile project(':auth-internal')
   compile project(":authorization-common-api")
   compile project(":auth-connector")
 

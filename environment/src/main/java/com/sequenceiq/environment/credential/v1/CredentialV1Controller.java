@@ -25,7 +25,6 @@ import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -43,7 +42,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@InternalReady
 @AuthorizationResource
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
 

@@ -7,23 +7,21 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import com.google.common.collect.Iterables;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.collect.Iterables;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -38,11 +36,11 @@ import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationSta
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
-@InternalReady
 @AuthorizationResource
 public class UserV1Controller implements UserV1Endpoint {
 

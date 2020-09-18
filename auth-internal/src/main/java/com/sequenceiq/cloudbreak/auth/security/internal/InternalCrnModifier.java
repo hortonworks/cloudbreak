@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
@@ -30,20 +31,34 @@ public class InternalCrnModifier {
         String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         if (userCrnString != null && InternalCrnBuilder.isInternalCrn(userCrnString)) {
-            Optional<Object> tenantAwareCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, TenantAwareParam.class);
-            if (tenantAwareCrn.isPresent() && tenantAwareCrn.get() instanceof String
-                    && Crn.isCrn((String) tenantAwareCrn.get())) {
-                String accountId = Crn.fromString((String) tenantAwareCrn.get()).getAccountId();
-                String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
-                return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
-            }
-            Optional<Object> accountId = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class);
-            if (accountId.isPresent() && accountId.get() instanceof String) {
-                String newUserCrn = getAccountIdModifiedCrn(userCrnString, (String) accountId.get());
-                return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
-            }
+            return ThreadBasedUserCrnProvider.doAs(getNewUserCrnIfAccountIdParamDefined(proceedingJoinPoint, methodSignature, userCrnString)
+                        .or(() -> getNewUserCrnIfTenantAwareParamDefined(proceedingJoinPoint, methodSignature, userCrnString))
+                        .orElse(userCrnString),
+                    () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
         }
         return reflectionUtil.proceed(proceedingJoinPoint, methodSignature);
+    }
+
+    private Optional<String> getNewUserCrnIfAccountIdParamDefined(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature,
+            String userCrnString) {
+        Optional<Object> accountId = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class);
+        if (accountId.isPresent() && accountId.get() instanceof String) {
+            String newUserCrn = getAccountIdModifiedCrn(userCrnString, (String) accountId.get());
+            return Optional.of(newUserCrn);
+        }
+        return Optional.empty();
+    }
+
+    private Optional<String> getNewUserCrnIfTenantAwareParamDefined(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature,
+            String userCrnString) {
+        Optional<Object> tenantAwareCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, TenantAwareParam.class);
+        if (tenantAwareCrn.isPresent() && tenantAwareCrn.get() instanceof String
+                && Crn.isCrn((String) tenantAwareCrn.get())) {
+            String accountId = Crn.fromString((String) tenantAwareCrn.get()).getAccountId();
+            String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
+            return Optional.of(newUserCrn);
+        }
+        return Optional.empty();
     }
 
     private String getAccountIdModifiedCrn(String userCrnString, String accountId) {
@@ -59,7 +74,7 @@ public class InternalCrnModifier {
         return newUserCrn.toString();
     }
 
-    public void createNewUser(Crn newUserCrn) {
+    private void createNewUser(Crn newUserCrn) {
         CrnUser newUser = InternalCrnBuilder.createInternalCrnUser(newUserCrn);
         internalUserModifier.persistModifiedInternalUser(newUser);
     }

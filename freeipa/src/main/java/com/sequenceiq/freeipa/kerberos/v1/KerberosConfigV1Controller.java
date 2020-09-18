@@ -16,7 +16,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
@@ -27,7 +26,6 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-@InternalReady
 @AuthorizationResource
 public class KerberosConfigV1Controller extends NotificationController implements KerberosConfigV1Endpoint {
     @Inject
