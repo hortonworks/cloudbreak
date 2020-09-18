@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
@@ -61,7 +60,7 @@ public class AzureStorageAccountService {
                 pollStorageAccountCreation(ac, new StorageAccountCheckerContext(client, resourceGroup, storageName));
                 CloudResource cloudResource = azureCloudResourceService.buildCloudResource(storage.name(), storage.id(), ResourceType.AZURE_STORAGE);
                 azureCloudResourceService.saveCloudResources(resourceNotifier, ac.getCloudContext(), List.of(cloudResource));
-            } catch (CloudException e) {
+            } catch (Exception e) {
                 LOGGER.error("Error during storage account creation: {}.", storageName, e);
                 throw new CloudConnectorException("Storage account creation failed.", e);
             }

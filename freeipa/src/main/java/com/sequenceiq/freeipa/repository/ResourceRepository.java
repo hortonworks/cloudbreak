@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.freeipa.entity.Resource;
 
 @Transactional(TxType.REQUIRED)
@@ -21,4 +23,8 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
+
+    @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceStatus = :status AND r.resourceType = :type")
+    Optional<Resource> findByResourceReferenceAndStatusAndType(@Param("resourceReference") String resourceReference, @Param("status") CommonStatus status,
+            @Param("type") ResourceType type);
 }

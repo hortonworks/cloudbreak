@@ -29,6 +29,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureImageService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
@@ -68,6 +69,9 @@ public class AzureStorage {
     @Inject
     private AzureStorageAccountBuilderService azureStorageAccountBuilderService;
 
+    @Inject
+    private AzureImageService azureImageService;
+
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
         String attachedStorageOption = parameters.get("attachedStorageOption");
         if (Strings.isNullOrEmpty(attachedStorageOption)) {
@@ -85,12 +89,11 @@ public class AzureStorage {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
         String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
-        String region = ac.getCloudContext().getLocation().getRegion().value();
-        return getCustomImage(imageBlobUri, imageResourceGroupName, region, client);
+        return getCustomImage(imageBlobUri, imageResourceGroupName, ac, client);
     }
 
-    private AzureImage getCustomImage(String vhd, String imageResourceGroupName, String region, AzureClient client) {
-        AzureImage image = client.getCustomImageId(imageResourceGroupName, vhd, region, true);
+    private AzureImage getCustomImage(String vhd, String imageResourceGroupName, AuthenticatedContext ac, AzureClient client) {
+        AzureImage image = azureImageService.getCustomImageId(imageResourceGroupName, vhd, ac, true, client);
         String customImageId = image.getId();
         LOGGER.debug("Custom image id: {}", customImageId);
         return image;
@@ -111,8 +114,7 @@ public class AzureStorage {
     }
 
     public StorageAccount createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup,
-            String region, Boolean encrypted, Map<String, String> tags)
-            throws CloudException {
+            String region, Boolean encrypted, Map<String, String> tags) throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
             StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
                     storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);

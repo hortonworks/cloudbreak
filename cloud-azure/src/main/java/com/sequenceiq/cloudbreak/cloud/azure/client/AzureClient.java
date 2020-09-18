@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
@@ -19,12 +18,10 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Strings;
-import com.microsoft.aad.adal4j.AuthenticationException;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
@@ -32,10 +29,8 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
-import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
@@ -78,9 +73,8 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
-import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
@@ -95,33 +89,16 @@ public class AzureClient {
 
     private final AzureClientCredentials azureClientCredentials;
 
-    public AzureClient(AzureClientCredentials azureClientCredentials) {
+    private final AzureAuthExceptionHandler azureAuthExceptionHandler;
+
+    public AzureClient(AzureClientCredentials azureClientCredentials, AzureAuthExceptionHandler azureAuthExceptionHandler) {
         this.azureClientCredentials = azureClientCredentials;
         azure = azureClientCredentials.getAzure();
+        this.azureAuthExceptionHandler = azureAuthExceptionHandler;
     }
 
-    private <T> T handleAuthException(Supplier<T> function) {
-        try {
-            return function.get();
-        } catch (RuntimeException e) {
-            if (ExceptionUtils.indexOfThrowable(e, AuthenticationException.class) != -1) {
-                throw new ProviderAuthenticationFailedException(e);
-            } else {
-                throw e;
-            }
-        }
-    }
-
-    private void handleAuthException(Runnable function) {
-        try {
-            function.run();
-        } catch (RuntimeException e) {
-            if (ExceptionUtils.indexOfThrowable(e, AuthenticationException.class) != -1) {
-                throw new ProviderAuthenticationFailedException(e);
-            } else {
-                throw e;
-            }
-        }
+    public Azure getAzure() {
+        return azure;
     }
 
     public Optional<String> getRefreshToken() {
@@ -395,7 +372,13 @@ public class AzureClient {
     public List<ListBlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         List<ListBlobItem> targetCollection = new ArrayList<>();
-        container.listBlobs().iterator().forEachRemaining(targetCollection::add);
+        try {
+            container.downloadAttributes();
+            container.listBlobs().iterator().forEachRemaining(targetCollection::add);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to list blobs in storage: {}.", storageName);
+            throw new CloudConnectorException(e);
+        }
         return targetCollection;
     }
 
@@ -516,55 +499,6 @@ public class AzureClient {
 
     public HasId getPublicIpAddress(String resourceGroup, String ipName) {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
-    }
-
-    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
-        String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
-        String imageName = CustomVMImageNameProvider.get(region, vhdName);
-        PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
-        Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
-                .filter(customImage -> customImage.name().equals(imageName)
-                        && (customImage.region().name().equals(region)
-                                || customImage.region().label().equals(region)))
-                .findFirst();
-        if (virtualMachineCustomImage.isPresent()) {
-            LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
-            return new AzureImage(customImage.id(), customImage.name(), true);
-        } else {
-            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
-            if (createIfNotFound) {
-                VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-                return new AzureImage(customImage.id(), customImage.name(), false);
-            } else {
-                return null;
-            }
-        }
-    }
-
-    private PagedList<VirtualMachineCustomImage> getCustomImageList(String resourceGroup) {
-        return handleAuthException(() -> azure.virtualMachineCustomImages().listByResourceGroup(resourceGroup));
-    }
-
-    private VirtualMachineCustomImage createCustomImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
-        return handleAuthException(() -> {
-            LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
-            if (!azure.resourceGroups().contain(resourceGroup)) {
-                azure.resourceGroups()
-                        .define(resourceGroup)
-                        .withRegion(region)
-                        .create();
-            }
-            LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
-                    fromVhdUri, imageName, resourceGroup, region);
-            return measure(() -> azure.virtualMachineCustomImages()
-                    .define(imageName)
-                    .withRegion(region)
-                    .withExistingResourceGroup(resourceGroup)
-                    .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                    .create(),
-                    LOGGER, "Custom image has been created under {} ms with name {}", imageName);
-        });
     }
 
     public PagedList<PublicIPAddress> getPublicIpAddresses(String resourceGroup) {
@@ -754,5 +688,13 @@ public class AzureClient {
 
     public void deleteDatabaseServer(String databaseServerId) {
         handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
+    }
+
+    private <T> T handleAuthException(Supplier<T> function) {
+        return azureAuthExceptionHandler.handleAuthException(function);
+    }
+
+    private void handleAuthException(Runnable function) {
+        azureAuthExceptionHandler.handleAuthException(function);
     }
 }

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceRetrievalNotification;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -21,9 +22,13 @@ public class CloudReactorInitializer {
     @Inject
     private Consumer<Event<ResourceNotification>> resourcePersistenceHandler;
 
+    @Inject
+    private Consumer<Event<ResourceRetrievalNotification>> resourceRetrievalHandler;
+
     @PostConstruct
     public void initialize() {
         eventBus.on(Selectors.$("resource-persisted"), resourcePersistenceHandler);
+        eventBus.on(Selectors.$("resource-retrieved"), resourceRetrievalHandler);
     }
 
 }
