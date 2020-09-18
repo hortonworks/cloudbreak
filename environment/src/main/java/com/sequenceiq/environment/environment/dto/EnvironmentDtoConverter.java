@@ -14,8 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -59,6 +59,8 @@ public class EnvironmentDtoConverter {
 
     private final CostTagging costTagging;
 
+    private final CrnUserDetailsService crnUserDetailsService;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -68,7 +70,8 @@ public class EnvironmentDtoConverter {
             EntitlementService entitlementService,
             DefaultInternalAccountTagService defaultInternalAccountTagService,
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
-            AccountTagService accountTagService) {
+            AccountTagService accountTagService,
+            CrnUserDetailsService crnUserDetailsService) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -78,6 +81,7 @@ public class EnvironmentDtoConverter {
         this.accountTagService = accountTagService;
         this.defaultInternalAccountTagService = defaultInternalAccountTagService;
         this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
+        this.crnUserDetailsService = crnUserDetailsService;
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
@@ -166,8 +170,8 @@ public class EnvironmentDtoConverter {
                 .build();
     }
 
-    private String getUserFromCrn(String crn) {
-        return Optional.ofNullable(Crn.fromString(crn)).map(Crn::getUserId).orElse(null);
+    private String getUserNameFromCrn(String crn) {
+        return crnUserDetailsService.loadUserByUsername(crn).getUsername();
     }
 
     private SecurityAccessDto environmentToSecurityAccessDto(Environment environment) {
@@ -194,7 +198,7 @@ public class EnvironmentDtoConverter {
                 .withPlatform(creationDto.getCloudPlatform())
                 .withResourceCrn(creationDto.getCrn())
                 .withIsInternalTenant(internalTenant)
-                .withUserName(getUserFromCrn(creationDto.getCreator()))
+                .withUserName(getUserNameFromCrn(creationDto.getCreator()))
                 .withAccountTags(accountTagsMap)
                 .withUserDefinedTags(userDefinedTags)
                 .build();

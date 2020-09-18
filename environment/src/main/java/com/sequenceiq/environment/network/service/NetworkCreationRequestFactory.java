@@ -12,8 +12,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -33,15 +31,16 @@ public class NetworkCreationRequestFactory {
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    private final CostTagging costTagging;
+    private final NetworkTagProvider networkTagProvider;
 
     public NetworkCreationRequestFactory(Collection<SubnetCidrProvider> subnetCidrProviders,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            CostTagging costTagging, DefaultSubnetCidrProvider defaultSubnetCidrProvider) {
+            DefaultSubnetCidrProvider defaultSubnetCidrProvider,
+            NetworkTagProvider networkTagProvider) {
         this.subnetCidrProviders = subnetCidrProviders.stream().collect(Collectors.toMap(SubnetCidrProvider::cloudPlatform, s -> s));
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
-        this.costTagging = costTagging;
         this.defaultSubnetCidrProvider = defaultSubnetCidrProvider;
+        this.networkTagProvider = networkTagProvider;
     }
 
     public NetworkCreationRequest create(EnvironmentDto environment) {
@@ -50,13 +49,6 @@ public class NetworkCreationRequestFactory {
         boolean privateSubnetEnabled = getPrivateSubnetEnabled(environment);
 
         Cidrs cidrs = getSubNetCidrs(environment.getCloudPlatform(), networkDto.getNetworkCidr(), privateSubnetEnabled);
-
-        CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
-                .builder()
-                .withEnvironmentTags(environment.getTags().getUserDefinedTags())
-                .withPlatform(environment.getCloudPlatform())
-                .withRequestTags(environment.getTags().getDefaultTags())
-                .build();
 
         NetworkCreationRequest.Builder builder = new NetworkCreationRequest.Builder()
                 .withStackName(getStackName(environment))
@@ -72,7 +64,7 @@ public class NetworkCreationRequestFactory {
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withAccountId(environment.getAccountId())
                 .withCreatorCrn(environment.getCreator())
-                .withTags(costTagging.mergeTags(mergeRequest))
+                .withTags(networkTagProvider.getTags(environment))
                 .withPrivateSubnets(cidrs.getPrivateSubnets())
                 .withPublicSubnets(cidrs.getPublicSubnets());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
