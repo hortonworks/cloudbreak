@@ -6,6 +6,7 @@ export DOCKER_TAG_ENVIRONMENT=dev
 export DOCKER_TAG_DATALAKE=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
+export THUNDERHEAD_MOCK_VOLUME_HOST=$(PWD)/../../mock-thunderhead/build/libs/mock-thunderhead.jar
 export CB_JAVA_OPTS="-Dthunderhead.url=thunderhead-mock:8080 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
 export UAA_DEFAULT_SECRET=cbsecret2015
 export UAA_DEFAULT_USER_PW=cloudbreak
@@ -16,7 +17,7 @@ export ENVIRONMENT_ENABLEDPLATFORMS=AZURE,AWS,YARN,MOCK
 export CB_DEFAULT_SUBSCRIPTION_ADDRESS=""
 export UMS_HOST=thunderhead-mock
 export CB_CLIENT_SECRET=cloudbreak
-export INGRESS_URLS=dev-gateway
+export INGRESS_URLS=dev-gateway,localhost
 export CLUSTERPROXY_ENABLED=false
 export ENVIRONMENT_AUTOSYNC_ENABLED=false
 export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false

@@ -10,9 +10,6 @@ logging:
 mock:
   server:
     address: localhost
-  image:
-    catalog:
-      url: https://localhost:9443/imagecatalog
 
 integrationtest:
   threadCount: 8
