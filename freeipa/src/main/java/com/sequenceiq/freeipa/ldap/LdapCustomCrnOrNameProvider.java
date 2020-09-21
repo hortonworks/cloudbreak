@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource
 import com.sequenceiq.freeipa.events.AbstractCustomCrnOrNameProvider;
 
 @Component
-public class LdapsCustomCrnOrNameProvider extends AbstractCustomCrnOrNameProvider {
+public class LdapCustomCrnOrNameProvider extends AbstractCustomCrnOrNameProvider {
 
     @Inject
     private LdapConfigService ldapConfigService;

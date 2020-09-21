@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.audit.KerberosConfigAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.kerberos.KerberosConfigListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -18,6 +19,9 @@ public class KerberosConfigCrudTest extends AbstractIntegrationTest {
 
     @Inject
     private KerberosConfigListStructuredEventAssertions kerberosConfigListStructuredEventAssertions;
+
+    @Inject
+    private KerberosConfigAuditGrpcServiceAssertion kerberosConfigAuditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -38,6 +42,7 @@ public class KerberosConfigCrudTest extends AbstractIntegrationTest {
                 .when(kerberosTestClient.describeV1())
                 .when(kerberosTestClient.deleteV1())
                 .then(kerberosConfigListStructuredEventAssertions::checkDeleteEvents)
+                .then(kerberosConfigAuditGrpcServiceAssertion::delete)
                 .validate();
     }
 }

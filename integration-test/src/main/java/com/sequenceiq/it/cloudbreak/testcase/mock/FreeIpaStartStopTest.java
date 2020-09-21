@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.assertion.audit.FreeIpaAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -32,6 +33,9 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaListStructuredEventAssertions freeIpaListStructuredEventAssertions;
+
+    @Inject
+    private FreeIpaAuditGrpcServiceAssertion freeIpaAuditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -69,6 +73,10 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.delete())
                 .await(Status.DELETE_COMPLETED)
+                .when(freeIpaAuditGrpcServiceAssertion::create)
+                .when(freeIpaAuditGrpcServiceAssertion::delete)
+                .when(freeIpaAuditGrpcServiceAssertion::stop)
+                .when(freeIpaAuditGrpcServiceAssertion::start)
                 .when(freeIpaListStructuredEventAssertions::checkCreateEvents)
                 .when(freeIpaListStructuredEventAssertions::checkDeleteEvents)
                 .when(freeIpaListStructuredEventAssertions::checkStartEvents)

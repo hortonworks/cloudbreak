@@ -20,7 +20,7 @@ public interface CloudbreakEventService {
 
     String KERBEROS_RESOURCE_TYPE = "kerberos";
 
-    String LDAP_RESOURCE_TYPE = "ldaps";
+    String LDAP_RESOURCE_TYPE = "ldap";
 
     String CREDENTIAL_RESOURCE_TYPE = "credential";
 

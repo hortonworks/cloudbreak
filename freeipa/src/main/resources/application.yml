@@ -109,7 +109,8 @@ altus:
   ums:
     host: localhost
   audit:
-    enabled: false
+    enabled: true
+    endpoint: localhost:8982
 
 spring:
   application:

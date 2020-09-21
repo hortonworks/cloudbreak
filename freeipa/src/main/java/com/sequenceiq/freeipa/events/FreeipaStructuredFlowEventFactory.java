@@ -45,7 +45,7 @@ public class FreeipaStructuredFlowEventFactory implements CDPStructuredFlowEvent
         String resourceType = CloudbreakEventService.FREEIPA_RESOURCE_TYPE;
         CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, stack.getId(),
                 stack.getName(), nodeConfig.getId(), serviceVersion, stack.getAccountId(), stack.getResourceCrn(), ThreadBasedUserCrnProvider.getUserCrn(),
-                stack.getResourceCrn(), null);
+                stack.getEnvironmentCrn(), null);
         CDPStructuredFlowEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, null);
         if (exception != null) {
             event.setException(ExceptionUtils.getStackTrace(exception));

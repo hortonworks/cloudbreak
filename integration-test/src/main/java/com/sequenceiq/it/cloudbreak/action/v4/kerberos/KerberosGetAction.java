@@ -16,7 +16,7 @@ public class KerberosGetAction implements Action<KerberosTestDto, FreeIpaClient>
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosGetAction.class);
 
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" Kerberos get request:%n", testDto.getName()));
+        Log.when(LOGGER, format(" Kerberos get request by env crn:%n", testDto.getName()));
         testDto.setResponse(
                 client.getFreeIpaClient()
                         .getKerberosConfigV1Endpoint()
