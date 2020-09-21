@@ -53,4 +53,24 @@ public class RedbeamsClientService {
             throw new CloudbreakServiceException(message, e);
         }
     }
+
+    public void startByCrn(String crn) {
+        try {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.start(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to start DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public void stopByCrn(String crn) {
+        try {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.stop(crn));
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 }

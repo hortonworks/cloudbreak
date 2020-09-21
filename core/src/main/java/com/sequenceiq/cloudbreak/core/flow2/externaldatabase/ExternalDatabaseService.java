@@ -82,6 +82,30 @@ public class ExternalDatabaseService {
         }
     }
 
+    public void startDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
+        LOGGER.info("Starting external {} database server in environment {} for DataHub {}",
+                externalDatabase.name(), environment.getName(), cluster.getName());
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            redbeamsClient.startByCrn(databaseCrn);
+            waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.START, false);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
+    public void stopDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
+        LOGGER.info("Stopping external {} database server in environment {} for DataHub {}",
+                externalDatabase.name(), environment.getName(), cluster.getName());
+        String databaseCrn = cluster.getDatabaseServerCrn();
+        try {
+            redbeamsClient.stopByCrn(databaseCrn);
+            waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.STOP, false);
+        } catch (NotFoundException notFoundException) {
+            LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
+        }
+    }
+
     private void updateClusterWithDatabaseServerCrn(Cluster cluster, String databaseServerCrn) {
         cluster.setDatabaseServerCrn(databaseServerCrn);
         clusterRepository.save(cluster);

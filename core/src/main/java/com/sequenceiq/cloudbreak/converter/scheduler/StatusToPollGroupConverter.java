@@ -39,6 +39,12 @@ public class StatusToPollGroupConverter extends AbstractConversionServiceAwareCo
             case EXTERNAL_DATABASE_DELETION_FAILED:
             case EXTERNAL_DATABASE_DELETION_FINISHED:
             case EXTERNAL_DATABASE_DELETION_IN_PROGRESS:
+            case EXTERNAL_DATABASE_START_FAILED:
+            case EXTERNAL_DATABASE_START_FINISHED:
+            case EXTERNAL_DATABASE_START_IN_PROGRESS:
+            case EXTERNAL_DATABASE_STOP_FAILED:
+            case EXTERNAL_DATABASE_STOP_FINISHED:
+            case EXTERNAL_DATABASE_STOP_IN_PROGRESS:
             case BACKUP_IN_PROGRESS:
             case BACKUP_FAILED:
             case RESTORE_IN_PROGRESS:

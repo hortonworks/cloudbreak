@@ -304,6 +304,12 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_CREATION_STARTED("cluster.externaldatabase.creation.started"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED("cluster.externaldatabase.creation.failed"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED("cluster.externaldatabase.creation.finished"),
+    CLUSTER_EXTERNAL_DATABASE_START_COMMANCED("cluster.externaldatabase.start.commenced"),
+    CLUSTER_EXTERNAL_DATABASE_START_FAILED("cluster.externaldatabase.start.failed"),
+    CLUSTER_EXTERNAL_DATABASE_START_FINISHED("cluster.externaldatabase.start.finished"),
+    CLUSTER_EXTERNAL_DATABASE_STOP_COMMANCED("cluster.externaldatabase.stop.commenced"),
+    CLUSTER_EXTERNAL_DATABASE_STOP_FAILED("cluster.externaldatabase.stop.failed"),
+    CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED("cluster.externaldatabase.stop.finished"),
 
     KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 

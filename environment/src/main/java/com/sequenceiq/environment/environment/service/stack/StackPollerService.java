@@ -1,17 +1,19 @@
 package com.sequenceiq.environment.environment.service.stack;
 
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Service
 public class StackPollerService {
@@ -29,7 +31,13 @@ public class StackPollerService {
         Status.START_FAILED,
         Status.EXTERNAL_DATABASE_CREATION_FAILED,
         Status.EXTERNAL_DATABASE_DELETION_FINISHED,
-        Status.EXTERNAL_DATABASE_DELETION_FAILED
+        Status.EXTERNAL_DATABASE_DELETION_FAILED,
+        Status.EXTERNAL_DATABASE_START_FAILED,
+        Status.EXTERNAL_DATABASE_START_FINISHED,
+        Status.EXTERNAL_DATABASE_START_IN_PROGRESS,
+        Status.EXTERNAL_DATABASE_STOP_FAILED,
+        Status.EXTERNAL_DATABASE_STOP_FINISHED,
+        Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS
     );
 
     private final StackV4Endpoint stackV4Endpoint;

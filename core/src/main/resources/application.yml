@@ -50,7 +50,7 @@ rest:
 
 cert:
   validation: true
-  ignorePreValidation: false
+  ignorePreValidation: true
 
 secret:
   application: cb/shared

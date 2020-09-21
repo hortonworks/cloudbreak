@@ -30,7 +30,11 @@ public enum MetricType implements Metric {
     EXTERNAL_DATABASE_CREATION_SUCCESSFUL("externaldatabase.creation.successful"),
     EXTERNAL_DATABASE_CREATION_FAILED("externaldatabase.creation.failed"),
     EXTERNAL_DATABASE_TERMINATION_SUCCESSFUL("externaldatabase.termination.successful"),
-    EXTERNAL_DATABASE_TERMINATION_FAILED("externaldatabase.termination.failed");
+    EXTERNAL_DATABASE_TERMINATION_FAILED("externaldatabase.termination.failed"),
+    EXTERNAL_DATABASE_START_SUCCESSFUL("externaldatabase.start.successful"),
+    EXTERNAL_DATABASE_START_FAILED("externaldatabase.start.failed"),
+    EXTERNAL_DATABASE_STOP_SUCCESSFUL("externaldatabase.stop.successful"),
+    EXTERNAL_DATABASE_STOP_FAILED("externaldatabase.stop.failed");
 
     private final String metricName;
 

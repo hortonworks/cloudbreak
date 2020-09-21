@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.spy;
@@ -113,7 +112,7 @@ class ExternalDatabaseServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void terminateDatabase(boolean forced) throws JsonProcessingException {
-        Cluster cluster = spy(new Cluster());
+        Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
         DatabaseServerV4Response deleteResponse = new DatabaseServerV4Response();
         deleteResponse.setCrn(RDBMS_CRN);
@@ -124,7 +123,35 @@ class ExternalDatabaseServiceTest {
         underTest.terminateDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse, forced);
 
         ArgumentCaptor<Boolean> forceCaptor = ArgumentCaptor.forClass(Boolean.class);
-        verify(redbeamsClient).deleteByCrn(anyString(), forceCaptor.capture());
+        verify(redbeamsClient).deleteByCrn(eq(RDBMS_CRN), forceCaptor.capture());
         assertThat(forceCaptor.getValue()).isEqualTo(forced);
+    }
+
+    @Test
+    void startDatabase() throws JsonProcessingException {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        DatabaseServerV4Response deleteResponse = new DatabaseServerV4Response();
+        deleteResponse.setCrn(RDBMS_CRN);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.START), eq(RDBMS_CRN), eq(false)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+
+        underTest.startDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient).startByCrn(RDBMS_CRN);
+    }
+
+    @Test
+    void stopDatabase() throws JsonProcessingException {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(RDBMS_CRN);
+        DatabaseServerV4Response deleteResponse = new DatabaseServerV4Response();
+        deleteResponse.setCrn(RDBMS_CRN);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.STOP), eq(RDBMS_CRN), eq(false)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+
+        underTest.stopDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient).stopByCrn(RDBMS_CRN);
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.domain.view;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 
 import javax.persistence.Column;
@@ -107,6 +108,10 @@ public class StackView extends CompactView {
 
     public boolean isStopRequested() {
         return STOP_REQUESTED.equals(getStatus());
+    }
+
+    public boolean isExternalDatabaseStopped() {
+        return EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
     }
 
     public Integer getGatewayPort() {

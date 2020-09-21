@@ -126,7 +126,7 @@ public class StackStartStopService {
     }
 
     public boolean isStopPossible(StackView stack) {
-        if (stack != null && stack.isStopRequested()) {
+        if (stack != null && (stack.isStopRequested() || stack.isExternalDatabaseStopped())) {
             return true;
         } else {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
@@ -135,7 +135,7 @@ public class StackStartStopService {
     }
 
     public boolean isStopPossible(Stack stack) {
-        if (stack != null && stack.isStopRequested()) {
+        if (stack != null && (stack.isStopRequested() || stack.isExternalDatabaseStopped())) {
             return true;
         } else {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
