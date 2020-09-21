@@ -32,9 +32,9 @@
                 "name": "fs_trash_interval",
                 "value": "0"
               },
-	      {
-	        "name": "fs_trash_checkpoint_interval",
-	        "value": "0"
+              {
+                "name": "fs_trash_checkpoint_interval",
+                "value": "0"
               }
             ]
           },
