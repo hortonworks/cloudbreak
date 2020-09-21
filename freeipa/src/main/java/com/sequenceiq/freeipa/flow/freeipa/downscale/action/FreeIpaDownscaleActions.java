@@ -297,7 +297,9 @@ public class FreeIpaDownscaleActions {
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating metadata");
                 List<String> repairInstanceIds = getInstanceIds(variables);
                 terminationService.finalizeTermination(stack.getId(), repairInstanceIds);
-                if (!isRepair(variables)) {
+                if (isRepair(variables)) {
+                    terminationService.finalizeTerminationForInstancesWithoutInstanceIds(stack.getId());
+                } else {
                     int nodeCount = getInstanceCountByGroup(variables);
                     for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                         instanceGroup.setNodeCount(nodeCount);

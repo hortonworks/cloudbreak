@@ -91,6 +91,11 @@ public class TerminationService {
         }
     }
 
+    public void finalizeTerminationForInstancesWithoutInstanceIds(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        terminateInstancesWithoutInstanceIds(stack);
+    }
+
     private void terminateInstanceGroups(Stack stack) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
@@ -104,6 +109,19 @@ public class TerminationService {
         stack.getAllInstanceMetaDataList().stream()
                 .filter(not(InstanceMetaData::isTerminated))
                 .filter(metaData -> Objects.isNull(instanceIds) || instanceIds.contains(metaData.getInstanceId()))
+                .forEach(metaData -> {
+                    metaData.setTerminationDate(clock.getCurrentTimeMillis());
+                    metaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                    instanceMetaDatas.add(metaData);
+                });
+        instanceMetaDataService.saveAll(instanceMetaDatas);
+    }
+
+    private void terminateInstancesWithoutInstanceIds(Stack stack) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+        stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
+                .filter(metaData -> Objects.isNull(metaData.getInstanceId()))
                 .forEach(metaData -> {
                     metaData.setTerminationDate(clock.getCurrentTimeMillis());
                     metaData.setInstanceStatus(InstanceStatus.TERMINATED);
