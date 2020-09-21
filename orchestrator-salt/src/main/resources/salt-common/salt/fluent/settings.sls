@@ -4,6 +4,8 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
+{% set cdp_logging_agent_version = '0.2.1' %}
+{% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
@@ -155,6 +157,31 @@
 
 {% set forward_port = 24224 %}
 
+{% set version_data = namespace(entities=[]) %}
+{% for role in grains.get('roles', []) %}
+{% if role.startswith("fluent_prewarmed") %}
+  {% set version_data.entities = version_data.entities + [role.split("fluent_prewarmed_v")[1]]%}
+{% endif %}
+{% endfor %}
+{% if version_data.entities|length > 0 %}
+{% set fluent_version = version_data.entities[0] | int %}
+{% else %}
+{% set fluent_version = 0 %}
+{% endif %}
+
+{% set td_agent_installed = salt['file.directory_exists' ]('/etc/td-agent') %}
+{% set cdp_logging_agent_installed = salt['file.directory_exists' ]('/etc/cdp-logging-agent') %}
+{% if td_agent_installed and cdp_logging_agent_installed %}
+  {% set binary = 'cdp-logging-agent' %}
+  {% set uninstall_td_agent = True %}
+{% elif td_agent_installed %}
+  {% set binary = 'td-agent' %}
+  {% set uninstall_td_agent = False %}
+{% else %}
+  {% set binary = 'cdp-logging-agent' %}
+  {% set uninstall_td_agent = False %}
+{% endif %}
+
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -207,5 +234,10 @@
     "proxyAuth": proxy_auth,
     "proxyUser": proxy_user,
     "proxyPassword": proxy_password,
-    "proxyFullUrl": proxy_full_url
+    "proxyFullUrl": proxy_full_url,
+    "binary": binary,
+    "fluentVersion": fluent_version,
+    "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
+    "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
+    "uninstallTdAgent": uninstall_td_agent
 }) %}

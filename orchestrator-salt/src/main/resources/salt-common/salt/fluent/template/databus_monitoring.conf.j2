@@ -15,7 +15,7 @@
   @type copy
   <store ignore_error>
     @type                            databus
-    credential_file                  /etc/td-agent/databus_credential
+    credential_file                  /etc/{{ fluent.binary }}/databus_credential
     credential_profile_name          dbus
     credential_file_reload_interval  60
     debug                            false
@@ -33,7 +33,7 @@
     {% endif %}
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/monitoring_databus
+      path /var/log/{{ fluent.binary }}/monitoring_databus
       timekey 1m
       timekey_wait 0s
       chunk_limit_size 600k

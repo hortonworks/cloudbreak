@@ -1,2 +1,11 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+{% if fluent.binary == 'cdp-logging-agent' %}
+{% if not fluent.dbusClusterLogsCollectionDisableStop %}
+[Service]
+Environment=CDP_LOGGING_AGENT_POST_START_SCRIPT=/etc/cdp-logging-agent/post-start.sh
+Environment=CDP_LOGGING_AGENT_POST_START_SCRIPT_PARAMS=1200
+{% endif %}
+{% else %}
 [Service]
 LimitNOFILE=65536
+{% endif %}

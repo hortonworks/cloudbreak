@@ -14,7 +14,7 @@
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}
+      path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  2048MB
@@ -41,7 +41,7 @@
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
+      path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  1024MB
@@ -85,7 +85,7 @@
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}
+      path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  2048MB
@@ -128,7 +128,7 @@
 
     <buffer tag,time>
       @type file
-      path /var/log/td-agent/{{fluent.providerPrefix}}_CM_COMMAND
+      path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}_CM_COMMAND
       timekey {{fluent.partitionIntervalMin}}m
       timekey_wait 0s
       total_limit_size  1024MB
@@ -158,7 +158,7 @@
   region {{ fluent.region }}
   <buffer tag>
      @type file
-     path /var/log/td-agent/{{fluent.providerPrefix}}
+     path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}
      flush_mode               "interval"
      flush_thread_count       10
      flush_interval           "10s"
