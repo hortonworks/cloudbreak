@@ -101,6 +101,7 @@ public class RepairInstancesService {
 
     private Map<String, InstanceStatus> getInstanceHealthMap(String accountId, String environmentCrn) {
         return healthDetailsService.getHealthDetails(environmentCrn, accountId).getNodeHealthDetails().stream()
+                .filter(nodeHealthDetails -> Objects.nonNull(nodeHealthDetails.getInstanceId()))
                 .collect(Collectors.toMap(NodeHealthDetails::getInstanceId, NodeHealthDetails::getStatus));
     }
 
