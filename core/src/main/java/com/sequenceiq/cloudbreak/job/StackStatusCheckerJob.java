@@ -159,7 +159,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.RESTORE_FAILED,
                 Status.BACKUP_FAILED,
                 Status.BACKUP_FINISHED,
-                Status.RESTORE_FINISHED
+                Status.RESTORE_FINISHED,
+                Status.EXTERNAL_DATABASE_START_FAILED,
+                Status.EXTERNAL_DATABASE_START_IN_PROGRESS,
+                Status.EXTERNAL_DATABASE_START_FINISHED,
+                Status.EXTERNAL_DATABASE_STOP_FAILED,
+                Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
+                Status.EXTERNAL_DATABASE_STOP_FINISHED
         );
     }
 

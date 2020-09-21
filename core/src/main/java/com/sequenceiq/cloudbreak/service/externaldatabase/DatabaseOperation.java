@@ -10,7 +10,11 @@ public enum DatabaseOperation {
     CREATION(Status::isAvailable, status -> status.isDeleteInProgressOrCompleted() || Status.CREATE_FAILED.equals(status),
             ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED),
     DELETION(Status.DELETE_COMPLETED::equals, Status.DELETE_FAILED::equals,
-            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FAILED);
+            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FAILED),
+    START(Status::isAvailable, Status.START_FAILED::equals,
+            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_START_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_START_FAILED),
+    STOP(Status.STOPPED::equals, Status.STOP_FAILED::equals,
+            ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED, ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FAILED);
 
     private Function<Status, Boolean> exitCriteria;
 

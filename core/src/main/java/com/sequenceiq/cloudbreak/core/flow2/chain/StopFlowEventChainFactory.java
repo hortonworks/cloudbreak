@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopEvent.CLUSTER_STOP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent.EXTERNAL_DATABASE_COMMENCE_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 
 import java.util.Queue;
@@ -23,6 +24,7 @@ public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEve
     public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(new StackEvent(EXTERNAL_DATABASE_COMMENCE_STOP_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
         return flowEventChain;
     }

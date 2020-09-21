@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.action;
+package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -14,14 +14,14 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseContext;
-import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationState;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent;
+import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @ExtendWith(MockitoExtension.class)
-class AbstractExternalDatabaseTerminationActionTest {
+class AbstractExternalDatabaseStopActionTest {
 
     @Mock
     private StackService stackService;
@@ -30,10 +30,10 @@ class AbstractExternalDatabaseTerminationActionTest {
     private FlowParameters flowParameters;
 
     @Mock
-    private StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext;
+    private StateContext<ExternalDatabaseStopState, ExternalDatabaseStopEvent> stateContext;
 
     @InjectMocks
-    private final AbstractExternalDatabaseTerminationAction<TestPayload> underTest = new TestAction(TestPayload.class);
+    private final AbstractExternalDatabaseStopAction<TestPayload> underTest = new TestAction(TestPayload.class);
 
     private boolean semaphore;
 
@@ -58,7 +58,7 @@ class AbstractExternalDatabaseTerminationActionTest {
         }
     }
 
-    private class TestAction extends AbstractExternalDatabaseTerminationAction<TestPayload> {
+    private class TestAction extends AbstractExternalDatabaseStopAction<TestPayload> {
 
         TestAction(Class<TestPayload> payloadClass) {
             super(payloadClass);
@@ -70,10 +70,11 @@ class AbstractExternalDatabaseTerminationActionTest {
 
         @Override
         protected void beforeReturnFlowContext(FlowParameters flowParameters,
-                StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext, TestPayload payload) {
+                StateContext<ExternalDatabaseStopState, ExternalDatabaseStopEvent> stateContext, TestPayload payload) {
 
             super.beforeReturnFlowContext(flowParameters, stateContext, payload);
             semaphore = true;
         }
     }
+
 }

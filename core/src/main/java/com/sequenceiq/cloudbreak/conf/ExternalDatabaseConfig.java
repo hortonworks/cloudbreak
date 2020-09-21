@@ -34,6 +34,9 @@ public class ExternalDatabaseConfig {
     @Value("${cb.externaldatabase.experimental.platform:AZURE,MOCK}")
     private Set<CloudPlatform> dbServiceExperimentalPlatforms;
 
+    @Value("${cb.externaldatabase.pause.supported.platform:AWS}")
+    private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
+
     @Inject
     private Set<DatabaseServerParameterDecorator> databaseServerParameterDecorators;
 
@@ -43,8 +46,16 @@ public class ExternalDatabaseConfig {
         return dbServiceSupportedPlatforms.contains(cloudPlatform);
     }
 
+    public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
+        return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
+    }
+
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {
         return dbServiceSupportedPlatforms;
+    }
+
+    public Set<CloudPlatform> getPauseSupportedExternalDatabasePlatforms() {
+        return dbServicePauseSupportedPlatforms;
     }
 
     public Set<CloudPlatform> getAllPossibleExternalDbPlatforms() {
