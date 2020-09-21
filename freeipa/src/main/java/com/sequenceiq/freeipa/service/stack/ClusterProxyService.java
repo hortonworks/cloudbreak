@@ -144,6 +144,7 @@ public class ClusterProxyService {
             tunnelGatewayConfigs = List.of(primaryGatewayConfig);
         } else if (ClusterProxyServiceAvailabilityChecker.isDnsBasedServiceNameAvailable(stack)) {
             List<GatewayConfig> targetGatewayConfigs = gatewayConfigs.stream()
+                    .filter(gatewayConfig -> Objects.nonNull(gatewayConfig.getInstanceId()))
                     .filter(gatewayConfig -> Objects.isNull(instanceIdsToRegister) || instanceIdsToRegister.contains(gatewayConfig.getInstanceId()))
                     .collect(Collectors.toList());
             serviceConfigs.addAll(createDnsMappedServiceConfigs(stack, targetGatewayConfigs, clientCertificate, usePrivateIpToTls));
