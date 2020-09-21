@@ -91,7 +91,7 @@ public class CDPStructuredEventEntity implements AccountAwareResource {
 
     @Override
     public String getName() {
-        return resourceType;
+        return structuredEventJson.getValue("operation.resourceName");
     }
 
     @Override

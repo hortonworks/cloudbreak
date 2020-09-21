@@ -23,7 +23,7 @@ public class LdapListStructuredEventAssertions {
         List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), 0, 100);
-        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("post-ldaps"));
+        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("post-ldap"));
         return testDto;
     }
 
@@ -31,7 +31,7 @@ public class LdapListStructuredEventAssertions {
         List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), 0, 100);
-        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-ldaps"));
+        eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-ldap"));
         return testDto;
     }
 }

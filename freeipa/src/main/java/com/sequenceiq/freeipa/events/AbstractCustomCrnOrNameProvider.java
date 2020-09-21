@@ -35,15 +35,21 @@ public abstract class AbstractCustomCrnOrNameProvider implements CustomCrnOrName
         Map<String, String> param = new HashMap<>();
         try {
             Optional<NameValuePair> environmentValue = findEnvironmentCrnInQueryParams(restCallDetails);
-            environmentValue.ifPresent(nameValuePair -> addFieldToParams(param, nameField, crnField, nameValuePair));
+            environmentValue.ifPresent(nameValuePair -> addFieldToParams(param, operationDetails, nameField, crnField, nameValuePair));
         } catch (URISyntaxException e) {
             LOGGER.warn("Cannot provide name and crn because the uri is invalid or any error occurred: {}", e.getMessage(), e);
         }
         return param;
     }
 
-    private void addFieldToParams(Map<String, String> restParams, String nameField, String crnField, NameValuePair nameValuePair) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+    private void addFieldToParams(Map<String, String> restParams, CDPOperationDetails operationDetails, String nameField, String crnField,
+            NameValuePair nameValuePair) {
+        String accountId;
+        if (operationDetails == null) {
+            accountId = ThreadBasedUserCrnProvider.getAccountId();
+        } else {
+            accountId = operationDetails.getAccountId();
+        }
         List<? extends AccountAwareResource> resources = getResource(nameValuePair.getValue(), accountId);
         restParams.put(nameField, resources.stream().map(AccountAwareResource::getName).collect(Collectors.joining(",")));
         restParams.put(crnField, resources.stream().map(AccountAwareResource::getResourceCrn).collect(Collectors.joining(",")));

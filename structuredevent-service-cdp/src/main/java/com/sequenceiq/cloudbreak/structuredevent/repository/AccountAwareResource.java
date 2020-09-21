@@ -13,6 +13,6 @@ public interface AccountAwareResource {
     void setAccountId(String accountId);
 
     default String getResourceName() {
-        return getClass().getSimpleName().toLowerCase();
+        return getClass().getSimpleName();
     }
 }

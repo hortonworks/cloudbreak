@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.credential.audit.rest;
+package com.sequenceiq.freeipa.ldap.audit.rest;
 
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_CRN;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_NAME;
@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.CDPRestCommonService;
 import com.sequenceiq.cloudbreak.structuredevent.service.audit.auditeventname.rest.CDPRestResourceAuditEventConverter;
 
 @Component
-public class CredentialRestResourceAuditEventConverter implements CDPRestResourceAuditEventConverter {
+public class LdapRestResourceAuditEventConverter implements CDPRestResourceAuditEventConverter {
 
     @Inject
     private CDPRestCommonService restCommonService;
@@ -29,10 +29,10 @@ public class CredentialRestResourceAuditEventConverter implements CDPRestResourc
         String method = structuredEvent.getRestCall().getRestRequest().getMethod();
         AuditEventName eventName = null;
         String resourceEvent = structuredEvent.getOperation().getResourceEvent();
-        if ("POST".equals(method) && resourceEvent == null) {
-            eventName = AuditEventName.CREATE_CREDENTIAL;
-        } else if ("PUT".equals(method) && resourceEvent == null) {
-            eventName = AuditEventName.MODIFY_CREDENTIAL;
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            if (resourceEvent == null) {
+                eventName = AuditEventName.CREATE_LDAP_CONFIG;
+            }
         } else if ("DELETE".equals(method)) {
             eventName = deletionRest(resourceEvent, structuredEvent.getOperation());
         }
@@ -43,7 +43,7 @@ public class CredentialRestResourceAuditEventConverter implements CDPRestResourc
         if (StringUtils.isEmpty(resourceEvent)
                 || resourceEvent.equals(operationDetails.getResourceName())
                 || resourceEvent.equals(operationDetails.getResourceCrn())) {
-            return AuditEventName.DELETE_CREDENTIAL;
+            return AuditEventName.DELETE_LDAP_CONFIG;
         }
         return null;
     }
@@ -55,7 +55,7 @@ public class CredentialRestResourceAuditEventConverter implements CDPRestResourc
 
     @Override
     public Crn.Service eventSource(CDPStructuredRestCallEvent structuredEvent) {
-        return Crn.Service.ENVIRONMENTS;
+        return Crn.Service.FREEIPA;
     }
 
     @Override

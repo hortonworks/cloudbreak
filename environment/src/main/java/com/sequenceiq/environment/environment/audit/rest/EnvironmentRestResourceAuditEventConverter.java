@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.environment.audit.rest;
 
-import java.util.Collections;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_CRN;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_NAME;
+
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -69,6 +72,7 @@ public class EnvironmentRestResourceAuditEventConverter implements CDPRestResour
 
     @Override
     public Map<String, String> requestParameters(CDPStructuredRestCallEvent structuredEvent) {
-        return restCommonService.collectCrnAndNameIfPresent(structuredEvent.getRestCall(), structuredEvent.getOperation(), Collections.emptyMap(), "", "");
+        return restCommonService.collectCrnAndNameIfPresent(structuredEvent.getRestCall(), structuredEvent.getOperation(), new HashMap<>(),
+                RESOURCE_NAME, RESOURCE_CRN);
     }
 }
