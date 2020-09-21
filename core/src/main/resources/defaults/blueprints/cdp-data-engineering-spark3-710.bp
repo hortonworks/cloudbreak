@@ -18,10 +18,6 @@
                 "value": "true"
               },
               {
-                "name": "role_config_suppression_fs_trash_interval_minimum_validator",
-                "value": "true"
-              },
-              {
                 "name": "fs_trash_interval",
                 "value": "0"
               },
@@ -54,10 +50,6 @@
               {
                 "name": "dfs_client_use_trash",
                 "value": false
-              },
-              {
-                "name": "role_config_suppression_hdfs_trash_disabled_validator",
-                "value": "true"
               }
             ]
           }

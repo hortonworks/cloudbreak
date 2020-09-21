@@ -75,10 +75,6 @@
               {
                 "name": "dfs_client_use_trash",
                 "value": false
-              },
-              {
-                "name": "role_config_suppression_hdfs_trash_disabled_validator",
-                "value": "true"
               }
             ]
           }
