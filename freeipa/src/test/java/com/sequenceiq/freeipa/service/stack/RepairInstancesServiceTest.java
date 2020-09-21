@@ -426,6 +426,26 @@ class RepairInstancesServiceTest {
         verify(flowManager, times(1)).notify(eq(REPAIR_TRIGGER_EVENT), any());
     }
 
+    @Test
+    public void testRepairAndAutodetectWith2InstancesWithNoInstanceIds() throws Exception {
+        Stack stack = createStack(List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED), 2);
+        OperationStatus operationStatus = new OperationStatus();
+        RepairInstancesRequest repairInstancesRequest = new RepairInstancesRequest();
+        repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        repairInstancesRequest.setForceRepair(false);
+
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
+                .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
+        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
+
+        assertEquals(operationStatus, underTest.repairInstances(ACCOUNT_ID, repairInstancesRequest));
+
+        verify(flowManager, times(1)).notify(eq(REPAIR_TRIGGER_EVENT), any());
+    }
+
     private HealthDetailsFreeIpaResponse getMockDetails1() {
         HealthDetailsFreeIpaResponse healthDetailsFreeIpaResponse = new HealthDetailsFreeIpaResponse();
         healthDetailsFreeIpaResponse.setCrn(ENVIRONMENT_ID1);
@@ -455,6 +475,10 @@ class RepairInstancesServiceTest {
     }
 
     private Stack createStack(List<InstanceStatus> instanceStatuses) {
+        return createStack(instanceStatuses, 0);
+    }
+
+    private Stack createStack(List<InstanceStatus> instanceStatuses, int requestedInstancesWithoutInstanceIds) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -466,6 +490,11 @@ class RepairInstancesServiceTest {
             instanceMetaData.setInstanceStatus(instanceStatus);
             instanceMetaDataSet.add(instanceMetaData);
             i++;
+        }
+        for (i = 0; i < requestedInstancesWithoutInstanceIds; i++) {
+            InstanceMetaData instanceMetaData = new InstanceMetaData();
+            instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
+            instanceMetaDataSet.add(instanceMetaData);
         }
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);
