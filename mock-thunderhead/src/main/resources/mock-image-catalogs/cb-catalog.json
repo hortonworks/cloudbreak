@@ -1,0 +1,47 @@
+{
+  "images": {
+    "base-images": [
+      {
+        "date": "2017-10-13",
+        "description": "Cloudbreak official base image",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710161226.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
+        "package-versions": {
+          "salt": "2017.7.5",
+          "salt-bootstrap": "0.13.0-2018-05-03T07:39:07"
+        }
+      },
+      {
+        "date": "2017-10-17",
+        "description": "Cloudbreak official base image 2",
+        "images": {
+          "mock": {
+            "default": "mockimage/hdc-hdp--1710171220.tar.gz"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "1a6eadd2-5B95-4EC9-B300-13dc43208b64"
+      }
+    ]
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "f6e778fc-7f17-4535-9021-515351df3691",
+          "1a6eadd2-5B95-4EC9-B300-13dc43208b64"
+        ],
+        "versions": [
+          "CB_VERSION"
+        ]
+      }
+    ]
+  }
+}

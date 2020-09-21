@@ -1,22 +1,15 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.dto.mock.CheckCount.atLeast;
-import static com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup.responseFromJsonFile;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.action.v4.credential.CredentialCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ImageCatalogEndpoint;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractMinimalTest;
 
 public class ImageCatalogBasicTest extends AbstractMinimalTest {
@@ -35,27 +28,20 @@ public class ImageCatalogBasicTest extends AbstractMinimalTest {
             when = "calling create image catalog with that URL",
             then = "getting image catalog response so the creation success")
     public void testIC(MockedTestContext testContext) {
-        String imgCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogWithUrl(testContext, testContext.getImageCatalogMockServerSetup().getImageCatalogUrl());
+        createImageCatalogWithUrl(testContext, testContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl());
+        createImageCatalogWithUrl(testContext, testContext.getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl());
+    }
 
+    public void createImageCatalogWithUrl(MockedTestContext testContext, String url) {
+        String imgCatalogName = resourcePropertyProvider().getName();
         testContext
                 .as()
-                .given(HttpMock.class)
-                .whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().thenReturn(
-                (model, uriParameters) -> testContext.getImageCatalogMockServerSetup()
-                        .patchCbVersionAndRuntime(responseFromJsonFile("imagecatalog/catalog.json"), testParameter))
-                .whenRequested(ImageCatalogEndpoint.Base.class).head()
-                .thenReturnHeader("Content-Length", "38")
-                .thenReturn((model, uriParameters) -> RETURN_WITH_EMPTY)
                 .given(ImageCatalogTestDto.class)
-                .withUrl(httpMock -> httpMock.whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().getFullUrl())
+                .withUrl(url)
                 .withName(imgCatalogName)
                 .when(new ImageCatalogCreateRetryAction())
-                .when(imageCatalogTestClient.getV4(Boolean.FALSE))
-                .given(HttpMock.class)
-                .then(ImageCatalogEndpoint.Base.class).head().verify(atLeast(1))
-                .then(ImageCatalogEndpoint.Base.class).getCatalog().verify(atLeast(1))
-                .given(CredentialTestDto.class)
-                .when(new CredentialCreateAction())
+                .when(imageCatalogTestClient.getV4())
                 .validate();
     }
 }

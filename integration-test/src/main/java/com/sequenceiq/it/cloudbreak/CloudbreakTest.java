@@ -26,6 +26,8 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
+    public static final String IMAGE_CATALOG_MOCK_SERVER_ROOT = "IMAGE_CATALOG_MOCK_SERVER_ROOT";
+
     public static final String CLOUDBREAK_SERVER_INTERNAL_ROOT = "CLOUDBREAK_SERVER_INTERNAL_ROOT";
 
     public static final String AUTOSCALE_CLIENT_ID = "AUTOSCALE_CLIENTID";
@@ -60,6 +62,9 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${integrationtest.user.secretkey}")
     private String secretkey;
 
+    @Value("${mock.imagecatalog.server:localhost}")
+    private String mockImageCatalogAddr;
+
     @Value("${integrationtest.uaa.autoscale.clientId:periscope}")
     private String autoscaleUaaClientId;
 
@@ -91,6 +96,8 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testContext.putContextParam(ACCESS_KEY, accesskey);
         testContext.putContextParam(SECRET_KEY, secretkey);
+
+        testContext.putContextParam(IMAGE_CATALOG_MOCK_SERVER_ROOT, mockImageCatalogAddr);
 
         testContext.putContextParam(AUTOSCALE_CLIENT_ID, autoscaleUaaClientId);
         testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
