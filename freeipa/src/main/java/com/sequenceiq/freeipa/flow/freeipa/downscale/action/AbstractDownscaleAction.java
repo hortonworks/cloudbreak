@@ -103,8 +103,9 @@ public abstract class AbstractDownscaleAction<P extends Payload> extends Abstrac
     }
 
     protected List<CloudInstance> getNonTerminatedCloudInstances(Stack stack, List<String> instanceIds) {
+        // Exclude terminated but include deleted
         return getInstanceMetadataFromStack(stack, instanceIds).stream()
-                .filter(im -> !im.isTerminated() && !im.isDeletedOnProvider())
+                .filter(im -> !im.isTerminated())
                 .map(instanceMetaData -> instanceConverter.convert(instanceMetaData))
                 .collect(Collectors.toList());
     }
