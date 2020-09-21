@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -403,6 +404,26 @@ class RepairInstancesServiceTest {
         assertEquals(operationStatus, underTest.rebootInstances(ACCOUNT_ID, rebootInstancesRequest));
         ArgumentCaptor<InstanceEvent> terminationEventArgumentCaptor = ArgumentCaptor.forClass(InstanceEvent.class);
         verify(flowManager, times(1)).notify(eq(REBOOT_EVENT.event()), terminationEventArgumentCaptor.capture());
+    }
+
+    @Test
+    public void testRepairAndAutodetectBadInstances() throws Exception {
+        Stack stack = createStack(List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
+        OperationStatus operationStatus = new OperationStatus();
+        RepairInstancesRequest repairInstancesRequest = new RepairInstancesRequest();
+        repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        repairInstancesRequest.setForceRepair(false);
+
+        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
+                .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
+        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
+        when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
+
+        assertEquals(operationStatus, underTest.repairInstances(ACCOUNT_ID, repairInstancesRequest));
+
+        verify(flowManager, times(1)).notify(eq(REPAIR_TRIGGER_EVENT), any());
     }
 
     private HealthDetailsFreeIpaResponse getMockDetails1() {

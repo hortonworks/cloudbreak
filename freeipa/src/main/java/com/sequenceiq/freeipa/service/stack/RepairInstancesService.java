@@ -149,7 +149,7 @@ public class RepairInstancesService {
                 .filter(im -> im.isTerminated() || im.isDeletedOnProvider())
                 .map(InstanceMetaData::getInstanceId)
                 .filter(Objects::nonNull)
-                .filter(id -> !requestedInstanceIds.contains(id))
+                .filter(id -> Objects.isNull(requestedInstanceIds) || !requestedInstanceIds.contains(id))
                 .collect(Collectors.toList());
     }
 
