@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.endpoint;
 
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AUDIT_EVENTS_NOTES;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_IN_WORKSPACE_ZIP;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_FOR_RESOURCE;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_FOR_RESOURCE_ZIP;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public interface CDPStructuredEventV1Endpoint {
     @GET
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = LIST_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
+    @ApiOperation(value = LIST_FOR_RESOURCE, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
             nickname = "getCDPAuditEventsForResource")
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
@@ -41,8 +41,8 @@ public interface CDPStructuredEventV1Endpoint {
     @GET
     @Path("zip")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = LIST_IN_WORKSPACE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsZipInAccount")
+    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
+            nickname = "getAuditEventsZipForResource")
     Response getAuditEventsZip(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn);
 }
