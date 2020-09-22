@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.HashMap;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
@@ -115,6 +116,7 @@ public class TelemetryApiConverter {
             logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(convertS3(loggingRequest.getS3()));
             logging.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
+            logging.setGcs(convertGcs(loggingRequest.getGcs()));
             logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
@@ -225,5 +227,14 @@ public class TelemetryApiConverter {
             adlsGen2CloudStorageV1Parameters.setSecure(adlsV2.isSecure());
         }
         return adlsGen2CloudStorageV1Parameters;
+    }
+
+    private GcsCloudStorageV1Parameters convertGcs(GcsCloudStorageV1Parameters gcs) {
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = null;
+        if (gcs != null) {
+            gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+            gcsCloudStorageV1Parameters.setServiceAccountEmail(gcs.getServiceAccountEmail());
+        }
+        return gcsCloudStorageV1Parameters;
     }
 }

@@ -2,8 +2,10 @@ package com.sequenceiq.freeipa.converter.telemetry;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.core.IsNull.nullValue;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,6 +25,8 @@ public class TelemetryConverterTest {
     private static final String INSTANCE_PROFILE_VALUE = "myInstanceProfile";
 
     private static final String DATABUS_ENDPOINT = "myCustomEndpoint";
+
+    private static final String EMAIL = "blah@blah.blah";
 
     private TelemetryConverter underTest;
 
@@ -64,6 +68,43 @@ public class TelemetryConverterTest {
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
         assertThat(result.getLogging().getS3().getInstanceProfile(), is(INSTANCE_PROFILE_VALUE));
+    }
+
+    @Test
+    public void testConvertFromRequestForGCS() {
+        // GIVEN
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        LoggingRequest logging = new LoggingRequest();
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(EMAIL);
+        logging.setGcs(gcsCloudStorageV1Parameters);
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.addClusterLogsCollection(false);
+        telemetryRequest.setLogging(logging);
+        telemetryRequest.setFeatures(featuresRequest);
+        // WHEN
+        Telemetry result = underTest.convert(telemetryRequest);
+        // THEN
+        assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
+        assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
+        assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
+        assertThat(result.getLogging().getGcs(), notNullValue());
+        assertThat(result.getLogging().getGcs().getServiceAccountEmail(), is(EMAIL));
+    }
+
+    @Test
+    public void testConvertToResponseForGcs() {
+        Logging logging = new Logging();
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(EMAIL);
+        logging.setGcs(gcsCloudStorageV1Parameters);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setLogging(logging);
+        // WHEN
+        TelemetryResponse result = underTest.convert(telemetry);
+        // THEN
+        assertThat(result.getLogging().getGcs(), notNullValue());
+        assertThat(result.getLogging().getGcs().getServiceAccountEmail(), is(EMAIL));
     }
 
 }

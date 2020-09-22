@@ -97,6 +97,8 @@ public class CloudStorageManifester {
                 log.setS3(logging.getS3());
             } else if (logging.getAdlsGen2() != null) {
                 log.setAdlsGen2(logging.getAdlsGen2());
+            } else if (logging.getGcs() != null) {
+                log.setGcs(logging.getGcs());
             } else if (logging.getCloudwatch() != null) {
                 LOGGER.debug("Cloudwatch will act as s3 storage identity!");
                 S3CloudStorageV1Parameters s3CloudwatchParams = new S3CloudStorageV1Parameters();
@@ -177,6 +179,8 @@ public class CloudStorageManifester {
                 idBroker.setWasb(cloudStorage.getWasb());
             } else if (fileSystemType.isAdlsGen2()) {
                 idBroker.setAdlsGen2(cloudStorage.getAdlsGen2());
+            } else if (fileSystemType.isGcs()) {
+                idBroker.setGcs(cloudStorage.getGcs());
             }
             cloudStorageRequest.getIdentities().add(idBroker);
         }

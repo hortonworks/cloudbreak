@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -81,6 +82,10 @@ public class TelemetryConverter {
                 adlsGen2Params.setSecure(adlsGen2FromRequest.isSecure());
                 adlsGen2Params.setManagedIdentity(adlsGen2FromRequest.getManagedIdentity());
                 logging.setAdlsGen2(adlsGen2Params);
+            } else if (loggingRequest.getGcs() != null) {
+                GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+                gcsCloudStorageV1Parameters.setServiceAccountEmail(loggingRequest.getGcs().getServiceAccountEmail());
+                logging.setGcs(gcsCloudStorageV1Parameters);
             } else if (loggingRequest.getCloudwatch() != null) {
                 logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
             }
@@ -104,6 +109,10 @@ public class TelemetryConverter {
                 adlsGen2Params.setSecure(logging.getAdlsGen2().isSecure());
                 adlsGen2Params.setManagedIdentity(logging.getAdlsGen2().getManagedIdentity());
                 loggingResponse.setAdlsGen2(adlsGen2Params);
+            } else if (logging.getGcs() != null) {
+                GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+                gcsCloudStorageV1Parameters.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
+                loggingResponse.setGcs(gcsCloudStorageV1Parameters);
             } else if (logging.getCloudwatch() != null) {
                 loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
             }
