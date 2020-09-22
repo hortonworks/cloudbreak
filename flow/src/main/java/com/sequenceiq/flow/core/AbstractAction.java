@@ -86,14 +86,14 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 Span activeSpan = tracer.activeSpan();
                 String operationName = context.getEvent().name();
                 SpanContext spanContext = flowParameters.getSpanContext();
-                if (TracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
+                if (FlowTracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
                     LOGGER.debug("Reusing existing span. {}", activeSpan.context());
                     flowContext = createFlowContext(flowParameters, context, payload);
                     executeAction(context, payload, flowContext, variables, flowStateName);
                 } else {
-                    Span span = TracingUtil.getSpan(tracer, operationName, spanContext, flowParameters.getFlowId(),
+                    Span span = FlowTracingUtil.getSpan(tracer, operationName, spanContext, flowParameters.getFlowId(),
                             null, flowParameters.getFlowTriggerUserCrn());
-                    spanContext = TracingUtil.useOrCreateSpanContext(spanContext, span);
+                    spanContext = FlowTracingUtil.useOrCreateSpanContext(spanContext, span);
                     flowParameters.setSpanContext(spanContext);
                     try (Scope ignored = tracer.activateSpan(span)) {
                         flowContext = createFlowContext(flowParameters, context, payload);

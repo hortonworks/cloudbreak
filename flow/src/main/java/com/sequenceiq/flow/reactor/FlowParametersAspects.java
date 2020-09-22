@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.TracingUtil;
+import com.sequenceiq.flow.core.FlowTracingUtil;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -42,14 +42,14 @@ public class FlowParametersAspects {
             String operationName = event.getKey().toString();
             SpanContext spanContext = event.getHeaders().get(FlowConstants.SPAN_CONTEXT);
             Span activeSpan = tracer.activeSpan();
-            if (TracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
+            if (FlowTracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
                 LOGGER.debug("Reusing existing span. {}", activeSpan.context());
                 return doProceed(proceedingJoinPoint, flowTriggerUserCrn, event, spanContext);
             } else {
-                Span span = TracingUtil.getSpan(tracer, operationName, spanContext, event.getHeaders().get(FlowConstants.FLOW_ID),
+                Span span = FlowTracingUtil.getSpan(tracer, operationName, spanContext, event.getHeaders().get(FlowConstants.FLOW_ID),
                         event.getHeaders().get(FlowConstants.FLOW_CHAIN_ID), flowTriggerUserCrn);
                 try (Scope ignored = tracer.activateSpan(span)) {
-                    spanContext = TracingUtil.useOrCreateSpanContext(spanContext, span);
+                    spanContext = FlowTracingUtil.useOrCreateSpanContext(spanContext, span);
                     return doProceed(proceedingJoinPoint, flowTriggerUserCrn, event, spanContext);
                 } finally {
                     span.finish();

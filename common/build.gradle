@@ -63,7 +63,6 @@ dependencies {
   compile group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                      version: opentracingJaxrs2Version
   compile group: 'io.opentracing.contrib',                name: 'opentracing-jdbc',                        version: opentracingJdbcVersion
   compile group: 'io.opentracing.contrib',                name: 'opentracing-spring-jaeger-starter',       version: opentracingSpringJaegerStarterVersion
-  compile group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                      version: opentracingJaxrs2Version
 
   compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true

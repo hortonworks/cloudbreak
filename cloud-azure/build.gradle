@@ -35,12 +35,12 @@ dependencies {
   compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
   }
-  compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
+  compile group: 'commons-net',                   name: 'commons-net',                      version: '3.6'
 
   testCompile project(path: ':core-model', configuration: 'tests')
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-  testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version:springBootVersion
+  testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
   testCompile (group: 'junit', name: 'junit', version: junitVersion) {
     exclude group: 'org.hamcrest'
   }
@@ -51,6 +51,5 @@ dependencies {
   testCompile project(path: ':cloud-common', configuration: 'tests')
 
   compile (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')
-
 
 }

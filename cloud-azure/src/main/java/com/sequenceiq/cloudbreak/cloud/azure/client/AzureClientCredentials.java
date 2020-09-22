@@ -13,6 +13,7 @@ import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.rest.LogLevel;
+import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
@@ -32,18 +33,22 @@ public class AzureClientCredentials {
 
     private final AuthenticationContextProvider authenticationContextProvider;
 
+    private final AzureOkHttp3TracingInterceptor tracingInterceptor;
+
     public AzureClientCredentials(AzureCredentialView credentialView, LogLevel logLevel, CBRefreshTokenClientProvider cbRefreshTokenClientProvider,
-                    AuthenticationContextProvider authenticationContextProvider) {
+            AuthenticationContextProvider authenticationContextProvider, AzureOkHttp3TracingInterceptor tracingInterceptor) {
         this.authenticationContextProvider = authenticationContextProvider;
         this.cbRefreshTokenClientProvider = cbRefreshTokenClientProvider;
         this.credentialView = credentialView;
         this.logLevel = logLevel;
+        this.tracingInterceptor = tracingInterceptor;
         azureClientCredentials = getAzureCredentials();
     }
 
     public Azure getAzure() {
         return Azure
                 .configure()
+                .withInterceptor(tracingInterceptor)
                 .withProxyAuthenticator(new JavaNetAuthenticator())
                 .withLogLevel(logLevel)
                 .authenticate(azureClientCredentials)
