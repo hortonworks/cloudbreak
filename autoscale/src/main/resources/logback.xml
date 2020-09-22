@@ -13,61 +13,65 @@
         </encoder>
     </appender>
 
-    <appender name="PERISCOPE_NODEID_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
-        <discriminator class="com.sequenceiq.periscope.logger.UniqueIdDiscriminator" >
-        </discriminator>
-        <sift>
-            <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>autoscale-log/autoscale-${nodeid}.log</file>
-                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-                    <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
-                        <loggerNameFilter>com.sequenceiq</loggerNameFilter>
-                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
-                    </layout>
-                </encoder>
-                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                    <FileNamePattern>cloudbreak-log/cloudbreak-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
-                </rollingPolicy>
-                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                    <MaxFileSize>1024MB</MaxFileSize>
-                </triggeringPolicy>
-            </appender>
-        </sift>
+    <appender name="AUTOSCALE_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>autoscale-log/autoscale.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>autoscale-log/autoscale-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024MB</MaxFileSize>
+        </triggeringPolicy>
     </appender>
-
+    
     <root level="${PERISCOPE_LOG_LEVEL:-INFO}">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </root>
 
     <logger name="com.sequenceiq" level="${PERISCOPE_LOG_LEVEL:-INFO}" additivity="false">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
+
     <logger name="org.hibernate.type" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
+
     <logger name="org.hibernate" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
+
     <logger name="org.hibernate.SQL" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
+
     <logger name="sql-log" level="${PERISCOPE_SQL_LOG_LEVEL:-INFO}">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
+
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
     </logger>
+
     <logger name="com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerScheduledExecutor">
         <level value="${PERISCOPE_LOG_LEVEL:-WARN}"/>
     </logger>
+
     <logger name="org.glassfish.jersey.logging.LoggingFeature" level="ERROR">
-        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 

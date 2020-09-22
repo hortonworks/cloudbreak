@@ -13,6 +13,11 @@ services:
     - ./integcb/etc:/etc/auth
     command: java -jar /mock-thunderhead.jar
     image: docker-private.infra.cloudera.com/cloudera_thirdparty/openjdk/openjdk:11-jdk
+    deploy:
+      resources:
+        limits:
+          memory: 1024M
+          cpus: 1.0
   test:
     networks:
       cbreak_default: {}
@@ -81,8 +86,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: "4096M"
-          cpus: "2.0"
+          memory: 4096M
   swagger-diff:
     networks:
       cbreak_default: {}
