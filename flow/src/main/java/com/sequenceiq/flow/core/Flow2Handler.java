@@ -88,12 +88,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         Span activeSpan = tracer.activeSpan();
         SpanContext spanContext = event.getHeaders().get(FlowConstants.SPAN_CONTEXT);
         String operationName = event.getKey().toString();
-        if (TracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
+        if (FlowTracingUtil.isActiveSpanReusable(activeSpan, spanContext, operationName)) {
             LOGGER.debug("Reusing existing span. {}", activeSpan.context());
             doAccept(event, key, payload, flowId, flowChainId, flowTriggerUserCrn, spanContext);
         } else {
-            Span span = TracingUtil.getSpan(tracer, operationName, spanContext, flowId, flowChainId, flowTriggerUserCrn);
-            spanContext = TracingUtil.useOrCreateSpanContext(spanContext, span);
+            Span span = FlowTracingUtil.getSpan(tracer, operationName, spanContext, flowId, flowChainId, flowTriggerUserCrn);
+            spanContext = FlowTracingUtil.useOrCreateSpanContext(spanContext, span);
             try (Scope ignored = tracer.activateSpan(span)) {
                 doAccept(event, key, payload, flowId, flowChainId, flowTriggerUserCrn, spanContext);
             } finally {

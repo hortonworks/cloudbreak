@@ -3,20 +3,20 @@ package com.sequenceiq.flow.core;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
 import io.opentracing.References;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 
-public class TracingUtil {
+public class FlowTracingUtil {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TracingUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowTracingUtil.class);
 
-    private TracingUtil() {
+    private FlowTracingUtil() {
     }
 
     public static SpanContext useOrCreateSpanContext(SpanContext spanContext, Span span) {
@@ -40,7 +40,7 @@ public class TracingUtil {
         span.setTag(FlowConstants.FLOW_ID, flowId);
         span.setTag(FlowConstants.FLOW_CHAIN_ID, flowChainId);
         span.setTag(FlowConstants.FLOW_TRIGGER_USERCRN, flowTriggerUserCrn);
-        span.setTag("RESOURCE_CRN", MDC.get("resourceCrn"));
+        TracingUtil.setTagsFromMdc(span);
         return span;
     }
 
