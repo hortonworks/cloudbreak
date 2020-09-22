@@ -88,6 +88,18 @@ cloudera_manager_set_parcel_validation:
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 
+replace_crl_in_cmca_profile:
+  file.replace:
+    - name: /etc/cloudera-scm-server/cmSubCaCert.profile
+    - pattern: "policyset.cmSubCaCertSet.9.default.params.crlDistPointsPointName_0=http://changeme.com/ipa/crl/MasterCRL.bin"
+    - repl: "policyset.cmSubCaCertSet.9.default.params.crlDistPointsPointName_0=http://ipa-ca.{{ metadata.cluster_domain }}/ipa/crl/MasterCRL.bin"
+
+replace_ocsp_in_cmca_profile:
+  file.replace:
+    - name: /etc/cloudera-scm-server/cmSubCaCert.profile
+    - pattern: "policyset.cmSubCaCertSet.5.default.params.authInfoAccessADLocation_0=http://changeme.com/ca/ocsp"
+    - repl: "policyset.cmSubCaCertSet.5.default.params.authInfoAccessADLocation_0=http://ipa-ca.{{ metadata.cluster_domain }}/ca/ocsp"
+
 /opt/salt/scripts/cm-setup-autotls.sh:
   file.managed:
     - makedirs: True
