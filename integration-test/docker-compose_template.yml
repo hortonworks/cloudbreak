@@ -82,6 +82,7 @@ services:
       resources:
         limits:
           memory: "4096M"
+          cpus: "2.0"
   swagger-diff:
     networks:
       cbreak_default: {}
