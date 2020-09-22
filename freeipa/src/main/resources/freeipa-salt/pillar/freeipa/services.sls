@@ -9,3 +9,4 @@ freeipa:
     - certmonger
     - sssd
     - nginx
+    - polkit
