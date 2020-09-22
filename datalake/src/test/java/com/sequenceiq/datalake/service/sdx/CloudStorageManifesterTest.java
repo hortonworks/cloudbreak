@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +45,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 public class CloudStorageManifesterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
+
+    private static final String EMAIL = "blah@blah.blah";
 
     @Mock
     private FileSystemV4Endpoint fileSystemV4Endpoint;
@@ -165,6 +169,75 @@ public class CloudStorageManifesterTest {
                 .filter(r -> r.getType().equals(CloudIdentityType.LOG))
                 .collect(Collectors.toSet()).size());
         assertEquals("logprofile", cloudStorageConfigReq.getIdentities().get(0).getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void whenEnvironmentHasLoggingEnabledThenShouldApplyAsLogIdentityForGCS() {
+        mockFileSystemResponseForCloudbreakClient();
+        SdxCluster sdxCluster = new SdxCluster();
+        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
+        sdxCluster.setInitiatorUserCrn(USER_CRN);
+        sdxCluster.setClusterName("sdx-cluster");
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("gs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(EMAIL);
+        cloudStorageRequest.setGcs(gcsCloudStorageV1Parameters);
+        sdxClusterRequest.setCloudStorage(cloudStorageRequest);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("GCP");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        loggingResponse.setGcs(gcsCloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        GcpEnvironmentParameters gcpEnvironmentParameters = GcpEnvironmentParameters.builder().build();
+        environment.setGcp(gcpEnvironmentParameters);
+        environment.setTelemetry(telemetryResponse);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest);
+        StorageLocationBase singleRequest = cloudStorageConfigReq.getLocations().iterator().next();
+
+        assertEquals(2, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.ID_BROKER))
+                .collect(Collectors.toSet()).size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.LOG))
+                .collect(Collectors.toSet()).size());
+        assertEquals(2, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getGcs().getServiceAccountEmail().equals(EMAIL))
+                .collect(Collectors.toSet()).size());
+        assertEquals(1, cloudStorageConfigReq.getLocations().size());
+        assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
+        assertEquals("ranger/example-path", singleRequest.getValue());
+    }
+
+    @Test
+    public void whenEnvironmentHasOnlyLoggingEnabledThenShouldApplyAsLogIdentityForGCS() {
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("GCP");
+        TelemetryResponse telemetryResponse = new TelemetryResponse();
+        LoggingResponse loggingResponse = new LoggingResponse();
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(EMAIL);
+        loggingResponse.setGcs(gcsCloudStorageV1Parameters);
+        telemetryResponse.setLogging(loggingResponse);
+        environment.setTelemetry(telemetryResponse);
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        clusterV4Request.setBlueprintName(exampleBlueprintName);
+        CloudStorageRequest cloudStorageConfigReq = underTest.initCloudStorageRequest(environment, clusterV4Request, null, new SdxClusterRequest());
+
+        assertEquals(1, cloudStorageConfigReq.getIdentities().size());
+        assertEquals(1, cloudStorageConfigReq.getIdentities()
+                .stream()
+                .filter(r -> r.getType().equals(CloudIdentityType.LOG))
+                .collect(Collectors.toSet()).size());
+        assertEquals(EMAIL, cloudStorageConfigReq.getIdentities().get(0).getGcs().getServiceAccountEmail());
     }
 
     @Test

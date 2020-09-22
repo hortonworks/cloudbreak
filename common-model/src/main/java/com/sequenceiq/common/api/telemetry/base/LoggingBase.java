@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
@@ -28,6 +29,9 @@ public abstract class LoggingBase implements Serializable {
 
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_ADLS_GEN_2_ATTRIBUTES)
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
+
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_GCS_ATTRIBUTES)
+    private GcsCloudStorageV1Parameters gcs;
 
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES)
     private CloudwatchParams cloudwatch;
@@ -54,6 +58,14 @@ public abstract class LoggingBase implements Serializable {
 
     public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
+    }
+
+    public GcsCloudStorageV1Parameters getGcs() {
+        return gcs;
+    }
+
+    public void setGcs(GcsCloudStorageV1Parameters gcs) {
+        this.gcs = gcs;
     }
 
     public CloudwatchParams getCloudwatch() {
