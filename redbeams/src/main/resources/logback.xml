@@ -17,40 +17,37 @@
         </encoder>
     </appender>
 
-    <appender name="REDBEAMS_NODEID_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
-        <discriminator class="com.sequenceiq.redbeams.logger.UniqueIdDiscriminator" >
-        </discriminator>
-        <sift>
-            <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
-                <file>redbeams-log/redbeams-${nodeid}.log</file>
-                <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-                    <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
-                        <loggerNameFilter>com.sequenceiq</loggerNameFilter>
-                        <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
-                    </layout>
-                </encoder>
-                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-                    <FileNamePattern>redbeams-log/redbeams-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
-                </rollingPolicy>
-                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
-                    <MaxFileSize>1024MB</MaxFileSize>
-                </triggeringPolicy>
-            </appender>
-        </sift>
+    <appender name="REDBEAMS_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>redbeams-log/redbeams.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
+        </filter>        
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>redbeams-log/redbeams-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024MB</MaxFileSize>
+        </triggeringPolicy>
     </appender>
 
     <root level="${REDBEAMS_ROOT_LOG_LEVEL:-INFO}">
-        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="REDBEAMS_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </root>
 
     <logger name="com.sequenceiq" level="${REDBEAMS_LOG_LEVEL:-DEBUG}" additivity="false">
-        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="REDBEAMS_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
     <logger name="com.zaxxer" level="${REDBEAMS_LOG_LEVEL:-INFO}" additivity="false">
-        <appender-ref ref="REDBEAMS_NODEID_BASED"/>
+        <appender-ref ref="REDBEAMS_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 

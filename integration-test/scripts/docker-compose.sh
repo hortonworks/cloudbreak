@@ -34,7 +34,7 @@ unset HTTPS_PROXY
 env
 
 TRACE=1 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged
 
 docker ps --format ‘{{.Image}}’
 
@@ -42,7 +42,7 @@ date
 if [ $? -ne 0 ]; then
     echo ERROR: Failed to bring up all the necessary services! Process is about to terminate.
     ./cbd kill
-    .deps/bin/docker-compose down
+    .deps/bin/docker-compose --compatibility down
     exit 1
 fi
 
@@ -118,6 +118,7 @@ if [[ "$CIRCLECI" ]]; then
 
     echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
     if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
+        sudo mkdir -p ./test-output
         sudo chmod -R a+rwx ./test-output
         mkdir ./test-output/docker_stats
         docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
