@@ -23,6 +23,7 @@ dependencies {
   compile project(':secret-engine')
   compile project(':notification-sender')
   compile project(':idbmms-connector')
+  compile project(':datalake-dr-connector')
 
   compile project(':core-api')
   compile project(':datalake-api')
