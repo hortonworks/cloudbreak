@@ -16,6 +16,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionParameters;
 import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 
 public interface DefaultNetworkConnector extends NetworkConnector {
 
@@ -37,6 +38,11 @@ public interface DefaultNetworkConnector extends NetworkConnector {
         }
         LOGGER.info("The subnet selection is: {}.", subnetSelectionResult);
         return subnetSelectionResult;
+    }
+
+    @Override
+    default void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest) {
+        LOGGER.info("No cloud provider specific resources exist on this cloud platform!");
     }
 
     SubnetSelectionResult filterSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters);

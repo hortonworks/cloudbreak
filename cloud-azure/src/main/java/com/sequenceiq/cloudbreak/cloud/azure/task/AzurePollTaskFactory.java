@@ -6,8 +6,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
-import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerTask;
+import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachChecker;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
@@ -40,6 +42,11 @@ public class AzurePollTaskFactory {
     public PollTask<Boolean> managedImageCreationCheckerTask(AuthenticatedContext authenticatedContext,
             AzureManagedImageCreationCheckerContext azureManagedImageCreationCheckerContext) {
         return createPollTask(AzureManagedImageCreationCheckerTask.NAME, authenticatedContext, azureManagedImageCreationCheckerContext);
+    }
+
+    public PollTask<Boolean> dnsZoneCreationCheckerTask(AuthenticatedContext authenticatedContext,
+            AzureDnsZoneCreationCheckerContext azureDnsZoneCreationCheckerContext) {
+        return createPollTask(AzureDnsZoneCreationCheckerTask.NAME, authenticatedContext, azureDnsZoneCreationCheckerContext);
     }
 
     @SuppressWarnings("unchecked")

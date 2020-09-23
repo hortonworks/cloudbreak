@@ -128,6 +128,15 @@ public class AzureCloudResourceService {
             case "Microsoft.Storage/storageAccounts":
                 cloudResourceBuilder.type(ResourceType.AZURE_STORAGE);
                 break;
+            case "Microsoft.Network/privateDnsZones":
+                cloudResourceBuilder.type(ResourceType.AZURE_PRIVATE_DNS_ZONE);
+                break;
+            case "Microsoft.Network/privateEndpoints/privateDnsZoneGroups":
+                cloudResourceBuilder.type(ResourceType.AZURE_DNS_ZONE_GROUP);
+                break;
+            case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
+                cloudResourceBuilder.type(ResourceType.AZURE_VIRTUAL_NETWORK_LINK);
+                break;
             default:
                 LOGGER.info("Unknown resource type {}", targetResource.resourceType());
                 return null;

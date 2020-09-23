@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState.SUCCEEDED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
@@ -49,6 +50,10 @@ import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.NetworkSecurityGroups;
 import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.network.Subnet;
+import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
+import com.microsoft.azure.management.privatedns.v2018_09_01.VirtualNetworkLinkState;
+import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.VirtualNetworkLinkInner;
+import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentMode;
 import com.microsoft.azure.management.resources.DeploymentOperations;
@@ -76,10 +81,12 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
-import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.common.api.type.CommonStatus;
 
 import rx.Completable;
 import rx.Observable;
@@ -90,6 +97,8 @@ public class AzureClient {
 
     private final Azure azure;
 
+    private final privatednsManager privatednsManager;
+
     private final AzureClientCredentials azureClientCredentials;
 
     private final AzureAuthExceptionHandler azureAuthExceptionHandler;
@@ -97,6 +106,7 @@ public class AzureClient {
     public AzureClient(AzureClientCredentials azureClientCredentials, AzureAuthExceptionHandler azureAuthExceptionHandler) {
         this.azureClientCredentials = azureClientCredentials;
         azure = azureClientCredentials.getAzure();
+        privatednsManager = azureClientCredentials.getPrivateDnsManager();
         this.azureAuthExceptionHandler = azureAuthExceptionHandler;
     }
 
@@ -165,8 +175,15 @@ public class AzureClient {
     public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
         return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
                 .map(Deployment::provisioningState)
-                .map(AzureStackStatus::mapResourceStatus)
+                .map(AzureStatusMapper::mapResourceStatus)
                 .orElse(ResourceStatus.DELETED);
+    }
+
+    public CommonStatus getTemplateDeploymentCommonStatus(String resourceGroupName, String deploymentName) {
+        return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
+                .map(Deployment::provisioningState)
+                .map(AzureStatusMapper::mapCommonStatus)
+                .orElse(CommonStatus.DETACHED);
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
@@ -720,6 +737,63 @@ public class AzureClient {
 
     public void deleteDatabaseServer(String databaseServerId) {
         handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
+    }
+
+    public PrivateZone getPrivateDnsZoneByResourceGroup(String resourceGroupName, String dnsZoneName) {
+        return privatednsManager.privateZones().getByResourceGroup(resourceGroupName, dnsZoneName);
+    }
+
+    public PagedList<PrivateZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
+        return privatednsManager.privateZones().listByResourceGroup(resourceGroupName);
+    }
+
+    public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
+        return privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+    }
+
+    public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzurePrivateDnsZoneServiceEnum> services) {
+        LOGGER.debug("Checking DNS Zones for services {}", services.stream()
+                .map(AzurePrivateDnsZoneServiceEnum::getDnsZoneName)
+                .collect(Collectors.toList()));
+
+        PagedList<PrivateZone> dnsZones = listPrivateDnsZonesByResourceGroup(resourceGroupName);
+        for (AzurePrivateDnsZoneServiceEnum service : services) {
+            String dnsZoneName = service.getDnsZoneName();
+            boolean dnsZoneFound = dnsZones.stream()
+                    .filter(dnsZone -> dnsZone.name().equals(dnsZoneName))
+                    .anyMatch(dnsZone -> dnsZone.provisioningState().equals(SUCCEEDED));
+            if (!dnsZoneFound) {
+                LOGGER.info("DNS Zone {} is not provisioned successfully yet!", dnsZoneName);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean checkIfNetworkLinksDeployed(String resourceGroupName, String networkId, List<AzurePrivateDnsZoneServiceEnum> services) {
+        LOGGER.debug("Checking Network link between network and services {} and network link {}", networkId,
+                services.stream()
+                        .map(AzurePrivateDnsZoneServiceEnum::getDnsZoneName)
+                        .collect(Collectors.toList()));
+        for (AzurePrivateDnsZoneServiceEnum service : services) {
+            String dnsZoneName = service.getDnsZoneName();
+            PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = listNetworkLinksByPrivateDnsZoneName(resourceGroupName, dnsZoneName);
+            if (virtualNetworkLinks.isEmpty()) {
+                LOGGER.info("Network link for network {} not found for DNS zone {}!", networkId, dnsZoneName);
+                return false;
+            } else if (!isNetworkLinkCreated(networkId, virtualNetworkLinks)) {
+                LOGGER.info("Network link for network {} and DNS Zone {} is not provisioned successfully yet!", networkId, dnsZoneName);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isNetworkLinkCreated(String networkId, PagedList<VirtualNetworkLinkInner> virtualNetworkLinks) {
+        return virtualNetworkLinks.stream()
+                .filter(networkLink -> networkId.equals(networkLink.name()))
+                .anyMatch(networkLink -> networkLink.provisioningState().equals(SUCCEEDED)
+                        && networkLink.virtualNetworkLinkState().equals(VirtualNetworkLinkState.COMPLETED));
     }
 
     private <T> T handleAuthException(Supplier<T> function) {

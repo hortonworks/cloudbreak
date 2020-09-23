@@ -40,8 +40,13 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -51,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -88,6 +94,8 @@ public class AzureNetworkConnectorTest {
 
     private static final String NETWORK_ID = "networkId";
 
+    private static final String NETWORK_RG = "networkRg";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -111,6 +119,9 @@ public class AzureNetworkConnectorTest {
 
     @Mock
     private AzureSubnetSelectorService azureSubnetSelectorService;
+
+    @Mock
+    private AzureDnsZoneService azureDnsZoneService;
 
     @Test
     public void testPlatformShouldReturnAzurePlatform() {
@@ -156,6 +167,25 @@ public class AzureNetworkConnectorTest {
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_0)));
         assertTrue(actual.getSubnets().stream().anyMatch(cloudSubnet -> cloudSubnet.getSubnetId().equals(SUBNET_ID_1)));
         assertTrue(actual.getSubnets().size() == 2);
+    }
+
+    @Test
+    public void testCreateProviderSpecificNetworkResourcesShouldRun() {
+        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
+
+        when(azureClientService.getClient(request.getCloudCredential())).thenReturn(azureClient);
+
+        underTest.createProviderSpecificNetworkResources(request);
+
+        verify(azureDnsZoneService).getOrCreateDnsZones(
+                authenticatedContext,
+                azureClient,
+                getNetworkView(),
+                RESOURCE_GROUP,
+                getTags()
+        );
+
     }
 
     @Test
@@ -337,7 +367,7 @@ public class AzureNetworkConnectorTest {
                 .withStackName(STACK_NAME)
                 .withEnvName(ENV_NAME)
                 .withEnvCrn(ENV_CRN)
-                .withCloudCredential(new CloudCredential("1", "credential"))
+                .withCloudCredential(getCredential())
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
                 .withPublicSubnets(subnets)
@@ -349,12 +379,40 @@ public class AzureNetworkConnectorTest {
         return new NetworkDeletionRequest.Builder()
                 .withRegion(REGION.value())
                 .withStackName(STACK)
-                .withCloudCredential(new CloudCredential("1", "credential"))
+                .withCloudCredential(getCredential())
                 .withResourceGroup(RESOURCE_GROUP)
                 .withNetworkId(NETWORK_ID)
                 .withSingleResourceGroup(singleResourceGroup)
                 .withExisting(existingNetwork)
                 .build();
+    }
+
+    private NetworkResourcesCreationRequest createProviderSpecificNetworkResources() {
+        return new NetworkResourcesCreationRequest.Builder()
+                .withNetworkId(NETWORK_ID)
+                .withNetworkResourceGroup(NETWORK_RG)
+                .withCloudCredential(getCredential())
+                .withCloudContext(createCloudContext())
+                .withRegion(REGION)
+                .withPrivateEndpointsEnabled(true)
+                .withTags(getTags())
+                .withResourceGroup(RESOURCE_GROUP).build();
+    }
+
+    private Map<String, String> getTags() {
+        Map<String, String> tags = new HashMap<>();
+        tags.put("owner", "cbuser");
+        tags.put("created", "yesterday");
+        return tags;
+    }
+
+    private CloudCredential getCredential() {
+        return new CloudCredential("1", "credential");
+    }
+
+    private CloudContext createCloudContext() {
+        Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
+        return new CloudContext(null, STACK_NAME, null, null, location, null, null, "");
     }
 
     public SubnetRequest publicSubnetRequest(String cidr, int index) {
@@ -372,5 +430,13 @@ public class AzureNetworkConnectorTest {
 
     private NetworkSubnetRequest createSubnetRequest(String s) {
         return new NetworkSubnetRequest(s, PUBLIC);
+    }
+
+    private AzureNetworkView getNetworkView() {
+        AzureNetworkView networkView = new AzureNetworkView();
+        networkView.setExistingNetwork(false);
+        networkView.setNetworkId(NETWORK_ID);
+        networkView.setResourceGroupName(NETWORK_RG);
+        return networkView;
     }
 }
