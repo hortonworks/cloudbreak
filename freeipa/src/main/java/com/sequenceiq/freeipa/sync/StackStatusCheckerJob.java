@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -25,8 +26,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
@@ -46,9 +45,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Inject
@@ -57,7 +53,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         Long stackId = getStackId();
-        Stack stack = stackService.getStackById(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
             prepareMdcContextWithStack(stack);
             if (flowLogService.isOtherFlowRunning(stackId)) {
@@ -88,8 +84,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             checkedMeasure(() -> {
                 ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
-                    Set<InstanceMetaData> notTerminatedForStack = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
-                    Set<InstanceMetaData> checkableInstances = notTerminatedForStack.stream().filter(i -> !i.isDeletedOnProvider())
+                    // Exclude terminated but include deleted
+                    Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
+                            .filter(Predicate.not(InstanceMetaData::isTerminated))
+                            .collect(Collectors.toSet());
+                    Set<InstanceMetaData> checkableInstances = notTerminatedForStack.stream()
+                            .filter(Predicate.not(InstanceMetaData::isDeletedOnProvider))
                             .collect(Collectors.toSet());
 
                     int alreadyDeletedCount = notTerminatedForStack.size() - checkableInstances.size();
@@ -99,7 +99,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
                         List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances);
-                        updateStackStatus(stack, syncResult, results);
+                        updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
                     }
                 });
                 return null;
@@ -109,8 +109,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults) {
-        DetailedStackStatus status = getStackStatus(providerSyncResults, result);
+    private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount) {
+        DetailedStackStatus status = getStackStatus(providerSyncResults, result, alreadyDeletedCount);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
                 stackUpdater.updateStackStatus(stack, status, result.getMessage());
@@ -121,21 +121,19 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private DetailedStackStatus getStackStatus(List<ProviderSyncResult> providerSyncResults, SyncResult result) {
-        if (result.getStatus() == DetailedStackStatus.PROVISIONED) {
-            return DetailedStackStatus.PROVISIONED;
+    private DetailedStackStatus getStackStatus(List<ProviderSyncResult> providerSyncResults, SyncResult result, int alreadyDeletedCount) {
+        if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
+            return DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
+        }
+        if (alreadyDeletedCount > 0) {
+            return DetailedStackStatus.UNHEALTHY;
         }
         if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.STOPPED))) {
             return DetailedStackStatus.STOPPED;
         }
-        if (providerSyncResults.stream().anyMatch(hasStatus(InstanceStatus.STOPPED))) {
-            return DetailedStackStatus.PROVISIONED;
-        }
-        if (providerSyncResults.stream().allMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
-            return DetailedStackStatus.DELETED_ON_PROVIDER_SIDE;
-        }
-        if (providerSyncResults.stream().anyMatch(hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER))) {
-            return DetailedStackStatus.PROVISIONED;
+        if (providerSyncResults.stream().anyMatch(
+                hasStatus(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.STOPPED))) {
+            return DetailedStackStatus.UNHEALTHY;
         }
         return result.getStatus();
     }

@@ -8,12 +8,9 @@ public class SyncResult {
 
     private DetailedStackStatus status;
 
-    private Boolean result;
-
-    public SyncResult(String message, DetailedStackStatus status, Boolean result) {
+    public SyncResult(String message, DetailedStackStatus status) {
         this.message = message;
         this.status = status;
-        this.result = result;
     }
 
     public String getMessage() {
@@ -22,9 +19,5 @@ public class SyncResult {
 
     public DetailedStackStatus getStatus() {
         return status;
-    }
-
-    public Boolean getResult() {
-        return result;
     }
 }
