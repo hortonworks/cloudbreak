@@ -17,6 +17,6 @@ public class LdapsCustomCrnOrNameProvider extends AbstractCustomCrnOrNameProvide
 
     @Override
     protected List<? extends AccountAwareResource> getResource(String environmentCrn, String accountId) {
-        return ldapConfigService.findAllByEnvironmentAndAccountId(environmentCrn, accountId);
+        return ldapConfigService.findAllByEnvironmentAndAccountIdEvenIfArchived(environmentCrn, accountId);
     }
 }

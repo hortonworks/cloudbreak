@@ -11,9 +11,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 @Transactional(TxType.REQUIRED)
 public interface LdapConfigRepository extends JpaRepository<LdapConfig, Long> {
 
-    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(String accountId, String environmentCrn);
+    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(String accountId, String environmentCrn);
+
+    List<LdapConfig> findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(String accountId, String environmentCrn);
 
     List<LdapConfig> findByAccountIdAndEnvironmentCrn(String accountId, String environmentCrn);
 
-    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterName(String accountId, String environmentCrn, String clusterName);
+    Optional<LdapConfig> findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(String accountId, String environmentCrn, String clusterName);
 }

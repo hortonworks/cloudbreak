@@ -17,6 +17,6 @@ public class KerberosCustomCrnOrNameProvider extends AbstractCustomCrnOrNameProv
 
     @Override
     protected List<? extends AccountAwareResource> getResource(String environmentCrn, String accountId) {
-        return kerberosConfigService.findAllInEnvironment(environmentCrn, accountId);
+        return kerberosConfigService.findAllInEnvironmentEvenIfArchived(environmentCrn, accountId);
     }
 }
