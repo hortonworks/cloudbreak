@@ -8,13 +8,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
-import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,9 +17,16 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAc
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
+import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 
 @Service
 public class UserKeytabService {
@@ -47,7 +47,7 @@ public class UserKeytabService {
 
     private String getKerberosRealm(String accountId, String environmentCrn) {
         KerberosConfig krbConfig =  kerberosConfigRepository
-                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn)
+                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn)
                 .orElseThrow(notFound("KerberosConfig for environment", environmentCrn));
         return krbConfig.getRealm();
     }

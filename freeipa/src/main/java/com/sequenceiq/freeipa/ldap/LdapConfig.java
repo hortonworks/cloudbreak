@@ -12,19 +12,16 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import org.hibernate.annotations.Where;
-
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 
 @Entity
-@Where(clause = "archived = false")
-public class LdapConfig implements ArchivableResource, AuthResource, AccountIdAwareResource {
+public class LdapConfig implements ArchivableResource, AuthResource, AccountAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "ldapconfig_generator")
     @SequenceGenerator(name = "ldapconfig_generator", sequenceName = "ldapconfig_id_seq", allocationSize = 1)

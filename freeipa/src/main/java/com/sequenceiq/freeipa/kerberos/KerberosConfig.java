@@ -8,8 +8,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 
-import org.hibernate.annotations.Where;
-
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
@@ -20,7 +18,6 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.KerberosType;
 import com.sequenceiq.freeipa.entity.util.KerberosTypeConverter;
 
 @Entity
-@Where(clause = "archived = false")
 public class KerberosConfig implements ArchivableResource, AuthResource, AccountAwareResource {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")

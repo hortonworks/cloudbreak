@@ -71,7 +71,7 @@ public class KerberosConfigServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentCrn(ENVIRONMENT_ID);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
                 .thenReturn(Optional.of(new KerberosConfig()));
         BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
             // WHEN
@@ -85,7 +85,7 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         KerberosConfig actualResult = underTest.get(ENVIRONMENT_ID);
@@ -111,7 +111,7 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(ACCOUNT_ID, ENVIRONMENT_ID))
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         underTest.delete(ENVIRONMENT_ID);

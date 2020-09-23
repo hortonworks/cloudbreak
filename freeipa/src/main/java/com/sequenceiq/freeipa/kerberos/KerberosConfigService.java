@@ -27,9 +27,6 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     private KerberosConfigRepository kerberosConfigRepository;
 
     @Inject
-    private KerberosConfigWithArchivedRepository kerberosConfigWithArchivedRepository;
-
-    @Inject
     private CrnService crnService;
 
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig) {
@@ -46,16 +43,16 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public KerberosConfig get(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn)
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn)
                 .orElseThrow(notFound("KerberosConfig for environment", environmentCrn));
     }
 
     public Optional<KerberosConfig> find(String environmentCrn, String accountId, String clusterName) {
-        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(accountId, environmentCrn, clusterName);
     }
 
-    public List<KerberosConfigWithArchived> findAllInEnvironment(String environmentCrn, String accountId) {
-        return kerberosConfigWithArchivedRepository.findAllByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
+    public List<KerberosConfig> findAllInEnvironmentEvenIfArchived(String environmentCrn, String accountId) {
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
     }
 
     public void delete(String environmentCrn) {
@@ -64,7 +61,8 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     }
 
     public void delete(String environmentCrn, String accountId) {
-        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn);
+        Optional<KerberosConfig> kerberosConfig = kerberosConfigRepository
+                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn);
         kerberosConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("KerberosConfig for environment", environmentCrn).get();
         });
@@ -72,14 +70,14 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public void delete(String environmentCrn, String accountId, String clusterName) {
         Optional<KerberosConfig> kerberosConfig =
-                kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+                kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(accountId, environmentCrn, clusterName);
         kerberosConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("KerberosConfig for environment", environmentCrn).get();
         });
     }
 
     public void deleteAllInEnvironment(String environmentCrn, String accountId) {
-        kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn).forEach(this::delete);
+        kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(accountId, environmentCrn).forEach(this::delete);
     }
 
     @Override
@@ -89,9 +87,10 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     private void checkIfExists(KerberosConfig resource) {
         Optional<KerberosConfig> kerberosConfigOptional = StringUtils.isBlank(resource.getClusterName()) ?
-                kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(resource.getAccountId(), resource.getEnvironmentCrn())
-                : kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(resource.getAccountId(), resource.getEnvironmentCrn(),
-                resource.getClusterName());
+                kerberosConfigRepository
+                        .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(resource.getAccountId(), resource.getEnvironmentCrn())
+                : kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(resource.getAccountId(),
+                resource.getEnvironmentCrn(), resource.getClusterName());
         kerberosConfigOptional.ifPresent(kerberosConfig -> {
             String message = format("KerberosConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),
                     resource.getEnvironmentCrn());
