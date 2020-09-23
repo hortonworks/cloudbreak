@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.context;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
@@ -24,5 +26,23 @@ public class AuthenticatedContext extends DynamicModel {
 
     public CloudCredential getCloudCredential() {
         return cloudCredential;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AuthenticatedContext that = (AuthenticatedContext) o;
+        return Objects.equals(cloudContext, that.cloudContext) &&
+                Objects.equals(cloudCredential, that.cloudCredential);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cloudContext, cloudCredential);
     }
 }

@@ -12,6 +12,8 @@ import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+
+import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationPoller;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
@@ -35,7 +37,7 @@ public class AzureImageService {
     private PersistenceNotifier persistenceNotifier;
 
     @Inject
-    private AzureImageIdProviderService azureImageIdProviderService;
+    private AzureResourceIdProviderService azureResourceIdProviderService;
 
     @Inject
     private AzureManagedImageCreationPoller azureManagedImageCreationPoller;
@@ -107,7 +109,7 @@ public class AzureImageService {
     }
 
     private void updateImageStatus(AuthenticatedContext ac, String imageName, String imageId, CommonStatus commonStatus) {
-        LOGGER.debug("Updating image status to CREATED: {}", imageId);
+        LOGGER.debug("Updating image status to {}: {}", commonStatus.toString(), imageId);
         persistenceNotifier.notifyUpdate(buildCloudResource(imageName, imageId, commonStatus), ac.getCloudContext());
     }
 
@@ -119,8 +121,8 @@ public class AzureImageService {
     }
 
     private String getImageId(String resourceGroup, AzureClient client, String imageName) {
-        return azureImageIdProviderService.generateImageId(
-                client.getCurrentSubscription().subscriptionId(), resourceGroup, imageName);
+        return azureResourceIdProviderService.generateImageId(client.getCurrentSubscription()
+                .subscriptionId(), resourceGroup, imageName);
     }
 
     public CloudResource buildCloudResource(String name, String id, CommonStatus status) {

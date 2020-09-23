@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_PUBLICKEY_CREATION_EVENT;
 
@@ -85,6 +86,7 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                             LOGGER.debug("Environment ({}) dto has no network!", environment.getName());
                         }
                         createCloudNetworkIfNeeded(environmentDto, environment);
+                        createProviderSpecificNetworkResourcesIfNeeded(environmentDto, environment.getNetwork());
                         environmentService.save(environment);
                     });
             initiateNextStep(environmentDtoEvent, environmentDto);
@@ -115,6 +117,12 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
             BaseNetwork baseNetwork = environmentNetworkService.createCloudNetwork(environmentDto, environment.getNetwork());
             baseNetwork = networkService.save(baseNetwork);
             environment.setNetwork(baseNetwork);
+        }
+    }
+
+    private void createProviderSpecificNetworkResourcesIfNeeded(EnvironmentDto environmentDto, BaseNetwork network) {
+        if (AZURE.equalsIgnoreCase(environmentDto.getCloudPlatform())) {
+            environmentNetworkService.createProviderSpecificNetworkResources(environmentDto, network);
         }
     }
 

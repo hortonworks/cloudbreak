@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -52,8 +55,6 @@ public class AzureNetworkConnector implements NetworkConnector {
     private static final String NETWORK_ID_KEY = "networkId";
 
     private static final String SUBNET_ID_KEY = "subnetId";
-
-    private static final String SUBNET_CIDR_KEY = "subnetCidr";
 
     @Inject
     private AzureClientService azureClientService;
@@ -69,6 +70,9 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Inject
     private AzureSubnetSelectorService azureSubnetSelectorService;
+
+    @Inject
+    private AzureDnsZoneService azureDnsZoneService;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -207,6 +211,26 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
+    public void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
+        if (request.isPrivateEndpointsEnabled()) {
+            LOGGER.debug("Private endpoints are enabled, checking the presence of DNS Zones and Network links..");
+            AzureClient azureClient = azureClientService.getClient(request.getCloudCredential());
+            String resourceGroup = request.getResourceGroup();
+            AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
+
+            Map<String, String> tags = request.getTags();
+            AzureNetworkView networkView = new AzureNetworkView();
+            networkView.setExistingNetwork(request.isExistingNetwork());
+            networkView.setNetworkId(request.getNetworkId());
+            networkView.setResourceGroupName(request.getNetworkResourceGroup());
+            azureDnsZoneService.getOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags);
+            azureDnsZoneService.getOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags);
+        } else {
+            LOGGER.debug("Private endpoints are disabled, nothing to do.");
+        }
+    }
+
+    @Override
     public Platform platform() {
         return AzureConstants.PLATFORM;
     }
@@ -252,5 +276,4 @@ public class AzureNetworkConnector implements NetworkConnector {
         properties.put("stackName", stackName);
         return properties;
     }
-
 }

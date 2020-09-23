@@ -1,30 +1,31 @@
 package com.sequenceiq.environment.resourcepersister;
 
-import java.io.Serializable;
-
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.CommonStatusConverter;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.parameters.dao.converter.ResourceTypeConverter;
 
 @Entity
-public class Resource implements Serializable {
+public class Resource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "resource_generator")
     @SequenceGenerator(name = "resource_generator", sequenceName = "resource_id_seq", allocationSize = 1)
     private Long id;
 
-    private String instanceGroup;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Environment environment;
 
     @Column(nullable = false)
     @Convert(converter = ResourceTypeConverter.class)
@@ -38,41 +39,20 @@ public class Resource implements Serializable {
 
     private String resourceReference;
 
-    private String crn;
-
-    private String instanceId;
-
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json attributes;
-
     public Resource() {
 
     }
 
-    public Resource(ResourceType resourceType, String resourceName, String crn) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, crn, null);
+    public Resource(ResourceType resourceType, String resourceName, Environment environment) {
+        this(resourceType, resourceName, null, CommonStatus.CREATED, environment);
     }
 
-    public Resource(ResourceType resourceType, String resourceName, String crn, String instanceGroup) {
-        this(resourceType, resourceName, null, CommonStatus.CREATED, crn, instanceGroup);
-    }
-
-    public Resource(ResourceType resourceType, String resourceName, String resourceReference, CommonStatus status, String crn, String instanceGroup) {
+    public Resource(ResourceType resourceType, String resourceName, String resourceReference, CommonStatus status, Environment environment) {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;
-        resourceStatus = status;
-        this.instanceGroup = instanceGroup;
-        this.crn = crn;
-    }
+        this.resourceStatus = status;
 
-    public String getInstanceGroup() {
-        return instanceGroup;
-    }
-
-    public void setInstanceGroup(String instanceGroup) {
-        this.instanceGroup = instanceGroup;
     }
 
     public Long getId() {
@@ -81,6 +61,14 @@ public class Resource implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Environment getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 
     public ResourceType getResourceType() {
@@ -115,27 +103,4 @@ public class Resource implements Serializable {
         this.resourceReference = resourceReference;
     }
 
-    public String getInstanceId() {
-        return instanceId;
-    }
-
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
-    }
-
-    public Json getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(Json attributes) {
-        this.attributes = attributes;
-    }
-
-    public String getCrn() {
-        return crn;
-    }
-
-    public void setCrn(String crn) {
-        this.crn = crn;
-    }
 }

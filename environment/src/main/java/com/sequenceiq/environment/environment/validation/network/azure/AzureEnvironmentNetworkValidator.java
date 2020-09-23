@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network.azure;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.MapUtils;
@@ -15,11 +16,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @Component
 public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
@@ -41,6 +47,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(),
                 cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto));
+        checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
     }
 
     @Override
@@ -124,6 +131,20 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                     azureParams.getNetworkId(), azureParams.getResourceGroupName());
             LOGGER.info(message);
             resultBuilder.error(message);
+        }
+    }
+
+    private void checkPrivateEndpointsWhenMultipleResourceGroup(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
+            ServiceEndpointCreation serviceEndpointCreation) {
+        ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::azureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
+                .orElse(ResourceGroupUsagePattern.USE_MULTIPLE);
+        if (resourceGroupUsagePattern == ResourceGroupUsagePattern.USE_MULTIPLE
+                && serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+            resultBuilder.error("Private endpoint creation is not supported for multiple resource group deployment model, "
+                    + "please use single single resource groups to be able to use private endpoints in Azure!");
         }
     }
 
