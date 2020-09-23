@@ -12,7 +12,7 @@ FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{pr
 
 install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
-ipa-server-install --unattended --uninstall
+ipa-server-install --unattended --uninstall --ignore-topology-disconnect --ignore-last-of-role
 
 ipa-client-install \
   --server "$FREEIPA_TO_REPLICATE" \
