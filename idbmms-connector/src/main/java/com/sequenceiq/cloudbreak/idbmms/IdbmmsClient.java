@@ -7,18 +7,20 @@ import java.util.Map;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementGrpc;
 import com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 
 import io.grpc.ManagedChannel;
+import io.opentracing.Tracer;
 
 /**
  * <p>
- *     A simple wrapper to the GRPC IDBroker Mapping Management Service. This handles setting up
- *     the appropriate context-propagating interceptors and hides some boilerplate.
+ * A simple wrapper to the GRPC IDBroker Mapping Management Service. This handles setting up
+ * the appropriate context-propagating interceptors and hides some boilerplate.
  * </p>
  *
  * <p>
- *     This class is meant to be used only by {@link GrpcIdbmmsClient}.
+ * This class is meant to be used only by {@link GrpcIdbmmsClient}.
  * </p>
  */
 class IdbmmsClient {
@@ -27,21 +29,18 @@ class IdbmmsClient {
 
     private final String actorCrn;
 
-    /**
-     * Constructor.
-     *
-     * @param channel  the managed channel.
-     * @param actorCrn the actor CRN.
-     */
-    IdbmmsClient(ManagedChannel channel, String actorCrn) {
+    private final Tracer tracer;
+
+    IdbmmsClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
+        this.tracer = tracer;
     }
 
     /**
      * Wraps a call to {@code GetMappingsConfig}.
      *
-     * @param requestId the request ID for the request; must not be {@code null}
+     * @param requestId      the request ID for the request; must not be {@code null}
      * @param environmentCrn the environment CRN; must not be {@code null}
      * @return the mappings config; never {@code null}
      * @throws NullPointerException if either argument is {@code null}
@@ -63,7 +62,7 @@ class IdbmmsClient {
     /**
      * Wraps a call to {@code DeleteMappings}.
      *
-     * @param requestId the request ID for the request; must not be {@code null}
+     * @param requestId      the request ID for the request; must not be {@code null}
      * @param environmentCrn the environment CRN; must not be {@code null}
      * @throws NullPointerException if either argument is {@code null}
      */
@@ -86,7 +85,8 @@ class IdbmmsClient {
     private IdBrokerMappingManagementGrpc.IdBrokerMappingManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
         return IdBrokerMappingManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
 }

@@ -53,6 +53,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 
 @Component
 public class GrpcUmsClient {
@@ -66,6 +67,9 @@ public class GrpcUmsClient {
 
     @Inject
     private UmsClientConfig umsClientConfig;
+
+    @Inject
+    private Tracer tracer;
 
     public static GrpcUmsClient createClient(UmsConfig config, UmsClientConfig clientConfig) {
         GrpcUmsClient client = new GrpcUmsClient();
@@ -660,7 +664,7 @@ public class GrpcUmsClient {
 
     @VisibleForTesting
     UmsClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new UmsClient(channel, actorCrn, umsClientConfig);
+        return new UmsClient(channel, actorCrn, umsClientConfig, tracer);
     }
 
     /**

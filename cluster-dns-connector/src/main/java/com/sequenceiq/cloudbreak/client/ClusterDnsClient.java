@@ -17,8 +17,10 @@ import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointM
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.google.protobuf.ByteString;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
+import io.opentracing.Tracer;
 
 public class ClusterDnsClient {
 
@@ -26,9 +28,12 @@ public class ClusterDnsClient {
 
     private final String actorCrn;
 
-    public ClusterDnsClient(ManagedChannel channel, String actorCrn) {
+    private final Tracer tracer;
+
+    public ClusterDnsClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
         this.channel = channel;
         this.actorCrn = actorCrn;
+        this.tracer = tracer;
     }
 
     public String signCertificate(String requestId, String accountId, String environment, byte[] csr) {
@@ -93,6 +98,7 @@ public class ClusterDnsClient {
     private PublicEndpointManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
         return PublicEndpointManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }

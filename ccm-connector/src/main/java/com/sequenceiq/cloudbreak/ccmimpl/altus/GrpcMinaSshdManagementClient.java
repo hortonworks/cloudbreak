@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.opentracing.Tracer;
 
 @Component
 public class GrpcMinaSshdManagementClient {
@@ -44,6 +45,9 @@ public class GrpcMinaSshdManagementClient {
 
     @Inject
     private MinaSshdManagementClientConfig minaSshdManagementClientConfig;
+
+    @Inject
+    private Tracer tracer;
 
     /**
      * Attempts to acquire a minasshd service for the specified account. If it is not available immediately,
@@ -240,6 +244,6 @@ public class GrpcMinaSshdManagementClient {
     }
 
     private MinaSshdManagementClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new MinaSshdManagementClient(channel, actorCrn, minaSshdManagementClientConfig);
+        return new MinaSshdManagementClient(channel, actorCrn, minaSshdManagementClientConfig, tracer);
     }
 }

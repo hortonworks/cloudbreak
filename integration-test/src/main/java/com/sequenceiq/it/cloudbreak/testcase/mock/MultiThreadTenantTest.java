@@ -52,7 +52,10 @@ import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
+import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
+
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class, TracerAutoConfiguration.class},
+        initializers = ConfigFileApplicationContextInitializer.class)
 public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);

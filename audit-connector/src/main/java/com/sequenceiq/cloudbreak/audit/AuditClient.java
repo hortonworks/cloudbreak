@@ -30,9 +30,11 @@ import com.sequenceiq.cloudbreak.audit.model.ListAuditEvent;
 import com.sequenceiq.cloudbreak.audit.util.ActorUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.opentracing.Tracer;
 
 @Component
 public class AuditClient {
@@ -47,12 +49,15 @@ public class AuditClient {
 
     private final ActorUtil actorUtil;
 
+    private final Tracer tracer;
+
     public AuditClient(AuditConfig auditConfig, AuditEventToGrpcAuditEventConverter auditEventConverter,
-            AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter resultConverter, ActorUtil actorUtil) {
+            AttemptAuditEventResultToGrpcAttemptAuditEventResultConverter resultConverter, ActorUtil actorUtil, Tracer tracer) {
         this.auditConfig = auditConfig;
         this.auditEventConverter = auditEventConverter;
         this.resultConverter = resultConverter;
         this.actorUtil = actorUtil;
+        this.tracer = tracer;
     }
 
     @Retryable(value = Exception.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
@@ -114,7 +119,8 @@ public class AuditClient {
     private AuditBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId);
         return AuditGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     public List<AuditProto.CdpAuditEvent> listEvents(ListAuditEvent listAuditEvent) {

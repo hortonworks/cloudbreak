@@ -13,7 +13,6 @@ buildscript {
 }
 
 dependencies {
-    compile project(':common')
     compile project(':grpc-common')
     compile project(':auth-connector')
     compile project(':structuredevent-model')

@@ -25,7 +25,6 @@ dependencyManagement {
 }
 
 dependencies {
-  compile project(':common')
   compile project(':grpc-common')
   compile project(':auth-connector')
 

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 
 /**
  * A wrapper to the GRPC minasshd management service, that handles setting up the appropriate context-propagating interceptors,
@@ -42,16 +43,13 @@ public class MinaSshdManagementClient {
 
     private final MinaSshdManagementClientConfig minaSshdManagementClientConfig;
 
-    /**
-     * Constructor.
-     *
-     * @param channel the managed channel.
-     */
-    MinaSshdManagementClient(ManagedChannel channel, String actorCrn,
-            MinaSshdManagementClientConfig minaSshdManagementClientConfig) {
+    private final Tracer tracer;
+
+    MinaSshdManagementClient(ManagedChannel channel, String actorCrn, MinaSshdManagementClientConfig minaSshdManagementClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel, "channel is null");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn is null");
         this.minaSshdManagementClientConfig = checkNotNull(minaSshdManagementClientConfig);
+        this.tracer = tracer;
     }
 
     /**
@@ -238,6 +236,7 @@ public class MinaSshdManagementClient {
     private MinaSshdManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
         return MinaSshdManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 }
