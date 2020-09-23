@@ -4,9 +4,10 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
-import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreSuccessEvent;
+import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -24,9 +25,9 @@ import org.springframework.stereotype.Component;
 import reactor.bus.Event;
 
 @Component
-public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHandler<DatalakeDatabaseRestoreWaitRequest> {
+public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler<DatalakeFullRestoreWaitRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeDatabaseRestoreWaitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeFullRestoreWaitHandler.class);
 
     @Value("${sdx.stack.restore.status.sleeptime_sec:20}")
     private int sleepTimeInSec;
@@ -39,34 +40,39 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
 
     @Override
     public String selector() {
-        return EventSelectorUtil.selector(DatalakeDatabaseRestoreWaitRequest.class);
+        return EventSelectorUtil.selector(DatalakeFullRestoreWaitRequest.class);
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatalakeDatabaseRestoreWaitRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatalakeFullRestoreWaitRequest> event) {
         return new DatalakeDatabaseRestoreFailedEvent(resourceId, null, e);
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent event) {
-        DatalakeDatabaseRestoreWaitRequest request = event.getData();
+        DatalakeFullRestoreWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;
         try {
-            LOGGER.info("Start polling datalake database restore for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            sdxDatabaseDrService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
-            response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());
+            LOGGER.info("Start polling datalake full restore status for id: {}", sdxId);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
+                TimeUnit.MINUTES);
+            sdxDatabaseDrService.waitForDatalakeDrRestoreOperation(sdxId, request.getOperationId(), request.getUserId(),
+                pollingConfig, "Full restore");
+            response = new DatalakeDatabaseRestoreSuccessEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
-            LOGGER.info("Database restore polling exited before timeout. Cause: ", userBreakException);
+            LOGGER.info("Full restore polling exited before timeout. Cause: ", userBreakException);
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.info("Database restore poller stopped for cluster: {}", sdxId);
+            LOGGER.info("Full restore poller stopped for cluster: {}", sdxId);
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database restore timed out after " + durationInMinutes + " minutes"));
+                new PollerStoppedException("Database restore timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
-            LOGGER.info("Database restore polling failed for cluster: {}", sdxId);
+            LOGGER.info("Full restore polling failed for cluster: {}", sdxId);
+            response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, exception);
+        } catch (CloudbreakApiException exception) {
+            LOGGER.info("Datalake restore failed. Reason: " + exception.getMessage());
             response = new DatalakeDatabaseRestoreFailedEvent(sdxId, userId, exception);
         }
         return response;
