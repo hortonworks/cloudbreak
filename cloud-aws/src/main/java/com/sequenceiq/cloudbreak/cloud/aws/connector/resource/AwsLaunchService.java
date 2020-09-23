@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -150,7 +152,8 @@ public class AwsLaunchService {
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(creationWaiter, describeStacksRequest, stackCancellationCheck, "Stack creation failed");
+        run(creationWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s creation failed.", cFStackName),
+                () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.CREATE_FAILED));
 
         List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);

@@ -5,7 +5,10 @@ import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.BackoffCancellablePo
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.amazonaws.AmazonWebServiceRequest;
@@ -14,6 +17,9 @@ import com.amazonaws.waiters.WaiterParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class WaiterRunner {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WaiterRunner.class);
+
     private WaiterRunner() {
     }
 
@@ -22,6 +28,11 @@ public class WaiterRunner {
     }
 
     public static <I extends AmazonWebServiceRequest> void run(Waiter<I> waiter, I input, CancellationCheck cancellationCheck, String exceptionMessage) {
+        run(waiter, input, cancellationCheck, exceptionMessage, null);
+    }
+
+    public static <I extends AmazonWebServiceRequest> void run(Waiter<I> waiter, I input, CancellationCheck cancellationCheck, String exceptionMessage,
+            Supplier<String> reasonSupplier) {
         try {
             waiter.run(new WaiterParameters<I>()
                     .withRequest(input)
@@ -36,6 +47,13 @@ public class WaiterRunner {
                 messages.add(e.getMessage());
             }
             Optional.ofNullable(e.getCause()).ifPresent(throwable -> messages.add(throwable.getMessage()));
+            if (reasonSupplier != null) {
+                try {
+                    messages.add(reasonSupplier.get());
+                } catch (Exception ex) {
+                    LOGGER.warn("Failed to get reason from supplier", ex);
+                }
+            }
             throw new CloudConnectorException(String.join(" ", messages), e);
         }
     }

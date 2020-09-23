@@ -24,6 +24,7 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
+import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.Tag;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClien
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.EnvironmentCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -203,11 +205,13 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkRequest.getRegion().value());
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
-        DescribeStacksRequest stackRequestWithStackId = new DescribeStacksRequest().withStackName(networkRequest.getStackName());
+        String cfStackName = networkRequest.getStackName();
+        DescribeStacksRequest stackRequestWithStackId = new DescribeStacksRequest().withStackName(cfStackName);
         EnvironmentCancellationCheck environmentCancellationCheck = new EnvironmentCancellationCheck(networkRequest.getEnvId(), networkRequest.getEnvName());
 
-        run(creationWaiter, stackRequestWithStackId,
-                environmentCancellationCheck, String.format("Network creation failed (cloudformation stack: %s)", networkRequest.getStackName()));
+        run(creationWaiter, stackRequestWithStackId, environmentCancellationCheck,
+                String.format("Network creation failed (cloudformation stack: %s).", cfStackName),
+                () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cloudFormationRetryClient, cfStackName, ResourceStatus.CREATE_FAILED));
 
         return getCreatedCloudNetwork(cloudFormationRetryClient, networkRequest, subnetRequests);
     }
@@ -245,14 +249,16 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
             AwsCredentialView credentialView = new AwsCredentialView(networkDeletionRequest.getCloudCredential());
             AmazonCloudFormationRetryClient cloudFormationRetryClient = getCloudFormationRetryClient(credentialView, networkDeletionRequest.getRegion());
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
-            deleteStackRequest.setStackName(networkDeletionRequest.getStackName());
+            String stackName = networkDeletionRequest.getStackName();
+            deleteStackRequest.setStackName(stackName);
             cloudFormationRetryClient.deleteStack(deleteStackRequest);
             AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, networkDeletionRequest.getRegion());
             Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
-            LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", networkDeletionRequest.getStackName());
-            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(networkDeletionRequest.getStackName());
+            LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", stackName);
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
             run(deletionWaiter, describeStacksRequest, null,
-                    String.format("Network delete failed (cloudformation: %s)", networkDeletionRequest.getStackName()));
+                    String.format("Network delete failed (cloudformation: %s)", stackName),
+                    () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cloudFormationRetryClient, stackName, ResourceStatus.DELETE_FAILED));
         }
     }
 

@@ -167,6 +167,6 @@ public class AwsDownscaleService {
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(stackId);
         run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck,
-                String.format("There was an error when application are deleting instances", String.join(",", instanceIds)));
+                String.format("There was an error when application are deleting instances %s", String.join(",", instanceIds)));
     }
 }
