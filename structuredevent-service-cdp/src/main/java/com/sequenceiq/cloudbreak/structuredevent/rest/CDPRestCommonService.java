@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUr
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_TYPE;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,22 +37,28 @@ public class CDPRestCommonService {
     @Inject
     private Map<String, CustomCrnOrNameProvider> customCrnOrNameProviders;
 
-    public Map<String, String> collectCrnAndNameIfPresent(RestCallDetails restCallDetails, CDPOperationDetails operationDetails,
-            Map<String, String> restParams, String nameField, String crnField) {
+    public Map<String, String> collectCrnAndNameIfPresent(RestCallDetails restCallDetails, CDPOperationDetails operationDetails, Map<String, String> restParams,
+            String nameField, String crnField) {
         Map<String, String> params = new HashMap<>();
+
         RestRequestDetails restRequest = restCallDetails.getRestRequest();
+
         Json requestJson = getJson(restRequest.getBody());
         Json responseJson = getJson(restCallDetails.getRestResponse().getBody());
+
         Map<String, String> copyRestParams = new HashMap<>(restParams);
-        CustomCrnOrNameProvider customCrnOrNameProvider = customCrnOrNameProviders.get(restParams.get(RESOURCE_TYPE) + "CustomCrnOrNameProvider");
-        if (customCrnOrNameProvider != null) {
-            copyRestParams.putAll(customCrnOrNameProvider.provide(restCallDetails, operationDetails, restParams, nameField, crnField));
-        }
+        copyRestParams.putAll(collectFromCrnOrNameProvider(restCallDetails, operationDetails, restParams, nameField, crnField));
+
         String resourceCrn = getCrn(requestJson, responseJson, operationDetails, copyRestParams, crnField);
         String name = getName(requestJson, responseJson, operationDetails, copyRestParams, nameField);
 
         checkNameOrCrnProvided(restRequest, resourceCrn, name);
 
+        addNameAndCrnIfNotEmpty(nameField, crnField, params, resourceCrn, name);
+        return params;
+    }
+
+    private void addNameAndCrnIfNotEmpty(String nameField, String crnField, Map<String, String> params, String resourceCrn, String name) {
         if (StringUtils.isNotEmpty(name)) {
             params.put(nameField, name);
         }
@@ -59,7 +66,15 @@ public class CDPRestCommonService {
         if (StringUtils.isNotEmpty(resourceCrn)) {
             params.put(crnField, resourceCrn);
         }
-        return params;
+    }
+
+    private Map<String, String> collectFromCrnOrNameProvider(RestCallDetails restCallDetails, CDPOperationDetails operationDetails,
+            Map<String, String> restParams, String nameField, String crnField) {
+        CustomCrnOrNameProvider customCrnOrNameProvider = customCrnOrNameProviders.get(restParams.get(RESOURCE_TYPE) + "CustomCrnOrNameProvider");
+        if (customCrnOrNameProvider != null) {
+            return customCrnOrNameProvider.provide(restCallDetails, operationDetails, restParams, nameField, crnField);
+        }
+        return Collections.emptyMap();
     }
 
     private String getName(Json requestJson, Json responseJson, CDPOperationDetails operationDetails, Map<String, String> restParams, String nameField) {
