@@ -324,6 +324,15 @@ public class AwsRepairTest {
         when(mockWaiter.instanceTerminated())
                 .thenReturn(mock(Waiter.class));
 
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
+        autoScalingGroup.setInstances(List.of(
+                new Instance().withInstanceId(INSTANCE_ID_1),
+                new Instance().withInstanceId(INSTANCE_ID_2),
+                new Instance().withInstanceId(INSTANCE_ID_3)));
+        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(any())).thenReturn(describeAutoScalingGroupsResult);
+
         List<Volume> volumes = List.of();
         InstanceTemplate instanceTemplate = new InstanceTemplate("", WORKER_GROUP, 0L, volumes, InstanceStatus.STARTED, Map.of(), 0L, IMAGE_ID);
         InstanceAuthentication authentication = new InstanceAuthentication("publicKey", "publicKeyId", "cloudbreak");
