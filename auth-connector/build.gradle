@@ -14,7 +14,6 @@ buildscript {
 }
 
 dependencies {
-  compile project(':common')
   compile project(':grpc-common')
 
   compile group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: '2.0.3.RELEASE'

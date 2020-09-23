@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.idbmms.model.MappingsConfig;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.opentracing.Tracer;
 
 /**
  * A GRPC-based client for the IDBroker Mapping Management Service (IDBMMS).
@@ -30,6 +31,9 @@ public class GrpcIdbmmsClient {
 
     @Inject
     private IdbmmsConfig idbmmsConfig;
+
+    @Inject
+    private Tracer tracer;
 
     /**
      * Retrieves IDBroker mappings from IDBMMS for a particular environment.
@@ -90,7 +94,7 @@ public class GrpcIdbmmsClient {
     }
 
     private IdbmmsClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new IdbmmsClient(channel, actorCrn);
+        return new IdbmmsClient(channel, actorCrn, tracer);
     }
 
 }

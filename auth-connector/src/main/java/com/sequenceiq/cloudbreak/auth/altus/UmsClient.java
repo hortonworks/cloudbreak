@@ -50,10 +50,12 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Workl
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -69,18 +71,19 @@ public class UmsClient {
 
     private final UmsClientConfig umsClientConfig;
 
+    private final Tracer tracer;
+
     /**
      * Constructor.
-     *
-     * @param channel  the managed channel.
+     *  @param channel  the managed channel.
      * @param actorCrn the actor CRN.
+     * @param tracer tracer
      */
-    UmsClient(ManagedChannel channel,
-            String actorCrn,
-            UmsClientConfig umsClientConfig) {
+    UmsClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
         this.umsClientConfig = checkNotNull(umsClientConfig);
+        this.tracer = tracer;
     }
 
     /**
@@ -685,7 +688,8 @@ public class UmsClient {
     private UserManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
         return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     /**

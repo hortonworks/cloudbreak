@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.opentracing.Tracer;
 
 @Component
 public class GrpcClusterDnsClient {
@@ -27,6 +28,9 @@ public class GrpcClusterDnsClient {
 
     @Inject
     private ClusterDnsConfig clusterDnsConfig;
+
+    @Inject
+    private Tracer tracer;
 
     public String signCertificate(String actorCrn, String accountId, String environment, byte[] csr,
             Optional<String> requestId) {
@@ -84,6 +88,6 @@ public class GrpcClusterDnsClient {
     }
 
     private ClusterDnsClient makeClient(ManagedChannel channel, String accountId) {
-        return new ClusterDnsClient(channel, accountId);
+        return new ClusterDnsClient(channel, accountId, tracer);
     }
 }

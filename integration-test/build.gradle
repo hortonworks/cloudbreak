@@ -98,6 +98,8 @@ dependencies {
     transitive = false;
   }
 
+  compile project(':common')
+
   compile group: 'xerces',              name: 'xercesImpl',            version: xerces
 
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {

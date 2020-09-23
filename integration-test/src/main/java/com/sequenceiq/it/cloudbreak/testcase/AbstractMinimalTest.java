@@ -48,7 +48,10 @@ import com.sequenceiq.it.config.AuditBeanConfig;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
 
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class}, initializers = ConfigFileApplicationContextInitializer.class)
+import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
+
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class, AuditBeanConfig.class, TracerAutoConfiguration.class},
+        initializers = ConfigFileApplicationContextInitializer.class)
 public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTests {
 
     public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);
