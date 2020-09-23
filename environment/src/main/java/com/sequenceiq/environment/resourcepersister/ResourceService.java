@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.resourcepersister;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -10,9 +8,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class ResourceService {
@@ -24,23 +21,8 @@ public class ResourceService {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    public List<CloudResourceStatus> getAllAsCloudResourceStatus(String crn) {
-        List<Resource> resources = repository.findAllByStackId(crn);
-        List<CloudResourceStatus> list = new ArrayList<>();
-        resources.forEach(r -> {
-            CloudResource cloudResource = conversionService.convert(r, CloudResource.class);
-            list.add(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
-        });
-
-        return list;
-    }
-
-    public List<Resource> findAllByStackId(String crn) {
-        return repository.findAllByStackId(crn);
-    }
-
-    public Optional<Resource> findByStackIdAndNameAndType(String crn, String name, ResourceType type) {
-        return repository.findByStackIdAndNameAndType(crn, name, type);
+    public Optional<Resource> findByEnvironmentIdAndNameAndType(Long environmentId, String name, ResourceType type) {
+        return repository.findByEnvironmentIdAndNameAndType(environmentId, name, type);
     }
 
     public void delete(Resource resource) {
@@ -55,4 +37,11 @@ public class ResourceService {
         return repository.saveAll(resources);
     }
 
+    public Optional<Resource> findByResourceReferenceAndStatusAndType(String resourceReference, CommonStatus status, ResourceType resourceType) {
+        return repository.findByResourceReferenceAndStatusAndType(resourceReference, status, resourceType);
+    }
+
+    public Optional<Resource> findByResourceReferencAndType(String resourceReference, ResourceType resourceType) {
+        return repository.findByResourceReferenceAndType(resourceReference, resourceType);
+    }
 }

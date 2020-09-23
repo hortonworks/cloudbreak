@@ -17,18 +17,23 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
@@ -90,7 +95,7 @@ class NetworkCreationRequestFactoryTest {
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
-        EnvironmentDto environmentDto = createEnvironmentDtoWithAzureParams().build();
+        EnvironmentDto environmentDto = createEnvironmentDtoWithAzureParams(ServiceEndpointCreation.DISABLED).build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
@@ -113,7 +118,7 @@ class NetworkCreationRequestFactoryTest {
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenResourceGroupNameIsPresent() {
-        EnvironmentDto environmentDto = createAzureParametersDto().build();
+        EnvironmentDto environmentDto = createAzureParametersDto(ServiceEndpointCreation.DISABLED).build();
         CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
@@ -122,6 +127,27 @@ class NetworkCreationRequestFactoryTest {
         NetworkCreationRequest actual = underTest.create(environmentDto);
 
         assertEquals(SINGLE_RG, actual.getResourceGroup());
+    }
+
+    @ParameterizedTest
+    @EnumSource(ServiceEndpointCreation.class)
+    void testCreateProviderSpecificNetworkResourcesShouldCreateAProviderSpecificNetworkResourcesCreationRequestWhenResourceGroupNameIsPresent(
+            ServiceEndpointCreation serviceEndpointCreation) {
+        EnvironmentDto environmentDto = createAzureParametersDto(serviceEndpointCreation).build();
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        BaseNetwork baseNetwork = getNetwork();
+
+        when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
+        when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
+
+        NetworkResourcesCreationRequest request = underTest.createProviderSpecificNetworkResources(environmentDto, baseNetwork);
+
+        assertEquals(NETWORK_ID, Long.parseLong(request.getNetworkId()));
+        assertEquals(LEGACY_RG, request.getNetworkResourceGroup());
+        assertEquals(cloudCredential, request.getCloudCredential());
+        assertEquals(REGION, request.getRegion().getRegionName());
+        assertEquals(SINGLE_RG, request.getResourceGroup());
+        assertEquals(serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT, request.isPrivateEndpointsEnabled());
     }
 
     private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {
@@ -135,21 +161,23 @@ class NetworkCreationRequestFactoryTest {
                 .withNetwork(NetworkDto.builder().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoWithAzureParams() {
+    private EnvironmentDto.Builder createEnvironmentDtoWithAzureParams(ServiceEndpointCreation serviceEndpointCreation) {
         EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAzureParams();
         builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
+                .withServiceEndpointCreation(serviceEndpointCreation)
                 .withNetworkCidr(NETWORK_CIDR)
                 .withAzure(AzureParams.builder()
                         .withNoPublicIp(true)
+                        .withNetworkId(String.valueOf(NETWORK_ID))
                         .withResourceGroupName(LEGACY_RG)
                         .build())
                 .build());
         return builder;
     }
 
-    private EnvironmentDto.Builder createAzureParametersDto() {
-        return createEnvironmentDtoWithAzureParams()
+    private EnvironmentDto.Builder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
+        return createEnvironmentDtoWithAzureParams(serviceEndpointCreation)
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(
                                 AzureParametersDto.builder()
@@ -160,13 +188,10 @@ class NetworkCreationRequestFactoryTest {
                         .build());
     }
 
-    public SubnetRequest publicSubnetRequest(String cidr, int index) {
-        SubnetRequest subnetRequest = new SubnetRequest();
-        subnetRequest.setIndex(index);
-        subnetRequest.setPublicSubnetCidr(cidr);
-        subnetRequest.setSubnetGroup(index % 3);
-        subnetRequest.setAvailabilityZone("az");
-        return subnetRequest;
+    private BaseNetwork getNetwork() {
+        AzureNetwork azureNetwork = new AzureNetwork();
+        azureNetwork.setNetworkId(String.valueOf(NETWORK_ID));
+        azureNetwork.setResourceGroupName(LEGACY_RG);
+        return azureNetwork;
     }
-
 }

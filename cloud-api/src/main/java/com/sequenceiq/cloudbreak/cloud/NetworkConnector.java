@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 
 /**
@@ -28,4 +29,6 @@ public interface NetworkConnector extends CloudPlatformAware {
     NetworkCidr getNetworkCidr(Network network, CloudCredential credential);
 
     SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters);
+
+    void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest networkResourcesCreationRequest);
 }

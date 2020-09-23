@@ -32,7 +32,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
@@ -138,7 +138,7 @@ public class AzureUtils {
     public CloudResourceStatus getTemplateStatus(CloudResource resource, Deployment templateDeployment, AzureClient access, String stackName) {
         String status = templateDeployment.provisioningState();
         LOGGER.debug("Azure stack status of: {}  is: {}", resource.getName(), status);
-        ResourceStatus resourceStatus = AzureStackStatus.mapResourceStatus(status);
+        ResourceStatus resourceStatus = AzureStatusMapper.mapResourceStatus(status);
         CloudResourceStatus armResourceStatus = null;
 
         if (ResourceStatus.FAILED.equals(resourceStatus)) {
@@ -149,16 +149,16 @@ public class AzureUtils {
 
                     if ("Failed".equals(deploymentOperation.provisioningState())) {
                         String statusMessage = (String) deploymentOperation.statusMessage();
-                        armResourceStatus = new CloudResourceStatus(resource, AzureStackStatus.mapResourceStatus(status), statusMessage);
+                        armResourceStatus = new CloudResourceStatus(resource, AzureStatusMapper.mapResourceStatus(status), statusMessage);
                         break;
                     }
                 }
             } catch (RuntimeException e) {
-                armResourceStatus = new CloudResourceStatus(resource, AzureStackStatus.mapResourceStatus(status), e.getMessage());
+                armResourceStatus = new CloudResourceStatus(resource, AzureStatusMapper.mapResourceStatus(status), e.getMessage());
             }
         } else {
             LOGGER.debug("Cloud resource status: {}", resourceStatus);
-            armResourceStatus = new CloudResourceStatus(resource, AzureStackStatus.mapResourceStatus(status));
+            armResourceStatus = new CloudResourceStatus(resource, AzureStatusMapper.mapResourceStatus(status));
         }
         return armResourceStatus;
     }

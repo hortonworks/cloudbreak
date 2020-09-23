@@ -151,7 +151,11 @@ cb:
         services: autoscaling,cloudformation,ec2,ecr.api,ecr.dkr,elasticfilesystem,elasticloadbalancing,sts
     credential.cache.ttl: 60
   arm:
-    network.template.path: templates/arm-network.ftl
+    network:
+      template.path: templates/arm-network.ftl
+      dnszone.template.path: templates/arm-network-dnszone.ftl
+    privateendpoint:
+      services: postgresqlServer
     app.creation.template:
       command.path: templates/app-creation-command.ftl
       json.path: templates/app-creation.json

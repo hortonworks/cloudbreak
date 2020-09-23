@@ -209,6 +209,11 @@ cb:
 
   azure:
     host.name.prefix.length: 255
+    poller:
+      dns:
+        checkinterval: 1000
+        maxattempt: 100
+        maxfailurenumber: 5
     database.template.batchSize: 1
     externaldatabase:
       ha:
