@@ -7,6 +7,8 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackResult;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
+import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -36,5 +38,9 @@ public class AmazonCloudFormationRetryClient extends AmazonRetryClient {
 
     public DescribeStackResourceResult describeStackResource(DescribeStackResourceRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() -> client.describeStackResource(request)));
+    }
+
+    public DescribeStackResourcesResult describeStackResources(DescribeStackResourcesRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> mapThrottlingError(() -> client.describeStackResources(request)));
     }
 }
