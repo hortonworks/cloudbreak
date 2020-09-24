@@ -14,6 +14,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -80,7 +81,12 @@ public class UpdateNodeCountValidator {
                 .filter(e -> e.getName().equals(instanceGroup))
                 .findFirst();
         if (hostGroup.isPresent()) {
+            User creator = stack.getCreator();
+            String userCrn = creator.getUserCrn();
+            String accountId = Crn.safeFromString(userCrn).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
+                    userCrn,
+                    accountId,
                     stack.getCluster().getBlueprint(),
                     hostGroup.get(),
                     instanceGroupAdjustmentJson.getScalingAdjustment());

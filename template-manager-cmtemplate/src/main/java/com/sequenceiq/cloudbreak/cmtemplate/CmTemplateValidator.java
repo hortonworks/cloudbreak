@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -21,6 +22,9 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     @Inject
     private CmTemplateProcessorFactory processorFactory;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
@@ -36,19 +40,23 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     @Override
-    public void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
+    public void validateHostGroupScalingRequest(String userCrn, String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
-                throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                        role.name()));
+                if (!entitlementService.scalingServiceEnabled(userCrn, accountId, role.getEntitledFor())) {
+                    throw new BadRequestException(String.format("'%s' service is not enabled to scale",
+                            role.name()));
+                }
             }
         }
         for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
             if (services.contains(role.name()) && adjustment > 0) {
-                throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                        role.name()));
+                if (!entitlementService.scalingServiceEnabled(userCrn, accountId, role.getEntitledFor())) {
+                    throw new BadRequestException(String.format("'%s' service is not enabled to scale",
+                            role.name()));
+                }
             }
         }
     }
