@@ -51,6 +51,7 @@ public class CloudStorageDecorator {
                 identity.setType(CloudIdentityType.LOG);
                 identity.setS3(logging.getS3());
                 identity.setAdlsGen2(logging.getAdlsGen2());
+                identity.setGcs(logging.getGcs());
                 List<StorageIdentityBase> identities = request.getIdentities();
                 if (identities == null) {
                     identities = new ArrayList<>();

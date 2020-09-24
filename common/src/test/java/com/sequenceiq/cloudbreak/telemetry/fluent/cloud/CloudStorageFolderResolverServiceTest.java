@@ -20,7 +20,7 @@ public class CloudStorageFolderResolverServiceTest {
     @Before
     public void setUp() {
         underTest = new CloudStorageFolderResolverService(new S3ConfigGenerator(),
-                new AdlsGen2ConfigGenerator());
+                new AdlsGen2ConfigGenerator(), new GcsConfigGenerator());
     }
 
     @Test

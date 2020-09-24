@@ -77,6 +77,10 @@ public class FluentConfigView implements TelemetryConfigView {
 
     private final String s3LogArchiveBucketName;
 
+    private final String gcsBucket;
+
+    private final String gcsProjectId;
+
     private final String cloudwatchStreamKey;
 
     private final String logFolderName;
@@ -111,6 +115,8 @@ public class FluentConfigView implements TelemetryConfigView {
         this.azureInstanceMsi = builder.azureInstanceMsi;
         this.azureIdBrokerInstanceMsi = builder.azureIdBrokerInstanceMsi;
         this.azureStorageAccessKey = builder.azureStorageAccessKey;
+        this.gcsBucket = builder.gcsBucket;
+        this.gcsProjectId = builder.gcsProjectId;
         this.anonymizationRules = builder.anonymizationRules;
         this.overrideAttributes = builder.overrideAttributes;
     }
@@ -183,6 +189,14 @@ public class FluentConfigView implements TelemetryConfigView {
         return azureStorageAccessKey;
     }
 
+    public String getGcsBucket() {
+        return gcsBucket;
+    }
+
+    public String getGcsProjectId() {
+        return gcsProjectId;
+    }
+
     public Boolean isEnabled() {
         return enabled;
     }
@@ -247,6 +261,8 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("azureStorageAccount", ObjectUtils.defaultIfNull(this.azureStorageAccount, EMPTY_CONFIG_DEFAULT));
         map.put("azureStorageAccessKey", ObjectUtils.defaultIfNull(this.azureStorageAccessKey, EMPTY_CONFIG_DEFAULT));
         map.put("azureInstanceMsi", ObjectUtils.defaultIfNull(this.azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        map.put("gcsBucket", ObjectUtils.defaultIfNull(this.gcsBucket, EMPTY_CONFIG_DEFAULT));
+        map.put("gcsProjectId", ObjectUtils.defaultIfNull(this.gcsProjectId, EMPTY_CONFIG_DEFAULT));
         map.put(AZURE_IDBROKER_INSTANCE_MSI, ObjectUtils.defaultIfNull(this.azureIdBrokerInstanceMsi, EMPTY_CONFIG_DEFAULT));
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
@@ -317,6 +333,10 @@ public class FluentConfigView implements TelemetryConfigView {
         private String azureIdBrokerInstanceMsi;
 
         private String azureStorageAccessKey;
+
+        private String gcsBucket;
+
+        private String gcsProjectId;
 
         private List<AnonymizationRule> anonymizationRules;
 
@@ -460,5 +480,16 @@ public class FluentConfigView implements TelemetryConfigView {
             this.anonymizationRules = anonymizationRules;
             return this;
         }
+
+        public Builder withGcsBucket(String gcsBucket) {
+            this.gcsBucket = gcsBucket;
+            return this;
+        }
+
+        public Builder withGcsProjectId(String gcsProjectId) {
+            this.gcsProjectId = gcsProjectId;
+            return this;
+        }
+
     }
 }

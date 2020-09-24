@@ -4,7 +4,7 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
-{% set cdp_logging_agent_version = '0.2.1' %}
+{% set cdp_logging_agent_version = '0.2.2' %}
 {% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
@@ -45,6 +45,9 @@
 {% endif %}
 {% set azore_storage_account = salt['pillar.get']('fluent:azureStorageAccount') %}
 {% set azure_storage_access_key = salt['pillar.get']('fluent:azureStorageAccessKey') %}
+{% set gcs_bucket = salt['pillar.get']('fluent:gcsBucket') %}
+{% set gcs_project_id = salt['pillar.get']('fluent:gcsProjectId') %}
+
 
 {% if salt['pillar.get']('fluent:dbusClusterLogsCollection') %}
     {% set dbus_cluster_logs_collection_enabled = True %}
@@ -209,6 +212,8 @@
     "azureInstanceMsi": azure_storage_instance_msi,
     "azureIdBrokerInstanceMsi": azure_storage_idbroker_instance_msi,
     "azureStorageAccessKey": azure_storage_access_key,
+    "gcsBucket": gcs_bucket,
+    "gcsProjectId": gcs_project_id,
     "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
     "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
