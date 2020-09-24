@@ -14,6 +14,12 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 @Service
 public class EntitlementService {
 
+    public static final String DATAHUB_FLOW_SCALING = "DATAHUB_FLOW_SCALING";
+
+    public static final String DATAHUB_STREAMING_SCALING = "DATAHUB_STREAMING_SCALING";
+
+    public static final String DATAHUB_DEFAULT_SCALING = "DATAHUB_DEFAULT_SCALING";
+
     @VisibleForTesting
     static final String CDP_AZURE = "CDP_AZURE";
 
@@ -76,6 +82,10 @@ public class EntitlementService {
 
     @Inject
     private GrpcUmsClient umsClient;
+
+    public boolean scalingServiceEnabled(String actorCrn, String accountId, String entitledFor) {
+        return isEntitlementRegistered(actorCrn, accountId, entitledFor);
+    }
 
     public boolean azureEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE);

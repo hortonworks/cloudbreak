@@ -13,7 +13,7 @@ public interface BlueprintValidator {
         boolean validateServiceCardinality)
             throws BlueprintValidationException;
 
-    void validateHostGroupScalingRequest(Blueprint blueprint, HostGroup hostGroup, Integer adjustment)
+    void validateHostGroupScalingRequest(String userCrn, String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment)
             throws BlueprintValidationException;
 
 }
