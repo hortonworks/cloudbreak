@@ -5,11 +5,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.util.StringUtils;
+
 import com.cloudera.thunderhead.service.audit.AuditProto;
 import com.sequenceiq.cloudbreak.audit.AuditClient;
 import com.sequenceiq.cloudbreak.audit.model.ActorCrn;
 import com.sequenceiq.cloudbreak.audit.model.ListAuditEvent;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -67,14 +70,52 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         }
         if (shouldCheckFlowEvents()) {
             List<AuditProto.CdpAuditEvent> flowEvents = filterFlowEvents(cdpAuditEvents, testDto, eventName);
-            checkFlowEvents(flowEvents, eventName);
+            checkFlowEvents(flowEvents, testDto, eventName);
         }
     }
 
-    private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, String eventName) {
+    private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, String eventName) {
         if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
-            throw new TestFailException(eventName + "flow audit log must contains minimum 2 items but has " + flowEvents.size());
+            throw new TestFailException(eventName + " flow audit log must contains minimum 2 items but has " + flowEvents.size());
         }
+        if (flowEvents.stream().noneMatch(e -> "INIT_STATE".equals(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contains INIT_STATE");
+        }
+        if (flowEvents.stream().noneMatch(e -> "FINAL_STATE".equals(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contains FINAL_STATE");
+        }
+        if (!flowEvents.stream().allMatch(e -> testDto.getCrn().equals(getCrn(e)))) {
+            throw new TestFailException(eventName + " flow audit log must match with all crns");
+        }
+        if (flowEvents.stream().allMatch(e -> StringUtils.isEmpty(getFlowId(e)))) {
+            throw new TestFailException("flow id cannot be null or empty for " + eventName);
+        }
+        if (flowEvents.stream().allMatch(e -> StringUtils.isEmpty(getUserCrn(e)))) {
+            throw new TestFailException("User crn cannot be null or empty for " + eventName);
+        }
+        if (flowEvents.stream().allMatch(e -> StringUtils.isEmpty(getEnvironmentCrn(e)))) {
+            throw new TestFailException("Environment crn cannot be null or empty for " + eventName);
+        }
+    }
+
+    private String getFlowState(AuditProto.CdpAuditEvent e) {
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("flowState");
+    }
+
+    private String getCrn(AuditProto.CdpAuditEvent e) {
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("clusterCrn");
+    }
+
+    private String getFlowId(AuditProto.CdpAuditEvent e) {
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("flowId");
+    }
+
+    private String getUserCrn(AuditProto.CdpAuditEvent e) {
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("userCrn");
+    }
+
+    private String getEnvironmentCrn(AuditProto.CdpAuditEvent e) {
+        return new Json(e.getCdpServiceEvent().getAdditionalServiceEventDetails()).getValue("environmentCrn");
     }
 
     private void checkRestEvents(List<AuditProto.CdpAuditEvent> restEvents, String eventName) {
