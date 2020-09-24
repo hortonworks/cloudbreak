@@ -61,7 +61,7 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsRealUser() {
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -78,7 +78,7 @@ public class InternalCrnModifierTest {
     @Test
     public void testModificationIfUserCrnIsNull() {
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertNull(ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -98,7 +98,7 @@ public class InternalCrnModifierTest {
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.empty());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -108,7 +108,7 @@ public class InternalCrnModifierTest {
             underTest.changeInternalCrn(proceedingJoinPoint);
         });
 
-        verify(reflectionUtil, times(1)).proceed(any(), any());
+        verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
     }
 
@@ -118,7 +118,7 @@ public class InternalCrnModifierTest {
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of(2));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -128,7 +128,7 @@ public class InternalCrnModifierTest {
             underTest.changeInternalCrn(proceedingJoinPoint);
         });
 
-        verify(reflectionUtil, times(1)).proceed(any(), any());
+        verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
     }
 
@@ -138,7 +138,7 @@ public class InternalCrnModifierTest {
         when(reflectionUtil.getParameter(any(), any(), eq(TenantAwareParam.class))).thenReturn(Optional.of("not_crn"));
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -148,7 +148,7 @@ public class InternalCrnModifierTest {
             underTest.changeInternalCrn(proceedingJoinPoint);
         });
 
-        verify(reflectionUtil, times(1)).proceed(any(), any());
+        verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
     }
 
@@ -159,7 +159,7 @@ public class InternalCrnModifierTest {
         doNothing().when(internalUserModifier).persistModifiedInternalUser(any());
 
         AtomicBoolean assertationHappened = new AtomicBoolean(false);
-        when(reflectionUtil.proceed(any(), any())).thenAnswer(invocation -> {
+        when(reflectionUtil.proceed(any())).thenAnswer(invocation -> {
             assertEquals(EXPECTED_INTERNAL_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             assertationHappened.set(true);
             return null;
@@ -172,7 +172,7 @@ public class InternalCrnModifierTest {
         ArgumentCaptor<CrnUser> newUserCaptor = ArgumentCaptor.forClass(CrnUser.class);
         verify(internalUserModifier, times(1)).persistModifiedInternalUser(newUserCaptor.capture());
         assertEquals("1234", newUserCaptor.getValue().getTenant());
-        verify(reflectionUtil, times(1)).proceed(any(), any());
+        verify(reflectionUtil, times(1)).proceed(any());
         assertTrue(assertationHappened.get());
     }
 }
