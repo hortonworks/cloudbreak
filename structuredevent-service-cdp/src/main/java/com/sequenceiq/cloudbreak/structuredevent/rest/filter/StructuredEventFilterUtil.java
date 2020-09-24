@@ -84,7 +84,7 @@ public class StructuredEventFilterUtil {
             dataCollector.fetchDataFromDbIfNeed(params);
             restParams.putAll(params);
             CDPOperationDetails cdpOperationDetails = restEventFilterRelatedObjectFactory.createCDPOperationDetails(restParams, requestTime);
-            CDPStructuredRestCallEvent structuredEvent = new CDPStructuredRestCallEvent(cdpOperationDetails, restCall);
+            CDPStructuredRestCallEvent structuredEvent = new CDPStructuredRestCallEvent(cdpOperationDetails, restCall, null, null);
             structuredEventClient.sendStructuredEvent(structuredEvent);
         } catch (Exception ex) {
             LOGGER.warn("Failed to send structured event: " + ex.getMessage(), ex);

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
@@ -37,13 +38,17 @@ public class EventSenderService {
 
     private final String serviceVersion;
 
+    private final CloudbreakMessagesService cloudbreakMessagesService;
+
     public EventSenderService(NotificationService notificationService, EnvironmentResponseConverter environmentResponseConverter,
-            CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient, NodeConfig nodeConfig, @Value("${info.app.version:}") String serviceVersion) {
+            CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient, NodeConfig nodeConfig, @Value("${info.app.version:}") String serviceVersion,
+            CloudbreakMessagesService cloudbreakMessagesService) {
         this.notificationService = notificationService;
         this.environmentResponseConverter = environmentResponseConverter;
         this.cdpDefaultStructuredEventClient = cdpDefaultStructuredEventClient;
         this.nodeConfig = nodeConfig;
         this.serviceVersion = serviceVersion;
+        this.cloudbreakMessagesService = cloudbreakMessagesService;
     }
 
     public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent) {
@@ -80,8 +85,8 @@ public class EventSenderService {
                 resourceCrn,
                 resourceEvent.name());
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
-
-        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails);
+        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage());
+        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
     }
 
     private CDPStructuredNotificationEvent createStructureEventForMissingEnvironment(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
@@ -102,7 +107,8 @@ public class EventSenderService {
                 resourceEvent.name());
 
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
-        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails);
+        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage());
+        return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
     }
 
     private CDPStructuredNotificationDetails getNotificationDetails(ResourceEvent resourceEvent, String resourceCrn, String resourceType,

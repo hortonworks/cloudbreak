@@ -34,7 +34,7 @@ public class CDPStructuredEventEntityToCDPStructuredEventConverterTest {
         operationDetails.setAccountId("accountId");
         FlowDetails flowDetails = new FlowDetails();
         Serializable payload = "payload";
-        CDPStructuredEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, payload);
+        CDPStructuredEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, payload, null, null);
 
         CDPStructuredEventEntity eventEntity = new CDPStructuredEventEntity();
         eventEntity.setEventType(StructuredEventType.FLOW);

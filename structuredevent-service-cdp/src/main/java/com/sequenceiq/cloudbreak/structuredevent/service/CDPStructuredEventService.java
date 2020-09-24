@@ -11,9 +11,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEventSen
 
 public interface CDPStructuredEventService extends CDPStructuredEventSenderService {
 
-    <T extends CDPStructuredEvent> Page<T> getPagedNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn, Pageable pageable);
-
     <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResource(List<StructuredEventType> eventType, String resourceCrn, Pageable pageable);
 
-    <T extends CDPStructuredEvent> List<T> getNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn);
+    <T extends CDPStructuredEvent> List<T> getEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn);
 }

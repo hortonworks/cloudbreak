@@ -26,8 +26,8 @@ public class CDPStructuredFlowEvent<T extends Serializable> extends CDPStructure
         super(CDPStructuredFlowEvent.class.getSimpleName());
     }
 
-    public CDPStructuredFlowEvent(CDPOperationDetails operation, FlowDetails flow, T payload) {
-        super(CDPStructuredFlowEvent.class.getSimpleName(), operation);
+    public CDPStructuredFlowEvent(CDPOperationDetails operation, FlowDetails flow, T payload, String status, String statusReason) {
+        super(CDPStructuredFlowEvent.class.getSimpleName(), operation, status, statusReason);
         this.flow = flow;
         this.payload = payload;
     }

@@ -21,7 +21,7 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     @Override
     CDPStructuredEventEntity save(CDPStructuredEventEntity entity);
 
-    List<CDPStructuredEventEntity> findByEventTypeAndResourceCrn(StructuredEventType eventType, String resourceCrn);
+    List<CDPStructuredEventEntity> findByEventTypeInAndResourceCrn(List<StructuredEventType> eventTypes, String resourceCrn);
 
     @Override
     default Optional<CDPStructuredEventEntity> findByNameAndAccountId(
