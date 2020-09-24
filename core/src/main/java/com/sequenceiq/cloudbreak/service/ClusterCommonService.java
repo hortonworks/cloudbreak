@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Reque
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -127,7 +129,14 @@ public class ClusterCommonService {
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
-            cmTemplateValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(),
+            User creator = stack.getCreator();
+            String userCrn = creator.getUserCrn();
+            String accountId = Crn.safeFromString(userCrn).getAccountId();
+            cmTemplateValidator.validateHostGroupScalingRequest(
+                    userCrn,
+                    accountId,
+                    blueprint,
+                    hostGroup.get(),
                     updateJson.getHostGroupAdjustment().getScalingAdjustment());
         }
         return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());

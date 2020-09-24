@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Set;
@@ -10,9 +13,11 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -24,6 +29,13 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CmTemplateValidatorTest {
+
+    private static String accountId = "1";
+
+    private static String userCrn = "user";
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private CmTemplateValidator subject = new CmTemplateValidator();
@@ -85,7 +97,22 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, -1));
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, -1));
+    }
+
+    @Test
+    public void testDownscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("broker");
+
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, -1));
     }
 
     @Test
@@ -96,7 +123,22 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, 2));
+    }
+
+    @Test
+    public void testUpscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("broker");
+
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, 2));
     }
 
     @Test
@@ -107,7 +149,22 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, -2));
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, -2));
+    }
+
+    @Test
+    public void testValidationIfNifiPresentedAndDownScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, -2));
     }
 
     @Test
@@ -118,7 +175,22 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(blueprint, hostGroup, 2));
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, 2));
+    }
+
+    @Test
+    public void testValidationIfNifiPresentedAndUpScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.scalingServiceEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(userCrn, accountId, blueprint, hostGroup, 2));
     }
 
 }
