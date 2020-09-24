@@ -29,7 +29,7 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }
-            if (value.getS3() == null && value.getAdlsGen2() == null) {
+            if (value.getS3() == null && value.getAdlsGen2() == null && value.getGcs() == null) {
                 String msg = "Provide at least 1 cloud storage detail in logging request";
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;

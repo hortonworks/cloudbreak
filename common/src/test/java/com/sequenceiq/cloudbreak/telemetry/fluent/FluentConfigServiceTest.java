@@ -11,9 +11,11 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -33,7 +35,8 @@ public class FluentConfigServiceTest {
     @Before
     public void setUp() {
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
-        underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new AnonymizationRuleResolver(), meteringConfiguration);
+        underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
+                new AnonymizationRuleResolver(), meteringConfiguration);
     }
 
     @Test
@@ -106,6 +109,27 @@ public class FluentConfigServiceTest {
         assertTrue(result.isCloudStorageLoggingEnabled());
         assertEquals("cluster-logs/datahub/cl1", result.getLogFolderName());
         assertEquals("mybucket", result.getS3LogArchiveBucketName());
+    }
+
+    @Test
+    public void testCreateFluentConfigWitGcsPath() {
+        // GIVEN
+        Logging logging = new Logging();
+        logging.setStorageLocation("gs://mybucket/cluster-logs/datahub/cl1");
+        GcsCloudStorageV1Parameters gcsParams = new GcsCloudStorageV1Parameters();
+        gcsParams.setServiceAccountEmail("myaccount@myprojectid.iam.gserviceaccount.com");
+        logging.setGcs(gcsParams);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setLogging(logging);
+        // WHEN
+        FluentConfigView result = underTest.createFluentConfigs(
+                DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
+        // THEN
+        assertTrue(result.isEnabled());
+        assertTrue(result.isCloudStorageLoggingEnabled());
+        assertEquals("cluster-logs/datahub/cl1", result.getLogFolderName());
+        assertEquals("mybucket", result.getGcsBucket());
+        assertEquals("myprojectid", result.getGcsProjectId());
     }
 
     @Test
@@ -261,6 +285,18 @@ public class FluentConfigServiceTest {
         Logging logging = new Logging();
         logging.setStorageLocation(null);
         logging.setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
+        Telemetry telemetry = new Telemetry();
+        telemetry.setLogging(logging);
+        // WHEN
+        underTest.createFluentConfigs(DEFAULT_FLUENT_CLUSTER_DETAILS, false, false, telemetry);
+    }
+
+    @Test(expected = CloudbreakServiceException.class)
+    public void testCreateFluentConfigWithoutGcsProjectId() {
+        // GIVEN
+        Logging logging = new Logging();
+        logging.setStorageLocation("gs://mybucket/mypath");
+        logging.setGcs(new GcsCloudStorageV1Parameters());
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
         // WHEN
