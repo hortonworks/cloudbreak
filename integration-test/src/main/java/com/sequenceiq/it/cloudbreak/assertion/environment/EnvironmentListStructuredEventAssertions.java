@@ -139,7 +139,7 @@ public class EnvironmentListStructuredEventAssertions {
     public EnvironmentTestDto checkCreateEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
                 .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), 0, 100);
+                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_CREATE_FLOW_STATES);
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_CREATE_NOTIFICATION_EVENTS);
         eventAssertionCommon.checkRestEvents(auditEvents, ENV_CREATE_REST_STATES);
@@ -149,7 +149,7 @@ public class EnvironmentListStructuredEventAssertions {
     public EnvironmentTestDto checkDeleteEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
                 .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), 0, 100);
+                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_DELETE_FLOW_STATES);
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_DELETE_NOTIFICATION_EVENTS);
         eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-environment-" + testDto.getCrn()));
@@ -159,7 +159,7 @@ public class EnvironmentListStructuredEventAssertions {
     public EnvironmentTestDto checkStopEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
                 .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), 0, 100);
+                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_STOP_FLOW_STATES);
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_STOP_NOTIFICATION_EVENTS);
         eventAssertionCommon.checkRestEvents(auditEvents, ENV_STOP_REST_STATES);
@@ -169,7 +169,7 @@ public class EnvironmentListStructuredEventAssertions {
     public EnvironmentTestDto checkStartEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
                 .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), 0, 100);
+                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_START_FLOW_STATES);
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_START_NOTIFICATION_EVENTS);
         eventAssertionCommon.checkRestEvents(auditEvents, ENV_START_REST_STATES);

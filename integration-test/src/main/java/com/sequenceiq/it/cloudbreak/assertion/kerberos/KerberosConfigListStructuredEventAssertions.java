@@ -22,7 +22,7 @@ public class KerberosConfigListStructuredEventAssertions {
     public KerberosTestDto checkDeleteEvents(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
                 .structuredEventsV1Endpoint()
-                .getAuditEvents(testDto.getCrn(), 0, 100);
+                .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-kerberos"));
         return testDto;
     }

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredFlowEventFactory;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
@@ -46,7 +47,9 @@ public class FreeipaStructuredFlowEventFactory implements CDPStructuredFlowEvent
         CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, stack.getId(),
                 stack.getName(), nodeConfig.getId(), serviceVersion, stack.getAccountId(), stack.getResourceCrn(), ThreadBasedUserCrnProvider.getUserCrn(),
                 stack.getEnvironmentCrn(), null);
-        CDPStructuredFlowEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, null);
+        StackStatus stackStatus = stack.getStackStatus();
+        CDPStructuredFlowEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, null, stackStatus.getDetailedStackStatus().name(),
+                stackStatus.getStatusReason());
         if (exception != null) {
             event.setException(ExceptionUtils.getStackTrace(exception));
         }

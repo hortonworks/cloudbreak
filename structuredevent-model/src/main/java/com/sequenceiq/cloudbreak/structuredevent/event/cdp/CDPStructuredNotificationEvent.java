@@ -11,8 +11,9 @@ public class CDPStructuredNotificationEvent extends CDPStructuredEvent {
         super(CDPStructuredNotificationEvent.class.getSimpleName());
     }
 
-    public CDPStructuredNotificationEvent(CDPOperationDetails operation, CDPStructuredNotificationDetails notificationDetails) {
-        super(CDPStructuredNotificationEvent.class.getSimpleName(), operation);
+    public CDPStructuredNotificationEvent(CDPOperationDetails operation, CDPStructuredNotificationDetails notificationDetails, String status,
+            String statusReason) {
+        super(CDPStructuredNotificationEvent.class.getSimpleName(), operation, status, statusReason);
         this.notificationDetails = notificationDetails;
     }
 

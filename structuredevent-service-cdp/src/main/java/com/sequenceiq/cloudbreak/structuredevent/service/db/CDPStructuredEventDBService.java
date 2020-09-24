@@ -13,6 +13,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -68,43 +69,43 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     }
 
     @Override
-    public <T extends CDPStructuredEvent> Page<T> getPagedNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn, Pageable pageable) {
-        LOGGER.debug("Gathering pageable events for type: '{}' and resource CRN: '{}'", eventType, resourceCrn);
+    public <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn, Pageable pageable) {
+        LOGGER.debug("Gathering pageable events for types: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
+        List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeAndResourceCrn(eventType, resourceCrn, pageable);
+            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn, pageable);
             return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, CDPStructuredEvent.class));
         } catch (Exception ex) {
-            String msg = String.format("Failed get pageable events for type: '%s' and resource CRN: '%s'", eventType, resourceCrn);
+            String msg = String.format("Failed get pageable events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
             LOGGER.warn(msg, ex);
             throw new CloudbreakServiceException(msg, ex);
         }
     }
 
     @Override
-    public <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResource(List<StructuredEventType> eventType, String resourceCrn, Pageable pageable) {
-        LOGGER.debug("Gathering pageable events for type: '{}' and resource CRN: '{}'", eventType, resourceCrn);
+    public <T extends CDPStructuredEvent> List<T> getEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn) {
+        LOGGER.debug("Gathering events for type: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
+        List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(eventType, resourceCrn, pageable);
-            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> conversionService.convert(event, CDPStructuredEvent.class));
-        } catch (Exception ex) {
-            String msg = String.format("Failed get pageable events for type: '%s' and resource CRN: '%s'", eventType, resourceCrn);
-            LOGGER.warn(msg, ex);
-            throw new CloudbreakServiceException(msg, ex);
-        }
-    }
-
-    @Override
-    public <T extends CDPStructuredEvent> List<T> getNotificationEventsOfResource(StructuredEventType eventType, String resourceCrn) {
-        LOGGER.debug("Gathering events for type: '{}' and resource CRN: '{}'", eventType, resourceCrn);
-        try {
-            List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeAndResourceCrn(eventType, resourceCrn);
+            List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn);
             return (List<T>) Optional.ofNullable(events).orElse(new ArrayList<>()).stream()
                     .map(event -> conversionService.convert(event, CDPStructuredEvent.class))
                     .collect(Collectors.toList());
         } catch (Exception ex) {
-            String msg = String.format("Failed get events for type: '%s' and resource CRN: '%s'", eventType, resourceCrn);
+            String msg = String.format("Failed get events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
             LOGGER.warn(msg, ex);
             throw new CloudbreakServiceException(msg, ex);
         }
+    }
+
+    private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {
+        List<StructuredEventType> types = new ArrayList<>(eventTypes);
+        if (CollectionUtils.isEmpty(eventTypes)) {
+            LOGGER.info("We need to add all structured event types to the filter");
+            types.add(StructuredEventType.NOTIFICATION);
+            types.add(StructuredEventType.REST);
+            types.add(StructuredEventType.FLOW);
+        }
+        return types;
     }
 }

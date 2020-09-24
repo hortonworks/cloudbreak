@@ -11,8 +11,8 @@ public class CDPStructuredRestCallEvent extends CDPStructuredEvent {
         super(CDPStructuredRestCallEvent.class.getSimpleName());
     }
 
-    public CDPStructuredRestCallEvent(CDPOperationDetails operation, RestCallDetails restCall) {
-        super(CDPStructuredRestCallEvent.class.getSimpleName(), operation);
+    public CDPStructuredRestCallEvent(CDPOperationDetails operation, RestCallDetails restCall, String status, String statusReason) {
+        super(CDPStructuredRestCallEvent.class.getSimpleName(), operation, status, statusReason);
         this.restCall = restCall;
     }
 

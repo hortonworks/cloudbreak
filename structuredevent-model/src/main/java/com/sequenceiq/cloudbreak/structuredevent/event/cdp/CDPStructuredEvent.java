@@ -20,6 +20,10 @@ public abstract class CDPStructuredEvent implements Serializable {
 
     private CDPOperationDetails operation;
 
+    private String status;
+
+    private String statusReason;
+
     public CDPStructuredEvent() {
     }
 
@@ -27,9 +31,11 @@ public abstract class CDPStructuredEvent implements Serializable {
         this.type = type;
     }
 
-    public CDPStructuredEvent(String type, CDPOperationDetails operation) {
+    public CDPStructuredEvent(String type, CDPOperationDetails operation, String status, String statusReason) {
         this.type = type;
         this.operation = operation;
+        this.status = status;
+        this.statusReason = statusReason;
     }
 
     public void setType(String type) {
@@ -51,4 +57,16 @@ public abstract class CDPStructuredEvent implements Serializable {
     public abstract String getStatus();
 
     public abstract Long getDuration();
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
 }

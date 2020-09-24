@@ -17,6 +17,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 
 import io.swagger.annotations.Api;
@@ -35,6 +36,7 @@ public interface CDPStructuredEventV1Endpoint {
             nickname = "getCDPAuditEventsForResource")
     List<CDPStructuredEvent> getAuditEvents(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
+            @QueryParam("types") List<StructuredEventType> types,
             @QueryParam("page") @DefaultValue("0") Integer page,
             @QueryParam("size") @DefaultValue("100") Integer size);
 
@@ -44,5 +46,6 @@ public interface CDPStructuredEventV1Endpoint {
     @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipForResource")
     Response getAuditEventsZip(
-            @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn);
+            @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
+            @QueryParam("types") List<StructuredEventType> types);
 }

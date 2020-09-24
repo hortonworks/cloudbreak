@@ -33,18 +33,15 @@ public class CDPStructuredEventV1Controller implements CDPStructuredEventV1Endpo
 
     @Override
     @CustomPermissionCheck
-    public List<CDPStructuredEvent> getAuditEvents(@ResourceCrn String resourceCrn, Integer page, Integer size) {
+    public List<CDPStructuredEvent> getAuditEvents(@ResourceCrn String resourceCrn, List<StructuredEventType> types, Integer page, Integer size) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        return structuredEventDBService
-                .getPagedEventsOfResource(List.of(StructuredEventType.REST, StructuredEventType.FLOW, StructuredEventType.NOTIFICATION), resourceCrn, pageable)
-                .getContent();
+        return structuredEventDBService.getPagedEventsOfResource(types, resourceCrn, pageable).getContent();
     }
 
     @Override
     @CustomPermissionCheck
-    public Response getAuditEventsZip(@ResourceCrn String resourceCrn) {
-        Collection<CDPStructuredNotificationEvent> events = structuredEventDBService.getNotificationEventsOfResource(StructuredEventType.NOTIFICATION,
-                resourceCrn);
+    public Response getAuditEventsZip(@ResourceCrn String resourceCrn, List<StructuredEventType> types) {
+        Collection<CDPStructuredNotificationEvent> events = structuredEventDBService.getEventsOfResource(types, resourceCrn);
         return getAuditEventsZipResponse(events, resourceCrn);
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.assertion.credential;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -22,7 +23,7 @@ public class CredentialTestAssertion {
     public Assertion<CredentialTestDto, EnvironmentClient> checkStructuredEvents() {
         return (testContext, entity, client) -> {
             List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient().structuredEventsV1Endpoint()
-                    .getAuditEvents(entity.getCrn(), 0, 100);
+                    .getAuditEvents(entity.getCrn(), Collections.emptyList(), 0, 100);
             eventAssertionCommon.checkRestEvents(auditEvents, List.of("post-credential",
                     "put-credential",
                     "delete-credential-" + entity.getName()));
