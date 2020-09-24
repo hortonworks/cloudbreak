@@ -42,14 +42,11 @@ dependencies {
   compile group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion
   compile group: 'org.bouncycastle',                      name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
+  compile group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
+  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: springBootVersion
+  compile group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
   compile group: 'org.springframework.boot',              name: 'spring-boot-autoconfigure',      version: springBootVersion
   compile group: 'org.springframework.boot',              name: 'spring-boot-starter-logging',    version: springBootVersion
-  compile group: 'org.springframework',                   name: 'spring-beans',                   version: springFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-context',                 version: springFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
-  compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
-  compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
   compile group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
   compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'
   compile group: 'javax.servlet',                         name: 'javax.servlet-api',              version: '4.0.1'

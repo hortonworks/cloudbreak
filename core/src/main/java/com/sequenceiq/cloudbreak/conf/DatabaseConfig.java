@@ -73,6 +73,9 @@ public class DatabaseConfig {
     @Value("${cb.hibernate.debug:false}")
     private boolean debug;
 
+    @Value("${cb.hibernate.statistics:false}")
+    private boolean statistics;
+
     @Inject
     @Named("databaseAddress")
     private String databaseAddress;
@@ -149,7 +152,9 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
-        properties.setProperty("hibernate.generate_statistics", Boolean.toString(debug));
+        // org.hibernate.engine.internal.StatisticalLoggingSessionEventListener is switched off by default in logback.xml
+        // if you want to print statistics then you should update the logback.xml
+        properties.setProperty("hibernate.generate_statistics", Boolean.toString(debug || statistics));
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
