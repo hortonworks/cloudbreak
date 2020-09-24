@@ -34,9 +34,9 @@ public class InternalCrnModifier {
             return ThreadBasedUserCrnProvider.doAs(getNewUserCrnIfAccountIdParamDefined(proceedingJoinPoint, methodSignature, userCrnString)
                         .or(() -> getNewUserCrnIfTenantAwareParamDefined(proceedingJoinPoint, methodSignature, userCrnString))
                         .orElse(userCrnString),
-                    () -> reflectionUtil.proceed(proceedingJoinPoint, methodSignature));
+                    () -> reflectionUtil.proceed(proceedingJoinPoint));
         }
-        return reflectionUtil.proceed(proceedingJoinPoint, methodSignature);
+        return reflectionUtil.proceed(proceedingJoinPoint);
     }
 
     private Optional<String> getNewUserCrnIfAccountIdParamDefined(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature,
