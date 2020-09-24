@@ -56,7 +56,6 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String clouderaManager = "cm";
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
@@ -69,9 +68,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                .withClouderaManager(clouderaManager)
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(upgradeImageCatalogName)

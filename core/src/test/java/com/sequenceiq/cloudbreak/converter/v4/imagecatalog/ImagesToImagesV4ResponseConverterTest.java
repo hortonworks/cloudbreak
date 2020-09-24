@@ -11,9 +11,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
-import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
-import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -22,26 +19,19 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
-import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<Images> {
 
     public static final String REDHAT_7 = "redhat7";
-
-    @Mock
-    private DefaultClouderaManagerRepoService defaultClouderaManagerRepoService;
-
-    @Mock
-    private ConverterUtil converterUtil;
 
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
@@ -55,7 +45,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     }
 
     @Test
-    public void testConvert() throws CloudbreakImageCatalogException {
+    public void testConvert() {
         setupStackEntries();
         ImagesV4Response result = underTest.convert(createSource());
         assertEquals(1, result.getCdhImages().size());
@@ -63,14 +53,14 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
 
     private Images getImages() {
         Images images = new Images(
-                Collections.singletonList(getImage(REDHAT_7, null)),
-                Collections.singletonList(getImage(REDHAT_7, StackType.CDH)),
+                Collections.singletonList(getImage(REDHAT_7)),
+                Collections.singletonList(getImage(REDHAT_7)),
                 new HashSet<>()
         );
         return images;
     }
 
-    private Image getImage(String osType, StackType type) {
+    private Image getImage(String osType) {
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put("AWS", null);
         StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
@@ -81,7 +71,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
                 Collections.emptyList(), Collections.emptyList(), "1");
     }
 
-    private void setupStackEntries() throws CloudbreakImageCatalogException {
+    private void setupStackEntries() {
 
         Map<String, ImageBasedDefaultCDHInfo> cdhEntries = new HashMap<>();
 
