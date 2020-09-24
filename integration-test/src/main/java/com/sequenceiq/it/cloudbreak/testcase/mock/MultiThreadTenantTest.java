@@ -52,7 +52,10 @@ import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-@ContextConfiguration(classes = {IntegrationTestConfiguration.class}, initializers = ConfigFileApplicationContextInitializer.class)
+import io.opentracing.contrib.spring.tracer.configuration.TracerAutoConfiguration;
+
+@ContextConfiguration(classes = {IntegrationTestConfiguration.class, TracerAutoConfiguration.class},
+        initializers = ConfigFileApplicationContextInitializer.class)
 public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     public static final Map<String, Status> STACK_DELETED = Map.of("status", Status.DELETE_COMPLETED);
@@ -91,13 +94,13 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
         MDC.put("testlabel", method.getDeclaringClass().getSimpleName() + '.' + method.getName());
-        TestContext testContext = (TestContext) params[0];
+        MockedTestContext testContext = (MockedTestContext) params[0];
         testContext.setTestMethodName(method.getName());
         collectTestCaseDescription(testContext, method, params);
     }
 
-    protected TestContext prepareTestContext(TestContext testContext, String tenant, String user) {
-        ((MockedTestContext) testContext).initModelAndImageCatalogIfNecessary();
+    protected TestContext prepareTestContext(MockedTestContext testContext, String tenant, String user) {
+        testContext.initModelAndImageCatalogIfNecessary();
         createUser(testContext, tenant, user);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
@@ -105,7 +108,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
         return testContext;
     }
 
-    private TestCaseDescription collectTestCaseDescription(TestContext testContext, Method method, Object[] params) {
+    private TestCaseDescription collectTestCaseDescription(MockedTestContext testContext, Method method, Object[] params) {
         Description declaredAnnotation = method.getDeclaredAnnotation(Description.class);
         TestCaseDescription testCaseDescription = null;
         if (declaredAnnotation != null) {
@@ -141,7 +144,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     @AfterMethod(alwaysRun = true)
     public void tearDown(Object[] data) {
-        ((TestContext) data[0]).cleanupTestContext();
+        ((MockedTestContext) data[0]).cleanupTestContext();
     }
 
     @AfterClass(alwaysRun = true)
@@ -159,22 +162,22 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
         };
     }
 
-    protected void createDefaultCredential(TestContext testContext) {
+    protected void createDefaultCredential(MockedTestContext testContext) {
         testContext.given(CredentialTestDto.class)
                 .when(credentialTestClient.create());
     }
 
-    protected void createDefaultImageCatalog(TestContext testContext) {
+    protected void createDefaultImageCatalog(MockedTestContext testContext) {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .when(new ImageCatalogCreateRetryAction());
     }
 
-    protected void createUser(TestContext testContext, String tenant, String user) {
+    protected void createUser(MockedTestContext testContext, String tenant, String user) {
         testContext.as(Actor.create(tenant, user));
     }
 
-    protected void initializeDefaultBlueprints(TestContext testContext) {
+    protected void initializeDefaultBlueprints(MockedTestContext testContext) {
         testContext
                 .init(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4());
@@ -207,7 +210,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
             then = "should not get 404 errors due to thread safe operations")
-    public void testParallelMultiTenantStacks(TestContext testContext) {
+    public void testParallelMultiTenantStacks(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(true)

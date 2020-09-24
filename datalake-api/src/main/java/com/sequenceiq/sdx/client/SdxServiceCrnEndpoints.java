@@ -4,6 +4,8 @@ import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
@@ -32,5 +34,15 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public FlowEndpoint flowEndpoint() {
         return getEndpoint(FlowEndpoint.class);
+    }
+
+    @Override
+    public DiagnosticsEndpoint diagnosticsEndpoint() {
+        return getEndpoint(DiagnosticsEndpoint.class);
+    }
+
+    @Override
+    public FlowPublicEndpoint flowPublicEndpoint() {
+        return getEndpoint(FlowPublicEndpoint.class);
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootContext;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
@@ -24,9 +25,15 @@ public abstract class AbstractRebootAction<P extends Payload>
 
     protected void setOperationId(Map<Object, Object> variables, String operationId) {
         variables.put(OPERATION_ID, operationId);
+        addMdcOperationId(variables);
     }
 
     protected String getOperationId(Map<Object, Object> variables) {
         return (String) variables.get(OPERATION_ID);
+    }
+
+    protected void addMdcOperationId(Map<Object, Object> varialbes) {
+        String operationId = getOperationId(varialbes);
+        MDCBuilder.addOperationId(operationId);
     }
 }

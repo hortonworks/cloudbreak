@@ -68,4 +68,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     public void cloudStorageDeleteContainer(String baseLocation) {
         amazonS3Util.deleteNonVersionedBucket(baseLocation);
     }
+
+    @Override
+    public Map<String, Boolean> enaSupport(List<String> instanceIds) {
+        return amazonEC2Util.enaSupport(instanceIds);
+    }
 }

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -31,7 +32,8 @@ public class FluentConfigServiceTest {
 
     @Before
     public void setUp() {
-        underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new AnonymizationRuleResolver());
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
+        underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new AnonymizationRuleResolver(), meteringConfiguration);
     }
 
     @Test

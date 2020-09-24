@@ -53,7 +53,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             given = "there is a prepared database",
             when = "the database is deleted and then a create request is sent with the same database name",
             then = "the database should be created again")
-    public void createAndDeleteAndCreateWithSameNameThenShouldRecreatedDatabase(TestContext testContext) {
+    public void createAndDeleteAndCreateWithSameNameThenShouldRecreatedDatabase(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(RedbeamsDatabaseTestDto.class)
@@ -76,7 +76,7 @@ public class DatabaseTest extends AbstractIntegrationTest {
             given = "there is a prepared database",
             when = "when a database create request is sent with the same database name",
             then = "the create should return a BadRequestException")
-    public void createAndCreateWithSameNameThenShouldThrowBadRequestException(TestContext testContext) {
+    public void createAndCreateWithSameNameThenShouldThrowBadRequestException(MockedTestContext testContext) {
         String databaseName = resourcePropertyProvider().getName();
         testContext
                 .given(RedbeamsDatabaseTestDto.class)

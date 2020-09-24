@@ -1031,6 +1031,43 @@ public final class UserManagementGrpc {
      return getCreateTrialAccountMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getCreateC1CAccountMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> METHOD_CREATE_C1CACCOUNT = getCreateC1CAccountMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod() {
+    return getCreateC1CAccountMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod;
+    if ((getCreateC1CAccountMethod = UserManagementGrpc.getCreateC1CAccountMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getCreateC1CAccountMethod = UserManagementGrpc.getCreateC1CAccountMethod) == null) {
+          UserManagementGrpc.getCreateC1CAccountMethod = getCreateC1CAccountMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "CreateC1CAccount"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateC1CAccount"))
+                  .build();
+          }
+        }
+     }
+     return getCreateC1CAccountMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGrantEntitlementMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> METHOD_GRANT_ENTITLEMENT = getGrantEntitlementMethodHelper();
@@ -3546,6 +3583,43 @@ public final class UserManagementGrpc {
      }
      return getListServicePrincipalCloudIdentitiesMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetUserSyncStateModelMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> METHOD_GET_USER_SYNC_STATE_MODEL = getGetUserSyncStateModelMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod() {
+    return getGetUserSyncStateModelMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod;
+    if ((getGetUserSyncStateModelMethod = UserManagementGrpc.getGetUserSyncStateModelMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetUserSyncStateModelMethod = UserManagementGrpc.getGetUserSyncStateModelMethod) == null) {
+          UserManagementGrpc.getGetUserSyncStateModelMethod = getGetUserSyncStateModelMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetUserSyncStateModel"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetUserSyncStateModel"))
+                  .build();
+          }
+        }
+     }
+     return getGetUserSyncStateModelMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -3857,6 +3931,16 @@ public final class UserManagementGrpc {
     public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getCreateTrialAccountMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create an email based account.
+     * </pre>
+     */
+    public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getCreateC1CAccountMethodHelper(), responseObserver);
     }
 
     /**
@@ -4565,6 +4649,16 @@ public final class UserManagementGrpc {
       asyncUnimplementedUnaryCall(getListServicePrincipalCloudIdentitiesMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Get user sync state model, including actors, groups, workload administration groups, etc
+     * </pre>
+     */
+    public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetUserSyncStateModelMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -4756,6 +4850,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>(
                   this, METHODID_CREATE_TRIAL_ACCOUNT)))
+          .addMethod(
+            getCreateC1CAccountMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>(
+                  this, METHODID_CREATE_C1CACCOUNT)))
           .addMethod(
             getGrantEntitlementMethodHelper(),
             asyncUnaryCall(
@@ -5232,6 +5333,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
                   this, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
+          .addMethod(
+            getGetUserSyncStateModelMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>(
+                  this, METHODID_GET_USER_SYNC_STATE_MODEL)))
           .build();
     }
   }
@@ -5564,6 +5672,17 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Create an email based account.
+     * </pre>
+     */
+    public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6339,6 +6458,17 @@ public final class UserManagementGrpc {
       asyncUnaryCall(
           getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Get user sync state model, including actors, groups, workload administration groups, etc
+     * </pre>
+     */
+    public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -6642,6 +6772,16 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
       return blockingUnaryCall(
           getChannel(), getCreateTrialAccountMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Create an email based account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getCreateC1CAccountMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -7349,6 +7489,16 @@ public final class UserManagementGrpc {
       return blockingUnaryCall(
           getChannel(), getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions(), request);
     }
+
+    /**
+     * <pre>
+     * Get user sync state model, including actors, groups, workload administration groups, etc
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetUserSyncStateModelMethodHelper(), getCallOptions(), request);
+    }
   }
 
   /**
@@ -7679,6 +7829,17 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Create an email based account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> createC1CAccount(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -8454,6 +8615,17 @@ public final class UserManagementGrpc {
       return futureUnaryCall(
           getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Get user sync state model, including actors, groups, workload administration groups, etc
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getUserSyncStateModel(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -8483,74 +8655,76 @@ public final class UserManagementGrpc {
   private static final int METHODID_CHECK_RIGHTS = 24;
   private static final int METHODID_CREATE_ACCOUNT = 25;
   private static final int METHODID_CREATE_TRIAL_ACCOUNT = 26;
-  private static final int METHODID_GRANT_ENTITLEMENT = 27;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 28;
-  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 29;
-  private static final int METHODID_ASSIGN_ROLE = 30;
-  private static final int METHODID_UNASSIGN_ROLE = 31;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 32;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 33;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 34;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 35;
-  private static final int METHODID_LIST_ROLES = 36;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 37;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 38;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 39;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 40;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 41;
-  private static final int METHODID_CREATE_MACHINE_USER = 42;
-  private static final int METHODID_LIST_MACHINE_USERS = 43;
-  private static final int METHODID_DELETE_MACHINE_USER = 44;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 45;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 46;
-  private static final int METHODID_ACCEPT_TERMS = 47;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 48;
-  private static final int METHODID_DESCRIBE_TERMS = 49;
-  private static final int METHODID_LIST_TERMS = 50;
-  private static final int METHODID_LIST_ENTITLEMENTS = 51;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 52;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 53;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 54;
-  private static final int METHODID_CREATE_GROUP = 55;
-  private static final int METHODID_DELETE_GROUP = 56;
-  private static final int METHODID_LIST_GROUPS = 57;
-  private static final int METHODID_UPDATE_GROUP = 58;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 59;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 60;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 61;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 62;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 63;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 64;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 65;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 66;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 67;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 68;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 69;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 70;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 71;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 72;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 73;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 74;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 75;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 76;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 77;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 78;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 79;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 81;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 82;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 83;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 84;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 85;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 86;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 87;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 88;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 89;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 90;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 91;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 92;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 93;
-  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 94;
+  private static final int METHODID_CREATE_C1CACCOUNT = 27;
+  private static final int METHODID_GRANT_ENTITLEMENT = 28;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 29;
+  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 30;
+  private static final int METHODID_ASSIGN_ROLE = 31;
+  private static final int METHODID_UNASSIGN_ROLE = 32;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 33;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 34;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 35;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 36;
+  private static final int METHODID_LIST_ROLES = 37;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 38;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 39;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 40;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 41;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 42;
+  private static final int METHODID_CREATE_MACHINE_USER = 43;
+  private static final int METHODID_LIST_MACHINE_USERS = 44;
+  private static final int METHODID_DELETE_MACHINE_USER = 45;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 46;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 47;
+  private static final int METHODID_ACCEPT_TERMS = 48;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 49;
+  private static final int METHODID_DESCRIBE_TERMS = 50;
+  private static final int METHODID_LIST_TERMS = 51;
+  private static final int METHODID_LIST_ENTITLEMENTS = 52;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 53;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 54;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 55;
+  private static final int METHODID_CREATE_GROUP = 56;
+  private static final int METHODID_DELETE_GROUP = 57;
+  private static final int METHODID_LIST_GROUPS = 58;
+  private static final int METHODID_UPDATE_GROUP = 59;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 60;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 61;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 62;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 63;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 64;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 65;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 66;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 67;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 68;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 69;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 70;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 71;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 72;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 73;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 74;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 75;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 76;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 77;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 78;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 79;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 82;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 83;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 84;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 85;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 86;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 87;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 88;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 89;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 90;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 91;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 92;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 93;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 94;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 95;
+  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 96;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -8676,6 +8850,10 @@ public final class UserManagementGrpc {
         case METHODID_CREATE_TRIAL_ACCOUNT:
           serviceImpl.createTrialAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>) responseObserver);
+          break;
+        case METHODID_CREATE_C1CACCOUNT:
+          serviceImpl.createC1CAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>) responseObserver);
           break;
         case METHODID_GRANT_ENTITLEMENT:
           serviceImpl.grantEntitlement((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest) request,
@@ -8949,6 +9127,10 @@ public final class UserManagementGrpc {
           serviceImpl.listServicePrincipalCloudIdentities((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>) responseObserver);
           break;
+        case METHODID_GET_USER_SYNC_STATE_MODEL:
+          serviceImpl.getUserSyncStateModel((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>) responseObserver);
+          break;
         default:
           throw new AssertionError();
       }
@@ -9037,6 +9219,7 @@ public final class UserManagementGrpc {
               .addMethod(getCheckRightsMethodHelper())
               .addMethod(getCreateAccountMethodHelper())
               .addMethod(getCreateTrialAccountMethodHelper())
+              .addMethod(getCreateC1CAccountMethodHelper())
               .addMethod(getGrantEntitlementMethodHelper())
               .addMethod(getRevokeEntitlementMethodHelper())
               .addMethod(getEnsureDefaultEntitlementsGrantedMethodHelper())
@@ -9105,6 +9288,7 @@ public final class UserManagementGrpc {
               .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
+              .addMethod(getGetUserSyncStateModelMethodHelper())
               .build();
         }
       }

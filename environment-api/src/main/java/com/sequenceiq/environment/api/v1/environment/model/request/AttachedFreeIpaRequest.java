@@ -5,6 +5,8 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureFreeIpaParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIpaParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,6 +24,14 @@ public class AttachedFreeIpaRequest {
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
     private AwsFreeIpaParameters aws;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AZURE_PARAMETERS)
+    private AzureFreeIpaParameters azure;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
+    private GcpFreeIpaParameters gcp;
 
     public Boolean getCreate() {
         return create;
@@ -53,6 +63,24 @@ public class AttachedFreeIpaRequest {
                 "create=" + create +
                 ", instanceCountByGroup=" + instanceCountByGroup +
                 ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
                 '}';
+    }
+
+    public AzureFreeIpaParameters getAzure() {
+        return azure;
+    }
+
+    public void setAzure(AzureFreeIpaParameters azure) {
+        this.azure = azure;
+    }
+
+    public GcpFreeIpaParameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpFreeIpaParameters gcp) {
+        this.gcp = gcp;
     }
 }

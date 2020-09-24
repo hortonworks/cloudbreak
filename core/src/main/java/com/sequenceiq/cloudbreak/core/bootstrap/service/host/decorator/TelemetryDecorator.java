@@ -3,19 +3,26 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
 import static java.util.Collections.singletonMap;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
@@ -67,6 +74,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Component
 public class TelemetryDecorator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryDecorator.class);
+
     private final String version;
 
     private final DatabusConfigService databusConfigService;
@@ -81,12 +90,15 @@ public class TelemetryDecorator {
 
     private final AltusMachineUserService altusMachineUserService;
 
+    private final VmLogsService vmLogsService;
+
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
             TelemetryCommonConfigService telemetryCommonConfigService,
             AltusMachineUserService altusMachineUserService,
+            VmLogsService vmLogsService,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
@@ -94,6 +106,7 @@ public class TelemetryDecorator {
         this.monitoringConfigService = monitoringConfigService;
         this.telemetryCommonConfigService = telemetryCommonConfigService;
         this.altusMachineUserService = altusMachineUserService;
+        this.vmLogsService = vmLogsService;
         this.version = version;
     }
 
@@ -128,7 +141,7 @@ public class TelemetryDecorator {
                 .withVersion(version)
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
-                telemetry, null, clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
+                telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
         servicePillar.put("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 
@@ -162,7 +175,9 @@ public class TelemetryDecorator {
 
     private void setupMetering(Map<String, SaltPillarProperties> servicePillar, Stack stack, String serviceType, boolean meteringEnabled) {
         MeteringConfigView meteringConfigView = meteringConfigService.createMeteringConfigs(meteringEnabled,
-                stack.getCloudPlatform(), stack.getResourceCrn(), serviceType, version);
+                stack.getCloudPlatform(), stack.getResourceCrn(), stack.getName(),
+                getServiceTypeForMetering(stack, serviceType),
+                getVersionForMetering(stack, version));
         if (meteringConfigView.isEnabled()) {
             Map<String, Object> meteringConfig = meteringConfigView.toMap();
             servicePillar.put("metering",
@@ -177,5 +192,30 @@ public class TelemetryDecorator {
             datalakeCrn = telemetry.getFluentAttributes().get(CLUSTER_CRN_KEY).toString();
         }
         return datalakeCrn;
+    }
+
+    private String getServiceTypeForMetering(Stack stack, String defaultServiceType) {
+        if (stack.getTags() != null) {
+            try {
+                StackTags stackTag = stack.getTags().get(StackTags.class);
+                if (stackTag != null) {
+                    Map<String, String> applicationTags = stackTag.getApplicationTags();
+                    return applicationTags.getOrDefault(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), defaultServiceType);
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Stack related applications tags cannot be parsed, use default service type for metering.", e);
+            }
+        }
+        return defaultServiceType;
+    }
+
+    private String getVersionForMetering(Stack stack, String defaultVersion) {
+        if (stack.getCluster() != null && stack.getCluster().getBlueprint() != null
+                && StringUtils.isNotBlank(stack.getCluster().getBlueprint().getStackVersion())) {
+            return stack.getCluster().getBlueprint().getStackVersion();
+        } else {
+            LOGGER.warn("No stack version for the cluster, use CB application version.");
+            return defaultVersion;
+        }
     }
 }

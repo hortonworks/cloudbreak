@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.flow.start.handler;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
@@ -11,7 +13,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 
 @Component

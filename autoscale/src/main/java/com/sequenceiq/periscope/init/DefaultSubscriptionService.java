@@ -19,7 +19,7 @@ public class DefaultSubscriptionService {
 
     private static final String DEFAULT_CLIENT_ID = "default";
 
-    @Value("${cb.default.subscription.address:}")
+    @Value("${periscope.notification.endpoint:}")
     private String defaultSubscriptionAddress;
 
     @Inject

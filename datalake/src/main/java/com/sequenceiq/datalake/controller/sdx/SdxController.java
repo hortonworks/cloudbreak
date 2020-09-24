@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -120,7 +122,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
-    public SdxClusterResponse getByCrn(@ResourceCrn String clusterCrn) {
+    public SdxClusterResponse getByCrn(@TenantAwareParam @ResourceCrn String clusterCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
@@ -161,7 +163,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
-    public SdxClusterDetailResponse getDetailByCrn(@ResourceCrn String clusterCrn, Set<String> entries) {
+    public SdxClusterDetailResponse getDetailByCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Set<String> entries) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
         StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
@@ -245,13 +247,13 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public List<String> versions() {
         return cdpConfigService.getDatalakeVersions();
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATALAKE_READ)
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public List<AdvertisedRuntime> advertisedRuntimes() {
         return cdpConfigService.getAdvertisedRuntimes();
     }
@@ -289,10 +291,17 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @InternalOnly
-    public void setRangerCloudIdentityMapping(String envCrn, SetRangerCloudIdentityMappingRequest request) {
+    public RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(String envCrn, SetRangerCloudIdentityMappingRequest request) {
         if (request.getAzureGroupMapping() != null) {
             throw new IllegalArgumentException("Azure group mappings is unsupported");
         }
-        rangerCloudIdentityService.setAzureCloudIdentityMapping(envCrn, request.getAzureUserMapping());
+        return rangerCloudIdentityService.setAzureCloudIdentityMapping(envCrn, request.getAzureUserMapping());
     }
+
+    @Override
+    @InternalOnly
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, long commandId) {
+        return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandId);
+    }
+
 }

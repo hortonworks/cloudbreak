@@ -11,13 +11,12 @@ import org.testng.ITestContext;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.audit.AuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
@@ -50,7 +49,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
+    private DatahubAuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
     //CB-7294
     @Ignore
@@ -87,11 +86,11 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                     .when(distroXClient.stop(), key(stack))
                     .awaitForFlow(key(stack))
                     .await(STACK_STOPPED, key(stack))
-                    .then(auditGrpcServiceAssertion::distroxStop)
+                    .then(auditGrpcServiceAssertion::stop)
                     .when(distroXClient.start(), key(stack))
                     .awaitForFlow(key(stack))
                     .await(STACK_AVAILABLE, key(stack))
-                    .then(auditGrpcServiceAssertion::distroxStart)
+                    .then(auditGrpcServiceAssertion::start)
                     .when(distroXClient.scale(params.getHostgroup(), current))
                     .awaitForFlow(key(stack))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
@@ -106,7 +105,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    private String getImageCatalogName(TestContext testContext) {
+    private String getImageCatalogName(MockedTestContext testContext) {
         return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
     }
 }

@@ -88,15 +88,25 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto valid() {
         withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withDefaultSDXSettings()
-                .withEnvironment()
+                .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
                 .withClusterShape(getCloudProvider().getInternalClusterShape())
-                .withTags(getCloudProvider().getTags());
+                .withTags(getCloudProvider().getTags())
+                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return getCloudProvider().sdxInternal(this);
     }
 
     @Override
     public String getName() {
         return super.getName() == null ? DEFAULT_SDX_NAME : super.getName();
+    }
+
+    @Override
+    public String getCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("You have tried to assign to SdxInternalTestDto," +
+                    " that hasn't been created and therefore has no Response object yet.");
+        }
+        return getResponse().getCrn();
     }
 
     public SdxInternalTestDto withDatabase(SdxDatabaseRequest sdxDatabaseRequest) {
@@ -116,19 +126,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto withCloudStorage(SdxCloudStorageRequest cloudStorage) {
         getRequest().setCloudStorage(cloudStorage);
-        return this;
-    }
-
-    public SdxInternalTestDto withEnvironmentKey(RunningParameter key) {
-        EnvironmentTestDto env = getTestContext().get(key.getKey());
-        if (env == null) {
-            throw new IllegalArgumentException("Environment is not given with key: " + key.getKey());
-        }
-        if (env.getResponse() == null) {
-            throw new IllegalArgumentException("Environment is not created, or GET response is not included");
-        }
-        String name = env.getResponse().getName();
-        getRequest().setEnvironment(name);
         return this;
     }
 
@@ -231,13 +228,33 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public SdxInternalTestDto withEnvironment() {
         EnvironmentTestDto environment = getTestContext().given(EnvironmentTestDto.class);
         if (environment == null) {
-            throw new IllegalArgumentException("Environment does not exist!");
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
         }
-        return withEnvironmentName(environment.getName());
+        return withEnvironmentName(environment.getResponse().getName());
     }
 
-    public SdxInternalTestDto withEnvironmentName(String environment) {
-        getRequest().setEnvironment(environment);
+    private SdxInternalTestDto withEnvironmentDto(EnvironmentTestDto environmentTestDto) {
+        return withEnvironmentName(environmentTestDto.getResponse().getName());
+    }
+
+    public SdxInternalTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
+        EnvironmentTestDto environment = getTestContext().get(environmentClass.getSimpleName());
+        if (environment == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
+        }
+        return withEnvironmentName(environment.getResponse().getName());
+    }
+
+    public SdxInternalTestDto withEnvironmentKey(RunningParameter key) {
+        EnvironmentTestDto environment = getTestContext().get(key.getKey());
+        if (environment == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
+        }
+        return withEnvironmentName(environment.getResponse().getName());
+    }
+
+    public SdxInternalTestDto withEnvironmentName(String environmentName) {
+        getRequest().setEnvironment(environmentName);
         return this;
     }
 
@@ -266,6 +283,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getTestContext().await(this, status, runningParameter);
     }
 
+    public SdxInternalTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
     @Override
     public SdxInternalTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
@@ -292,17 +313,21 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Refresh resource with name: {}", getName());
-        return when(sdxTestClient.describeInternal(), key("refresh-sdx-" + getName()));
+    public CloudbreakTestDto refresh() {
+        LOGGER.info("Refresh SDX Internal with name: {}", getName());
+        return when(sdxTestClient.refreshInternal(), key("refresh-sdx-" + getName()));
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up sdx with name: {}", getName());
-        when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()))
-                .awaitForFlow(key("delete-sdx-" + getName()))
-                .await(DELETED, new RunningParameter().withSkipOnFail(true));
+        LOGGER.info("Cleaning up sdx internal with name: {}", getName());
+        if (getResponse() != null) {
+            when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
+            awaitForFlow(key("delete-sdx-" + getName()));
+            await(DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Sdx internal: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -402,11 +427,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             return null;
         }
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());
-        boolean hasSpotTermination = getResponse().getStackV4Response().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("SDX", auditEvents, getResponse(), hasSpotTermination);

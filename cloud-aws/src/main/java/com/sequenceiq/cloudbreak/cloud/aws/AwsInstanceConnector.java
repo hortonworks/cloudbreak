@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +31,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.GetConsoleOutputRequest;
 import com.amazonaws.services.ec2.model.GetConsoleOutputResult;
 import com.amazonaws.services.ec2.model.Instance;
-import com.amazonaws.services.ec2.model.RebootInstancesRequest;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -56,9 +55,6 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Inject
     private PollerUtil pollerUtil;
-
-    @Inject
-    private AwsClient awsClient;
 
     @Value("${cb.aws.hostkey.verify:}")
     private boolean verifyHostKey;
@@ -131,25 +127,31 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        List<CloudInstance> affectedVms = new ArrayList<>();
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
+
         try {
             if (!vms.isEmpty()) {
                 List<CloudVmInstanceStatus> statuses = check(ac, vms);
-                doReboot(affectedVms, amazonEC2Client, getStarted(statuses));
-                doStart(affectedVms, ac, getStopped(statuses));
-                logInvalidStatuses(getNotStoppedOrStarted(statuses));
+                doStop(ac, getStarted(statuses));
+                statuses = check(ac, vms);
+                logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
+                rebootedVmsStatus = doStart(ac, getStopped(statuses));
+                logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (SdkClientException e) {
             LOGGER.warn("Failed to send reboot request to AWS: ", e);
             throw e;
         }
-        return pollerUtil.waitFor(ac, affectedVms, Sets.newHashSet(InstanceStatus.STARTED, InstanceStatus.FAILED));
+        return rebootedVmsStatus;
     }
 
-    private List<CloudVmInstanceStatus> getNotStoppedOrStarted(List<CloudVmInstanceStatus> statuses) {
-        return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STOPPED && status.getStatus() != InstanceStatus.STARTED)
+    private List<CloudVmInstanceStatus> getNotStarted(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STARTED)
+                .collect(Collectors.toList());
+    }
+
+    private List<CloudVmInstanceStatus> getNotStopped(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STOPPED)
                 .collect(Collectors.toList());
     }
 
@@ -163,32 +165,35 @@ public class AwsInstanceConnector implements InstanceConnector {
                 .map(status -> status.getCloudInstance()).collect(Collectors.toList());
     }
 
-    private void doReboot(List<CloudInstance> affectedVMs, AmazonEC2Client amazonEC2Client, List<CloudInstance> instances) {
+    private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudInstance> instances) {
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
         for (CloudInstance instance: instances) {
             try {
-                amazonEC2Client.rebootInstances(new RebootInstancesRequest().withInstanceIds(List.of(instance.getInstanceId())));
-                affectedVMs.add(instance);
-            } catch (AmazonEC2Exception e) {
-                LOGGER.warn(String.format("Unable to reboot instance %s", instance), e);
-            }
-        }
-    }
-
-    private void doStart(List<CloudInstance> affectedVMs, AuthenticatedContext ac, List<CloudInstance> instances) {
-        for (CloudInstance instance: instances) {
-            try {
-                start(ac, null, List.of(instance));
-                affectedVMs.add(instance);
+                rebootedVmsStatus.addAll(start(ac, null, List.of(instance)));
             } catch (AmazonEC2Exception e) {
                 LOGGER.warn(String.format("Unable to start instance %s", instance), e);
             }
         }
+        return rebootedVmsStatus;
     }
 
-    private void logInvalidStatuses(List<CloudVmInstanceStatus> instances) {
-        for (CloudVmInstanceStatus instance: instances) {
-            LOGGER.warn(String.format("Unable to reboot instance %s because of invalid status %s.",
-                    instance.getCloudInstance().getInstanceId(), instance.getStatus().toString()));
+    private void doStop(AuthenticatedContext ac, List<CloudInstance> instances) {
+        for (CloudInstance instance: instances) {
+            try {
+                stop(ac, null, List.of(instance));
+            } catch (AmazonEC2Exception e) {
+                LOGGER.warn(String.format("Unable to stop instance %s", instance), e);
+            }
+        }
+    }
+
+    public void logInvalidStatuses(List<CloudVmInstanceStatus> instances, InstanceStatus targetStatus) {
+        if (CollectionUtils.isNotEmpty(instances)) {
+            StringBuilder warnMessage = new StringBuilder("Unable to reboot ");
+            warnMessage.append(instances.stream().map(instance -> String.format("instance %s because of invalid status %s",
+                    instance.getCloudInstance().getInstanceId(), instance.getStatus().toString())).collect(Collectors.joining(", ")));
+            warnMessage.append(String.format(". Instances should be in %s state.", targetStatus.toString()));
+            LOGGER.warn(warnMessage.toString());
         }
     }
 

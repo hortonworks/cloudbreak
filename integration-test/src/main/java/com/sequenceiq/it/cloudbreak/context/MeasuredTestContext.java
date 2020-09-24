@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -22,7 +21,9 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
@@ -217,18 +218,13 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public CloudbreakClient getCloudbreakClient(String who) {
-        return wrappedTestContext.getCloudbreakClient(who);
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+        return wrappedTestContext.getAdminMicroserviceClient(msClientClass);
     }
 
     @Override
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String who) {
         return wrappedTestContext.getMicroserviceClient(msClientClass, who);
-    }
-
-    @Override
-    public CloudbreakClient getCloudbreakClient() {
-        return wrappedTestContext.getCloudbreakClient();
     }
 
     @Override
@@ -247,6 +243,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
     public <T extends SdxTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         return wrappedTestContext.awaitForFlow(entity, runningParameter);
     }
@@ -257,7 +258,22 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+    public <T extends DistroXTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends EnvironmentTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends FreeIpaDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
+        return wrappedTestContext.awaitForFlow(entity, runningParameter);
+    }
+
+    @Override
+    public <T extends SdxDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
         return wrappedTestContext.awaitForFlow(entity, runningParameter);
     }
 

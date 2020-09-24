@@ -84,9 +84,14 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
+        AzureImage image = azureStorage.getCustomImage(client, ac, stack);
+        if (!image.getAlreadyExists()) {
+            LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
+            CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
+            azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
+        }
+        String customImageId = image.getId();
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
-
-        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
                 cloudContext, stack, AzureInstanceTemplateOperation.PROVISION);
 
@@ -94,9 +99,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
         boolean resourcesPersisted = false;
         try {
-            List<CloudResource> templateResources;
             List<CloudResource> instances;
-            List<CloudResource> osDiskResources;
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
@@ -127,8 +130,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         } finally {
             if (!resourcesPersisted) {
                 Deployment templateDeployment = client.getTemplateDeployment(resourceGroupName, stackName);
-                LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
-                persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                if (templateDeployment != null && templateDeployment.exportTemplate() != null) {
+                    LOGGER.debug("Get template deployment to persist created resources: {}", templateDeployment.exportTemplate().template());
+                    persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
+                }
             }
         }
 
@@ -219,9 +224,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        Boolean singleResourceGroup = azureResourceGroupMetadataProvider.useSingleResourceGroup(stack);
+        ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
 
-        if (singleResourceGroup) {
+        if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
             azureTerminationHelperService.terminate(ac, stack, resources);
             return check(ac, Collections.emptyList());
         } else {

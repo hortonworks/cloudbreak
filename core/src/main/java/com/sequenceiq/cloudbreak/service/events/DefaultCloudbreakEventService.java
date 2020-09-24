@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.BaseLegacyStructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyStructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -57,13 +57,13 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEventHandler cloudbreakEventHandler;
 
     @Inject
-    private StructuredEventService structuredEventService;
+    private LegacyStructuredEventService legacyStructuredEventService;
 
     @Inject
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -75,7 +75,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackService stackService;
 
     @Inject
-    private StructuredFlowEventFactory structuredFlowEventFactory;
+    private BaseLegacyStructuredFlowEventFactory baseLegacyStructuredFlowEventFactory;
 
     @Inject
     private StackToStackV4ResponseConverter stackV4ResponseConverter;
@@ -110,11 +110,11 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Override
     public List<StructuredNotificationEvent> cloudbreakEvents(Long workspaceId, Long since) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(workspaceId, user);
         List<StructuredNotificationEvent> events;
-        events = null == since ? structuredEventService.getEventsForWorkspaceWithType(workspace, StructuredNotificationEvent.class)
-                : structuredEventService.getEventsForWorkspaceWithTypeSince(workspace, StructuredNotificationEvent.class, since);
+        events = null == since ? legacyStructuredEventService.getEventsForWorkspaceWithType(workspace, StructuredNotificationEvent.class)
+                : legacyStructuredEventService.getEventsForWorkspaceWithTypeSince(workspace, StructuredNotificationEvent.class, since);
         return events;
     }
 
@@ -123,7 +123,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
             StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
-            events = structuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, stackView.getType().getResourceType(), stackId);
+            events = legacyStructuredEventService.getEventsWithTypeAndResourceId(StructuredNotificationEvent.class, stackView.getType().getResourceType(),
+                    stackId);
         }
         return events;
     }
@@ -131,7 +132,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Override
     public Page<StructuredNotificationEvent> cloudbreakEventsForStack(Long stackId, String resourceType, Pageable pageable) {
         return Optional.ofNullable(stackId)
-                .map(id -> structuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, resourceType, id, pageable))
+                .map(id -> legacyStructuredEventService.getEventsLimitedWithTypeAndResourceId(StructuredNotificationEvent.class, resourceType, id, pageable))
                 .orElse(Page.empty());
     }
 
@@ -145,7 +146,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             String eventMessage, String instanceGroupName) {
 
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        StructuredNotificationEvent structuredNotificationEvent = structuredFlowEventFactory.createStructuredNotificationEvent(
+        StructuredNotificationEvent structuredNotificationEvent = baseLegacyStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,
                 eventType,
                 eventMessage,

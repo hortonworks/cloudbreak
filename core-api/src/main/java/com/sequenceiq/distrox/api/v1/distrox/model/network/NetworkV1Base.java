@@ -17,6 +17,9 @@ public class NetworkV1Base implements Serializable {
     @ApiModelProperty(NetworkModelDescription.MOCK_PARAMETERS)
     private MockNetworkV1Parameters mock;
 
+    @ApiModelProperty(NetworkModelDescription.GCP_PARAMETERS)
+    private GcpNetworkV1Parameters gcp;
+
     public void setAws(AwsNetworkV1Parameters aws) {
         this.aws = aws;
     }
@@ -41,4 +44,11 @@ public class NetworkV1Base implements Serializable {
         this.mock = mock;
     }
 
+    public GcpNetworkV1Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpNetworkV1Parameters gcp) {
+        this.gcp = gcp;
+    }
 }

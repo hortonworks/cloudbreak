@@ -85,10 +85,12 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListM
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.Builder;
@@ -126,16 +128,16 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
-import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
-import com.sequenceiq.thunderhead.model.AltusToken;
-import com.sequenceiq.thunderhead.util.CrnHelper;
-import com.sequenceiq.thunderhead.util.IniUtil;
-import com.sequenceiq.thunderhead.util.JsonUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
+import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
+import com.sequenceiq.thunderhead.model.AltusToken;
+import com.sequenceiq.thunderhead.util.CrnHelper;
+import com.sequenceiq.thunderhead.util.IniUtil;
+import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
@@ -172,6 +174,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_AZURE = "CDP_AZURE";
 
+    private static final String CDP_GCP = "CDP_GCP";
+
     private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
 
     private static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
@@ -200,9 +204,16 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
+    private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
+
     private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
     private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
+
+    private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
+
+    // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
+    private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
@@ -265,11 +276,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.single.resourcegroup.enable}")
     private boolean enableAzureSingleResourceGroupDeployment;
 
+    @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
+    private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
+
     @Value("${auth.mock.fastebsencryption.enable}")
     private boolean enableFastEbsEncryption;
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
+
+    @Value("${auth.mock.upgrade.internalrepo.enable}")
+    private boolean enableInternalRepositoryForUpgrade;
 
     private String cbLicense;
 
@@ -398,8 +415,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
         RoleAssignment roleAssignment = RoleAssignment.newBuilder().setRole(powerUserRole).build();
         GetRightsResponse.Builder rightsBuilder = GetRightsResponse.newBuilder()
-                .addRoleAssignment(roleAssignment)
-                .addWorkloadAdministrationGroupName(mockGroupManagementService.generateWorkloadGroupName(ENV_ACCESS_RIGHT));
+                .addRoleAssignment(roleAssignment);
         workloadGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         userGroups.forEach(group -> rightsBuilder.addGroupCrn(group.getCrn()));
         return rightsBuilder.build();
@@ -554,11 +570,17 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableAzureSingleResourceGroupDeployment) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
         }
+        if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
+        }
         if (enableFastEbsEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
+        }
+        if (enableInternalRepositoryForUpgrade) {
+            builder.addEntitlements(createEntitlement(CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
@@ -566,12 +588,16 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
                                 .addEntitlements(createEntitlement(CDP_AZURE))
+                                .addEntitlements(createEntitlement(CDP_GCP))
                                 .addEntitlements(createEntitlement(CDP_AUTOMATIC_USERSYNC_POLLER))
                                 .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
+                                .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .setPasswordPolicy(workloadPasswordPolicy)
+                                .setAccountId(request.getAccountId())
+                                .setExternalAccountId("external-" + request.getAccountId())
                                 .build())
                         .build());
         responseObserver.onCompleted();
@@ -581,6 +607,14 @@ public class MockUserManagementService extends UserManagementImplBase {
         return Entitlement.newBuilder()
                 .setEntitlementName(entitlementName)
                 .build();
+    }
+
+    @Override
+    public void listTerms(ListTermsRequest request, StreamObserver<ListTermsResponse> responseObserver) {
+        responseObserver.onNext(
+                ListTermsResponse.newBuilder().build()
+        );
+        responseObserver.onCompleted();
     }
 
     @Override

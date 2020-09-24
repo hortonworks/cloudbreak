@@ -50,4 +50,8 @@ public class CloudbreakUserCache {
         }
         users.stream().forEach(u -> CloudbreakUser.validateRealUmsUser(u));
     }
+
+    public boolean isInitialized() {
+        return users != null;
+    }
 }

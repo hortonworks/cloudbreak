@@ -1,17 +1,18 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure.AzureDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Parameters;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServerModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Max;
 
 public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
@@ -46,20 +47,9 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     @ApiModelProperty(DatabaseServerModelDescriptions.AZURE_PARAMETERS)
     private AzureDatabaseServerV4Parameters azure;
 
-    // @ApiModelProperty(DatabaseServerModelDescriptions.GCP_PARAMETERS)
-    // private GcpDatabaseServerV4Parameters gcp;
-
-    // @ApiModelProperty(DatabaseServerModelDescriptions.AZURE_PARAMETERS)
-    // private AzureDatabaseServerV4Parameters azure;
-
-    // @ApiModelProperty(DatabaseServerModelDescriptions.OPEN_STACK_PARAMETERS)
-    // private OpenStackDatabaseServerV4Parameters openstack;
-
-    // @ApiModelProperty(hidden = true)
-    // private MockDatabaseServerV4Parameters mock;
-
-    // @ApiModelProperty(hidden = true)
-    // private YarnDatabaseServerV4Parameters yarn;
+    @Valid
+    @ApiModelProperty(DatabaseServerModelDescriptions.GCP_PARAMETERS)
+    private GcpDatabaseServerV4Parameters gcp;
 
     public String getInstanceType() {
         return instanceType;
@@ -131,7 +121,10 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     @Override
     public Mappable createGcp() {
-        return null;
+        if (gcp == null) {
+            gcp = new GcpDatabaseServerV4Parameters();
+        }
+        return gcp;
     }
 
     @Override
@@ -170,5 +163,13 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
 
     public AzureDatabaseServerV4Parameters getAzure() {
         return azure;
+    }
+
+    public GcpDatabaseServerV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpDatabaseServerV4Parameters gcp) {
+        this.gcp = gcp;
     }
 }

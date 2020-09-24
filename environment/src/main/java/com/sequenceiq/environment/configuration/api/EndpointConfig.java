@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.environment.api.EnvironmentApi;
 import com.sequenceiq.environment.credential.v1.AuditCredentialV1Controller;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
@@ -21,6 +23,7 @@ import com.sequenceiq.environment.tags.v1.controller.AccountTagController;
 import com.sequenceiq.environment.telemetry.v1.controller.AccountTelemetryController;
 import com.sequenceiq.environment.util.v1.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -43,7 +46,9 @@ public class EndpointConfig extends ResourceConfig {
             EnvironmentPlatformResourceController.class,
             UtilController.class,
             FlowController.class,
-            AuthorizationInfoController.class);
+            FlowPublicController.class,
+            AuthorizationInfoController.class,
+            CDPStructuredEventV1Controller.class);
 
     private final String applicationVersion;
 
@@ -52,7 +57,7 @@ public class EndpointConfig extends ResourceConfig {
     private final List<ExceptionMapper<?>> exceptionMappers;
 
     public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
-            @Value("${environment.structuredevent.rest.enabled:false}") Boolean auditEnabled,
+            @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
             List<ExceptionMapper<?>> exceptionMappers, ServerTracingDynamicFeature serverTracingDynamicFeature,
             ClientTracingFeature clientTracingFeature) {
 
@@ -74,7 +79,8 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(EnvironmentApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
+        swaggerConfig.setResourcePackage("com.sequenceiq.environment.api,com.sequenceiq.flow.api,com.sequenceiq.authorization," +
+                "com.sequenceiq.cloudbreak.structuredevent.rest.endpoint");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);
@@ -89,6 +95,10 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         CONTROLLERS.forEach(this::register);
+
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

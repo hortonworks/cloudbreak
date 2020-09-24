@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;
@@ -126,7 +127,7 @@ public class EnvironmentCreationService {
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
-                "Provisioning in Microsoft Azure is not enabled for this account.");
+                "Provisioning in " + creationDto.getCloudPlatform() + " is not enabled for this account.");
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());
         validationBuilder.merge(freeIpaCreationValidation);
         ValidationResult validationResult = validationBuilder.build();
@@ -136,6 +137,7 @@ public class EnvironmentCreationService {
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {
-        return AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId());
+        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()))
+                || (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()));
     }
 }

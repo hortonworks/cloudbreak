@@ -1,8 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import java.lang.annotation.Annotation;
-
-import javax.inject.Inject;
+import java.util.Map;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -15,20 +14,18 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 @Component
-public class ResourceCrnPermissionChecker implements PermissionChecker<CheckPermissionByResourceCrn> {
+public class ResourceCrnPermissionChecker extends ResourcePermissionChecker<CheckPermissionByResourceCrn> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCrnPermissionChecker.class);
-
-    @Inject
-    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Override
     public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
             MethodSignature methodSignature, long startTime) {
         CheckPermissionByResourceCrn methodAnnotation = (CheckPermissionByResourceCrn) rawMethodAnnotation;
-        String resourceCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
+        String resourceCrn = getCommonPermissionCheckingUtils().getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
         AuthorizationResourceAction action = methodAnnotation.action();
-        commonPermissionCheckingUtils.checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
     }
 
     @Override

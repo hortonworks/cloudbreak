@@ -38,5 +38,9 @@ public class MessageCode {
 
     public static final String VALIDATION_TIME_NEGATIVE_ADJUSTMENT_FOR_EXACT = "autoscale.validation.time.negative.adjustment";
 
+    public static final String NOTIFICATION_HISTORY_UPDATE = "autoscale.notification.history.update";
+
+    public static final String NOTIFICATION_AS_CONFIG_UPDATE = "autoscale.notification.config.update";
+
     private MessageCode() { }
 }

@@ -26,6 +26,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 import com.google.common.util.concurrent.ListeningScheduledExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -127,6 +128,11 @@ public class TestApplicationContext {
     @Bean(name = "bad-instance")
     public CloudInstance cloudInstanceBad() {
         return cloudInstanceBad;
+    }
+
+    @Bean
+    public AltusDatabusConfiguration altusDatabusConfiguration() {
+        return new AltusDatabusConfiguration("", false, "", "");
     }
 
     @Bean

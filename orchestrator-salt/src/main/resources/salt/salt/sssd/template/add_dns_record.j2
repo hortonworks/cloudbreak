@@ -29,8 +29,8 @@ fi
 for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
 do
     ZONE_NET=${zone//.in-addr.arpa./}
-    if echo "$REVERSE_IP" | grep -qE "$ZONE_NET$"; then
-        REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/.$ZONE_NET$//g")
+    if echo "$REVERSE_IP" | grep -qE "\.$ZONE_NET$"; then
+        REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/\.$ZONE_NET$//g")
         # dnsrecord-add must either add the record or modify it
         if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
           ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}

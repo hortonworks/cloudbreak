@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.util.SimpleRetryWrapper;
 import com.sequenceiq.it.verification.Call;
 
 import spark.Response;
@@ -23,6 +24,10 @@ import spark.Response;
 public class MockVerification<T> implements Assertion<T, MicroserviceClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockVerification.class);
+
+    private static final int RETRY_WAIT_SECONDS = 30;
+
+    private static final int RETRY_TIMES = 5;
 
     private final String path;
 
@@ -56,13 +61,22 @@ public class MockVerification<T> implements Assertion<T, MicroserviceClient> {
 
     @Override
     public T doAssertion(TestContext testContext, T testDto, MicroserviceClient cloudbreakClient) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        Map<Call, Response> requestResponseMap = mockedTestContext.getSparkServer().getRequestResponseMap();
-        int matchesCount = getTimesMatched(requestResponseMap);
         logVerify();
+        Map<Call, Response> requestResponseMap = ((MockedTestContext) testContext).getSparkServer().getRequestResponseMap();
+        int matchesCount = getTimesMatched(requestResponseMap);
+
+        SimpleRetryWrapper.create(() -> check(matchesCount))
+                .withName("MockVerification check")
+                .withRetryTimes(RETRY_TIMES)
+                .withRetryWaitSeconds(RETRY_WAIT_SECONDS)
+                .run();
+
+        return testDto;
+    }
+
+    private void check(int matchesCount) {
         checkExactTimes(matchesCount);
         checkAtLeast(matchesCount);
-        return testDto;
     }
 
     public String getPath() {

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
@@ -68,13 +70,26 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     }
 
     private List<ClouderaManagerProduct> getClouderaManagerProductsFromStack(Stack stack) {
-        return Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getComponents)
-                .orElse(Set.of())
-                .stream()
-                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType()))
+        return getClusterComponents(stack).stream()
+                .filter(createClusterComponentFilter(stack))
                 .map(ClusterComponent::getAttributes)
                 .map(toAttributeClass(ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
+    }
+
+    private Set<ClusterComponent> getClusterComponents(Stack stack) {
+        return Optional.ofNullable(stack)
+                .map(Stack::getCluster)
+                .map(Cluster::getComponents).orElse(Set.of());
+    }
+
+    private Predicate<ClusterComponent> createClusterComponentFilter(Stack stack) {
+        boolean datalake = stack != null && stack.isDatalake();
+        Predicate<ClusterComponent> datalakeClusterComponentFilter =
+                clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name());
+        Predicate<ClusterComponent> distroxClusterComponentFilter =
+                clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType());
+        return datalake ? datalakeClusterComponentFilter : distroxClusterComponentFilter;
     }
 
     private ApiParcelList getClouderaManagerParcels(ApiClient apiClient, String stackName) throws ApiException {

@@ -68,8 +68,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
 
             executorService.submit(scalingRequest);
             rejectedThreadService.remove(cluster.getId());
-            cluster.setLastScalingActivityCurrent();
-            clusterService.save(cluster);
+            clusterService.setLastScalingActivity(cluster.getId(), System.currentTimeMillis());
         } else {
             LOGGER.info("Autoscaling activity not required for config '{}', cluster '{}'.", alert.getName(), cluster.getStackCrn());
             if (alert instanceof TimeAlert) {

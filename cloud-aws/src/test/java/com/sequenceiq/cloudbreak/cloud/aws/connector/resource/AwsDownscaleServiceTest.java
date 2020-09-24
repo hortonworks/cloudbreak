@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,9 +23,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
+import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
 import com.amazonaws.services.ec2.waiters.AmazonEC2Waiters;
@@ -67,7 +71,7 @@ class AwsDownscaleServiceTest {
     private AwsClient awsClient;
 
     @Test
-    void downscaleASGRetryTest() {
+    void downscaleASG() {
         CloudStack stack = mock(CloudStack.class);
         List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
                 new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
@@ -91,24 +95,30 @@ class AwsDownscaleServiceTest {
         when(amazonEC2Client.waiters()).thenReturn(amazonEC2Waiters);
         Waiter waiter = mock(Waiter.class);
         when(amazonEC2Waiters.instanceTerminated()).thenReturn(waiter);
+        when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
 
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
+        autoScalingGroup.setInstances(List.of(new Instance().withInstanceId("i-worker1")));
+        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
         ArgumentCaptor<DetachInstancesRequest> detachInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(DetachInstancesRequest.class);
-        AmazonServiceException amazonServiceException = new AmazonServiceException("i-worker2, i-worker3 are not part of Auto Scaling");
-        amazonServiceException.setErrorCode("ValidationError");
+        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
+                .thenReturn(describeAutoScalingGroupsResult);
         when(amazonAutoScalingRetryClient.detachInstances(detachInstancesRequestArgumentCaptor.capture()))
-                .thenThrow(amazonServiceException)
                 .thenReturn(new DetachInstancesResult());
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances, null);
 
         List<DetachInstancesRequest> allValues = detachInstancesRequestArgumentCaptor.getAllValues();
-        assertThat(allValues.get(0).getInstanceIds(), contains("i-worker1", "i-worker2", "i-worker3"));
-        assertThat(allValues.get(1).getInstanceIds(), contains("i-worker1"));
-        verify(amazonAutoScalingRetryClient, times(2)).detachInstances(any());
+        assertThat(allValues.get(0).getInstanceIds(), contains("i-worker1"));
+        verify(amazonAutoScalingRetryClient, times(1)).detachInstances(any());
+
+        assertEquals(describeAutoScalingGroupsRequest.getValue().getAutoScalingGroupNames(), List.of("autoscalegroup-1"));
     }
 
     @Test
-    void downscaleASGRetryStackOverflowPreventionTest() {
+    void downscaleASGWhenAllInstancesHaveBeenRemovedFromASG() {
         CloudStack stack = mock(CloudStack.class);
         List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
                 new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
@@ -126,25 +136,27 @@ class AwsDownscaleServiceTest {
                 new CloudCredential());
         AmazonAutoScalingRetryClient amazonAutoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
         when(awsClient.createAutoScalingRetryClient(any(), anyString())).thenReturn(amazonAutoScalingRetryClient);
+        AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
+        when(awsClient.createAccess(any(), anyString())).thenReturn(amazonEC2Client);
+        AmazonEC2Waiters amazonEC2Waiters = mock(AmazonEC2Waiters.class);
+        when(amazonEC2Client.waiters()).thenReturn(amazonEC2Waiters);
+        Waiter waiter = mock(Waiter.class);
+        when(amazonEC2Waiters.instanceTerminated()).thenReturn(waiter);
+        when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
 
-        ArgumentCaptor<DetachInstancesRequest> detachInstancesRequestArgumentCaptor = ArgumentCaptor.forClass(DetachInstancesRequest.class);
-        AmazonServiceException firstAmazonServiceException = new AmazonServiceException("i-worker2, i-worker3 are not part of Auto Scaling");
-        AmazonServiceException secondAmazonServiceException = new AmazonServiceException("i-worker1 are not part of Auto Scaling");
-        firstAmazonServiceException.setErrorCode("ValidationError");
-        secondAmazonServiceException.setErrorCode("ValidationError");
-        when(amazonAutoScalingRetryClient.detachInstances(detachInstancesRequestArgumentCaptor.capture()))
-                .thenThrow(firstAmazonServiceException)
-                .thenThrow(secondAmazonServiceException);
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
+        autoScalingGroup.setInstances(List.of());
+        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        ArgumentCaptor<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequest = ArgumentCaptor.forClass(DescribeAutoScalingGroupsRequest.class);
+        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(describeAutoScalingGroupsRequest.capture()))
+                .thenReturn(describeAutoScalingGroupsResult);
 
-        Assertions.assertThrows(AmazonServiceException.class, () -> {
-            underTest.downscale(authenticatedContext, stack, resources, cloudInstances, null);
-        });
+        underTest.downscale(authenticatedContext, stack, resources, cloudInstances, null);
 
+        verify(amazonAutoScalingRetryClient, never()).detachInstances(any());
 
-        List<DetachInstancesRequest> allValues = detachInstancesRequestArgumentCaptor.getAllValues();
-        assertThat(allValues.get(0).getInstanceIds(), contains("i-worker1", "i-worker2", "i-worker3"));
-        assertThat(allValues.get(1).getInstanceIds(), contains("i-worker1"));
-        verify(amazonAutoScalingRetryClient, times(2)).detachInstances(any());
+        assertEquals(describeAutoScalingGroupsRequest.getValue().getAutoScalingGroupNames(), List.of("autoscalegroup-1"));
     }
 
     @Test
@@ -167,6 +179,11 @@ class AwsDownscaleServiceTest {
                 new CloudCredential());
 
         AmazonAutoScalingRetryClient amazonAutoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        AutoScalingGroup autoScalingGroup = new AutoScalingGroup();
+        autoScalingGroup.setInstances(List.of(new Instance().withInstanceId("i-worker1")));
+        describeAutoScalingGroupsResult.setAutoScalingGroups(List.of(autoScalingGroup));
+        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(any())).thenReturn(describeAutoScalingGroupsResult);
         when(awsClient.createAutoScalingRetryClient(any(), anyString())).thenReturn(amazonAutoScalingRetryClient);
         AmazonEC2Client amazonEC2Client = mock(AmazonEC2Client.class);
         when(awsClient.createAccess(any(), anyString())).thenReturn(amazonEC2Client);
@@ -177,6 +194,7 @@ class AwsDownscaleServiceTest {
 
         when(amazonAutoScalingRetryClient.detachInstances(any())).thenReturn(new DetachInstancesResult());
         when(amazonEC2Client.terminateInstances(any())).thenReturn(new TerminateInstancesResult());
+        when(cfStackUtil.getAutoscalingGroupName(any(), (String) any(), any())).thenReturn("autoscalegroup-1");
 
         //create inOrder object passing any mocks that need to be verified in order
         InOrder inOrder = Mockito.inOrder(amazonAutoScalingRetryClient, amazonEC2Client);

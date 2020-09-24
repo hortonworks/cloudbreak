@@ -67,13 +67,13 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a valid cluster template create request is sent",
             then = "the cluster template is created and can be deleted"
     )
-    public void testClusterTemplateCreateAndGetAndDelete(TestContext testContext) {
+    public void testClusterTemplateCreateAndGetAndDelete(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
         String stackTemplate = resourcePropertyProvider().getName();
 
         testContext
                 .given(stackTemplate, StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
@@ -135,7 +135,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster template create request with null environment name is sent",
             then = "the cluster template is cannot be created"
     )
-    public void testCreateClusterTemplateWithoutEnvironmentName(TestContext testContext) {
+    public void testCreateClusterTemplateWithoutEnvironmentName(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext.given(DistroXTemplateTestDto.class)
@@ -222,7 +222,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = " list requested",
             then = " the response has defined number of cluster templates"
     )
-    public void testListDefaultClusterTemplate(TestContext testContext) {
+    public void testListDefaultClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
         testContext
                 .given(ClusterTemplateTestDto.class)
@@ -237,7 +237,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster template create request is sent with invalid name",
             then = "the cluster template cannot be created"
     )
-    public void testCreateInvalidNameClusterTemplate(TestContext testContext) {
+    public void testCreateInvalidNameClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
@@ -255,14 +255,14 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster template create request is sent with a special name",
             then = "the cluster template creation should be successful"
     )
-    public void testCreateSpecialNameClusterTemplate(TestContext testContext) {
+    public void testCreateSpecialNameClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
         String stackTemplate = resourcePropertyProvider().getName();
         String name = StringUtils.substring(resourcePropertyProvider().getName(), 0, 40 - SPECIAL_CT_NAME.length()) + SPECIAL_CT_NAME;
 
         testContext
                 .given(stackTemplate, StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .given(ClusterTemplateTestDto.class)
                 .withName(name)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
@@ -276,7 +276,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster template create request is sent with a too short name",
             then = "the cluster template cannot be created"
     )
-    public void testCreateInvalidShortNameClusterTemplate(TestContext testContext) {
+    public void testCreateInvalidShortNameClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
@@ -295,7 +295,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster definition create request is sent without blueprint name",
             then = "the cluster definition cannot be created"
     )
-    public void testCreateWithoutBlueprintInCluster(TestContext testContext) {
+    public void testCreateWithoutBlueprintInCluster(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
@@ -314,7 +314,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster definition create request is sent with an empty blueprint name",
             then = "the cluster definition cannot be created"
     )
-    public void testCreateWithEmptyBlueprintInCluster(TestContext testContext) {
+    public void testCreateWithEmptyBlueprintInCluster(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
@@ -333,7 +333,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster definition create request is sent with a not existing blueprint name",
             then = "the cluster definition cannot be created"
     )
-    public void testCreateWithNotExistingBlueprintInCluster(TestContext testContext) {
+    public void testCreateWithNotExistingBlueprintInCluster(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
@@ -352,14 +352,14 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "the cluster template create request is sent again",
             then = "a BadRequest should be returned"
     )
-    public void testCreateAgainClusterTemplate(TestContext testContext) {
+    public void testCreateAgainClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext
                 .given("placementSettings", PlacementSettingsTestDto.class)
                 .withRegion(MockCloudProvider.LONDON)
                 .given("stackTemplate", StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withPlacement("placementSettings")
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
@@ -376,7 +376,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a create cluster template request is sent with too long description",
             then = "the a cluster template should not be created"
     )
-    public void testCreateLongDescriptionClusterTemplate(TestContext testContext) {
+    public void testCreateLongDescriptionClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
         String invalidLongDescripton = getLongNameGenerator().stringGenerator(1001);
         testContext
@@ -395,7 +395,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster template create request without stack template is sent",
             then = "the a cluster template should not be created"
     )
-    public void testCreateEmptyStackTemplateClusterTemplateException(TestContext testContext) {
+    public void testCreateEmptyStackTemplateClusterTemplateException(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
 
         testContext.given(ClusterTemplateTestDto.class)
@@ -412,7 +412,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
             when = "a cluster tempalte create request with null name is sent",
             then = "the a cluster template should not be created"
     )
-    public void testCreateEmptyClusterTemplateNameException(TestContext testContext) {
+    public void testCreateEmptyClusterTemplateNameException(MockedTestContext testContext) {
         String generatedKey1 = resourcePropertyProvider().getName();
         String generatedKey2 = resourcePropertyProvider().getName();
 
@@ -434,7 +434,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
         assertNotNull(entity);
         assertNotNull(entity.getResponses());
         long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-        long expectedCount = 98;
+        long expectedCount = 201;
         assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
         return entity;
     }

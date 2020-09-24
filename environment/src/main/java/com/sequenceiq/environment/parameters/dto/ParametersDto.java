@@ -12,12 +12,18 @@ public class ParametersDto {
 
     private final AzureParametersDto azureParametersDto;
 
+    private final GcpParametersDto gcpParametersDto;
+
+    private final YarnParametersDto yarnParametersDto;
+
     private ParametersDto(Builder builder) {
         id = builder.id;
         name = builder.name;
         accountId = builder.accountId;
         awsParametersDto = builder.awsParametersDto;
         azureParametersDto = builder.azureParametersDto;
+        yarnParametersDto = builder.yarnParametersDto;
+        gcpParametersDto = builder.gcpParametersDto;
     }
 
     public Long getId() {
@@ -48,6 +54,14 @@ public class ParametersDto {
         return azureParametersDto;
     }
 
+    public GcpParametersDto getGcpParametersDto() {
+        return gcpParametersDto;
+    }
+
+    public YarnParametersDto getYarnParametersDto() {
+        return yarnParametersDto;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -74,6 +88,10 @@ public class ParametersDto {
 
         private AzureParametersDto azureParametersDto;
 
+        private GcpParametersDto gcpParametersDto;
+
+        private YarnParametersDto yarnParametersDto;
+
         public Builder withId(Long id) {
             this.id = id;
             return this;
@@ -96,6 +114,16 @@ public class ParametersDto {
 
         public Builder withAzureParameters(AzureParametersDto azureParametersDto) {
             this.azureParametersDto = azureParametersDto;
+            return this;
+        }
+
+        public Builder withGcpParameters(GcpParametersDto gcpParametersDto) {
+            this.gcpParametersDto = gcpParametersDto;
+            return this;
+        }
+
+        public Builder withYarnParameters(YarnParametersDto yarnParametersDto) {
+            this.yarnParametersDto = yarnParametersDto;
             return this;
         }
 

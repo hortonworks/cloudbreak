@@ -22,6 +22,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageVali
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -98,7 +99,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private AwsEnvironmentParameters aws;
 
     @Valid
-    @ApiModelProperty(EnvironmentModelDescription.AWS_PARAMETERS)
+    @ApiModelProperty(EnvironmentModelDescription.AZURE_PARAMETERS)
     private AzureEnvironmentParameters azure;
 
     @Valid
@@ -107,6 +108,10 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(value = EnvironmentModelDescription.PARENT_ENVIRONMENT_NAME)
     private String parentEnvironmentName;
+
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
+    private GcpEnvironmentParameters gcp;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -290,5 +295,13 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", tags=" + tags +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
                 '}';
+    }
+
+    public GcpEnvironmentParameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpEnvironmentParameters gcp) {
+        this.gcp = gcp;
     }
 }

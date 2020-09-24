@@ -9,9 +9,9 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -30,6 +30,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
+import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -42,6 +43,7 @@ import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.google.common.annotations.VisibleForTesting;
@@ -56,6 +58,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
+import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -164,21 +167,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException {
+    public void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
         try {
-            ClusterComponent stackComponent = components.stream()
-                    .filter(clusterComponent -> clusterComponent.getName().equals(com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name()))
-                    .findFirst().orElse(null);
+            ClusterComponent stackComponent = getStackComponent(components);
 
-            if (Objects.isNull(stackComponent)) {
-                throw new NotFoundException("Runtime component not found!");
-            }
             ClouderaManagerProduct stackProduct = stackComponent.getAttributes().get(ClouderaManagerProduct.class);
             String stackProductVersion = stackProduct.getVersion();
             String stackProductParcel = stackProduct.getParcel();
             String product = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
 
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+            ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
             ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
             MgmtServiceResourceApi mgmtServiceResourceApi = clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
@@ -189,14 +188,26 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             refreshParcelRepos(clouderaManagerResourceApi);
             downloadParcel(stackProductVersion, parcelResourceApi, product);
             distributeParcel(stackProductVersion, parcelResourceApi, product);
-            callUpgradeCdhCommand(stackProductVersion, clustersResourceApi);
-            restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
-
+            if (patchUpgrade) {
+                activateParcel(stackProductVersion, parcelResourceApi, product);
+                restartServices(clustersResourceApi);
+            } else {
+                callUpgradeCdhCommand(stackProductVersion, clustersResourceApi);
+                restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
+            }
+            clouderaManagerParcelService.removeUnusedParcelVersions(apiClient, parcelsResourceApi, parcelResourceApi, stack, product, stackProductVersion);
             configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
         } catch (ApiException | IOException e) {
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private ClusterComponent getStackComponent(Set<ClusterComponent> components) {
+        return components.stream()
+                .filter(clusterComponent -> clusterComponent.getName().equals(com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
     private List<String> getUpscaleHosts(ClustersResourceApi clustersResourceApi, String clusterName, Collection<InstanceMetaData> instanceMetaDatas)
@@ -218,16 +229,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Refreshing parcel repos");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommand refreshParcelRepos = clouderaManagerResourceApi.refreshParcelRepos();
-        PollingResult activateParcelsPollingResult =
-                clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, refreshParcelRepos.getId());
+        PollingResult activateParcelsPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient,
+                refreshParcelRepos.getId());
         if (isExited(activateParcelsPollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for parcel repository refresh");
         } else if (isTimeout(activateParcelsPollingResult)) {
             throw new CloudbreakException("Timeout while Cloudera Manager was refreshing parcel repositories.");
         }
 
-        PollingResult downloadPollingResult =
-                clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, refreshParcelRepos.getId());
+        PollingResult downloadPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient,
+                refreshParcelRepos.getId());
         if (isExited(downloadPollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for parcel download");
         } else if (isTimeout(downloadPollingResult)) {
@@ -271,8 +282,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
-        ApiCommand deployClientConfigCmd =
-                getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig);
+        ApiCommand deployClientConfigCmd = getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig);
         pollDeployConfig(deployClientConfigCmd);
         ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
         pollRefresh(refreshServicesCmd);
@@ -290,6 +300,27 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             command = fn.apply(clusterName);
         }
         return command;
+    }
+
+    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
+        Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
+                .filter(cmd -> "Restart".equals(cmd.getName())).findFirst();
+        ApiCommand restartCommand;
+        if (optionalRestartCommand.isPresent()) {
+            restartCommand = optionalRestartCommand.get();
+            LOGGER.debug("Restart for Cluster services is already running with id: [{}]", restartCommand.getId());
+        } else {
+            ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
+            restartClusterArgs.setRedeployClientConfiguration(true);
+            restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
+        }
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while restarting services.");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout happened while restarting services.");
+        }
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -374,20 +405,34 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Parcels are activated on upscaled hosts.");
     }
 
-    private void callUpgradeCdhCommand(String stackProductVersion,
-            ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        LOGGER.debug("Upgrading the CDP Runtime..");
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
-        ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
-        upgradeArgs.setCdhParcelVersion(stackProductVersion);
-        ApiCommand apiCommand = clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(
-                stack, apiClient, apiCommand.getId());
-        if (isExited(pollingResult)) {
-            throw new CancellationException("Cluster was terminated while waiting for CDP Runtime to be upgraded");
-        } else if (isTimeout(pollingResult)) {
-            throw new CloudbreakException("Timeout during CDP Runtime upgrade.");
+    private void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        LOGGER.debug("Upgrading the CDP Runtime...");
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_UPGRADE);
+        ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
+        Optional<ApiCommand> optionalUpgradeCommand = apiCommandList.getItems().stream()
+                .filter(cmd -> "UpgradeCluster".equals(cmd.getName())).findFirst();
+        try {
+            ApiCommand upgradeCommand;
+            if (optionalUpgradeCommand.isPresent()) {
+                upgradeCommand = optionalUpgradeCommand.get();
+                LOGGER.debug("Upgrade of CDP Runtime is already running with id: [{}]", upgradeCommand.getId());
+            } else {
+                ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
+                upgradeArgs.setCdhParcelVersion(stackProductVersion);
+                upgradeCommand = clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs);
+            }
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommand.getId());
+            if (isExited(pollingResult)) {
+                throw new CancellationException("Cluster was terminated while waiting for CDP Runtime to be upgraded");
+            } else if (isTimeout(pollingResult)) {
+                throw new CloudbreakException("Timeout during CDP Runtime upgrade.");
+            }
+        } catch (ApiException ex) {
+            if (ex.getResponseBody().contains("Cannot upgrade because the version is already CDH")) {
+                LOGGER.info("The Runtime has already been upgraded to {}", stackProductVersion);
+            } else {
+                throw ex;
+            }
         }
         LOGGER.info("Runtime is successfully upgraded!");
     }
@@ -403,8 +448,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void distributeParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DISTRIBUTE_PARCEL);
         LOGGER.debug("Distributing downloaded parcel");
         ApiCommand apiCommand = parcelResourceApi.startDistributionCommand(stack.getName(), product, stackProductVersion);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(
@@ -416,10 +460,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
+    private void activateParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_ACTIVATE_PARCEL);
+        LOGGER.debug("Activating parcel");
+        ApiCommand apiCommand = parcelResourceApi.activateCommand(stack.getName(), product, stackProductVersion);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, apiCommand.getId());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for CDP Runtime Parcel to be activated");
+        } else if (isTimeout(pollingResult)) {
+            throw new CloudbreakException("Timeout during the updated CDP Runtime Parcel activation.");
+        }
+    }
+
     private void downloadParcel(String stackProductVersion, ParcelResourceApi parcelResourceApi, String product) throws ApiException, CloudbreakException {
         LOGGER.debug("Downloading parcel..");
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_PARCEL);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_PARCEL);
         ApiCommand apiCommand = parcelResourceApi.startDownloadCommand(stack.getName(), product, stackProductVersion);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(
                 stack, apiClient, apiCommand.getId(), new ParcelResource(stack.getName(), product, stackProductVersion));
@@ -510,13 +565,23 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public Map<String, String> gatherInstalledComponents(String stackName) {
-        try {
-        return clouderaManagerParcelService.getActivatedParcels(apiClient, stackName);
-        } catch (ApiException e) {
-            LOGGER.info("Unable to fetch the list of activated parcels", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+    public Map<String, String> gatherInstalledParcels(String stackName) {
+        return clouderaManagerParcelService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName,
+                ParcelStatus.ACTIVATED);
+    }
+
+    @Override
+    public void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
+        ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+        Map<String, ClouderaManagerProduct> cmProducts = new HashMap<>();
+        for (ClusterComponent clusterComponent : usedParcelComponents) {
+            ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
+            cmProducts.put(product.getName(), product);
         }
+        clouderaManagerParcelService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), cmProducts);
+        clouderaManagerParcelService.undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+        clouderaManagerParcelService.removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
     }
 
     private int startServices(Stack stack, ApiClient client) throws ApiException, CloudbreakException {

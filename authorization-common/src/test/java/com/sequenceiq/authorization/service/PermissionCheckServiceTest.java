@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Before;
@@ -28,7 +27,9 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -46,6 +47,9 @@ public class PermissionCheckServiceTest {
 
     @Mock
     private PermissionChecker permissionChecker;
+
+    @Mock
+    private ReflectionUtil reflectionUtil;
 
     @Spy
     private List<PermissionChecker> permissionCheckers = new ArrayList<PermissionChecker>();

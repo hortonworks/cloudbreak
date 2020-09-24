@@ -15,6 +15,7 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -40,7 +41,8 @@ public class TelemetryConverterTest {
     @Before
     public void setUp() {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, true, "****", "****");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, true);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, true, true);
         underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
 
@@ -174,7 +176,8 @@ public class TelemetryConverterTest {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, true, false);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, true, false);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
@@ -246,7 +249,8 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
         sdxClusterResponse.setName("sdxName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, true, true, false);
+        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
+        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, true, false);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, false, true);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);

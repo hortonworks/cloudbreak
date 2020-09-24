@@ -35,7 +35,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class SdxDeleteActions {
@@ -49,7 +49,7 @@ public class SdxDeleteActions {
     private ProvisionerService provisionerService;
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Inject
     private SdxService sdxService;
@@ -76,7 +76,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxDeleteStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }
@@ -98,7 +98,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(SdxDeleteStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }
@@ -120,7 +120,7 @@ public class SdxDeleteActions {
 
             @Override
             protected Object getFailurePayload(StackDeletionSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxDeletionFailedEvent.from(payload, ex);
+                return SdxDeletionFailedEvent.from(payload, ex, payload.isForced());
             }
         };
     }

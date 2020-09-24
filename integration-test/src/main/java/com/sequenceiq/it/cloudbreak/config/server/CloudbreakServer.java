@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.config.server;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakTest.IMAGE_CATALOG_MOCK_SERVER_ROOT;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -42,6 +44,9 @@ public class CloudbreakServer {
     @Value("${integrationtest.dp.profile:}")
     private String profile;
 
+    @Value("${mock.imagecatalog.server:localhost}")
+    private String mockImageCatalogAddr;
+
     @Inject
     private TestParameter testParameter;
 
@@ -66,6 +71,8 @@ public class CloudbreakServer {
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT, "http://" + cloudbreakUrl + cbRootContextPath);
         testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
         testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
+
+        testParameter.put(IMAGE_CATALOG_MOCK_SERVER_ROOT, mockImageCatalogAddr);
     }
 
     private void configureFromCliProfile() throws IOException {

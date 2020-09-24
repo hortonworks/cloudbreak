@@ -77,6 +77,12 @@
         "Description": "Storage type",
         "AllowedValues": [ "standard", "gp2", "io1" ]
     },
+    "DeletionProtectionParameter": {
+        "Type": "String",
+        "Default": "true",
+        "Description": "Value indicates whether the DB instance has deletion protection enabled.",
+        "AllowedValues": [ "true", "false"]
+    },
     <#if hasPort>
     "PortParameter": {
         "Type": "Number",
@@ -165,6 +171,7 @@
                 "EngineVersion": { "Ref": "EngineVersionParameter" },
                 "MasterUserPassword": { "Ref": "MasterUserPasswordParameter" },
                 "MasterUsername": { "Ref": "MasterUsernameParameter" },
+                "DeletionProtection": { "Ref": "DeletionProtectionParameter" },
                 "MultiAZ": { "Fn::If" : [ "UseMultiAZ", true, false ] },
                 <#if hasPort>
                 "Port": { "Ref": "PortParameter" },

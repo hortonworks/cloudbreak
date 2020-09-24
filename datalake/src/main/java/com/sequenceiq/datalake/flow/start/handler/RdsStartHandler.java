@@ -22,6 +22,8 @@ import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToStartRequest> {
 
@@ -45,7 +47,7 @@ public class RdsStartHandler extends ExceptionCatcherEventHandler<RdsWaitingToSt
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RdsWaitingToStartRequest> event) {
         return new SdxStartFailedEvent(resourceId, null, e);
     }
 

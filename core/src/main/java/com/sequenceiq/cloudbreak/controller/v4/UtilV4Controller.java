@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
@@ -11,11 +10,12 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckResourceRightsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckResourceRightsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4SingleResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.authorization.UtilAuthorizationService;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationServi
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
@@ -123,10 +123,13 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    public CheckRightV4Response checkRight(CheckRightV4Request checkRightV4Request) {
-        return new CheckRightV4Response(checkRightV4Request.getRights().stream()
-                .map(rightReq -> new CheckRightV4SingleResponse(rightReq, utilAuthorizationService.getRightResult(rightReq)))
-                .collect(Collectors.toList()));
+    public CheckRightV4Response checkRightInAccount(CheckRightV4Request checkRightV4Request) {
+        return utilAuthorizationService.getRightResult(checkRightV4Request);
+    }
+
+    @Override
+    public CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkResourceRightsV4Request) {
+        return utilAuthorizationService.getResourceRightsResult(checkResourceRightsV4Request);
     }
 
     @Override

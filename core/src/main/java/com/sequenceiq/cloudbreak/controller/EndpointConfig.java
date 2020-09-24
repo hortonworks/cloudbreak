@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudProviderServicesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.DatabaseConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatalakeV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DiagnosticsV4Controller;
@@ -35,11 +36,12 @@ import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UtilV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.WorkspaceAwareUtilV4Controller;
-import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
+import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -58,6 +60,7 @@ public class EndpointConfig extends ResourceConfig {
             EventV4Controller.class,
             ClusterTemplateV4Controller.class,
             DatabaseV4Controller.class,
+            DatabaseConfigV4Controller.class,
             ImageCatalogV4Controller.class,
             RecipesV4Controller.class,
             UserProfileV4Controller.class,
@@ -74,13 +77,14 @@ public class EndpointConfig extends ResourceConfig {
             DiagnosticsV4Controller.class,
             CloudProviderServicesV4Controller.class,
             FlowController.class,
+            FlowPublicController.class,
             AuthorizationInfoController.class
     );
 
     @Value("${info.app.version:unspecified}")
     private String cbVersion;
 
-    @Value("${cb.structuredevent.rest.enabled:false}")
+    @Value("${cb.structuredevent.rest.enabled}")
     private Boolean auditEnabled;
 
     @Inject
@@ -95,7 +99,7 @@ public class EndpointConfig extends ResourceConfig {
     @PostConstruct
     private void init() {
         if (auditEnabled) {
-            register(StructuredEventFilter.class);
+            register(LegacyStructuredEventFilter.class);
         }
         registerEndpoints();
         registerExceptionMappers();

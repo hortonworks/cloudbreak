@@ -31,8 +31,8 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -54,13 +54,13 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
             when = "a create credential request is sent",
             then = "a credential should be created, but MgmtConsoleAdminB should not be able to retrieve it")
     public void testCreateCredentialWithManagementConsoleAdmin(TestContext testContext) {
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .when(credentialTestClient.get(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(credentialTestClient.get(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class, RunningParameter.key("CredentialGetAction")
-                        .withExpectedMessage("You have no right to perform environments/describeCredential on resource crn:cdp.*"))
+                        .withExpectedMessage("You have no right to perform any of these actions: environments/describeCredential on crn:cdp:environments:.*"))
                 .validate();
     }
 

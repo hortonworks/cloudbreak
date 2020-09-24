@@ -35,8 +35,8 @@ PATCH_VERSION=$(echo $VERSION | cut -f 3 -d '.')
 PREVIOUS_MINOR_VERSION=$MAJOR_VERSION.$(expr $MINOR_VERSION - 1).$PATCH_VERSION
 PREVIOUS_MINOR_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${PREVIOUS_MINOR_VERSION}" | jq -r '.latest_build_version')
 PREVIOUS_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=$VERSION" | jq '.full_list_versions[1]' | tr -d '"')
-Services="cloudbreak,freeipa,environment,datalake,redbeams,autoscale"
-declare -A zone=( ["cloudbreak"]="eu-central-1" ["environment"]="us-east-2" ["datalake"]="us-east-2" ["redbeams"]="us-east-2" ["autoscale"]="us-east-2" ["freeipa"]="us-east-2")
+Services="cloudbreak,freeipa,environment,datalake,redbeams"
+declare -A zone=( ["cloudbreak"]="eu-central-1" ["environment"]="us-east-2" ["datalake"]="us-east-2" ["redbeams"]="us-east-2" ["freeipa"]="us-east-2")
 Field_Separator=$IFS
 IFS=,
 set +e
@@ -61,11 +61,11 @@ for service in $Services; do
 done
 set -e
 IFS=$Field_Separator
-$INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-diff | tee swagger-diff.out
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up swagger-diff | tee swagger-diff.out
 grep "swagger diff finished succesfully" swagger-diff.out
 swaggerdiffresult=$?
 
-$INTEGCB_LOCATION/.deps/bin/docker-compose up swagger-validation | tee swagger-validation-result.out
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up swagger-validation | tee swagger-validation-result.out
 grep "swagger validation finished succesfully" swagger-validation-result.out
 swaggervalidationresult=$?
 

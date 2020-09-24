@@ -19,17 +19,17 @@ public class AwsParams {
                 '}';
     }
 
-    public static final class AwsParamsBuilder {
+    public static AwsParams.Builder builder() {
+        return new AwsParams.Builder();
+    }
+
+    public static final class Builder {
         private String vpcId;
 
-        private AwsParamsBuilder() {
+        private Builder() {
         }
 
-        public static AwsParamsBuilder anAwsParams() {
-            return new AwsParamsBuilder();
-        }
-
-        public AwsParamsBuilder withVpcId(String vpcId) {
+        public Builder withVpcId(String vpcId) {
             this.vpcId = vpcId;
             return this;
         }

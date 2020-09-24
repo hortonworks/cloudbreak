@@ -37,7 +37,7 @@ public class ClouderaManagerUtil {
 
     private static ClouderaManagerStackDescriptorV4Response getCMDescriptor(TestContext testContext) throws Exception {
         StackMatrixV4Response stackMatrix = testContext
-                .getCloudbreakClient()
+                .getMicroserviceClient(CloudbreakClient.class)
                 .getCloudbreakClient()
                 .utilV4Endpoint().getStackMatrix(null, null);
         return stackMatrix.getCdh().get(CDH_VERSION);
@@ -81,7 +81,7 @@ public class ClouderaManagerUtil {
             }
         } catch (Exception e) {
             LOGGER.error("Can't get users' list at: {} or test user is not valid with {}", cmClient.getBasePath(), userDetails);
-            throw new TestFailException("Can't get users' list at: " + cmClient.getBasePath() + " or test user is not valid with " + userDetails);
+            throw new TestFailException("Can't get users' list at: " + cmClient.getBasePath() + " or test user is not valid with " + userDetails, e);
         }
         return stackTestDto;
     }

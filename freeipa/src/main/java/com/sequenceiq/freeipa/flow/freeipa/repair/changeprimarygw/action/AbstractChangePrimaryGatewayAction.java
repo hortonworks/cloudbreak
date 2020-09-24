@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -32,6 +33,8 @@ public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> exte
     protected ChangePrimaryGatewayContext createFlowContext(FlowParameters flowParameters,
             StateContext<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> stateContext, P payload) {
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+        MDCBuilder.buildMdcContext(stack);
+        addMdcOperationIdIfPresent(stateContext.getExtendedState().getVariables());
         return new ChangePrimaryGatewayContext(flowParameters, stack);
     }
 

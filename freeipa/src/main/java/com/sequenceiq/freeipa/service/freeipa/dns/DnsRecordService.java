@@ -6,14 +6,15 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.client.model.DnsZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -36,8 +37,9 @@ public class DnsRecordService {
 
     public void deleteDnsRecordByFqdn(String environmentCrn, String accountId,  List<String> fqdns) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(environmentCrn, accountId);
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         for (DnsZone dnsZone : freeIpaClient.findAllDnsZone()) {
             LOGGER.debug("Looking for records in zone [{}]", dnsZone.getIdnsname());
             Set<DnsRecord> allDnsRecordsInZone = freeIpaClient.findAllDnsRecordInZone(dnsZone.getIdnsname());

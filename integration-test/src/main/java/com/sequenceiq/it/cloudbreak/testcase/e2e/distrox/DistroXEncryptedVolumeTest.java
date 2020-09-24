@@ -19,6 +19,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
 
 public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
@@ -28,13 +29,16 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Inject
     private TestParameter testParameter;
 
+    @Inject
+    private SshEnaDriverCheckActions sshEnaDriverCheckActions;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
+        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
-        initializeDefaultBlueprints(testContext);
         createDatalake(testContext);
     }
 
@@ -57,6 +61,10 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .withExternalDatabase(externalDatabaseName)
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
+                .then((tc, testDto, client) -> {
+                    sshEnaDriverCheckActions.checkEnaDriverOnAws(testDto.getResponse(), client);
+                    return testDto;
+                })
                 .then(validateTemplateContainsExternalDatabaseHostname())
                 .then((context, distrox, client) -> {
                     distrox.getResponse();

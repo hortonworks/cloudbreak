@@ -1,15 +1,20 @@
 package com.sequenceiq.environment.service.integration;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DELETE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_CREDENTIAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -25,7 +30,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.google.common.collect.Maps;
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.google.api.client.util.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -104,7 +110,7 @@ public class CredentialAuthorizationIntegrationTest {
     @Test
     public void testCredentialCreateAws() throws InterruptedException {
         when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any())).thenAnswer(
+        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new EnvironmentServiceIntegrationTest.CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
@@ -176,19 +182,70 @@ public class CredentialAuthorizationIntegrationTest {
         String firstCredentialCrn = getResourceCrn(FIRST_CRED_NAME, ACCOUNT_ID);
         String secondCredentialCrn = getResourceCrn(SECOND_CRED_NAME, ACCOUNT_ID);
 
-        Map<String, Boolean> firstUserMap = Maps.newHashMap();
-        firstUserMap.put(firstCredentialCrn, Boolean.TRUE);
-        firstUserMap.put(secondCredentialCrn, Boolean.FALSE);
-        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyList(), any(), any())).thenReturn(firstUserMap);
-        Map<String, Boolean> seondUserMap = Maps.newHashMap();
-        seondUserMap.put(firstCredentialCrn, Boolean.FALSE);
-        seondUserMap.put(secondCredentialCrn, Boolean.TRUE);
-        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyList(), any(), any())).thenReturn(seondUserMap);
+        List<Boolean> firstUserResult = Lists.newArrayList();
+        firstUserResult.add(Boolean.TRUE);
+        firstUserResult.add(Boolean.FALSE);
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyList(), any())).thenReturn(firstUserResult);
+        List<Boolean> secondUserResult = Lists.newArrayList();
+        secondUserResult.add(Boolean.TRUE);
+        secondUserResult.add(Boolean.FALSE);
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyList(), any())).thenReturn(secondUserResult);
 
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), eq(firstCredentialCrn), any())).thenReturn(Boolean.TRUE);
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), eq(secondCredentialCrn), any())).thenReturn(Boolean.FALSE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), eq(firstCredentialCrn), any())).thenReturn(Boolean.FALSE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), eq(secondCredentialCrn), any())).thenReturn(Boolean.TRUE);
+        AuthorizationProto.RightCheck firstCredDescribeCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(firstCredentialCrn)
+                .setRight(DESCRIBE_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(firstCredDescribeCheck)), any()))
+                .thenReturn(List.of(Boolean.TRUE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(firstCredDescribeCheck)), any()))
+                .thenReturn(List.of(Boolean.FALSE));
+
+        AuthorizationProto.RightCheck secondCredDescribeCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(secondCredentialCrn)
+                .setRight(DESCRIBE_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(secondCredDescribeCheck)), any()))
+                .thenReturn(List.of(Boolean.FALSE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(secondCredDescribeCheck)), any()))
+                .thenReturn(List.of(Boolean.TRUE));
+
+        AuthorizationProto.RightCheck firstCredEditCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(firstCredentialCrn)
+                .setRight(EDIT_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(firstCredEditCheck)), any())).thenReturn(List.of(Boolean.TRUE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(firstCredEditCheck)), any())).thenReturn(List.of(Boolean.FALSE));
+
+        AuthorizationProto.RightCheck secondCredEditCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(secondCredentialCrn)
+                .setRight(EDIT_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(secondCredEditCheck)), any())).thenReturn(List.of(Boolean.FALSE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(secondCredEditCheck)), any())).thenReturn(List.of(Boolean.FALSE));
+
+        AuthorizationProto.RightCheck firstCredDeleteCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(firstCredentialCrn)
+                .setRight(DELETE_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(firstCredDeleteCheck)), any())).thenReturn(List.of(Boolean.TRUE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(firstCredDeleteCheck)), any())).thenReturn(List.of(Boolean.FALSE));
+
+        AuthorizationProto.RightCheck secondCredDeleteCheck = AuthorizationProto.RightCheck.newBuilder()
+                .setResource(secondCredentialCrn)
+                .setRight(DELETE_CREDENTIAL.getRight())
+                .build();
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(secondCredDeleteCheck)), any())).thenReturn(List.of(Boolean.FALSE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(secondCredDeleteCheck)), any())).thenReturn(List.of(Boolean.TRUE));
+
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(secondCredentialCrn)),
+                eq(DELETE_CREDENTIAL.getRight()), any())).thenReturn(Map.of(secondCredentialCrn, Boolean.FALSE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(secondCredentialCrn)),
+                eq(DELETE_CREDENTIAL.getRight()), any())).thenReturn(Map.of(secondCredentialCrn, Boolean.TRUE));
+
+        when(grpcUmsClient.hasRights(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), eq(List.of(firstCredentialCrn)),
+                eq(DELETE_CREDENTIAL.getRight()), any())).thenReturn(Map.of(secondCredentialCrn, Boolean.TRUE));
+        when(grpcUmsClient.hasRights(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), eq(List.of(firstCredentialCrn)),
+                eq(DELETE_CREDENTIAL.getRight()), any())).thenReturn(Map.of(secondCredentialCrn, Boolean.FALSE));
     }
 
     private CredentialRequest getAwsCredentialRequest(String name) {

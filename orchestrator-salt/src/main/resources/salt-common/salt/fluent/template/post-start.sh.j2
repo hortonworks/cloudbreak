@@ -1,0 +1,21 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+#!/bin/sh
+
+function main() {
+    BUNDLE_LOCK_FILE="/etc/cdp-logging-agent/databus_bundle.lock"
+    SLEEP_TIME=$1
+
+    if [[ -f "$BUNDLE_LOCK_FILE" ]]; then
+        echo "Delayed restart skipped as $BUNDLE_LOCK_FILE exists. [POST START SCRIPT]"
+    else
+        touch $BUNDLE_LOCK_FILE
+        chmod 700 $BUNDLE_LOCK_FILE
+        echo "Delayed restart called for CDP logging agent. (sleep time: $SLEEP_TIME seconds)"
+        echo "Start sleeping at: $(date)"
+        sleep $SLEEP_TIME
+        echo "Sleeping finished at: $(date)"
+        service cdp-logging-agent restart
+    fi
+}
+
+main ${1+"$@"}

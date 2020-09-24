@@ -13,7 +13,6 @@ buildscript {
 }
 
 dependencies {
-  compile project(':common')
   compile project(':grpc-common')
 
   compile ("io.grpc:grpc-all:1.19.0") {

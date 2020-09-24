@@ -24,4 +24,4 @@ docker run -it --rm \
 -e CB_USERNAME=$CB_USERNAME \
 -e CB_PASSWORD=$CB_PASSWORD \
 -e CB_HOSTNAME_ALIASES=$CB_HOSTNAME_ALIASES \
-denvazh/gatling:2.3.1
+docker-private.infra.cloudera.com/cloudera_thirdparty/denvazh/gatling:2.3.1

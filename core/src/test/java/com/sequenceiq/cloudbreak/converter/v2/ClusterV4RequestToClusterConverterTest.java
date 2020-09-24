@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
@@ -56,6 +58,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterV4RequestToClusterConverterTest {
@@ -85,6 +89,10 @@ public class ClusterV4RequestToClusterConverterTest {
 
     @Mock
     private CloudStorageConverter cloudStorageConverter;
+
+    @Spy
+    @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
+    private IdBrokerConverterUtil idBrokerConverterUtil = new IdBrokerConverterUtil();
 
     private Workspace workspace;
 

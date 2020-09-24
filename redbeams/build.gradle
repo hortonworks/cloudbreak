@@ -45,9 +45,6 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',    version: opentracingSpringJaegerStarterVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                   version: opentracingJaxrs2Version
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                     version: opentracingJdbcVersion
 
   runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
   runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
@@ -85,11 +82,12 @@ dependencies {
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   }
   compile project(':authorization-common')
-  
+
   implementation project(':flow')
   implementation project(':cloud-reactor')
   implementation project(':cloud-reactor-api')
   implementation project(':environment-api')
+  implementation project(':datalake-api')
   implementation project(':status-checker')
 
   compile project(':cloud-common')
@@ -119,7 +117,7 @@ bootRun {
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
-} 
+}
 
 springBoot {
   mainClassName = 'com.sequenceiq.redbeams.RedbeamsApplication'

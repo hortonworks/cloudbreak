@@ -5,6 +5,8 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -42,14 +44,19 @@ public class AzureResourceGroupMetadataProvider {
     }
 
     public Boolean useSingleResourceGroup(CloudStack cloudStack) {
-        String resourceGroupUsageParameter = cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER);
-        return ResourceGroupUsage.SINGLE.name().equals(resourceGroupUsageParameter) ? Boolean.TRUE : Boolean.FALSE;
+        return ResourceGroupUsage.SINGLE == getResourceGroupUsage(cloudStack) ? Boolean.TRUE : Boolean.FALSE;
     }
 
-    public Boolean useSingleResourceGroup(DatabaseStack cloudStack) {
+    public ResourceGroupUsage getResourceGroupUsage(CloudStack cloudStack) {
+        return Optional.ofNullable(cloudStack.getParameters().get(RESOURCE_GROUP_USAGE_PARAMETER))
+                .map(ResourceGroupUsage::valueOf)
+                .orElse(ResourceGroupUsage.MULTIPLE);
+    }
+
+    public ResourceGroupUsage getResourceGroupUsage(DatabaseStack cloudStack) {
         String resourceGroupUsageParameter = cloudStack.getDatabaseServer().getParameters()
-                .getOrDefault(RESOURCE_GROUP_USAGE_PARAMETER, "").toString();
-        return ResourceGroupUsage.SINGLE.name().equals(resourceGroupUsageParameter) ? Boolean.TRUE : Boolean.FALSE;
+                .getOrDefault(RESOURCE_GROUP_USAGE_PARAMETER, ResourceGroupUsage.MULTIPLE.name()).toString();
+        return ResourceGroupUsage.valueOf(resourceGroupUsageParameter);
     }
 
     public String getImageResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {

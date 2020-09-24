@@ -28,8 +28,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.environment.validation.network.aws.AwsEnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.AwsParams;
-import com.sequenceiq.environment.network.dto.AwsParams.AwsParamsBuilder;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,8 +81,8 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringFlowWhenTheAwsNetworkParamsDoesNotContainVPCId() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        AwsParams awsParams = AwsParamsBuilder
-                .anAwsParams()
+        AwsParams awsParams = AwsParams
+                .builder()
                 .build();
 
         NetworkDto networkDto = NetworkDto.builder()
@@ -101,8 +101,8 @@ class AwsEnvironmentNetworkValidatorTest {
     @Test
     void testValidateDuringFlowWhenTheAwsNetworkParamsContainsVPCId() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        AwsParams awsParams = AwsParamsBuilder
-                .anAwsParams()
+        AwsParams awsParams = AwsParams
+                .builder()
                 .withVpcId("aVPCResourceIDFromAWS")
                 .build();
 
@@ -250,8 +250,8 @@ class AwsEnvironmentNetworkValidatorTest {
     }
 
     private AwsParams getAwsParams() {
-        return AwsParamsBuilder
-                .anAwsParams()
+        return AwsParams
+                .builder()
                 .withVpcId("vpcId")
                 .build();
     }

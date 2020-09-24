@@ -1,8 +1,13 @@
 package com.sequenceiq.it.cloudbreak.action.v1.distrox;
 
+import static java.lang.String.format;
+
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -16,11 +21,16 @@ public class DistroXStartAction implements Action<DistroXTestDto, CloudbreakClie
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, " Stack start request on: " + testDto.getName());
-        FlowIdentifier flow = client.getCloudbreakClient()
+        Log.when(LOGGER, format(" Starting Distrox: %s ", testDto.getName()));
+        Log.whenJson(LOGGER, " Distrox start request: ", testDto.getRequest());
+        FlowIdentifier flowIdentifier = client.getCloudbreakClient()
                 .distroXV1Endpoint()
                 .putStartByName(testDto.getName());
-        testDto.setFlow("DistroX start", flow);
+        testDto.setFlow("DistroX start", flowIdentifier);
+        StackV4Response stackV4Response = client.getCloudbreakClient()
+                .distroXV1Endpoint().getByName(testDto.getName(), Collections.emptySet());
+        testDto.setResponse(stackV4Response);
+        Log.whenJson(LOGGER, " Distrox start response: ", stackV4Response);
         return testDto;
     }
 }

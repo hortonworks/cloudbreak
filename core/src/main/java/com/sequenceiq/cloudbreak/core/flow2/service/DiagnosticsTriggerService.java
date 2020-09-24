@@ -9,15 +9,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.controller.validation.diagnostics.DiagnosticsCollectionValidator;
+import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionEvent;
+import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.telemetry.converter.CmDiagnosticsDataToParameterConverter;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
+import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -40,6 +45,9 @@ public class DiagnosticsTriggerService {
     private DiagnosticsDataToParameterConverter diagnosticsDataToParameterConverter;
 
     @Inject
+    private CmDiagnosticsDataToParameterConverter cmDiagnosticsDataToParameterConverter;
+
+    @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
@@ -57,6 +65,25 @@ public class DiagnosticsTriggerService {
                 .withResourceId(stack.getId())
                 .withResourceCrn(stack.getResourceCrn())
                 .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
+                .withParameters(parameters)
+                .withHosts(parameters.getHosts())
+                .withHostGroups(parameters.getHostGroups())
+                .build();
+        return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
+    }
+
+    public FlowIdentifier startCmDiagnostics(BaseCmDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
+        Stack stack = stackService.getByCrn(stackCrn);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Starting CM based diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
+        CmDiagnosticsParameters parameters = cmDiagnosticsDataToParameterConverter.convert(request, telemetry, stack.getName(), stack.getRegion());
+        CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
+                .withAccepted(new Promise<>())
+                .withResourceId(stack.getId())
+                .withResourceCrn(stack.getResourceCrn())
+                .withSelector(CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_INIT_EVENT.selector())
                 .withParameters(parameters)
                 .build();
         return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));

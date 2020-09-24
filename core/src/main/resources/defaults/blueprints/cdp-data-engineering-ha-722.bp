@@ -20,10 +20,6 @@
         "serviceType": "HDFS",
         "serviceConfigs": [
           {
-            "name": "redaction_policy_enabled",
-            "value": "false"
-          },
-          {
             "name": "zookeeper_service",
             "ref": "zookeeper"
           },
@@ -38,6 +34,10 @@
             "roleType": "NAMENODE",
             "base": true,
             "configs": [
+              {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              },
               {
                 "name": "fs_trash_interval",
                 "value": "0"
@@ -218,6 +218,18 @@
         ]
       },
       {
+        "refName": "sqoop",
+        "serviceType": "SQOOP_CLIENT",
+        "roleConfigGroups": [
+          {
+            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [ ],
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "yarn",
         "serviceType": "YARN",
         "serviceConfigs": [
@@ -331,6 +343,18 @@
           {
             "name": "tez.task.launch.cmd-opts",
             "value": "-XX:+PrintGCDetails -verbose:gc -XX:+UseNUMA -XX:+UseG1GC -XX:+ResizeTLAB"
+          },
+          {
+            "name": "tez.grouping.split-waves",
+            "value": 1.4
+          },
+          {
+            "name": "tez.grouping.min-size",
+            "value": 268435456
+          },
+          {
+            "name": "tez.grouping.max-size",
+            "value": 268435456
           }
         ],
         "roleConfigGroups": [
@@ -474,6 +498,7 @@
           "tez-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "das-DAS_EVENT_PROCESSOR",
           "das-DAS_WEBAPP",

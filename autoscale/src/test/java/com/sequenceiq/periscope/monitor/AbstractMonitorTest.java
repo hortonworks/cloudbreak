@@ -110,8 +110,7 @@ public class AbstractMonitorTest {
             }
 
             @Override
-            protected Monitored save(Monitored monitored) {
-                return null;
+            protected void save(Monitored monitored) {
             }
 
             @Override

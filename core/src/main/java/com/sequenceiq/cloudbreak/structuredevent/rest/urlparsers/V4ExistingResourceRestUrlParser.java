@@ -6,12 +6,14 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class V4ExistingResourceRestUrlParser extends RestUrlParser {
+public class V4ExistingResourceRestUrlParser extends LegacyRestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
-    public static final int RESOURCE_NAME_GROUP_NUMBER = 3;
+    public static final int RESOURCE_NAME_GROUP_NUMBER = 4;
 
     public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
@@ -25,7 +27,7 @@ public class V4ExistingResourceRestUrlParser extends RestUrlParser {
             + "|connectors/[a-z_]+"
             + "|file_systems/[a-z_]+)");
 
-    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([^/]+)");
+    private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)(/internal)?/([^/]+)");
 
     @Override
     protected List<String> parsedMethods() {

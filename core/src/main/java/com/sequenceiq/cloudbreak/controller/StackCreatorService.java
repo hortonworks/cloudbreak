@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.validation.ParametersValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -37,7 +38,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -69,6 +70,7 @@ import org.springframework.util.CollectionUtils;
 
 import javax.inject.Inject;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -81,6 +83,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -202,7 +205,8 @@ public class StackCreatorService {
                 Stack stack = stackDecorator.decorate(stackStub, stackRequest, user, workspace);
 
                 LOGGER.info("Get credential from environment service with {} environmentCrn.", stack.getEnvironmentCrn());
-                Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+                Credential credential = ThreadBasedUserCrnProvider
+                        .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
                 CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
                 LOGGER.info("Validate Stack parameter for {} name.", stackName);
@@ -369,9 +373,13 @@ public class StackCreatorService {
         }
     }
 
-    private void fillInstanceMetadata(Stack stack) {
+    void fillInstanceMetadata(Stack stack) {
         long privateIdNumber = 0;
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+        //Gateway HostGroups are sorted first to start with privateIdNumber 0.
+        List<InstanceGroup> sortedInstanceGroups = stack.getInstanceGroups().stream()
+                .sorted(Comparator.comparing(InstanceGroup::getInstanceGroupType)
+                        .thenComparing(InstanceGroup::getGroupName)).collect(Collectors.toList());
+        for (InstanceGroup instanceGroup : sortedInstanceGroups) {
             for (InstanceMetaData instanceMetaData : instanceGroup.getAllInstanceMetaData()) {
                 instanceMetaData.setPrivateId(privateIdNumber++);
                 instanceMetaData.setInstanceStatus(InstanceStatus.REQUESTED);
@@ -383,6 +391,7 @@ public class StackCreatorService {
         if (stack.getDatalakeResourceId() != null) {
             return sharedServiceConfigProvider.prepareDatalakeConfigs(stack);
         }
+        LOGGER.debug("No Data Lake resource id has been given for stack! (crn: {})", stack.getResourceCrn());
         return stack;
     }
 
@@ -422,7 +431,7 @@ public class StackCreatorService {
         if (clusterRequest == null) {
             return null;
         }
-        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest);
+        boolean shouldUseBaseCMImage = shouldUseBaseCMImage(clusterRequest, platformString);
         boolean baseImageEnabled = imageCatalogService.baseImageEnabled();
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         CloudbreakUser cbUser = restRequestThreadLocalService.getCloudbreakUser();
@@ -452,9 +461,9 @@ public class StackCreatorService {
         });
     }
 
-    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest) {
+    boolean shouldUseBaseCMImage(ClusterV4Request clusterRequest, String platformString) {
         ClouderaManagerV4Request cmRequest = clusterRequest.getCm();
-        return hasCmParcelInfo(cmRequest);
+        return hasCmParcelInfo(cmRequest) || CloudPlatform.YARN.equalsIgnoreCase(platformString);
     }
 
     private boolean hasCmParcelInfo(ClouderaManagerV4Request cmRequest) {

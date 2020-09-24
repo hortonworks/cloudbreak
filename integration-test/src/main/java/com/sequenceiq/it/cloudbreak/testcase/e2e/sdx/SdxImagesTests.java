@@ -46,7 +46,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         String sdx = resourcePropertyProvider().getName();
 
         testContext
-                .given(sdx, SdxTestDto.class)
+                .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
                 .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -87,6 +87,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
+                .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))

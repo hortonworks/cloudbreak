@@ -1,0 +1,6 @@
+package com.sequenceiq.environment.environment.audit.flow;
+
+import com.sequenceiq.cloudbreak.structuredevent.service.audit.auditeventname.flow.CDPFlowOperationAuditEventNameConverter;
+
+public interface EnvironmentFlowOperationAuditEventNameConverter extends CDPFlowOperationAuditEventNameConverter {
+}

@@ -1,7 +1,25 @@
 package com.sequenceiq.freeipa.kerberosmgmt;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -12,26 +30,9 @@ import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
-import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabGenerator;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.UserKeytabService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserKeytabServiceTest {
@@ -68,7 +69,7 @@ class UserKeytabServiceTest {
     private void setupKerberosConfig() {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
         when(kerberosConfig.getRealm()).thenReturn("realm");
-        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(any(), any()))
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(any(), any()))
                 .thenReturn(Optional.of(kerberosConfig));
     }
 
@@ -146,7 +147,7 @@ class UserKeytabServiceTest {
 
     @Test
     void testGetKeytabBase64MissingKerberosConfig() {
-        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(any(), any()))
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(any(), any()))
                 .thenReturn(Optional.empty());
         Exception exception =  assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
         assertEquals(String.format("KerberosConfig for environment '%s' not found.", ENV_CRN), exception.getMessage());

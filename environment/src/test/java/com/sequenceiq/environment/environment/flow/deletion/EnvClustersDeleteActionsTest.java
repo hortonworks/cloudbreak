@@ -39,7 +39,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
-import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -47,7 +47,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.notification.NotificationService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -80,10 +79,7 @@ class EnvClustersDeleteActionsTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private NotificationService notificationService;
-
-    @Mock
-    private EnvironmentResponseConverter environmentResponseConverter;
+    private EventSenderService eventSenderService;
 
     @Mock
     private StateContext stateContext;
@@ -192,8 +188,7 @@ class EnvClustersDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -211,9 +206,8 @@ class EnvClustersDeleteActionsTest {
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
         verify(environment, never()).setStatus(any());
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), any());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -227,12 +221,11 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(savedEnvironment);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
-        when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
 
         action.execute(stateContext);
 
         verify(environment).setStatus(EnvironmentStatus.DATAHUB_CLUSTERS_DELETE_IN_PROGRESS);
-        verify(notificationService).send(ResourceEvent.ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED, simpleEnvironmentResponse, FLOW_TRIGGER_USER_CRN);
+        verify(eventSenderService).sendEventAndNotification(environmentDto, FLOW_TRIGGER_USER_CRN, ResourceEvent.ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -250,8 +243,7 @@ class EnvClustersDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -269,9 +261,8 @@ class EnvClustersDeleteActionsTest {
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
         verify(environment, never()).setStatus(any());
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), any());
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
@@ -285,12 +276,11 @@ class EnvClustersDeleteActionsTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(savedEnvironment);
         when(environmentService.getEnvironmentDto(savedEnvironment)).thenReturn(environmentDto);
-        when(environmentResponseConverter.dtoToSimpleResponse(environmentDto)).thenReturn(simpleEnvironmentResponse);
 
         action.execute(stateContext);
 
         verify(environment).setStatus(EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS);
-        verify(notificationService).send(ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED, simpleEnvironmentResponse, FLOW_TRIGGER_USER_CRN);
+        verify(eventSenderService).sendEventAndNotification(environmentDto, FLOW_TRIGGER_USER_CRN, ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 

@@ -58,13 +58,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an environment with a cluster in it",
             when = "calling create cluster with a different cluster name",
             then = "the second cluster should be created")
-    public void testSameEnvironmentWithDifferentClusters(TestContext testContext) {
+    public void testSameEnvironmentWithDifferentClusters(MockedTestContext testContext) {
         createDefaultEnvironment(testContext);
 
         String newStack = resourcePropertyProvider().getName();
         testContext
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(newStack, StackTestDto.class)
@@ -78,13 +78,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an environment and a database which in not attached to the environment",
             when = "a cluster is created in the environment and with the non-attached database",
             then = "the cluster create should succeed")
-    public void testClusterWithRdsWithoutEnvironment(TestContext testContext) {
+    public void testClusterWithRdsWithoutEnvironment(MockedTestContext testContext) {
         createDefaultRdsConfig(testContext);
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withCluster(setResources(testContext, testContext.get(RedbeamsDatabaseTestDto.class).getName(),
                         null, null))
                 .when(stackTestClient.createV4())
@@ -102,7 +102,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe())
                 .given(StackTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(NEW_CREDENTIAL_KEY, CredentialTestDto.class)
@@ -120,7 +120,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
             given = "there is an available environment",
             when = "create cluster request is sent with missing environment settings",
             then = "a BadRequestException should be returned")
-    public void testClusterWithEmptyEnvironmentRequest(TestContext testContext) {
+    public void testClusterWithEmptyEnvironmentRequest(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
@@ -133,13 +133,13 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private void createEnvWithResources(TestContext testContext) {
+    private void createEnvWithResources(MockedTestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.describe());
     }
 
-    private void checkCredentialAttachedToCluster(TestContext testContext) {
+    private void checkCredentialAttachedToCluster(MockedTestContext testContext) {
         testContext.given(StackTestDto.class)
                 .withName(testContext.get(StackTestDto.class).getName())
                 .when(stackTestClient.getV4())
@@ -147,7 +147,7 @@ public class EnvironmentClusterTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private ClusterTestDto setResources(TestContext testContext, String rdsName, String ldapName, String proxyName) {
+    private ClusterTestDto setResources(MockedTestContext testContext, String rdsName, String ldapName, String proxyName) {
         ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
                 .valid();
         if (rdsName != null) {

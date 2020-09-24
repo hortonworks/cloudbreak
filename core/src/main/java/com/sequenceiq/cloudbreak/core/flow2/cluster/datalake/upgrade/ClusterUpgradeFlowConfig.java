@@ -1,14 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_MANAGER_UPGRADE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_MANAGER_UPGRADE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.CLUSTER_UPGRADE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeState.INIT_STATE;
@@ -29,10 +31,10 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
             new Builder<ClusterUpgradeState, ClusterUpgradeEvent>()
                     .defaultFailureEvent(CLUSTER_UPGRADE_FAILED_EVENT)
 
-                    .from(INIT_STATE).to(CLUSTER_MANAGER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_EVENT)
+                    .from(INIT_STATE).to(CLUSTER_UPGRADE_INIT_STATE).event(CLUSTER_UPGRADE_INIT_EVENT)
                     .defaultFailureEvent()
 
-                    .from(INIT_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT)
+                    .from(CLUSTER_UPGRADE_INIT_STATE).to(CLUSTER_MANAGER_UPGRADE_STATE).event(CLUSTER_UPGRADE_INIT_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(CLUSTER_MANAGER_UPGRADE_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT)
@@ -71,7 +73,7 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     public ClusterUpgradeEvent[] getInitEvents() {
         return new ClusterUpgradeEvent[]{
-                CLUSTER_MANAGER_UPGRADE_EVENT
+                CLUSTER_UPGRADE_INIT_EVENT
         };
     }
 

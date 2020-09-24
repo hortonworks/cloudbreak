@@ -16,19 +16,26 @@
 {% set update_package = salt['pillar.get']('filecollector:updatePackage') %}
 {% set skip_test_cloud_storage = salt['pillar.get']('filecollector:skipTestCloudStorage') %}
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
+{% set mode = salt['pillar.get']('filecollector:mode') %}
 
 {% if s3_location and not s3_region %}
   {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
   {%- set s3_region = instanceDetails['region'] %}
 {% endif %}
 
+{% if mode == 'CLOUDERA_MANAGER' %}
+  {% set compressed_file_pattern = '/var/lib/filecollector/*.zip' %}
+{% else %}
+  {% set compressed_file_pattern = '/var/lib/filecollector/*.gz' %}
+{% endif %}
+
 {% set cloud_storage_upload_params = None %}
 {% set test_cloud_storage_upload_params = None %}
 {% if s3_location %}
-  {% set cloud_storage_upload_params = "s3 upload -e -p '/var/lib/filecollector/*.gz' --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
+  {% set cloud_storage_upload_params = "s3 upload -e -p '" + compressed_file_pattern + "' --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
   {% set test_cloud_storage_upload_params = "s3 upload -e -p /tmp/.test_cloud_storage_upload.txt --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
 {% elif adlsv2_storage_location %}
-  {% set cloud_storage_upload_params = "abfs upload -p '/var/lib/filecollector/*.gz' --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
+  {% set cloud_storage_upload_params = "abfs upload -p '" + compressed_file_pattern + "' --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
   {% set test_cloud_storage_upload_params = "abfs upload -p /tmp/.test_cloud_storage_upload.txt --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
 {% endif %}
 
@@ -67,5 +74,6 @@
     "updatePackage": update_package,
     "skipValidation": skip_validation,
     "proxyUrl": proxy_full_url,
-    "proxyProtocol": proxy_protocol
+    "proxyProtocol": proxy_protocol,
+    "mode": mode
 }) %}

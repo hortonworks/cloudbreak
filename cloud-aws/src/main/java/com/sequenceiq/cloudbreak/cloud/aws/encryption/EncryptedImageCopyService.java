@@ -75,7 +75,7 @@ public class EncryptedImageCopyService {
             Waiter<DescribeImagesRequest> imageWaiter = client.waiters().imageAvailable();
             DescribeImagesRequest describeImagesRequest = new DescribeImagesRequest().withImageIds(imageIds);
             StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-            run(imageWaiter, describeImagesRequest, stackCancellationCheck);
+            run(imageWaiter, describeImagesRequest, stackCancellationCheck, "Encrypted image creation failed");
             LOGGER.info("All created encrypted AMIs are available: '{}'", String.join(",", imageIds));
         }
         return imageIdByGroupName;

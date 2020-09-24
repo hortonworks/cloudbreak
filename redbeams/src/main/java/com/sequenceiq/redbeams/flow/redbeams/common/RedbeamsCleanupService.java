@@ -22,10 +22,9 @@ public class RedbeamsCleanupService implements ApplicationListener<ContextRefres
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         try {
-            restartFlowService.purgeTerminatedResourceFlowLogs();
             restartFlowService.collectUnderOperationResources();
         } catch (Exception e) {
-            LOGGER.error("Clean up or the migration operations failed. Shutting down the node. ", e);
+            LOGGER.error("Cleanup or the migration operations failed. Shutting down the node. ", e);
             ConfigurableApplicationContext applicationContext = (ConfigurableApplicationContext) event.getApplicationContext();
             applicationContext.close();
         }

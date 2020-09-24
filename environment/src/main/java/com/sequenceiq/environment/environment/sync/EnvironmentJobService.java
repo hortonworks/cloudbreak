@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class EnvironmentJobService {
@@ -14,15 +14,11 @@ public class EnvironmentJobService {
 
     private final AutoSyncConfig autoSyncConfig;
 
-    private final JobService jobService;
+    private final StatusCheckerJobService jobService;
 
-    public EnvironmentJobService(AutoSyncConfig autoSyncConfig, JobService jobService) {
+    public EnvironmentJobService(AutoSyncConfig autoSyncConfig, StatusCheckerJobService jobService) {
         this.autoSyncConfig = autoSyncConfig;
         this.jobService = jobService;
-    }
-
-    public void deleteAll() {
-        jobService.deleteAll();
     }
 
     public void schedule(Environment environment) {

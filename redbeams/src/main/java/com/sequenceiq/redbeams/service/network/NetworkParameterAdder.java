@@ -27,16 +27,21 @@ public class NetworkParameterAdder {
     @VisibleForTesting
     static final String SUBNET_ID = "subnetId";
 
+    @VisibleForTesting
+    static final String AVAILABILITY_ZONE = "availabilityZone";
+
     // These constants must match those in AzureNetworkView
 
     @VisibleForTesting
     static final String SUBNETS = "subnets";
 
-    public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, CloudPlatform cloudPlatform) {
+    public Map<String, Object> addSubnetIds(Map<String, Object> parameters, List<String> subnetIds, List<String> azs, CloudPlatform cloudPlatform) {
         switch (cloudPlatform) {
             case AWS:
+            case GCP:
             case MOCK:
                 parameters.put(SUBNET_ID, String.join(",", subnetIds));
+                parameters.put(AVAILABILITY_ZONE, String.join(",", azs));
                 break;
             case AZURE:
                 parameters.put(SUBNETS, String.join(",", subnetIds));
@@ -57,6 +62,9 @@ public class NetworkParameterAdder {
             case AZURE:
                 // oddly, nothing to pass on yet
                 //parameters.put(VPC_ID, environmentResponse.getNetwork().getAzure().getNetworkId());
+                break;
+            case GCP:
+                // oddly, nothing to pass on yet
                 break;
             case MOCK:
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getMock().getVpcId());

@@ -1,13 +1,10 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -38,21 +35,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -113,19 +109,13 @@ public class ClusterUpgradeAvailabilityServiceTest {
     private ClusterRepairService clusterRepairService;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
-
-    @Mock
-    private GatewayConfigService gatewayConfigService;
-
-    @Mock
-    private GatewayConfig gatewayConfig;
-
-    @Mock
     private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
     private ClusterApi clusterApi;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     private boolean lockComponents;
 
@@ -135,6 +125,10 @@ public class ClusterUpgradeAvailabilityServiceTest {
     public void setUp() {
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         activatedParcels = new HashMap<>();
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion(V_7_0_3);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        ReflectionTestUtils.setField(underTest, "upgradeSupportedVersion", V_7_0_3);
     }
 
     @Test
@@ -323,32 +317,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     @Test
-    public void testSaltStatesArePresent() {
-        UpgradeV4Response response = new UpgradeV4Response();
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
-
-        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
-
-        assertNull(actual.getReason());
-    }
-
-    @Test
-    public void testSaltStatesAreMissing() throws CloudbreakOrchestratorFailedException {
-        UpgradeV4Response response = new UpgradeV4Response();
-        when(stackService.getByNameInWorkspaceWithLists(anyString(), anyLong())).thenReturn(Optional.of(createStack(createStackStatus(Status.AVAILABLE))));
-        doThrow(new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
-                        + "Please ensure that your cluster is up to date!"))
-                .when(hostOrchestrator).
-                checkIfClusterUpgradable(any());
-
-        UpgradeV4Response actual = underTest.checkIfClusterRuntimeUpgradable(WORKSPACE_ID, STACK_NAME, response);
-
-        assertNotNull(actual.getReason());
-        assertEquals("Cluster is not upgradeable due to required Salt files not being present. "
-                + "Please ensure that your cluster is up to date!", actual.getReason());
-    }
-
-    @Test
     public void testFilterUpgradeOptionsUpgradeRequestEmpty() {
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
@@ -498,10 +466,13 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private Stack createStack(StackStatus stackStatus) {
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
         Stack stack = new Stack();
         stack.setId(2L);
         stack.setCloudPlatform("AWS");
         stack.setStackStatus(stackStatus);
+        stack.setCluster(cluster);
         return stack;
     }
 

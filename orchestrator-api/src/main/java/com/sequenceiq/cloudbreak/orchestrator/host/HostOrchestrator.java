@@ -23,9 +23,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void checkIfClusterUpgradable(GatewayConfig primaryGatewayConfig)
-            throws CloudbreakOrchestratorFailedException;
-
     void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, byte[] stateConfigZip,
             BootstrapParams params, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
@@ -101,5 +98,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> parameters,
             ExitCriteriaModel stackBasedExitCriteriaModel) throws CloudbreakOrchestratorFailedException;
+
+    void uploadGatewayPillar(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException;
 
 }

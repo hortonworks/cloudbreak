@@ -3,15 +3,22 @@ package com.sequenceiq.freeipa.flow.chain;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
+import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 public abstract class AbstractCommonChainAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
         extends AbstractStackAction<S, E, C, P> {
-
     protected static final String INSTANCE_IDS = "INSTANCE_IDS";
 
     protected static final String OPERATION_ID = "OPERATION_ID";
@@ -25,6 +32,11 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     protected static final String INSTANCE_COUNT_BY_GROUP = "INSTANCE_COUNT_BY_GROUP";
 
     protected static final String FINAL_CHAIN = "FINAL_CHAIN";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCommonChainAction.class);
+
+    @Inject
+    private FreeipaJobService jobService;
 
     protected AbstractCommonChainAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -40,6 +52,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     protected void setOperationId(Map<Object, Object> variables, String operationId) {
         variables.put(OPERATION_ID, operationId);
+        addMdcOperationIdIfPresent(variables);
     }
 
     protected String getOperationId(Map<Object, Object> variables) {
@@ -86,4 +99,20 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
         return (Boolean) variable.get(FINAL_CHAIN);
     }
 
+    protected void enableStatusChecker(Stack stack, String reason) {
+        LOGGER.info("Enabling the status checker for stack ID {}. {}", stack.getId(), reason);
+        jobService.schedule(stack);
+    }
+
+    protected void disableStatusChecker(Stack stack, String reason) {
+        LOGGER.info("Disabling the status checker for stack ID {}. {}", stack.getId(), reason);
+        jobService.unschedule(stack);
+    }
+
+    protected void addMdcOperationIdIfPresent(Map<Object, Object> varialbes) {
+        String operationId = getOperationId(varialbes);
+        if (operationId != null) {
+            MDCBuilder.addOperationId(operationId);
+        }
+    }
 }

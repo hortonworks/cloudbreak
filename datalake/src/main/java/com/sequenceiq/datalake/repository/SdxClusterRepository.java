@@ -39,4 +39,7 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
     @Query("SELECT s.crn FROM SdxCluster s WHERE s.accountId = :accountId")
     List<String> findAllCrnInAccount(@Param("accountId") String accountId);
 
+    @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.crn = :crn")
+    Optional<String> findStackCrnByClusterCrn(@Param("crn") String crn);
+
 }

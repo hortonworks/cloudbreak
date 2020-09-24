@@ -37,6 +37,8 @@ import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
+import com.sequenceiq.it.cloudbreak.context.Clue;
+import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -48,7 +50,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 @Prototype
 public class EnvironmentTestDto
         extends DeletableEnvironmentTestDto<EnvironmentRequest, DetailedEnvironmentResponse, EnvironmentTestDto, SimpleEnvironmentResponse>
-        implements Searchable, Assignable {
+        implements Searchable, Assignable, Investigable {
 
     public static final String ENVIRONMENT = "ENVIRONMENT";
 
@@ -241,7 +243,7 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withParentEnvironment() {
-        CloudbreakTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
+        EnvironmentTestDto parentEnvDto = getTestContext().given(EnvironmentTestDto.class);
         return withParentEnvironment(parentEnvDto);
     }
 
@@ -294,19 +296,19 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public EnvironmentTestDto refresh(TestContext context, CloudbreakClient client) {
-        LOGGER.info("Refresh resource with name: {}", getName());
-        return when(environmentTestClient.describe(), key("refresh-environment-" + getName()));
+    public EnvironmentTestDto refresh() {
+        LOGGER.info("Refresh Environment with name: {}", getName());
+        return when(environmentTestClient.refresh(), key("refresh-environment-" + getName()));
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient client) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
+        LOGGER.info("Cleaning up environment with name: {}", getName());
         if (getResponse() != null) {
             when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
             await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
         } else {
-            LOGGER.info("Response field is null for env: {}", getName());
+            LOGGER.info("Environment: {} response is null!", getName());
         }
     }
 
@@ -337,6 +339,15 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto await(EnvironmentStatus status, Duration pollingInterval) {
         return await(status, emptyRunningParameter(), pollingInterval);
+    }
+
+    public EnvironmentTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
+    public EnvironmentTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
     }
 
     @Override
@@ -374,8 +385,16 @@ public class EnvironmentTestDto
     @Override
     public String getCrn() {
         if (getResponse() == null) {
-            throw new IllegalStateException("You have tried to assign to a Dto that hasn't been created and therefore has no Response object.");
+            throw new IllegalStateException("Environment response hasn't been set, therefore 'getCrn' cannot be fulfilled.");
         }
         return getResponse().getCrn();
+    }
+
+    @Override
+    public Clue investigate() {
+        if (getResponse() == null) {
+            return null;
+        }
+        return new Clue("Environment", null, getResponse(), false);
     }
 }

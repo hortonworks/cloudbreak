@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -32,10 +33,11 @@ public class KeytabProvider {
     public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig) {
         ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig);
         try {
-            return kerberosMgmtV1Endpoint.generateServiceKeytab(request);
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> kerberosMgmtV1Endpoint.generateServiceKeytab(request, accountId));
         } catch (WebApplicationException e) {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Failed to get Keytab from FreeIpa service due to: '%s' ", errorMessage);
+            String message = String.format("Failed to generate Keytab with FreeIpa service due to: '%s' ", errorMessage);
             LOGGER.warn(message, e);
             throw new CloudbreakServiceException(message, e);
         }

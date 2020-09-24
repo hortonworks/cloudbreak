@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.flow.diagnostics;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +12,11 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.SdxClusterService;
-import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -26,7 +24,7 @@ import com.sequenceiq.flow.api.model.FlowLogResponse;
 @Service
 public class SdxDiagnosticsFlowService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiagnosticsFlowService.class);
 
     private static final String DIAGNOSTICS_COLLECTION_FAILED_STATE = "DIAGNOSTICS_COLLECTION_FAILED_STATE";
 
@@ -40,7 +38,7 @@ public class SdxDiagnosticsFlowService {
     private DiagnosticsParamsConverter diagnosticsParamsConverter;
 
     @Inject
-    private SdxClusterService sdxClusterService;
+    private SdxService sdxService;
 
     public FlowIdentifier startDiagnosticsCollection(Map<String, Object> properties) {
         LOGGER.debug("Start diagnostic collection for SDX");
@@ -48,25 +46,36 @@ public class SdxDiagnosticsFlowService {
         return diagnosticsV4Endpoint.collectDiagnostics(request);
     }
 
+    public FlowIdentifier startCmDiagnosticsCollection(Map<String, Object> properties) {
+        LOGGER.debug("Start CM based diagnostic collection for SDX");
+        CmDiagnosticsCollectionRequest request = diagnosticsParamsConverter.convertToCmRequest(properties);
+        return diagnosticsV4Endpoint.collectCmDiagnostics(request);
+    }
+
     public void waitForDiagnosticsCollection(Long sdxId, PollingConfig pollingConfig, FlowIdentifier flowIdentifier) {
-        LOGGER.debug("Start polling diagnostics collection for SDX stack id '{}'", sdxId);
-        sdxClusterService.findById(sdxId).ifPresentOrElse(sdxCluster -> {
-            Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
-                    .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
-                    .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
-                    .run(() -> {
-                        List<FlowLogResponse> flowLogs = flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId());
-                        if (hasFlowFailed(flowLogs)) {
-                            return AttemptResults.breakFor("Diagnostic collection flow failed in Cloudbreak.");
-                        }
-                        if (!flowLogs.isEmpty() && flowLogs.get(0).getFinalized()) {
-                            return AttemptResults.justFinish();
-                        }
-                        return AttemptResults.justContinue();
-                    });
-        }, () -> {
-            throw notFound("SDX cluster", sdxId).get();
-        });
+        waitForDiagnosticsCollection(sdxId, pollingConfig, flowIdentifier, false);
+    }
+
+    public void waitForDiagnosticsCollection(Long sdxId, PollingConfig pollingConfig, FlowIdentifier flowIdentifier, boolean cmBundle) {
+        String startPollingMessage = cmBundle ? String.format("Start polling CM based diagnostics collection for SDX stack id '%s'", sdxId)
+                : String.format("Start polling diagnostics collection for SDX stack id '%s'", sdxId);
+        String failedMessage = cmBundle ? "Cm based diagnostic collection flow failed in Cloudbreak."
+                : "Diagnostic collection flow failed in Cloudbreak.";
+        LOGGER.debug(startPollingMessage);
+        sdxService.getById(sdxId);
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
+                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+                .run(() -> {
+                    List<FlowLogResponse> flowLogs = flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId());
+                    if (hasFlowFailed(flowLogs)) {
+                        return AttemptResults.breakFor(failedMessage);
+                    }
+                    if (!flowLogs.isEmpty() && flowLogs.get(0).getFinalized()) {
+                        return AttemptResults.justFinish();
+                    }
+                    return AttemptResults.justContinue();
+                });
     }
 
     private boolean hasFlowFailed(List<FlowLogResponse> flowLogs) {

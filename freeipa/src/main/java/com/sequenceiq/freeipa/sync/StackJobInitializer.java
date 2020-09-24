@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.statuschecker.model.JobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 
 @Component
 public class StackJobInitializer implements JobInitializer {
@@ -27,7 +27,6 @@ public class StackJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        freeipaJobService.deleteAll();
         List<Stack> stacks = checkedMeasure(() -> stackService.findAllForAutoSync(), LOGGER, ":::Auto sync::: stacks are fetched from db in {}ms");
         for (Stack stack : stacks) {
             freeipaJobService.schedule(stack);

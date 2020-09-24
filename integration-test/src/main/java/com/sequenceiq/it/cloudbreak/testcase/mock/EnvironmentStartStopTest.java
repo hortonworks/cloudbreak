@@ -5,13 +5,15 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.assertion.audit.EnvironmentAuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -32,6 +34,10 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
 
     private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
+    private static final String DX_1 = "dx1";
+
+    private static final String DX_2 = "dx2";
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -43,6 +49,12 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private EnvironmentListStructuredEventAssertions environmentListStructuredEventAssertions;
+
+    @Inject
+    private EnvironmentAuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -56,18 +68,17 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     @Description(
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
-            then = "should be stopped first and started after it")
-    public void testCreateStopStartEnvironment(TestContext testContext) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        setUpFreeIpaRouteStubbing(mockedTestContext);
+            then = "should be stopped first and started after it and validate the flow events")
+    public void testCreateStopStartEnvironment(MockedTestContext testContext) {
+        setUpFreeIpaRouteStubbing(testContext);
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
-                .withCatalog(mockedTestContext
-                .getImageCatalogMockServerSetup()
+                .withCatalog(testContext
+                        .getImageCatalogMockServerSetup()
                         .getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
@@ -75,21 +86,62 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .given("dx1", DistroXTestDto.class)
-                .when(distroXTestClient.create(), key("dx1"))
-                .given("dx2", DistroXTestDto.class)
-                .when(distroXTestClient.create(), key("dx2"))
-                .given("dx1", DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key("dx1"))
-                .given("dx2", DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key("dx2"))
+                .given(DX_1, DistroXTestDto.class)
+                .when(distroXTestClient.create(), key(DX_1))
+                .given(DX_2, DistroXTestDto.class)
+                .when(distroXTestClient.create(), key(DX_2))
+                .given(DX_1, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(DX_1))
+                .given(DX_2, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(DX_2));
+        testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
+                // await stopped datahubs
+                .given(DX_1, DistroXTestDto.class)
+                .await(STACK_STOPPED, key(DX_1))
+                .given(DX_2, DistroXTestDto.class)
+                .await(STACK_STOPPED, key(DX_2))
+                // await stopped datalake
+                .given(SdxInternalTestDto.class)
+                .await(SdxClusterStatusResponse.STOPPED);
+        // mock stopped freeipa server_conncheck response
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
+        testContext
+                // await stopped freeipa
+                .given(FreeIpaTestDto.class)
+                .await(Status.STOPPED)
+                // await stopped env
+                .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        // mock started freeipa server_conncheck response
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
+                // await started freeipa
+                .given(FreeIpaTestDto.class)
+                .await(AVAILABLE)
+                // await started datalake
+                .given(SdxInternalTestDto.class)
+                .await(SdxClusterStatusResponse.RUNNING)
+                // await started datahubs
+                .given(DX_1, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(DX_1))
+                .given(DX_2, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(DX_2))
+                // await started env
+                .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
+                .when(environmentTestClient.delete())
+                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
+                .then(auditGrpcServiceAssertion::create)
+                .then(auditGrpcServiceAssertion::delete)
+                .then(auditGrpcServiceAssertion::start)
+                .then(auditGrpcServiceAssertion::stop)
+                .then(environmentListStructuredEventAssertions::checkCreateEvents)
+                .then(environmentListStructuredEventAssertions::checkStopEvents)
+                .then(environmentListStructuredEventAssertions::checkStartEvents)
+                .then(environmentListStructuredEventAssertions::checkDeleteEvents)
                 .validate();
         getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
     }

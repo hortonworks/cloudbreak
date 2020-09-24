@@ -52,9 +52,9 @@ public class ClouderaManagerDatabusServiceTest {
                 .setMachineUserName("machineUser")
                 .setCrn(USER_CRN)
                 .build();
-        when(umsClient.createMachineUser(any(), any(), any())).thenReturn(Optional.of(machineUser.getCrn()));
-        doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any());
-        when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any())).thenReturn(credential);
+        when(umsClient.createMachineUser(any(), any(), any(), any())).thenReturn(Optional.of(machineUser.getCrn()));
+        doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any(), any());
+        when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any(), any())).thenReturn(credential);
         // WHEN
         AltusCredential result = underTest.getAltusCredential(stack);
         // THEN

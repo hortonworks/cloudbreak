@@ -32,9 +32,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementBase;
@@ -106,6 +108,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
         stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
+        MDCBuilder.addResourceCrn(stack.getResourceCrn());
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));
         stack.setAvailabilityZone(Optional.ofNullable(source.getPlacement()).map(PlacementBase::getAvailabilityZone).orElse(null));
@@ -248,7 +251,11 @@ public class CreateFreeIpaRequestToStackConverter {
         }
         Set<InstanceGroup> convertedSet = new HashSet<>();
         source.getInstanceGroups().stream()
-                .map(ig -> instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform()))
+                .map(ig -> {
+                    FreeIpaServerRequest ipaServerRequest = source.getFreeIpa();
+                    return instanceGroupConverter.convert(ig, accountId, stack.getCloudPlatform(), stack.getName(),
+                            ipaServerRequest.getHostname(), ipaServerRequest.getDomain());
+                })
                 .forEach(ig -> {
                     ig.setStack(stack);
                     convertedSet.add(ig);

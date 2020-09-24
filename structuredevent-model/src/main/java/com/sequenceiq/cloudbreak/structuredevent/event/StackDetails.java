@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackDetails implements Serializable {
     private Long id;
@@ -18,6 +20,8 @@ public class StackDetails implements Serializable {
     private String type;
 
     private String description;
+
+    private String tunnel;
 
     private String region;
 
@@ -103,6 +107,14 @@ public class StackDetails implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(String tunnel) {
+        this.tunnel = tunnel;
     }
 
     public String getCloudPlatform() {

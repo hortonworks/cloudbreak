@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.network;
 
+import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
+import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -29,6 +32,10 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @Component
 public class EnvironmentNetworkService {
@@ -59,7 +66,6 @@ public class EnvironmentNetworkService {
                 .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + environment.getCloudPlatform()));
         NetworkCreationRequest networkCreationRequest = networkCreationRequestFactory.create(environment);
         EnvironmentNetworkConverter converter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
-
         CreatedCloudNetwork createdCloudNetwork = networkConnector.createNetworkWithSubnets(networkCreationRequest);
         return converter.setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
     }
@@ -86,14 +92,36 @@ public class EnvironmentNetworkService {
         NetworkDeletionRequest.Builder builder = new NetworkDeletionRequest.Builder()
                 .withStackName(networkCreationRequestFactory.getStackName(environment))
                 .withCloudCredential(cloudCredential)
+                .withRegion(environment.getLocation().getName())
+                .withSingleResourceGroup(isSingleResourceGroup(environment))
+                .withSubnetIds(environment.getNetwork().getSubnetIds())
+                .withNetworkId(environment.getNetwork().getNetworkId())
+                .withEnvName(environment.getName())
+                .withEnvId(environment.getId())
+                .withAccountId(environment.getAccountId())
+                .withUserId(environment.getCreator())
                 .withRegion(environment.getLocation().getName());
         getResourceGroupName(environment.getNetwork()).ifPresent(builder::withResourceGroup);
+        getNetworkId(environment.getNetwork()).ifPresent(builder::withNetworkId);
         builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);
         return builder.build();
     }
 
     private Optional<String> getResourceGroupName(NetworkDto networkDto) {
         return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getResourceGroupName);
+    }
+
+    private Optional<String> getNetworkId(NetworkDto networkDto) {
+        return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getNetworkId);
+    }
+
+    private boolean isSingleResourceGroup(EnvironmentDto environmentDto) {
+        ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::azureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
+                .orElse(USE_MULTIPLE);
+        return USE_SINGLE.equals(resourceGroupUsagePattern);
     }
 
     private Optional<NetworkConnector> getNetworkConnector(String cloudPlatform) {

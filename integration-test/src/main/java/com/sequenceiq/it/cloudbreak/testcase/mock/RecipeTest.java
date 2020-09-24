@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
@@ -31,24 +32,24 @@ public class RecipeTest extends AbstractIntegrationTest {
         createDefaultUser(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid recipe request",
             when = "create recipe",
             then = "recipe created")
-    public void testCreateValidRecipe(TestContext testContext) {
+    public void testCreateValidRecipe(MockedTestContext testContext) {
         testContext
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid recipe request",
             when = "create recipe and then delete and create again",
             then = "recipe created")
-    public void testCreateDeleteValidCreateAgain(TestContext testContext) {
+    public void testCreateDeleteValidCreateAgain(MockedTestContext testContext) {
         testContext
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
@@ -57,12 +58,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an invalid recipe request with specific characters in name",
             when = "create recipe",
             then = "getting a BadRequestException")
-    public void testCreateSpecialNameRecipe(TestContext testContext) {
+    public void testCreateSpecialNameRecipe(MockedTestContext testContext) {
         String spacialName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
@@ -74,12 +75,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid recipe request",
             when = "create recipe twice",
             then = "getting a BadRequestException")
-    public void testCreateAgainRecipe(TestContext testContext) {
+    public void testCreateAgainRecipe(MockedTestContext testContext) {
         String againName = resourcePropertyProvider().getName();
         testContext.given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
@@ -89,12 +90,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an invalid recipe request with too short name",
             when = "create recipe",
             then = "getting a BadRequestException")
-    public void testCreateInvalidRecipeShortName(TestContext testContext) {
+    public void testCreateInvalidRecipeShortName(MockedTestContext testContext) {
         String shortName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
@@ -105,12 +106,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an invalid recipe request with too long name",
             when = "create recipe",
             then = "getting a BadRequestException")
-    public void testCreateInvalidRecipeLongName(TestContext testContext) {
+    public void testCreateInvalidRecipeLongName(MockedTestContext testContext) {
         String longName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
@@ -121,12 +122,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "an invalid recipe request with too long description",
             when = "create recipe",
             then = "getting a BadRequestException")
-    public void testCreateInvalidRecipeLongDescription(TestContext testContext) {
+    public void testCreateInvalidRecipeLongDescription(MockedTestContext testContext) {
         String longDesc = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
@@ -137,12 +138,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a deleted valid recipe",
             when = "list recipes",
             then = "recipe is not present")
-    public void testCreateDeleteValidAndList(TestContext testContext) {
+    public void testCreateDeleteValidAndList(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
@@ -158,12 +159,12 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a valid recipe",
             when = "list recipes",
             then = "recipe is present")
-    public void testCreateValidAndList(TestContext testContext) {
+    public void testCreateValidAndList(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)

@@ -9,6 +9,7 @@
   "environments/deleteCdpEnvironment": "environments/write",
   "environments/describeEnvironment": "environments/read",
   "environments/accessEnvironment": "environments/accessEnvironment",
+  "environments/repairFreeIPA": "environments/write",
   "environments/adminFreeIPA": "environments/adminFreeIPA",
   "environments/createCredential": "environments/write",
   "environments/createEnvironment": "environments/write",
@@ -66,10 +67,12 @@
   "environments/describeAuditCredential": "environments/read",
   "environments/modifyAuditCredential": "environments/write",
   "cloudbreak/allowPowerUserOnly": "datahub/read",
+  "environments/useSharedResource": "datahub/read",
   "environments/read": "environments/read",
   "environments/write": "environments/write",
   "datalake/read": "datalake/read",
   "datalake/write": "datalake/write",
   "datahub/read": "datahub/read",
-  "datahub/write": "datahub/write"
+  "datahub/write": "datahub/write",
+  "structured_events/read": "structured_events/read"
 }

@@ -65,7 +65,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
                     }
                     break;
                 default:
-                    LOGGER.error("Unknown imagestatus: {}", checkImageResult.getImageStatus());
+                    LOGGER.error("Unknown image status: {}", checkImageResult.getImageStatus());
                     break;
             }
         });

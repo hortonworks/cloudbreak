@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -85,6 +86,8 @@ public class AzureNetworkConnectorTest {
 
     private static final String ENV_CRN = "someCrn";
 
+    private static final String NETWORK_ID = "networkId";
+
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -156,8 +159,30 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroup() {
-        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+    public void testDeleteNetworkWithSubNetsShouldNotDeleteResourceGroupWhenSingleResourceGroup() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, true);
+        when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
+        verify(azureClient).deleteNetworkInResourceGroup(RESOURCE_GROUP, NETWORK_ID);
+        verify(azureClient, never()).deleteResourceGroup(RESOURCE_GROUP);
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsShouldDeleteNothingWhenExistingNetwork() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(true, false);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(azureClient, never()).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
+        verify(azureClient, never()).deleteResourceGroup(RESOURCE_GROUP);
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroupWhenNotExistingNetwork() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
@@ -170,10 +195,11 @@ public class AzureNetworkConnectorTest {
 
     @Test(expected = CloudConnectorException.class)
     public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
-        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
+        when(azureUtils.convertToCloudConnectorException(any(), anyString())).thenReturn(new CloudConnectorException(""));
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -183,7 +209,6 @@ public class AzureNetworkConnectorTest {
     public void testDeleteNetworkWithSubNetsShouldDoNothingWhenResourceGroupNameIsNullInRequest() {
         NetworkDeletionRequest networkDeletionRequest = mock(NetworkDeletionRequest.class);
         when(networkDeletionRequest.getResourceGroup()).thenReturn(null);
-        when(azureClientService.getClient(any())).thenReturn(azureClient);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
 
@@ -320,12 +345,15 @@ public class AzureNetworkConnectorTest {
                 .build();
     }
 
-    private NetworkDeletionRequest createNetworkDeletionRequest() {
+    private NetworkDeletionRequest createNetworkDeletionRequest(boolean existingNetwork, boolean singleResourceGroup) {
         return new NetworkDeletionRequest.Builder()
                 .withRegion(REGION.value())
                 .withStackName(STACK)
                 .withCloudCredential(new CloudCredential("1", "credential"))
                 .withResourceGroup(RESOURCE_GROUP)
+                .withNetworkId(NETWORK_ID)
+                .withSingleResourceGroup(singleResourceGroup)
+                .withExisting(existingNetwork)
                 .build();
     }
 

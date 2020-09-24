@@ -13,12 +13,14 @@ base:
              - freeipa.primary-install
              - freeipa.common-install
              - freeipa.backups
+             - freeipa.healthagent
 
            'roles:freeipa_replica':
              - match: grain
              - freeipa.replica-install
              - freeipa.common-install
              - freeipa.backups
+             - freeipa.healthagent
 
            'roles:freeipa_primary_replacement':
              - match: grain
@@ -26,3 +28,4 @@ base:
              - freeipa.common-install
              - freeipa.promote-replica-to-master
              - freeipa.backups
+             - freeipa.healthagent

@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
-import com.sequenceiq.freeipa.service.freeipa.user.UmsCredentialProvider;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
 

@@ -9,11 +9,14 @@ import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -90,6 +93,9 @@ public class ClusterBootstrapper {
 
     @Inject
     private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private ClusterNodeNameGenerator clusterNodeNameGenerator;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -176,16 +182,18 @@ public class ClusterBootstrapper {
         return saltComponent;
     }
 
-    private void updateSaltComponent(Stack stack) {
+    public ClusterComponent updateSaltComponent(Stack stack) {
         ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
         try {
             byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
             if (saltComponent == null) {
+                LOGGER.debug("Create new salt component");
                 saltComponent = createSaltComponent(stack, stateConfigZip);
             } else {
+                LOGGER.debug("Overwrite existing salt component attributes");
                 saltComponent.setAttributes(new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))));
             }
-            clusterComponentProvider.store(saltComponent);
+            return clusterComponentProvider.store(saltComponent);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e);
         }
@@ -242,12 +250,16 @@ public class ClusterBootstrapper {
     private Set<Node> collectNodesForBootstrap(Stack stack) {
         Set<Node> nodes = new HashSet<>();
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
+
+        Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
+        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
+                .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
+
         for (InstanceMetaData im : stack.getNotDeletedInstanceMetaDataSet()) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
-                String generatedHostName = hostDiscoveryService.generateHostname(stack.getCustomHostname(), im.getInstanceGroupName(),
-                        im.getPrivateId(), stack.isHostgroupNameAsHostname());
+                String generatedHostName = clusterNodeNameGenerator.getNodeNameForInstanceMetadata(im, stack, hostGroupNodeIndexes, clusterNodeNames);
                 String instanceId = im.getInstanceId();
                 String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
                 nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, generatedHostName, domain, im.getInstanceGroupName()));
@@ -267,9 +279,13 @@ public class ClusterBootstrapper {
                 .collect(Collectors.toSet());
         String clusterDomain = getClusterDomain(metaDataSet, stack.getCustomDomain());
 
+        Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
+        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
+                .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
+
         Iterator<String> iterator = recoveryHostNames.iterator();
         for (InstanceMetaData im : metaDataSet) {
-            Node node = createNode(stack.getCustomHostname(), im, clusterDomain, stack.isHostgroupNameAsHostname());
+            Node node = createNode(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
                 // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
@@ -341,14 +357,14 @@ public class ClusterBootstrapper {
      * Even if the domain has changed keep the rest of the nodes domain.
      * Note: if we recovered a node the private id is not the same as it is in the hostname
      */
-    private Node createNode(String customHostname, InstanceMetaData im, String domain, boolean hostgroupAsHostname) {
+    private Node createNode(Stack stack, InstanceMetaData im, String domain, Map<String, AtomicLong> hostGroupNodeIndexes, Set<String> clusterNodeNames) {
         String discoveryFQDN = im.getDiscoveryFQDN();
         String instanceId = im.getInstanceId();
         String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
         if (isNoneBlank(discoveryFQDN)) {
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, im.getShortHostname(), domain, im.getInstanceGroupName());
         } else {
-            String hostname = hostDiscoveryService.generateHostname(customHostname, im.getInstanceGroupName(), im.getPrivateId(), hostgroupAsHostname);
+            String hostname = clusterNodeNameGenerator.getNodeNameForInstanceMetadata(im, stack, hostGroupNodeIndexes, clusterNodeNames);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
     }
@@ -358,5 +374,4 @@ public class ClusterBootstrapper {
             throw new CancellationException(cancelledMessage);
         }
     }
-
 }

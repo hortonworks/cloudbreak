@@ -54,7 +54,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog valid URL",
             when = "calling create image catalog with that URL",
             then = "getting image catalog response so the creation success")
-    public void testImageCatalogCreationWhenURLIsValidAndExists(TestContext testContext) {
+    public void testImageCatalogCreationWhenURLIsValidAndExists(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -72,7 +72,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog invalid URL but too short name",
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenNameIsTooShort(TestContext testContext) {
+    public void testImageCatalogCreationWhenNameIsTooShort(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName().substring(0, 4);
 
         testContext
@@ -90,7 +90,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog invalid URL but too long name",
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenNameIsTooLong(TestContext testContext) {
+    public void testImageCatalogCreationWhenNameIsTooLong(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName().concat(getLongNameGenerator().stringGenerator(100));
 
         testContext
@@ -108,7 +108,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog invalid name contains specific characters",
             when = "calling create image catalog with that URL and name",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenNameContainsSpecialCharacters(TestContext testContext) {
+    public void testImageCatalogCreationWhenNameContainsSpecialCharacters(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName().concat(IMAGECATALOG_NAME_WITH_SPECIAL_CHARS);
 
         testContext
@@ -125,7 +125,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog invalid url",
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenTheCatalogURLIsInvalid(TestContext testContext) {
+    public void testImageCatalogCreationWhenTheCatalogURLIsInvalid(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         String invalidURL = "https:/google.com/imagecatalog";
 
@@ -144,7 +144,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog valid url but does not contain a catalog",
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenTheCatalogURLPointsNotToAnImageCatalogJson(TestContext testContext) {
+    public void testImageCatalogCreationWhenTheCatalogURLPointsNotToAnImageCatalogJson(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext
@@ -162,7 +162,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog valid url but the JSON is invalid",
             when = "calling create image catalog with that URL",
             then = "getting a BadRequestException")
-    public void testImageCatalogCreationWhenTheCatalogURLPointsToAnInvalidImageCatalogJson(TestContext testContext) {
+    public void testImageCatalogCreationWhenTheCatalogURLPointsToAnInvalidImageCatalogJson(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext
@@ -180,7 +180,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog in the database",
             when = "calling delete on the existing one and create a new one with the same name",
             then = "getting an image catalog response so the request was valid")
-    public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(TestContext testContext) {
+    public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -208,7 +208,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog deletion",
             when = "calling delete on the existing one",
             then = "the deletion was success")
-    public void testImageCatalogDeletion(TestContext testContext) {
+    public void testImageCatalogDeletion(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         String catalogKey = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
@@ -230,7 +230,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get the default catalog with MOCK provider",
             when = "calling get on the default",
             then = "the response contains MOCK images")
-    public void testGetImageCatalogWhenCatalogContainsTheRequestedProvider(TestContext testContext) {
+    public void testGetImageCatalogWhenCatalogContainsTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -255,7 +255,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get the default catalog with AWS provider but catalog does not contain AWS entry",
             when = "calling get on the default",
             then = "the response does not contains AWS images")
-    public void testGetImageCatalogWhenCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
+    public void testGetImageCatalogWhenCatalogDoesNotContainTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -280,7 +280,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get with a non existing name",
             when = "calling get with that name",
             then = "getting a NotFoundException")
-    public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(TestContext testContext) {
+    public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -298,7 +298,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get with AWS provider if exist in catalog",
             when = "calling get AWS provider",
             then = "getting a list with AWS specific images")
-    public void testGetImageCatalogWhenDefaultCatalogContainsTheRequestedProvider(TestContext testContext) {
+    public void testGetImageCatalogWhenDefaultCatalogContainsTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -323,7 +323,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get with AWS provider if exist in catalog",
             when = "calling get AWS provider",
             then = "getting a list with AWS specific images")
-    public void testGetImageCatalogWhenDefaultCatalogDoesNotContainTheRequestedProvider(TestContext testContext) {
+    public void testGetImageCatalogWhenDefaultCatalogDoesNotContainTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -348,7 +348,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog get request",
             when = "calling get request on catalog endpoint",
             then = "getting back the catalog request")
-    public void testGetImageCatalogsRequestFromExistingImageCatalog(TestContext testContext) {
+    public void testGetImageCatalogsRequestFromExistingImageCatalog(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -381,7 +381,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog update request",
             when = "calling update request with new url",
             then = "the image catalog list should contains the new url")
-    public void testUpdateImageCatalog(TestContext testContext) {
+    public void testUpdateImageCatalog(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
@@ -420,7 +420,7 @@ public class ImageCatalogTest extends AbstractIntegrationTest {
             given = "image catalog list",
             when = "calling list all the catalog",
             then = "getting back the account related catalogs")
-    public void testGetListOfImageCatalogs(TestContext testContext) {
+    public void testGetListOfImageCatalogs(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
 
         testContext

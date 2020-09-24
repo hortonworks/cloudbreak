@@ -152,7 +152,7 @@ public class AwsStackRequestHelperTest {
 
         when(cloudContext.getUserName()).thenReturn("bob@cloudera.com");
 
-        Collection<Parameter> parameters = underTest.getStackParameters(authenticatedContext, databaseStack);
+        Collection<Parameter> parameters = underTest.getStackParameters(authenticatedContext, databaseStack, false);
 
         assertContainsParameter(parameters, "AllocatedStorageParameter", "50");
         assertContainsParameter(parameters, "BackupRetentionPeriodParameter", "1");
@@ -168,6 +168,10 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "PortParameter", "5432");
         assertContainsParameter(parameters, "StorageTypeParameter", "gp2");
         assertContainsParameter(parameters, "VPCSecurityGroupsParameter", "sg-1234,sg-5678");
+        assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
+
+        parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
+        assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 
     @Test
@@ -189,7 +193,7 @@ public class AwsStackRequestHelperTest {
 
         when(cloudContext.getUserName()).thenReturn("bob@cloudera.com");
 
-        Collection<Parameter> parameters = underTest.getStackParameters(authenticatedContext, databaseStack);
+        Collection<Parameter> parameters = underTest.getStackParameters(authenticatedContext, databaseStack, false);
 
         assertDoesNotContainParameter(parameters, "AllocatedStorageParameter");
         assertDoesNotContainParameter(parameters, "BackupRetentionPeriodParameter");
@@ -197,6 +201,17 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "MultiAZParameter");
         assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
+        assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
+
+        parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
+
+        assertDoesNotContainParameter(parameters, "AllocatedStorageParameter");
+        assertDoesNotContainParameter(parameters, "BackupRetentionPeriodParameter");
+        assertDoesNotContainParameter(parameters, "EngineVersionParameter");
+        assertDoesNotContainParameter(parameters, "MultiAZParameter");
+        assertDoesNotContainParameter(parameters, "StorageTypeParameter");
+        assertDoesNotContainParameter(parameters, "PortParameter");
+        assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 
     @Test

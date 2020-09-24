@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.AwsInstanceConnector.INSTANCE_
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -15,8 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
+import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
+import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
@@ -80,7 +84,7 @@ public class AwsDownscaleService {
                     auth.getCloudContext().getLocation().getRegion().value());
             AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
-            detachInstances(asGroupName, instanceIds, amazonASClient, true);
+            detachInstances(asGroupName, instanceIds, amazonASClient);
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
 
@@ -103,31 +107,32 @@ public class AwsDownscaleService {
         return awsResourceConnector.check(auth, resources);
     }
 
-    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient,
-            boolean retryIfUnattachedInstancesPresent) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
         try {
-            for (int i = 0; i < instanceIds.size(); i += MAX_DETACH_INSTANCE_SIZE) {
-                List<String> idPartition = instanceIds.subList(i, i + Math.min(instanceIds.size() - i, MAX_DETACH_INSTANCE_SIZE));
+            DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
+            request.setAutoScalingGroupNames(List.of(asGroupName));
+            List<String> instanceIdsToDetach = amazonASClient.describeAutoScalingGroups(request).getAutoScalingGroups().stream()
+                    .map(AutoScalingGroup::getInstances)
+                    .flatMap(Collection::stream)
+                    .map(Instance::getInstanceId)
+                    .filter(instanceIds::contains)
+                    .collect(Collectors.toList());
+            if (instanceIds.size() != instanceIdsToDetach.size()) {
+                LOGGER.info("Some instances were already detached. Requesting to detach [{}] from original list [{}].", instanceIdsToDetach, instanceIds);
+            }
+
+            for (int i = 0; i < instanceIdsToDetach.size(); i += MAX_DETACH_INSTANCE_SIZE) {
+                List<String> idPartition = instanceIdsToDetach.subList(i, i + Math.min(instanceIdsToDetach.size() - i, MAX_DETACH_INSTANCE_SIZE));
                 DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(idPartition)
                         .withShouldDecrementDesiredCapacity(true);
-                LOGGER.info("Detach instances from asGroupName: {}, instanceIds: {}, detachInstancesRequest: {}", asGroupName,
-                        instanceIds, detachInstancesRequest);
+                LOGGER.info("Detach instances from asGroupName: {}, instanceIdsToDetach: {}, detachInstancesRequest: {}", asGroupName,
+                        instanceIdsToDetach, detachInstancesRequest);
                 DetachInstancesResult result = amazonASClient.detachInstances(detachInstancesRequest);
-                LOGGER.info("Detach instances from asGroupName: {}, instanceIds: {}, result: {}", asGroupName,
-                        instanceIds, result);
+                LOGGER.info("Detach instances from asGroupName: {}, instanceIdsToDetach: {}, result: {}", asGroupName,
+                        instanceIdsToDetach, result);
             }
         } catch (AmazonServiceException e) {
             LOGGER.info("Detach instances failed: {}", instanceIds, e);
-            // it is good enough to check with string contains, because AWS instance ids are unique and the lengths are fix
-            if (retryIfUnattachedInstancesPresent &&
-                    ("ValidationError".equals(e.getErrorCode()) && e.getErrorMessage().contains("not part of Auto Scaling"))) {
-                List<String> attachedInstances = instanceIds.stream().filter(id -> !e.getErrorMessage().contains(id)).collect(Collectors.toList());
-                if (!attachedInstances.isEmpty()) {
-                    LOGGER.info("Attached instances from AWS error response: {}", attachedInstances);
-                    detachInstances(asGroupName, attachedInstances, amazonASClient, false);
-                    return;
-                }
-            }
             throw e;
         }
     }
@@ -166,6 +171,7 @@ public class AwsDownscaleService {
         Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(stackId);
-        run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck);
+        run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck,
+                String.format("There was an error when application are deleting instances %s", String.join(",", instanceIds)));
     }
 }

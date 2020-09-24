@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.dto.distrox;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.time.Duration;
@@ -80,9 +79,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(distroXTestClient.forceDelete(), withoutLogError());
-        await(STACK_DELETED);
+        LOGGER.info("Cleaning up distrox with name: {}", getName());
+        if (getResponse() != null) {
+            when(distroXTestClient.forceDelete(), key("delete-distrox-" + getName()).withSkipOnFail(false));
+            awaitForFlow(key("delete-distrox-" + getName()));
+            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Distrox: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -118,8 +122,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(distroXTestClient.refresh(), key("refresh-distrox-" + getName()));
+    public CloudbreakTestDto refresh() {
+        return when(distroXTestClient.refresh(), RunningParameter.key("refresh-distrox-" + getName()).switchToAdmin());
     }
 
     @Override
@@ -187,6 +191,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
+    public DistroXTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
+    public DistroXTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
+    }
+
     private void waitTillFlowInOperation() {
         while (hasFlow()) {
             try {
@@ -199,9 +212,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private boolean hasFlow() {
         try {
-            return getTestContext().getCloudbreakClient().getCloudbreakClient()
-                    .flowEndpoint()
-                    .getFlowLogsByResourceName(getName()).stream().anyMatch(flowentry -> !flowentry.getFinalized());
+            return ((CloudbreakClient) getTestContext().getAdminMicroserviceClient(CloudbreakClient.class))
+                    .getCloudbreakClient()
+                    .flowPublicEndpoint()
+                    .hasFlowRunningByChainId(getLastKnownFlowChainId(), getCrn()).getHasActiveFlow();
         } catch (NotFoundException e) {
             return false;
         }
@@ -268,11 +282,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
             return null;
         }
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
                 null);
-        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("DistroX", auditEvents, getResponse(), hasSpotTermination);
@@ -281,5 +295,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 }

@@ -65,9 +65,6 @@ uploadBootArchives {
   }
 }
 
-// override Spring Depenendencies
-ext['kafka.version'] = '2.3.1'
-
 configurations {
   compile {
     resolutionStrategy {
@@ -143,7 +140,6 @@ dependencyManagement {
     dependency group: 'javax.mail',                         name: 'mail',                        version: '1.5.0-b01'
     dependency group: 'dnsjava',                            name: 'dnsjava',                     version: '2.1.7'
 
-    dependency group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
     dependency group: 'org.springframework.retry',          name: 'spring-retry',                version: '1.2.0.RELEASE'
     dependency group: 'org.springframework',                name: 'spring-context-support',      version: springFrameworkVersion
 
@@ -176,7 +172,6 @@ dependencies {
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey'
   compile group: 'org.springframework.boot',           name: 'spring-boot-starter-quartz'
 
-  compile group: 'org.springframework.kafka',          name: 'spring-kafka'
   compile group: 'org.springframework.retry',          name: 'spring-retry'
 
   compile group: 'io.projectreactor',                  name: 'reactor-core'
@@ -205,9 +200,6 @@ dependencies {
   compile group: 'io.springfox',                       name: 'springfox-core'
   compile group: 'io.springfox',                       name: 'springfox-swagger-ui'
 
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-spring-jaeger-starter',       version: opentracingSpringJaegerStarterVersion
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-jaxrs2',                      version: opentracingJaxrs2Version
-  compile group: 'io.opentracing.contrib',             name: 'opentracing-jdbc',                        version: opentracingJdbcVersion
   compile group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
@@ -221,6 +213,7 @@ dependencies {
   compile project(':cloud-reactor-api')
   compile project(':cloud-reactor')
   compile project(':structuredevent-model')
+  compile project(':structuredevent-service-legacy')
   compile project(':template-manager-blueprint')
   compile project(':template-manager-recipe')
   compile project(':template-manager-cmtemplate')
@@ -254,7 +247,7 @@ dependencies {
   runtime project(':cloud-yarn')
   runtime project(':cluster-cm')
   runtime project(':auth-connector')
-  compile project(':audit-connector')
+  runtime project(':audit-connector')
   runtime group: 'activation',                    name: 'activation'
 
   testCompile project(path: ':core-model', configuration: 'tests')

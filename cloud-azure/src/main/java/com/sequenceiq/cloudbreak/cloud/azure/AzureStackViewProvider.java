@@ -58,7 +58,8 @@ class AzureStackViewProvider {
             for (CloudInstance instance : group.getInstances()) {
                 String imageId = instance.getTemplate().getImageId();
                 if (StringUtils.isNotBlank(imageId)) {
-                    String imageCustomName = imageNameMap.computeIfAbsent(imageId, s -> azureStorage.getCustomImageId(client, ac, cloudStack, imageId));
+                    String imageCustomName = imageNameMap.computeIfAbsent(
+                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
                     customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
                 }
             }

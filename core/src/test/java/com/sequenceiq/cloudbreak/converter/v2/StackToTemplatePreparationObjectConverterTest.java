@@ -32,6 +32,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -58,13 +60,13 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -75,8 +77,10 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -94,6 +98,8 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 public class StackToTemplatePreparationObjectConverterTest {
 
@@ -223,7 +229,14 @@ public class StackToTemplatePreparationObjectConverterTest {
     private ResourceService resourceService;
 
     @Mock
+    private IdBrokerService idBrokerService;
+
+    @Mock
     private GatewayConfigService gatewayConfigService;
+
+    @Spy
+    @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
+    private IdBrokerConverterUtil idBrokerConverterUtil = new IdBrokerConverterUtil();
 
     @Before
     public void setUp() throws IOException {
@@ -273,6 +286,10 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(clusterService.getById(anyLong())).thenReturn(cluster);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
         when(resourceService.getAllByStackId(anyLong())).thenReturn(Collections.EMPTY_LIST);
+        IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster, cluster.getWorkspace());
+        cluster.setIdBroker(idbroker);
+        when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
+        when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
     }
 
     @Test
@@ -301,16 +318,16 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST,
-                new Json(""), configQueryEntries)).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(),
+                eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertTrue(result.getFileSystemConfigurationView().isPresent());
         assertEquals(expected, result.getFileSystemConfigurationView().get());
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(clusterServiceFileSystem,
-                stackMock, Collections.EMPTY_LIST, new Json(""), configQueryEntries);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(clusterServiceFileSystem),
+                eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
     }
 
     @Test
@@ -319,14 +336,14 @@ public class StackToTemplatePreparationObjectConverterTest {
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(null);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST, new Json(""),
-                new ConfigQueryEntries())).thenReturn(expected);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, resourceType -> Collections.EMPTY_LIST,
+                new Json(""), new ConfigQueryEntries())).thenReturn(expected);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertFalse(result.getFileSystemConfigurationView().isPresent());
         verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem,
-                stackMock, Collections.EMPTY_LIST, new Json(""), new ConfigQueryEntries());
+                stackMock, resourceType -> Collections.EMPTY_LIST, new Json(""), new ConfigQueryEntries());
     }
 
     @Test
@@ -340,8 +357,8 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, Collections.EMPTY_LIST, new Json(""),
-                configQueryEntries)).thenThrow(invokedException);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(), eq(new Json("")),
+                eq(configQueryEntries))).thenThrow(invokedException);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
         expectedException.expect(CloudbreakServiceException.class);

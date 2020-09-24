@@ -13,7 +13,11 @@ buildscript {
 }
 
 dependencies {
-  implementation group: 'org.slf4j',        name: 'slf4j-api',    version: slf4jApiVersion
+  compile project(':common')
+
+  compile        group: 'io.opentracing.contrib',       name: 'opentracing-grpc',     version: opentracingGrpcVersion
+  implementation group: 'com.squareup.okhttp',          name: 'okhttp',               version: '2.7.4'
+  implementation group: 'org.slf4j',                    name: 'slf4j-api',            version: slf4jApiVersion
 
   implementation ("io.grpc:grpc-all:1.22.0") {
     exclude group: 'org.mockito'
@@ -22,7 +26,7 @@ dependencies {
     exclude group: 'org.hamcrest'
     exclude group: 'io.grpc', module: 'grpc-testing'
   }
-  compile group: 'com.squareup.okhttp',     name: 'okhttp',       version: '2.7.4'
+
   testImplementation (group: 'org.mockito',  name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }

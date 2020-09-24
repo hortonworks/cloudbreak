@@ -52,9 +52,10 @@ public class DnsRecordServiceTest {
     @Test
     public void testDeleteDnsRecordByFqdn() throws Exception {
         // GIVEN
-        given(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).willReturn(createStack());
+        Stack stack = createStack();
+        given(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).willReturn(stack);
         given(freeIpaService.findByStack(any())).willReturn(createFreeIpa());
-        given(freeIpaClientFactory.getFreeIpaClientByAccountAndEnvironment(ENV_CRN, ACCOUNT_ID)).willReturn(freeIpaClient);
+        given(freeIpaClientFactory.getFreeIpaClientForStack(stack)).willReturn(freeIpaClient);
         given(freeIpaClient.findAllDnsZone()).willReturn(createDnsZones());
         given(freeIpaClient.findAllDnsRecordInZone(DOMAIN)).willReturn(createDnsRecords());
         // WHEN

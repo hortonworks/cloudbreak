@@ -68,6 +68,14 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.SPAN_ID.toString(), spanId);
     }
 
+    public static void addOperationId(String operationId) {
+        MDC.put(LoggerContextKey.OPERATION_ID.toString(), operationId);
+    }
+
+    public static void removeOperationId() {
+        removeMdcField(LoggerContextKey.OPERATION_ID.toString());
+    }
+
     public static void buildMdcContext(Object object) {
         if (object == null) {
             MDC.put(LoggerContextKey.USER_CRN.toString(), null);

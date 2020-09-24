@@ -8,8 +8,11 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
+import com.sequenceiq.it.cloudbreak.assertion.audit.LdapConfigAuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.ldap.LdapListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
@@ -21,6 +24,12 @@ public class LdapConfigTest extends AbstractIntegrationTest {
 
     @Inject
     private LdapTestClient ldapTestClient;
+
+    @Inject
+    private LdapListStructuredEventAssertions ldapListStructuredEventAssertions;
+
+    @Inject
+    private LdapConfigAuditGrpcServiceAssertion ldapConfigAuditGrpcServiceAssertion;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -35,7 +44,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "a valid ldap request",
             when = "calling create ldap",
             then = "the ldap should be created")
-    public void testCreateValidLdap(TestContext testContext) {
+    public void testCreateValidLdap(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
@@ -47,6 +56,11 @@ public class LdapConfigTest extends AbstractIntegrationTest {
                     assertNotNull(entity.getResponse());
                     return entity;
                 })
+                .when(ldapTestClient.deleteV1())
+                .then(ldapListStructuredEventAssertions::checkCreateEvents)
+                .then(ldapListStructuredEventAssertions::checkDeleteEvents)
+                .then(ldapConfigAuditGrpcServiceAssertion::create)
+                .then(ldapConfigAuditGrpcServiceAssertion::delete)
                 .validate();
     }
 
@@ -55,7 +69,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "a valid active directory request",
             when = "calling create ldap",
             then = "the ldap should be created")
-    public void testCreateValidAd(TestContext testContext) {
+    public void testCreateValidAd(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
@@ -76,7 +90,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "an invalid ldap request with empty name",
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid name")
-    public void testCreateLdapWithMissingName(TestContext testContext) {
+    public void testCreateLdapWithMissingName(MockedTestContext testContext) {
         String key = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
@@ -94,7 +108,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "an invalid ldap request with empty environmentCrn",
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid environmentCrn")
-    public void testCreateLdapWithMissingEnvironmentCrn(TestContext testContext) {
+    public void testCreateLdapWithMissingEnvironmentCrn(MockedTestContext testContext) {
         String key = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
@@ -112,7 +126,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "an invalid ldap request with specific characters in the name",
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid name")
-    public void testCreateLdapWithInvalidName(TestContext testContext) {
+    public void testCreateLdapWithInvalidName(MockedTestContext testContext) {
         testContext
                 .given(LdapTestDto.class)
                 .valid()
@@ -129,7 +143,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "an invalid ldap request with too long name",
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid name")
-    public void testCreateLdapWithLongName(TestContext testContext) {
+    public void testCreateLdapWithLongName(MockedTestContext testContext) {
         String longName = getLongNameGenerator().stringGenerator(101);
         testContext
                 .given(LdapTestDto.class)
@@ -147,7 +161,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "an invalid ldap request with too long description",
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid description")
-    public void testCreateLdapWithLongDesc(TestContext testContext) {
+    public void testCreateLdapWithLongDesc(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         String longDesc = getLongNameGenerator().stringGenerator(1001);
         testContext
@@ -167,7 +181,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "a valid ldap request",
             when = "calling create ldap and delete and create again with the same name",
             then = "ldap should be created")
-    public void testCreateDeleteCreateAgain(TestContext testContext) {
+    public void testCreateDeleteCreateAgain(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, LdapTestDto.class)
@@ -189,7 +203,7 @@ public class LdapConfigTest extends AbstractIntegrationTest {
             given = "a valid ldap request",
             when = "calling create ldap and create again with the same environment",
             then = "getting BadRequestException because only one ldap can exist with same environment in an account at the same time")
-    public void testCreateLdapWithSameEnvironment(TestContext testContext) {
+    public void testCreateLdapWithSameEnvironment(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
         testContext
                 .given(name, LdapTestDto.class)

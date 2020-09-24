@@ -29,25 +29,49 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
     public boolean canRetry(RetryContext context) {
         Throwable lastThrowable = context.getLastThrowable();
         if (lastThrowable == null) {
+            LOGGER.debug("lastThrowable is null");
             return true;
+        } else {
+            return handleLastThrowableNotNull(context, lastThrowable);
         }
+    }
+
+    private boolean handleLastThrowableNotNull(RetryContext context, Throwable lastThrowable) {
         if (lastThrowable instanceof ApiException) {
-            if (context.getRetryCount() <= maxAttempts) {
-                int code = ((ApiException) lastThrowable).getCode();
-                if (code != 0) {
-                    HttpStatus httpStatus = HttpStatus.valueOf(code);
-                    boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
-                    LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})",
-                            code,
-                            httpStatus5xxServerError,
-                            context.getRetryCount(),
-                            maxAttempts);
-                    return httpStatus5xxServerError;
-                }
-            } else {
-                return false;
-            }
+            return handleApiException(context, (ApiException) lastThrowable);
+        } else {
+            return handleNotApiException(lastThrowable);
         }
+    }
+
+    private boolean handleApiException(RetryContext context, ApiException lastThrowable) {
+        if (context.getRetryCount() <= maxAttempts) {
+            return handleMaxRetryCountNotReached(context, lastThrowable);
+        } else {
+            LOGGER.debug("Max attempt reached: attempt: [{}] of [{}]", context.getRetryCount(), maxAttempts);
+            return false;
+        }
+    }
+
+    private boolean handleMaxRetryCountNotReached(RetryContext context, ApiException lastThrowable) {
+        int code = lastThrowable.getCode();
+        if (code != 0) {
+            return handleStatusCodeNotZero(context, code);
+        } else {
+            LOGGER.debug("HTTP status code is 0");
+            return false;
+        }
+    }
+
+    private boolean handleStatusCodeNotZero(RetryContext context, int code) {
+        HttpStatus httpStatus = HttpStatus.valueOf(code);
+        boolean httpStatus5xxServerError = httpStatus.is5xxServerError();
+        LOGGER.warn("{} Exception occurred during CM API call, retryable: {} ({}/{})", code, httpStatus5xxServerError, context.getRetryCount(), maxAttempts);
+        return httpStatus5xxServerError;
+    }
+
+    private boolean handleNotApiException(Throwable lastThrowable) {
+        LOGGER.debug("'lastThrowble' is not an 'ApiException'. Exception type: [{}]", lastThrowable.getClass().getCanonicalName());
         return false;
     }
 
@@ -66,6 +90,8 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
         contextSupport.registerThrowable(throwable);
         if (throwable != null) {
             LOGGER.warn("Exception occurred during CM API call.", throwable);
+        } else {
+            LOGGER.debug("Throwable is null");
         }
     }
 }

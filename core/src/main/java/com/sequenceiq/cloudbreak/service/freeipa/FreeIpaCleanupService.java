@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -136,7 +138,8 @@ public class FreeIpaCleanupService {
         try {
             CleanupRequest cleanupRequest = createCleanupRequest(stack, stepsToSkip, hostNames, ips);
             LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
-            OperationStatus cleanup = freeIpaV1Endpoint.cleanup(cleanupRequest);
+            OperationStatus cleanup = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    freeIpaV1Endpoint.internalCleanup(cleanupRequest, Crn.fromString(stack.getResourceCrn()).getAccountId()));
             LOGGER.info("Cleanup operation started: {}", cleanup);
             return cleanup;
         } catch (WebApplicationException e) {

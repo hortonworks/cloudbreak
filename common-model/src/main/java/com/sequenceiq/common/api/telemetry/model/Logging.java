@@ -3,6 +3,7 @@ package com.sequenceiq.common.api.telemetry.model;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 
@@ -14,6 +15,8 @@ public class Logging implements Serializable {
     private S3CloudStorageV1Parameters s3;
 
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
+
+    private GcsCloudStorageV1Parameters gcs;
 
     private CloudwatchParams cloudwatch;
 
@@ -39,6 +42,14 @@ public class Logging implements Serializable {
 
     public void setAdlsGen2(AdlsGen2CloudStorageV1Parameters adlsGen2) {
         this.adlsGen2 = adlsGen2;
+    }
+
+    public GcsCloudStorageV1Parameters getGcs() {
+        return gcs;
+    }
+
+    public void setGcs(GcsCloudStorageV1Parameters gcs) {
+        this.gcs = gcs;
     }
 
     public CloudwatchParams getCloudwatch() {

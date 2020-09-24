@@ -67,7 +67,8 @@ public class CloudStorageValidator {
 
             ObjectStorageValidateRequest request = createObjectStorageValidateRequest(
                     environment.getCloudPlatform(), cloudCredential, cloudStorageRequest);
-            ObjectStorageValidateResponse response = cloudProviderServicesV4Endpoint.validateObjectStorage(request);
+            ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    cloudProviderServicesV4Endpoint.validateObjectStorage(request));
 
             LOGGER.info("ValidateObjectStorage: request: {}, response: {}", JsonUtil.writeValueAsStringSilent(request),
                     JsonUtil.writeValueAsStringSilent(response));

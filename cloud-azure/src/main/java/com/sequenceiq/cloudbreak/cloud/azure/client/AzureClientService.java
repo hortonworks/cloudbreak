@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.rest.LogLevel;
+import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -23,6 +24,9 @@ public class AzureClientService {
     @Inject
     private AuthenticationContextProvider authenticationContextProvider;
 
+    @Inject
+    private AzureOkHttp3TracingInterceptor tracingInterceptor;
+
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         AzureClient azureClient = getClient(cloudCredential);
@@ -33,7 +37,7 @@ public class AzureClientService {
     public AzureClient getClient(CloudCredential cloudCredential) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AzureClientCredentials azureClientCredentials = new AzureClientCredentials(azureCredentialView, logLevel, cbRefreshTokenClientProvider,
-                authenticationContextProvider);
+                authenticationContextProvider, tracingInterceptor);
         return new AzureClient(azureClientCredentials);
     }
 }

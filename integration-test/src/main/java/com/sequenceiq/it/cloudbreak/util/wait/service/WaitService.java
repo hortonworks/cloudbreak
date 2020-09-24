@@ -70,9 +70,8 @@ public class WaitService<T> {
     private void sleep(Duration duration) {
         try {
             Thread.sleep(duration.toMillis());
-        } catch (InterruptedException e) {
-            LOGGER.error("Interrupted exception occurred during waiting.", e);
-            Thread.currentThread().interrupt();
+        } catch (InterruptedException ignored) {
+            LOGGER.error("Interrupted exception occurred during waiting.", ignored);
         }
     }
 }

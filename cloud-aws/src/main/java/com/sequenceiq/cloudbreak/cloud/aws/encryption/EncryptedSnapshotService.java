@@ -142,14 +142,15 @@ public class EncryptedSnapshotService {
         Waiter<DescribeSnapshotsRequest> snapshotWaiter = client.waiters().snapshotCompleted();
         DescribeSnapshotsRequest describeSnapshotsRequest = new DescribeSnapshotsRequest().withSnapshotIds(snapshotResult.getSnapshot().getSnapshotId());
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(snapshotWaiter, describeSnapshotsRequest, stackCancellationCheck);
+        run(snapshotWaiter, describeSnapshotsRequest, stackCancellationCheck, String.format("Snapshot creation failed (snapshot id: %s)",
+                snapshotResult.getSnapshot().getSnapshotId()));
     }
 
     private void checkEbsVolumeStatus(AuthenticatedContext ac, AmazonEC2Client client, String volumeId) {
         Waiter<DescribeVolumesRequest> volumeChecker = client.waiters().volumeAvailable();
         DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest().withVolumeIds(volumeId);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(volumeChecker, describeVolumesRequest, stackCancellationCheck);
+        run(volumeChecker, describeVolumesRequest, stackCancellationCheck, String.format("Volume creation failed (volume id: %s)", volumeId));
     }
 
     private CreateSnapshotRequest prepareCreateSnapshotRequest(CreateVolumeResult volumeResult) {

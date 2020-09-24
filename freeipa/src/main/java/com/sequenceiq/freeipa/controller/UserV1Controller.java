@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -11,16 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
+import com.google.common.collect.Iterables;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
@@ -35,11 +36,11 @@ import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationSta
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
-@InternalReady
 @AuthorizationResource
 public class UserV1Controller implements UserV1Endpoint {
 
@@ -80,10 +81,10 @@ public class UserV1Controller implements UserV1Endpoint {
             default:
                 throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
         }
-        return checkOperationRejected(
-                operationToSyncOperationStatus.convert(
-                        userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
-                userCrnFilter, machineUserCrnFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)));
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
+        Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
+                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
     @Override
@@ -94,10 +95,22 @@ public class UserV1Controller implements UserV1Endpoint {
 
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(nullToEmpty(request.getUsers()),
+                nullToEmpty(request.getMachineUsers()),
+                getOptionalDeletedWorkloadUser(request.getDeletedWorkloadUsers()));
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
-                nullToEmpty(request.getEnvironments()), nullToEmpty(request.getUsers()),
-                nullToEmpty(request.getMachineUsers()), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                nullToEmpty(request.getEnvironments()), userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
+    }
+
+    private Optional<String> getOptionalDeletedWorkloadUser(Set<String> deletedWorkloadUsers) {
+        if (deletedWorkloadUsers.size() == 1) {
+            return Optional.of(Iterables.getOnlyElement(deletedWorkloadUsers));
+        } else if (deletedWorkloadUsers.isEmpty()) {
+            return Optional.empty();
+        } else {
+            throw new BadRequestException("Only 1 deleted workload user is supported");
+        }
     }
 
     @Override

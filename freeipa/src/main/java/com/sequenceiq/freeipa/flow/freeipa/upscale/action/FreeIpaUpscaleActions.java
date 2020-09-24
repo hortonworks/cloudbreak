@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
+
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_SAVE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_STARTING_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
@@ -21,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.ClientErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
@@ -42,8 +47,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.type.CommonResourceType;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -197,6 +204,7 @@ public class FreeIpaUpscaleActions {
                     finishAddInstances(context, payload);
                     sendEvent(context, UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
                 } catch (Exception e) {
+                    LOGGER.error("Failed to validate the instances", e);
                     sendEvent(context, UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT.selector(),
                             new UpscaleFailureEvent(stack.getId(), "Validating new instances", Set.of(), Map.of(), e));
                 }
@@ -314,6 +322,7 @@ public class FreeIpaUpscaleActions {
                     }
                     event = new StackEvent(UpscaleFlowEvent.UPSCALE_TLS_SETUP_FINISHED_EVENT.event(), stack.getId());
                 } catch (Exception e) {
+                    LOGGER.error("Failed to setup TLS", e);
                     event = new UpscaleFailureEvent(stack.getId(), "Setting ups TLS", Set.of(), Map.of(), e);
                 }
                 sendEvent(context, event.selector(), event);
@@ -413,9 +422,6 @@ public class FreeIpaUpscaleActions {
     @Bean(name = "UPSCALE_UPDATE_METADATA_STATE")
     public Action<?, ?> updateMetadataAction() {
         return new AbstractUpscaleAction<>(PostInstallFreeIpaSuccess.class) {
-            @Inject
-            private OperationService operationService;
-
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
@@ -428,6 +434,38 @@ public class FreeIpaUpscaleActions {
                     }
                 }
                 sendEvent(context, UPSCALE_UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE")
+    public Action<?, ?> updateEnvironmentStackConfigAction() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Inject
+            private EnvironmentEndpoint environmentEndpoint;
+
+            @Inject
+            private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating environment stack config");
+                try {
+                    ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+                        environmentEndpoint.updateConfigsInEnvironmentByCrn(stack.getEnvironmentCrn());
+                    });
+                    sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+                } catch (ClientErrorException e) {
+                    String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                    LOGGER.error("Failed to update the stack config due to {}", errorMessage, e);
+                    sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT.selector(),
+                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), Map.of(), e));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to update the stack config", e);
+                    sendEvent(context, UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT.selector(),
+                            new UpscaleFailureEvent(stack.getId(), "Updating environment stack config", Set.of(), Map.of(), e));
+                }
             }
         };
     }
@@ -488,6 +526,7 @@ public class FreeIpaUpscaleActions {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), getFailedStatus(variables), errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                enableStatusChecker(stack, "Failed upscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

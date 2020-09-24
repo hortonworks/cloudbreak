@@ -1,18 +1,21 @@
 package com.sequenceiq.it.cloudbreak.dto.blueprint;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.WebApplicationException;
+import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Request, BlueprintV4Response, BlueprintTestDto> {
@@ -23,17 +26,20 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
 
     private Collection<BlueprintV4ViewResponse> viewResponses;
 
+    @Inject
+    private BlueprintTestClient blueprintTestClient;
+
     public BlueprintTestDto(TestContext testContext) {
         super(new BlueprintV4Request(), testContext);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        try {
-            cloudbreakClient.getCloudbreakClient().clusterTemplateV4EndPoint().deleteByName(cloudbreakClient.getWorkspaceId(), getName());
-        } catch (WebApplicationException ignore) {
-            LOGGER.info("Something happend.");
+        LOGGER.info("Cleaning up blueprint with name: {}", getName());
+        if (getResponse() != null) {
+            when(blueprintTestClient.deleteV4(), key("delete-blueprint-" + getName()).withSkipOnFail(false));
+        } else {
+            LOGGER.info("Blueprint: {} response is null!", getName());
         }
     }
 

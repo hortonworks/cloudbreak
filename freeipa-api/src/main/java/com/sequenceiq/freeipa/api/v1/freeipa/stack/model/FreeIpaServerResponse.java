@@ -46,4 +46,13 @@ public class FreeIpaServerResponse extends FreeIpaServerBase {
         this.freeIpaPort = freeIpaPort;
     }
 
+    @Override
+    public String toString() {
+        return "FreeIpaServerResponse{" +
+                "FreeIpaServerBase=" + super.toString() +
+                ", serverIp=" + serverIp +
+                ", freeIpaHost='" + freeIpaHost + '\'' +
+                ", freeIpaPort=" + freeIpaPort +
+                '}';
+    }
 }

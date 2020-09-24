@@ -101,6 +101,7 @@ public class RepairInstancesService {
 
     private Map<String, InstanceStatus> getInstanceHealthMap(String accountId, String environmentCrn) {
         return healthDetailsService.getHealthDetails(environmentCrn, accountId).getNodeHealthDetails().stream()
+                .filter(nodeHealthDetails -> Objects.nonNull(nodeHealthDetails.getInstanceId()))
                 .collect(Collectors.toMap(NodeHealthDetails::getInstanceId, NodeHealthDetails::getStatus));
     }
 
@@ -149,7 +150,7 @@ public class RepairInstancesService {
                 .filter(im -> im.isTerminated() || im.isDeletedOnProvider())
                 .map(InstanceMetaData::getInstanceId)
                 .filter(Objects::nonNull)
-                .filter(id -> !requestedInstanceIds.contains(id))
+                .filter(id -> Objects.isNull(requestedInstanceIds) || !requestedInstanceIds.contains(id))
                 .collect(Collectors.toList());
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
@@ -77,8 +78,11 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 import rx.Completable;
 import rx.Observable;
@@ -138,7 +142,7 @@ public class AzureClient {
 
     public boolean resourceGroupExists(String name) {
         try {
-                return getResourceGroups().contain(name);
+            return getResourceGroups().contain(name);
         } catch (CloudException e) {
             if (e.getMessage().contains("Status code 403")) {
                 LOGGER.info("Resource group {} does not exist or insufficient permission to access it, exception: {}", name, e);
@@ -146,10 +150,6 @@ public class AzureClient {
             }
             throw e;
         }
-    }
-
-    public boolean isResourceGroupEmpty(String name) {
-        return handleAuthException(() -> azure.genericResources().listByResourceGroup(name).isEmpty());
     }
 
     public void deleteResourceGroup(String name) {
@@ -180,6 +180,13 @@ public class AzureClient {
 
     public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {
         return handleAuthException(() -> azure.deployments().checkExistence(resourceGroupName, deploymentName));
+    }
+
+    public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
+        return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
+                .map(Deployment::provisioningState)
+                .map(AzureStackStatus::mapResourceStatus)
+                .orElse(ResourceStatus.DELETED);
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
@@ -360,7 +367,9 @@ public class AzureClient {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
             CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+            LOGGER.debug("Downloading {} container attributes.", container.getName());
             container.downloadAttributes();
+            LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
             cloudPageBlob.downloadAttributes();
             return cloudPageBlob.getCopyState();
         } catch (URISyntaxException e) {
@@ -397,7 +406,9 @@ public class AzureClient {
         try {
             CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-            return blobClient.getContainerReference(containerName);
+            CloudBlobContainer containerReference = blobClient.getContainerReference(containerName);
+            LOGGER.debug("Blob container {} reference retrieved.", containerReference.getName());
+            return containerReference;
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't get blob container, URI is not valid", e);
         } catch (InvalidKeyException e) {
@@ -487,6 +498,10 @@ public class AzureClient {
         handleAuthException(() -> azure.virtualMachines().powerOff(resourceGroup, vmName));
     }
 
+    public Completable stopVirtualMachineAsync(String resourceGroup, String vmName) {
+        return handleAuthException(() -> azure.virtualMachines().powerOffAsync(resourceGroup, vmName));
+    }
+
     public Completable deletePublicIpAddressByNameAsync(String resourceGroup, String ipName) {
         return handleAuthException(() -> azure.publicIPAddresses().deleteByResourceGroupAsync(resourceGroup, ipName));
     }
@@ -503,7 +518,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName));
     }
 
-    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+    public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, String region, boolean createIfNotFound) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = CustomVMImageNameProvider.get(region, vhdName);
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
@@ -514,11 +529,16 @@ public class AzureClient {
                 .findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.debug("Custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            return virtualMachineCustomImage.get().id();
+            VirtualMachineCustomImage customImage = virtualMachineCustomImage.get();
+            return new AzureImage(customImage.id(), customImage.name(), true);
         } else {
-            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
-            VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
-            return customImage.id();
+            LOGGER.debug("Custom image NOT found in '{}' resource group with name '{}', creating it now: {}", resourceGroup, imageName, createIfNotFound);
+            if (createIfNotFound) {
+                VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
+                return new AzureImage(customImage.id(), customImage.name(), false);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -530,16 +550,20 @@ public class AzureClient {
         return handleAuthException(() -> {
             LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
             if (!azure.resourceGroups().contain(resourceGroup)) {
-                azure.resourceGroups().define(resourceGroup).withRegion(region).create();
+                azure.resourceGroups()
+                        .define(resourceGroup)
+                        .withRegion(region)
+                        .create();
             }
             LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
                     fromVhdUri, imageName, resourceGroup, region);
-            return azure.virtualMachineCustomImages()
+            return measure(() -> azure.virtualMachineCustomImages()
                     .define(imageName)
                     .withRegion(region)
                     .withExistingResourceGroup(resourceGroup)
                     .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
-                    .create();
+                    .create(),
+                    LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
     }
 
@@ -600,6 +624,18 @@ public class AzureClient {
 
     public Observable<String> deleteNetworksAsync(Collection<String> networkIds) {
         return handleAuthException(() -> azure.networks().deleteByIdsAsync(networkIds));
+    }
+
+    public void deleteNetworkInResourceGroup(String resourceGroup, String networkId) {
+        handleAuthException(() -> azure.networks().deleteByResourceGroup(resourceGroup, networkId));
+    }
+
+    public Observable<String> deleteStorageAccountsAsync(Collection<String> accountIds) {
+        return handleAuthException(() -> azure.storageAccounts().deleteByIdsAsync(accountIds));
+    }
+
+    public Observable<String> deleteImagesAsync(Collection<String> imageIds) {
+        return handleAuthException(() -> azure.virtualMachineCustomImages().deleteByIdsAsync(imageIds));
     }
 
     public NetworkSecurityGroups getSecurityGroups() {

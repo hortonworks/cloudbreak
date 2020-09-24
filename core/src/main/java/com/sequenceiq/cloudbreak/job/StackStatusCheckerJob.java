@@ -47,8 +47,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
@@ -58,7 +58,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
 
     @Inject
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Inject
     private StackService stackService;

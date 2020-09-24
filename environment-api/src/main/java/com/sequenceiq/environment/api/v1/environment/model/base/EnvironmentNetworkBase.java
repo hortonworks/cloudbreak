@@ -12,6 +12,7 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
@@ -54,6 +55,9 @@ public abstract class EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.MOCK_PARAMETERS)
     private EnvironmentNetworkMockParams mock;
+
+    @ApiModelProperty(EnvironmentModelDescription.GCP_SPECIFIC_PARAMETERS)
+    private EnvironmentNetworkGcpParams gcp;
 
     public Set<String> getSubnetIds() {
         return subnetIds;
@@ -136,9 +140,19 @@ public abstract class EnvironmentNetworkBase {
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", aws=" + aws +
+                ", gcp=" + gcp +
                 ", azure=" + azure +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 '}';
+
+    }
+
+    public EnvironmentNetworkGcpParams getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(EnvironmentNetworkGcpParams gcp) {
+        this.gcp = gcp;
     }
 }

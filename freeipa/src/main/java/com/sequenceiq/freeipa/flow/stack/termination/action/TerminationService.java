@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
+import static java.util.function.Predicate.not;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -89,6 +91,11 @@ public class TerminationService {
         }
     }
 
+    public void finalizeTerminationForInstancesWithoutInstanceIds(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        terminateInstancesWithoutInstanceIds(stack);
+    }
+
     private void terminateInstanceGroups(Stack stack) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
@@ -99,8 +106,22 @@ public class TerminationService {
 
     private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
-        stack.getNotDeletedInstanceMetaDataList().stream()
+        stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
                 .filter(metaData -> Objects.isNull(instanceIds) || instanceIds.contains(metaData.getInstanceId()))
+                .forEach(metaData -> {
+                    metaData.setTerminationDate(clock.getCurrentTimeMillis());
+                    metaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                    instanceMetaDatas.add(metaData);
+                });
+        instanceMetaDataService.saveAll(instanceMetaDatas);
+    }
+
+    private void terminateInstancesWithoutInstanceIds(Stack stack) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>();
+        stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
+                .filter(metaData -> Objects.isNull(metaData.getInstanceId()))
                 .forEach(metaData -> {
                     metaData.setTerminationDate(clock.getCurrentTimeMillis());
                     metaData.setInstanceStatus(InstanceStatus.TERMINATED);

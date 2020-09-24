@@ -34,6 +34,8 @@ public class NetworkDto {
 
     private final MockParams mock;
 
+    private final GcpParams gcp;
+
     private final String networkCidr;
 
     private final Set<String> networkCidrs;
@@ -74,6 +76,7 @@ public class NetworkDto {
         networkCidr = builder.networkCidr;
         networkCidrs = builder.networkCidrs;
         networkId = builder.networkId;
+        gcp = builder.gcp;
         privateSubnetCreation = builder.privateSubnetCreation;
         serviceEndpointCreation = builder.serviceEndpointCreation;
         outboundInternetTraffic = builder.outboundInternetTraffic;
@@ -119,6 +122,10 @@ public class NetworkDto {
 
     public MockParams getMock() {
         return mock;
+    }
+
+    public GcpParams getGcp() {
+        return gcp;
     }
 
     public Set<String> getSubnetIds() {
@@ -198,6 +205,7 @@ public class NetworkDto {
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", aws=" + aws +
                 ", azure=" + azure +
+                ", gcp=" + gcp +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", networkCidr='" + networkCidr + '\'' +
@@ -226,6 +234,8 @@ public class NetworkDto {
         private AzureParams azure;
 
         private YarnParams yarn;
+
+        private GcpParams gcp;
 
         private MockParams mock;
 
@@ -277,6 +287,7 @@ public class NetworkDto {
             dwxSubnets = networkDto.dwxSubnets;
             liftieSubnets = networkDto.liftieSubnets;
             networkCidrs = networkDto.networkCidrs;
+            gcp = networkDto.gcp;
         }
 
         public Builder withId(Long id) {
@@ -304,6 +315,12 @@ public class NetworkDto {
         public Builder withYarn(YarnParams yarn) {
             this.yarn = yarn;
             cloudPlatform = CloudPlatform.YARN;
+            return this;
+        }
+
+        public Builder withGcp(GcpParams gcp) {
+            this.gcp = gcp;
+            cloudPlatform = CloudPlatform.GCP;
             return this;
         }
 

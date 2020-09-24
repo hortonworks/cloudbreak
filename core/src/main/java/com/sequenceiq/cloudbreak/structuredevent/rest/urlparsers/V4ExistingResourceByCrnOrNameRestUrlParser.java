@@ -6,8 +6,10 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
+public class V4ExistingResourceByCrnOrNameRestUrlParser extends LegacyRestUrlParser {
 
     private static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
@@ -18,11 +20,11 @@ public class V4ExistingResourceByCrnOrNameRestUrlParser extends RestUrlParser {
     // v4/{workspaceId}/blueprints/name/{name}
     // v4/{workspaceId}/blueprints/crn/{name}
     private static final Pattern PATTERN = Pattern
-            .compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stacks|distrox|cluster_templates)/(?:name|crn)/([^/]+)");
+            .compile("v4/(\\d+)/(blueprints|image_catalogs|recipes|stacks|distrox|cluster_templates)/(?:name|crn)/([^/]+)(/\\w+)?");
 
     @Override
     protected List<String> parsedMethods() {
-        return List.of("DELETE", "GET");
+        return List.of("DELETE", "GET", "PUT");
     }
 
     @Override

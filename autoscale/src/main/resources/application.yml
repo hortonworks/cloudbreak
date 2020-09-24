@@ -44,22 +44,26 @@ periscope:
       addr: localhost
       port: 5432
   cloudbreak.url: http://localhost:9091
+  notification:
+    endpoint: http://localhost:3000/notifications
   entitlementCheckEnabled: true
   enabledAutoscaleMonitors:
     time-monitor:
       enabled: true
     load-monitor:
       enabled: true
-    cluster-manager-host-health-monitor:
-      enabled: false
     cluster-status-monitor:
       enabled: true
-    prometheus-monitor:
-      enabled: false
 
 cb:
   server:
     contextPath: "/cb"
+  cm:
+    client:
+      cluster.proxy.timeout: 90000
+      connect.timeout.seconds: 100
+      read.timeout.seconds: 100
+      write.timeout.seconds: 100
 
 rest:
   debug: false

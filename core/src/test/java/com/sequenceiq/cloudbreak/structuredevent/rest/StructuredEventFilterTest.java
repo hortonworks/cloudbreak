@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest;
 
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_CRN;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_ID;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_CRN;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -35,8 +35,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -45,13 +45,13 @@ import com.sequenceiq.flow.ha.NodeConfig;
 class StructuredEventFilterTest {
 
     @InjectMocks
-    private StructuredEventFilter underTest;
+    private LegacyStructuredEventFilter underTest;
 
     @Mock
     private SecurityContext securityContext;
 
     @Mock
-    private StructuredEventClient structuredEventClient;
+    private LegacyDefaultStructuredEventClient legacyStructuredEventClient;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -64,7 +64,7 @@ class StructuredEventFilterTest {
 
     @BeforeEach
     public void setup() {
-        ReflectionTestUtils.setField(underTest, "restUrlParsers", new ArrayList<>());
+        ReflectionTestUtils.setField(underTest, "legacyRestUrlParsers", new ArrayList<>());
         ReflectionTestUtils.setField(underTest, "contentLogging", true);
     }
 
@@ -106,10 +106,10 @@ class StructuredEventFilterTest {
         ContainerRequest requestContext = createRequestContext(headersMap);
         underTest.filter(requestContext);
 
-        requestContext.setProperty("structuredevent.loggingEnabled", Boolean.TRUE);
+        requestContext.setProperty("cdp.structuredevent.loggingEnabled", Boolean.TRUE);
 
         ArgumentCaptor<StructuredRestCallEvent> structuredEventCaptor = ArgumentCaptor.forClass(StructuredRestCallEvent.class);
-        doNothing().when(structuredEventClient).sendStructuredEvent(structuredEventCaptor.capture());
+        doNothing().when(legacyStructuredEventClient).sendStructuredEvent(structuredEventCaptor.capture());
 
         ContainerResponseContext responseContext = new ContainerResponse(requestContext, Response.accepted().build());
         underTest.filter(requestContext, responseContext);

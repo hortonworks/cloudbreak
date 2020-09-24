@@ -25,7 +25,6 @@ public enum EnvironmentStatus {
     CLUSTER_DEFINITION_CLEANUP_PROGRESS("Cleaning up cluster definitions"),
 
     UMS_RESOURCE_DELETE_IN_PROGRESS("User resources deletion in progress"),
-    PREREQUISITES_DELETE_IN_PROGRESS("Prerequisites deletion in progress"),
 
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS("Deleting Role Mappings"),
     S3GUARD_TABLE_DELETE_IN_PROGRESS("Deleting DynamoDB table"),
@@ -58,6 +57,8 @@ public enum EnvironmentStatus {
     START_DATALAKE_FAILED("Failed to Start Data Lake"),
     START_FREEIPA_STARTED("Starting Free IPA"),
     START_FREEIPA_FAILED("Failed to Start Free IPA"),
+    START_SYNCHRONIZE_USERS_STARTED("Starting to synchronize users"),
+    START_SYNCHRONIZE_USERS_FAILED("Failed to synchronize users"),
 
     FREEIPA_DELETED_ON_PROVIDER_SIDE("Free IPA deleted on cloud provider side");
 
@@ -65,6 +66,7 @@ public enum EnvironmentStatus {
             AVAILABLE,
             START_DATALAKE_STARTED,
             START_DATAHUB_STARTED,
+            START_SYNCHRONIZE_USERS_STARTED,
             START_FREEIPA_STARTED
     );
 
@@ -92,7 +94,8 @@ public enum EnvironmentStatus {
     private static final Set<EnvironmentStatus> FAILED_STATUSES = Set.of(
             CREATE_FAILED,
             DELETE_FAILED,
-            UPDATE_FAILED
+            UPDATE_FAILED,
+            FREEIPA_DELETED_ON_PROVIDER_SIDE
     );
 
     private static final Set<EnvironmentStatus> STOP_IN_PROGRESS_OR_STOPPED_STATUSES = Set.of(
@@ -105,6 +108,7 @@ public enum EnvironmentStatus {
     private static final Set<EnvironmentStatus> START_IN_PROGRESS_STATUSES = Set.of(
             START_DATAHUB_STARTED,
             START_DATALAKE_STARTED,
+            START_SYNCHRONIZE_USERS_STARTED,
             START_FREEIPA_STARTED
     );
 

@@ -17,15 +17,18 @@ dependencies {
 
     compile project(':cloud-template')
 
-    compile group: 'org.slf4j',                     name: 'slf4j-api',                    version: slf4jApiVersion
-    compile group: 'org.apache.commons',            name: 'commons-lang3',                version: apacheCommonsLangVersion
-    compile group: 'commons-io',                    name: 'commons-io',                   version: '2.4'
-    compile group: 'commons-codec',                 name: 'commons-codec',                version: commonsCodecVersion
-    compile group: 'com.google.apis',               name: 'google-api-services-compute',  version: 'v1-rev214-1.25.0'
-    compile group: 'com.google.apis',               name: 'google-api-services-storage',  version: 'v1-rev94-1.22.0'
-    compile group: 'com.google.apis',               name: 'google-api-services-dns',      version: 'v2beta1-rev14-1.22.0'
-    compile group: 'com.google.apis',               name: 'google-api-services-cloudkms', version: 'v1-rev26-1.23.0'
-    compile group: 'junit',                         name: 'junit',                        version: junitVersion
+    compile group: 'org.slf4j',                     name: 'slf4j-api',                                  version: slf4jApiVersion
+    compile group: 'org.apache.commons',            name: 'commons-lang3',                              version: apacheCommonsLangVersion
+    compile group: 'commons-io',                    name: 'commons-io',                                 version: '2.4'
+    compile group: 'commons-codec',                 name: 'commons-codec',                              version: commonsCodecVersion
+    implementation (group: 'com.google.apis',       name: 'google-api-services-compute',                version: 'v1-rev235-1.25.0') {
+        exclude group: 'com.google.guava',  module: 'guava'
+    }
+    compile group: 'com.google.apis',               name: 'google-api-services-storage',                version: 'v1-rev171-1.25.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2beta1-rev99-1.25.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev108-1.25.0'
+    compile group: 'com.google.apis',               name: 'google-api-services-sqladmin',               version: 'v1beta4-rev76-1.25.0'
+    compile group: 'junit',                         name: 'junit',                                      version: junitVersion
 
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile project(':cloud-reactor')

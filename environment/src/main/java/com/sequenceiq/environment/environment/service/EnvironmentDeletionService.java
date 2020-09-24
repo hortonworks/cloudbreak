@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,15 +72,13 @@ public class EnvironmentDeletionService {
     public Environment delete(Environment environment, String userCrn,
         boolean cascading, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
-        validateDeletion(environment);
+        validateDeletion(environment, cascading);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         environmentJobService.unschedule(environment);
         if (cascading) {
             reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
         } else {
-            if (!forced) {
-                checkIsEnvironmentDeletable(environment);
-            }
+            checkIsEnvironmentDeletable(environment);
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;
@@ -86,22 +86,20 @@ public class EnvironmentDeletionService {
 
     public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,
         boolean cascading, boolean forced) {
-        return environmentService
-                .findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId).stream()
-                .map(environment -> {
-                    LOGGER.debug(String.format("Starting to archive environment [name: %s]", environment.getName()));
-                    delete(environment, actualUserCrn, cascading, forced);
-                    return environmentDtoConverter.environmentToDto(environment);
-                })
-                .collect(Collectors.toList());
+        Collection<Environment> environments = environmentService.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
+        return deleteMultiple(actualUserCrn, cascading, forced, environments);
     }
 
     public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn,
         boolean cascading, boolean forced) {
-        return environmentService
-                .findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId).stream()
+        Collection<Environment> environments = environmentService.findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
+        return deleteMultiple(actualUserCrn, cascading, forced, environments);
+    }
+
+    private List<EnvironmentDto> deleteMultiple(String actualUserCrn, boolean cascading, boolean forced, Collection<Environment> environments) {
+        return new ArrayList<>(environments).stream()
                 .map(environment -> {
-                    LOGGER.debug(String.format("Starting to archive environment [CRN: %s]", environment.getName()));
+                    LOGGER.debug(String.format("Starting to archive environment [name: %s, CRN: %s]", environment.getName(), environment.getResourceCrn()));
                     delete(environment, actualUserCrn, cascading, forced);
                     return environmentDtoConverter.environmentToDto(environment);
                 })
@@ -130,11 +128,14 @@ public class EnvironmentDeletionService {
         }
     }
 
-    void validateDeletion(Environment environment) {
-        List<String> childEnvNames = environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
-        if (!childEnvNames.isEmpty()) {
-            throw new BadRequestException(String.format("The following Environment(s) must be deleted before Environment deletion [%s]",
-                    String.join(", ", childEnvNames)));
+    void validateDeletion(Environment environment, boolean cascading) {
+        if (!cascading) {
+            List<String> childEnvNames =
+                    environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
+            if (!childEnvNames.isEmpty()) {
+                throw new BadRequestException(String.format("The following Environment(s) must be deleted before Environment deletion [%s]",
+                        String.join(", ", childEnvNames)));
+            }
         }
     }
 }

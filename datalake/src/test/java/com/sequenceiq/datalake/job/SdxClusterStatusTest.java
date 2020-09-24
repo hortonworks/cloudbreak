@@ -33,7 +33,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SdxClusterStatusTest.TestAppContext.class)
@@ -110,7 +110,7 @@ class SdxClusterStatusTest {
     static class TestAppContext {
 
         @MockBean
-        private JobService jobService;
+        private StatusCheckerJobService jobService;
 
     }
 }

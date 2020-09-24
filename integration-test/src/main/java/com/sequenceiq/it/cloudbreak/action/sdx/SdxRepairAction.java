@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import static java.lang.String.format;
 
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
 
@@ -24,7 +27,11 @@ public class SdxRepairAction implements Action<SdxTestDto, SdxClient> {
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest());
         testDto.setFlow("SDX repair", flowIdentifier);
-        Log.when(LOGGER, " SDX repair have been initiated.");
+        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+                .sdxEndpoint()
+                .getDetail(testDto.getName(), Collections.emptySet());
+        testDto.setResponse(detailedResponse);
+        Log.whenJson(LOGGER, " SDX repair response: ", detailedResponse);
         return testDto;
     }
 }

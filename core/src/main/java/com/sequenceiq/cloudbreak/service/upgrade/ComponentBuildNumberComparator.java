@@ -20,6 +20,6 @@ class ComponentBuildNumberComparator {
     }
 
     private boolean compare(Optional<String> currentVersion, Optional<String> newVersion) {
-        return currentVersion.map(Integer::parseInt).get() < newVersion.map(Integer::parseInt).get();
+        return currentVersion.map(Integer::parseInt).get() <= newVersion.map(Integer::parseInt).get();
     }
 }

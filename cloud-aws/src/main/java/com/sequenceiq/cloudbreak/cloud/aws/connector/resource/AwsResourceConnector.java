@@ -69,6 +69,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private AwsRdsTerminateService awsRdsTerminateService;
 
     @Inject
+    private AwsRdsModifyService awsRdsModifyService;
+
+    @Inject
     private AwsTerminateService awsTerminateService;
 
     @Inject
@@ -118,6 +121,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
+        if (awsRdsStatusLookupService.isDeleteProtectionEnabled(ac, stack)) {
+            LOGGER.debug("Delete protection is enabled for DB: {}, Disabling it", stack.getDatabaseServer().getServerId());
+            awsRdsModifyService.disableDeleteProtection(ac, stack);
+        }
         return awsRdsTerminateService.terminate(ac, stack, force, persistenceNotifier, resources);
     }
 

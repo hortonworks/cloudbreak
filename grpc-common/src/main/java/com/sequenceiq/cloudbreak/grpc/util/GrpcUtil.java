@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.grpc.util;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
 import io.grpc.Status;
+import io.opentracing.Tracer;
+import io.opentracing.contrib.grpc.TracingClientInterceptor;
 
 /**
  * Provides GRPC-related utilities.
@@ -31,5 +34,14 @@ public class GrpcUtil {
      */
     public static boolean isRetryable(Status.Code statusCode) {
         return RETRYABLE_STATUS_CODES.contains(statusCode);
+    }
+
+    public static TracingClientInterceptor getTracingInterceptor(Tracer tracer) {
+        return TracingClientInterceptor.newBuilder()
+                .withTracer(tracer)
+                .withClientSpanDecorator((span, method, callOptions) -> {
+                    TracingUtil.setTagsFromMdc(span);
+                })
+                .build();
     }
 }

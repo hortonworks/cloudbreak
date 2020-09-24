@@ -1,5 +1,15 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import java.util.Optional;
+import java.util.Set;
+
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.WebApplicationException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -8,13 +18,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.WebApplicationException;
-import java.util.Optional;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 
 @Service
 public class FreeIpaService {
@@ -23,11 +29,15 @@ public class FreeIpaService {
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
+    private final UserV1Endpoint userV1Endpoint;
+
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
+            UserV1Endpoint userV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.userV1Endpoint = userV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
@@ -87,6 +97,17 @@ public class FreeIpaService {
         }
     }
 
+    public SyncOperationStatus getSyncOperationStatus(String environmentCrn, String operationId) {
+        try {
+            return userV1Endpoint.getSyncOperationStatus(operationId);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to get user synchronization status from FreeIpa for environment '%s' due to: '%s'",
+                    environmentCrn, errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn) {
         try {
             return freeIpaV1Endpoint.healthDetails(environmentCrn);
@@ -94,6 +115,17 @@ public class FreeIpaService {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to get health details for the freeIpa of the given environment: '%s' due to: '%s'",
                     environmentCrn, errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    SyncOperationStatus synchronizeAllUsersInEnvironment(String environmentCrn) {
+        try {
+            SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest(Set.of(environmentCrn), Set.of());
+            return userV1Endpoint.synchronizeAllUsers(request);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to synchronize users with FreeIpa for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

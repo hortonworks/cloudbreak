@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.ApplicationContext;
@@ -22,9 +25,12 @@ import org.springframework.data.repository.support.Repositories;
         "spring.jpa.properties.hibernate.session_factory.statement_inspector=com.sequenceiq.environment.service.integration.SqlStatementInspector"})
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
         "com.sequenceiq.environment",
-        "com.sequenceiq.cloudbreak.ha.domain"})
+        "com.sequenceiq.cloudbreak.ha.domain",
+        "com.sequenceiq.cloudbreak.structuredevent.domain"})
 @Import(SqlStatementInspector.class)
 public class JpaTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTest.class);
 
     @Inject
     private ApplicationContext applicationContext;
@@ -66,6 +72,8 @@ public class JpaTest {
             case "Set":
             case "Collection":
                 return Set.of();
+            case "List":
+                return List.of();
             case "Long":
             case "long":
             case "Serializable":
@@ -75,6 +83,7 @@ public class JpaTest {
             case "Boolean":
                 return true;
             default:
+                LOGGER.info("Cannot parse '{}' type", typeName);
                 return null;
         }
     }
@@ -91,12 +100,12 @@ public class JpaTest {
                 Assertions.assertEquals(1, SqlStatementInspector.getSelectCountNumberAndReset(),
                         "find method should compile only one select!");
             } catch (IllegalAccessException | IllegalArgumentException e) {
-                Assertions.fail("Could not call find method", e);
+                Assertions.fail("Could not call find method: " + method.toString(), e);
             } catch (InvocationTargetException e) {
                 if (e.getCause() instanceof UnsupportedOperationException) {
                     Assertions.assertTrue(true, "find finished with UnsupportedOperation");
                 } else {
-                    Assertions.fail("Could not call find method", e);
+                    Assertions.fail("Could not call find method, because InvocationTargetException: " + method.toString(), e);
                 }
             }
         };

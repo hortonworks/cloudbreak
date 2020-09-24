@@ -5,8 +5,10 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -43,6 +46,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
     }
@@ -65,17 +69,17 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().create(), key(envKey))
+                .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.DELETED)
+                .await(SdxClusterStatusResponse.DELETED, key(sdxInternal))
                 .validate();
     }
 
@@ -98,17 +102,17 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().create(), key(envKey))
+                .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withTemplate(jsonObject)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.DELETED)
+                .await(SdxClusterStatusResponse.DELETED, key(sdxInternal))
                 .validate();
     }
 
@@ -130,21 +134,47 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().create(), key(envKey))
+                .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
-                .when(sdxTestClient.stopInternal())
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
+                .when(sdxTestClient.stopInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.STOPPED)
-                .when(sdxTestClient.startInternal())
+                .await(SdxClusterStatusResponse.STOPPED, key(sdxInternal))
+                .when(sdxTestClient.startInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "terminate instances and repair an sdx cluster",
+            then = "SDX should be available"
+    )
+    public void repairTerminatedMasterAndIdbroker(MockedTestContext testContext) {
+        testRepair(testContext,
+                List.of(MASTER, IDBROKER),
+                testContext.getModel()::terminateInstance,
+                SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "terminate instances and repair an sdx cluster",
+            then = "SDX should be available"
+    )
+    public void repairTerminatedMaster(MockedTestContext testContext) {
+        testRepair(testContext,
+                List.of(MASTER),
+                testContext.getModel()::terminateInstance,
+                SdxClusterStatusResponse.CLUSTER_AMBIGUOUS);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -153,7 +183,18 @@ public class MockSdxTests extends AbstractIntegrationTest {
             when = "stop and repair an sdx cluster",
             then = "SDX should be available"
     )
-    public void testSdxRepairWithTerminatedMasterAndIdbroker(MockedTestContext testContext) {
+    public void repairStoppedMasterAndIdbroker(MockedTestContext testContext) {
+        testRepair(testContext,
+                List.of(MASTER, IDBROKER),
+                testContext.getModel()::stopInstance,
+                SdxClusterStatusResponse.STOPPED);
+    }
+
+    public void testRepair(MockedTestContext testContext,
+            List<HostGroupType> hostGroups,
+            Consumer<String> actionOnNode,
+            SdxClusterStatusResponse stateBeforeRepair
+    ) {
         String sdxInternal = resourcePropertyProvider().getName();
         String networkKey = "someOtherNetwork";
         String envKey = "sdxEnvKey";
@@ -172,8 +213,8 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
-                .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .when(getEnvironmentTestClient().create(), key(envKey))
+                .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequest)
@@ -181,17 +222,19 @@ public class MockSdxTests extends AbstractIntegrationTest {
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> {
-                    List<String> instancesToDelete = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
-                    instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
-                    instancesToDelete.forEach(id -> testContext.getModel().terminateInstance(testContext.getModel().getInstanceMap(), id));
+                    List<String> instancesToDelete = new ArrayList<>();
+                    for (HostGroupType hostGroupType : hostGroups) {
+                        instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName()));
+                    }
+                    instancesToDelete.forEach(actionOnNode);
                     return testDto;
                 })
-                .await(SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE)
-                .when(sdxTestClient.repairInternal())
+                .await(stateBeforeRepair)
+                .when(sdxTestClient.repairInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
-                .await(SdxClusterStatusResponse.RUNNING)
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
     }
 }

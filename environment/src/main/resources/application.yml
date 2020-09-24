@@ -40,7 +40,8 @@ altus:
   ums:
     host: localhost
   audit:
-    enabled: false
+    enabled: true
+    endpoint: localhost:8982
 
 secret:
   application: env/shared
@@ -58,12 +59,14 @@ vault:
       service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
       mount.path: "dps-dev"
       login.role: "cloudbreak.default"
-
+cdp.structuredevent:
+  rest:
+    contentlogging: true
 environment:
   cert.dir: /certs/
   structuredevent:
     rest:
-      enabled: false
+      enabled: true
   cloudbreak:
     url: http://localhost:9091
     contextPath: /cb
@@ -74,7 +77,8 @@ environment:
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
-    supportedPlatforms: AWS,AZURE
+    synchronizeOnStart: true
+    supportedPlatforms: AWS,AZURE,GCP
   sdx:
     url: http://localhost:8086
     contextPath: /dl
@@ -88,9 +92,9 @@ environment:
       schema: public
       cert.file: database.crt
       ssl: false
-  enabledplatforms: AWS, AZURE, YARN
-  enabledParentPlatforms: AWS, MOCK
-  enabledChildPlatforms: YARN, MOCK
+  enabledplatforms: AWS,AZURE,YARN,GCP
+  enabledParentPlatforms: AWS,MOCK
+  enabledChildPlatforms: YARN,MOCK
   tunnel:
     default: DIRECT
   admin.group.default.prefix: cdp_

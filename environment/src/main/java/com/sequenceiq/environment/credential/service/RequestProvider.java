@@ -26,6 +26,11 @@ public class RequestProvider {
         return new CredentialVerificationRequest(cloudContext, cloudCredential);
     }
 
+    public CredentialVerificationRequest getCredentialVerificationRequest(CloudContext cloudContext, CloudCredential cloudCredential,
+            boolean creationVerification) {
+        return new CredentialVerificationRequest(cloudContext, cloudCredential, creationVerification);
+    }
+
     public InteractiveLoginRequest getInteractiveLoginRequest(CloudContext cloudContext, ExtendedCloudCredential cloudCredential) {
         return new InteractiveLoginRequest(cloudContext, cloudCredential);
     }

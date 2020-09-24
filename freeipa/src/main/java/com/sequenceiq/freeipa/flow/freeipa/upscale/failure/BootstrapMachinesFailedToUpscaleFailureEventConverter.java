@@ -16,7 +16,7 @@ public class BootstrapMachinesFailedToUpscaleFailureEventConverter implements Pa
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         BootstrapMachinesFailed result = (BootstrapMachinesFailed) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Bootstrapping mahcines", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Bootstrapping machines", Set.of(), Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }

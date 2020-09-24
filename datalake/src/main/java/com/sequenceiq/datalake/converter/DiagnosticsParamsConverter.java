@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.converter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
@@ -20,13 +22,19 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_ISSUE = "issue";
 
+    private static final String PARAMS_TICKET = "ticket";
+
     private static final String PARAM_DESCRIPTION = "description";
+
+    private static final String PARAMS_COMMENTS = "comments";
 
     private static final String PARAM_HOSTS = "hosts";
 
     private static final String PARAMS_HOST_GROUPS = "hostGroups";
 
     private static final String PARAMS_LABELS = "labels";
+
+    private static final String PARAMS_ROLES = "roles";
 
     private static final String PARAMS_START_TIME = "startTime";
 
@@ -41,6 +49,10 @@ public class DiagnosticsParamsConverter {
     private static final String PARAMS_UPDATE_PACKAGE = "updatePackage";
 
     private static final String PARAMS_SKIP_VALIDATION = "skipValidation";
+
+    private static final String PARAMS_ENABLE_MONITOR_METRICS_COLLECTION = "enableMonitorMetricsCollection";
+
+    private static final String PARAMS_BUNDLE_SIZE_BYTES = "bundleSizeBytes";
 
     public Map<String, Object> convertFromRequest(DiagnosticsCollectionRequest request) {
         Map<String, Object> props = new HashMap<>();
@@ -74,6 +86,40 @@ public class DiagnosticsParamsConverter {
         request.setStartTime((Date) Optional.ofNullable(props.get(PARAMS_START_TIME)).orElse(null));
         request.setEndTime((Date) Optional.ofNullable(props.get(PARAMS_END_TIME)).orElse(null));
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
+        request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
+        request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
+        return request;
+    }
+
+    public Map<String, Object> convertFromCmRequest(CmDiagnosticsCollectionRequest request) {
+        Map<String, Object> props = new HashMap<>();
+        props.put(PARAMS_STACK_CRN, request.getStackCrn());
+        props.put(PARAM_DESTINATION, request.getDestination());
+        props.put(PARAMS_UPDATE_PACKAGE, request.getUpdatePackage());
+        props.put(PARAMS_SKIP_VALIDATION, request.getSkipValidation());
+        props.put(PARAMS_START_TIME, request.getStartTime());
+        props.put(PARAMS_END_TIME, request.getEndTime());
+        props.put(PARAMS_COMMENTS, request.getComments());
+        props.put(PARAMS_TICKET, request.getTicket());
+        props.put(PARAMS_ENABLE_MONITOR_METRICS_COLLECTION, request.getEnableMonitorMetricsCollection());
+        props.put(PARAMS_ROLES, request.getRoles());
+        props.put(PARAMS_BUNDLE_SIZE_BYTES, request.getBundleSizeBytes());
+        return props;
+    }
+
+    public CmDiagnosticsCollectionRequest convertToCmRequest(Map<String, Object> props) {
+        CmDiagnosticsCollectionRequest request = new CmDiagnosticsCollectionRequest();
+        request.setStackCrn(Optional.ofNullable(props.get(PARAMS_STACK_CRN)).map(Object::toString).orElse(null));
+        request.setTicket(Optional.ofNullable(props.get(PARAMS_TICKET)).map(Object::toString).orElse(null));
+        request.setComments(Optional.ofNullable(props.get(PARAMS_COMMENTS)).map(Object::toString).orElse(null));
+        request.setBundleSizeBytes(Optional.ofNullable(props.get(PARAMS_BUNDLE_SIZE_BYTES))
+                .map(n -> BigDecimal.valueOf(Long.parseLong(n.toString()))).orElse(null));
+        request.setDestination(Optional.ofNullable(props.get(PARAM_DESTINATION))
+                .map(v -> DiagnosticsDestination.valueOf(v.toString())).orElse(null));
+        request.setRoles((List<String>) Optional.ofNullable(props.get(PARAMS_ROLES)).orElse(null));
+        request.setStartTime((Date) Optional.ofNullable(props.get(PARAMS_START_TIME)).orElse(null));
+        request.setEndTime((Date) Optional.ofNullable(props.get(PARAMS_END_TIME)).orElse(null));
+        request.setEnableMonitorMetricsCollection((Boolean) Optional.ofNullable(props.get(PARAMS_ENABLE_MONITOR_METRICS_COLLECTION)).orElse(false));
         request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
         return request;

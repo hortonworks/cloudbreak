@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RdsDetails implements Serializable {
 
@@ -36,6 +38,8 @@ public class RdsDetails implements Serializable {
     private String userName;
 
     private String tenantName;
+
+    private Boolean externalDatabase;
 
     public String getTenantName() {
         return tenantName;
@@ -155,5 +159,13 @@ public class RdsDetails implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Boolean getExternal() {
+        return externalDatabase;
+    }
+
+    public void setExternal(Boolean external) {
+        externalDatabase = external;
     }
 }

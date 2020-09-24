@@ -1,5 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -40,6 +42,8 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     private CloudPlatform cloudPlatform;
 
+    private Map<String, String> tags;
+
     public SdxClusterResponse() {
     }
 
@@ -47,7 +51,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
-            boolean rangerRazEnabled) {
+            boolean rangerRazEnabled, Map<String, String> tags) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -60,6 +64,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.cloudStorageFileSystemType = cloudStorageFileSystemType;
         this.runtime = runtime;
         this.rangerRazEnabled = rangerRazEnabled;
+        this.tags = tags;
     }
 
     public String getCrn() {
@@ -188,6 +193,14 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     public void setCloudPlatform(CloudPlatform cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
     }
 
     @JsonIgnore

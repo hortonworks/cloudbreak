@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -163,10 +162,9 @@ public class ClusterHostServiceRunnerTest {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
 
         Map<String, SaltPillarProperties> pillar = new HashMap<>();
-        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+        underTest.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, pillar, Optional.of(license));
 
         SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
         Map<String, Object> properties = resultPillar.getProperties();
@@ -183,10 +181,9 @@ public class ClusterHostServiceRunnerTest {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
 
         Map<String, SaltPillarProperties> pillar = new HashMap<>();
-        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+        underTest.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, pillar, Optional.of(license));
 
         SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
         Map<String, Object> properties = resultPillar.getProperties();
@@ -203,10 +200,9 @@ public class ClusterHostServiceRunnerTest {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
 
         Map<String, SaltPillarProperties> pillar = new HashMap<>();
-        underTest.decoratePillarWithClouderaManagerRepo(CLUSTER_ID, pillar, Optional.of(license));
+        underTest.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, pillar, Optional.of(license));
 
         SaltPillarProperties resultPillar = pillar.get("cloudera-manager-repo");
         Map<String, Object> properties = resultPillar.getProperties();
@@ -216,5 +212,4 @@ public class ClusterHostServiceRunnerTest {
         assertNull(values.get("paywall_username"));
         assertNull(values.get("paywall_password"));
     }
-
 }

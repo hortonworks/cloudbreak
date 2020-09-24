@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -21,8 +22,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerLaunchService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerTerminateService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
@@ -47,6 +52,15 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Inject
     private ComputeResourceService computeResourceService;
+
+    @Inject
+    private DatabaseServerTerminateService databaseServerTerminateService;
+
+    @Inject
+    private DatabaseServerLaunchService databaseServerLaunchService;
+
+    @Inject
+    private DatabaseServerCheckerService databaseServerCheckerService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -78,8 +92,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-        PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("Database server launch is not supported for " + getClass().getName());
+        PersistenceNotifier persistenceNotifier) throws Exception {
+        List<CloudResource> cloudResources = databaseServerLaunchService.launch(authenticatedContext, stack, persistenceNotifier);
+        return cloudResources.stream()
+                .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -106,8 +123,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
-        throw new UnsupportedOperationException("Database server termination is not supported for " + getClass().getName());
+            List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
+        List<CloudResource> cloudResources = databaseServerTerminateService.terminate(authenticatedContext, stack, persistenceNotifier);
+        return cloudResources.stream()
+                .map(e -> new CloudResourceStatus(e, ResourceStatus.DELETED))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -200,6 +220,10 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
             resources.add(status.getCloudResource());
         }
         return resources;
+    }
+
+    protected DatabaseServerCheckerService databaseServerCheckerService() {
+        return databaseServerCheckerService;
     }
 
     protected Group getScalingGroup(Group scalingGroup) {

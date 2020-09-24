@@ -77,7 +77,7 @@ import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StackStatusIntegrationTest.TestAppContext.class)
@@ -336,7 +336,7 @@ class StackStatusIntegrationTest {
     static class TestAppContext {
 
         @MockBean
-        private JobService jobService;
+        private StatusCheckerJobService jobService;
 
         @MockBean
         private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;

@@ -7,6 +7,6 @@ public class ResourceGroupCreationConverter extends DefaultEnumConverter<Resourc
 
     @Override
     public ResourceGroupCreation getDefault() {
-        return ResourceGroupCreation.CREATE_NEW;
+        return ResourceGroupCreation.USE_EXISTING;
     }
 }

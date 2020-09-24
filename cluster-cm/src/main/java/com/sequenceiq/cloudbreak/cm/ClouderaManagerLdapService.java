@@ -42,6 +42,9 @@ public class ClouderaManagerLdapService {
     @Value("${cb.cm.limited.admin.role}")
     private String limitedAdminRole;
 
+    @Value("${cb.cm.dashboard.user.role}")
+    private String dashboardUserRole;
+
     @Value("${cb.cm.user.role}")
     private String userRole;
 
@@ -67,17 +70,18 @@ public class ClouderaManagerLdapService {
             AuthRolesResourceApi authRolesResourceApi = clouderaManagerApiFactory.getAuthRolesResourceApi(client);
             ApiAuthRoleMetadataList roleMetadataList = authRolesResourceApi.readAuthRolesMetadata(null);
             if (roleMetadataList.getItems() != null) {
+                Optional<ApiAuthRoleMetadata> dashboardUserRoleOpt = findRole(roleMetadataList, dashboardUserRole);
                 Optional<ApiAuthRoleMetadata> limitedAdminRoleOpt = findRole(roleMetadataList, limitedAdminRole);
                 Optional<ApiAuthRoleMetadata> role = limitedAdminRoleOpt.isPresent() ? limitedAdminRoleOpt : findRole(roleMetadataList, adminRole);
                 if (role.isPresent()) {
                     String virtualGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight());
-                    addGroupMapping(externalUserMappingsResourceApi, role.get(), virtualGroup);
+                    addGroupMapping(externalUserMappingsResourceApi, role.get(), dashboardUserRoleOpt, virtualGroup);
                 } else {
                     LOGGER.info("Cannot setup admin group mapping. Admin roles ({}, {}) are not found", adminRole, limitedAdminRole);
                 }
                 Optional<ApiAuthRoleMetadata> userMetadata = roleMetadataList.getItems().stream().filter(toRole(userRole)).findFirst();
                 if (userMetadata.isPresent() && StringUtils.isNotBlank(ldapView.getUserGroup())) {
-                    addGroupMapping(externalUserMappingsResourceApi, userMetadata.get(), ldapView.getUserGroup());
+                    addGroupMapping(externalUserMappingsResourceApi, userMetadata.get(), dashboardUserRoleOpt, ldapView.getUserGroup());
                 } else {
                     LOGGER.info("Cannot setup user group mapping. User metadata present: [{}] User group: [{}]",
                             userMetadata.isPresent(), ldapView.getUserGroup());
@@ -86,22 +90,29 @@ public class ClouderaManagerLdapService {
         }
     }
 
+    private Optional<ApiAuthRoleMetadata> findRole(ApiAuthRoleMetadataList apiAuthRoleMetadataList, String role) {
+        return apiAuthRoleMetadataList.getItems().stream().filter(toRole(role)).findFirst();
+    }
+
     private Predicate<ApiAuthRoleMetadata> toRole(String role) {
         return rm -> role.equals(rm.getRole());
     }
 
-    private void addGroupMapping(ExternalUserMappingsResourceApi cmApi, ApiAuthRoleMetadata role, String ldapGroup) throws ApiException {
-        LOGGER.info("Associate virtual group '{}' to CM role '{}'", ldapGroup, role.getDisplayName());
+    private void addGroupMapping(ExternalUserMappingsResourceApi cmApi, ApiAuthRoleMetadata adminRole,
+            Optional<ApiAuthRoleMetadata> dashboardUserRoleOpt, String ldapGroup) throws ApiException {
+        LOGGER.info("Associating virtual group '{}' to CM role '{}'", ldapGroup, adminRole.getDisplayName());
         ApiExternalUserMappingList apiExternalUserMappingList = new ApiExternalUserMappingList()
                 .addItemsItem(new ApiExternalUserMapping()
                         .name(ldapGroup)
                         .type(ApiExternalUserMappingType.LDAP)
-                        .addAuthRolesItem(new ApiAuthRoleRef()
-                                .displayName(role.getDisplayName()).uuid(role.getUuid())));
+                        .addAuthRolesItem(new ApiAuthRoleRef().displayName(adminRole.getDisplayName()).uuid(adminRole.getUuid()))
+                );
+        if (dashboardUserRoleOpt.isPresent()) {
+            ApiAuthRoleMetadata dashboardUserRole = dashboardUserRoleOpt.get();
+            LOGGER.info("Associating virtual group '{}' to CM role '{}'", ldapGroup, dashboardUserRole.getDisplayName());
+            apiExternalUserMappingList.getItems()
+                    .get(0).addAuthRolesItem(new ApiAuthRoleRef().displayName(dashboardUserRole.getDisplayName()).uuid(dashboardUserRole.getUuid()));
+        }
         cmApi.createExternalUserMappings(apiExternalUserMappingList);
-    }
-
-    private Optional<ApiAuthRoleMetadata> findRole(ApiAuthRoleMetadataList apiAuthRoleMetadataList, String role) {
-        return apiAuthRoleMetadataList.getItems().stream().filter(toRole(role)).findFirst();
     }
 }

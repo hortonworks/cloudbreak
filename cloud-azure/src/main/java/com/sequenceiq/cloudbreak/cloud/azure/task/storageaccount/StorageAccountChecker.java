@@ -32,10 +32,10 @@ public class StorageAccountChecker extends PollBooleanStateTask {
         StorageAccount storageAccount = client.getStorageAccountByGroup(context.getResourceGroupName(), context.getResourceGroupName());
         if (storageAccount == null) {
             LOGGER.info("Storage account creation not finished yet");
-            return true;
+            return false;
         } else {
             LOGGER.info("Storage account creation has been finished");
-            return false;
+            return true;
         }
     }
 }

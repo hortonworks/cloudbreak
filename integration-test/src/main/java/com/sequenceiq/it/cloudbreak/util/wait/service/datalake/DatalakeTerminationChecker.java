@@ -41,7 +41,7 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
             LOGGER.warn("No datalake found with name '{}'", name, e);
         } catch (Exception e) {
             LOGGER.error("Datalake termination failed: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Datalake termination failed: ", e.getMessage()));
+            throw new TestFailException("Datalake termination failed", e);
         }
         return true;
     }
@@ -55,8 +55,7 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
                     "statusReason: '%s'", name, sdx.getCrn(), sdx.getStatus(), sdx.getStatusReason()));
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, datalake termination failed. Also failed to get datalake status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, datalake termination failed. Also failed to get datalake status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, datalake termination failed. Also failed to get datalake status", e);
         }
     }
 

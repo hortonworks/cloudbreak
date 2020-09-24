@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.stop.handler;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,8 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStopAllDatahubRequest;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxStopAllDatahubRequest> {
@@ -33,7 +36,7 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<SdxStopAllDatahubRequest> event) {
         return new SdxStopFailedEvent(resourceId, null, e);
     }
 
@@ -53,10 +56,13 @@ public class SdxStopAllDatahubHandler extends ExceptionCatcherEventHandler<SdxSt
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Poller stopped for stack: " + sdxId, pollerStoppedException);
             response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake start timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
+                    new PollerStoppedException("Datalake stop timed out after " + DURATION_IN_MINUTES + " minutes", pollerStoppedException));
         } catch (PollerException exception) {
             LOGGER.error("Polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);
+        } catch (BadRequestException badRequest) {
+            LOGGER.error("Datahub stop failed.", badRequest);
+            response = new SdxStopFailedEvent(sdxId, userId, badRequest);
         }
         return response;
     }

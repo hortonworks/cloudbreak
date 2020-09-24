@@ -5,12 +5,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
@@ -63,14 +66,18 @@ public class TelemetryDecoratorTest {
     @Mock
     private TelemetryCommonConfigService telemetryCommonConfigService;
 
+    @Mock
+    private VmLogsService vmLogsService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusCredential altusCredential = new AltusCredential("myAccessKey", "mySecretKey".toCharArray());
         given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
                 .willReturn(Optional.of(altusCredential));
+        given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, "1.0.0");
+                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, vmLogsService, "1.0.0");
     }
 
     @Test
@@ -102,8 +109,8 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("user"), "root");
         verify(fluentConfigService, times(1)).createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class));
-        verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
-                anyString());
+        verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(),
+                anyString(), anyString(), anyString());
     }
 
     @Test
@@ -268,10 +275,10 @@ public class TelemetryDecoratorTest {
                 anyBoolean(), anyBoolean(), any(Telemetry.class)))
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
-                anyString())).willReturn(meteringConfigView);
+                anyString(), anyString())).willReturn(meteringConfigView);
         given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
-        given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), isNull(), anyString(), anyString(),
+        given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
                 anyString(), anyString(), anyString()))
                 .willReturn(telemetryCommonConfigView);
     }

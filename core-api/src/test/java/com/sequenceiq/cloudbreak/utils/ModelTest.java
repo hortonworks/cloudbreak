@@ -17,10 +17,10 @@ import com.openpojo.validation.rule.impl.NoStaticExceptFinalRule;
 import com.openpojo.validation.rule.impl.SetterMustExistRule;
 import com.openpojo.validation.test.impl.GetterTester;
 import com.openpojo.validation.test.impl.SetterTester;
-import com.sequenceiq.cloudbreak.api.model.annotations.IgnorePojoValidation;
-import com.sequenceiq.cloudbreak.api.model.annotations.Immutable;
-import com.sequenceiq.cloudbreak.api.model.annotations.TransformGetterType;
-import com.sequenceiq.cloudbreak.api.model.annotations.TransformSetterType;
+import com.sequenceiq.common.model.annotations.IgnorePojoValidation;
+import com.sequenceiq.common.model.annotations.Immutable;
+import com.sequenceiq.common.model.annotations.TransformGetterType;
+import com.sequenceiq.common.model.annotations.TransformSetterType;
 
 public class ModelTest {
 

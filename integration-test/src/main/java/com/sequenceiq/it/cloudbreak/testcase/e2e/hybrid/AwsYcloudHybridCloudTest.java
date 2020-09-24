@@ -12,22 +12,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
-import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
-import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
-import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
-import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
@@ -35,15 +19,33 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ClouderaManagerStackDescriptorV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
+import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -83,6 +85,8 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
 
+    private static final String STACK_AUTHENTICATION = "stackAuthentication";
+
     @Value("${integrationtest.aws.hybridCloudSecurityGroupID}")
     private String hybridCloudSecurityGroupID;
 
@@ -106,6 +110,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
         checkCloudPlatform(CloudPlatform.AWS);
 
         createDefaultUser(testContext);
+        initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         //Use a pre-prepared security group what allows inbound connections from ycloud
         testContext
@@ -116,13 +121,18 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .withSecurityAccess();
         createEnvironmentWithNetworkAndFreeIpa(testContext);
 
-        testContext.given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
+        testContext
+                .given("childtelemetry", TelemetryTestDto.class)
+                .withLogging(CloudPlatform.YARN)
+                .withReportClusterLogs()
+                .given(CHILD_ENVIRONMENT_CREDENTIAL_KEY, CredentialTestDto.class, CHILD_CLOUD_PLATFORM)
                 .when(credentialTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_CREDENTIAL_KEY))
                 .given(CHILD_ENVIRONMENT_NETWORK_KEY, EnvironmentNetworkTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
                 .withCredentialName(testContext.get(CHILD_ENVIRONMENT_CREDENTIAL_KEY).getName())
                 .withParentEnvironment()
                 .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
+                .withTelemetry("childtelemetry")
                 .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
@@ -173,8 +183,10 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withClouderaManager(clouderaManager)
                 .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(MASTER).withNodeCount(1)
                 .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class, CHILD_CLOUD_PLATFORM).withHostGroup(IDBROKER).withNodeCount(1)
+                .given(STACK_AUTHENTICATION, StackAuthenticationTestDto.class, CHILD_CLOUD_PLATFORM)
                 .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM).withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
+                    .withStackAuthentication(STACK_AUTHENTICATION)
                 .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))

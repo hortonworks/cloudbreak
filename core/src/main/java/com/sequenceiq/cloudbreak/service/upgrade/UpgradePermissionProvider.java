@@ -53,15 +53,6 @@ public class UpgradePermissionProvider {
         return currentVersion.equals(newVersion) && componentBuildNumberComparator.compare(currentImage, image, buildNumberKey);
     }
 
-    public boolean permitSaltUpgrade(String currentVersion, String newVersion) {
-        boolean result = false;
-        if (currentVersion != null && newVersion != null) {
-            VersionPrefix prefixMatcher = new VersionPrefix();
-            result = prefixMatcher.prefixMatch(() -> currentVersion, () -> newVersion, MAJOR);
-        }
-        return result;
-    }
-
     public boolean permitExtensionUpgrade(String currentVersion, String newVersion) {
         boolean result = false;
         if (currentVersion == null) {

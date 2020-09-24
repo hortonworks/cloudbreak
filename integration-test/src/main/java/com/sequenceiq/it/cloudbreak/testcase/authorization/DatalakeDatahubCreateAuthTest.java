@@ -22,9 +22,8 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.ITResponse;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -45,8 +44,8 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_B);
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         useRealUmsUser(testContext, AuthUserKeys.ZERO_RIGHTS);
     }
 
@@ -58,18 +57,23 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     public void testCreateEnvironment(MockedTestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String envKey = "sdxEnvKey";
         String clouderaManager = "cm";
         String cluster = "cmcluster";
 
-        useRealUmsUser(testContext, AuthUserKeys.MGMT_CONSOLE_ADMIN_A);
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
-                .given(envKey, EnvironmentTestDto.class)
+                .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .withDatahubCreator()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .withEnvironmentUser()
+                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
@@ -77,30 +81,16 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
-                .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.MGMT_CONSOLE_ADMIN_B)))
+                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
+                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform datalake/describeDetailedDatalake on resource crn:cdp.*")
-                                .withKey("SdxDescribeInternalAction"))
-                .when(sdxTestClient.describeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform datalake/describeDetailedDatalake on resource crn:cdp.*")
-                                .withKey("SdxDescribeInternalAction"))
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datalake/describeDetailedDatalake.*")
+                                .withKey("SdxDetailedDescribeInternalAction"))
                 .validate();
-    }
-
-    private MockedTestContext mockCmForFreeipa(TestContext testContext) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
-        return mockedTestContext;
     }
 
 }

@@ -1,9 +1,8 @@
 mock:
   server:
     address: test
-  image:
-    catalog:
-      url: https://test:9443/imagecatalog
+  imagecatalog:
+    server: thunderhead-mock:8080
 
 integrationtest:
   outputdir: /it

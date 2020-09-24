@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.service.eventbus;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
-
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +14,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class CloudResourcePersisterService implements Persister<ResourceNotification> {
@@ -34,7 +32,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     private ResourceService resourceService;
 
     @Inject
-    private StackService stackService;
+    private EntityManager entityManager;
 
     @Override
     public ResourceNotification persist(ResourceNotification notification) {
@@ -83,7 +81,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private Stack findStackById(Long stackId) {
-        return stackService.findById(stackId).orElseThrow(notFound("Stack", stackId));
+        return entityManager.getReference(Stack.class, stackId);
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {

@@ -16,6 +16,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointC
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
+import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.MockParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
@@ -46,6 +47,16 @@ public class NetworkRequestToDtoConverter {
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
         }
+        if (network.getGcp() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "GCP");
+            GcpParams gcpParams = new GcpParams();
+            gcpParams.setNetworkId(network.getGcp().getNetworkId());
+            gcpParams.setSharedProjectId(network.getGcp().getSharedProjectId());
+            gcpParams.setNoFirewallRules(network.getGcp().getNoFirewallRules());
+            gcpParams.setNoPublicIp(network.getGcp().getNoPublicIp());
+            builder.withGcp(gcpParams);
+            builder.withNetworkId(network.getGcp().getNetworkId());
+        }
         if (network.getYarn() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
             YarnParams yarnParams = new YarnParams();
@@ -60,6 +71,16 @@ public class NetworkRequestToDtoConverter {
             mockParams.setVpcId(network.getMock().getVpcId());
             builder.withMock(mockParams);
             builder.withNetworkId(mockParams.getVpcId());
+        }
+        if (network.getGcp() != null) {
+            LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Gcp");
+            GcpParams gcpParams = new GcpParams();
+            gcpParams.setSharedProjectId(network.getGcp().getSharedProjectId());
+            gcpParams.setNetworkId(network.getGcp().getNetworkId());
+            gcpParams.setNoFirewallRules(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules()));
+            gcpParams.setNoPublicIp(Boolean.TRUE.equals(network.getGcp().getNoPublicIp()));
+            builder.withGcp(gcpParams);
+            builder.withNetworkId(gcpParams.getNetworkId());
         }
         if (network.getSubnetIds() != null) {
             builder.withSubnetMetas(network.getSubnetIds().stream()

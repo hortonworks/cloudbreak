@@ -107,27 +107,6 @@ public class UpgradePermissionProviderTest {
     }
 
     @Test
-    public void testSaltUpgrade() {
-        // Allow upgrade between 2017.7.*
-        assertTrue(underTest.permitSaltUpgrade("2017.7.5", "2017.7.5"));
-        assertTrue(underTest.permitSaltUpgrade("2017.7.5", "2017.7.7"));
-        assertTrue(underTest.permitSaltUpgrade("2017.7.7", "2017.7.5"));
-
-        assertTrue(underTest.permitSaltUpgrade("2017.7.7", "2017.8.0"));
-        assertFalse(underTest.permitSaltUpgrade("2017.7.7", "2019.7.0"));
-
-        // Allow upgrade between 3000.*, according to new Salt versioning scheme (since
-        // then, version numbers are in the format MAJOR.PATCH)
-        assertTrue(underTest.permitSaltUpgrade("3000.2", "3000.2"));
-        assertTrue(underTest.permitSaltUpgrade("3000.2", "3000.3"));
-        assertFalse(underTest.permitSaltUpgrade("3000.2", "3001.3"));
-        assertFalse(underTest.permitSaltUpgrade("3000", "3001"));
-
-        // Do not allow if no Salt version
-        assertFalse(underTest.permitSaltUpgrade("2017.7.7", null));
-    }
-
-    @Test
     public void testPermitUpgradeShouldReturnTrueWhenTheVersionsAreEqualAndTheBuildNumberIsGreater() {
         Image currentImage = createImage("7.2.1", "2000");
         Image candidateImage = createImage("7.2.1", "2001");

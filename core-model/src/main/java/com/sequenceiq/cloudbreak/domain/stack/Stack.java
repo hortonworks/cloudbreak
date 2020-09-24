@@ -42,9 +42,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
-import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
-import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -52,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -64,6 +62,8 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -422,6 +422,23 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 return getResourcesByType(ResourceType.AZURE_VOLUMESET);
             default:
                 return List.of();
+        }
+    }
+
+    public ResourceType getDiskResourceType() {
+        switch (platformVariant) {
+            case CloudConstants.AWS:
+                return ResourceType.AWS_VOLUMESET;
+            case CloudConstants.GCP:
+                return ResourceType.GCP_ATTACHED_DISKSET;
+            case CloudConstants.AZURE:
+                return ResourceType.AZURE_VOLUMESET;
+            case CloudConstants.OPENSTACK:
+                return ResourceType.OPENSTACK_ATTACHED_DISK;
+            case CloudConstants.MOCK:
+                return ResourceType.MOCK_VOLUME;
+            default:
+                return null;
         }
     }
 

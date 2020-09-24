@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.runners.Parameterized.Parameters;
 import static org.mockito.Mockito.times;
@@ -20,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -79,6 +81,18 @@ public class RdsConfigToRdsDetailsConverterTest {
     }
 
     @Test
+    public void testWhenDatabaseEngineIsEmbeddedThenIsExternalShouldBeFalseOtherwiseTrue() {
+        RdsDetails result = underTest.convert(source);
+
+        assertNotNull(result);
+        if (source.getDatabaseEngine() == DatabaseVendor.EMBEDDED) {
+            assertFalse(result.getExternal());
+        } else {
+            assertTrue(result.getExternal());
+        }
+    }
+
+    @Test
     public void testAllLogicIndependentDataArePassedProperly() {
         RdsDetails result = underTest.convert(source);
 
@@ -97,7 +111,7 @@ public class RdsConfigToRdsDetailsConverterTest {
         assertEquals(cloudbreakUser.getUsername(), result.getUserName());
         assertEquals(cloudbreakUser.getUserId(), result.getUserId());
         assertEquals(cloudbreakUser.getTenant(), result.getTenantName());
-        verify(restRequestThreadLocalService, times(3)).getCloudbreakUser();
+        verify(restRequestThreadLocalService, times(4)).getCloudbreakUser();
     }
 
 }

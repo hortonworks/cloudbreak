@@ -12,10 +12,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.datahub.model.AttachedVolumeRequest;
+import com.cloudera.cdp.datahub.model.AzureInstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.CreateAzureClusterRequest;
 import com.cloudera.cdp.datahub.model.DatahubResourceTagRequest;
 import com.cloudera.cdp.datahub.model.ImageRequest;
-import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.VolumeEncryptionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
@@ -57,10 +57,10 @@ public class StackRequestToCreateAzureClusterRequestConverter implements StackRe
         return environmentClientService.getByCrn(environmentCrn).getName();
     }
 
-    private List<InstanceGroupRequest> convertInstanceGroups(List<InstanceGroupV4Request> source) {
-        List<InstanceGroupRequest> instanceGroups = new ArrayList<>();
+    private List<AzureInstanceGroupRequest> convertInstanceGroups(List<InstanceGroupV4Request> source) {
+        List<AzureInstanceGroupRequest> instanceGroups = new ArrayList<>();
         doIfNotNull(source, s -> s.forEach(ig -> {
-            InstanceGroupRequest instanceGroup = new InstanceGroupRequest();
+            AzureInstanceGroupRequest instanceGroup = new AzureInstanceGroupRequest();
             instanceGroup.setAttachedVolumeConfiguration(convertAttachedVolumeConfiguration(ig.getTemplate().getAttachedVolumes()));
             instanceGroup.setInstanceGroupName(ig.getName());
             instanceGroup.setInstanceGroupType(ig.getType().name());
@@ -69,7 +69,6 @@ public class StackRequestToCreateAzureClusterRequestConverter implements StackRe
             instanceGroup.setRecipeNames(getIfNotNull(ig.getRecipeNames(), List::copyOf));
             instanceGroup.setRecoveryMode(ig.getRecoveryMode().name());
             instanceGroup.setRootVolumeSize(ig.getTemplate().getRootVolume().getSize());
-            instanceGroup.setVolumeEncryption(convertVolumeEncryption(ig.getTemplate()));
             instanceGroups.add(instanceGroup);
         }));
         return instanceGroups;

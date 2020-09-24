@@ -95,8 +95,11 @@ public class OperationService {
         if (!operationOptional.isPresent()) {
             LOGGER.info("Operation [{}] in account [{}] not found", operationId, accountId);
             throw NotFoundException.notFound("Operation", operationId).get();
+        } else {
+            Operation operation = operationOptional.get();
+            LOGGER.debug("Operation found: {}", operation);
+            return operation;
         }
-        return operationOptional.get();
     }
 
     private Operation requestOperation(String accountId, OperationType operationType,

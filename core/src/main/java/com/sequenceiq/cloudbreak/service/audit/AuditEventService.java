@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.comparator.audit.AuditEventComparator;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.db.StructuredEventDBService;
+import com.sequenceiq.cloudbreak.structuredevent.db.LegacyStructuredEventDBService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -37,24 +37,24 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
     private UserService userService;
 
     @Inject
-    private StructuredEventDBService structuredEventDBService;
+    private LegacyStructuredEventDBService legacyStructuredEventDBService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     public AuditEventV4Response getAuditEvent(Long auditId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         return getAuditEventByWorkspaceId(workspaceService.getDefaultWorkspaceForUser(user).getId(), auditId);
     }
 
     public AuditEventV4Response getAuditEventByWorkspaceId(Long workspaceId, Long auditId) {
-        StructuredEventEntity event = Optional.ofNullable(structuredEventDBService.findByWorkspaceIdAndId(workspaceId, auditId))
+        StructuredEventEntity event = Optional.ofNullable(legacyStructuredEventDBService.findByWorkspaceIdAndId(workspaceId, auditId))
                 .orElseThrow(notFound("StructuredEvent", auditId));
         return converterUtil.convert(event, AuditEventV4Response.class);
     }
 
     public List<AuditEventV4Response> getAuditEventsByWorkspaceId(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         List<AuditEventV4Response> auditEventV4Responses = getEventsForUserWithTypeAndResourceIdByWorkspace(workspace,
                 resourceType, resourceId, resourceCrn);
@@ -66,16 +66,16 @@ public class AuditEventService extends AbstractWorkspaceAwareResourceService<Str
         Long resourceId, String resourceCrn) {
         List<StructuredEventEntity> events;
         if (!Strings.isNullOrEmpty(resourceCrn)) {
-            events = structuredEventDBService.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
+            events = legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
         } else {
-            events = structuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+            events = legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
         }
         return events != null ? converterUtil.convertAll(events, AuditEventV4Response.class) : Collections.emptyList();
     }
 
     @Override
     public WorkspaceResourceRepository<StructuredEventEntity, Long> repository() {
-        return structuredEventDBService.repository();
+        return legacyStructuredEventDBService.repository();
     }
 
     @Override

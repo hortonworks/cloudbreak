@@ -16,7 +16,9 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 @Transactional(TxType.REQUIRED)
 public interface ClusterTemplateViewRepository extends WorkspaceResourceRepository<ClusterTemplateView, Long> {
 
-    @Query("SELECT b FROM ClusterTemplateView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT b FROM ClusterTemplateView b " +
+            "LEFT JOIN FETCH b.stackTemplate " +
+            "WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     Set<ClusterTemplateView> findAllActive(@Param("workspaceId") Long workspaceId);
 
     @Override

@@ -46,4 +46,13 @@ public abstract class InstanceGroupBase {
     public void setType(InstanceGroupType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceGroupBase{" +
+                "nodeCount=" + nodeCount +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                '}';
+    }
 }

@@ -1,9 +1,11 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
@@ -38,6 +41,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -130,6 +136,11 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     @Inject
     private EntitlementService entitlementService;
 
+    public String getStackCrnByClusterCrn(String crn) {
+        return sdxClusterRepository.findStackCrnByClusterCrn(crn)
+                .orElseThrow(notFound("SdxCluster", crn));
+    }
+
     public Set<Long> findByResourceIdsAndStatuses(Set<Long> resourceIds, Set<DatalakeStatusEnum> statuses) {
         LOGGER.info("Searching for SDX cluster by ids and statuses.");
         List<SdxStatusEntity> sdxStatusEntities = sdxStatusService.findDistinctFirstByStatusInAndDatalakeIdOrderByIdDesc(statuses, resourceIds);
@@ -149,7 +160,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
-            return stackV4Endpoint.get(0L, name, entries, accountId);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(0L, name, entries, accountId));
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
@@ -200,14 +211,21 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         sdxCluster.setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
             sdxCluster.setCloudStorageBaseLocation(trimmedBaseLocation);
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
+        } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
+                !CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform.name()) &&
+                !CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
+                internalStackV4Request == null) {
+            throw new BadRequestException("Cloud storage parameter is required.");
         }
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request);
         sdxCluster.setRuntime(runtimeVersion);
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
@@ -250,6 +268,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             throw new BadRequestException("The environment is stopped. Please start the environment first!");
         } else if (environment.getEnvironmentStatus().isStartInProgress()) {
             throw new BadRequestException("The environment is starting. Please wait until finished!");
+        } else if (environment.getEnvironmentStatus().isFailed()) {
+            throw new BadRequestException("The environment is in failed phase. Please fix the environment or create a new one first!");
         }
     }
 
@@ -300,12 +320,13 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     public FlowIdentifier sync(String name, String accountId) {
-        return stackV4Endpoint.sync(0L, name, accountId);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.sync(0L, name, accountId));
     }
 
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
-        stackV4Endpoint.sync(0L, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId());
+        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                stackV4Endpoint.sync(0L, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
     protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
@@ -442,11 +463,14 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
-            if (!AZURE.name().equalsIgnoreCase(environment.getCloudPlatform())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for Microsoft Azure.");
+            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+            if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
+                validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
-            if (!isRazSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning Ranger Raz is only valid for CM version >= 7.2.1 and not " + sdxClusterRequest.getRuntime());
+            if (!isRazSupported(sdxClusterRequest.getRuntime(), cloudPlatform)) {
+                String errorMsg =  AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
+                validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -475,14 +499,15 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     /**
-     * Ranger Raz is only on 7.2.1 and later.  If runtime is empty, then sdx-internal call was used.
+     * Ranger Raz is only on 7.2.1 and later on Microsoft Azure, and only on 7.2.2 and later on Amazon Web Services.
+     * If runtime is empty, then sdx-internal call was used.
      */
-    private boolean isRazSupported(String runtime) {
+    private boolean isRazSupported(String runtime, CloudPlatform cloudPlatform) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> "7.2.1") > -1;
+        return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
     }
 
     /**
@@ -580,6 +605,49 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 .orElseThrow(() -> notFound("SDX cluster", name).get());
     }
 
+    public void updateRuntimeVersionFromStackResponse(SdxCluster sdxCluster, StackV4Response stackV4Response) {
+        String clusterName = sdxCluster.getClusterName();
+        Optional<String> cdpVersionOpt = getCdpVersion(stackV4Response);
+        LOGGER.info("Update '{}' runtime version from stackV4Response", clusterName);
+        if (cdpVersionOpt.isPresent()) {
+            String version = cdpVersionOpt.get();
+            LOGGER.info("Update Sdx runtime version of {} to {}, previous version: {}", clusterName, version, sdxCluster.getRuntime());
+            sdxCluster.setRuntime(version);
+            sdxClusterRepository.save(sdxCluster);
+        } else {
+            LOGGER.warn("Cannot update the Sdx runtime version for cluster: {}", clusterName);
+        }
+    }
+
+    private Optional<String> getCdpVersion(StackV4Response stack) {
+        Optional<String> result = Optional.empty();
+        String stackName = stack.getName();
+        ClusterV4Response cluster = stack.getCluster();
+        if (cluster != null) {
+            ClouderaManagerV4Response cm = cluster.getCm();
+            if (cm != null) {
+                LOGGER.info("Repository details are available for cluster: {}: {}", stackName, cm);
+                List<ClouderaManagerProductV4Response> products = cm.getProducts();
+                if (products != null && !products.isEmpty()) {
+                    Optional<ClouderaManagerProductV4Response> cdpOpt = products.stream().filter(p -> "CDH".equals(p.getName())).findFirst();
+                    if (cdpOpt.isPresent()) {
+                        result = getRuntimeVersionFromCdpVersion(cdpOpt.get().getVersion());
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    private Optional<String> getRuntimeVersionFromCdpVersion(String cdpVersion) {
+        Optional<String> result = Optional.empty();
+        if (isNotEmpty(cdpVersion)) {
+            LOGGER.info("Extract runtime version from CDP version: {}", cdpVersion);
+            result = Optional.of(StringUtils.substringBefore(cdpVersion, "-"));
+        }
+        return result;
+    }
+
     public void setAdditionalClusterResponseFields(SdxClusterResponse sdxClusterResponse, SdxCluster sdxCluster) {
         setCloudPlatform(sdxClusterResponse, sdxCluster);
     }
@@ -607,8 +675,15 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         if (!forced && sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
             throw new BadRequestException(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()));
         }
-        Collection<StackViewV4Response> attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
-        if (!attachedDistroXClusters.isEmpty()) {
+        Collection<StackViewV4Response> attachedDistroXClusters = null;
+        try {
+            attachedDistroXClusters = distroxService.getAttachedDistroXClusters(sdxCluster.getEnvCrn());
+        } catch (Exception ex) {
+            if (!forced) {
+                throw ex;
+            }
+        }
+        if (attachedDistroXClusters != null && !attachedDistroXClusters.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before SDX deletion [%s]",
                     String.join(", ", attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.toList()))));
         }
@@ -624,12 +699,12 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 .toString();
     }
 
-    public String getAccountIdFromCrn(String userCrn) {
+    public String getAccountIdFromCrn(String crnStr) {
         try {
-            Crn crn = Crn.safeFromString(userCrn);
+            Crn crn = Crn.safeFromString(crnStr);
             return crn.getAccountId();
         } catch (NullPointerException | CrnParseException e) {
-            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
+            throw new BadRequestException("Can not parse CRN to find account ID: " + crnStr);
         }
     }
 
@@ -655,7 +730,16 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     @Override
+    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return Optional.of(getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn).getEnvCrn());
+    }
+
+    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.DATALAKE;
+    }
+
+    public SdxCluster save(SdxCluster sdxCluster) {
+        return sdxClusterRepository.save(sdxCluster);
     }
 }

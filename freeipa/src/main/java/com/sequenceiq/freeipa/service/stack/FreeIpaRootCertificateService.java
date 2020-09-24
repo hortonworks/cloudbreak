@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -24,6 +25,7 @@ public class FreeIpaRootCertificateService {
 
     public String getRootCertificate(String environmentCrn, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
 
         return convertToPemFormat(client.getRootCertificate());

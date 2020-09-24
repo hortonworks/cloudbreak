@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -83,7 +83,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Inject
     private ClusterTemplateLoaderService clusterTemplateLoaderService;
@@ -325,7 +325,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return StreamSupport.stream(clusterTemplates.spliterator(), false)
                 .map(ct -> {
                     try {
-                        return create(ct, ct.getWorkspace(), userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser()));
+                        return create(ct, ct.getWorkspace(), userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser()));
                     } catch (DuplicateClusterTemplateException duplicateClusterTemplateException) {
                         LOGGER.info("Template was found, try to get it", duplicateClusterTemplateException);
                         return getByNameForWorkspace(ct.getName(), ct.getWorkspace());

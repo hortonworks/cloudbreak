@@ -67,7 +67,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
             }
         } catch (Exception e) {
             LOGGER.error("Failed to get '{}' instance group status, because of {}", hostGroup, e.getMessage(), e);
-            throw new TestFailException(String.format("Failed to get '%s' instance group status, because of %s", hostGroup, e.getMessage()));
+            throw new TestFailException(String.format("Failed to get '%s' instance group status", hostGroup), e);
         }
         return false;
     }
@@ -101,8 +101,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
             }
         } catch (Exception e) {
             LOGGER.error("Wait operation timed out, failed to get instance status: {}", e.getMessage(), e);
-            throw new TestFailException(String.format("Wait operation timed out, failed to get instance status: %s",
-                    e.getMessage()));
+            throw new TestFailException("Wait operation timed out, failed to get instance status", e);
         }
     }
 

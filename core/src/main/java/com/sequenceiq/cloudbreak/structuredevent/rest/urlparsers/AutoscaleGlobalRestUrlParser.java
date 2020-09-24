@@ -5,8 +5,10 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class AutoscaleGlobalRestUrlParser extends RestUrlParser {
+public class AutoscaleGlobalRestUrlParser extends LegacyRestUrlParser {
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 1;
 

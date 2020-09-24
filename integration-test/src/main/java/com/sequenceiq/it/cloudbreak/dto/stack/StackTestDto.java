@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.stack;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
 import java.util.List;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
@@ -37,7 +37,7 @@ import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
-public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable {
+public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Searchable, Investigable, Assignable {
 
     public static final String STACK = "STACK";
 
@@ -67,14 +67,18 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public StackTestDtoBase<StackTestDto> valid() {
-        return super.valid().withEnvironment(EnvironmentTestDto.class);
+        return super.valid().withEnvironmentClass(EnvironmentTestDto.class);
     }
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(stackTestClient.forceDeleteV4(), withoutLogError());
-        await(STACK_DELETED);
+        LOGGER.info("Cleaning up stack with name: {}", getName());
+        if (getResponse() != null) {
+            when(stackTestClient.forceDeleteV4(), key("delete-stack-" + getName()).withSkipOnFail(false));
+            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("Stack: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -111,7 +115,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     }
 
     @Override
-    public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
+    public CloudbreakTestDto refresh() {
         return when(stackTestClient.refreshV4(), key("refresh-stack-" + getName()));
     }
 
@@ -135,11 +139,11 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
             return null;
         }
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
-                getTestContext().getCloudbreakClient(),
+                getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
                 null);
-        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("DistroX", auditEvents, getResponse(), hasSpotTermination);
@@ -148,5 +152,10 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 }

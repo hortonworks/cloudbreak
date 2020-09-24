@@ -9,6 +9,8 @@ import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
@@ -32,6 +34,8 @@ import com.google.api.services.compute.Compute.ZoneOperations;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
+import com.google.api.services.sqladmin.SQLAdmin;
+import com.google.api.services.sqladmin.model.OperationError;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Builder;
 import com.google.api.services.storage.StorageScopes;
@@ -47,7 +51,13 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public final class GcpStackUtil {
 
+    public static final String GCP = "gcp";
+
+    public static final String JSON = "json";
+
     public static final String NETWORK_ID = "networkId";
+
+    public static final String NETWORK_IP_RANGE = "networkRange";
 
     public static final String SHARED_PROJECT_ID = "sharedProjectId";
 
@@ -61,6 +71,12 @@ public final class GcpStackUtil {
 
     public static final String CREDENTIAL_JSON = "credentialJson";
 
+    public static final String NO_PUBLIC_IP = "noPublicIp";
+
+    public static final String NO_FIREWALL_RULES = "noFirewallRules";
+
+    public static final String REGION = "region";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
@@ -71,13 +87,17 @@ public final class GcpStackUtil {
 
     private static final String EMPTY_BUCKET = "";
 
+    private static final String EMPTY_PATH = "";
+
     private static final int FINISHED = 100;
+
+    private static final Set<String> FINISHED_STATUS = Set.of("DONE");
 
     private static final int PRIVATE_ID_PART = 2;
 
-    private static final String NO_PUBLIC_IP = "noPublicIp";
+    private static final int MIN_PATH_PARTS = 3;
 
-    private static final String NO_FIREWALL_RULES = "noFirewallRules";
+    private static final int FIRST = 1;
 
     private GcpStackUtil() {
     }
@@ -122,7 +142,9 @@ public final class GcpStackUtil {
     }
 
     public static String getServiceAccountCredentialJson(CloudCredential credential) {
-        return credential.getParameter(CREDENTIAL_JSON, String.class);
+        Map<String, Object> gcp = (Map<String, Object>) credential.getParameters().get(GCP);
+        Map<String, Object> json = (Map<String, Object>) gcp.get(JSON);
+        return json.get(CREDENTIAL_JSON).toString();
     }
 
     public static String getServiceAccountId(CloudCredential credential) {
@@ -172,6 +194,16 @@ public final class GcpStackUtil {
         }
     }
 
+    public static boolean isOperationFinished(com.google.api.services.sqladmin.model.Operation operation) throws Exception {
+        String errorMessage = checkForErrors(operation);
+        if (errorMessage != null) {
+            throw new Exception(errorMessage);
+        } else {
+            String progress = operation.getStatus();
+            return FINISHED_STATUS.contains(progress);
+        }
+    }
+
     private static String checkForErrors(Operation operation) {
         if (operation == null) {
             LOGGER.info("Operation is null!");
@@ -195,8 +227,32 @@ public final class GcpStackUtil {
         return msg;
     }
 
+    private static String checkForErrors(com.google.api.services.sqladmin.model.Operation operation) {
+        if (operation == null) {
+            LOGGER.info("Operation is null!");
+            return null;
+        }
+        String msg = null;
+        if (operation.getError() != null) {
+            StringBuilder error = new StringBuilder();
+            if (operation.getError().getErrors() != null) {
+                for (OperationError errors : operation.getError().getErrors()) {
+                    error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
+                }
+                msg = error.toString();
+            } else {
+                LOGGER.debug("No errors found, Error: {}", operation.getError());
+            }
+        }
+        return msg;
+    }
+
     public static GlobalOperations.Get globalOperations(Compute compute, String projectId, String operationName) throws IOException {
         return compute.globalOperations().get(projectId, operationName);
+    }
+
+    public static SQLAdmin.Operations.Get sqlAdminOperations(SQLAdmin sqlAdmin, String projectId, String operationName) throws IOException {
+        return sqlAdmin.operations().get(projectId, operationName);
     }
 
     public static ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
@@ -214,6 +270,21 @@ public final class GcpStackUtil {
             GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
             return new Builder(
                     httpTransport, JSON_FACTORY, null).setApplicationName(name)
+                    .setHttpRequestInitializer(credential)
+                    .build();
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred while building Google Storage access.", e);
+        }
+        return null;
+    }
+
+    public static SQLAdmin buildSQLAdmin(CloudCredential gcpCredential, String name) {
+        try {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
+            return new SQLAdmin.Builder(
+                    httpTransport, JSON_FACTORY, null)
+                    .setApplicationName(name)
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
@@ -241,6 +312,26 @@ public final class GcpStackUtil {
         }
     }
 
+    public static String getBucketName(String objectStorageLocation) {
+        String[] parts = createParts(objectStorageLocation);
+        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
+            return parts[FIRST];
+        } else {
+            LOGGER.debug("No bucket found in object storage location.");
+            return EMPTY_BUCKET;
+        }
+    }
+
+    public static String getPath(String objectStorageLocation) {
+        String[] parts = createParts(objectStorageLocation);
+        if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > MIN_PATH_PARTS) {
+            return StringUtils.join(ArrayUtils.removeAll(parts, 0, 1), "/");
+        } else {
+            LOGGER.debug("No path found in object storage location.");
+            return EMPTY_PATH;
+        }
+    }
+
     public static String getImageName(String image) {
         if (image.contains("/")) {
             return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
@@ -263,6 +354,14 @@ public final class GcpStackUtil {
 
     public static boolean isExistingNetwork(Network network) {
         return isNotEmpty(getCustomNetworkId(network));
+    }
+
+    public static String getNetworkIpRange(Network network) {
+        return network.getStringParameter(NETWORK_IP_RANGE);
+    }
+
+    public static boolean isNetworkIpRangeDefined(Network network) {
+        return isNotEmpty(getNetworkIpRange(network));
     }
 
     public static boolean isNewSubnetInExistingNetwork(Network network) {

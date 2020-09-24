@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -40,7 +41,7 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @DisableCheckPermissions
     public AccountTelemetryResponse get() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return accountTelemetryConverter.convert(accountTelemetryService.getOrDefault(accountId));
@@ -55,13 +56,13 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @DisableCheckPermissions
     public AccountTelemetryResponse getDefault() {
         return accountTelemetryConverter.convert(accountTelemetryService.createDefaultAccuontTelemetry());
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @DisableCheckPermissions
     public FeaturesResponse listFeatures() {
         AccountTelemetryResponse response = get();
         return response.getFeatures();
@@ -77,7 +78,7 @@ public class AccountTelemetryController extends NotificationController implement
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @DisableCheckPermissions
     public List<AnonymizationRule> listRules() {
         AccountTelemetryResponse response = get();
         return response.getRules();

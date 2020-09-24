@@ -45,8 +45,9 @@ public class FreeIpaUsersStateProvider {
         return builder.build();
     }
 
-    public UsersState getFilteredFreeIpaState(FreeIpaClient freeIpaClient, Set<FmsUser> users) throws FreeIpaClientException {
-        LOGGER.debug("Retrieving users with user ids [{}] from FreeIPA", users);
+    public UsersState getFilteredFreeIpaState(FreeIpaClient freeIpaClient, Set<String> userNames)
+            throws FreeIpaClientException {
+        LOGGER.debug("Retrieving users with user names [{}] from FreeIPA", userNames);
         UsersState.Builder builder = new UsersState.Builder();
 
         // get all groups from IPA
@@ -54,11 +55,11 @@ public class FreeIpaUsersStateProvider {
                 .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group.getCn()))
                 .forEach(group -> builder.addGroup(fromIpaGroup(group)));
 
-        for (FmsUser user : users) {
-            if (IPA_PROTECTED_USERS.contains(user.getName())) {
+        for (String userName : userNames) {
+            if (IPA_PROTECTED_USERS.contains(userName)) {
                 continue;
             }
-            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(user.getName());
+            Optional<com.sequenceiq.freeipa.client.model.User> ipaUserOptional = freeIpaClient.userFind(userName);
             if (ipaUserOptional.isPresent()) {
                 com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
                 builder.addUser(fromIpaUser(ipaUser));
@@ -66,7 +67,7 @@ public class FreeIpaUsersStateProvider {
                     ipaUser.getMemberOfGroup().stream()
                             .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
                             .forEach(groupname -> {
-                                builder.addMemberToGroup(groupname, user.getName());
+                                builder.addMemberToGroup(groupname, userName);
                             });
                 }
             }

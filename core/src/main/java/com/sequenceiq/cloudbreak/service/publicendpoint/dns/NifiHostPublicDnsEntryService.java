@@ -5,13 +5,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiConfigProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 
-@Service
 public class NifiHostPublicDnsEntryService extends BaseDnsEntryService {
 
     @Inject

@@ -14,7 +14,8 @@ import reactor.bus.EventBus;
 @TestConfiguration
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
         "com.sequenceiq.environment",
-        "com.sequenceiq.cloudbreak.ha.domain"})
+        "com.sequenceiq.cloudbreak.ha.domain",
+        "com.sequenceiq.cloudbreak.structuredevent.domain"})
 @Profile("test")
 public class TestConfigurationForServiceIntegration {
     @MockBean

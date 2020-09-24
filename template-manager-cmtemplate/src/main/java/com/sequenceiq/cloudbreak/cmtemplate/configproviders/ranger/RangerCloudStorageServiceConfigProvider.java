@@ -39,11 +39,10 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
-
         String cmVersion = templatePreparationObject.getProductDetailsView().getCm().getVersion();
+        CloudPlatform cloudPlatform = templatePreparationObject.getCloudPlatform();
         if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2)
-                && templatePreparationObject.getCloudPlatform().equals(CloudPlatform.AZURE)) {
-
+                && (cloudPlatform.equals(CloudPlatform.AWS) || cloudPlatform.equals(CloudPlatform.AZURE))) {
             List<String> cloudPaths = new ArrayList<>();
             ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HIVE_METASTORE_DIR)
                     .ifPresent(location -> cloudPaths.add(HIVE_METASTORE_WAREHOUSE.name() + "=" + location.getValue()));
@@ -102,4 +101,5 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
 
         return "";
     }
+
 }

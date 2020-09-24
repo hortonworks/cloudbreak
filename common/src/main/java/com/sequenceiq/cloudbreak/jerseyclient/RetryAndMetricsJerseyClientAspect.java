@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.jerseyclient;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -51,14 +52,22 @@ public class RetryAndMetricsJerseyClientAspect {
                     MetricTag.TARGET_API.name(), invokedApi,
                     MetricTag.TARGET_METHOD.name(), invokedMethod);
             return result;
+        } catch (NotFoundException nFE) {
+            LOGGER.debug("API call failed with 404 not found error code.", nFE);
+            incrementMetricCounter(invokedApi, invokedMethod, nFE);
+            throw nFE;
         } catch (Exception e) {
             LOGGER.error("Failed to execute REST API call with retries.", e);
-            metricService.incrementMetricCounter(MetricType.REST_OPERATION_FAILED,
-                    MetricTag.TARGET_API.name(), invokedApi,
-                    MetricTag.TARGET_METHOD.name(), invokedMethod,
-                    MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName());
+            incrementMetricCounter(invokedApi, invokedMethod, e);
             throw e;
         }
+    }
+
+    private void incrementMetricCounter(String invokedApi, String invokedMethod, Exception e) throws Exception {
+        metricService.incrementMetricCounter(MetricType.REST_OPERATION_FAILED,
+                MetricTag.TARGET_API.name(), invokedApi,
+                MetricTag.TARGET_METHOD.name(), invokedMethod,
+                MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName());
     }
 
 }

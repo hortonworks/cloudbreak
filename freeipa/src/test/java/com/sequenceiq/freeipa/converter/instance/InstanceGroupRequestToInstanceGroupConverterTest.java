@@ -31,6 +31,10 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
 
     private static final String NAME = "NAME";
 
+    private static final String HOSTNAME = "HOSTNAME";
+
+    private static final String DOMAINNAME = "DOMAINNAME";
+
     @InjectMocks
     private InstanceGroupRequestToInstanceGroupConverter underTest;
 
@@ -60,7 +64,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         given(defaultInstanceGroupProvider.createDefaultTemplate(eq(MOCK), eq(ACCOUNT_ID))).willReturn(template);
         given(securityGroupConverter.convert(eq(securityGroupRequest))).willReturn(securityGroup);
         // WHEN
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME);
         // THEN
         assertThat(result).isNotNull();
         assertThat(result.getGroupName()).isEqualTo(NAME);
@@ -82,7 +86,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         Template template = mock(Template.class);
         when(templateConverter.convert(instanceTemplateRequest, MOCK, ACCOUNT_ID)).thenReturn(template);
 
-        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name());
+        InstanceGroup result = underTest.convert(request, ACCOUNT_ID, MOCK.name(), NAME, HOSTNAME, DOMAINNAME);
 
         assertThat(result).isNotNull();
         assertThat(result.getTemplate()).isSameAs(template);

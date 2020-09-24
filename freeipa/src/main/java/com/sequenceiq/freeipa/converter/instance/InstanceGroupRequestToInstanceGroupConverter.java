@@ -26,27 +26,30 @@ public class InstanceGroupRequestToInstanceGroupConverter {
     @Inject
     private DefaultInstanceGroupProvider defaultInstanceGroupProvider;
 
-    public InstanceGroup convert(InstanceGroupRequest source, String accountId, String cloudPlatformString) {
+    public InstanceGroup convert(InstanceGroupRequest source, String accountId, String cloudPlatformString, String stackName, String hostname, String domain) {
         InstanceGroup instanceGroup = new InstanceGroup();
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(cloudPlatformString);
         instanceGroup.setTemplate(source.getInstanceTemplate() == null
                 ? defaultInstanceGroupProvider.createDefaultTemplate(cloudPlatform, accountId)
                 : templateConverter.convert(source.getInstanceTemplate(), cloudPlatform, accountId));
         instanceGroup.setSecurityGroup(securityGroupConverter.convert(source.getSecurityGroup()));
-        instanceGroup.setGroupName(source.getName());
+        String instanceGroupName = source.getName();
+        instanceGroup.setGroupName(instanceGroupName);
         instanceGroup.setInstanceGroupType(source.getType());
+        instanceGroup.setAttributes(defaultInstanceGroupProvider.createAttributes(cloudPlatform, stackName, instanceGroupName));
         if (source.getNodeCount() > 0) {
-            addInstanceMetadatas(source, instanceGroup);
+            addInstanceMetadatas(source, instanceGroup, hostname, domain);
         }
         instanceGroup.setNodeCount(source.getNodeCount());
         return instanceGroup;
     }
 
-    private void addInstanceMetadatas(InstanceGroupRequest request, InstanceGroup instanceGroup) {
+    private void addInstanceMetadatas(InstanceGroupRequest request, InstanceGroup instanceGroup, String hostname, String domain) {
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
+            instanceMetaData.setDiscoveryFQDN(hostname + String.format("%d.", i) + domain);
             instanceMetaDataSet.add(instanceMetaData);
         }
         instanceGroup.setInstanceMetaData(instanceMetaDataSet);

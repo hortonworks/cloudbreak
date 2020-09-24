@@ -10,10 +10,10 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.cdp.datahub.model.AttachedVolumeRequest;
+import com.cloudera.cdp.datahub.model.AzureInstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.CreateAzureClusterRequest;
 import com.cloudera.cdp.datahub.model.DatahubResourceTagRequest;
 import com.cloudera.cdp.datahub.model.ImageRequest;
-import com.cloudera.cdp.datahub.model.InstanceGroupRequest;
 import com.cloudera.cdp.datahub.model.VolumeEncryptionRequest;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -46,10 +46,10 @@ public class DistroXV1RequestToCreateAzureClusterRequestConverter implements Dis
         return request;
     }
 
-    private List<InstanceGroupRequest> convertInstanceGroups(Set<InstanceGroupV1Request> source) {
-        List<InstanceGroupRequest> instanceGroups = new ArrayList<>();
+    private List<AzureInstanceGroupRequest> convertInstanceGroups(Set<InstanceGroupV1Request> source) {
+        List<AzureInstanceGroupRequest> instanceGroups = new ArrayList<>();
         doIfNotNull(source, s -> s.forEach(ig -> {
-            InstanceGroupRequest instanceGroup = new InstanceGroupRequest();
+            AzureInstanceGroupRequest instanceGroup = new AzureInstanceGroupRequest();
             instanceGroup.setAttachedVolumeConfiguration(convertAttachedVolumeConfiguration(ig.getTemplate().getAttachedVolumes()));
             instanceGroup.setInstanceGroupName(ig.getName());
             instanceGroup.setInstanceGroupType(ig.getType().name());
@@ -58,7 +58,6 @@ public class DistroXV1RequestToCreateAzureClusterRequestConverter implements Dis
             instanceGroup.setRecipeNames(getIfNotNull(ig.getRecipeNames(), List::copyOf));
             instanceGroup.setRecoveryMode(ig.getRecoveryMode().name());
             instanceGroup.setRootVolumeSize(ig.getTemplate().getRootVolume().getSize());
-            instanceGroup.setVolumeEncryption(convertVolumeEncryption(ig.getTemplate()));
             instanceGroups.add(instanceGroup);
         }));
         return instanceGroups;

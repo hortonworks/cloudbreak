@@ -30,6 +30,18 @@ setup_missed_cm_heartbeat:
     - text: setsettings MISSED_HB_BAD {{ cloudera_manager.settings.missed_heartbeat_interval }}
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
+add_settings_file_to_cfm_server_args:
+  file.replace:
+    - name: /etc/default/cloudera-scm-server
+    - pattern: "CMF_SERVER_ARGS=.*"
+{% if salt['pillar.get']('cloudera-manager:settings:set_cdp_env') == True %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings -env PUBLIC_CLOUD\"" /etc/default/cloudera-scm-server
+{% else %}
+    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
+    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
+{% endif %}
+
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
 add_ldap_settings_to_cm:
@@ -41,13 +53,6 @@ add_ldap_settings_to_cm:
     - context:
         ldap: {{ cloudera_manager.ldap }}
     - unless: grep "AUTH_BACKEND_ORDER" /etc/cloudera-scm-server/cm.settings
-
-cloudera_manager_setup_ldap:
-  file.replace:
-    - name: /etc/default/cloudera-scm-server
-    - pattern: "CMF_SERVER_ARGS=.*"
-    - repl: CMF_SERVER_ARGS="-i /etc/cloudera-scm-server/cm.settings"
-    - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
 
 {% endif %}
 
@@ -83,6 +88,18 @@ cloudera_manager_set_parcel_validation:
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 
+replace_crl_in_cmca_profile:
+  file.replace:
+    - name: /etc/cloudera-scm-server/cmSubCaCert.profile
+    - pattern: "policyset.cmSubCaCertSet.9.default.params.crlDistPointsPointName_0=http://changeme.com/ipa/crl/MasterCRL.bin"
+    - repl: "policyset.cmSubCaCertSet.9.default.params.crlDistPointsPointName_0=http://ipa-ca.{{ metadata.cluster_domain }}/ipa/crl/MasterCRL.bin"
+
+replace_ocsp_in_cmca_profile:
+  file.replace:
+    - name: /etc/cloudera-scm-server/cmSubCaCert.profile
+    - pattern: "policyset.cmSubCaCertSet.5.default.params.authInfoAccessADLocation_0=http://changeme.com/ca/ocsp"
+    - repl: "policyset.cmSubCaCertSet.5.default.params.authInfoAccessADLocation_0=http://ipa-ca.{{ metadata.cluster_domain }}/ca/ocsp"
+
 /opt/salt/scripts/cm-setup-autotls.sh:
   file.managed:
     - makedirs: True
@@ -111,6 +128,15 @@ copy_autotls_setup_to_cm_settings:
     - require:
       - cmd: run_autotls_setup
     - unless: grep "# Auto-tls related configurations" /etc/cloudera-scm-server/cm.settings
+
+disable_phone_home:
+  file.blockreplace:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - marker_start: "# BLOCK TOP : salt managed zone : please do not edit"
+    - marker_end: "# BLOCK BOTTOM : end of salt managed zone --"
+    - content: "setsettings PHONE_HOME false"
+    - show_changes: True
+    - append_if_not_found: True
 
 /opt/salt/scripts/cm_generate_agent_tokens.sh:
   file.managed:

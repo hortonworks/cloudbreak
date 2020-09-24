@@ -18,6 +18,9 @@ public class EntitlementService {
     static final String CDP_AZURE = "CDP_AZURE";
 
     @VisibleForTesting
+    static final String CDP_GCP = "CDP_GCP";
+
+    @VisibleForTesting
     static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
 
     @VisibleForTesting
@@ -57,16 +60,29 @@ public class EntitlementService {
     static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
     @VisibleForTesting
+    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
+
+    @VisibleForTesting
     static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
 
     @VisibleForTesting
     static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
+
+    @VisibleForTesting
+    static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
+
+    @VisibleForTesting
+    static final String CDP_UMS_USER_SYNC_MODEL_GENERATION = "CDP_UMS_USER_SYNC_MODEL_GENERATION";
 
     @Inject
     private GrpcUmsClient umsClient;
 
     public boolean azureEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE);
+    }
+
+    public boolean gcpEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_GCP);
     }
 
     public boolean baseImageEnabled(String actorCrn, String accountId) {
@@ -121,12 +137,24 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
 
+    public boolean azureSingleResourceGroupDedicatedStorageAccountEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT);
+    }
+
     public boolean fastEbsEncryptionEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_CB_FAST_EBS_ENCRYPTION);
     }
 
     public boolean cloudIdentityMappingEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_CLOUD_IDENTITY_MAPPING);
+    }
+
+    public boolean isInternalRepositoryForUpgradeAllowed(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
+    }
+
+    public boolean umsUserSyncModelGenerationEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_UMS_USER_SYNC_MODEL_GENERATION);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

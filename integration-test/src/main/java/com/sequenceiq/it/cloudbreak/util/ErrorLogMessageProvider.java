@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -27,36 +29,48 @@ public class ErrorLogMessageProvider {
             LOGGER.error("Exception during test: " + msg, ex);
             messageBuilder.append(msg).append(": ")
                     .append(ResponseUtil.getErrorMessage(ex))
+                    .append(System.lineSeparator())
+                    .append(getStackTrace(ex))
                     .append(System.lineSeparator());
         });
         addCluesToMessage(messageBuilder, clues);
         return messageBuilder.toString().replace("%", "%%");
     }
 
-    private void addCluesToMessage(StringBuilder builder, List<Clue> clues) {
-        if (clues.stream().anyMatch(Clue::isHasSpotTermination)) {
-            String spotTerminatedNames = clues.stream()
-                    .filter(Clue::isHasSpotTermination)
-                    .map(Clue::getName)
-                    .collect(Collectors.joining(", "));
+    private String getStackTrace(Exception ex) {
+        StringWriter stringWriter = new StringWriter();
+        ex.printStackTrace(new PrintWriter(stringWriter));
+        return stringWriter.toString();
+    }
 
-            LOGGER.warn("There were spot terminations in the following resources: {}", spotTerminatedNames);
-            builder.append("There were spot terminations in the following resources: ")
-                    .append(spotTerminatedNames)
+    void addCluesToMessage(StringBuilder builder, List<Clue> clues) {
+        try {
+            if (clues.stream().anyMatch(Clue::isHasSpotTermination)) {
+                String spotTerminatedNames = clues.stream()
+                        .filter(Clue::isHasSpotTermination)
+                        .map(Clue::getName)
+                        .collect(Collectors.joining(", "));
+
+                LOGGER.warn("There were spot terminations in the following resources: {}", spotTerminatedNames);
+                builder.append("There were spot terminations in the following resources: ")
+                        .append(spotTerminatedNames)
+                        .append(System.lineSeparator());
+            }
+            builder.append("Responses:")
                     .append(System.lineSeparator());
+            clues.forEach(clue -> builder.append(clue.getName())
+                    .append(" response: ")
+                    .append(convertToString(clue.getResponse()))
+                    .append(System.lineSeparator()));
+            builder.append("All audit events:")
+                    .append(System.lineSeparator());
+            clues.forEach(clue -> builder.append(clue.getName())
+                    .append(" audit events: ")
+                    .append(convertToString(clue.getAuditEvents()))
+                    .append(System.lineSeparator()));
+        } catch (Exception e) {
+            LOGGER.warn("Exception occurred during processing clues. Clues: {}.", convertToString(clues), e);
         }
-        builder.append("Responses:")
-                .append(System.lineSeparator());
-        clues.forEach(clue -> builder.append(clue.getName())
-                .append(" response: ")
-                .append(convertToString(clue.getResponse()))
-                .append(System.lineSeparator()));
-        builder.append("All audit events:")
-                .append(System.lineSeparator());
-        clues.forEach(clue -> builder.append(clue.getName())
-                .append(" audit events: ")
-                .append(convertToString(clue.getAuditEvents()))
-                .append(System.lineSeparator()));
     }
 
     private String convertToString(Object o) {

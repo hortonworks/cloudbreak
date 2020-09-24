@@ -13,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -38,7 +37,7 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
             given = "get prewarmed image if stack info is presented",
             when = "posting a stack with all the repository version",
             then = "getting back a stack which using a prewarmed image")
-    public void testGetImageCatalogByNameAndStackWhenPreWarmedImageHasBeenUsed(TestContext testContext) {
+    public void testGetImageCatalogByNameAndStackWhenPreWarmedImageHasBeenUsed(MockedTestContext testContext) {
         initializeDefaultBlueprints(testContext);
 
         String imgCatalogName = resourcePropertyProvider().getName();
@@ -54,7 +53,7 @@ public class ImageCatalogPrewarmedTest extends AbstractIntegrationTest {
                 // .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))
                 .given(StackTestDto.class)
                 .withCatalog(ImageCatalogTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withName(stackName)
                 .when(stackTestClient.createV4(), key(imgCatalogName))
                 .await(STACK_AVAILABLE)

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.cm;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -19,14 +20,17 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Iterables;
 
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.datalake.controller.exception.RangerCloudIdentitySyncException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.inject.Inject;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Component
@@ -74,25 +78,13 @@ public class ClouderaManagerRangerUtil {
         return config;
     }
 
-    private void triggerRoleRefresh(ApiClient client, String clusterName, String serviceName, String roleName) {
-        LOGGER.info("Attempting to trigger role refresh on clusterName = {}, serviceName = {}, roleName = {}", clusterName, serviceName, roleName);
+    private ApiCommand triggerRoleRefresh(ApiClient client, String clusterName, String serviceName, String roleName) throws ApiException {
+        LOGGER.info("Trigerring role refresh on clusterName = {}, serviceName = {}, roleName = {}", clusterName, serviceName, roleName);
         ApiRoleNameList roleNameList = new ApiRoleNameList();
         roleNameList.addItemsItem(roleName);
         RoleCommandsResourceApi roleCommandsResourceApi = clouderaManagerApiFactory.getRoleCommandsResourceApi(client);
-        try {
-            ApiBulkCommandList bulkResponse = roleCommandsResourceApi.refreshCommand(clusterName, serviceName, roleNameList);
-            ApiCommand response = Iterables.getOnlyElement(bulkResponse.getItems());
-            LOGGER.info("ApiCommand response for role refresh = {}", response);
-            if (response != null && (response.getActive() || response.getSuccess())) {
-                LOGGER.info("Successfully triggered role refresh");
-            } else {
-                LOGGER.debug("Failed to trigger role refresh");
-                throw new RangerCloudIdentitySyncException("Role refresh was not successfully trigerred");
-            }
-        } catch (ApiException e) {
-            LOGGER.error("Encountered ApiException on role refresh", e);
-            throw new RangerCloudIdentitySyncException("Encountered ApiException on role refresh", e);
-        }
+        ApiBulkCommandList bulkResponse = roleCommandsResourceApi.refreshCommand(clusterName, serviceName, roleNameList);
+        return Iterables.getOnlyElement(bulkResponse.getItems());
     }
 
     private boolean isCloudIdMappingSupported(RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRole) throws ApiException {
@@ -100,39 +92,97 @@ public class ClouderaManagerRangerUtil {
         return configList.getItems().stream().map(ApiConfig::getName).anyMatch(configName -> configName.equals(AZURE_USER_MAPPING));
     }
 
-    private boolean isRoleRefreshNeeded(RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRole) throws ApiException {
+    private boolean isRoleStale(RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRole) throws ApiException {
         ApiRole role = rolesResourceApi.readRole(clusterName, rangerUserSyncRole, RANGER_SERVICE_NAME, "summary");
         ApiConfigStalenessStatus stalenessStatus = role.getConfigStalenessStatus();
         LOGGER.debug("Ranger user sync ApiConfigStalenessStatus = {}", stalenessStatus);
         return stalenessStatus.equals(ApiConfigStalenessStatus.STALE_REFRESHABLE);
     }
 
-    private void refreshRoleIfStale(ApiClient client, RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRoleName)
-            throws ApiException {
-        if (isRoleRefreshNeeded(rolesResourceApi, clusterName, rangerUserSyncRoleName)) {
-            LOGGER.info("Role refresh required, trigerring role refresh");
-            triggerRoleRefresh(client, clusterName, RANGER_SERVICE_NAME, rangerUserSyncRoleName);
-        } else {
-            LOGGER.info("No role refresh required");
-        }
-    }
-
-    public void setAzureCloudIdentityMapping(String stackCrn, Map<String, String> azureUserMapping) throws ApiException {
+    public boolean isCloudIdMappingSupported(String stackCrn) throws ApiException {
         // NOTE: The necessary configs changed here are only available in CM7.2-1
         ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
         String clusterName = getClusterName(client);
         String rangerUserSyncRoleName = getRangerUserSyncRoleName(client, clusterName);
         RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
-        if (!isCloudIdMappingSupported(rolesResourceApi, clusterName, rangerUserSyncRoleName)) {
-            LOGGER.info("This version of CM does not support cloud identity mapping. Skipping.");
+        return isCloudIdMappingSupported(rolesResourceApi, clusterName, rangerUserSyncRoleName);
+    }
+
+    private Map<String, String> userMappingStrToMap(String userMappingStr) {
+        Map<String, String> userMappingMap = new HashMap<>();
+
+        userMappingStr = userMappingStr.trim();
+        if (userMappingStr.isEmpty()) {
+            LOGGER.info("Existing azure cloud mappings are empty");
         } else {
+            String[] mappings = userMappingStr.split(";");
+            Arrays.stream(mappings).forEach(mapping -> {
+                String[] entry = mapping.split("=");
+                if (entry.length == 2) {
+                    String key = entry[0];
+                    String val = entry[1];
+                    userMappingMap.put(key, val);
+                } else {
+                    LOGGER.warn("Skipping malformed azure cloud mapping entry: {}", mapping);
+                }
+            });
+        }
+        return userMappingMap;
+    }
+
+    private Map<String, String> getExistingAzureUserMapping(RolesResourceApi rolesResourceApi, String clusterName, String rangerUserSyncRoleName)
+            throws ApiException {
+        ApiConfigList roleConfigList = rolesResourceApi.readRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME, "summary");
+        Optional<ApiConfig> azureUserMappingConfig = roleConfigList.getItems().stream()
+                .filter(apiConfig -> apiConfig.getName().equals(AZURE_USER_MAPPING))
+                .findFirst();
+
+        Map<String, String> userMappingMap;
+        if (azureUserMappingConfig.isPresent()) {
+            String azureUserMappingStr = azureUserMappingConfig.get().getValue();
+            userMappingMap = userMappingStrToMap(azureUserMappingStr);
+        } else {
+            LOGGER.info("No azure cloud mapping config set.");
+            userMappingMap = new HashMap<>();
+        }
+
+        return userMappingMap;
+    }
+
+    public Optional<ApiCommand> setAzureCloudIdentityMapping(String stackCrn, Map<String, String> requestedAzureUserMapping) throws ApiException {
+        ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
+        String clusterName = getClusterName(client);
+        String rangerUserSyncRoleName = getRangerUserSyncRoleName(client, clusterName);
+        RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
+
+        Map<String, String> existingMappingStr = getExistingAzureUserMapping(rolesResourceApi, clusterName, rangerUserSyncRoleName);
+
+        // We only want to go through with the operation when ONE of the following conditions are met
+        // 1) When the requested azure user mapping is different than the existing one
+        // 2) When the role is stale. This is for the rare case when we previously were able to set the role and
+        //    failed before trigerring refresh. This ensures that we trigger refresh in the subsequent call.
+        boolean operationRequired = !existingMappingStr.equals(requestedAzureUserMapping) ||
+                isRoleStale(rolesResourceApi, clusterName, rangerUserSyncRoleName);
+
+        if (!operationRequired) {
+            LOGGER.info("Existing azure cloud mappings are the same, nothing to do");
+            return Optional.empty();
+        } else {
+            LOGGER.info("Existing azure cloud mappings are different (or role is stale), setting mapping and trigerring role refresh");
             ApiConfigList configList = new ApiConfigList();
-            configList.addItemsItem(newCloudIdentityConfig(AZURE_USER_MAPPING, azureUserMapping));
+            configList.addItemsItem(newCloudIdentityConfig(AZURE_USER_MAPPING, requestedAzureUserMapping));
             rolesResourceApi.updateRoleConfig(clusterName, rangerUserSyncRoleName, RANGER_SERVICE_NAME,
                     "Updating Azure Cloud Identity Mapping through Cloudbreak",
                     configList);
-            refreshRoleIfStale(client, rolesResourceApi, clusterName, rangerUserSyncRoleName);
+            ApiCommand command = triggerRoleRefresh(client, clusterName, RANGER_SERVICE_NAME, rangerUserSyncRoleName);
+            return Optional.of(command);
         }
+    }
+
+    public ApiCommand getApiCommand(String stackCrn, long commandId) throws ApiException {
+        ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
+        CommandsResourceApi commandsResourceApi = clouderaManagerApiFactory.getCommandsResourceApi(client);
+        return commandsResourceApi.readCommand(BigDecimal.valueOf(commandId));
     }
 
 }

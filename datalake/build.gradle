@@ -57,15 +57,12 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey',      version: springBootVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa',    version: springBootVersion
 
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jaxrs2',                       version: opentracingJaxrs2Version
-  implementation     group: 'io.opentracing.contrib',    name: 'opentracing-jdbc',                         version: opentracingJdbcVersion
-  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
+  implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',      version: springBootVersion
 
-  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',       version: cmClientVersion
+  implementation     group: 'com.cloudera.api.swagger',    name: 'cloudera-manager-api-swagger',  version: cmClientVersion
 
   testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',        version: springBootVersion
-  testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: '1.9.12'

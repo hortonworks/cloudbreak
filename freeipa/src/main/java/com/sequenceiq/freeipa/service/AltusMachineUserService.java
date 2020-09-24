@@ -28,13 +28,19 @@ public class AltusMachineUserService {
     public Optional<AltusCredential> createMachineUserWithAccessKeys(Stack stack, Telemetry telemetry) {
         String userCrn = crnService.getUserCrn();
         String machineUserName = getFluentMachineUser(stack);
-        return altusIAMService.generateMachineUserWithAccessKey(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
+        return altusIAMService.generateMachineUserWithAccessKey(machineUserName,
+                userCrn,
+                Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                telemetry.isUseSharedAltusCredentialEnabled());
     }
 
     public void cleanupMachineUser(Stack stack, Telemetry telemetry) {
         String userCrn = crnService.getUserCrn();
         String machineUserName = getFluentMachineUser(stack);
-        altusIAMService.clearMachineUser(machineUserName, userCrn, telemetry.isUseSharedAltusCredentialEnabled());
+        altusIAMService.clearMachineUser(machineUserName,
+                userCrn,
+                Crn.fromString(stack.getResourceCrn()).getAccountId(),
+                telemetry.isUseSharedAltusCredentialEnabled());
     }
 
     private String getFluentMachineUser(Stack stack) {

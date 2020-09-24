@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -24,7 +24,7 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
     private UserService userService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Override
     public StackImageV4Response convert(Image source) {
@@ -39,7 +39,7 @@ public class ImageToStackImageV4ResponseConverter extends AbstractConversionServ
 
     private void decorateWithImageCatalogUrl(Image source, StackImageV4Response image) {
         if (Strings.isNullOrEmpty(source.getImageCatalogUrl())) {
-            CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+            CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
             User user = userService.getOrCreate(cloudbreakUser);
             image.setCatalogUrl(imageCatalogService.getImageDefaultCatalogUrl(user));
         } else {

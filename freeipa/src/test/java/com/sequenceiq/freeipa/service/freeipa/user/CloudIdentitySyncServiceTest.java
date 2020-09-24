@@ -4,14 +4,15 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Azure
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentityName;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
-import com.google.common.collect.HashMultimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
+import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncPollerObject;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncState;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,10 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -41,6 +43,9 @@ class CloudIdentitySyncServiceTest {
 
     @Mock
     private Stack stack;
+
+    @Mock
+    private PollingService<CloudIdSyncPollerObject> cloudIdSyncPollingService;
 
     @InjectMocks
     private CloudIdentitySyncService cloudIdentitySyncService;
@@ -63,27 +68,21 @@ class CloudIdentitySyncServiceTest {
                 .build();
     }
 
-    @Test
-    void testSyncAzureIdentites() {
+    private void testSyncAzureIdentitiesWithStatus(RangerCloudIdentitySyncStatus status) {
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AZURE.toString());
         when(stack.getEnvironmentCrn()).thenReturn("envcrn");
-        UsersState usersState = new UsersState(
-                Set.of(new FmsGroup().withName("group1")),
-                Set.of(new FmsUser().withName("user1"), new FmsUser().withName("user2")),
-                HashMultimap.create()
-        );
-        UmsUsersState.Builder umsUsersStateBuilder = new UmsUsersState.Builder()
+        when(sdxEndpoint.setRangerCloudIdentityMapping(eq("envcrn"), any())).thenReturn(status);
+        UmsUsersState.Builder umsUsersStateBuilder = UmsUsersState.newBuilder()
                 .addUserCloudIdentities("user1", List.of(newAzureObjectId("user-oid-1")))
                 .addUserCloudIdentities("user2", List.of(newAzureObjectId("user-oid-2")))
-                .addUserCloudIdentities("user3", List.of(newAzureObjectId("user-oid-3")))
-                .setUsersState(usersState);
+                .setUsersState(UsersState.newBuilder().build());
 
         List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
         spCloudIds.add(newServicePrincipalAzureObjectId("sp01", "sp-oid-1"));
         spCloudIds.add(newServicePrincipalAzureObjectId("sp02", "sp-oid-2"));
         umsUsersStateBuilder.addServicePrincipalCloudIdentities(spCloudIds);
 
-        cloudIdentitySyncService.syncCloudIdentites(stack, umsUsersStateBuilder.build(), mock(BiConsumer.class));
+        cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersStateBuilder.build(), mock(BiConsumer.class));
 
         SetRangerCloudIdentityMappingRequest expectedRequest = new SetRangerCloudIdentityMappingRequest();
         expectedRequest.setAzureUserMapping(Map.of("user1", "user-oid-1", "user2", "user-oid-2", "sp01", "sp-oid-1", "sp02", "sp-oid-2"));
@@ -91,10 +90,44 @@ class CloudIdentitySyncServiceTest {
     }
 
     @Test
-    void testSyncAwsIdentites() {
+    void testSyncAzureIdentitiesSuccess() {
+        RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
+        status.setState(RangerCloudIdentitySyncState.SUCCESS);
+        testSyncAzureIdentitiesWithStatus(status);
+        verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void testSyncAzureIdentitiesActive() {
+        RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
+        status.setState(RangerCloudIdentitySyncState.ACTIVE);
+        status.setCommandId(1L);
+        CloudIdSyncPollerObject expectedPollerObject = new CloudIdSyncPollerObject("envcrn", 1L);
+        testSyncAzureIdentitiesWithStatus(status);
+        verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), eq(expectedPollerObject), anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void testSyncAzureIdentitiesFailed() {
+        RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
+        status.setState(RangerCloudIdentitySyncState.FAILED);
+        testSyncAzureIdentitiesWithStatus(status);
+        verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void testSyncAzureIdentitiesNotApplicable() {
+        RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
+        status.setState(RangerCloudIdentitySyncState.NOT_APPLICABLE);
+        testSyncAzureIdentitiesWithStatus(status);
+        verify(cloudIdSyncPollingService, never()).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    void testSyncAwsIdentities() {
         // aws cloud identites is unsupported, should no-op
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.toString());
-        cloudIdentitySyncService.syncCloudIdentites(stack, mock(UmsUsersState.class), mock(BiConsumer.class));
+        cloudIdentitySyncService.syncCloudIdentities(stack, mock(UmsUsersState.class), mock(BiConsumer.class));
         verify(sdxEndpoint, never()).setRangerCloudIdentityMapping(any(), any());
     }
 

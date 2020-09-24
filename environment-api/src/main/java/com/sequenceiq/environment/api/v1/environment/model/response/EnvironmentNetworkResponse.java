@@ -10,6 +10,7 @@ import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
@@ -171,6 +172,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private EnvironmentNetworkMockParams mock;
 
+        private EnvironmentNetworkGcpParams gcp;
+
         private EnvironmentNetworkResponseBuilder() {
         }
 
@@ -258,6 +261,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public EnvironmentNetworkResponseBuilder withGcp(EnvironmentNetworkGcpParams gcp) {
+            this.gcp = gcp;
+            return this;
+        }
+
         public EnvironmentNetworkResponseBuilder withNetworkCidr(String networkCidr) {
             this.networkCidr = networkCidr;
             return this;
@@ -283,6 +291,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setAws(aws);
             environmentNetworkResponse.setAzure(azure);
             environmentNetworkResponse.setYarn(yarn);
+            environmentNetworkResponse.setGcp(gcp);
             environmentNetworkResponse.setSubnetMetas(subnetMetas);
             environmentNetworkResponse.setExistingNetwork(existingNetwork);
             environmentNetworkResponse.setMock(mock);

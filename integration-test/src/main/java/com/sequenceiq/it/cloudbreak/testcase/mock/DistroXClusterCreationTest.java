@@ -19,7 +19,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
-import com.sequenceiq.it.cloudbreak.assertion.audit.AuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -74,7 +74,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private AuditGrpcServiceAssertion auditGrpcServiceAssertion;
+    private DatahubAuditGrpcServiceAssertion auditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -111,10 +111,11 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .then(DistroXClusterCreationTest::distroxClusterGeneratedBlueprintCheck)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
-                .then(auditGrpcServiceAssertion::distroxCreate)
+                .then(DistroXClusterCreationTest::distroxServiceTypeTagExists)
+                .then(auditGrpcServiceAssertion::create)
                 .when(distroXClient.forceDelete(), withoutLogError())
                 .await(STACK_DELETED)
-                .then(auditGrpcServiceAssertion::distroxDelete)
+                .then(auditGrpcServiceAssertion::delete)
                 .validate();
     }
 
@@ -291,7 +292,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    private String getImageCatalogName(TestContext testContext) {
+    private String getImageCatalogName(MockedTestContext testContext) {
         return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
     }
 
@@ -420,6 +421,16 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         if (testDto.getResponse().getCluster().getCloudStorage() == null) {
             throw new TestFailException("Cloud storage should be set on DistroX");
         }
+    }
+
+    private static DistroXTestDto distroxServiceTypeTagExists(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
+        if (testDto.getResponse().getTags() == null || testDto.getResponse().getTags().getApplication() == null) {
+            throw new TestFailException("Application tags cannot be empty for DistroX cluster");
+        }
+        if (!testDto.getResponse().getTags().getApplication().containsKey("Cloudera-Service-Type")) {
+            throw new TestFailException("Application tag 'Cloudera-Service-Type' needs to exist for DistroX cluster");
+        }
+        return testDto;
     }
 
     private SdxCloudStorageRequest testStorage() {

@@ -76,8 +76,6 @@ public enum ResourceEvent {
     ENVIRONMENT_INITIALIZATION_FAILED("environment.initialization.failed"),
     ENVIRONMENT_VALIDATION_STARTED("environment.validation.started"),
     ENVIRONMENT_VALIDATION_FAILED("environment.validation.failed"),
-    ENVIRONMENT_PREREQUISITES_CREATE_STARTED("environment.prerequisites.create.started"),
-    ENVIRONMENT_PREREQUISITES_CREATE_FAILED("environment.prerequisites.create.failed"),
     ENVIRONMENT_NETWORK_CREATION_STARTED("environment.network.creation.started"),
     ENVIRONMENT_NETWORK_CREATION_FAILED("environment.network.creation.failed"),
     ENVIRONMENT_PUBLICKEY_CREATION_STARTED("environment.publickey.creation.started"),
@@ -96,7 +94,6 @@ public enum ResourceEvent {
     ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED("environment.idbroker.mappings.deletion.started"),
     ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED("environment.s3guard.table.deletion.started"),
     ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED("environment.ums.resource.deletion.started"),
-    ENVIRONMENT_PREREQUISITES_DELETION_STARTED("environment.prerequisites.deletion.started"),
     ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED("environment.datahubs.deletion.started"),
     ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED("environment.datalakes.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
@@ -118,6 +115,12 @@ public enum ResourceEvent {
     ENVIRONMENT_START_DATALAKE_FAILED("environment.start.datalake.failed"),
     ENVIRONMENT_START_FREEIPA_STARTED("environment.start.freeipa.started"),
     ENVIRONMENT_START_FREEIPA_FAILED("environment.start.freeipa.failed"),
+    ENVIRONMENT_START_SYNCHRONIZE_USERS_STARTED("environment.start.syncusers.started"),
+    ENVIRONMENT_START_SYNCHRONIZE_USERS_FAILED("environment.start.syncusers.failed"),
+
+    ENVIRONMENT_STACK_CONFIGS_UPDATE_STARTED("environment.stack.config.updates.started"),
+    ENVIRONMENT_STACK_CONFIGS_UPDATE_FINISHED("environment.stack.config.updates.finished"),
+    ENVIRONMENT_STACK_CONFIGS_UPDATE_FAILED("environment.stack.config.updates.failed"),
 
     ENVIRONMENT_STARTED("environment.start.success"),
     ENVIRONMENT_START_FAILED("environment.start.failed"),
@@ -186,6 +189,12 @@ public enum ResourceEvent {
     STACK_DIAGNOSTICS_CLEANUP_RUNNING("stack.diagnostics.cleanup.running"),
     STACK_DIAGNOSTICS_COLLECTION_FINISHED("stack.diagnostics.collection.finished"),
     STACK_DIAGNOSTICS_COLLECTION_FAILED("stack.diagnostics.collection.failed"),
+    STACK_CM_DIAGNOSTICS_INIT_RUNNING("stack.cm.diagnostics.init.running"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_RUNNING("stack.cm.diagnostics.collection.running"),
+    STACK_CM_DIAGNOSTICS_UPLOAD_RUNNING("stack.cm.diagnostics.upload.running"),
+    STACK_CM_DIAGNOSTICS_CLEANUP_RUNNING("stack.cm.diagnostics.cleanup.running"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_FINISHED("stack.cm.diagnostics.collection.finished"),
+    STACK_CM_DIAGNOSTICS_COLLECTION_FAILED("stack.cm.diagnostics.collection.failed"),
 
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),
@@ -243,6 +252,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_FINISHED_NOVERSION("cluster.upgrade.finished.noversion"),
     CLUSTER_UPGRADE_DOWNLOAD_PARCEL("cluster.upgrade.download.parcel"),
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
+    CLUSTER_UPGRADE_ACTIVATE_PARCEL("cluster.upgrade.activate.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
 
@@ -288,6 +298,8 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_CREATION_STARTED("cluster.externaldatabase.creation.started"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED("cluster.externaldatabase.creation.failed"),
     CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED("cluster.externaldatabase.creation.finished"),
+
+    KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 
     STACK_RETRY_FLOW_START("retry.flow.start"),
 

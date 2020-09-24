@@ -35,7 +35,14 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         Optional<CloudSubnet> cloudSubnet;
         if (StringUtils.isNotBlank(source.getPreferedSubnetId())) {
             LOGGER.debug("Choosing subnet by prefered subnet Id {}", source.getPreferedSubnetId());
-            cloudSubnet = Optional.of(source.getSubnetMetas().get(source.getPreferedSubnetId()));
+            CloudSubnet cloudSubnetById = source.getSubnetMetas().get(source.getPreferedSubnetId());
+            if (cloudSubnetById == null) {
+                cloudSubnetById = source.getSubnetMetas().values()
+                        .stream()
+                        .filter(e -> e.getId().equals(source.getPreferedSubnetId()))
+                        .findFirst().orElse(null);
+            }
+            cloudSubnet = Optional.of(cloudSubnetById);
         } else if (StringUtils.isNotEmpty(availabilityZone)) {
             LOGGER.debug("Choosing subnet by availability zone {}", availabilityZone);
             cloudSubnet = source.getSubnetMetas().values().stream()

@@ -10,14 +10,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.util.WaitResult;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Component
 public class FlowUtil {
@@ -41,55 +46,85 @@ public class FlowUtil {
         return maxRetry;
     }
 
-    public WaitResult waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
+    public SdxTestDto waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        waitForFlow(flowEndpoint, sdxTestDto.getResponse().getCrn(), sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
+        return sdxTestDto;
     }
 
-    public WaitResult waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        FlowEndpoint flowEndpoint = sdxClient.getSdxClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, sdxInternalTestDto.getLastKnownFlowChainId(), sdxInternalTestDto.getLastKnownFlowId());
+    public SdxInternalTestDto waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        waitForFlow(flowEndpoint,
+                sdxInternalTestDto.getResponse().getCrn(),
+                sdxInternalTestDto.getLastKnownFlowChainId(),
+                sdxInternalTestDto.getLastKnownFlowId());
+        return sdxInternalTestDto;
     }
 
-    public WaitResult waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        FlowEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowEndpoint();
-        return isFlowRunning(flowEndpoint, distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
+    public CloudbreakTestDto waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
+        FlowPublicEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowPublicEndpoint();
+        waitForFlow(flowEndpoint, distroXTestDto.getCrn(), distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
+        return distroXTestDto;
     }
 
-    private WaitResult isFlowRunning(FlowEndpoint flowEndpoint, String flowChainId, String flowId) {
-        WaitResult waitResult = WaitResult.SUCCESSFUL;
+    public EnvironmentTestDto waitBasedOnLastKnownFlow(EnvironmentTestDto environmentTestDto, EnvironmentClient environmentClient) {
+        FlowPublicEndpoint flowEndpoint = environmentClient.getEnvironmentClient().flowPublicEndpoint();
+        waitForFlow(flowEndpoint, environmentTestDto.getCrn(), environmentTestDto.getLastKnownFlowChainId(), environmentTestDto.getLastKnownFlowId());
+        return environmentTestDto;
+    }
+
+    public SdxDiagnosticsTestDto waitBasedOnLastKnownFlow(SdxDiagnosticsTestDto sdxDiagnosticsTestDto, SdxClient sdxClient) {
+        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
+        waitForFlow(flowEndpoint,
+                sdxDiagnosticsTestDto.getRequest().getStackCrn(),
+                sdxDiagnosticsTestDto.getLastKnownFlowChainId(),
+                sdxDiagnosticsTestDto.getLastKnownFlowId());
+        return sdxDiagnosticsTestDto;
+    }
+
+    public FreeIpaDiagnosticsTestDto waitBasedOnLastKnownFlow(FreeIpaDiagnosticsTestDto freeIpaDiagnosticsTestDto, FreeIpaClient freeIpaClient) {
+        FlowPublicEndpoint flowEndpoint = freeIpaClient.getFreeIpaClient().getFlowPublicEndpoint();
+        waitForFlow(flowEndpoint,
+                freeIpaDiagnosticsTestDto.getFreeIpaCrn(),
+                freeIpaDiagnosticsTestDto.getLastKnownFlowChainId(),
+                freeIpaDiagnosticsTestDto.getLastKnownFlowId());
+        return freeIpaDiagnosticsTestDto;
+    }
+
+    private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {
         boolean flowRunning = true;
         int retryCount = 0;
         while (flowRunning && retryCount < maxRetry) {
-            sleep(pollingInterval);
+            sleep(pollingInterval, crn, flowChainId, flowId);
             try {
                 if (StringUtils.isNotBlank(flowChainId)) {
-                    LOGGER.info("Waiting for flow chain {}, retry count {}", flowChainId, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId).getHasActiveFlow();
+                    LOGGER.info("Waiting for flow chain: '{}' at resource: '{}', retry count: '{}'", flowChainId, crn, retryCount);
+                    flowRunning = flowEndpoint.hasFlowRunningByChainId(flowChainId, crn).getHasActiveFlow();
                 } else if (StringUtils.isNoneBlank(flowId)) {
-                    LOGGER.info("Waiting for flow {}, retry count {}", flowId, retryCount);
-                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId).getHasActiveFlow();
+                    LOGGER.info("Waiting for flow: '{}' at resource: '{}', retry count: '{}'", flowId, crn, retryCount);
+                    flowRunning = flowEndpoint.hasFlowRunningByFlowId(flowId, crn).getHasActiveFlow();
                 } else {
-                    LOGGER.info("Flow id and flow chain id are empty so flow is not running");
+                    LOGGER.info("Flow id and flow chain id are empty so flow is not running at resource: '{}'", crn);
                     flowRunning = false;
                 }
             } catch (Exception ex) {
-                LOGGER.warn("Error during polling flow. FlowId=" + flowId + ", FlowChainId=" + flowChainId + ", Message=" + ex.getMessage());
-                return waitResult;
+                LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, Message={}", crn, flowId, flowChainId, ex.getMessage(), ex);
+                throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
+                        crn, flowId, flowChainId, ex.getMessage()));
             }
             retryCount++;
         }
-        if (flowRunning) {
-            waitResult = WaitResult.TIMEOUT;
-        }
-        return waitResult;
     }
 
-    private void sleep(long pollingInterval) {
+    private void sleep(long pollingInterval, String crn, String flowChainId, String flowId) {
         try {
             TimeUnit.MILLISECONDS.sleep(pollingInterval);
         } catch (InterruptedException e) {
-            LOGGER.warn("Exception has been occurred during wait: ", e);
+            Thread.currentThread().interrupt();
+            LOGGER.error("Waiting for flowId:flowChainId '{}:{}' has been interrupted at resource {}, because of: {}", flowId, flowChainId, crn,
+                    e.getMessage(), e);
+            throw new TestFailException(String.format(" Waiting for flowId:flowChainId '%s:%s' has been interrupted at resource %s, because of: %s ",
+                    flowId, flowChainId, crn, e.getMessage()));
         }
     }
 }

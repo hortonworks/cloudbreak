@@ -16,7 +16,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Creat
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
@@ -50,6 +53,7 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 
 @Component
 public class GrpcUmsClient {
@@ -63,6 +67,9 @@ public class GrpcUmsClient {
 
     @Inject
     private UmsClientConfig umsClientConfig;
+
+    @Inject
+    private Tracer tracer;
 
     public static GrpcUmsClient createClient(UmsConfig config, UmsClientConfig clientConfig) {
         GrpcUmsClient client = new GrpcUmsClient();
@@ -143,7 +150,7 @@ public class GrpcUmsClient {
      * @param actorCrn  the CRN of the actor
      * @param userCrn   the CRN of the user
      * @param requestId an optional request Id
-     * @return the user associated with this user CRN
+     * @return the workload credentials associated with this user CRN
      */
     public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
@@ -193,11 +200,11 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #actorCrn, #userCrn }")
-    public MachineUser getMachineUserDetails(String actorCrn, String userCrn, Optional<String> requestId) {
+    public MachineUser getMachineUserDetails(String actorCrn, String userCrn, String accountId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting machine user information for {} using request ID {}", userCrn, requestId);
-            MachineUser machineUser = client.getMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn);
+            MachineUser machineUser = client.getMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, accountId);
             LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
             return machineUser;
         }
@@ -207,28 +214,34 @@ public class GrpcUmsClient {
      * Retrieves list of all machine users from UMS.
      *
      * @param accountId the account Id
+     * @param includeInternal whether to include internal machine users
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    public List<MachineUser> listAllMachineUsers(String actorCrn, String accountId, Optional<String> requestId) {
-        return listMachineUsers(actorCrn, accountId, null, requestId);
+    public List<MachineUser> listAllMachineUsers(
+            String actorCrn, String accountId, boolean includeInternal, Optional<String> requestId) {
+        return listMachineUsers(actorCrn, accountId, null, includeInternal, requestId);
     }
 
     /**
      * Retrieves machine user list from UMS.
      *
      * @param accountId       the account Id
-     * @param requestId       an optional request Id
      * @param machineUserCrns machine users to list. if null or empty then all machine users will be listed
+     * @param includeInternal whether to include internal machine users
+     * @param requestId       an optional request Id
      * @return the user associated with this user CRN
      */
-    public List<MachineUser> listMachineUsers(String actorCrn, String accountId, List<String> machineUserCrns, Optional<String> requestId) {
+    public List<MachineUser> listMachineUsers(
+            String actorCrn, String accountId, List<String> machineUserCrns, boolean includeInternal, Optional<String> requestId) {
+
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
-            List<MachineUser> users = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()), accountId, machineUserCrns);
-            LOGGER.debug("{} Users found for account {}", users.size(), accountId);
-            return users;
+            List<MachineUser> machineUsers = client.listMachineUsers(requestId.orElse(UUID.randomUUID().toString()),
+                    accountId, machineUserCrns, includeInternal);
+            LOGGER.debug("{} Machine users found for account {}", machineUsers.size(), accountId);
+            return machineUsers;
         }
     }
 
@@ -241,14 +254,14 @@ public class GrpcUmsClient {
      * @return the machine user crn
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
-    public Optional<String> createMachineUser(String machineUserName, String userCrn, Optional<String> requestId) {
+    public Optional<String> createMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
-            Optional<String> machineUserCrn = client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+            Optional<String> machineUserCrn = client.createMachineUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, accountId, machineUserName);
             if (machineUserCrn.isEmpty()) {
-                MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, machineUserName);
+                MachineUser machineUser = client.getMachineUserForUser(requestId.orElse(UUID.randomUUID().toString()), userCrn, accountId, machineUserName);
                 machineUserCrn = Optional.of(machineUser.getCrn());
             }
             LOGGER.debug("Machine User information retrieved for userCrn: {}", machineUserCrn.orElse(null));
@@ -256,6 +269,11 @@ public class GrpcUmsClient {
         } catch (StatusRuntimeException ex) {
             if (Status.NOT_FOUND.getCode().equals(ex.getStatus().getCode())) {
                 String errMessage = String.format("Machine user with name %s is not found yet", machineUserName);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot create machinue user '%s' for '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserName, userCrn);
                 LOGGER.debug(errMessage, ex);
                 throw new UmsOperationException(errMessage, ex);
             } else {
@@ -283,9 +301,9 @@ public class GrpcUmsClient {
     /**
      * Retrieves list of service principal cloud identities for an environment from UMS.
      *
-     * @param accountId       the account Id
-     * @param environmentCrn  the environment crn
-     * @param requestId       an optional request Id
+     * @param accountId      the account Id
+     * @param environmentCrn the environment crn
+     * @param requestId      an optional request Id
      * @return list of service principal cloud identities for an environment
      */
     public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(
@@ -381,7 +399,9 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    //"#value.concat(#fieldId).concat(#projectId)"
+//    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right, #resource }")
     public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
@@ -425,7 +445,7 @@ public class GrpcUmsClient {
      */
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
-                rightChecks.stream().map(rightCheck -> rightCheckToString(rightCheck)).collect(Collectors.toList()));
+                rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
@@ -457,6 +477,7 @@ public class GrpcUmsClient {
                         .setRight(right)
                         .build())
                 .collect(Collectors.toList());
+        LOGGER.debug("Check if {} has rights to resources {}:", actorCrn, rightChecks);
         List<Boolean> result = hasRights(actorCrn, memberCrn, rightChecks, requestId);
         return resources.stream().collect(
                 Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));
@@ -490,11 +511,21 @@ public class GrpcUmsClient {
      * @param roleCrn        role that will be assigned
      * @param requestId      id for the request
      */
-    public void assignMachineUserRole(String userCrn, String machineUserCrn, String roleCrn, Optional<String> requestId) {
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    public void assignMachineUserRole(String userCrn, String accountId, String machineUserCrn, String roleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.assignMachineUserRole(requestId.orElse(UUID.randomUUID().toString()),
-                    userCrn, machineUserCrn, roleCrn);
+                    userCrn, accountId, machineUserCrn, roleCrn);
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot assign role '%s' to machine user '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserCrn, roleCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
         }
     }
 
@@ -523,14 +554,24 @@ public class GrpcUmsClient {
      * @param accessKeyType  algorithm type used for the access key
      * @return access / private key holder object
      */
-    public AltusCredential generateAccessSecretKeyPair(String actorCrn, String machineUserCrn,
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    public AltusCredential generateAccessSecretKeyPair(String actorCrn, String accountId, String machineUserCrn,
             Optional<String> requestId, UserManagementProto.AccessKeyType.Value accessKeyType) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Generating new access / secret key pair for {}", machineUserCrn);
             CreateAccessKeyResponse accessKeyResponse = client.createAccessPrivateKeyPair(
-                    requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn, accessKeyType);
+                    requestId.orElse(UUID.randomUUID().toString()), actorCrn, accountId, machineUserCrn, accessKeyType);
             return new AltusCredential(accessKeyResponse.getAccessKey().getAccessKeyId(), accessKeyResponse.getPrivateKey().toCharArray());
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot generate access key pair for machine user '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
         }
     }
 
@@ -543,8 +584,8 @@ public class GrpcUmsClient {
      * @param roleCrn         crn of the role
      * @return credential (access/secret keypair)
      */
-    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String roleCrn) {
-        return createMachineUserAndGenerateKeys(machineUserName, userCrn, roleCrn, UserManagementProto.AccessKeyType.Value.UNSET);
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId, String roleCrn) {
+        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, roleCrn, UserManagementProto.AccessKeyType.Value.UNSET);
     }
 
     /**
@@ -558,13 +599,13 @@ public class GrpcUmsClient {
      * @return credential (access/secret keypair)
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
-    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn,
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId,
             String roleCrn, UserManagementProto.AccessKeyType.Value accessKeyType) {
-        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
+        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, accountId, MDCUtils.getRequestId());
         if (StringUtils.isNotEmpty(roleCrn)) {
-            assignMachineUserRole(userCrn, machineUserCrn.orElse(null), roleCrn, MDCUtils.getRequestId());
+            assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn, MDCUtils.getRequestId());
         }
-        return generateAccessSecretKeyPair(userCrn, machineUserCrn.orElse(null), MDCUtils.getRequestId(), accessKeyType);
+        return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null), MDCUtils.getRequestId(), accessKeyType);
     }
 
     /**
@@ -574,11 +615,11 @@ public class GrpcUmsClient {
      * @param userCrn         crn of the actor
      * @param roleCrn         crn of the role
      */
-    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String roleCrn) {
+    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String accountId, String roleCrn) {
         if (StringUtils.isNotEmpty(roleCrn)) {
             unassignMachineUserRole(userCrn, machineUserName, roleCrn, MDCUtils.getRequestId());
         }
-        deleteMachineUserAccessKeys(userCrn, machineUserName, MDCUtils.getRequestId());
+        deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, MDCUtils.getRequestId());
         deleteMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
     }
 
@@ -589,11 +630,11 @@ public class GrpcUmsClient {
      * @param machineUserCrn machine user
      * @param requestId      id for the request
      */
-    public void deleteMachineUserAccessKeys(String actorCrn, String machineUserCrn, Optional<String> requestId) {
+    public void deleteMachineUserAccessKeys(String actorCrn, String accountId, String machineUserCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.info("Getting access keys for {}", machineUserCrn);
-            List<String> accessKeys = client.listMachineUserAccessKeys(requestId.orElse(UUID.randomUUID().toString()), actorCrn, machineUserCrn);
+            List<String> accessKeys = client.listMachineUserAccessKeys(requestId.orElse(UUID.randomUUID().toString()), actorCrn, accountId, machineUserCrn);
             LOGGER.info("Deleting access keys for {}", machineUserCrn);
             client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, actorCrn);
         }
@@ -623,7 +664,7 @@ public class GrpcUmsClient {
 
     @VisibleForTesting
     UmsClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new UmsClient(channel, actorCrn, umsClientConfig);
+        return new UmsClient(channel, actorCrn, umsClientConfig, tracer);
     }
 
     /**
@@ -642,8 +683,13 @@ public class GrpcUmsClient {
     }
 
     // Cache evict does not work with this key, we need to wait 60s
-    // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
-    public void assignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
+    @Caching(evict = {
+            @CacheEvict(cacheNames = {"umsUserRoleAssigmentsCache"}, key = "#userCrn"),
+            @CacheEvict(cacheNames = {"umsResourceAssigneesCache"}, key = "#userCrn"),
+            @CacheEvict(cacheNames = {"umsUserRightsCache"}, key = "{ #userCrn, #right, #resource }")
+    })
+    public void assignResourceRole(
+            String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -735,6 +781,25 @@ public class GrpcUmsClient {
             UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
             LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
             return client.getEventGenerationIds(requestId.orElse(UUID.randomUUID().toString()), accountId);
+        }
+    }
+
+    /**
+     * Retrieves user sync state model from UMS.
+     *
+     * @param accountId        the account Id
+     * @param requestId        an optional request Id
+     * @param rightsChecks     list of rights checks for resources. a List is used to preserve order.
+     * @return the user sync state for this account and rights checks
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String actorCrn, String accountId,
+            List<UserManagementProto.RightsCheck> rightsChecks, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, requestId);
+
+            return client.getUserSyncStateModel(requestId.orElse(UUID.randomUUID().toString()), accountId, rightsChecks);
         }
     }
 

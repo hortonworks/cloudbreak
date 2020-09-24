@@ -23,11 +23,14 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBac
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBackupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBackupSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<DatabaseBackupRequest> {
@@ -48,13 +51,16 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private RangerVirtualGroupService rangerVirtualGroupService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatabaseBackupRequest.class);
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<DatabaseBackupRequest> event) {
         return new DatabaseBackupFailedEvent(resourceId, e, DetailedStackStatus.DATABASE_BACKUP_FAILED);
     }
 
@@ -71,7 +77,8 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
-            SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), stack);
+            String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
+            SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup, stack);
             hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
 
             result = new DatabaseBackupSuccess(stackId);

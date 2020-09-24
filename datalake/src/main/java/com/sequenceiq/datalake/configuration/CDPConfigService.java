@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.configuration;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -98,7 +99,10 @@ public class CDPConfigService {
 
     public List<String> getDatalakeVersions() {
         List<String> runtimeVersions = cdpStackRequests.keySet().stream()
-                .map(CDPConfigKey::getRuntimeVersion).distinct().sorted().collect(Collectors.toList());
+                .map(CDPConfigKey::getRuntimeVersion)
+                .distinct()
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
 
         LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);
         return runtimeVersions;

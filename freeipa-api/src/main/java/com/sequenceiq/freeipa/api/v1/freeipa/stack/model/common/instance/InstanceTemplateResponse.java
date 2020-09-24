@@ -21,4 +21,12 @@ public class InstanceTemplateResponse extends InstanceTemplateBase {
     public void setAttachedVolumes(Set<VolumeResponse> attachedVolumes) {
         this.attachedVolumes = attachedVolumes;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceTemplateResponse{" +
+                "InstanceTemplateBase=" + super.toString() +
+                ", attachedVolumes=" + attachedVolumes +
+                '}';
+    }
 }

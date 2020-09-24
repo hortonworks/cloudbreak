@@ -165,7 +165,6 @@ public class ChangePrimaryGatewayActions {
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FAIL_STATE")
     public Action<?, ?> failureAction() {
         return new AbstractChangePrimaryGatewayAction<>(ChangePrimaryGatewayFailureEvent.class) {
-
             @Inject
             private OperationService operationService;
 
@@ -198,6 +197,8 @@ public class ChangePrimaryGatewayActions {
                 String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REPAIR_FAILED, errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());
+                enableStatusChecker(stack, "Failed to repair FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }
 

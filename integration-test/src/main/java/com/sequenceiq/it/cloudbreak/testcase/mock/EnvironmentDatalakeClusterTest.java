@@ -13,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -55,7 +56,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create datalake cluster and then delete",
             when = "create cluster and if available then delete",
             then = "the cluster should work")
-    public void testCreateDatalakeDelete(TestContext testContext) {
+    public void testCreateDatalakeDelete(MockedTestContext testContext) {
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -67,7 +68,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given("placement", PlacementSettingsTestDto.class)
 
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
 
                 .when(stackTestClient.createV4())
@@ -87,7 +88,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create datalake cluster and then delete resources",
             when = "create cluster and then delete resources",
             then = "the resource deletion does not work because the resources attached to the cluster")
-    public void testCreateDatalakeDeleteFails(TestContext testContext) {
+    public void testCreateDatalakeDeleteFails(MockedTestContext testContext) {
         String forbiddenKey = resourcePropertyProvider().getName();
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
@@ -99,7 +100,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .withRdsConfigNames(rdsList)
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class).withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .given(LdapTestDto.class)
@@ -117,7 +118,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create two datalake cluster in one environment",
             when = "create cluster called twice",
             then = "the cluster creation should work in both case")
-    public void testSameEnvironmentWithDifferentDatalakes(TestContext testContext) {
+    public void testSameEnvironmentWithDifferentDatalakes(MockedTestContext testContext) {
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
@@ -134,7 +135,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
             given = "Create datalake cluster and workload",
             when = "call create cluster with datalake and with workload config",
             then = "will work fine")
-    public void testSameEnvironmentInDatalakeAndWorkload(TestContext testContext) {
+    public void testSameEnvironmentInDatalakeAndWorkload(MockedTestContext testContext) {
         String dlName = resourcePropertyProvider().getName();
         String hivedb = resourcePropertyProvider().getName();
         String rangerdb = resourcePropertyProvider().getName();
@@ -145,26 +146,26 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
                 .given(StackTestDto.class)
                 .withName(dlName)
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .when(stackTestClient.createV4())
                 .validate();
         createDatalake(testContext, rdsList);
     }
 
-    private void createDatalake(TestContext testContext, Set<String> rdsList) {
+    private void createDatalake(MockedTestContext testContext, Set<String> rdsList) {
         testContext.given("placement", PlacementSettingsTestDto.class)
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
                 .given(StackTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .withPlacement("placement")
-                .withEnvironment(EnvironmentTestDto.class)
+                .withEnvironmentClass(EnvironmentTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .validate();
     }
 
-    private Set<String> createDatalakeResources(TestContext testContext, String hiveDb, String rangerDb) {
+    private Set<String> createDatalakeResources(MockedTestContext testContext, String hiveDb, String rangerDb) {
         createDefaultLdapConfig(testContext);
         createDefaultKerberosConfig(testContext);
         testContext

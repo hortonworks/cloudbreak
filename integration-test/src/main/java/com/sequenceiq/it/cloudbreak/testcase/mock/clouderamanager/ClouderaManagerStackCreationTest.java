@@ -8,8 +8,8 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -29,7 +29,7 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
             given = "there is a running cloudbreak",
             when = "a cluster with Cloudera Manager is created",
             then = "the cluster should be available")
-    public void testCreateNewRegularCluster(TestContext testContext) {
+    public void testCreateNewRegularCluster(MockedTestContext testContext) {
         String name = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";
@@ -50,7 +50,7 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
             given = "there is a running cloudbreak",
             when = "a cluster with incomplete product posted",
             then = "validation error")
-    public void testCreateClusterWithIncompleteProduct(TestContext testContext) {
+    public void testCreateClusterWithIncompleteProduct(MockedTestContext testContext) {
         String name = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String clouderaManager = "cm";
         String cluster = "cmcluster";

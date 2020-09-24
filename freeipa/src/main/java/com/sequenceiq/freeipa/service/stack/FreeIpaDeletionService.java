@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -61,6 +62,7 @@ public class FreeIpaDeletionService {
     }
 
     private void unscheduleAndTriggerTerminate(Stack stack, boolean forced) {
+        MDCBuilder.buildMdcContext(stack);
         flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         freeipaJobService.unschedule(stack);
         if (!stack.isDeleteCompleted()) {
@@ -97,6 +99,7 @@ public class FreeIpaDeletionService {
     }
 
     private void validateDeletion(Stack stack, String accountId) {
+        MDCBuilder.buildMdcContext(stack);
         List<ChildEnvironment> childEnvironments = childEnvironmentService.findChildEnvironments(stack, accountId);
         if (!childEnvironments.isEmpty()) {
             String childEnvironmentCrns = childEnvironments.stream()

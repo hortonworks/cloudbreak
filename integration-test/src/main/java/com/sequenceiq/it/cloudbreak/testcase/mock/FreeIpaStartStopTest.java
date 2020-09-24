@@ -2,13 +2,14 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.it.cloudbreak.assertion.audit.FreeIpaAuditGrpcServiceAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaListStructuredEventAssertions;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -29,6 +30,12 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaRouteHandler freeIpaRouteHandler;
+
+    @Inject
+    private FreeIpaListStructuredEventAssertions freeIpaListStructuredEventAssertions;
+
+    @Inject
+    private FreeIpaAuditGrpcServiceAssertion freeIpaAuditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -56,7 +63,7 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
                 .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse(false, Collections.emptyList()));
+        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED);
@@ -64,6 +71,16 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
+                .when(freeIpaTestClient.delete())
+                .await(Status.DELETE_COMPLETED)
+                .when(freeIpaAuditGrpcServiceAssertion::create)
+                .when(freeIpaAuditGrpcServiceAssertion::delete)
+                .when(freeIpaAuditGrpcServiceAssertion::stop)
+                .when(freeIpaAuditGrpcServiceAssertion::start)
+                .when(freeIpaListStructuredEventAssertions::checkCreateEvents)
+                .when(freeIpaListStructuredEventAssertions::checkDeleteEvents)
+                .when(freeIpaListStructuredEventAssertions::checkStartEvents)
+                .when(freeIpaListStructuredEventAssertions::checkStopEvents)
                 .validate();
     }
 }

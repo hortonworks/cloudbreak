@@ -26,6 +26,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetId
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
@@ -42,15 +44,18 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -66,18 +71,19 @@ public class UmsClient {
 
     private final UmsClientConfig umsClientConfig;
 
+    private final Tracer tracer;
+
     /**
      * Constructor.
-     *
-     * @param channel  the managed channel.
+     *  @param channel  the managed channel.
      * @param actorCrn the actor CRN.
+     * @param tracer tracer
      */
-    UmsClient(ManagedChannel channel,
-            String actorCrn,
-            UmsClientConfig umsClientConfig) {
+    UmsClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
         this.umsClientConfig = checkNotNull(umsClientConfig);
+        this.tracer = tracer;
     }
 
     /**
@@ -222,17 +228,17 @@ public class UmsClient {
         return users;
     }
 
-    public MachineUser getMachineUser(String requestId, String userCrn) {
-        return getMachineUserForUser(requestId, userCrn, userCrn);
+    public MachineUser getMachineUser(String requestId, String userCrn, String accountId) {
+        return getMachineUserForUser(requestId, userCrn, accountId, userCrn);
     }
 
-    public MachineUser getMachineUserForUser(String requestId, String userCrn, String machineUserName) {
+    public MachineUser getMachineUserForUser(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         Crn crn = Crn.fromString(userCrn);
         List<MachineUser> machineUsers = newStub(requestId).listMachineUsers(
                 ListMachineUsersRequest.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setAccountId(accountId)
                         .addMachineUserNameOrCrn(machineUserName)
                         .build()
         ).getMachineUserList();
@@ -246,9 +252,12 @@ public class UmsClient {
      * @param requestId                the request ID for the request
      * @param accountId                the account ID
      * @param machineUserNameOrCrnList a list of users to list. If null or empty then all users will be listed
+     * @param includeInternal          whether to include internal machine users
      * @return the list of machine users
      */
-    public List<MachineUser> listMachineUsers(String requestId, String accountId, List<String> machineUserNameOrCrnList) {
+    public List<MachineUser> listMachineUsers(
+            String requestId, String accountId, List<String> machineUserNameOrCrnList, boolean includeInternal) {
+
         checkNotNull(requestId);
         checkNotNull(accountId);
 
@@ -256,6 +265,7 @@ public class UmsClient {
 
         ListMachineUsersRequest.Builder requestBuilder = ListMachineUsersRequest.newBuilder()
                 .setAccountId(accountId)
+                .setIncludeInternal(includeInternal)
                 .setPageSize(umsClientConfig.getListMachineUsersPageSize());
 
         if (machineUserNameOrCrnList != null && !machineUserNameOrCrnList.isEmpty()) {
@@ -278,7 +288,7 @@ public class UmsClient {
      * @param userCrn         actor useridentifier
      * @param machineUserName machine user name that will be created
      */
-    public Optional<String> createMachineUser(String requestId, String userCrn, String machineUserName) {
+    public Optional<String> createMachineUser(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
@@ -286,7 +296,7 @@ public class UmsClient {
         try {
             UserManagementProto.CreateMachineUserResponse response = newStub(requestId).createMachineUser(
                     UserManagementProto.CreateMachineUserRequest.newBuilder()
-                            .setAccountId(Crn.fromString(userCrn).getAccountId())
+                            .setAccountId(accountId)
                             .setMachineUserName(machineUserName)
                             .build());
             LOGGER.info("Machine user created: {}.", response.getMachineUser().getCrn());
@@ -383,7 +393,7 @@ public class UmsClient {
      * @param machineUserCrn machine user identifier
      * @param roleCrn        role identifier
      */
-    public void assignMachineUserRole(String requestId, String userCrn, String machineUserCrn, String roleCrn) {
+    public void assignMachineUserRole(String requestId, String userCrn, String accountId, String machineUserCrn, String roleCrn) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserCrn);
@@ -392,11 +402,11 @@ public class UmsClient {
             newStub(requestId).assignRole(
                     UserManagementProto.AssignRoleRequest.newBuilder()
                             .setActor(UserManagementProto.Actor.newBuilder()
-                                    .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                    .setAccountId(accountId)
                                     .setMachineUserNameOrCrn(machineUserCrn)
                                     .build())
                             .setAssignee(UserManagementProto.Assignee.newBuilder()
-                                    .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                    .setAccountId(accountId)
                                     .setMachineUserNameOrCrn(machineUserCrn)
                                     .build())
                             .setRoleNameOrCrn(roleCrn)
@@ -550,8 +560,8 @@ public class UmsClient {
      * @param machineUserName the machine user name
      * @return key creation response
      */
-    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName) {
-        return createAccessPrivateKeyPair(requestId, userCrn, machineUserName,
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String accountId, String machineUserName) {
+        return createAccessPrivateKeyPair(requestId, userCrn, accountId, machineUserName,
                 UserManagementProto.AccessKeyType.Value.UNSET);
     }
 
@@ -564,13 +574,13 @@ public class UmsClient {
      * @param accessKeyType   accessKeyType
      * @return key creation response
      */
-    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String machineUserName,
+    CreateAccessKeyResponse createAccessPrivateKeyPair(String requestId, String userCrn, String accountId, String machineUserName,
             UserManagementProto.AccessKeyType.Value accessKeyType) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
-        builder.setAccountId(Crn.fromString(userCrn).getAccountId())
+        builder.setAccountId(accountId)
                 .setMachineUserNameOrCrn(machineUserName)
                 .setType(accessKeyType);
         if (!UserManagementProto.AccessKeyType.Value.UNSET.equals(accessKeyType)) {
@@ -587,12 +597,11 @@ public class UmsClient {
      * @param machineUserName machine user that owns the access keys
      * @return access key CRNs
      */
-    public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String machineUserName) {
+    public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         List<String> accessKeys = new ArrayList<>();
-        String accountId = Crn.fromString(userCrn).getAccountId();
         UserManagementProto.ListAccessKeysRequest.Builder listAccessKeysRequestBuilder =
                 UserManagementProto.ListAccessKeysRequest.newBuilder()
                         .setAccountId(accountId)
@@ -679,7 +688,8 @@ public class UmsClient {
     private UserManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
         return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                        new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     /**
@@ -778,5 +788,22 @@ public class UmsClient {
             assignee.setUserIdOrCrn(userCrn);
         }
         return assignee.build();
+    }
+
+    /**
+     * Retrieves user sync state model from the UMS.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param rightsChecks       list of rights checks for resources. A List is used to preserve order.
+     * @return the user sync state model
+     */
+    public GetUserSyncStateModelResponse getUserSyncStateModel(
+            String requestId, String accountId, List<RightsCheck> rightsChecks) {
+        GetUserSyncStateModelRequest request = GetUserSyncStateModelRequest.newBuilder()
+                .setAccountId(accountId)
+                .addAllRightsCheck(rightsChecks)
+                .build();
+        return newStub(requestId).getUserSyncStateModel(request);
     }
 }

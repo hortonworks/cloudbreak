@@ -21,8 +21,9 @@
           "kafka-KAFKA_BROKER-BASE",
           "solr-SOLR_SERVER-BASE",
           "ranger-RANGER_ADMIN-BASE",
-          "hbase-REGIONSERVER-BASE",
-          "hbase-MASTER-BASE"
+          "hdfs-GATEWAY-BASE",
+          "hive-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE"
         ]
       },
       {
@@ -31,15 +32,23 @@
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-JOURNALNODE-BASE",
+          "ranger-RANGER_ADMIN-BASE",
           "ranger-RANGER_USERSYNC-BASE",
           "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE",
           "knox-KNOX_GATEWAY-BASE",
-          "atlas-ATLAS_SERVER-BASE"
+          "atlas-ATLAS_SERVER-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hbase-MASTER-BASE",
+          "solr-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "hive-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE"
         ]
       },
       {
-        "cardinality": 1,
+        "cardinality": 2,
         "refName": "idbroker",
         "roleConfigGroupsRefNames": [
           "knox-IDBROKER-BASE"
@@ -177,10 +186,19 @@
               {
                 "name": "solr_https_port",
                 "value": "8985"
+              },
+              {
+                "name": "solr_java_opts",
+                "value": "{{JAVA_GC_ARGS}} -Dsolr.hdfs.allow.location.override=true"
               }
             ],
             "refName": "solr-SOLR_SERVER-BASE",
             "roleType": "SOLR_SERVER"
+          },
+          {
+            "base": true,
+            "refName": "solr-GATEWAY-BASE",
+            "roleType": "GATEWAY"
           }
         ],
         "serviceConfigs": [
@@ -224,6 +242,10 @@
           }
         ],
         "serviceConfigs": [
+          {
+            "name": "hbase_wal_dir",
+            "value": "/hbase-wals"
+          },
           {
             "name": "service_config_suppression_hadoop_secure_web_ui",
             "value": "true"
@@ -364,6 +386,11 @@
         "refName": "hive",
         "displayName": "Hive Metastore",
         "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "hive-GATEWAY-BASE",
+            "roleType": "GATEWAY"
+          },
           {
             "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",

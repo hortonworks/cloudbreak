@@ -162,6 +162,15 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName, credentialName, region, platformVariant, availabilityZone, cdpResourceType);
     }
 
+    public PlatformRecommendation getRecommendationByCredentialCrn(Long workspaceId, String blueprintName, String credentialCrn,
+            String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
+        if (!ObjectUtils.allNotNull(region)) {
+            throw new BadRequestException("region cannot be null");
+        }
+        return cloudResourceAdvisor
+                .createForBlueprintByCredCrn(workspaceId, blueprintName, credentialCrn, region, platformVariant, availabilityZone, cdpResourceType);
+    }
+
     public AutoscaleRecommendation getAutoscaleRecommendation(Long workspaceId, String blueprintName) {
         return cloudResourceAdvisor.getAutoscaleRecommendation(workspaceId, blueprintName);
     }
@@ -381,7 +390,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return Crn.builder()
                 .setService(Crn.Service.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(ResourceType.CLUSTER_DEFINITION)
+                .setResourceType(ResourceType.CLUSTER_TEMPLATE)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

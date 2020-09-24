@@ -31,6 +31,10 @@
             "base": true,
             "configs": [
               {
+                "name": "role_config_suppression_namenode_java_heapsize_minimum_validator",
+                "value": "true"
+              },
+              {
                 "name": "fs_trash_interval",
                 "value": "0"
               },
@@ -381,6 +385,18 @@
         ]
       },
       {
+        "refName": "sqoop",
+        "serviceType": "SQOOP_CLIENT",
+        "roleConfigGroups": [
+          {
+            "refName": "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [ ],
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "queuemanager",
         "serviceType": "QUEUEMANAGER",
         "serviceConfigs": [
@@ -424,6 +440,7 @@
           "livy-LIVY_SERVER-BASE",
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "oozie-OOZIE_SERVER-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "zookeeper-SERVER-BASE",

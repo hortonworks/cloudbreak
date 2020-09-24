@@ -4,6 +4,8 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
+{% set cdp_logging_agent_version = '0.2.1' %}
+{% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
@@ -140,7 +142,45 @@
   {% set proxy_full_url = None %}
 {% endif %}
 
+{% if dbus_metering_enabled %}
+  {% if "metering_prewarmed_v2" in grains.get('roles', []) and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+    {% set dbus_metering_app_headers = 'app:' + cluster_type + ',@metering-app:' + salt['pillar.get']('fluent:dbusMeteringAppName') %}
+    {% set dbus_metering_stream_name = salt['pillar.get']('fluent:dbusMeteringStreamName') %}
+  {% else %}
+    {% set dbus_metering_app_headers = 'app:' + cluster_type %}
+    {% set dbus_metering_stream_name = 'Metering' %}
+  {% endif %}
+{% else %}
+  {% set dbus_metering_app_headers = None %}
+  {% set dbus_metering_stream_name = None %}
+{% endif %}
+
 {% set forward_port = 24224 %}
+
+{% set version_data = namespace(entities=[]) %}
+{% for role in grains.get('roles', []) %}
+{% if role.startswith("fluent_prewarmed") %}
+  {% set version_data.entities = version_data.entities + [role.split("fluent_prewarmed_v")[1]]%}
+{% endif %}
+{% endfor %}
+{% if version_data.entities|length > 0 %}
+{% set fluent_version = version_data.entities[0] | int %}
+{% else %}
+{% set fluent_version = 0 %}
+{% endif %}
+
+{% set td_agent_installed = salt['file.directory_exists' ]('/etc/td-agent') %}
+{% set cdp_logging_agent_installed = salt['file.directory_exists' ]('/etc/cdp-logging-agent') %}
+{% if td_agent_installed and cdp_logging_agent_installed %}
+  {% set binary = 'cdp-logging-agent' %}
+  {% set uninstall_td_agent = True %}
+{% elif td_agent_installed %}
+  {% set binary = 'td-agent' %}
+  {% set uninstall_td_agent = False %}
+{% else %}
+  {% set binary = 'cdp-logging-agent' %}
+  {% set uninstall_td_agent = False %}
+{% endif %}
 
 {% do fluent.update({
     "enabled": fluent_enabled,
@@ -172,6 +212,8 @@
     "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
     "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
     "dbusMeteringEnabled": dbus_metering_enabled,
+    "dbusMeteringAppHeaders": dbus_metering_app_headers,
+    "dbusMeteringStreamName": dbus_metering_stream_name,
     "dbusMonitoringEnabled": dbus_monitoring_enabled,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
@@ -192,5 +234,10 @@
     "proxyAuth": proxy_auth,
     "proxyUser": proxy_user,
     "proxyPassword": proxy_password,
-    "proxyFullUrl": proxy_full_url
+    "proxyFullUrl": proxy_full_url,
+    "binary": binary,
+    "fluentVersion": fluent_version,
+    "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
+    "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
+    "uninstallTdAgent": uninstall_td_agent
 }) %}

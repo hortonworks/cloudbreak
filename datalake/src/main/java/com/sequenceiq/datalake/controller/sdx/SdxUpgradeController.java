@@ -57,14 +57,13 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     private void lockComponentsIfRuntimeUpgradeIsDisabled(SdxUpgradeRequest request, String userCrn, String clusterNameOrCrn) {
-        boolean runtimeUpgradeEnabled = sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn);
-        if (!runtimeUpgradeEnabled && (!requestSpecifiesUpgradeType(request) || isShowOnly(request))) {
+        if (!sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn) && (!isUpgradeTypeSpecified(request) || isShowOnly(request))) {
             LOGGER.info("Set lock-components since no upgrade type is specified and runtime upgrade is disabled for cluster: {}", clusterNameOrCrn);
-            request.setLockComponents(true);
+            request.setLockComponents(Boolean.TRUE);
         }
     }
 
-    private boolean requestSpecifiesUpgradeType(SdxUpgradeRequest request) {
+    private boolean isUpgradeTypeSpecified(SdxUpgradeRequest request) {
         return !(request.isEmpty() || isDryRunOnly(request));
     }
 

@@ -46,11 +46,19 @@ sdx:
       nonha:
         backupretentionperiod: 7
         georedundantbackup: false
+    gcp:
+      engineversion: 10
+      ha:
+        backupretentionperiod: 30
+      nonha:
+        backupretentionperiod: 7
 
   gateway:
     topology:
       name: cdp-proxy
     ssotype: SSO_PROVIDER
+
+  paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 
 altus:
   idbmms:
@@ -60,6 +68,8 @@ altus:
   audit:
     enabled: true
     endpoint: localhost:8982
+  datalakedr:
+    enabled: false
 
 datalake:
   cert.dir: /certs/
@@ -88,9 +98,9 @@ datalake:
       cert.file: database.crt
       ssl: false
   runtimes:
-    default: "7.2.1"
-    advertised: "7.1.0,7.2.0,7.2.1,7.2.2"
-    supported: "7.0.2,7.1.0,7.2.0,7.2.1,7.2.2"
+    default: "7.2.2"
+    advertised: "7.1.0,7.2.0,7.2.1,7.2.2,7.2.3"
+    supported: "7.0.2,7.1.0,7.2.0,7.2.1,7.2.2,7.2.3"
 
 secret:
   application: sdx/shared
@@ -112,6 +122,12 @@ vault:
 cb:
   authentication:
     disabled: false
+  cm:
+    client:
+      cluster.proxy.timeout: 90000
+      connect.timeout.seconds: 100
+      read.timeout.seconds: 100
+      write.timeout.seconds: 100
 
 notification:
   urls: http://localhost:3000/notifications

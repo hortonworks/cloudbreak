@@ -114,9 +114,7 @@ public class ApiDescription {
         public static final String STACK_NAME = "Name of stack in Cloudbreak";
         public static final String STACK_TYPE = "Type of stack in Cloudbreak";
         public static final String STATE = "State of the cluster";
-        public static final String METRIC_ALERTS = "Metric based alerts of the cluster";
         public static final String TIME_ALERTS = "Time based alerts of the cluster";
-        public static final String PROMETHEUS_ALERTS = "Prometheus based alerts of the cluster";
         public static final String LOAD_ALERTS = "Load based alerts of the cluster";
         public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }
@@ -149,20 +147,6 @@ public class ApiDescription {
         public static final String CRON = "Cron expression of the time alert";
     }
 
-    public static class MetricAlertJsonProperties {
-        public static final String ALERTDEFINITION = "Definition of the alert";
-        public static final String PERIOD = "Period of the alert";
-        public static final String ALERTSTATE = "State of the alert";
-    }
-
-    public static class PrometheusAlertJsonProperties {
-        public static final String ALERTRULE = "Name of the predefined Prometheus alert rule that could be parameterized by the period and threshold fields.";
-        public static final String PERIOD = "Period of the alert";
-        public static final String THRESHOLD = "Threshold of the alert in percent";
-        public static final String ALERTSTATE = "State of the alert";
-        public static final String ALERTOPERATOR = "Operator of the alert's query.";
-    }
-
     public static class LoadAlertJsonProperties {
         public static final String LOAD_ALERT_CONFIGURATION_MIN_RESOUCE_VALUE = "The lower bound for the resource";
         public static final String LOAD_ALERT_CONFIGURATION_MAX_RESOUCE_VALUE = "The upper bound for the resource";
@@ -172,6 +156,7 @@ public class ApiDescription {
 
     public static class BaseAlertJsonProperties {
         public static final String ID = "Id of the alert";
+        public static final String CRN = "Crn of the alert";
         public static final String ALERTNAME = "Name of the alert";
         public static final String DESCRIPTION = "Description of the alert";
         public static final String SCALINGPOLICYID = "Id of the scaling ploicy";

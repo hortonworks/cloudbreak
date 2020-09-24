@@ -17,12 +17,19 @@ public class EnvironmentModelDescription {
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
+    public static final String GCP_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn parameters";
     public static final String MOCK_PARAMETERS = "Mock parameters";
     public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
+    public static final String GCP_NETWORK_ID = "Gcp network id";
+    public static final String GCP_SHARED_PROJECT_ID = "Gcp shared project id";
+    public static final String GCP_NO_PUBLIC_IP = "Gcp no public ip";
+    public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
+
     public static final String AZURE_RESOURCE_GROUP_NAME = "Subnet ids of the specified networks";
     public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";
     public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
+
     public static final String CREATE_FREEIPA = "Create freeipa in environment";
     public static final String FREEIPA = "The FreeIPA paramaters";
     public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating freeipa in environment";
@@ -74,8 +81,12 @@ public class EnvironmentModelDescription {
     public static final String TAGS = "Tags for environments.";
     public static final String S3_GUARD = "S3Guard parameters.";
     public static final String S3_GUARD_DYNAMO_TABLE_NAME = "S3Guard Dynamo table name.";
+    public static final String QUEUE = "Queue for yarn and cumulus.";
+    public static final String AZURE_PARAMETERS = "AZURE Specific parameters.";
+    public static final String GCP_PARAMETERS = "GCP Specific parameters.";
+    public static final String YARN_PARAMETERS = "YARN Specific parameters.";
+    public static final String OPENSTACK_PARAMETERS = "OPENSTACK Specific parameters.";
 
-    public static final String AZURE_PARAMETERS = "Azure Specific parameters.";
     public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
     public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing azure resource group.";
     public static final String RESOURCE_GROUP_NAME = "Name of the azure resource group.";
@@ -87,6 +98,9 @@ public class EnvironmentModelDescription {
     public static final String PARENT_ENVIRONMENT_CLOUD_PLATFORM = "Parent environment cloud platform";
 
     public static final String FREEIPA_AWS_PARAMETERS = "Aws specific FreeIpa parameters";
+    public static final String FREEIPA_AZURE_PARAMETERS = "Azure specific FreeIpa parameters";
+    public static final String FREEIPA_OPENSTACK_PARAMETERS = "Openstack specific FreeIpa parameters";
+    public static final String FREEIPA_GCP_PARAMETERS = "Gcp specific FreeIpa parameters";
     public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";
     public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
     public static final String FREEIPA_AWS_SPOT_MAX_PRICE = "Max price per hour of spot instances launched in FreeIpa instance group";

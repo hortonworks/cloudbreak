@@ -2,7 +2,9 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -17,13 +19,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -44,6 +44,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -90,16 +91,13 @@ public class EnvironmentApiConverterTest {
     @Mock
     private NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @BeforeAll
     static void before() {
         ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
     }
 
     @ParameterizedTest
-    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
+    @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE", "GCP"})
     void testInitCreationDto(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -174,9 +172,8 @@ public class EnvironmentApiConverterTest {
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = { false, true })
-    void testAzureSingleRgEnabledWithEmptyAzureRequest(Boolean azureSingleResourceGroupDeploymentEnabled) {
+    @Test
+    void testAzureSingleRgEnabledAndEmptyAzureRequest() {
         EnvironmentRequest request = createEnvironmentRequest(AZURE);
         request.setAzure(null);
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
@@ -184,7 +181,6 @@ public class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-
         when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
         when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
@@ -192,15 +188,71 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(azureSingleResourceGroupDeploymentEnabled);
 
         EnvironmentCreationDto actual = underTest.initCreationDto(request);
-        assertEquals(
-                azureSingleResourceGroupDeploymentEnabled
-                        ? ResourceGroupUsagePattern.USE_SINGLE
-                        : ResourceGroupUsagePattern.USE_MULTIPLE,
-                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
 
+        assertEquals(ResourceGroupUsagePattern.USE_MULTIPLE,
+                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
+    }
+
+    @Test
+    void testAzureSingleRgEnabledAndAzureRequestWithSingleUsageAndName() {
+        EnvironmentRequest request = createEnvironmentRequest(AZURE);
+        request.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(
+                        AzureResourceGroup.builder()
+                                .withName("myResourceGroup")
+                                .withResourceGroupUsage(ResourceGroupUsage.SINGLE)
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+
+        assertEquals(ResourceGroupUsagePattern.USE_SINGLE,
+                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
+        assertEquals("myResourceGroup",
+                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+    }
+
+    @Test
+    void testAzureSingleRgEnabledAndAzureRequestWithoutUsageAndWithName() {
+        EnvironmentRequest request = createEnvironmentRequest(AZURE);
+        request.setAzure(AzureEnvironmentParameters.builder()
+                .withAzureResourceGroup(
+                        AzureResourceGroup.builder()
+                                .withName("myResourceGroup")
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+
+        assertNull(actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
+        assertEquals("myResourceGroup",
+                actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {
@@ -225,7 +277,7 @@ public class EnvironmentApiConverterTest {
     private void assertParameters(EnvironmentRequest request, ParametersDto actual, CloudPlatform cloudPlatform) {
         if (AWS.equals(cloudPlatform)) {
             assertAwsParameters(request, actual);
-        } else {
+        } else if (AZURE.equals(cloudPlatform)) {
             assertAzureParameters(request, actual);
         }
     }
@@ -274,6 +326,8 @@ public class EnvironmentApiConverterTest {
             request.setAws(createAwsRequest());
         } else if (AZURE.equals(cloudPlatform)) {
             request.setAzure(createAzureRequest());
+        } else if (GCP.equals(cloudPlatform)) {
+            request.setGcp(createGcpRequest());
         } else {
             throw new RuntimeException("Unexpected cloudplatform: " + cloudPlatform);
         }
@@ -310,6 +364,10 @@ public class EnvironmentApiConverterTest {
                         .build()
         );
         return azureEnvironmentParameters;
+    }
+
+    private GcpEnvironmentParameters createGcpRequest() {
+        return GcpEnvironmentParameters.builder().build();
     }
 
     private AttachedFreeIpaRequest createFreeIpaRequest() {

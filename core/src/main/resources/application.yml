@@ -124,7 +124,8 @@ cb:
     url: http://localhost:8087
     contextPath: /redbeams
   runtimes:
-    latest: "7.2.2"
+    latest: "7.2.3"
+    upgradeSupported: "7.1.0"
 
   host.discovery.custom.hostname.enabled: false
 
@@ -153,6 +154,7 @@ cb:
       enabled.instance.types: >
         t2.large,
         t2.xlarge,
+        m5.xlarge,
         m5.2xlarge,
         m5.4xlarge,
         m5.8xlarge,
@@ -320,6 +322,21 @@ cb:
         7.2.2 - Data Discovery and Exploration=cdp-dde-722;
         7.2.2 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-722;
         7.2.2 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-722;
+        7.2.3 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-723;
+        7.2.3 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha-723;
+        7.2.3 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-723;
+        7.2.3 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha-723;
+        7.2.3 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3-723;
+        7.2.3 - Data Mart: Apache Impala, Hue=cdp-data-mart-723;
+        7.2.3 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart-723;
+        7.2.3 - Operational Database: Apache HBase, Phoenix=cdp-opdb-723;
+        7.2.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-723;
+        7.2.3 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small-723;
+        7.2.3 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small-723;
+        7.2.3 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-723;
+        7.2.3 - Data Discovery and Exploration=cdp-dde-723;
+        7.2.3 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light-723;
+        7.2.3 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy-723;
 
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
@@ -340,6 +357,7 @@ cb:
     network.template.path: templates/arm-network.ftl
     parameter.path: templates/parameters.ftl
     database.template.path: templates/arm-database.ftl
+    storageaccount.template.path: templates/arm-storageaccount.ftl
     app.creation.template:
       command.path: templates/app-creation-command.ftl
       json.path: templates/app-creation.json
@@ -379,6 +397,14 @@ cb:
     disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
     stopStart.batch.size: 10
     create.batch.size: 5
+    externaldatabase:
+      engineversion: 10
+      ha:
+        retentionperiod: 30
+        georedundantbackup: true
+      nonha:
+        retentionperiod: 7
+        georedundantbackup: false
 
   nginx:
     port: 9443
@@ -410,10 +436,16 @@ cb:
   cm:
     admin.role: "ROLE_ADMIN"
     limited.admin.role: "ROLE_LIMITED_CLUSTER_ADMIN"
+    dashboard.user.role: "ROLE_DASHBOARD_USER"
     user.role: "ROLE_USER"
     heartbeat.interval: 3
     missed.heartbeat.interval: 30
     kerberos.encryption.type: "aes256-cts"
+    client:
+      cluster.proxy.timeout: 90000
+      connect.timeout.seconds: 100
+      read.timeout.seconds: 100
+      write.timeout.seconds: 100
 
   workspace.service.cache.ttl: 15
 

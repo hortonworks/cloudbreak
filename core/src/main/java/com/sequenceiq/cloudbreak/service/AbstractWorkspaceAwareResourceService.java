@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -34,7 +35,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     private WorkspaceService workspaceService;
 
     @Inject
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @Inject
     private UserService userService;
@@ -193,7 +194,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     }
 
     protected User getLoggedInUser() {
-        return userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        return userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
     }
 
     protected abstract WorkspaceResourceRepository<T, Long> repository();

@@ -4,11 +4,13 @@ import java.io.Serializable;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.json.AnonymizingBase64Serializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterDetails implements Serializable {
     private Long id;
@@ -42,6 +44,8 @@ public class ClusterDetails implements Serializable {
     private Boolean externalDatabase;
 
     private String databaseType;
+
+    private List<RdsDetails> databases;
 
     private String fileSystemType;
 
@@ -115,16 +119,16 @@ public class ClusterDetails implements Serializable {
         return ssoType;
     }
 
-    public void setSsoType(String ssoType) {
-        this.ssoType = ssoType;
-    }
-
     public String getAmbariVersion() {
         return ambariVersion;
     }
 
     public void setAmbariVersion(String ambariVersion) {
         this.ambariVersion = ambariVersion;
+    }
+
+    public void setSsoType(String ssoType) {
+        this.ssoType = ssoType;
     }
 
     public String getClusterType() {
@@ -165,6 +169,14 @@ public class ClusterDetails implements Serializable {
 
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
+    }
+
+    public List<RdsDetails> getDatabases() {
+        return databases;
+    }
+
+    public void setDatabases(List<RdsDetails> databases) {
+        this.databases = databases;
     }
 
     public String getFileSystemType() {

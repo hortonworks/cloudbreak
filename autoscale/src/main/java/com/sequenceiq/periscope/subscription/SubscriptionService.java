@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.subscription;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,13 +17,19 @@ public class SubscriptionService {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    public Long subscribe(Subscription subscription) {
-        List<Subscription> clientSubscriptions = subscriptionRepository.findByClientIdAndEndpoint(subscription.getClientId(), subscription.getEndpoint());
-        if (!clientSubscriptions.isEmpty()) {
-            LOGGER.debug("Subscription already exists for this client with the same endpoint [client: '{}', endpoint: '{}']",
-                    subscription.getClientId(), subscription.getEndpoint());
-            return clientSubscriptions.get(0).getId();
-        }
-        return subscriptionRepository.save(subscription).getId();
+    public void subscribe(Subscription subscription) {
+        subscriptionRepository.findByClientId(subscription.getClientId()).ifPresentOrElse(
+                dbSubscription -> {
+                    if (!dbSubscription.getEndpoint().equals(subscription.getEndpoint())) {
+                        dbSubscription.setEndpoint(subscription.getEndpoint());
+                        subscriptionRepository.save(dbSubscription);
+                    }
+                },
+                () -> {
+                    subscriptionRepository.save(subscription);
+                });
+
+        LOGGER.info("Subscription updated for this client with the endpoint [client: '{}', endpoint: '{}']",
+                subscription.getClientId(), subscription.getEndpoint());
     }
 }

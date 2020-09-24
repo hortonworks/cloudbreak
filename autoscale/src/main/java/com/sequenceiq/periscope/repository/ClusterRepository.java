@@ -3,6 +3,8 @@ package com.sequenceiq.periscope.repository;
 import java.util.List;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -14,6 +16,7 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 
 @EntityType(entityClass = Cluster.class)
+@Transactional(Transactional.TxType.REQUIRED)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findByStackId(@Param("stackId") Long stackId);
@@ -26,10 +29,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
             " WHERE c.stackName = :stackName and c.clusterPertain.tenant = :tenant")
     Optional<Cluster> findByStackNameAndTenant(@Param("stackName") String stackName, @Param("tenant") String tenant);
 
-    @Query(" SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain " +
-            " WHERE c.id = :clusterId and c.clusterPertain.tenant = :tenant")
-    Optional<Cluster> findByClusterIdAndTenant(@Param("clusterId") Long clusterId, @Param("tenant") String tenant);
-
     @Query("SELECT c.stackCrn FROM Cluster c WHERE c.id = :id")
     String findStackCrnById(@Param("id") Long id);
 
@@ -38,9 +37,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     @Query("SELECT c FROM Cluster c WHERE c.id IN :clusterIds")
     List<Cluster> findClustersByClusterIds(@Param("clusterIds") List<Long> clusterIds);
-
-    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.userId = :userId")
-    List<Cluster> findByUserId(@Param("userId") String userId);
 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.tenant = :tenant and c.stackType = :stackType")
     List<Cluster> findByTenantAndStackType(@Param("tenant") String tenant, @Param("stackType") StackType stackType);
@@ -74,4 +70,12 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")
     void deallocateClustersOfNode(@Param("periscopeNodeId") String periscopeNodeId);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.lastEvaluated = :lastEvaluated WHERE c.id = :clusterId")
+    void setClusterLastEvaluated(@Param("clusterId") Long clusterId, @Param("lastEvaluated") Long lastEvaluated);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.lastScalingActivity = :lastScalingActivity WHERE c.id = :clusterId")
+    void setClusterLastScalingActivity(@Param("clusterId") Long clusterId, @Param("lastScalingActivity") Long lastScalingActivity);
 }

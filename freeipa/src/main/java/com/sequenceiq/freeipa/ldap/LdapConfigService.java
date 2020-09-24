@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.ldap;
 import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -45,12 +46,16 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     public LdapConfig get(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn)
+        return ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn)
                 .orElseThrow(notFound("LdapConfig for environment", environmentCrn));
     }
 
+    public List<LdapConfig> findAllByEnvironmentAndAccountIdEvenIfArchived(String environmentCrn, String accountId) {
+        return ldapConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
+    }
+
     public Optional<LdapConfig> find(String environmentCrn, String accountId, String clusterName) {
-        return ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+        return ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(accountId, environmentCrn, clusterName);
     }
 
     public void delete(String environmentCrn) {
@@ -59,7 +64,8 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     }
 
     public void delete(String environmentCrn, String accountId) {
-        Optional<LdapConfig> ldapConfig = ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(accountId, environmentCrn);
+        Optional<LdapConfig> ldapConfig = ldapConfigRepository
+                .findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(accountId, environmentCrn);
         ldapConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("LdapConfig for environment", environmentCrn).get();
         });
@@ -67,14 +73,14 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     public void delete(String environmentCrn, String accountId, String clusterName) {
         Optional<LdapConfig> ldapConfig =
-                ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(accountId, environmentCrn, clusterName);
+                ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(accountId, environmentCrn, clusterName);
         ldapConfig.ifPresentOrElse(this::delete, () -> {
             throw notFound("LdapConfig for environment", environmentCrn).get();
         });
     }
 
     public void deleteAllInEnvironment(String environmentCrn, String accountId) {
-        ldapConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn).forEach(this::delete);
+        ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(accountId, environmentCrn).forEach(this::delete);
     }
 
     public String testConnection(String environmentCrn, LdapConfig ldapConfig) {
@@ -99,8 +105,9 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     private void checkIfExists(LdapConfig resource) {
         Optional<LdapConfig> ldapConfig = StringUtils.isBlank(resource.getClusterName()) ?
-                ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNull(resource.getAccountId(), resource.getEnvironmentCrn())
-                : ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterName(resource.getAccountId(), resource.getEnvironmentCrn(),
+                ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(resource.getAccountId(),
+                        resource.getEnvironmentCrn())
+                : ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameAndArchivedIsFalse(resource.getAccountId(), resource.getEnvironmentCrn(),
                 resource.getClusterName());
         ldapConfig.ifPresent(kerberosConfig -> {
             String message = format("LdapConfig in the [%s] account's [%s] environment is already exists", resource.getAccountId(),

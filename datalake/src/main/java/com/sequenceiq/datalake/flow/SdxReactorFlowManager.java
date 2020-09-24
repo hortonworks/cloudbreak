@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
+import static com.sequenceiq.datalake.flow.diagnostics.SdxCmDiagnosticsEvent.SDX_CM_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
@@ -114,6 +115,11 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerDiagnosticsCollection(SdxDiagnosticsCollectionEvent startEvent) {
         String selector = SDX_DIAGNOSTICS_COLLECTION_EVENT.event();
+        return notify(selector, startEvent);
+    }
+
+    public FlowIdentifier triggerCmDiagnosticsCollection(SdxDiagnosticsCollectionEvent startEvent) {
+        String selector = SDX_CM_DIAGNOSTICS_COLLECTION_EVENT.event();
         return notify(selector, startEvent);
     }
 

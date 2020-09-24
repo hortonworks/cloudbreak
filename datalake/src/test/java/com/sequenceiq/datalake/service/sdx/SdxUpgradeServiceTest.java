@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,9 +39,6 @@ public class SdxUpgradeServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
-
-    @Mock
-    private SdxClusterRepository sdxClusterRepository;
 
     @Captor
     private ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor;
@@ -59,13 +54,13 @@ public class SdxUpgradeServiceTest {
     @DisplayName("Test if the runtime is properly updated")
     public void testUpdateRuntimeVersionFromCloudbreak() {
         when(sdxService.getById(1L)).thenReturn(sdxCluster);
+        StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
-                .thenReturn(getStackV4Response());
+                .thenReturn(stackV4Response);
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxClusterRepository, times(1)).save(sdxClusterArgumentCaptor.capture());
-        assertEquals("7.2.1", sdxClusterArgumentCaptor.getValue().getRuntime());
+        verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(sdxCluster), eq(stackV4Response));
     }
 
     @Test
@@ -82,7 +77,7 @@ public class SdxUpgradeServiceTest {
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxClusterRepository, times(0)).save(any());
+        verify(sdxService, times(0)).save(any());
     }
 
     @Test
@@ -96,7 +91,7 @@ public class SdxUpgradeServiceTest {
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxClusterRepository, times(0)).save(any());
+        verify(sdxService, times(0)).save(any());
     }
 
     @Test
@@ -110,7 +105,7 @@ public class SdxUpgradeServiceTest {
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxClusterRepository, times(0)).save(any());
+        verify(sdxService, times(0)).save(any());
     }
 
     @Test
@@ -126,7 +121,7 @@ public class SdxUpgradeServiceTest {
 
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
-        verify(sdxClusterRepository, times(0)).save(any());
+        verify(sdxService, times(0)).save(any());
     }
 
     private StackV4Response getStackV4Response() {

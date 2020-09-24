@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.handler;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,9 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerSuccess;
@@ -33,7 +35,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class TerminateDatabaseServerHandler implements EventHandler<TerminateDatabaseServerRequest> {
+public class TerminateDatabaseServerHandler extends ExceptionCatcherEventHandler<TerminateDatabaseServerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminateDatabaseServerHandler.class);
 
@@ -61,30 +63,55 @@ public class TerminateDatabaseServerHandler implements EventHandler<TerminateDat
     }
 
     @Override
-    public void accept(Event<TerminateDatabaseServerRequest> event) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<TerminateDatabaseServerRequest> event) {
+        TerminateDatabaseServerRequest request = event.getData();
+        return new TerminateDatabaseServerFailed(resourceId, e, request.isForced());
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent event) {
         LOGGER.debug("Received event: {}", event);
         TerminateDatabaseServerRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResource> resourcesToTerminate = dbResourceService.getAllAsCloudResource(request.getResourceId());
-            List<CloudResourceStatus> resourceStatuses =
-                connector.resources().terminateDatabaseServer(ac, request.getDatabaseStack(), resourcesToTerminate, persistenceNotifier, request.isForced());
-            List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
+            if (request.getCloudCredential() != null) {
+                AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+                List<CloudResource> resourcesToTerminate = dbResourceService.getAllAsCloudResource(request.getResourceId());
+                List<CloudResourceStatus> resourceStatuses =
+                        connector.resources()
+                                .terminateDatabaseServer(
+                                    ac,
+                                    request.getDatabaseStack(),
+                                    resourcesToTerminate,
+                                    persistenceNotifier,
+                                    request.isForced());
+                List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
-            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
-            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatuses);
-            if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
+                PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
+                ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatuses);
+                if (!task.completed(statePollerResult)) {
+                    statePollerResult = syncPollingScheduler.schedule(task);
+                }
+                LOGGER.debug("Terminating the database stack successfully finished for {}", cloudContext);
+                return new TerminateDatabaseServerSuccess(request.getResourceId(), statePollerResult.getResults());
+            } else {
+                if (request.isForced()) {
+                    return new TerminateDatabaseServerSuccess(request.getResourceId(), new ArrayList<>());
+                } else {
+                    return new TerminateDatabaseServerFailed(
+                            request.getResourceId(),
+                            new CloudbreakException("Could not detect cloud credential, probably the environment does not exist anymore"),
+                            request.isForced());
+                }
             }
-            RedbeamsEvent success = new TerminateDatabaseServerSuccess(request.getResourceId(), statePollerResult.getResults());
-            eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
-            LOGGER.debug("Terminating the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            TerminateDatabaseServerFailed failure = new TerminateDatabaseServerFailed(request.getResourceId(), e);
-            LOGGER.warn("Error terminating the database stack:", e);
-            eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
+            if (request.isForced()) {
+                return new TerminateDatabaseServerSuccess(request.getResourceId(), new ArrayList<>());
+            } else {
+                LOGGER.warn("Error terminating the database stack:", e);
+                return new TerminateDatabaseServerFailed(request.getResourceId(), e, request.isForced());
+            }
         }
     }
 }

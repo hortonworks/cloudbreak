@@ -135,6 +135,10 @@ service UserManagement {
   rpc CreateTrialAccount (CreateTrialAccountRequest)
     returns (CreateTrialAccountResponse) {}
 
+  // Create an email based account.
+  rpc CreateC1CAccount (CreateC1CAccountRequest)
+  returns (CreateC1CAccountResponse) {}
+
   // Grant Entitlement to an Account
   rpc GrantEntitlement (GrantEntitlementRequest)
     returns (GrantEntitlementResponse) {}
@@ -434,6 +438,10 @@ service UserManagement {
   // List cloud identity mappings for service principals.
   rpc ListServicePrincipalCloudIdentities (ListServicePrincipalCloudIdentitiesRequest)
     returns (ListServicePrincipalCloudIdentitiesResponse) {}
+
+  // Get user sync state model, including actors, groups, workload administration groups, etc
+  rpc GetUserSyncStateModel (GetUserSyncStateModelRequest)
+    returns (GetUserSyncStateModelResponse) {}
 }
 
 // The state of the actor.
@@ -926,6 +934,10 @@ message DeleteActorResponse {
   // A list of all resource assignments that were removed. Includes the
   // resource role CRNs and the resource that were assigned.
   repeated ResourceAssignment resourceRolesUnassigned = 4;
+  // The Crn of the deleted actor.
+  string actorCrn = 5;
+  // The workload username of the deleted actor.
+  string workloadUsername = 6;
 }
 
 message DeleteTrialUserRequest {
@@ -1058,7 +1070,7 @@ message CreateClusterSshPrivateKeyRequest {
   // AWS region
   string awsRegion = 3;
   // Encrypted cluster SSH private key
-  string encryptedClusterSshPrivateKey = 4;
+  string encryptedClusterSshPrivateKey = 4 [(options.FieldExtension.sensitive) = true];
 }
 
 // Response object for creating a new cluster SSH private key.
@@ -1080,7 +1092,7 @@ message GetClusterSshPrivateKeyRequest {
 // Response object that contains cluster SSH private key details.
 message GetClusterSshPrivateKeyResponse {
   // The ClusterSshPrivateKey object
-  ClusterSshPrivateKey clusterSshPrivateKey = 1;
+  ClusterSshPrivateKey clusterSshPrivateKey = 1 [(options.FieldExtension.sensitive) = true];
 }
 
 // EntitlementGrant lists name of entitlement associated with account.
@@ -1115,6 +1127,8 @@ enum AccountType {
   // Trial accounts are single-user accounts that do not necessarily have
   // SFDC account id associated with them
   TRIAL = 1;
+  // C1C accounts. C1C accounts are created by users using in email
+  C1C = 2;
 }
 
 message Account {
@@ -1257,17 +1271,16 @@ message ResourceAssignee {
 }
 
 message GetRightsResponse {
+  reserved 5;
   // A list of resource role assignments.
   repeated ResourceRoleAssignment resourceRolesAssignment = 1;
   // A list of RoleAssignments.
   repeated RoleAssignment roleAssignment = 2;
   // Whether the actor is a thunderhead admin or not.
   bool thunderheadAdmin = 3;
-  // A list of group CRNs the actor is a member of.
+  // A list of group CRNs the actor is a member of. Deprecated and will be removed.
+  // CDPCP-2584 tracks removing it.
   repeated string groupCrn = 4;
-  // A list of workload administration group names the actor
-  // is a member of.
-  repeated string workloadAdministrationGroupName = 5;
 }
 
 message RightsCheck {
@@ -1304,6 +1317,20 @@ message CreateTrialAccountRequest {
 }
 
 message CreateTrialAccountResponse {
+  Account account = 1;
+}
+
+message CreateC1CAccountRequest {
+  // The email of the user creating the account. An email can be used to create one
+  // and only one account.
+  string email = 1;
+  // This may be an empty string.
+  string firstName = 2;
+  // This may be an empty string.
+  string lastName = 3;
+}
+
+message CreateC1CAccountResponse {
   Account account = 1;
 }
 
@@ -1704,6 +1731,10 @@ message DeleteMachineUserResponse {
   // A list of all resource assignments that were removed. Includes the
   // resource role CRNs and the resource that were assigned.
   repeated ResourceAssignment resourceRolesUnassigned = 4;
+  // The Crn of the deleted actor.
+  string actorCrn = 5;
+  // The workload username of the deleted actor.
+  string workloadUsername = 6;
 }
 
 message WorkloadPasswordPolicyStorage {
@@ -2242,7 +2273,7 @@ message LocalProviderInfo {
   // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
   // key name inside this map.
   // To enable login via Local, console auth service should must have required permissions to read this value.
-  string passwordHashRef = 2;
+  string passwordHashRef = 2 [(options.FieldExtension.sensitive) = true];
   // Email address of this user
   // This is a required field for interactive login. However, we would not ever want to use this
   // address or expect it to be valid.
@@ -2437,7 +2468,7 @@ message LocalIdpDetails {
   // where the password is stored. This, when using Vault KV store is a key-value map. `key` is the actual
   // key name inside this map.
   // To enable login via Local, console auth service should must have required permissions to read this value.
-  string passwordHashRef = 2;
+  string passwordHashRef = 2 [(options.FieldExtension.sensitive) = true];
   // Email address of this user
   // This is a required field for interactive login. However, we would not ever want to use this
   // address or expect it to be valid.
@@ -2585,11 +2616,19 @@ message CreateWorkloadMachineUserRequest {
   repeated ResourceAssignment resourceAssignment = 3;
   // A list of role roles to use. May be empty
   repeated string roleCrn = 4;
+  // Whether to generate an access key or not. If missing or set to 'TRUE' an access
+  // key will be generated and returned.
+  nullable.BoolValue generateAccessKey = 5;
+  // Whether to generate a workload password for the machine user. If missing or set to
+  // 'FALSE' the workload password will not be set.
+  nullable.BoolValue generateWorkloadPassword = 6;
 }
 
 message CreateWorkloadMachineUserResponse {
   // The CRN for the machine user created.
   string machineUserCrn = 1;
+  // The access key ID and private key are only returned if an access key was requested,
+  // which is the default behavior.
   // The access key ID. Since the rpc is idempotent a new key will be generated
   // for each successful call. Old keys are not removed by this call and will
   // only be removed by calling DeleteWorkloadMachineUser.
@@ -2597,6 +2636,14 @@ message CreateWorkloadMachineUserResponse {
   // The private key for the machine user. This is an Ed25519 private key and is
   // 32 bytes encoded in base64 that should be used to sign requests.
   string privateKey = 3 [(options.FieldExtension.sensitive) = true];
+  // The machine user details, including its workload username.
+  MachineUser machineUser = 4;
+  // The workload password that was generated for the machine user. Only populated if
+  // setWorkloadPassword was set to 'TRUE'. Note that since we do not keep the workload
+  // password anywhere, but just the hash, consecutive calls to CreateWorkloadMachineUser
+  // for the same machine user, will override the old generated password.
+  // It is the responsibility of the caller to store the password securely.
+  string generatedWorkloadPassword = 5 [(options.FieldExtension.sensitive) = true];
 }
 
 message DeleteWorkloadMachineUserRequest {
@@ -2845,26 +2892,57 @@ message GetEventGenerationIdsRequest {
   string accountId = 1;
 }
 
-message GetEventGenerationIdsResponse {
+// Object collecting the event generation ids for some account.
+message EventGenerationIds {
   // Generated when a role was assigned or unassigned to a user, machine-user, or
-  // a group. Empty string if no such event has been occurred since tracking
+  // a group. Empty string if no such event has occurred since tracking
   // started.
   string lastRoleAssignmentEventId = 1;
   // Generated when a resource role was assigned or unassigned to a user,
-  // machine-user, or a group. Empty string if no such event has been occurred
+  // machine-user, or a group. Empty string if no such event has occurred
   // since tracking started.
   string lastResourceRoleAssignmentEventId = 2;
   // Generated when a member, i.e., a user or a machine-user, was added or
-  // removed from a group. Empty string if no such event has been occurred
+  // removed from a group. Empty string if no such event has occurred
   // since tracking started.
   string lastGroupMembershipChangedEventId = 3;
   // Generated when an actor, i.e., a user or a machine-user, was deleted.
-  // Empty string if no such event has been occurred since tracking started.
+  // Empty string if no such event has occurred since tracking started.
   string lastActorDeletedEventId = 4;
   // Generated when an actor workload credentials change - the actor called
-  // set-workload-password. Empty string if no such event has been occurred since
+  // set-workload-password. Empty string if no such event has occurred since
   // tracking started.
   string lastActorWorkloadCredentialsChangedEventId = 5;
+}
+
+// GetEventGenerationIdsResponse object.
+// New event ids should be added to the EventGenerationIds object rather than
+// directly to the GetEventGenerationIdsResponse.
+// Individual event id fields can be removed after calling code has migrated
+// to using the EventGenerationIds object.
+// TODO CDPCP-2938 remove redundant fields
+message GetEventGenerationIdsResponse {
+  // Generated when a role was assigned or unassigned to a user, machine-user, or
+  // a group. Empty string if no such event has occurred since tracking
+  // started.
+  string lastRoleAssignmentEventId = 1;
+  // Generated when a resource role was assigned or unassigned to a user,
+  // machine-user, or a group. Empty string if no such event has occurred
+  // since tracking started.
+  string lastResourceRoleAssignmentEventId = 2;
+  // Generated when a member, i.e., a user or a machine-user, was added or
+  // removed from a group. Empty string if no such event has occurred
+  // since tracking started.
+  string lastGroupMembershipChangedEventId = 3;
+  // Generated when an actor, i.e., a user or a machine-user, was deleted.
+  // Empty string if no such event has occurred since tracking started.
+  string lastActorDeletedEventId = 4;
+  // Generated when an actor workload credentials change - the actor called
+  // set-workload-password. Empty string if no such event has occurred since
+  // tracking started.
+  string lastActorWorkloadCredentialsChangedEventId = 5;
+  // An object collecting the event generation ids.
+  EventGenerationIds eventGenerationIds = 6;
 }
 
 message AddActorSshPublicKeyRequest {
@@ -3083,4 +3161,67 @@ message ListServicePrincipalCloudIdentitiesResponse {
   repeated ServicePrincipalCloudIdentities servicePrincipalCloudIdentities = 1;
   // See the PageToken comment in paging.proto on paging usage.
   paging.PageToken nextPageToken = 2;
+}
+
+message GetUserSyncStateModelRequest {
+  // The account id.
+  string accountId = 1;
+  // The rights checks to be performed on each actor.
+  repeated RightsCheck rightsCheck = 2;
+}
+
+message GetUserSyncStateModelResponse {
+  EventGenerationIds eventGenerationIds = 1;
+  // Users and machine users, along with supporting information needed for user sync.
+  repeated UserSyncActor actor = 2;
+  // Groups.
+  repeated Group group = 3;
+  // Workload administration groups.
+  repeated WorkloadAdministrationGroup workloadAdministrationGroup = 4;
+}
+
+// Actor workload credentials object. This contains fields needed to set
+// workload credentials through user sync.
+message ActorWorkloadCredentials {
+  // The password hash.
+  string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // The date, in ms from the Java epoch of 1970-01-01T00:00:00Z, when the
+  // password hash expires. A value of 0 indicates that the password hash
+  // never expires.
+  uint64 passwordHashExpirationDate = 3;
+  // A list of kerberos keys for the actor.
+  repeated ActorKerberosKey kerberosKeys = 2;
+  // A list of Ssh public keys for the actor.
+  repeated SshPublicKey sshPublicKey = 5;
+}
+
+//
+message RightsCheckResult {
+  // Results of a rights checks, returned in the same order as
+  // the right list in the corresponding RightsCheck
+  repeated bool hasRight = 1;
+}
+
+message UserSyncActor {
+  // Information extracted from a User or MachineUser
+  UserSyncActorDetails actorDetails = 1;
+  // Results of the RightsChecks, returned in the same order as the
+  // rightsCheck field of the request.
+  repeated RightsCheckResult rightsCheckResult = 2;
+  // Groups this actor is a member of, represented as indices into the
+  // list of groups in the response.
+  repeated int32 groupIndex = 3;
+  // Wags this actor is a member of, represented as indices into the
+  // list of workload administration groups in the response.
+  repeated int32 workloadAdministrationGroupIndex = 4;
+  // Credentials.
+  ActorWorkloadCredentials credentials = 5;
+}
+
+message UserSyncActorDetails {
+  string firstName = 1;
+  string lastName = 2;
+  string crn = 3;
+  string workloadUsername = 4;
+  repeated CloudIdentity cloudIdentity = 5;
 }

@@ -6,14 +6,18 @@ import java.util.regex.Pattern;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
+
 @Component
-public class V4EventRestUrlParser extends RestUrlParser {
+public class V4EventRestUrlParser extends LegacyRestUrlParser {
 
     public static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
     public static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
     public static final int RESOURCE_EVENT_GROUP_NUMBER = 3;
+
+    private static final Pattern ANTI_PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/internal");
 
     private static final Pattern PATTERN = Pattern.compile("v4/(\\d+)/([a-z_]+)/([a-z_]+)");
 
@@ -29,6 +33,11 @@ public class V4EventRestUrlParser extends RestUrlParser {
     @Override
     protected List<String> parsedMethods() {
         return List.of("POST", "GET");
+    }
+
+    @Override
+    protected Pattern getAntiPattern() {
+        return ANTI_PATTERN;
     }
 
     @Override

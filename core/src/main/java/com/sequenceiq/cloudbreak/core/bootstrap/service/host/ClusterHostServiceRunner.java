@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
@@ -7,8 +8,6 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -37,13 +36,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.CMLicenseUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -58,13 +57,13 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -265,6 +264,22 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    public void redeployGatewayCertificate(@Nonnull Stack stack, @Nonnull Cluster cluster) {
+        try {
+            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.uploadGatewayPillar(gatewayConfigs, nodes, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
             Set<Node> nodes)
             throws IOException, CloudbreakOrchestratorException {
@@ -284,7 +299,7 @@ public class ClusterHostServiceRunner {
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
         saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
-
+        saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
         if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
@@ -335,7 +350,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
-        decoratePillarWithClouderaManagerRepo(cluster.getId(), servicePillar, licenseOpt);
+        decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
@@ -419,7 +434,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
+    public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
         Account account = umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
@@ -434,22 +449,15 @@ public class ClusterHostServiceRunner {
         return licenseOpt;
     }
 
-    @VisibleForTesting
-    void decoratePillarWithClouderaManagerRepo(Long clusterId, Map<String, SaltPillarProperties> servicePillar, Optional<String> license)
-            throws CloudbreakOrchestratorFailedException {
-        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
-        if (clouderaManagerRepo == null) {
-            throw new CloudbreakOrchestratorFailedException("Cloudera Manager repository details are missing.");
-        }
+    public void decoratePillarWithClouderaManagerRepo(ClouderaManagerRepo repo, Map<String, SaltPillarProperties> servicePillar, Optional<String> license) {
         servicePillar.put("cloudera-manager-repo", new SaltPillarProperties("/cloudera-manager/repo.sls",
-                singletonMap("cloudera-manager", createCMRepoPillar(clouderaManagerRepo, license))));
-
+                singletonMap("cloudera-manager", createCMRepoPillar(repo, license))));
     }
 
-    private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> license) {
+    private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> licenseOpt) {
         Map<String, Object> pillarValues = new HashMap<>();
         pillarValues.put("repo", clouderaManagerRepo);
-        parseLicense(license).ifPresent(jsonLicense -> {
+        licenseOpt.flatMap(CMLicenseUtil::parseLicense).ifPresent(jsonLicense -> {
             String username = jsonLicense.getPaywallUsername();
             String password = jsonLicense.getPaywallPassword();
             if (isNotEmpty(username) && isNotEmpty(password)) {
@@ -460,22 +468,6 @@ public class ClusterHostServiceRunner {
         return pillarValues;
     }
 
-    private Optional<JsonCMLicense> parseLicense(Optional<String> licenseOpt) {
-        Optional<JsonCMLicense> result = Optional.empty();
-        if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
-            String license = licenseOpt.get();
-            try {
-                String json = '{' + substringBeforeLast(substringAfter(license, "{"), "}") + '}';
-                JsonCMLicense jsonCMLicense = JsonUtil.readValue(json, JsonCMLicense.class);
-                result = Optional.of(jsonCMLicense);
-                LOGGER.info("Parsed CM licence: {}", jsonCMLicense);
-            } catch (IOException e) {
-                LOGGER.warn("Cannot parse CM license, paywall authentication will not work", e);
-            }
-        }
-        return result;
-    }
-
     private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
         List<String> csdUrls = getCsdUrlList(cluster);
         servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
@@ -484,12 +476,13 @@ public class ClusterHostServiceRunner {
     }
 
     public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
-        boolean deterministicUidGid = isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_1);
+        String cmVersion = clouderaManagerRepo.getVersion();
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", singletonMap("settings", Map.of(
                         "heartbeat_interval", cmHeartbeatInterval,
                         "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                        "deterministic_uid_gid", deterministicUidGid)))));
+                        "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
+                        "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1))))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
@@ -497,6 +490,8 @@ public class ClusterHostServiceRunner {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
                 Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
+                Map<String, Object> applicationTags = new HashMap<>(stackTags.getApplicationTags());
+                tags.putAll(applicationTags);
                 servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
                         Collections.singletonMap("tags", tags)));
             } catch (Exception e) {
@@ -550,6 +545,7 @@ public class ClusterHostServiceRunner {
         gateway.put("ssotype", SSOType.NONE);
 
         Gateway clusterGateway = cluster.getGateway();
+
         if (clusterGateway != null) {
             gateway.put("path", clusterGateway.getPath());
             gateway.put("ssotype", clusterGateway.getSsoType());
@@ -591,6 +587,19 @@ public class ClusterHostServiceRunner {
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void saveIdBrokerPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+        IdBroker clusterIdBroker = cluster.getIdBroker();
+        Map<String, Object> idbroker = new HashMap<>();
+
+        if (clusterIdBroker != null) {
+            idbroker.put("signpub", clusterIdBroker.getSignPub());
+            idbroker.put("signcert", clusterIdBroker.getSignCert());
+            idbroker.put("signkey", clusterIdBroker.getSignKey());
+            idbroker.put("mastersecret", clusterIdBroker.getMasterSecret());
+        }
+        servicePillar.put("idbroker", new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker)));
     }
 
     private void addGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {

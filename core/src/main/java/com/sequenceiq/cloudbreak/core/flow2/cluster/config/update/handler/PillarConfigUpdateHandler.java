@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.handler;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateFailed;
@@ -7,10 +13,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarCo
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
-import javax.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+
+import reactor.bus.Event;
 
 @Component
 public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<PillarConfigUpdateRequest> {
@@ -26,7 +30,7 @@ public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<Pill
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<PillarConfigUpdateRequest> event) {
         return new PillarConfigUpdateFailed(resourceId, e);
     }
 

@@ -60,8 +60,8 @@ public interface ClusterApi {
         return clusterModificationService().upscaleCluster(hostGroup, metas);
     }
 
-    default void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException {
-        clusterModificationService().upgradeClusterRuntime(components);
+    default void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade);
     }
 
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
@@ -72,8 +72,12 @@ public interface ClusterApi {
         return clusterModificationService().startCluster(hostsInCluster);
     }
 
-    default Map<String, String> gatherInstalledComponents(String hostname) {
-        return clusterModificationService().gatherInstalledComponents(hostname);
+    default Map<String, String> gatherInstalledParcels(String stackName) {
+        return clusterModificationService().gatherInstalledParcels(stackName);
+    }
+
+    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        clusterModificationService().removeUnusedParcels(usedParcelComponents);
     }
 
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
@@ -121,4 +125,6 @@ public interface ClusterApi {
     ClusterStatusService clusterStatusService();
 
     ClusterDecomissionService clusterDecomissionService();
+
+    ClusterDiagnosticsService clusterDiagnosticsService();
 }

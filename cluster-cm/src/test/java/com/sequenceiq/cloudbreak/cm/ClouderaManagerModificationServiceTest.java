@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
+import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -45,9 +48,11 @@ import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -55,6 +60,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -116,6 +122,9 @@ class ClouderaManagerModificationServiceTest {
     private ParcelResourceApi parcelResourceApi;
 
     @Mock
+    private ParcelsResourceApi parcelsResourceApi;
+
+    @Mock
     private ClusterComponentConfigProvider clusterComponentProvider;
 
     @Mock
@@ -129,6 +138,9 @@ class ClouderaManagerModificationServiceTest {
 
     @Mock
     private ClouderaManagerConfigService configService;
+
+    @Mock
+    private ClouderaManagerParcelService clouderaManagerParcelService;
 
     private Cluster cluster;
 
@@ -288,12 +300,63 @@ class ClouderaManagerModificationServiceTest {
                 = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH")).collect(Collectors.toSet());
 
         cluster.setComponents(clusterComponentsNoCDH);
-        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH));
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.upgradeClusterRuntime(clusterComponentsNoCDH, true));
         Assertions.assertEquals("Runtime component not found!", exception.getMessage());
     }
 
     @Test
-    void testUpgradeCluster() throws CloudbreakException, ApiException {
+    void testUpgradeClusterWhenPatchUpgrade() throws CloudbreakException, ApiException {
+        TestUtil.clusterComponents(cluster);
+
+        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
+        when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
+        BigDecimal apiCommandId = new BigDecimal(200);
+        PollingResult successPollingResult = PollingResult.SUCCESS;
+        ParcelResource parcelResource = new ParcelResource(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+
+        // Start download
+        when(parcelResourceApi.startDownloadCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION)))
+                .thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDownload(stack, apiClientMock, apiCommandId, parcelResource))
+                .thenReturn(successPollingResult);
+
+        // Start distribute
+        when(parcelResourceApi.startDistributionCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION)))
+                .thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(stack, apiClientMock, apiCommandId, parcelResource))
+                .thenReturn(successPollingResult);
+
+        // Activate parcel
+        when(parcelResourceApi.activateCommand(eq(stack.getName()), eq(TestUtil.CDH), eq(TestUtil.CDH_VERSION))).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
+
+        // Restart services
+        when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(new ApiCommandList().items(List.of()));
+        when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
+
+        when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(apiCommandId));
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
+
+        underTest.upgradeClusterRuntime(cluster.getComponents(), true);
+
+        verify(clouderaManagerResourceApi, times(1)).updateConfig(any(), any());
+        verify(parcelResourceApi, times(1)).startDownloadCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        verify(parcelResourceApi, times(1)).startDistributionCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        verify(parcelResourceApi, times(1)).activateCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        verify(clustersResourceApi, times(1)).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
+
+        InOrder inOrder = Mockito.inOrder(clouderaManagerResourceApi, parcelResourceApi, clustersResourceApi);
+        inOrder.verify(clouderaManagerResourceApi).updateConfig(any(), any());
+        inOrder.verify(parcelResourceApi).startDownloadCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        inOrder.verify(parcelResourceApi).startDistributionCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
+        inOrder.verify(clustersResourceApi).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
+    }
+
+    @Test
+    void testUpgradeClusterWhenNotPatchUpgrade() throws CloudbreakException, ApiException {
         TestUtil.clusterComponents(cluster);
 
         when(clouderaManagerApiFactory.getMgmtServiceResourceApi(any())).thenReturn(mgmtServiceResourceApi);
@@ -321,16 +384,14 @@ class ClouderaManagerModificationServiceTest {
         ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
         upgradeArgs.setCdhParcelVersion(TestUtil.CDH_VERSION);
         when(clustersResourceApi.upgradeCdhCommand(eq(stack.getName()), eq(upgradeArgs))).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClientMock, apiCommandId))
-                .thenReturn(successPollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
 
         // Mgmt Service restart
         ApiCommandList apiCommandList = new ApiCommandList();
         apiCommandList.setItems(new ArrayList<>());
         when(mgmtServiceResourceApi.listActiveCommands("SUMMARY")).thenReturn(apiCommandList);
         when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId))
-                .thenReturn(successPollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(successPollingResult);
 
         ApiService apiService = new ApiService()
                 .name("SERVICE")
@@ -353,7 +414,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
 
-        underTest.upgradeClusterRuntime(cluster.getComponents());
+        underTest.upgradeClusterRuntime(cluster.getComponents(), false);
 
         verify(clouderaManagerResourceApi, times(1)).updateConfig(any(), any());
         verify(parcelResourceApi, times(1)).startDownloadCommand(stack.getName(), TestUtil.CDH, TestUtil.CDH_VERSION);
@@ -369,7 +430,6 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clustersResourceApi).upgradeCdhCommand(stack.getName(), upgradeArgs);
         inOrder.verify(clustersResourceApi).deployClientConfig(stack.getName());
         inOrder.verify(clustersResourceApi).refresh(stack.getName());
-
     }
 
     @Test
@@ -443,6 +503,38 @@ class ClouderaManagerModificationServiceTest {
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), any());
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmConfigurationRefresh(eq(stack), eq(apiClientMock), any());
+    }
+
+    @Test
+    public void removeUnusedParcels() throws CloudbreakException {
+        // GIVEN
+        ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
+        ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
+        Set<ClusterComponent> usedComponents = Set.of(createClusterComponent(cmProduct1), createClusterComponent(cmProduct2));
+        Map<String, ClouderaManagerProduct> productMap = Map.of(cmProduct1.getName(), cmProduct1, cmProduct2.getName(), cmProduct2);
+        when(clouderaManagerApiFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourceApi);
+        when(clouderaManagerApiFactory.getParcelResourceApi(apiClientMock)).thenReturn(parcelResourceApi);
+        // WHEN
+        underTest.removeUnusedParcels(usedComponents);
+        // THEN
+        verify(clouderaManagerParcelService, times(1)).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), productMap);
+        verify(clouderaManagerParcelService, times(1)).undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack, productMap);
+        verify(clouderaManagerParcelService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack, productMap);
+    }
+
+    private ClusterComponent createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {
+        ClusterComponent component = new ClusterComponent();
+        Json attribute = mock(Json.class);
+        when(attribute.getSilent(ClouderaManagerProduct.class)).thenReturn(clouderaManagerProduct);
+        component.setAttributes(attribute);
+        return component;
+    }
+
+    private ClouderaManagerProduct createClouderaManagerProduct(String name, String version) {
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setName(name);
+        product.setVersion(version);
+        return product;
     }
 
     private void setUpReadHosts() throws ApiException {

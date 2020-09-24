@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
@@ -16,8 +17,8 @@ public class NetworkV4StackBase extends ProviderParametersBase {
     @ApiModelProperty(NetworkModelDescriptions.AZURE_PARAMETERS)
     private AzureNetworkV4Parameters azure;
 
-    // @ApiModelProperty(NetworkModelDescriptions.GCP_PARAMETERS)
-    // private GcpNetworkV4Parameters gcp;
+    @ApiModelProperty(NetworkModelDescriptions.GCP_PARAMETERS)
+    private GcpNetworkV4Parameters gcp;
 
     // @ApiModelProperty(NetworkModelDescriptions.AZURE_PARAMETERS)
     // private AzureNetworkV4Parameters azure;
@@ -45,7 +46,10 @@ public class NetworkV4StackBase extends ProviderParametersBase {
 
     @Override
     public Mappable createGcp() {
-        return null;
+        if (gcp == null) {
+            gcp = new GcpNetworkV4Parameters();
+        }
+        return gcp;
     }
 
     @Override
@@ -82,5 +86,13 @@ public class NetworkV4StackBase extends ProviderParametersBase {
 
     public AzureNetworkV4Parameters getAzure() {
         return azure;
+    }
+
+    public GcpNetworkV4Parameters getGcp() {
+        return gcp;
+    }
+
+    public void setGcp(GcpNetworkV4Parameters gcp) {
+        this.gcp = gcp;
     }
 }

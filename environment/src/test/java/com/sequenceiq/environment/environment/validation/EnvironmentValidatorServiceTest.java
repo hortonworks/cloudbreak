@@ -84,7 +84,7 @@ class EnvironmentValidatorServiceTest {
         request.setCredentialName("azure-credential");
         ValidationResult result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateAwsEnvironmentRequest(request));
         assertTrue(result.hasError());
-        assertEquals("Environment request is not for AWS.", result.getErrors().get(0));
+        assertEquals("Environment request is not for cloud platform AWS.", result.getErrors().get(0));
     }
 
     @Test

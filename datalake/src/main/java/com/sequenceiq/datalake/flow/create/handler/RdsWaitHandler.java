@@ -32,6 +32,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
+import reactor.bus.Event;
+
 @Component
 public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest> {
 
@@ -50,13 +52,13 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
     private SdxStatusService sdxStatusService;
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
-        return new SdxCreateFailedEvent(resourceId, null, e);
+    public String selector() {
+        return "RdsWaitRequest";
     }
 
     @Override
-    public String selector() {
-        return "RdsWaitRequest";
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<RdsWaitRequest> event) {
+        return new SdxCreateFailedEvent(resourceId, null, e);
     }
 
     @Override

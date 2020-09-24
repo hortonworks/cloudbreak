@@ -17,6 +17,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
 
     private static final String DH_CREATOR_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataHubCreator";
 
+    private static final String ENV_USER_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentUser";
+
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
     }
@@ -28,6 +30,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
 
     public UmsTestDto withDatahubCreator() {
         getRequest().setRoleCrn(DH_CREATOR_CRN);
+        return this;
+    }
+
+    public UmsTestDto withEnvironmentUser() {
+        getRequest().setRoleCrn(ENV_USER_CRN);
         return this;
     }
 

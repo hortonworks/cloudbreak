@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_EVENT;
-import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers.RestUrlParser.RESOURCE_TYPE;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_EVENT;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser.RESOURCE_TYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -39,6 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.controller.EndpointConfig;
+import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.LegacyRestUrlParser;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = RestUrlParserConfig.class)
@@ -81,15 +82,15 @@ public class RestUrlParserTest {
     private UriInfo uriInfo;
 
     @Autowired
-    private List<RestUrlParser> restUrlParsers;
+    private List<LegacyRestUrlParser> restUrlParsers;
 
-    private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/autoscale", "cluster_templates", "/v4/events"};
+    private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale", "cluster_templates", "/v4/events", "/v4/diagnostics"};
 
     @Test
     public void testEventUrlParser() {
         when(containerRequestContext.getMethod()).thenReturn("DELETE");
         when(containerRequestContext.getUriInfo()).thenReturn(uriInfo);
-        RestUrlParser eventUrlParser = new V4ExistingResourceEventRestUrlParser();
+        LegacyRestUrlParser eventUrlParser = new V4ExistingResourceEventRestUrlParser();
 
         when(uriInfo.getPath()).thenReturn("v4/2/users/johnny/evict");
         Map<String, String> params = new HashMap<>();
@@ -127,9 +128,9 @@ public class RestUrlParserTest {
                         String methodPath = getMethodPath(rootPath, method);
                         String requestMethod = getRequestMethod(method);
                         if (requestMethod != null) {
-                            List<RestUrlParser> matchedParsers = new ArrayList<>();
+                            List<LegacyRestUrlParser> matchedParsers = new ArrayList<>();
                             Map<String, String> params = new HashMap<>();
-                            for (RestUrlParser restUrlParser : restUrlParsers) {
+                            for (LegacyRestUrlParser restUrlParser : restUrlParsers) {
                                 setupMocks(methodPath, requestMethod);
                                 if (restUrlParser.fillParams(containerRequestContext, params)) {
                                     matchedParsers.add(restUrlParser);
@@ -166,7 +167,8 @@ public class RestUrlParserTest {
         if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
             resourceEvent = parts[2];
         } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
-                && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])) {
+                && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])
+                && !("internal".equals(parts[3]) && parts.length == 4)) {
             // Skip v4/{workspaceId}/audits/{auditId}
             // Skip v4/{workspaceId}/blueprints/{name} and similars
             // Skip v4/{workspaceId}/credentials/code_grant_flow/init
@@ -223,33 +225,33 @@ public class RestUrlParserTest {
     private void checkResourceIdOrName(String methodPath, Map<String, String> params) {
         if (methodPath.contains(RESOURCE_ID)) {
             assertEquals("params should contain resource ID",
-                    RESOURCE_ID, params.get(RestUrlParser.RESOURCE_ID));
-            assertNull("params must not contain resource name when having a resource ID", params.get(RestUrlParser.RESOURCE_NAME));
+                    RESOURCE_ID, params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertNull("params must not contain resource name when having a resource ID", params.get(LegacyRestUrlParser.RESOURCE_NAME));
         } else if (methodPath.contains(RESOURCE_NAME)) {
             assertEquals("params should contain resource name",
-                    RESOURCE_NAME, params.get(RestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource name", params.get(RestUrlParser.RESOURCE_ID));
+                    RESOURCE_NAME, params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource ID when having a resource name", params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else if (methodPath.contains(WORKSPACE_NAME)) {
             assertEquals("params should contain workspace name",
-                    WORKSPACE_NAME, params.get(RestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource name", params.get(RestUrlParser.RESOURCE_ID));
+                    WORKSPACE_NAME, params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource ID when having a resource name", params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else if (methodPath.contains(RESOURCE_CRN)) {
-            assertEquals("params should contains resource crn", RESOURCE_CRN, params.get(RestUrlParser.RESOURCE_NAME));
-            assertNull("params must not contain resource ID when having a resource crn", params.get(RestUrlParser.RESOURCE_ID));
+            assertEquals("params should contains resource crn", RESOURCE_CRN, params.get(LegacyRestUrlParser.RESOURCE_NAME));
+            assertNull("params must not contain resource ID when having a resource crn", params.get(LegacyRestUrlParser.RESOURCE_ID));
         } else {
-            assertNull(String.format("%s method params must not contain resource ID", methodPath), params.get(RestUrlParser.RESOURCE_ID));
-            assertNull(String.format("%s method params must not contain resource name", methodPath), params.get(RestUrlParser.RESOURCE_NAME));
+            assertNull(String.format("%s method params must not contain resource ID", methodPath), params.get(LegacyRestUrlParser.RESOURCE_ID));
+            assertNull(String.format("%s method params must not contain resource name", methodPath), params.get(LegacyRestUrlParser.RESOURCE_NAME));
         }
     }
 
     private void checkWorkspaceId(String methodPath, Map<String, String> params) {
         if (methodPath.contains(WORKSPACE_ID)) {
             assertEquals("params should contain workspace ID",
-                    WORKSPACE_ID, params.get(RestUrlParser.WORKSPACE_ID));
+                    WORKSPACE_ID, params.get(LegacyRestUrlParser.WORKSPACE_ID));
         }
     }
 
-    private void checkIfMoreThanOneParserDetected(String methodPath, List<RestUrlParser> matchedParsers) {
+    private void checkIfMoreThanOneParserDetected(String methodPath, List<LegacyRestUrlParser> matchedParsers) {
         if (matchedParsers.size() > 1) {
             fail("More than one parser match for this URL: " + methodPath
                     + "\nParsers: " + matchedParsers.stream()

@@ -27,9 +27,11 @@ public interface ClusterModificationService {
 
     void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
-    void upgradeClusterRuntime(Set<ClusterComponent> components) throws CloudbreakException;
+    void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException;
 
-    default Map<String, String> gatherInstalledComponents(String hostname) {
+    Map<String, String> gatherInstalledParcels(String stackName);
+
+    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

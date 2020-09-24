@@ -13,7 +13,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
-import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 
@@ -30,7 +30,7 @@ public class ImageCatalogToImageCatalogV4ResponseConverterTest {
     private UserService userService;
 
     @MockBean
-    private RestRequestThreadLocalService restRequestThreadLocalService;
+    private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
     @MockBean
     private DefaultConversionService conversionService;

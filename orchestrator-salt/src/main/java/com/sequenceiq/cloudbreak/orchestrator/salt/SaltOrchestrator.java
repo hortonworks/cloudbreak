@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -56,7 +55,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.RoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
-import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
@@ -131,7 +129,10 @@ SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry.forced:2}")
     private int maxRetryRecipeForced;
 
-    @Value("${cb.max.salt.database.dr.retry.onerror:2}")
+    @Value("${cb.max.salt.database.dr.retry:60}")
+    private int maxDatabaseDrRetry;
+
+    @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
 
     @Inject
@@ -220,19 +221,6 @@ SaltOrchestrator implements HostOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
-        }
-    }
-
-    @Override
-    public void checkIfClusterUpgradable(GatewayConfig primaryGatewayConfig)
-            throws CloudbreakOrchestratorFailedException {
-        SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig);
-        ApplyFullResponse applyFullResponse = SaltStates.showState(sc, "cloudera.agent.upgrade");
-        LOGGER.debug("Checking salt state response is: {}.", applyFullResponse.toString());
-        if (applyFullResponse.isError()) {
-            LOGGER.info("Checking the upgrade state failed {}", applyFullResponse.getResult());
-            throw new CloudbreakOrchestratorFailedException("Cluster is not upgradeable due to required Salt files not being present. "
-                    + "Please ensure that your cluster is up to date!");
         }
     }
 
@@ -423,7 +411,7 @@ SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            getRolesBeforeHighstateMagicWithRetry(sc);
+            retry.testWith2SecDelayMax5Times(() -> getRolesBeforeHighstateMagic(sc));
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
@@ -439,12 +427,16 @@ SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Run services on nodes finished: {}", allNodes);
     }
 
-    @Retryable
-    private void getRolesBeforeHighstateMagicWithRetry(SaltConnector sc) {
-        // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
-        // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
-        Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
-        LOGGER.info("Roles before highstate: " + roles);
+    private void getRolesBeforeHighstateMagic(SaltConnector sc) {
+        try {
+            // YARN/SALT MAGIC: If you remove 'get role grains' before highstate, then highstate can run with defective roles,
+            // so it can happen that some roles will be missing on some nodes. Please do not delete only if you know what you are doing.
+            Map<String, JsonNode> roles = SaltStates.getGrains(sc, "roles");
+            LOGGER.info("Roles before highstate: " + roles);
+        } catch (RuntimeException e) {
+            LOGGER.info("Can't get roles before highstate", e);
+            throw new Retry.ActionFailedException("Can't get roles before highstate: " + e.getMessage());
+        }
     }
 
     private void setPostgreRoleIfNeeded(Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel, SaltConnector sc, Set<String> serverHostname)
@@ -842,6 +834,21 @@ SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public void uploadGatewayPillar(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGatewayConfig = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig)) {
+            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargets, allNodes);
+            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithUsingErrorCount(hostSave, exitCriteria, exitModel);
+            saltPillarRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during gateway pillar upload for certificate renewal", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     private void throwExceptionIfNotForced(boolean forced, Exception e) throws CloudbreakOrchestratorFailedException {
         if (!forced) {
             throw new CloudbreakOrchestratorFailedException(e);
@@ -929,13 +936,14 @@ SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
-                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetryOnError, true);
+                Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
 
             StateRunner stateRunner = new StateRunner(target, allNodes, state);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxDatabaseDrRetryOnError, true);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel,
+                    maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during database backup/restore", e);

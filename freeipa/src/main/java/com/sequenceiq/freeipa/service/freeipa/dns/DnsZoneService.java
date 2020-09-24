@@ -8,17 +8,18 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.client.model.DnsZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
@@ -69,18 +70,20 @@ public class DnsZoneService {
 
     private FreeIpaClient getFreeIpaClient(String environmentCrn, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         return freeIpaClientFactory.getFreeIpaClientForStack(stack);
     }
 
     public void deleteDnsZoneBySubnet(String environmentCrn, String accountId, String subnet) throws FreeIpaClientException {
+        FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
         String reverseDnsZone = reverseDnsZoneCalculator.reverseDnsZoneForCidr(subnet);
         LOGGER.info("Delete DNS reverse zone [{}], for subnet [{}]", reverseDnsZone, subnet);
-        FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
         freeIpaClient.deleteDnsZone(reverseDnsZone);
     }
 
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
+        MDCBuilder.buildMdcContext(stack);
         Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack,
                 request.getAddDnsZoneNetwork().getNetworkId(), request.getAddDnsZoneNetwork().getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
@@ -108,6 +111,7 @@ public class DnsZoneService {
 
     public void deleteDnsZoneBySubnetId(String environmentCrn, String accountId, String networkId, String subnetId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
         Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(environmentCrn, stack, networkId, Collections.singletonList(subnetId));
         for (String cidr : subnetWithCidr.values()) {
             deleteDnsZoneBySubnet(environmentCrn, accountId, cidr);

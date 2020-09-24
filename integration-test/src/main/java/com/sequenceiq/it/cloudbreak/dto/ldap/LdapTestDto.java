@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.dto.ldap;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
@@ -27,16 +29,21 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up ldapconfig with name: {}", getName());
+        LOGGER.info("Cleaning up LDAP config with name: {}", getName());
         try {
-            when(ldapTestClient.deleteV1());
+            when(ldapTestClient.deleteV1(), key("delete-ldap-" + getName()).withSkipOnFail(false));
         } catch (WebApplicationException ignore) {
-            LOGGER.info("Something happend.");
+            LOGGER.warn("Something went wrong during {} LDAP config delete, because of: {}", getName(), ignore.getMessage(), ignore);
         }
     }
 
     public String getName() {
         return getRequest().getEnvironmentCrn();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 
     public LdapTestDto valid() {

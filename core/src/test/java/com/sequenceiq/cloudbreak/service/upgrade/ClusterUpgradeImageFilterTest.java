@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -79,6 +81,12 @@ public class ClusterUpgradeImageFilterTest {
     @Mock
     private PreWarmParcelParser preWarmParcelParser;
 
+    @Mock
+    private EntitlementDrivenPackageLocationFilter entitlementDrivenPackageLocationFilter;
+
+    @Mock
+    private ImageCreationBasedFilter imageCreationBasedFilter;
+
     private Image currentImage;
 
     private Image properImage;
@@ -92,6 +100,10 @@ public class ClusterUpgradeImageFilterTest {
         currentImage = createCurrentImage();
         properImage = createProperImage();
         activatedParcels = Map.of("stack", V_7_0_3);
+        Predicate<Image> predicate = mock(Predicate.class);
+        when(predicate.test(any())).thenReturn(Boolean.TRUE);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class))).thenReturn(predicate);
+        when(imageCreationBasedFilter.filterPreviousImages(any(Image.class), any())).thenReturn(predicate);
     }
 
     @Test
@@ -100,7 +112,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
@@ -110,13 +121,28 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
+    public void testFilterShouldNotReturnImageIfPackageFilterReturnFalse() {
+        List<Image> properImages = List.of(properImage);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null), "");
+
+        Predicate<Image> predicate = mock(Predicate.class);
+        when(predicate.test(any())).thenReturn(Boolean.FALSE);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class))).thenReturn(predicate);
+        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
+
+        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
+
+        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
+    }
+
+    @Test
     public void testFilterShouldReturnTheProperImageWhenTheCloudPlatformDoesNotMatches() {
         Image availableImages = createImageWithDifferentPlatform();
         List<Image> allImage = List.of(availableImages, properImage);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), any(), any(), any())).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
@@ -153,34 +179,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
-    }
-
-    @Test
-    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBeforeAndLockComponents() {
-        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
-        lockComponents = true;
-
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
-
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
-
-        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no newer images available than " + DATE + ".", actual.getReason());
-    }
-
-    @Test
-    public void testFilterShouldReturnReasonMessageWhenTheImageIsCreatedBefore() {
-        List<Image> allImage = List.of(createImageWithSmallerCreatedNumber());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
-
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(any(), any(), any(), any())).thenReturn(true);
-        when(upgradePermissionProvider.permitSaltUpgrade(any(), any())).thenReturn(true);
-
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
-
-        assertEquals(1, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
@@ -221,7 +219,6 @@ public class ClusterUpgradeImageFilterTest {
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(lowerCmAndCdpImage), any(), any())).thenReturn(false);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(lowerCmImage), any(), any())).thenReturn(true);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
 
@@ -249,7 +246,6 @@ public class ClusterUpgradeImageFilterTest {
         List<Image> availableImages = List.of(imageWithSameStackAndCmVersion);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(imageWithSameStackAndCmVersion), any(), any())).thenReturn(true);
 
@@ -260,35 +256,32 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     @Test
-    public void testFilterShouldReturnTheProperImageWhenTheSaltVersionDoesNotMatch() {
-        Image differentSaltVersionImage = createImageWithDifferentSaltVersion();
-        List<Image> availableImages = List.of(properImage, differentSaltVersionImage);
+    public void testFilterShouldReturnReasonMessageWhenTheCmVersionIsLowerButStackIsGreater() {
+        Image lowerCMVersion = createImageWithLowerCmVersion();
+        List<Image> availableImages = List.of(lowerCMVersion);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(differentSaltVersionImage), any(), any())).thenReturn(true);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, lowerCMVersion, "cm", "cm-build-number")).thenReturn(false);
 
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
 
-        assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
-        assertEquals(1, actual.getAvailableImages().getCdhImages().size());
+        assertEquals(0, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
-    public void testFilterShouldReturnReasonMessageWhenTheSaltVersionDoesNotMatch() {
-        Image imageWithDifferentSaltVersion = createImageWithDifferentSaltVersion();
-        List<Image> availableImages = List.of(imageWithDifferentSaltVersion);
+    public void testFilterShouldReturnReasonMessageWhenTheCmVersionIsGreaterButStackIsLower() {
+        Image image = createImageWithGreaterCmVersionButLowerStackVersion();
+        List<Image> availableImages = List.of(image);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(imageWithDifferentSaltVersion), any(), any())).thenReturn(true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, "cm", "cm-build-number")).thenReturn(true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, image, "stack", "cdh-build-number")).thenReturn(false);
 
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
 
-        assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        assertEquals("There are no images with compatible Salt version.", actual.getReason());
+        assertEquals(0, actual.getAvailableImages().getCdhImages().size());
     }
 
     @Test
@@ -298,7 +291,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
         when(upgradePermissionProvider.permitCmAndStackUpgrade(eq(currentImage), eq(properImage), any(), any())).thenReturn(true);
 
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
@@ -331,7 +323,6 @@ public class ClusterUpgradeImageFilterTest {
         activatedParcels = Map.of(PARCEL_NAME, PARCEL_VERSION);
 
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
-        when(upgradePermissionProvider.permitSaltUpgrade(SALT_VERSION, SALT_VERSION)).thenReturn(true);
         when(preWarmParcelParser.parseProductFromParcel(List.of(PARCEL_URL, PARCEL_VERSION))).thenReturn(Optional.of(getClouderaManagerProduct()));
 
         ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, currentImage, CLOUD_PLATFORM, lockComponents, activatedParcels);
@@ -392,6 +383,12 @@ public class ClusterUpgradeImageFilterTest {
     private Image createImageWithLowerCmVersion() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_3, CMF_VERSION, CSP_VERSION, SALT_VERSION),
+                getParcels(), null, null);
+    }
+
+    private Image createImageWithGreaterCmVersionButLowerStackVersion() {
+        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
+                Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 getParcels(), null, null);
     }
 

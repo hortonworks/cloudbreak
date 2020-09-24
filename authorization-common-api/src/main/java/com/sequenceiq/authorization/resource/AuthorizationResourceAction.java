@@ -1,5 +1,12 @@
 package com.sequenceiq.authorization.resource;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.ws.rs.NotFoundException;
+
 public enum AuthorizationResourceAction {
     CHANGE_CREDENTIAL("environments/changeCredential", AuthorizationResourceType.ENVIRONMENT),
     EDIT_CREDENTIAL("environments/editCredential", AuthorizationResourceType.CREDENTIAL),
@@ -8,21 +15,23 @@ public enum AuthorizationResourceAction {
     STOP_ENVIRONMENT("environments/stopEnvironment", AuthorizationResourceType.ENVIRONMENT),
     DELETE_CREDENTIAL("environments/deleteCredential", AuthorizationResourceType.CREDENTIAL),
     DESCRIBE_CREDENTIAL("environments/describeCredential", AuthorizationResourceType.CREDENTIAL),
+    DESCRIBE_CREDENTIAL_ON_ENVIRONMENT("environments/describeCredential", AuthorizationResourceType.ENVIRONMENT),
     DELETE_ENVIRONMENT("environments/deleteCdpEnvironment", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_ENVIRONMENT("environments/describeEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ACCESS_ENVIRONMENT("environments/accessEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ADMIN_FREEIPA("environments/adminFreeIPA", AuthorizationResourceType.ENVIRONMENT),
+    REPAIR_FREEIPA("environments/repairFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     CREATE_CREDENTIAL("environments/createCredential", AuthorizationResourceType.CREDENTIAL),
     CREATE_ENVIRONMENT("environments/createEnvironment", AuthorizationResourceType.ENVIRONMENT),
     GET_KEYTAB("environments/getKeytab", AuthorizationResourceType.ENVIRONMENT),
     CREATE_IMAGE_CATALOG("environments/createImageCatalog", AuthorizationResourceType.IMAGE_CATALOG),
     EDIT_IMAGE_CATALOG("environments/editImageCatalog", AuthorizationResourceType.IMAGE_CATALOG),
-    DESCRIBE_IMAGE_CATALOG("environments/describeImageCatalog", AuthorizationResourceType.IMAGE_CATALOG),
+    DESCRIBE_IMAGE_CATALOG("environments/useSharedResource", AuthorizationResourceType.IMAGE_CATALOG),
     DELETE_IMAGE_CATALOG("environments/deleteImageCatalog", AuthorizationResourceType.IMAGE_CATALOG),
-    DESCRIBE_CLUSTER_DEFINITION("environments/describeClusterDefinitions", AuthorizationResourceType.CLUSTER_DEFINITION),
+    DESCRIBE_CLUSTER_DEFINITION("environments/useSharedResource", AuthorizationResourceType.CLUSTER_DEFINITION),
     DELETE_CLUSTER_DEFINITION("environments/deleteClusterDefinitions", AuthorizationResourceType.CLUSTER_DEFINITION),
     CREATE_CLUSTER_DEFINITION("environments/createClusterDefinitions", AuthorizationResourceType.CLUSTER_DEFINITION),
-    DESCRIBE_CLUSTER_TEMPLATE("datahub/describeClusterTemplate", AuthorizationResourceType.CLUSTER_TEMPLATE),
+    DESCRIBE_CLUSTER_TEMPLATE("environments/useSharedResource", AuthorizationResourceType.CLUSTER_TEMPLATE),
     DELETE_CLUSTER_TEMPLATE("datahub/deleteClusterTemplate", AuthorizationResourceType.CLUSTER_TEMPLATE),
     CREATE_CLUSTER_TEMPLATE("datahub/createClusterTemplate", AuthorizationResourceType.CLUSTER_TEMPLATE),
     GET_OPERATION_STATUS("environments/getFreeipaOperationStatus", AuthorizationResourceType.ENVIRONMENT),
@@ -61,7 +70,7 @@ public enum AuthorizationResourceAction {
     STOP_DATABASE_SERVER("environments/stopDatabaseServer", AuthorizationResourceType.DATABASE_SERVER),
     BACKUP_DATALAKE("datalake/backupDatalake", AuthorizationResourceType.DATALAKE),
     RESTORE_DATALAKE("datalake/restoreDatalake", AuthorizationResourceType.DATALAKE),
-    DESCRIBE_RECIPE("environments/describeRecipe", AuthorizationResourceType.RECIPE),
+    DESCRIBE_RECIPE("environments/useSharedResource", AuthorizationResourceType.RECIPE),
     CREATE_RECIPE("environments/createRecipe", AuthorizationResourceType.RECIPE),
     DELETE_RECIPE("environments/deleteRecipe", AuthorizationResourceType.RECIPE),
     CREATE_AUDIT_CREDENTIAL("environments/createAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
@@ -74,7 +83,11 @@ public enum AuthorizationResourceAction {
     DATALAKE_READ("datalake/read", AuthorizationResourceType.DATALAKE),
     DATALAKE_WRITE("datalake/write", AuthorizationResourceType.DATALAKE),
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
-    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
+    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB),
+    STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT);
+
+    private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
+            .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));
 
     private final String right;
 
@@ -91,5 +104,15 @@ public enum AuthorizationResourceAction {
 
     public AuthorizationResourceType getAuthorizationResourceType() {
         return authorizationResourceType;
+    }
+
+    public static AuthorizationResourceAction getByRight(String right) {
+        List<AuthorizationResourceAction> result = BY_RIGHT.get(right);
+        if (result == null || result.isEmpty()) {
+            throw new NotFoundException(String.format("Action not found by right %s", right));
+        } else if (result.size() > 1) {
+            throw new NotFoundException(String.format("Multiple results found by right %s, thus we cannot lookup for action!", right));
+        }
+        return result.get(0);
     }
 }

@@ -9,6 +9,8 @@ import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
@@ -31,9 +33,18 @@ public class RangerRazDatahubConfigProviderTest {
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
-    @Test
+    static Object[][] razCloudPlatformDataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform
+                {"CloudPlatform.AWS", CloudPlatform.AWS},
+                {"CloudPlatform.AZURE", CloudPlatform.AZURE}
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
     @DisplayName("CM 7.2.0 DH is used but Raz is not requested, no additional service needs to be added to the template")
-    void getAdditionalServicesWhenRazIsNotEnabled() {
+    void getAdditionalServicesWhenRazIsNotEnabled(String testCaseName, CloudPlatform cloudPlatform) {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.0");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -41,7 +52,7 @@ public class RangerRazDatahubConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withCloudPlatform(CloudPlatform.AZURE)
+                .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withDataLakeView(new DatalakeView(false))
@@ -52,9 +63,32 @@ public class RangerRazDatahubConfigProviderTest {
         assertEquals(0, additionalServices.size());
     }
 
-    @Test
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.1.0 DH is used and Raz is requested, no additional service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledWithCm710(String testCaseName, CloudPlatform cloudPlatform) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.1.0");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withDataLakeView(new DatalakeView(true))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
     @DisplayName("CM 7.2.0 DH is used and Raz is requested, no additional service needs to be added to the template")
-    void getAdditionalServicesWhenRazIsEnabledWithCm720() {
+    void getAdditionalServicesWhenRazIsEnabledWithCm720(String testCaseName, CloudPlatform cloudPlatform) {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.0");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -62,9 +96,9 @@ public class RangerRazDatahubConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withCloudPlatform(CloudPlatform.AZURE)
+                .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(false))
+                .withDataLakeView(new DatalakeView(true))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -73,9 +107,10 @@ public class RangerRazDatahubConfigProviderTest {
         assertEquals(0, additionalServices.size());
     }
 
-    @Test
-    @DisplayName("CM 7.2.1 DH is used and Raz is requested, Raz service needs to be added to the template")
-    void getAdditionalServicesWhenRazIsEnabledWithCm721() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.1 DH is used and Raz is requested, no additional service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledWithCm721(String testCaseName, CloudPlatform cloudPlatform) {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.1");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -83,7 +118,29 @@ public class RangerRazDatahubConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withCloudPlatform(CloudPlatform.AZURE)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withDataLakeView(new DatalakeView(true))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.2 DH is used and Raz is requested, Raz service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledWithCm722(String testCaseName, CloudPlatform cloudPlatform) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.2");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
                 .withDataLakeView(new DatalakeView(true))
                 .withGeneralClusterConfigs(generalClusterConfigs)
@@ -103,8 +160,8 @@ public class RangerRazDatahubConfigProviderTest {
     }
 
     @Test
-    @DisplayName("CM 7.2.0 DH is used and Raz is requested, but AWS, no additional service needs to be added to the template")
-    void getAdditionalServicesWhenRazIsEnabledAndAWS() {
+    @DisplayName("CM 7.2.0 DH is used and Raz is requested, but YARN, no additional service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledAndNotAwsOrAzure() {
         ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
         cmRepo.setVersion("7.2.0");
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -113,10 +170,32 @@ public class RangerRazDatahubConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.WORKLOAD)
-                .withCloudPlatform(CloudPlatform.AWS)
+                .withCloudPlatform(CloudPlatform.YARN)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.0 DH is used and Raz is requested, but Data Lake, no additional service needs to be added to the template")
+    void getAdditionalServicesWhenRazIsEnabledAndDataLake(String testCaseName, CloudPlatform cloudPlatform) {
+        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
+        cmRepo.setVersion("7.2.0");
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(true);
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView idbroker = new HostgroupView("idbroker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.DATALAKE)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(cmRepo, List.of())
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, idbroker))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
 

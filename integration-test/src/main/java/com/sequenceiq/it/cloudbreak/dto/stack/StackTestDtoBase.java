@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.SecurityRulesEntity;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -100,29 +101,8 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return getCloudProvider().stack(this);
     }
 
-    public StackTestDtoBase<T> withEnvironmentCrn() {
-        return withEnvironmentCrn("");
-    }
-
-    public StackTestDtoBase<T> withEnvironmentCrn(String environmentCrn) {
-        getRequest().setEnvironmentCrn(environmentCrn);
-        return this;
-    }
-
     public StackTestDtoBase<T> withCloudPlatform(CloudPlatform cloudPlatform) {
         getRequest().setCloudPlatform(cloudPlatform);
-        return this;
-    }
-
-    public StackTestDtoBase<T> withEnvironment(Class<EnvironmentTestDto> environmentTestDtoClass) {
-        EnvironmentTestDto env = getTestContext().get(environmentTestDtoClass);
-        if (env != null) {
-            if (env.getResponse() == null) {
-                throw new IllegalArgumentException("Environment is not created, or GET response is not included");
-            }
-            String crn = env.getResponse().getCrn();
-            getRequest().setEnvironmentCrn(crn);
-        }
         return this;
     }
 
@@ -135,12 +115,41 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
         return this;
     }
 
-    public StackTestDtoBase<T> withEnvironmentKey(String environmentKey) {
-        EnvironmentTestDto env = getTestContext().get(environmentKey);
+    public StackTestDtoBase<T> withEnvironmentClass(Class<EnvironmentTestDto> environmentTestDtoClass) {
+        EnvironmentTestDto env = getTestContext().get(environmentTestDtoClass.getSimpleName());
         if (env == null) {
-            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this stack: '%s' response!", getName()));
         }
-        return withEnvironmentCrn(env.getResponse().getCrn());
+        return withEnvironmentCrn(env.getCrn());
+    }
+
+    public StackTestDtoBase<T> withEnvironmentName(String environmentName) {
+        EnvironmentTestDto env = getTestContext().get(environmentName);
+        if (env == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this stack: '%s' response!", getName()));
+        }
+        return withEnvironmentCrn(env.getCrn());
+    }
+
+    public StackTestDtoBase<T> withEnvironmentKey(RunningParameter key) {
+        EnvironmentTestDto env = getTestContext().get(key.getKey());
+        if (env == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this stack: '%s' response!", getName()));
+        }
+        return withEnvironmentCrn(env.getCrn());
+    }
+
+    public StackTestDtoBase<T> withEnvironment() {
+        EnvironmentTestDto env = getTestContext().given(EnvironmentTestDto.class);
+        if (env == null) {
+            throw new IllegalArgumentException(String.format("Environment has not been provided for this stack: '%s' response!", getName()));
+        }
+        return withEnvironmentCrn(env.getCrn());
+    }
+
+    public StackTestDtoBase<T> withEnvironmentCrn(String environmentCrn) {
+        getRequest().setEnvironmentCrn(environmentCrn);
+        return this;
     }
 
     public StackTestDtoBase<T> withName(String name) {
@@ -294,6 +303,12 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     }
 
     public StackTestDtoBase<T> withStackAuthentication(StackAuthenticationTestDto stackAuthentication) {
+        getRequest().setAuthentication(stackAuthentication.getRequest());
+        return this;
+    }
+
+    public StackTestDtoBase<T> withStackAuthentication(String key) {
+        StackAuthenticationTestDto stackAuthentication = getTestContext().get(key);
         getRequest().setAuthentication(stackAuthentication.getRequest());
         return this;
     }

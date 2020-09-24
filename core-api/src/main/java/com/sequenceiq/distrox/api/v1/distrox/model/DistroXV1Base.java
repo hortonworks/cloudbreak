@@ -25,6 +25,9 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
     private AzureDistroXV1Parameters azure;
 
     @ApiModelProperty
+    private GcpDistroXV1Parameters gcp;
+
+    @ApiModelProperty
     private YarnDistroXV1Parameters yarn;
 
     @ApiModelProperty
@@ -46,6 +49,14 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
         this.azure = azure;
     }
 
+    public void setYarn(YarnDistroXV1Parameters yarn) {
+        this.yarn = yarn;
+    }
+
+    public void setGcp(GcpDistroXV1Parameters gcp) {
+        this.gcp = gcp;
+    }
+
     @Override
     public AwsDistroXV1Parameters getAws() {
         return aws;
@@ -56,6 +67,16 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
         return azure;
     }
 
+    @Override
+    public YarnDistroXV1Parameters getYarn() {
+        return yarn;
+    }
+
+    @Override
+    public GcpDistroXV1Parameters getGcp() {
+        return gcp;
+    }
+
     public Long getTimeToLive() {
         return timeToLive;
     }
@@ -64,12 +85,4 @@ public abstract class DistroXV1Base implements Serializable, CloudPlatformProvid
         this.timeToLive = timeToLive;
     }
 
-    @Override
-    public YarnDistroXV1Parameters getYarn() {
-        return yarn;
-    }
-
-    public void setYarn(YarnDistroXV1Parameters yarn) {
-        this.yarn = yarn;
-    }
 }

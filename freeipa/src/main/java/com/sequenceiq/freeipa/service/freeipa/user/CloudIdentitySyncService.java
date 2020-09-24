@@ -5,11 +5,18 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Cloud
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.freeipa.configuration.CloudIdSyncConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncPollerObject;
+import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncStatusListenerTask;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -28,10 +34,24 @@ public class CloudIdentitySyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudIdentitySyncService.class);
 
+    private static final int ONE_MAX_CONSECUTIVE_FAILURE = 1;
+
+    @Inject
+    private Clock clock;
+
     @Inject
     private SdxEndpoint sdxEndpoint;
 
-    public void syncCloudIdentites(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
+    @Inject
+    private CloudIdSyncConfig config;
+
+    @Inject
+    private PollingService<CloudIdSyncPollerObject> cloudIdSyncPollingService;
+
+    @Inject
+    private CloudIdSyncStatusListenerTask cloudIdSyncStatusListenerTask;
+
+    public void syncCloudIdentities(Stack stack, UmsUsersState umsUsersState, BiConsumer<String, String> warnings) {
         LOGGER.info("Syncing cloud identities for stack = {}", stack);
         if (CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
             LOGGER.info("Syncing Azure Object IDs for stack = {}", stack);
@@ -47,10 +67,12 @@ public class CloudIdentitySyncService {
             Map<String, String> azureUserMapping = getAzureUserMapping(umsUsersState);
             SetRangerCloudIdentityMappingRequest setRangerCloudIdentityMappingRequest = new SetRangerCloudIdentityMappingRequest();
             setRangerCloudIdentityMappingRequest.setAzureUserMapping(azureUserMapping);
-            // TODO The SDX endpoint currently sets the config and triggers refresh. The SDX endpoint should also be updated
-            //      to allow polling the status of the refresh.
+
             LOGGER.debug("Setting ranger cloud identity mapping: {}", setRangerCloudIdentityMappingRequest);
-            sdxEndpoint.setRangerCloudIdentityMapping(envCrn, setRangerCloudIdentityMappingRequest);
+            RangerCloudIdentitySyncStatus syncStatus = sdxEndpoint.setRangerCloudIdentityMapping(envCrn, setRangerCloudIdentityMappingRequest);
+
+            // The sync status represents a cloud identity sync that may still be in progress, which we need to poll to check for completion.
+            checkSyncStatus(syncStatus, envCrn, warnings);
         } catch (Exception e) {
             LOGGER.warn("Failed to set cloud identity mapping for environment {}", envCrn, e);
             warnings.accept(envCrn, "Failed to set cloud identity mapping");
@@ -58,7 +80,7 @@ public class CloudIdentitySyncService {
     }
 
     private Map<String, String> getAzureUserMapping(UmsUsersState umsUsersState) {
-        Map<String, List<CloudIdentity>> userCloudIdentites = getUserCloudIdentitiesToSync(umsUsersState);
+        Map<String, List<CloudIdentity>> userCloudIdentites = umsUsersState.getUserToCloudIdentityMap();
         Map<String, String> userToAzureObjectIdMap = getAzureObjectIdMap(userCloudIdentites);
         Map<String, String> servicePrincipalObjectIdMap = getAzureObjectIdMap(umsUsersState.getServicePrincipalCloudIdentities());
 
@@ -66,6 +88,42 @@ public class CloudIdentitySyncService {
         azureUserMapping.putAll(userToAzureObjectIdMap);
         azureUserMapping.putAll(servicePrincipalObjectIdMap);
         return azureUserMapping;
+    }
+
+    private void checkSyncStatus(RangerCloudIdentitySyncStatus syncStatus, String envCrn, BiConsumer<String, String> warnings) {
+        LOGGER.info("syncStatus = {}", syncStatus);
+        switch (syncStatus.getState()) {
+            case SUCCESS:
+                LOGGER.info("Successfully synced cloud identity, envCrn = {}", envCrn);
+                return;
+            case NOT_APPLICABLE:
+                LOGGER.info("Cloud identity sync not applicable, envCrn = {}", envCrn);
+                return;
+            case FAILED:
+                LOGGER.error("Failed to sync cloud identity, envCrn = {}", envCrn);
+                warnings.accept(envCrn, "Failed to sync cloud identity into environment");
+                return;
+            case ACTIVE:
+                // NOTE: Although it's synchronously polling, in practice this sync takes less than a second to complete
+                LOGGER.info("Sync is still in progress, attempting to poll sync status for envCrn = {}", envCrn);
+                pollSyncStatus(envCrn, syncStatus.getCommandId(), warnings);
+                break;
+            default:
+                warnings.accept(envCrn, "Encountered unknown cloud identity sync state");
+        }
+    }
+
+    private void pollSyncStatus(String environmentCrn, long commandId, BiConsumer<String, String> warnings) {
+        CloudIdSyncPollerObject pollerObject = new CloudIdSyncPollerObject(environmentCrn, commandId);
+        Pair<PollingResult, Exception> resultPair = cloudIdSyncPollingService.pollWithAbsoluteTimeout(cloudIdSyncStatusListenerTask, pollerObject,
+                config.getPollerSleepIntervalMs(), config.getPollerTimeoutSeconds(), ONE_MAX_CONSECUTIVE_FAILURE);
+        PollingResult result = resultPair.getLeft();
+        if (!result.equals(PollingResult.SUCCESS)) {
+            String errMsg = String.format("Failed to poll cloud id sync status, envCrn = %s, polling result = %s", environmentCrn, result);
+            Exception ex = resultPair.getRight();
+            LOGGER.error(errMsg, ex);
+            warnings.accept(environmentCrn, "Failed to sync cloud identity into environment");
+        }
     }
 
     private Map<String, String> getAzureObjectIdMap(Map<String, List<CloudIdentity>> cloudIdentityMapping) {
@@ -105,19 +163,4 @@ public class CloudIdentitySyncService {
             return Optional.of(azureObjectId);
         }
     }
-
-    private Map<String, List<CloudIdentity>> getUserCloudIdentitiesToSync(UmsUsersState umsUsersState) {
-        Map<String, List<CloudIdentity>> allUserCloudIdentites = umsUsersState.getUserToCloudIdentityMap();
-        Set<String> userFilter = usersWithEnvironmentAccess(umsUsersState);
-        return allUserCloudIdentites.entrySet().stream()
-                .filter(entry -> userFilter.contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
-    private Set<String> usersWithEnvironmentAccess(UmsUsersState umsUsersState) {
-        return umsUsersState.getUsersState().getUsers().stream()
-                .map(FmsUser::getName)
-                .collect(Collectors.toSet());
-    }
-
 }

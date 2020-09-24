@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx.status;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE;
 
 import java.util.Collection;
 import java.util.Date;
@@ -137,7 +138,8 @@ public class SdxStatusService {
 
     public void updateInMemoryStateStore(SdxCluster sdxCluster) {
         SdxStatusEntity actualStatusForSdx = getActualStatusForSdx(sdxCluster);
-        if (actualStatusForSdx != null && actualStatusForSdx.getStatus().isDeleteInProgressOrCompleted()) {
+        if (actualStatusForSdx != null &&
+                (actualStatusForSdx.getStatus().isDeleteInProgressOrCompleted() || DELETED_ON_PROVIDER_SIDE.equals(actualStatusForSdx.getStatus()))) {
             DatalakeInMemoryStateStore.put(sdxCluster.getId(), PollGroup.CANCELLED);
             LOGGER.info("Update {} datalake status in inmemory store to {}", sdxCluster.getClusterName(), PollGroup.CANCELLED.name());
         } else {

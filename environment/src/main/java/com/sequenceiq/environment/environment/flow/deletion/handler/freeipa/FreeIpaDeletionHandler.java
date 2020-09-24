@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import javax.ws.rs.NotFoundException;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +90,6 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private boolean shouldRemoveFreeIpa(Environment environment) {
         return Objects.nonNull(environment)
-                && (environment.isCreateFreeIpa() || Objects.nonNull(environment.getParentEnvironment()))
                 && freeIpaExistsForEnvironment(environment);
     }
 
@@ -103,16 +104,24 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void detachChildEnvironmentFromFreeIpa(Environment environment) {
-        DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
-        detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
-        detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
-        freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
+        try {
+            DetachChildEnvironmentRequest detachChildEnvironmentRequest = new DetachChildEnvironmentRequest();
+            detachChildEnvironmentRequest.setParentEnvironmentCrn(environment.getParentEnvironment().getResourceCrn());
+            detachChildEnvironmentRequest.setChildEnvironmentCrn(environment.getResourceCrn());
+            freeIpaService.detachChildEnvironment(detachChildEnvironmentRequest);
 
-        if (lastChildEnvironmentInNetworkIsGettingDeleted(environment)) {
-            try {
-                dnsV1Endpoint.deleteDnsZoneBySubnet(environment.getParentEnvironment().getResourceCrn(), environment.getNetwork().getNetworkCidr());
-            } catch (Exception e) {
-                LOGGER.warn("Failed to delete dns zone of child environment.", e);
+            if (lastChildEnvironmentInNetworkIsGettingDeleted(environment)) {
+                try {
+                    dnsV1Endpoint.deleteDnsZoneBySubnet(environment.getParentEnvironment().getResourceCrn(), environment.getNetwork().getNetworkCidr());
+                } catch (Exception e) {
+                    LOGGER.warn("Failed to delete dns zone of child environment.", e);
+                }
+            }
+        } catch (FreeIpaOperationFailedException e) {
+            if (e.getCause() instanceof NotFoundException) {
+                LOGGER.warn("Child FreeIpa is already detached.", e);
+            } else {
+                throw e;
             }
         }
     }

@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.PlatformEncryptionKeysV4Response;
-import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
 @Prototype
 public class PlatformEncryptionKeysTestDto extends AbstractCloudbreakTestDto<Object, PlatformEncryptionKeysV4Response, PlatformEncryptionKeysTestDto> {
@@ -68,11 +67,6 @@ public class PlatformEncryptionKeysTestDto extends AbstractCloudbreakTestDto<Obj
     public PlatformEncryptionKeysTestDto withAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

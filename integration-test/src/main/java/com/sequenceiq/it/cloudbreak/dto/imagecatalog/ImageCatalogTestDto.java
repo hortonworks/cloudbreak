@@ -1,13 +1,18 @@
 package com.sequenceiq.it.cloudbreak.dto.imagecatalog;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.Collection;
 import java.util.function.Function;
+
+import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -28,6 +33,9 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     private ImagesV4Response imagesV4Response;
 
     private Boolean skipCleanup = Boolean.FALSE;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
 
     public ImageCatalogTestDto(TestContext testContext) {
         super(new ImageCatalogV4Request(), testContext);
@@ -94,7 +102,12 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
         if (!skipCleanup) {
-            delete(context, getResponse(), cloudbreakClient);
+            LOGGER.info("Cleaning up image catalog with name: {}", getName());
+            if (getResponse() != null) {
+                when(imageCatalogTestClient.deleteV4(), key("delete-imagecatalog-" + getName()).withSkipOnFail(false));
+            } else {
+                LOGGER.info("Image catalog: {} response is null!", getName());
+            }
         }
     }
 

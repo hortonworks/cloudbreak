@@ -37,8 +37,6 @@ When you are planning an API endpoint you should specify one of these parameter 
 - resource CRN list
 - resource name list
 - resource object
-- environment CRN
-- environment name
 
 If it is possible, please use CRN of a resource instead of name, since generally CRN is used in the whole platform to identify a resource and also during authorization it requires additional database query to find out the CRN based on the name, because we need CRN to authorize a call in UMS.
 
@@ -61,14 +59,6 @@ If it is possible, please use CRN of a resource instead of name, since generally
 - add `@CheckPermissionByResourceObject` annotation to the method
 - annotate the resource object method parameter with `@ResourceObject`, the type of the parameter can be any Object
 - annotate any field of object with `@ResourceObjectField`
-#### environment name
-- add `@CheckPermissionByEnvironmentName(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the environment name method parameter with `@EnvironmentName`, the type of the parameter can be a String
-- implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnByEnvironmentName` method
-#### environment CRN
-- add `@CheckPermissionByEnvironmentCrn(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the environment CRN method parameter with `@EnvironmentCrn`, the type of the parameter can be a String
-- implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnByEnvironmentCrn` method
 
 #### Notes
 - `action` parameter should defined explicitly every time
@@ -118,18 +108,6 @@ In this case we are checking annotated fields of the objects and do permission c
 
 [ResourceObjectPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceObjectPermissionChecker.java)
 
-#### Environment Name
-
-In this case we are calling the method `getResourceCrnByEnvironmentName` of the current implementation of `ResourceBasedCrnProvider` to get resource CRN by environment name.
-
-[EnvironmentNamePermissionChecker](src/main/java/com/sequenceiq/authorization/service/EnvironmentNamePermissionChecker.java)
-
-#### Environment CRN
-
-In this case we are calling the method `getResourceCrnByEnvironmentCrn` of the current implementation of `ResourceBasedCrnProvider` to get resource CRN by environment CRN.
-
-[EnvironmentCrnPermissionChecker](src/main/java/com/sequenceiq/authorization/service/EnvironmentCrnPermissionChecker.java)
-
 ### I have some default resources and I want to exclude them from the auth authorization process. How can I do that?
 
 You need to implement the [DefaultResourceChecker](src/main/java/com/sequenceiq/authorization/service/DefaultResourceChecker.java) interface where you can mark different resources as defaults so that the framework won't go to UMS.
@@ -142,10 +120,9 @@ Some APIs are used internal only between services, in this case we are using int
 
 We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can called with internal actor:
 
-You should annotate controller with `@InternalReady`.
-Your method should have at least one parameter:
+Your method in the Controller class should have at least one parameter:
 - which is some kind of resource CRN -> annotate the parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
-- or it is an accound id parameter -> annotate a CRN parameter with `@AccountId` and we'll use that in lower layers
+- or it is an accound id parameter -> annotate a CRN parameter with `@AccountId` and we'll use that in lower layers. Please note that `@AccountId` is also a validation annotation, thus you need to place it on the API interface method's parameter.
 
 ### APIs without authorization
 

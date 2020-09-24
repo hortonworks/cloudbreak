@@ -92,21 +92,6 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenCreateNewResourceGroupThenNoError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW).build())
-                        .build())
-                .build();
-
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     public void testWhenUseExistingResourceGroupAndExistsThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -170,6 +155,47 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenUseExistingResourceGroupAndEmptyNameThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. If you use a single resource group for your resources then please provide the name of that resource group.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWhenUseExistingResourceGroupAndEmptyResourceGroupUsageThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. If you have provided the resource group name for your resources then please provide the resource group usage pattern too.",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
     public void testWhenUseExistingResourceGroupAndNotExistsThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
@@ -195,9 +221,7 @@ public class AzureParameterValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
-                                .withResourceGroupCreation(ResourceGroupCreation.CREATE_NEW)
-                                .withName("myResourceGroup").build())
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -211,7 +235,7 @@ public class AzureParameterValidatorTest {
         assertFalse(validationResult.hasError());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(entitlementService, times(1)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(entitlementService, times(0)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
     }
 
     @Test
@@ -234,6 +258,30 @@ public class AzureParameterValidatorTest {
 
         assertTrue(validationResult.hasError());
         assertEquals("1. You specified to use a single resource group for all of your resources, but that feature is currently disabled",
+                validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWhenDedicatedStorageAccountFeatureTurnedOffAndUseSingleThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT)
+                                .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
+                                .withName("myResourceGroup").build())
+                        .build())
+                .build();
+        when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
+        AzureClient azureClient = mock(AzureClient.class);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString(), anyString())).thenReturn(false);
+
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals("1. You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
     }
 

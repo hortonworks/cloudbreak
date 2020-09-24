@@ -12,7 +12,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.flow.controller.FlowController;
+import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.controller.ClientTestV1Controller;
 import com.sequenceiq.freeipa.controller.DiagnosticsV1Controller;
@@ -39,7 +42,8 @@ public class EndpointConfig extends ResourceConfig {
     private static final List<Class<?>> CONTROLLERS = List.of(
             UserV1Controller.class, ClientTestV1Controller.class, FreeIpaV1Controller.class, LdapConfigV1Controller.class,
             KerberosConfigV1Controller.class, KerberosMgmtV1Controller.class, DnsV1Controller.class, OperationV1Controller.class,
-            FlowController.class, AuthorizationInfoController.class, DiagnosticsV1Controller.class);
+            FlowController.class, FlowPublicController.class, AuthorizationInfoController.class, DiagnosticsV1Controller.class,
+            CDPStructuredEventV1Controller.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
@@ -58,11 +62,9 @@ public class EndpointConfig extends ResourceConfig {
 
     @PostConstruct
     private void init() {
-        /* TODO Add StructuredEventFilter, preferably as a library
-            if (auditEnabled) {
-                register(StructuredEventFilter.class);
-            }
-         */
+        if (auditEnabled) {
+            register(CDPStructuredEventFilter.class);
+        }
         registerEndpoints();
         registerExceptionMappers();
         register(serverTracingDynamicFeature);
@@ -78,7 +80,8 @@ public class EndpointConfig extends ResourceConfig {
         swaggerConfig.setSchemes(new String[]{"http", "https"});
         swaggerConfig.setBasePath(FreeIpaApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
-        swaggerConfig.setResourcePackage("com.sequenceiq.freeipa.api,com.sequenceiq.flow.api,com.sequenceiq.authorization");
+        swaggerConfig.setResourcePackage("com.sequenceiq.freeipa.api,com.sequenceiq.flow.api,com.sequenceiq.authorization," +
+                "com.sequenceiq.cloudbreak.structuredevent.rest.endpoint");
         swaggerConfig.setScan(true);
         swaggerConfig.setContact("https://hortonworks.com/contact-sales/");
         swaggerConfig.setPrettyPrint(true);

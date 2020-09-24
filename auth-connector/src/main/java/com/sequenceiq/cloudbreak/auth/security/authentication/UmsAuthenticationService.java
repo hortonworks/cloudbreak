@@ -6,12 +6,12 @@ import org.springframework.security.core.Authentication;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
+import com.sequenceiq.cloudbreak.auth.CrnUser;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
-import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -54,7 +54,8 @@ public class UmsAuthenticationService implements AuthenticationService {
                 }
                 break;
             case MACHINE_USER:
-                MachineUser machineUserInfo = umsClient.getMachineUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
+                MachineUser machineUserInfo =
+                        umsClient.getMachineUserDetails(userCrn, userCrn, Crn.fromString(userCrn).getAccountId(), Optional.ofNullable(requestId));
                 String machineUserName = principal != null ? principal : machineUserInfo.getMachineUserName();
                 cloudbreakUser = new CloudbreakUser(machineUserInfo.getMachineUserId(), userCrn,
                         machineUserName, machineUserInfo.getMachineUserName(), crn.getAccountId());

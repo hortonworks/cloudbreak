@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.validation.validators;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.valueOf;
@@ -59,6 +60,7 @@ public class EnvironmentNetworkProviderValidator {
             Map<CloudPlatform, Optional<Object>> providerNetworkParamPair = Map.of(
                     AWS, optional(networkDto.getAws()),
                     AZURE, optional(networkDto.getAzure()),
+                    GCP, optional(networkDto.getGcp()),
                     MOCK, optional(networkDto.getMock()),
                     YARN, optional(networkDto.getYarn())
             );
@@ -101,7 +103,7 @@ public class EnvironmentNetworkProviderValidator {
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
                 environmentSecurityGroupValidator.validate(request, resultBuilder);
-            } else if (!MOCK.equalsIgnoreCase(cloudPlatform) && !YARN.equalsIgnoreCase(cloudPlatform)) {
+            } else if (!MOCK.equalsIgnoreCase(cloudPlatform) && !YARN.equalsIgnoreCase(cloudPlatform) && !GCP.equalsIgnoreCase(cloudPlatform)) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }

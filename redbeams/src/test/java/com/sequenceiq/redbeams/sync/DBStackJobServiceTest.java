@@ -1,7 +1,7 @@
 package com.sequenceiq.redbeams.sync;
 
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.statuschecker.service.JobService;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +22,7 @@ public class DBStackJobServiceTest {
     private AutoSyncConfig autoSyncConfig;
 
     @Mock
-    private JobService jobService;
+    private StatusCheckerJobService jobService;
 
     @Mock
     private DBStack dbStack;

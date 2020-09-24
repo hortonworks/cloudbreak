@@ -25,8 +25,13 @@ import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.service.list.ListPermissionChecker;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 
 @Service
 public class PermissionCheckService {
@@ -42,6 +47,15 @@ public class PermissionCheckService {
     @Inject
     private ListPermissionChecker listPermissionChecker;
 
+    @Inject
+    private InternalUserModifier internalUserModifier;
+
+    @Inject
+    private CrnUserDetailsService crnUserDetailsService;
+
+    @Inject
+    private ReflectionUtil reflectionUtil;
+
     private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
 
     @PostConstruct
@@ -54,6 +68,14 @@ public class PermissionCheckService {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         LOGGER.debug("Permission check started at {} (method: {})", startTime,
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + "#" + methodSignature.getMethod().getName());
+        Optional<Object> initiatorUserCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, InitiatorUserCrn.class);
+        if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())
+                && initiatorUserCrn.isPresent()
+                && initiatorUserCrn.get() instanceof String && Crn.isCrn((String) initiatorUserCrn.get())) {
+            String newUserCrn = (String) initiatorUserCrn.get();
+            internalUserModifier.persistModifiedInternalUser(crnUserDetailsService.loadUserByUsername(newUserCrn));
+            return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
+        }
 
         if (commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint) ||
                 InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {

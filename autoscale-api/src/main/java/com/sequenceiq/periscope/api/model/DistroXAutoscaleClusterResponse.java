@@ -10,8 +10,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class DistroXAutoscaleClusterResponse implements Json {
-    @ApiModelProperty(ClusterJsonsProperties.ID)
-    private long id;
 
     @ApiModelProperty(ClusterJsonsProperties.STACK_NAME)
     private String stackName;
@@ -38,20 +36,11 @@ public class DistroXAutoscaleClusterResponse implements Json {
     }
 
     public DistroXAutoscaleClusterResponse(String stackCrn, String stackName,
-            boolean autoscalingEnabled, long id, ClusterState state) {
+            boolean autoscalingEnabled, ClusterState state) {
         this.stackCrn = stackCrn;
         this.stackName = stackName;
-        this.id = id;
         this.state = state;
         this.autoscalingEnabled = autoscalingEnabled;
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public ClusterState getState() {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
@@ -11,8 +12,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FMS_CL
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_UMS_USER_SYNC_MODEL_GENERATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.LOCAL_DEV;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,6 +64,9 @@ class EntitlementServiceTest {
                 // testCaseName, entitlementName, function, enabled
                 {"CDP_AZURE == false", CDP_AZURE, (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
                 {"CDP_AZURE == true", CDP_AZURE, (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
+
+                {"CDP_GCP == false", CDP_GCP, (EntitlementCheckFunction) EntitlementService::gcpEnabled, false},
+                {"CDP_GCP == true", CDP_GCP, (EntitlementCheckFunction) EntitlementService::gcpEnabled, true},
 
                 {"CDP_BASE_IMAGE == false", CDP_BASE_IMAGE, (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE == true", CDP_BASE_IMAGE, (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},
@@ -115,6 +121,14 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, false},
                 {"CDP_CLOUD_IDENTITY_MAPPING == true", CDP_CLOUD_IDENTITY_MAPPING,
                         (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, true},
+                {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE == true", CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE,
+                        (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, true},
+                {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE == false", CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE,
+                        (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, false},
+                {"CDP_UMS_USER_SYNC_MODEL_GENERATION == false", CDP_UMS_USER_SYNC_MODEL_GENERATION,
+                        (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, false},
+                {"CDP_UMS_USER_SYNC_MODEL_GENERATION == true", CDP_UMS_USER_SYNC_MODEL_GENERATION,
+                        (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, true},
         };
     }
 

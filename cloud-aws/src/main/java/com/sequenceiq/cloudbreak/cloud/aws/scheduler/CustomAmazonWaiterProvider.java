@@ -1,10 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws.scheduler;
 
+import java.util.Date;
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
+import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
+import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.services.autoscaling.waiters.DescribeAutoScalingGroupsFunction;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
@@ -26,6 +32,8 @@ public class CustomAmazonWaiterProvider {
 
     private static final int DEFAULT_MAX_ATTEMPTS = 60;
 
+    private static final int ACTIVITIES_DEFAULT_MAX_ATTEMPTS = 120;
+
     private static final int DEFAULT_DELAY_IN_SECONDS = 30;
 
     public Waiter<DescribeAutoScalingGroupsRequest> getAutoscalingInstancesInServiceWaiter(AmazonAutoScalingClient asClient, Integer requiredCount) {
@@ -44,6 +52,28 @@ public class CustomAmazonWaiterProvider {
                     }
                 })
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
+                        new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
+                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+    }
+
+    public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitiesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {
+        return new WaiterBuilder<DescribeScalingActivitiesRequest, DescribeScalingActivitiesResult>()
+                .withSdkFunction(asClient::describeScalingActivities)
+                .withAcceptors(new WaiterAcceptor<DescribeScalingActivitiesResult>() {
+                    @Override
+                    public boolean matches(DescribeScalingActivitiesResult describeScalingActivitiesResult) {
+                        Optional<Activity> firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst();
+                        return firstActivity
+                                .filter(activity -> timeBeforeASUpdate == null || activity.getStartTime().after(timeBeforeASUpdate))
+                                .isPresent();
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.SUCCESS;
+                    }
+                })
+                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(ACTIVITIES_DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }
@@ -68,6 +98,39 @@ public class CustomAmazonWaiterProvider {
                                 .anyMatch(instance ->
                                         "failed".equals(instance.getDBInstanceStatus())
                                                 || "deleting".equals(instance.getDBInstanceStatus())
+                                                || "deleted".equals(instance.getDBInstanceStatus())
+                                );
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.FAILURE;
+                    }
+                })
+                .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
+                        new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
+                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+    }
+
+    public Waiter<DescribeDBInstancesRequest> getDbInstanceModifyWaiter(AmazonRDS rdsClient) {
+        return new WaiterBuilder<DescribeDBInstancesRequest, DescribeDBInstancesResult>()
+                .withSdkFunction(new DescribeDBInstancesFunction(rdsClient))
+                .withAcceptors(new WaiterAcceptor<DescribeDBInstancesResult>() {
+                    @Override
+                    public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
+                        return describeDBInstancesResult.getDBInstances().stream().allMatch(instance -> "available".equals(instance.getDBInstanceStatus()));
+                    }
+
+                    @Override
+                    public WaiterState getState() {
+                        return WaiterState.SUCCESS;
+                    }
+                }, new WaiterAcceptor<DescribeDBInstancesResult>() {
+                    @Override
+                    public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
+                        return describeDBInstancesResult.getDBInstances().stream()
+                                .anyMatch(instance ->
+                                        "failed".equals(instance.getDBInstanceStatus())
                                                 || "deleted".equals(instance.getDBInstanceStatus())
                                 );
                     }

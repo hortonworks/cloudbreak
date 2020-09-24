@@ -95,15 +95,18 @@ public class AzureTerminationHelperService {
         deleteVolumeSets(ac, stack, resourcesToRemove, networkResources, resourceGroupName);
 
         if (deleteWholeDeployment) {
+            // deleting availability sets
             List<String> availabiltySetNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
             azureUtils.deleteAvailabilitySets(client, resourceGroupName, availabiltySetNames);
             deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
 
+            // deleting networks
             List<String> networkIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK);
             azureUtils.deleteNetworks(client, networkIds);
             deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK);
             deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SUBNET);
 
+            // deleting security groups
             List<String> securityGroupIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
             azureUtils.deleteSecurityGroups(client, securityGroupIds);
             deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);

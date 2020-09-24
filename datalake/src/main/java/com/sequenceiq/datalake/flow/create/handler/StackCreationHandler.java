@@ -12,15 +12,20 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.ProvisionerService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCreationWaitRequest> {
@@ -29,6 +34,9 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private SdxService sdxService;
 
     @Value("${sdx.stack.provision.sleeptime_sec:10}")
     private int sleepTimeInSec;
@@ -45,7 +53,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e) {
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StackCreationWaitRequest> event) {
         return new SdxCreateFailedEvent(resourceId, null, e);
     }
 
@@ -58,7 +66,9 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
         try {
             LOGGER.debug("start polling stack creation process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
+            StackV4Response stackV4Response = provisionerService.waitCloudbreakClusterCreation(sdxId, pollingConfig);
+            SdxCluster sdxCluster = sdxService.getById(sdxId);
+            sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
             setStackCreatedStatus(sdxId);
             response = new StackCreationSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -81,4 +91,5 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     private void setStackCreatedStatus(Long datalakeId) {
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED, "Datalake stack created", datalakeId);
     }
+
 }

@@ -57,7 +57,7 @@ public class AwsRdsStopService {
                 .getDbInstanceStopWaiter(rdsClient);
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(rdsWaiter, describeDBInstancesRequest, stackCancellationCheck);
+        run(rdsWaiter, describeDBInstancesRequest, stackCancellationCheck, "RDS stop failed");
         LOGGER.debug("RDS stop process finished. DB Instance ID: {}", dbInstanceIdentifier);
     }
 }

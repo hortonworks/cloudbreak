@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkList;
 import com.google.api.services.compute.model.RegionList;
 import com.google.api.services.compute.model.Subnetwork;
+import com.google.api.services.compute.model.SubnetworkList;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -126,9 +128,30 @@ public class GcpPlatformResources implements PlatformResources {
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
+        String networkId = null;
+        String subnetId = null;
+        if (filters != null) {
+            networkId = filters.getOrDefault("networkId", null);
+            subnetId = filters.getOrDefault("subnetId", null);
+        }
+
+        LOGGER.debug("Get subnets with filter values, networkId : {}, subnetId : {}", networkId, subnetId);
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        NetworkList networkList = compute.networks().list(projectId).execute();
-        List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
+        NetworkList networkList = StringUtils.isEmpty(networkId) ?
+                compute.networks().list(projectId).execute() :
+                new NetworkList().setItems(Collections.singletonList(compute.networks().get(projectId, networkId).execute()));
+        SubnetworkList subnetworkList = StringUtils.isEmpty(subnetId) ?
+                compute.subnetworks().list(projectId, region.value()).execute() :
+                new SubnetworkList().setItems(Collections.singletonList(compute.subnetworks().get(projectId, region.value(), subnetId).execute()));
+        // GCP VPCs are global. Subnets have a global scope in region. So picking the first availability zone in the region for subnet.
+        String zone = compute.regions().get(projectId, region.value())
+                .execute()
+                .getZones()
+                .stream()
+                .findFirst()
+                .map(tmpZone -> tmpZone.substring(tmpZone.lastIndexOf('/') + 1))
+                .orElse(null);
+        LOGGER.debug("Zone chosen for the subnets is {}", zone);
         for (Network network : networkList.getItems()) {
             Map<String, Object> properties = new HashMap<>();
             properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
@@ -138,9 +161,18 @@ public class GcpPlatformResources implements PlatformResources {
 
             Set<CloudSubnet> subnets = new HashSet<>();
             if (subnetworkList != null && network.getSubnetworks() != null) {
-                for (Subnetwork subnetwork : subnetworkList) {
+                for (Subnetwork subnetwork : subnetworkList.getItems()) {
                     if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
-                        subnets.add(new CloudSubnet(subnetwork.getId().toString(), subnetwork.getName(), null, subnetwork.getIpCidrRange()));
+                        subnets.add(
+                                new CloudSubnet(
+                                        subnetwork.getId().toString(),
+                                        subnetwork.getName(),
+                                        zone,
+                                        subnetwork.getIpCidrRange(),
+                                        subnetwork.getPrivateIpGoogleAccess(),
+                                        !subnetwork.getPrivateIpGoogleAccess(),
+                                        !Strings.isNullOrEmpty(subnetwork.getGatewayAddress()),
+                                        PUBLIC));
                     }
                 }
             }

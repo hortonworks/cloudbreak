@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.freeipa;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -111,6 +112,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return FREEIPA_RESOURCE_NAME;
     }
 
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
     public FreeIpaTestDto withTelemetry(String telemetry) {
         TelemetryTestDto telemetryTestDto = getTestContext().get(telemetry);
         getRequest().setTelemetry(telemetryTestDto.getRequest());
@@ -179,16 +185,16 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     private SecurityGroupRequest mapSecurityGroupRequest(InstanceGroupV4Request request) {
         SecurityGroupRequest securityGroup = new SecurityGroupRequest();
         securityGroup.setSecurityRules(request.getSecurityGroup().getSecurityRules()
-            .stream()
-            .map(sgreq -> {
-                SecurityRuleRequest rule = new SecurityRuleRequest();
-                rule.setModifiable(sgreq.isModifiable());
-                rule.setPorts(sgreq.getPorts());
-                rule.setProtocol(sgreq.getProtocol());
-                rule.setSubnet(sgreq.getSubnet());
-                return rule;
-            })
-            .collect(Collectors.toList()));
+                .stream()
+                .map(sgreq -> {
+                    SecurityRuleRequest rule = new SecurityRuleRequest();
+                    rule.setModifiable(sgreq.isModifiable());
+                    rule.setPorts(sgreq.getPorts());
+                    rule.setProtocol(sgreq.getProtocol());
+                    rule.setSubnet(sgreq.getSubnet());
+                    return rule;
+                })
+                .collect(Collectors.toList()));
         securityGroup.setSecurityGroupIds(request.getSecurityGroup().getSecurityGroupIds());
         return securityGroup;
     }
@@ -197,15 +203,15 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         InstanceTemplateRequest template = new InstanceTemplateRequest();
         template.setInstanceType(request.getTemplate().getInstanceType());
         template.setAttachedVolumes(request.getTemplate().getAttachedVolumes()
-            .stream()
-            .map(volreq -> {
-                VolumeRequest volumeRequest = new VolumeRequest();
-                volumeRequest.setCount(volreq.getCount());
-                volumeRequest.setSize(volreq.getSize());
-                volumeRequest.setType(volreq.getType());
-                return volumeRequest;
-            })
-            .collect(Collectors.toSet()));
+                .stream()
+                .map(volreq -> {
+                    VolumeRequest volumeRequest = new VolumeRequest();
+                    volumeRequest.setCount(volreq.getCount());
+                    volumeRequest.setSize(volreq.getSize());
+                    volumeRequest.setType(volreq.getType());
+                    return volumeRequest;
+                })
+                .collect(Collectors.toSet()));
         Optional.ofNullable(request.getTemplate().getAws())
                 .map(AwsInstanceTemplateV4Parameters::getSpot)
                 .map(AwsInstanceTemplateV4SpotParameters::getPercentage)
@@ -274,8 +280,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public CloudbreakTestDto refresh(TestContext context, CloudbreakClient cloudbreakClient) {
-        return when(freeIpaTestClient.describe(), key("refresh-freeipa-" + getName()));
+    public CloudbreakTestDto refresh() {
+        LOGGER.info("Refresh FreeIPA with name: {}", getName());
+        return when(freeIpaTestClient.refresh(), key("refresh-freeipa-" + getName()));
     }
 
     @Override
@@ -305,8 +312,13 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
-        LOGGER.info("Cleaning up resource with name: {}", getName());
-        when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+        LOGGER.info("Cleaning up freeIpa with name: {}", getName());
+        if (getResponse() != null) {
+            when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
+            await(DELETE_COMPLETED, new RunningParameter().withSkipOnFail(true));
+        } else {
+            LOGGER.info("FreeIpa: {} response is null!", getName());
+        }
     }
 
     @Override
@@ -314,7 +326,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         if (getResponse() == null) {
             return null;
         }
-        boolean hasSpotTermination = getResponse().getInstanceGroups().stream()
+        boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("FreeIpa", null, getResponse(), hasSpotTermination);

@@ -1,13 +1,13 @@
 package com.sequenceiq.redbeams.sync;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.statuschecker.service.JobService;
 
 @Component
 public class DBStackJobService {
@@ -18,11 +18,7 @@ public class DBStackJobService {
     private AutoSyncConfig autoSyncConfig;
 
     @Inject
-    private JobService jobService;
-
-    public void deleteAll() {
-        jobService.deleteAll();
-    }
+    private StatusCheckerJobService jobService;
 
     public void schedule(DBStack dbStack) {
         if (autoSyncConfig.isEnabled()) {

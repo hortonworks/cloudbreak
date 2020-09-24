@@ -11,6 +11,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.D
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_DNS_ENTRIES_FINISHED_EVENT;
@@ -27,21 +29,22 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.S
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.STOP_TELEMETRY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_ADDITIONAL_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_COLLECT_RESOURCES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_FAIL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_DNS_ENTRIES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_HOSTS_FROM_ORCHESTRATION_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_SERVERS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REVOKE_CERTS_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_FAIL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_TELEMETRY_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.INIT_STATE;
-import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.STARTING_DOWNSCALE_STATE;
 
 import java.util.List;
@@ -108,9 +111,13 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT)
                     .failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT)
 
-                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
                     .event(UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(DOWNSCALE_FINISHED_STATE)
+                    .event(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT)
 
                     .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE)
                     .event(DOWNSCALE_FINISHED_EVENT)

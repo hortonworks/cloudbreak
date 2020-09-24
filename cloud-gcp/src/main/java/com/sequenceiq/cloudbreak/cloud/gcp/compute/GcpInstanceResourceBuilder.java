@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNet
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +17,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -83,6 +82,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final String PREEMPTIBLE = "preemptible";
 
+    private static final int MAX_TAG_LENGTH = 63;
+
     private static final int ORDER = 3;
 
     @Inject
@@ -121,6 +122,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
+        instance.setHostname(getHostname(cloudStack, buildableResource));
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
@@ -138,10 +140,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         tagList.add(groupname);
-
+        // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
+        if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
+            tagList.add(group.getSecurity().getCloudSecurityId());
+        }
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(key + '-' + value));
+        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
@@ -179,6 +184,19 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
+        String hostname = null;
+        if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
+            hostname = cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+            LOGGER.debug("Setting FreeIPA hostname to {}", hostname);
+        }
+        return hostname;
+    }
+
+    private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {
+        return StringUtils.left(key + middle + value, maxLen);
     }
 
     private void verifyOperation(Operation operation, List<CloudResource> buildableResource) {
@@ -344,7 +362,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
             List<CloudResource> subnet, String networkName) {
-        if (isNotEmpty(getSharedProjectId(network))) {
+        if (StringUtils.isNotEmpty(getSharedProjectId(network))) {
             networkInterface.setNetwork(getNetworkUrl(getSharedProjectId(network), getCustomNetworkId(network)));
             networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getSubnetId(network)));
         } else {

@@ -33,7 +33,7 @@ public class SetPasswordRequest extends SynchronizeOperationRequestBase {
     @Override
     public String toString() {
         return "SetPasswordRequest{"
-                + super.fieldsToString()
+                + fieldsToString()
                 + '}';
     }
 }

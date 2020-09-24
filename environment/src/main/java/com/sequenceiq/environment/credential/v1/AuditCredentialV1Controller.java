@@ -14,7 +14,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalReady;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -24,12 +23,12 @@ import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequ
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@InternalReady
 @AuthorizationResource
 public class AuditCredentialV1Controller extends NotificationController implements AuditCredentialEndpoint {
 
@@ -37,11 +36,15 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     private final CredentialToCredentialV1ResponseConverter credentialConverter;
 
+    private final CredentialDeleteService credentialDeleteService;
+
     public AuditCredentialV1Controller(
             CredentialService credentialService,
-            CredentialToCredentialV1ResponseConverter credentialConverter) {
+            CredentialToCredentialV1ResponseConverter credentialConverter,
+            CredentialDeleteService credentialDeleteService) {
         this.credentialService = credentialService;
         this.credentialConverter = credentialConverter;
+        this.credentialDeleteService = credentialDeleteService;
     }
 
     @Override
@@ -104,5 +107,23 @@ public class AuditCredentialV1Controller extends NotificationController implemen
     public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String deploymentAddress) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return credentialService.getPrerequisites(platform, deploymentAddress, userCrn, AUDIT);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
+    public CredentialResponse deleteByName(String name) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Credential deleted = credentialDeleteService.deleteByName(name, accountId, AUDIT);
+        notify(ResourceEvent.CREDENTIAL_DELETED);
+        return credentialConverter.convert(deleted);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
+    public CredentialResponse deleteByResourceCrn(String crn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Credential deleted = credentialDeleteService.deleteByCrn(crn, accountId, AUDIT);
+        notify(ResourceEvent.CREDENTIAL_DELETED);
+        return credentialConverter.convert(deleted);
     }
 }

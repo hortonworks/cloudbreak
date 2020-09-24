@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
@@ -33,7 +34,7 @@ public class StackTemplateService {
     private CredentialToCloudCredentialConverter credentialConverter;
 
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack, Credential credential) {
-        Location location = location(region(stack.getRegion()));
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
