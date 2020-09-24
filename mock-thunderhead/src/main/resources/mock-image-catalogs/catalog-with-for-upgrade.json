@@ -35,6 +35,7 @@
           "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CDH_RUNTIME/redhat7/yum/"
         },
         "version": "CDH_RUNTIME",
+        "build-number": "5949264",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.1.3.0.0.0-118-el7.parcel",
@@ -100,6 +101,7 @@
         "repo": {
           "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CDH_RUNTIME/redhat7/yum/"
         },
+        "build-number": "5949264",
         "version": "CDH_RUNTIME",
         "pre_warm_parcels": [
           [

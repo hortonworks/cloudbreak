@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade;
+package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import java.util.regex.Pattern;
 

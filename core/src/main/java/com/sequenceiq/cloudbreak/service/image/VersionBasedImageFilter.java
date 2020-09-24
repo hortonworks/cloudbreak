@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterResult;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @Component
 public class VersionBasedImageFilter {

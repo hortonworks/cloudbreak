@@ -24,7 +24,7 @@ public class SdxUpgradeTestAssertion {
             SdxUpgradeResponse upgradeResponse =
                     sdxClient.getSdxClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             assertNotNull(upgradeResponse);
-            assertTrue(upgradeResponse.getReason().contains(reason));
+            assertTrue("Expected: " + reason + " Actual: " + upgradeResponse.getReason(), upgradeResponse.getReason().contains(reason));
             return entity;
         };
     }
