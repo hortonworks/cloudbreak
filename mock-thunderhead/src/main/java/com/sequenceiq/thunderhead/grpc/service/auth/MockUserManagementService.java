@@ -29,6 +29,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -464,12 +465,32 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onCompleted();
     }
 
+    private UserManagementProto.CloudIdentity newAzureObjectId(String azureObjectId) {
+        UserManagementProto.AzureCloudIdentityName azureCloudIdentityName = UserManagementProto.AzureCloudIdentityName.newBuilder()
+                .setObjectId(azureObjectId)
+                .build();
+        return UserManagementProto.CloudIdentity.newBuilder()
+                .setCloudIdentityName(UserManagementProto.CloudIdentityName.newBuilder()
+                        .setAzureCloudIdentityName(azureCloudIdentityName)
+                        .build())
+                .build();
+    }
+
+    private UserManagementProto.ServicePrincipalCloudIdentities newServicePrincipalAzureObjectId(String servicePrincipal, String azureObjectId) {
+        return UserManagementProto.ServicePrincipalCloudIdentities.newBuilder()
+                .setServicePrincipal(servicePrincipal)
+                .addCloudIdentities(newAzureObjectId(azureObjectId))
+                .build();
+    }
+
     @Override
     public void listServicePrincipalCloudIdentities(ListServicePrincipalCloudIdentitiesRequest request,
         StreamObserver<ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
         LOGGER.info("List service principal cloud identities for account: {}, environment: {}", request.getAccountId(), request.getEnvironmentCrn());
         ListServicePrincipalCloudIdentitiesResponse.Builder responseBuilder = ListServicePrincipalCloudIdentitiesResponse.newBuilder();
+        responseBuilder.addServicePrincipalCloudIdentities(newServicePrincipalAzureObjectId("spark", "spark-oid-01"));
+        responseBuilder.addServicePrincipalCloudIdentities(newServicePrincipalAzureObjectId("hive", "hive-oid-01"));
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }
