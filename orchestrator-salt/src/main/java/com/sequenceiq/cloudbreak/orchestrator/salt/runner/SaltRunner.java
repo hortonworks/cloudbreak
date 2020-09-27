@@ -38,7 +38,4 @@ public class SaltRunner {
                 maxRetryOnError);
     }
 
-    public Callable<Boolean> runnerWithUsingErrorCount(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
-        return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, true);
-    }
 }
