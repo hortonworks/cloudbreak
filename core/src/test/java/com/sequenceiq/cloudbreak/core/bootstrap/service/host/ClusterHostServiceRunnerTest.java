@@ -216,4 +216,5 @@ public class ClusterHostServiceRunnerTest {
         assertNull(values.get("paywall_username"));
         assertNull(values.get("paywall_password"));
     }
+
 }
