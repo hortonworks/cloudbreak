@@ -99,7 +99,4 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> parameters,
             ExitCriteriaModel stackBasedExitCriteriaModel) throws CloudbreakOrchestratorFailedException;
 
-    void uploadGatewayPillar(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
-
 }
