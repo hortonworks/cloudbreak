@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
+import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
@@ -118,7 +119,7 @@ public class SdxReactorFlowManager {
         return notify(selector, startEvent);
     }
 
-    public FlowIdentifier triggerCmDiagnosticsCollection(SdxDiagnosticsCollectionEvent startEvent) {
+    public FlowIdentifier triggerCmDiagnosticsCollection(SdxCmDiagnosticsCollectionEvent startEvent) {
         String selector = SDX_CM_DIAGNOSTICS_COLLECTION_EVENT.event();
         return notify(selector, startEvent);
     }
