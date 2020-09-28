@@ -206,6 +206,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
+            {% if 'RESOURCEMANAGERAPI' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>RESOURCEMANAGERAPI</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
             {% if 'WEBHBASE' in exposed and 'HBASERESTSERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>WEBHBASE</name>
