@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.util.base;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 public enum RightV4 {
@@ -18,5 +19,14 @@ public enum RightV4 {
 
     public AuthorizationResourceAction getAction() {
         return action;
+    }
+
+    @JsonCreator
+    public static RightV4 fromString(String string) {
+        try {
+            return RightV4.valueOf(string);
+        } catch (Exception e) {
+            return ENVIRONMENT_READ;
+        }
     }
 }
