@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,6 +23,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -32,14 +34,17 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.util.ReflectionUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -51,9 +56,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.grain.GrainUploader;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
@@ -291,5 +298,38 @@ public class SaltOrchestratorTest {
 
         boolean bootstrapApiAvailable = saltOrchestrator.isBootstrapApiAvailable(gatewayConfig);
         assertFalse(bootstrapApiAvailable);
+    }
+
+    @Test
+    public void testUploadGatewayPillarShouldSaveGatewayPillarProperties() throws CloudbreakOrchestratorFailedException {
+        SaltConfig saltConfig = mock(SaltConfig.class, RETURNS_DEEP_STUBS);
+        String gatewayPillarPath = "gatewaypath";
+        SaltPillarProperties gatewayPath = new SaltPillarProperties(gatewayPillarPath, Map.of());
+        Callable<Boolean> callable = mock(Callable.class);
+        when(saltConfig.getServicePillarConfig().get("gateway")).thenReturn(gatewayPath);
+        when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+        ArgumentCaptor<PillarSave> pillarSaveArgumentCaptor =
+                ArgumentCaptor.forClass(PillarSave.class);
+
+        saltOrchestrator.uploadGatewayPillar(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel, saltConfig);
+
+        verify(saltRunner).runnerWithUsingErrorCount(pillarSaveArgumentCaptor.capture(), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        PillarSave capturedPillarSave = pillarSaveArgumentCaptor.getValue();
+        Field field = ReflectionUtils.findField(PillarSave.class, "pillar");
+        field.setAccessible(true);
+        Pillar pillar = (Pillar) ReflectionUtils.getField(field, capturedPillarSave);
+        Assert.assertEquals(gatewayPillarPath, pillar.getPath());
+    }
+
+    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    public void testUploadGatewayPillarShouldThrowExceptionWhenThereIsNowGatewayPillar() throws CloudbreakOrchestratorFailedException {
+        SaltConfig saltConfig = mock(SaltConfig.class, RETURNS_DEEP_STUBS);
+        Callable<Boolean> callable = mock(Callable.class);
+        when(saltConfig.getServicePillarConfig().get("gateway")).thenReturn(null);
+        when(saltRunner.runnerWithUsingErrorCount(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
+                .thenReturn(callable);
+
+        saltOrchestrator.uploadGatewayPillar(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel, saltConfig);
     }
 }
