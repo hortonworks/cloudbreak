@@ -834,6 +834,22 @@ SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public void uploadGatewayPillar(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel, SaltConfig saltConfig)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGatewayConfig = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig)) {
+            SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
+            OrchestratorBootstrap gatewayPillarSave = new PillarSave(sc, gatewayTargets, gatewayPillarProperties);
+            Callable<Boolean> saltPillarRunner = saltRunner.runnerWithUsingErrorCount(gatewayPillarSave, exitCriteria, exitModel);
+            saltPillarRunner.call();
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during gateway pillar upload for certificate renewal", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     private void throwExceptionIfNotForced(boolean forced, Exception e) throws CloudbreakOrchestratorFailedException {
         if (!forced) {
             throw new CloudbreakOrchestratorFailedException(e);

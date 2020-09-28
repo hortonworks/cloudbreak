@@ -264,6 +264,22 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    public void redeployGatewayCertificate(@Nonnull Stack stack, @Nonnull Cluster cluster) {
+        try {
+            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            hostOrchestrator.uploadGatewayPillar(gatewayConfigs, nodes, exitCriteriaModel, saltConfig);
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
     private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, Iterable<GatewayConfig> gatewayConfigs,
             Set<Node> nodes)
             throws IOException, CloudbreakOrchestratorException {
