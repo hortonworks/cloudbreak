@@ -37,6 +37,7 @@ import org.mockito.Spy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -238,6 +239,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
     private IdBrokerConverterUtil idBrokerConverterUtil = new IdBrokerConverterUtil();
 
+    @Mock
+    private GrpcUmsClient grpcUmsClient;
+
     @Before
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -290,6 +294,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         cluster.setIdBroker(idbroker);
         when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
+        when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString(), anyString(), any(Optional.class))).thenReturn(Collections.EMPTY_LIST);
     }
 
     @Test
