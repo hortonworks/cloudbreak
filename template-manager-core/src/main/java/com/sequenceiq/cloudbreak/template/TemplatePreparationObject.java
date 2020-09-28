@@ -85,6 +85,8 @@ public class TemplatePreparationObject {
 
     private final IdBroker idBroker;
 
+    private final Map<String, String> servicePrincipals;
+
     private TemplatePreparationObject(Builder builder) {
         cloudPlatform = builder.cloudPlatform;
         rdsConfigs = builder.rdsConfigs.stream().collect(Collectors.toMap(
@@ -110,6 +112,7 @@ public class TemplatePreparationObject {
         virtualGroupRequest = builder.virtualGroupRequest;
         datalakeView = builder.datalakeView;
         idBroker = builder.idBroker;
+        servicePrincipals = builder.servicePrincipals;
     }
 
     public Stream<HostgroupView> getHostGroupsWithComponent(String component) {
@@ -207,6 +210,10 @@ public class TemplatePreparationObject {
         return idBroker;
     }
 
+    public Map<String, String> getServicePrincipals() {
+        return servicePrincipals;
+    }
+
     public static class Builder {
 
         private CloudPlatform cloudPlatform;
@@ -250,6 +257,8 @@ public class TemplatePreparationObject {
         private Optional<DatalakeView> datalakeView;
 
         private IdBroker idBroker;
+
+        private Map<String, String> servicePrincipals;
 
         public static Builder builder() {
             return new Builder();
@@ -380,6 +389,11 @@ public class TemplatePreparationObject {
 
         public Builder withIdBroker(IdBroker idBroker) {
             this.idBroker = idBroker;
+            return this;
+        }
+
+        public Builder withServicePrincipals(Map<String, String> servicePrincipals) {
+            this.servicePrincipals = servicePrincipals;
             return this;
         }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 
@@ -9,15 +10,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -43,6 +49,7 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -163,6 +170,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private IdBrokerConverterUtil idBrokerConverterUtil;
 
+    @Inject
+    private GrpcUmsClient grpcUmsClient;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -194,13 +204,18 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             cluster.setIdBroker(idbroker);
             String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
-
-            boolean internalTenant = entitlementService.internalTenant(source.getCreator().getUserCrn(), source.getCreator().getTenant().getName());
+            String accountId = source.getCreator().getTenant().getName();
+            List<UserManagementProto.ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities =
+                    grpcUmsClient.listServicePrincipalCloudIdentities(INTERNAL_ACTOR_CRN,
+                            accountId,
+                            source.getEnvironmentCrn(),
+                            MDCUtils.getRequestId());
+            boolean internalTenant = entitlementService.internalTenant(source.getCreator().getUserCrn(), accountId);
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(source.getCreator().getUserCrn())
                     .withEnvironmentCrn(source.getEnvironmentCrn())
                     .withPlatform(source.getCloudPlatform())
-                    .withAccountId(source.getCreator().getTenant().getName())
+                    .withAccountId(accountId)
                     .withIsInternalTenant(internalTenant)
                     .withResourceCrn(source.getResourceCrn())
                     .withUserName(source.getCreator().getUserName())
@@ -230,6 +245,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
+            decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
             decorateDatalakeView(source, builder);
 
             return builder.build();
@@ -350,4 +366,38 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         return generalClusterConfigs;
     }
 
+    private void decorateBuilderWithServicePrincipals(Stack source, Builder builder,
+            List<UserManagementProto.ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities) {
+        if (StackType.DATALAKE.equals(source.getType())
+                && AZURE.equals(source.cloudPlatform())
+                && source.getCluster().isRangerRazEnabled()
+                && entitlementService.cloudIdentityMappingEnabled(source.getCreator().getUserCrn(), source.getCreator().getTenant().getName())) {
+
+            ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
+            servicePrincipalCloudIdentities.forEach(spCloudId -> {
+                Optional<String> azureObjectId = getOptionalAzureObjectId(spCloudId.getCloudIdentitiesList());
+                if (azureObjectId.isPresent()) {
+                    azureObjectIdMap.put(spCloudId.getServicePrincipal(), azureObjectId.get());
+                }
+            });
+
+            builder.withServicePrincipals(azureObjectIdMap.build());
+        } else {
+            builder.withServicePrincipals(null);
+        }
+    }
+
+    private Optional<String> getOptionalAzureObjectId(List<UserManagementProto.CloudIdentity> cloudIdentities) {
+        List<UserManagementProto.CloudIdentity> azureCloudIdentities = cloudIdentities.stream()
+                .filter(cloudIdentity -> cloudIdentity.getCloudIdentityName().hasAzureCloudIdentityName())
+                .collect(Collectors.toList());
+        if (azureCloudIdentities.isEmpty()) {
+            return Optional.empty();
+        } else if (azureCloudIdentities.size() > 1) {
+            throw new IllegalStateException(String.format("List contains multiple azure cloud identities = %s", cloudIdentities));
+        } else {
+            String azureObjectId = Iterables.getOnlyElement(azureCloudIdentities).getCloudIdentityName().getAzureCloudIdentityName().getObjectId();
+            return Optional.of(azureObjectId);
+        }
+    }
 }

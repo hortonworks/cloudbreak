@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Component
@@ -26,6 +28,8 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
 
     private static final String RANGER_USERSYNC_UNIX_BACKEND = "ranger.usersync.unix.backend";
 
+    private static final String RANGER_USERSYNC_AZURE_MAPPING = "ranger_usersync_azure_user_mapping";
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
@@ -35,9 +39,29 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String adminGroup = virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight());
-        return List.of(
-                config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
-                config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup));
+
+        if (CloudPlatform.AZURE.equals(source.getCloudPlatform()) && source.getGeneralClusterConfigs().isEnableRangerRaz()
+                && source.getServicePrincipals() != null) {
+            String servicePrincipals = getServicePrincipalsString(source);
+            return List.of(
+                    config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
+                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup),
+                    config(RANGER_USERSYNC_AZURE_MAPPING, servicePrincipals));
+        } else {
+            return List.of(
+                    config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
+                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup));
+        }
+    }
+
+    private String getServicePrincipalsString(TemplatePreparationObject source) {
+        if (source.getServicePrincipals().isEmpty()) {
+            return "";
+        } else {
+            return source.getServicePrincipals().entrySet().stream()
+                    .map(e -> String.format("%s=%s", e.getKey(), e.getValue()))
+                    .collect(Collectors.joining(";"));
+        }
     }
 
     @Override
