@@ -3,7 +3,17 @@ set -x
 
 echo "Build version: $VERSION"
 
-./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadBootArchives -Pversion=$VERSION --parallel -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadBootArchives -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+
+if [[ "${RUN_SONARQUBE}" == "true" ]]; then
+    ./gradlew -Penv=jenkins -b build.gradle core:sonarqube core:jacocoTestReport
+    ./gradlew -Penv=jenkins -b build.gradle freeipa:sonarqube freeipa:jacocoTestReport
+    ./gradlew -Penv=jenkins -b build.gradle autoscale:sonarqube autoscale:jacocoTestReport
+    ./gradlew -Penv=jenkins -b build.gradle datalake:sonarqube datalake:jacocoTestReport
+    ./gradlew -Penv=jenkins -b build.gradle environment:sonarqube environment:jacocoTestReport
+    ./gradlew -Penv=jenkins -b build.gradle redbeams:sonarqube redbeams:jacocoTestReport
+fi
+
 
 aws s3 cp ./core/build/swagger/cb.json "s3://cloudbreak-swagger/swagger-${VERSION}.json" --acl public-read
 aws s3 cp ./environment/build/swagger/environment.json "s3://environment-swagger/swagger-${VERSION}.json" --acl public-read

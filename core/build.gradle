@@ -12,6 +12,7 @@ buildscript {
         classpath "org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}"
         classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
         classpath "gradle.plugin.com.github.jk1:gradle-license-report:0.3.4"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.7"
     }
 }
 
@@ -19,12 +20,32 @@ plugins {
     id "com.github.jk1.dependency-license-report" version "0.3.4"
     id 'net.ltgt.apt' version '0.14'
     id 'java'
+    id "org.sonarqube" version "2.7"
 }
 
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'info.solidsoft.pitest'
 apply plugin: "jacoco"
+apply plugin: org.sonarqube.gradle.SonarQubePlugin
+
+sonarqube {
+  properties {
+    property "sonar.projectName", "cb-core-service"
+    property "sonar.projectKey", "cb-core-service"
+    property "sonar.sourceEncoding", "UTF-8"
+    property "sonar.java.coveragePlugin", "plugin"
+    property "sonar.sources", "src/main"
+    property "sonar.tests", "src/test"
+    property "sonar.java.binaries", "build/classes"
+    property "sonar.java.libraries", "build/libs/*.jar"
+    property "project.reporting.outputEncoding", "UTF-8"
+    property "sonar.host.url", "$System.env.SONAR_URL"
+    property "sonar.login", "$System.env.SONAR_USERNAME"
+    property "sonar.password", "$System.env.SONAR_PASSWORD"
+  }
+}
+
 
 bootRun {
   systemProperty "spring.profiles.active", System.properties["spring.profiles.active"]
