@@ -20,6 +20,8 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCollectDiagnosticDataArguments;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfig;
+import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDiagnosticsService;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 
 @Service
@@ -77,6 +80,9 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
     public void collectDiagnostics(CmDiagnosticsParameters parameters) throws CloudbreakException {
         ClouderaManagerResourceApi resourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         try {
+            ApiConfigList configList = resourceApi.getConfig(null);
+            Boolean globalPhoneHomeConfig = getPhoneHomeConfig(configList);
+            preUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
             ApiCommand collectDiagnostics = resourceApi.collectDiagnosticDataCommand(convertToCollectDiagnosticDataArguments(parameters));
             PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCollectDiagnostics(stack, client, collectDiagnostics.getId());
             if (isExited(pollingResult)) {
@@ -84,9 +90,50 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
             } else if (isTimeout(pollingResult)) {
                 throw new CloudbreakException("Timeout during waiting for command API to be available (diagnostics collections).");
             }
+            postUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
         } catch (ApiException e) {
             LOGGER.error("Error during CM based diagnostics collection", e);
             throw new ClouderaManagerOperationFailedException("Collect diagnostics failed", e);
+        }
+    }
+
+    private void preUpdatePhoneHomeConfig(DiagnosticsDestination destination, ClouderaManagerResourceApi resourceApi,
+            Boolean globalPhoneHomeConfig) throws ApiException {
+        if (DiagnosticsDestination.SUPPORT.equals(destination)) {
+            if (globalPhoneHomeConfig) {
+                LOGGER.debug("PHONE_HOME is set properly for sending data to Cloudera Support, value: {}", globalPhoneHomeConfig);
+            } else {
+                LOGGER.debug("PHONE_HOME is not set properly for sending data to Cloudera Support, value: {}, updating it ...",
+                        globalPhoneHomeConfig);
+                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination)",
+                        createPhoneHomeConfig(true));
+            }
+        } else {
+            if (globalPhoneHomeConfig) {
+                LOGGER.debug("PHONE_HOME is not set properly for NOT sending data to Cloudera Support (only to cloud storage), " +
+                                "value: {}, updating it ...", globalPhoneHomeConfig);
+                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination)",
+                        createPhoneHomeConfig(false));
+            } else {
+                LOGGER.debug("PHONE_HOME is set properly for sending data to cloud storage only, value: {}", globalPhoneHomeConfig);
+            }
+        }
+    }
+
+    private void postUpdatePhoneHomeConfig(DiagnosticsDestination destination, ClouderaManagerResourceApi resourceApi,
+            Boolean globalPhoneHomeConfig) throws ApiException {
+        if (DiagnosticsDestination.SUPPORT.equals(destination)) {
+            if (!globalPhoneHomeConfig) {
+                LOGGER.debug("As PHONE_HOME value was different before diagnostics, setting its value back to false.");
+                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination) - post update",
+                        createPhoneHomeConfig(globalPhoneHomeConfig));
+            }
+        } else {
+            if (globalPhoneHomeConfig) {
+                LOGGER.debug("As PHONE_HOME value was different before diagnostics, setting its value back to true.");
+                resourceApi.updateConfig("Update phone home setting for diagnostics (support destination) - post update",
+                        createPhoneHomeConfig(globalPhoneHomeConfig));
+            }
         }
     }
 
@@ -103,5 +150,21 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
             args.setRoles(parameters.getRoles());
         }
         return args;
+    }
+
+    private ApiConfigList createPhoneHomeConfig(Boolean value) {
+        return new ApiConfigList().addItemsItem(new ApiConfig().name("PHONE_HOME").value(value.toString()));
+    }
+
+    private Boolean getPhoneHomeConfig(ApiConfigList configs) {
+        Boolean result = true;
+        if (configs != null && CollectionUtils.isNotEmpty(configs.getItems())) {
+            for (ApiConfig config :configs.getItems()) {
+                if ("phone_home".equalsIgnoreCase(config.getName())) {
+                    result = Boolean.valueOf(config.getValue());
+                }
+            }
+        }
+        return result;
     }
 }
