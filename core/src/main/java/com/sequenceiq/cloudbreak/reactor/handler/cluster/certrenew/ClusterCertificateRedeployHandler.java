@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCertificateRedeployRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCertificateRedeploySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrenew.ClusterCertificateRenewFailed;
@@ -41,13 +40,12 @@ public class ClusterCertificateRedeployHandler implements EventHandler<ClusterCe
         LOGGER.debug("Redeploy certificate for stack 'id:{}'", stackId);
         Selectable response;
         try {
-            clusterServiceRunner.redeployGatewayCertificate(stackId);
+            clusterServiceRunner.updateSaltState(stackId);
             LOGGER.info("Certificate of the cluster has been redeployed successfully.");
             response = new ClusterCertificateRedeploySuccess(stackId);
         } catch (Exception ex) {
-            String msg = "Certificate couldn't be redeployed to the cluster: ";
-            LOGGER.warn(msg, ex);
-            response = new ClusterCertificateRenewFailed(stackId, new CloudbreakOrchestratorFailedException(msg + ex.getMessage(), ex));
+            LOGGER.warn("Redeploy of certificate has been failed for cluster", ex);
+            response = new ClusterCertificateRenewFailed(stackId, ex);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

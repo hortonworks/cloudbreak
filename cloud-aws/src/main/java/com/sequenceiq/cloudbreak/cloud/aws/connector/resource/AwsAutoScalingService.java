@@ -160,8 +160,12 @@ public class AwsAutoScalingService {
                 autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName)));
                 DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
                         .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
+
+                // if we run into InsufficientInstanceCapacity we can skip to waitForGroup because that method will wait for the required instance count
                 firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst()
-                        .filter(activity -> "failed".equals(activity.getStatusCode().toLowerCase()));
+                        .filter(activity -> "failed".equals(activity.getStatusCode().toLowerCase()) &&
+                                !activity.getStatusMessage().contains("InsufficientInstanceCapacity"));
+
             } catch (Exception e) {
                 LOGGER.error("Failed to list activities: {}", e.getMessage(), e);
                 throw new AmazonAutoscalingFailed(e.getMessage(), e);
