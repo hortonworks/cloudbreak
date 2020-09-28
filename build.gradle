@@ -87,7 +87,6 @@ allprojects {
           }
       }
   }
-
 }
 
 subprojects {
@@ -97,7 +96,7 @@ subprojects {
   apply plugin: 'com.github.spotbugs'
   apply plugin: 'jacoco'
   apply plugin: 'com.adarshr.test-logger'
-
+  //apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
   sourceCompatibility = 11
   targetCompatibility = 11

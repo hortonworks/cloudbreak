@@ -1,19 +1,44 @@
 import org.ajoberstar.grgit.Grgit
 
+buildscript {
+  repositories {
+    mavenLocal()
+    maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+    mavenCentral()
+    jcenter()
+  }
+  dependencies {
+    classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.7"
+  }
+}
+
 plugins {
   id "java"
   id "checkstyle"
   id "jacoco"
   id 'maven'
   id "org.springframework.boot" version "2.1.2.RELEASE"
+  id "org.sonarqube" version "2.7"
 }
 
-repositories {
-  mavenLocal()
-  maven { url = "$repoUrl" }
-  maven { url = "$springRepoUrl" }
-  mavenCentral()
-  jcenter()
+apply plugin: org.sonarqube.gradle.SonarQubePlugin
+
+sonarqube {
+  properties {
+    property "sonar.sourceEncoding", "UTF-8"
+    property "sonar.projectName", "cb-freeipa-service"
+    property "sonar.projectKey", "cb-freeipa-service"
+    property "sonar.java.coveragePlugin", "plugin"
+    property "sonar.sources", "src/main"
+    property "sonar.tests", "src/test"
+    property "sonar.java.binaries", "build/classes"
+    property "sonar.java.libraries", "build/libs/*.jar"
+    property "project.reporting.outputEncoding", "UTF-8"
+    property "sonar.host.url", "$System.env.SONAR_URL"
+    property "sonar.login", "$System.env.SONAR_USERNAME"
+    property "sonar.password", "$System.env.SONAR_PASSWORD"
+  }
 }
 
 dependencies {
