@@ -49,6 +49,7 @@ dependencies {
   compile group: 'org.springframework',                   name: 'spring-context-support',         version: springFrameworkVersion
   compile group: 'org.springframework.data',              name: 'spring-data-jpa',                version: springDataJpaFrameworkVersion
   compile group: 'org.springframework',                   name: 'spring-jdbc',                    version: springFrameworkVersion
+  compile group: 'org.hibernate',                         name: 'hibernate-core',                 version: hibernateCoreVersion
   compile group: 'org.springframework',                   name: 'spring-web',                     version: springFrameworkVersion
   compile group: 'org.springframework.boot',              name: 'spring-boot-starter-quartz',     version: springBootVersion
   compile group: 'org.springframework.retry',             name: 'spring-retry',                   version: '1.2.0.RELEASE'

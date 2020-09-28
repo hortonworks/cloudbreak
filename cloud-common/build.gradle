@@ -31,7 +31,6 @@ dependencies {
 
     compile group: 'org.slf4j', name: 'slf4j-api', version: slf4jApiVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter',            version: springBootVersion
-    compile group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-web',        version: springBootVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-security',   version: springBootVersion
     compile group: 'org.springframework.boot',              name: 'spring-boot-starter-data-jpa',   version: springBootVersion
