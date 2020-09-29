@@ -33,7 +33,7 @@ public class DiagnosticsCollectionValidator {
         } else if (DiagnosticsDestination.ENG.equals(destination) && isClusterLogCollectionDisabled(telemetry)) {
             validationBuilder.error(
                     String.format("Cluster log collection is not enabled for this stack '%s'", stackV4Response.getName()));
-        } else if (DiagnosticsDestination.SUPPORT.equals(destination)) {
+        } else if (DiagnosticsDestination.SUPPORT.equals(destination) && !cmBundle) {
             validationBuilder.error(
                     String.format("Destination %s is not supported yet.", DiagnosticsDestination.SUPPORT.name()));
         }

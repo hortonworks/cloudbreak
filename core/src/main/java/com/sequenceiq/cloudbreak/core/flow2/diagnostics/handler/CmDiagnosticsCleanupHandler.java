@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionFailureEvent;
+import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -50,7 +51,11 @@ public class CmDiagnosticsCleanupHandler extends EventSenderAwareHandler<CmDiagn
         Map<String, Object> parameterMap = parameters.toMap();
         try {
             LOGGER.debug("CM based diagnostics cleanup started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            diagnosticsFlowService.cleanup(resourceId, parameterMap);
+            if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
+                LOGGER.debug("CM based diagnostics uses SUPPORT destination, no support specific cleanup step yet.");
+            } else {
+                diagnosticsFlowService.cleanup(resourceId, parameterMap);
+            }
             CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
