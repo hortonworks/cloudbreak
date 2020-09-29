@@ -12,6 +12,8 @@ public class TracingUtil {
 
     public static final String HTTP_METHOD = "http.method";
 
+    public static final String HEADERS = "headers";
+
     public static final String ERROR = "error";
 
     public static final String RESPONSE_CODE = "responseCode";

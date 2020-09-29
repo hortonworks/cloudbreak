@@ -3,6 +3,13 @@ package com.sequenceiq.cloudbreak.datalakedr;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
+import java.util.Optional;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc.datalakeDRBlockingStub;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
@@ -12,16 +19,11 @@ import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatala
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-
-import java.util.Optional;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import io.opentracing.Tracer;
 
 @Component
 public class DatalakeDrClient {
@@ -34,9 +36,12 @@ public class DatalakeDrClient {
 
     private final GrpcStatusResponseToDatalakeDrStatusResponseConverter statusConverter;
 
-    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeDrStatusResponseConverter statusConverter) {
+    private final Tracer tracer;
+
+    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeDrStatusResponseConverter statusConverter, Tracer tracer) {
         this.datalakeDrConfig = datalakeDrConfig;
         this.statusConverter = statusConverter;
+        this.tracer = tracer;
     }
 
     public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
@@ -105,7 +110,7 @@ public class DatalakeDrClient {
     private datalakeDRBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId);
         return datalakeDRGrpc.newBlockingStub(channel)
-            .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+            .withInterceptors(GrpcUtil.getTracingInterceptor(tracer), new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
     private DatalakeDrStatusResponse missingConnectorResponse() {

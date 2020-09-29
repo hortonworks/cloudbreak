@@ -27,7 +27,6 @@ dependencies {
   compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
       exclude group: 'commons-logging'
   }
-  compile group: 'io.opentracing.contrib',        name: 'opentracing-aws-sdk-1',          version: opentracingAwsSdkVersion
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
   compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'
 

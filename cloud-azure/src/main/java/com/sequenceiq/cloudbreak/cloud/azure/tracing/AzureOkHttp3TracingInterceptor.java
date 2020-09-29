@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
 import io.opentracing.References;
@@ -33,11 +34,12 @@ public class AzureOkHttp3TracingInterceptor implements Interceptor {
     public Response intercept(@NotNull Chain chain) throws IOException {
         Request request = chain.request();
         String loggingContext = request.header(X_MS_LOGGING_CONTEXT).split(" ")[0];
-        Span span = tracer.buildSpan("[" + request.method() + "] " + loggingContext)
+        Span span = tracer.buildSpan("Azure - [" + request.method() + "] " + loggingContext)
                 .addReference(References.FOLLOWS_FROM, tracer.activeSpan() != null ? tracer.activeSpan().context() : null)
                 .start();
         span.setTag(TracingUtil.COMPONENT, JAVA_AZURE_SDK);
         span.setTag(TracingUtil.HTTP_METHOD, request.method());
+        span.setTag(TracingUtil.HEADERS, Json.silent(chain.request().headers().toMultimap()).getValue());
         TracingUtil.setTagsFromMdc(span);
         try (Scope ignored = tracer.activateSpan(span)) {
             Response response = chain.proceed(request);
