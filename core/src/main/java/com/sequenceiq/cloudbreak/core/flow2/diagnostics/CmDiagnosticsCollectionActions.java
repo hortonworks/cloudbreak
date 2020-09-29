@@ -116,7 +116,7 @@ public class CmDiagnosticsCollectionActions {
                         message = "Engineering will receive the logs.";
                         break;
                     case SUPPORT:
-                        message = String.format("Support ticket will be created for the logs. Ticket: '%s' Comments: '%s'",
+                        message = String.format("Diagnostics bundle sent to support. Ticket: '%s' Comments: '%s'",
                                 parameters.getTicketNumber(), parameters.getComments());
                         break;
                     default:
