@@ -4,12 +4,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-<<<<<<< HEAD
 import com.sequenceiq.it.cloudbreak.action.v4.util.CheckResourceRightAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.CheckRightAction;
-=======
 import com.sequenceiq.it.cloudbreak.action.v4.util.CheckRightRawAction;
->>>>>>> CB-2.29.0
 import com.sequenceiq.it.cloudbreak.action.v4.util.CloudStorageMatrixAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.DeploymentPreferencesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RepoConfigValidationAction;
