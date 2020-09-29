@@ -2,13 +2,19 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+
+import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -25,6 +31,8 @@ public class CloudbreakClient extends MicroserviceClient {
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
 
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
+
+    private WebTarget rawClient;
 
     private Long workspaceId;
 
@@ -56,29 +64,41 @@ public class CloudbreakClient extends MicroserviceClient {
 
     private static synchronized void createProxyCloudbreakClient(IntegrationTestContext integrationTestContext, Entity entity) {
         CloudbreakClient clientEntity = (CloudbreakClient) entity;
+        ConfigKey configKey = new ConfigKey(false, true, true, TIMEOUT);
+        String accessKey = integrationTestContext.getContextParam(CloudbreakTest.ACCESS_KEY);
+        String secretKey = integrationTestContext.getContextParam(CloudbreakTest.SECRET_KEY);
+        String serviceAddress = null;
         if (singletonCloudbreakClient == null) {
-            singletonCloudbreakClient = new CloudbreakApiKeyClient(
-                    integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                    new ConfigKey(false, true, true, TIMEOUT))
-                    .withKeys(integrationTestContext.getContextParam(CloudbreakTest.ACCESS_KEY),
-                            integrationTestContext.getContextParam(CloudbreakTest.SECRET_KEY));
+            serviceAddress = integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_ROOT);
+            singletonCloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey).withKeys(accessKey, secretKey);
         }
         if (singletonCloudbreakClient == null) {
-            singletonCloudbreakInternalCrnClient =
-                    createCloudbreakInternalCrnClient(integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT));
+            serviceAddress = integrationTestContext.getContextParam(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT);
+            singletonCloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(serviceAddress);
         }
         clientEntity.cloudbreakClient = singletonCloudbreakClient;
         clientEntity.cloudbreakInternalCrnClient = singletonCloudbreakInternalCrnClient;
+        clientEntity.rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT, accessKey, secretKey);
+    }
+
+    private static synchronized WebTarget createRawWebTarget(ConfigKey configKey, String serviceAddress, String apiRoot,
+            String accessKey, String secretKey) {
+        Client client = RestClientUtil.get(configKey);
+        WebTarget webTarget = client.target(serviceAddress).path(apiRoot);
+        webTarget.register(new ApiKeyRequestFilter(accessKey, secretKey));
+        return webTarget;
     }
 
     public static synchronized CloudbreakClient createProxyCloudbreakClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         CloudbreakClient clientEntity = new CloudbreakClient();
         clientEntity.setActing(cloudbreakUser);
-        clientEntity.cloudbreakClient = new CloudbreakApiKeyClient(
-                testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT),
-                new ConfigKey(false, true, true))
+        ConfigKey configKey = new ConfigKey(false, true, true);
+        String serviceAddress = testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_ROOT);
+        clientEntity.cloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey)
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         clientEntity.cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(testParameter.get(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT));
+        clientEntity.rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
+                cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
     }
 
@@ -109,6 +129,10 @@ public class CloudbreakClient extends MicroserviceClient {
 
     public void setWorkspaceId(Long workspaceId) {
         this.workspaceId = workspaceId;
+    }
+
+    public WebTarget getRawClient() {
+        return rawClient;
     }
 }
 
