@@ -5,8 +5,10 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
+import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import io.opentracing.Tracer;
+import io.opentracing.contrib.grpc.OperationNameConstructor;
 import io.opentracing.contrib.grpc.TracingClientInterceptor;
 
 /**
@@ -39,6 +41,15 @@ public class GrpcUtil {
     public static TracingClientInterceptor getTracingInterceptor(Tracer tracer) {
         return TracingClientInterceptor.newBuilder()
                 .withTracer(tracer)
+                .withOperationName(new OperationNameConstructor() {
+                    @Override
+                    // CHECKSTYLE:OFF
+                    public <ReqT, RespT> String constructOperationName(MethodDescriptor<ReqT, RespT> method) {
+                        return "gRPC - " + method.getFullMethodName();
+                    }
+                    // CHECKSTYLE:ON
+                })
+                .withTracedAttributes(TracingClientInterceptor.ClientRequestAttribute.HEADERS)
                 .withClientSpanDecorator((span, method, callOptions) -> {
                     TracingUtil.setTagsFromMdc(span);
                 })
