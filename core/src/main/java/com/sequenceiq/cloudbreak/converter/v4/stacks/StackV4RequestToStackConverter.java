@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.cmtemplate.servicetype.ServiceTypeResolver;
+import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
@@ -120,7 +120,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
-    private ServiceTypeResolver serviceTypeResolver;
+    private MeteringServiceFieldResolver meteringServiceFieldResolver;
 
     @Override
     public Stack convert(StackV4Request source) {
@@ -174,6 +174,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         }
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         determineServiceTypeTag(stack, source.getTags());
+        determineServiceFeatureTag(stack, source.getTags());
         return stack;
     }
 
@@ -400,28 +401,41 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private void determineServiceTypeTag(Stack stack, TagsV4Request tags) {
+        determineMeteringServiceFieldTag(stack, tags, ClusterTemplateApplicationTag.SERVICE_TYPE.key(), "type");
+    }
+
+    private void determineServiceFeatureTag(Stack stack, TagsV4Request tags) {
+        determineMeteringServiceFieldTag(stack, tags, ClusterTemplateApplicationTag.SERVICE_FEATURE.key(), "feature");
+    }
+
+    private void determineMeteringServiceFieldTag(Stack stack, TagsV4Request tags, String tagName, String field) {
         if (tags != null && tags.getApplication() != null
-                && tags.getApplication().containsKey(ClusterTemplateApplicationTag.SERVICE_TYPE.key())) {
-            LOGGER.debug("The following service type tag is provided for the cluster template: {}",
-                    tags.getApplication().get(ClusterTemplateApplicationTag.SERVICE_TYPE.key()));
+                && tags.getApplication().containsKey(tagName)) {
+            LOGGER.debug("The following service {} tag is provided for the cluster template: {}",
+                    field, tags.getApplication().get(tagName));
         } else {
-            updateServiceTypeApplicationTag(stack);
+            updateMeteringServiceFieldApplicationTag(stack, tagName, field);
         }
     }
 
-    private void updateServiceTypeApplicationTag(Stack stack) {
+    private void updateMeteringServiceFieldApplicationTag(Stack stack, String tagName, String field) {
         try {
             if (!StackType.DATALAKE.equals(stack.getType()) && stack.getCluster() != null && stack.getCluster().getBlueprint() != null) {
                 Blueprint blueprint = stack.getCluster().getBlueprint();
-                String serviceType = serviceTypeResolver.resolveServiceType(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
-                if (stack.getTags() != null) {
+                String serviceField = null;
+                if (ClusterTemplateApplicationTag.SERVICE_TYPE.key().equals(tagName)) {
+                    serviceField = meteringServiceFieldResolver.resolveServiceType(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
+                } else if (ClusterTemplateApplicationTag.SERVICE_FEATURE.key().equals(tagName)) {
+                    serviceField = meteringServiceFieldResolver.resolveServiceFeature(cmTemplateProcessorFactory.get(blueprint.getBlueprintText()));
+                }
+                if (stack.getTags() != null && serviceField != null) {
                     StackTags tags = stack.getTags().get(StackTags.class);
-                    tags.getApplicationTags().put(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), serviceType);
+                    tags.getApplicationTags().put(tagName, serviceField);
                     stack.setTags(new Json(tags));
                 }
             }
         } catch (IOException e) {
-            throw new BadRequestException("Failed to convert dynamic tags for updating stack tags with service type.");
+            throw new BadRequestException(String.format("Failed to convert dynamic tags for updating stack tags with service %s.", field));
         }
     }
 }

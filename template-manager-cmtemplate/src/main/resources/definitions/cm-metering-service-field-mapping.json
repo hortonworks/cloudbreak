@@ -1,0 +1,9 @@
+{
+  "types": [],
+  "features": [
+    {
+      "name": "NIFI",
+      "relatedServices": ["NIFI"]
+    }
+  ]
+}

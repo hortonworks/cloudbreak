@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.servicetype;
+package com.sequenceiq.cloudbreak.cmtemplate.metering;
 
 import java.io.Serializable;
 import java.util.List;
@@ -8,18 +8,18 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ServiceTypeMapperDefinition implements Serializable {
+public class MeteringServiceFieldMapperDefinition implements Serializable {
 
-    private String type;
+    private String name;
 
     private List<String> relatedServices;
 
-    public String getType() {
-        return type;
+    public String getName() {
+        return name;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public List<String> getRelatedServices() {

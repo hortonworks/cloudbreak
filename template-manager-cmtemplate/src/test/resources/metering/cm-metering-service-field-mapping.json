@@ -1,0 +1,36 @@
+{
+  "types": [
+    {
+      "name":"NIFI",
+      "relatedServices":[
+        "NIFI"
+      ]
+    },
+    {
+      "name":"OpDB",
+      "relatedServices":[
+        "HBASE"
+      ]
+    },
+    {
+      "name":"Custom",
+      "relatedServices":[
+        "NIFI"
+      ]
+    }
+  ],
+  "features": [
+    {
+      "name":"NIFI",
+      "relatedServices":[
+        "NIFI"
+      ]
+    },
+    {
+      "name":"IMPALA",
+      "relatedServices":[
+        "IMPALA"
+      ]
+    }
+  ]
+}
