@@ -1,10 +1,10 @@
-package com.sequenceiq.cloudbreak.service.upgrade;
+package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.mutable.MutableObject;
+import org.apache.commons.lang3.mutable.Mutable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 @Component
 public class ImageCreationBasedFilter {
 
-    public Predicate<Image> filterPreviousImages(Image currentImage, MutableObject<String> reason) {
+    public Predicate<Image> filterPreviousImages(Image currentImage, Mutable<String> reason) {
         return candidate -> {
             reason.setValue("There are no newer images available than " + currentImage.getDate() + ".");
             return isDifferentVersion(currentImage, candidate) || isNewerOrSameCreationImage(currentImage, candidate);

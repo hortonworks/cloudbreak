@@ -202,6 +202,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String DATAHUB_AZURE_AUTOSCALING = "DATAHUB_AZURE_AUTOSCALING";
 
+    private static final String DATAHUB_FLOW_SCALING = "DATAHUB_FLOW_SCALING";
+
+    private static final String DATAHUB_STREAMING_SCALING = "DATAHUB_STREAMING_SCALING";
+
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
 
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
@@ -594,6 +598,8 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
+                                .addEntitlements(createEntitlement(DATAHUB_FLOW_SCALING))
+                                .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())

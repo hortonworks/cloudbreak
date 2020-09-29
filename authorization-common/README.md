@@ -60,11 +60,7 @@ If it is possible, please use CRN of a resource instead of name, since generally
 - annotate the resource object method parameter with `@ResourceObject`, the type of the parameter can be any Object
 - annotate any field of object with `@ResourceObjectField`
 
-#### Notes
-- `action` parameter should defined explicitly every time
-- enum value of `action` refers to the `right` in actions.json used for checkRight call to UMS, please check [AuthorizationResourceAction](../authorization-common-api/src/main/java/com/sequenceiq/authorization/resource/AuthorizationResourceAction.java) and [actions.json](src/main/resources/actions.json)
-
-### Special case: list API endpoints
+### Special case: list API endpoints (not used currently)
 
 In case of list API methods, we have to query the list of resources first, then filter it based on permissions.
 To do this, you need:
@@ -118,11 +114,12 @@ Some APIs are used internal only between services, in this case we are using int
 
 #### But what about account id?
 
-We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can called with internal actor:
+We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can be called with internal actor:
 
 Your method in the Controller class should have at least one parameter:
 - which is some kind of resource CRN -> annotate the parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
-- or it is an accound id parameter -> annotate a CRN parameter with `@AccountId` and we'll use that in lower layers. Please note that `@AccountId` is also a validation annotation, thus you need to place it on the API interface method's parameter.
+- or it is an account id parameter -> annotate the parameter with `@AccountId` and we'll use that in lower layers. Please note that `@AccountId` is also a validation annotation, thus you need to place it on the API interface method's parameter.
+- or it is an initator user crn parameter -> annotate the initiator user CRN parameter with `@InitiatorUserCrn` and we'll use that in lower layers to find out account id
 
 ### APIs without authorization
 
@@ -134,7 +131,7 @@ There are some controller class which used to give service informations (info pa
 
 If every method of a controller class used internally only, you only need to annotate the class with `@InternalOnly` and every method will be restricted for internal actor.
 
-**Be aware: if your API is internal only, then you have to make sure that every method (which is internal only) can be called with CRN parameter and annotated correctly as described in `Internal calls` chapter or somehow you added account id to your method and it is used in lower layers like service layer.**
+**Be aware: if your API is internal only, then you have to make sure that every method (which is internal only) can be called with proper parameter and annotated correctly as described in `Internal calls` chapter.**
 
 Same applies for API's methods which can called without authorization, in that case you need to annotate the class only with `@DisabledCheckPermissions`.
 

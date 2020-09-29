@@ -20,12 +20,12 @@ public class ReflectionUtil {
                 .findFirst();
         if (optionalParameter.isPresent()) {
             int parameterIndex = Lists.newArrayList(methodSignature.getMethod().getParameters()).indexOf(optionalParameter.get());
-            return Optional.of(proceedingJoinPoint.getArgs()[parameterIndex]);
+            return Optional.ofNullable(proceedingJoinPoint.getArgs()[parameterIndex]);
         }
         return Optional.empty();
     }
 
-    public Object proceed(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
+    public Object proceed(ProceedingJoinPoint proceedingJoinPoint) {
         try {
             return proceedingJoinPoint.proceed();
         } catch (Error | RuntimeException unchecked) {

@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 
@@ -46,5 +47,14 @@ public enum RightV4 {
             throw new NotFoundException(String.format("Action %s not found in this enum", authorizationResourceAction));
         }
         return result;
+    }
+
+    @JsonCreator
+    public static RightV4 fromString(String string) {
+        try {
+            return RightV4.valueOf(string);
+        } catch (Exception e) {
+            return ENVIRONMENT_READ;
+        }
     }
 }

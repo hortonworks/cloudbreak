@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade;
+package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 

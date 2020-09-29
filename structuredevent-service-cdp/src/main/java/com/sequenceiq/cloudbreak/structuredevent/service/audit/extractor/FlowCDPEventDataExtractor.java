@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -10,11 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.sequenceiq.cloudbreak.audit.converter.AuditEventDetailsProto;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.audit.model.ServiceEventData;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
@@ -35,15 +36,23 @@ public class FlowCDPEventDataExtractor implements CDPEventDataExtractor<CDPStruc
 
     @Override
     public EventData eventData(CDPStructuredFlowEvent structuredEvent) {
-        Map<String, Object> eventDetails = new HashMap<>();
-        eventDetails.put(USER_CRN, structuredEvent.getOperation().getUserCrn());
-        eventDetails.put(CLUSTER_CRN, structuredEvent.getOperation().getResourceCrn());
-        eventDetails.put(TIMESTAMP, System.currentTimeMillis());
-        eventDetails.put(ENVIRONMENT_CRN, structuredEvent.getOperation().getEnvironmentCrn());
-        eventDetails.put(FLOW_STATE, getFlowState(structuredEvent));
-        eventDetails.put(FLOW_ID, structuredEvent.getFlow().getFlowId());
+        AuditEventDetailsProto.AuditEventDetails.Builder builder = AuditEventDetailsProto.AuditEventDetails.newBuilder()
+                .setClusterCrn(structuredEvent.getOperation().getResourceCrn())
+                .setUserCrn(structuredEvent.getOperation().getUserCrn())
+                .setTimestamp(System.currentTimeMillis())
+                .setEnvironmentCrn(structuredEvent.getOperation().getEnvironmentCrn())
+                .setFlowState(getFlowState(structuredEvent))
+                .setFlowId(structuredEvent.getFlow().getFlowId());
+
+        GsonBuilder gsonBuilder = new GsonBuilder();
+        Gson gson = gsonBuilder
+                .registerTypeAdapter(
+                    AuditEventDetailsProto.AuditEventDetails.class,
+                    new AuditEventDetailsAdapter())
+                .create();
+
         return ServiceEventData.builder()
-                .withEventDetails(new Json(eventDetails).getValue())
+                .withEventDetails(gson.toJson(builder.build()))
                 .withVersion(cbVersion)
                 .build();
     }

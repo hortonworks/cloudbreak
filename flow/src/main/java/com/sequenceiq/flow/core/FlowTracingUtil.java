@@ -30,11 +30,10 @@ public class FlowTracingUtil {
 
     public static Span getSpan(Tracer tracer, String operationName, SpanContext spanContext, String flowId, String flowChainId, String flowTriggerUserCrn) {
         Span span = tracer
-                .buildSpan(operationName)
+                .buildSpan("Flow - " + operationName)
                 .addReference(References.FOLLOWS_FROM, spanContext)
                 .ignoreActiveSpan()
                 .start();
-        span.setBaggageItem(FlowConstants.OPERATION_NAME, operationName);
         MDCBuilder.addSpanId(span.context().toSpanId());
         MDCBuilder.addTraceId(span.context().toTraceId());
         span.setTag(FlowConstants.FLOW_ID, flowId);

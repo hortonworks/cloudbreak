@@ -38,6 +38,7 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -48,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.service.Retry;
 
 import io.opentracing.Tracer;
-import io.opentracing.contrib.aws.TracingRequestHandler;
 
 @Component
 public class AwsClient {
@@ -112,13 +112,13 @@ public class AwsClient {
 
     public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider, ClientConfiguration clientConfiguration) {
         AmazonEC2Client client = new AmazonEC2Client(awsSessionCredentialProvider, clientConfiguration);
-        client.addRequestHandler(new TracingRequestHandler(tracer));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
         return client;
     }
 
     public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials, ClientConfiguration clientConfiguration) {
         AmazonEC2Client client = new AmazonEC2Client(basicAWSCredentials, clientConfiguration);
-        client.addRequestHandler(new TracingRequestHandler(tracer));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
         return client;
     }
 
@@ -138,7 +138,7 @@ public class AwsClient {
 
     public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         return AmazonIdentityManagementClientBuilder.standard()
-                .withRequestHandlers(new TracingRequestHandler(tracer))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
@@ -147,7 +147,7 @@ public class AwsClient {
 
     public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
         return AWSKMSClientBuilder.standard()
-                .withRequestHandlers(new TracingRequestHandler(tracer))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(regionName)
                 .build();
@@ -158,7 +158,7 @@ public class AwsClient {
                 new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
                 new AmazonCloudFormationClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new TracingRequestHandler(tracer));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
         return client;
     }
 
@@ -175,7 +175,7 @@ public class AwsClient {
                 new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
                 new AmazonAutoScalingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
         client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new TracingRequestHandler(tracer));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
         return client;
     }
 
@@ -185,7 +185,7 @@ public class AwsClient {
 
     public AmazonS3 createS3Client(AwsCredentialView awsCredential) {
         return AmazonS3ClientBuilder.standard()
-                .withRequestHandlers(new TracingRequestHandler(tracer))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
                 .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
@@ -194,7 +194,7 @@ public class AwsClient {
 
     public AmazonDynamoDB createDynamoDbClient(AwsCredentialView awsCredential, String region) {
         return AmazonDynamoDBClientBuilder.standard()
-                .withRequestHandlers(new TracingRequestHandler(tracer))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDynamoDbClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(region)
@@ -203,7 +203,7 @@ public class AwsClient {
 
     public AmazonRDS createRdsClient(AwsCredentialView awsCredentialView, String region) {
         return AmazonRDSClientBuilder.standard()
-                .withRequestHandlers(new TracingRequestHandler(tracer))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredentialView))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(region)

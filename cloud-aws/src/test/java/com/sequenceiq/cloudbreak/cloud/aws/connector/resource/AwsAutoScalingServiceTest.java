@@ -66,6 +66,23 @@ public class AwsAutoScalingServiceTest {
     }
 
     @Test
+    public void testCheckLastScalingActivityWhenActivitiesFailedWithInsufficientInstanceCapacity() throws AmazonAutoscalingFailed {
+        DescribeScalingActivitiesResult result = new DescribeScalingActivitiesResult();
+        Activity activity1 = new Activity();
+        activity1.setStatusMessage("Status InsufficientInstanceCapacity blahblah");
+        activity1.setDescription("Description");
+        activity1.setCause("Cause");
+        activity1.setStatusCode("FAILED");
+        result.setActivities(List.of(activity1));
+        Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
+        when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
+        when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+
+        Date date = new Date();
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
+    }
+
+    @Test
     public void testCheckLastScalingActivityWhenActivitiesSuccessThenNoException() throws AmazonAutoscalingFailed {
         DescribeScalingActivitiesResult result = new DescribeScalingActivitiesResult();
         Activity activity1 = new Activity();

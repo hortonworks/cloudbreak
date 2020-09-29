@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.upgrade;
+package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertFalse;

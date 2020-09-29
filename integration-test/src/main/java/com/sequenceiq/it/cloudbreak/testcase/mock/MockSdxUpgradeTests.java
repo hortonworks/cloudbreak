@@ -2,10 +2,13 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
@@ -56,7 +59,6 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-        String clouderaManager = "cm";
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
@@ -69,9 +71,7 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
-                .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                .withClouderaManager(clouderaManager)
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(upgradeImageCatalogName)
@@ -104,7 +104,14 @@ public class MockSdxUpgradeTests extends AbstractIntegrationTest {
         String cluster = "cmcluster";
         String imageSettings = "imageSettingsUpgrade";
         String networkKey = "someOtherNetwork";
-        String clusterCrn = "crn:cdp:datalake:us-west-1:cloudera:datalake:793fef8e-81f3-4f80-b158-0d65abd13104";
+        String clusterCrn = Crn.builder()
+                .setResource(UUID.randomUUID().toString())
+                .setResourceType(Crn.ResourceType.DATALAKE)
+                .setAccountId("cloudera")
+                .setService(Crn.Service.DATALAKE)
+                .setPartition(Crn.Partition.CDP)
+                .build()
+                .toString();
 
         testContext
                 .given(networkKey, EnvironmentNetworkTestDto.class)

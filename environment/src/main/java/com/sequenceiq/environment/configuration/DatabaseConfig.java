@@ -78,6 +78,9 @@ public class DatabaseConfig {
     @Value("${environment.hibernate.debug:false}")
     private boolean debug;
 
+    @Value("${environment.hibernate.statistics:true}")
+    private boolean statistics;
+
     @Inject
     @Named("databaseAddress")
     private String databaseAddress;
@@ -161,6 +164,9 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
+        if (statistics) {
+            properties.setProperty("hibernate.session.events.auto", "com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneLogger");
+        }
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
         properties.setProperty("hibernate.default_schema", dbSchemaName);
         properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));

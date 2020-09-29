@@ -58,6 +58,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterUpgradeAvailabilityServiceTest {

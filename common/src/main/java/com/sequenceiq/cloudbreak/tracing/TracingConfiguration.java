@@ -1,17 +1,20 @@
 package com.sequenceiq.cloudbreak.tracing;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import io.opentracing.Span;
@@ -65,24 +68,34 @@ public class TracingConfiguration {
         public void decorateRequest(ContainerRequestContext requestContext, Span span) {
             MDCBuilder.addTraceId(span.context().toTraceId());
             MDCBuilder.addSpanId(span.context().toSpanId());
+            TracingUtil.setTagsFromMdc(span);
+            span.setTag(TracingUtil.HEADERS, Json.silent(requestContext.getHeaders()).getValue());
         }
 
         @Override
         public void decorateResponse(ContainerResponseContext responseContext, Span span) {
-            MDCBuilder.addTraceId(span.context().toTraceId());
-            MDCBuilder.addSpanId(span.context().toSpanId());
+            Response.StatusType statusInfo = responseContext.getStatusInfo();
+            if (statusInfo.getFamily() != Response.Status.Family.SUCCESSFUL) {
+                span.setTag(TracingUtil.ERROR, true);
+                span.log(Map.of(TracingUtil.RESPONSE_CODE, statusInfo.getStatusCode(), "reasonPhrase", statusInfo.getReasonPhrase()));
+            }
         }
 
         @Override
         public void decorateRequest(ClientRequestContext requestContext, Span span) {
             MDCBuilder.addTraceId(span.context().toTraceId());
             MDCBuilder.addSpanId(span.context().toSpanId());
+            TracingUtil.setTagsFromMdc(span);
+            span.setTag(TracingUtil.HEADERS, Json.silent(requestContext.getHeaders()).getValue());
         }
 
         @Override
         public void decorateResponse(ClientResponseContext responseContext, Span span) {
-            MDCBuilder.addTraceId(span.context().toTraceId());
-            MDCBuilder.addSpanId(span.context().toSpanId());
+            Response.StatusType statusInfo = responseContext.getStatusInfo();
+            if (statusInfo.getFamily() != Response.Status.Family.SUCCESSFUL) {
+                span.setTag(TracingUtil.ERROR, true);
+                span.log(Map.of(TracingUtil.RESPONSE_CODE, statusInfo.getStatusCode(), "reasonPhrase", statusInfo.getReasonPhrase()));
+            }
         }
     }
 }

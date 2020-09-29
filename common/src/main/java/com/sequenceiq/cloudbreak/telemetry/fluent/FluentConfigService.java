@@ -12,10 +12,13 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -30,6 +33,8 @@ public class FluentConfigService {
 
     private static final String ADLS_GEN2_PROVIDER_PREFIX = "abfs";
 
+    private static final String GCS_PROVIDER_PREFIX = "gcs";
+
     private static final String CLOUDWATCH_PROVIDER_PREFIX = "cloudwatch";
 
     private static final String DEFAULT_PROVIDER_PREFIX = "stdout";
@@ -38,16 +43,20 @@ public class FluentConfigService {
 
     private final AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
+    private final GcsConfigGenerator gcsConfigGenerator;
+
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
     private final MeteringConfiguration meteringConfiguration;
 
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
+            GcsConfigGenerator gcsConfigGenerator,
             AnonymizationRuleResolver anonymizationRuleResolver,
             MeteringConfiguration meteringConfiguration) {
         this.s3ConfigGenerator = s3ConfigGenerator;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
+        this.gcsConfigGenerator = gcsConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.meteringConfiguration = meteringConfiguration;
     }
@@ -96,6 +105,10 @@ public class FluentConfigService {
             } else if (logging.getAdlsGen2() != null) {
                 fillAdlsGen2Configs(builder, logging.getStorageLocation(), logging.getAdlsGen2());
                 LOGGER.debug("Fluent will be configured to use ADLS Gen2 output.");
+                cloudStorageLoggingEnabled = true;
+            } else if (logging.getGcs() != null) {
+                fillGcsConfigs(builder, logging.getStorageLocation(), logging.getGcs());
+                LOGGER.debug("Fluent will be configured to use GCS output");
                 cloudStorageLoggingEnabled = true;
             } else if (logging.getCloudwatch() != null) {
                 fillCloudwatchConfigs(builder, logging.getStorageLocation(), logging.getCloudwatch());
@@ -156,6 +169,15 @@ public class FluentConfigService {
                 .withAzureContainer(adlsGen2Config.getFileSystem())
                 .withAzureStorageAccount(storageAccount)
                 .withLogFolderName(adlsGen2Config.getFolderPrefix());
+    }
+
+    private void fillGcsConfigs(FluentConfigView.Builder builder, String storageLocation,
+            GcsCloudStorageV1Parameters parameters) {
+        GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(storageLocation, parameters.getServiceAccountEmail());
+        builder.withProviderPrefix(GCS_PROVIDER_PREFIX)
+                .withGcsBucket(gcsConfig.getBucket())
+                .withGcsProjectId(gcsConfig.getProjectId())
+                .withLogFolderName(gcsConfig.getFolderPrefix());
     }
 
     private void fillCloudwatchConfigs(FluentConfigView.Builder builder,

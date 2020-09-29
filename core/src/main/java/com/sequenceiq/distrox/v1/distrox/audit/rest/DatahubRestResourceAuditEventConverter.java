@@ -1,15 +1,21 @@
 package com.sequenceiq.distrox.v1.distrox.audit.rest;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.auditeventname.rest.RestResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.auditeventname.rest.RestResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyRestCommonService;
@@ -19,6 +25,12 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
 
     @Inject
     private LegacyRestCommonService legacyRestCommonService;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private HostGroupService hostGroupService;
 
     @Override
     public AuditEventName auditEventName(StructuredRestCallEvent structuredEvent) {
@@ -77,6 +89,20 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
 
     @Override
     public Map<String, Object> requestParameters(StructuredRestCallEvent structuredEvent) {
-        return legacyRestCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
+        Map<String, Object> params = legacyRestCommonService.addClusterCrnAndNameIfPresent(structuredEvent);
+        OperationDetails operation = structuredEvent.getOperation();
+        Optional<Stack> stack = stackService.findStackByNameAndWorkspaceId(operation.getResourceName(), operation.getWorkspaceId());
+        AuditEventName auditEventName = auditEventName(structuredEvent);
+        if (stack.isPresent() && auditEventName == AuditEventName.RESIZE_DATAHUB_CLUSTER) {
+            Json json = new Json(structuredEvent.getRestCall().getRestRequest().getBody());
+            String group = json.getValue("group");
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndNameWithRecipes(stack.get().getCluster().getId(), group);
+            Integer desiredCount = json.getValue("desiredCount");
+            Integer originalNodeCount = hostGroup.getInstanceGroup().getNodeCount();
+            params.put("desiredCount", desiredCount);
+            params.put("originalCount", originalNodeCount);
+            params.put("hostGroup", group);
+        }
+        return params;
     }
 }
