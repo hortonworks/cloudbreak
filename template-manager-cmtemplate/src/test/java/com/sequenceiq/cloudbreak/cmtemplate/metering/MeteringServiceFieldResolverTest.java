@@ -1,6 +1,7 @@
-package com.sequenceiq.cloudbreak.cmtemplate.servicetype;
+package com.sequenceiq.cloudbreak.cmtemplate.metering;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 
 import java.util.HashSet;
@@ -18,18 +19,18 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceTypeResolverTest {
+public class MeteringServiceFieldResolverTest {
 
-    private static final String SERVICE_TYPE_MAPPING_LOCATION = "servicetype/cm-service-type-mapping.json";
+    private static final String SERVICE_TYPE_MAPPING_LOCATION = "metering/cm-metering-service-field-mapping.json";
 
-    private static ServiceTypeResolver underTest;
+    private static MeteringServiceFieldResolver underTest;
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
     @BeforeAll
     public static void setUpGlobal() {
-        underTest = new ServiceTypeResolver(SERVICE_TYPE_MAPPING_LOCATION);
+        underTest = new MeteringServiceFieldResolver(SERVICE_TYPE_MAPPING_LOCATION);
         underTest.init();
     }
 
@@ -75,6 +76,26 @@ public class ServiceTypeResolverTest {
         String result = underTest.resolveServiceType(cmTemplateProcessor);
         // THEN
         assertEquals("NIFI", result);
+    }
+
+    @Test
+    public void testResolveServiceFeatureForNifi() {
+        // GIVEN
+        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("NIFI"));
+        // WHEN
+        String result = underTest.resolveServiceFeature(cmTemplateProcessor);
+        // THEN
+        assertEquals("NIFI", result);
+    }
+
+    @Test
+    public void testResolveServiceFeatureWithoutMatchingService() {
+        // GIVEN
+        given(cmTemplateProcessor.getAllComponents()).willReturn(createServiceComponents("HBASE"));
+        // WHEN
+        String result = underTest.resolveServiceFeature(cmTemplateProcessor);
+        // THEN
+        assertNull(result);
     }
 
     private Set<ServiceComponent> createServiceComponents(String... services) {

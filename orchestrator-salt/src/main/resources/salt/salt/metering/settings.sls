@@ -39,12 +39,19 @@
    {% set metered_cluster_name = cluster_name %}
 {% endif %}
 
+{% if salt['pillar.get']('tags:Cloudera-Service-Feature') %}
+  {% set service_feature = salt['pillar.get']('tags:Cloudera-Service-Feature') %}
+{% else %}
+  {% set service_feature = None %}
+{% endif %}
+
 {% do metering.update({
     "is_systemd" : is_systemd,
     "enabled": metering_enabled,
     "clusterCrn": cluster_crn,
     "clusterName": cluster_name,
     "serviceType": service_type,
+    "serviceFeature": service_feature,
     "serviceVersion": service_version,
     "version": version,
     "meteredClusterCrn": metered_cluster_crn,

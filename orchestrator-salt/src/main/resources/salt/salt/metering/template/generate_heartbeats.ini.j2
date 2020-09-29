@@ -4,6 +4,7 @@
 [Event]
 ServiceVersion = {{ metering.serviceVersion }}{% if metering.version > 1 %}
 ServiceType = {{ metering.serviceType }}
+{% if metering.serviceFeature %}ServiceConfiguration = {{ metering.serviceFeature }} {% endif %}
 MeteredResourceName = {{ metering.meteredClusterName }}
 MeteredResourceCRN = {{ metering.meteredClusterCrn }}
 CreatorCRN = {{ salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') }}

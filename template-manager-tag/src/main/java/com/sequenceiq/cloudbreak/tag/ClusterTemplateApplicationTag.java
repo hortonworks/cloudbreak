@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.tag;
 
 public enum ClusterTemplateApplicationTag {
-    SERVICE_TYPE("Cloudera-Service-Type");
+    SERVICE_TYPE("Cloudera-Service-Type"), SERVICE_FEATURE("Cloudera-Service-Feature");
 
     private final String key;
 
