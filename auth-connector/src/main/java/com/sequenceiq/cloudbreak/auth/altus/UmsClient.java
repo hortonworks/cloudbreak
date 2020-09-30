@@ -598,6 +598,20 @@ public class UmsClient {
      * @return access key CRNs
      */
     public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String accountId, String machineUserName) {
+        return listMachineUserAccessKeys(requestId, userCrn, accountId, machineUserName, false);
+    }
+
+    /**
+     * Get a list of access key CRN (keys owned by a machine user)
+     *
+     * @param requestId       id of the request
+     * @param userCrn         actor that query the keys for the machine user
+     * @param machineUserName machine user that owns the access keys
+     * @param userAccessKeyId put access key id to the result instead of access key crns
+     * @return access key CRNs (or access key ids)
+     */
+    public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String accountId,
+            String machineUserName, boolean userAccessKeyId) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
@@ -615,7 +629,13 @@ public class UmsClient {
                         newStub(requestId).listAccessKeys(listAccessKeysRequestBuilder.build());
                 accessKeys.addAll(
                         listAccessKeysResponse.getAccessKeyList().stream()
-                                .map(UserManagementProto.AccessKey::getCrn)
+                                .map(accessKeyObject -> {
+                                    if (userAccessKeyId) {
+                                        return accessKeyObject.getAccessKeyId();
+                                    } else {
+                                        return accessKeyObject.getCrn();
+                                    }
+                                })
                                 .collect(Collectors.toList()));
                 if (!listAccessKeysResponse.hasNextPageToken()) {
                     break;
