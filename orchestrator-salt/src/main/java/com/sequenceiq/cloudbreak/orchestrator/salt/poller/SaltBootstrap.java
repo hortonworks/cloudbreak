@@ -61,7 +61,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (!targets.isEmpty()) {
             LOGGER.debug("Missing targets for SaltBootstrap: {}", targets);
 
-            SaltAction saltAction = createBootstrap();
+            SaltAction saltAction = createBootstrap(params.isRestartNeeded());
             GenericResponses responses = sc.action(saltAction);
 
             Set<Node> failedTargets = new HashSet<>();
@@ -108,7 +108,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 : new MinionAcceptor(sc, saltAction.getMinions(), new AcceptAllFpMatcher(), new DummyFingerprintCollector());
     }
 
-    private SaltAction createBootstrap() {
+    private SaltAction createBootstrap(boolean restartNeeded) {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
         if (params.getCloud() != null) {
             saltAction.setCloud(new Cloud(params.getCloud()));
@@ -131,23 +131,24 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 // set due to compatibility reasons
                 saltAction.setServer(gatewayAddress);
                 saltAction.setMaster(master);
-                saltAction.addMinion(createMinion(saltMaster));
+                saltAction.addMinion(createMinion(saltMaster, restartNeeded));
                 saltAction.addMaster(master);
             }
         }
         for (Node minion : targets.stream().filter(node -> !getGatewayPrivateIps().contains(node.getPrivateIp())).collect(Collectors.toList())) {
-            saltAction.addMinion(createMinion(minion));
+            saltAction.addMinion(createMinion(minion, restartNeeded));
         }
         return saltAction;
     }
 
-    private Minion createMinion(Node node) {
+    private Minion createMinion(Node node, boolean restartNeeded) {
         Minion minion = new Minion();
         minion.setAddress(node.getPrivateIp());
         minion.setHostGroup(node.getHostGroup());
         minion.setHostName(node.getHostname());
         minion.setDomain(node.getDomain());
         minion.setServers(getGatewayPrivateIps());
+        minion.setRestartNeeded(restartNeeded);
         // set due to compatibility reasons
         minion.setServer(getGatewayPrivateIps().get(0));
         return minion;

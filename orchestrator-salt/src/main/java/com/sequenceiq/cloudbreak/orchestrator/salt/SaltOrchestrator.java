@@ -290,6 +290,7 @@ SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             if (!gatewayTargets.isEmpty()) {
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
+                params.setRestartNeeded(true);
             }
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
