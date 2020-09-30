@@ -4,6 +4,7 @@ import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -257,7 +258,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 }
                 Region platformRegion = regions.get(platform(cloudPlatform));
                 if (platformRegion == null || isEmpty(platformRegion.value())) {
-                    throw new BadRequestException(String.format("No default region specified for: %s. Region cannot be empty.", cloudPlatform));
+                    throw new BadRequestException(format("No default region specified for: %s. Region cannot be empty.", cloudPlatform));
                 }
                 return platformRegion.value();
             } else {
@@ -293,8 +294,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                     .withEnvironmentTags(userDefined)
                     .build();
             return new Json(new StackTags(costTagging.mergeTags(request), tags.getApplication(), new HashMap<>()));
-        } catch (Exception ignored) {
-            throw new BadRequestException("Failed to convert dynamic tags.");
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to convert dynamic tags. " + e.getMessage(), e);
         }
     }
 
@@ -435,7 +436,8 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                 }
             }
         } catch (IOException e) {
-            throw new BadRequestException(String.format("Failed to convert dynamic tags for updating stack tags with service %s.", field));
+            throw new BadRequestException(format("Failed to convert dynamic tags for updating stack tags with service %s. Error: %s",
+                    field, e.getMessage()), e);
         }
     }
 }

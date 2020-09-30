@@ -208,8 +208,8 @@ public class EnvironmentDtoConverter {
             return new Json(new EnvironmentTags(Objects.requireNonNullElseGet(userDefinedTags, HashMap::new), defaultTags));
         } catch (AccountTagValidationFailed aTVF) {
             throw new BadRequestException(aTVF.getMessage());
-        } catch (Exception ignored) {
-            throw new BadRequestException("Failed to convert dynamic tags.");
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to convert dynamic tags. " + e.getMessage(), e);
         }
     }
 
