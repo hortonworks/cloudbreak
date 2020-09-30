@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_FREEIP
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_RUNTIME_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_UMS_USER_SYNC_MODEL_GENERATION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.LOCAL_DEV;
@@ -129,6 +130,10 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, false},
                 {"CDP_UMS_USER_SYNC_MODEL_GENERATION == true", CDP_UMS_USER_SYNC_MODEL_GENERATION,
                         (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, true},
+                {"CDP_SDX_HBASE_CLOUD_STORAGE == false", CDP_SDX_HBASE_CLOUD_STORAGE,
+                        (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, false},
+                {"CDP_SDX_HBASE_CLOUD_STORAGE == true", CDP_SDX_HBASE_CLOUD_STORAGE,
+                        (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, true},
         };
     }
 

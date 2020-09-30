@@ -80,6 +80,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_UMS_USER_SYNC_MODEL_GENERATION = "CDP_UMS_USER_SYNC_MODEL_GENERATION";
 
+    @VisibleForTesting
+    static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -165,6 +168,10 @@ public class EntitlementService {
 
     public boolean umsUserSyncModelGenerationEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_UMS_USER_SYNC_MODEL_GENERATION);
+    }
+
+    public boolean sdxHbaseCloudStorageEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

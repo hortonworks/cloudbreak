@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -7,9 +8,13 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
@@ -22,6 +27,9 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
     private static final String HBASE_ROOT_DIR = "hbase.rootdir";
 
     private static final String HBASE_ROOT_DIR_TEMPLATE_PARAM = "hdfs_rootdir";
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
@@ -48,9 +56,13 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
                 .orElse(false);
         String cdhVersion = getCdhVersion(source);
         boolean is722OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_2);
+        String actorCrn = INTERNAL_ACTOR_CRN;
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        boolean sdxHbaseCloudStorageEnabled =
+                entitlementService.sdxHbaseCloudStorageEnabled(actorCrn, accountId);
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
-                && (!datalakeCluster || is722OrNewer);
+                && (!datalakeCluster || (is722OrNewer && sdxHbaseCloudStorageEnabled));
     }
 
     private String getCdhVersion(TemplatePreparationObject source) {
