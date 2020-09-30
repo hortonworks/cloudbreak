@@ -55,6 +55,36 @@ public class DefaultInternalAccountTagServiceTest {
         assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("apple", "awsapple")));
     }
 
+    @Test
+    public void testInValidateWhenValueContainsTooMuchMustache() {
+        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("apple", "{{{{pear}}}")));
+    }
+
+    @Test
+    public void testInValidateWhenKeyContainsTooMuchMustache() {
+        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("{{{{apple}}}", "pear")));
+    }
+
+    @Test
+    public void testInValidateWhenValueContainsInvalidModelKey() {
+        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("pear", "{{{creatorcrn}}}")));
+    }
+
+    @Test
+    public void testInValidateWhenKeyContainsInvalidModelKey() {
+        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("{{{creatorcrn}}}", "pear")));
+    }
+
+    @Test
+    public void testValidateWhenValueContainsvalidModelKey() {
+        underTest.validate(accountTags("pear", "{{{creatorCrn}}}"));
+    }
+
+    @Test
+    public void testValidateWhenKeyContainsvalidModelKey() {
+        underTest.validate(accountTags("{{{creatorCrn}}}", "pear"));
+    }
+
     private List<AccountTag> accountTags(String key, String value) {
         List<AccountTag> accountTagList = new ArrayList<>();
 

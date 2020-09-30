@@ -31,4 +31,12 @@ public enum HandleBarModelKey {
         return result;
     }
 
+    public static Set<String> modelTemplateKeys() {
+        Set<String> result = new HashSet<>();
+        for (HandleBarModelKey handleBarModelKey : HandleBarModelKey.values()) {
+            result.add(String.format("{{{%s}}}", handleBarModelKey.modelKey()));
+        }
+        return result;
+    }
+
 }
