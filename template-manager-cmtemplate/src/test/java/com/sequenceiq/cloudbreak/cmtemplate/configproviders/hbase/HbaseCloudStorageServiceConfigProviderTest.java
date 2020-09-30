@@ -3,16 +3,24 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -29,7 +37,19 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @RunWith(MockitoJUnitRunner.class)
 public class HbaseCloudStorageServiceConfigProviderTest {
 
+    @InjectMocks
     private final HbaseCloudStorageServiceConfigProvider underTest = new HbaseCloudStorageServiceConfigProvider();
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Before
+    public void setUp() {
+        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
+            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
+        }
+        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString(), anyString())).thenReturn(true);
+    }
 
     @Test
     public void testGetHbaseStorageServiceConfigsWhenAttachedCluster() {

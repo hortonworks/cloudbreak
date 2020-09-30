@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,8 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
@@ -61,6 +64,9 @@ public class CentralCmTemplateUpdaterTest {
     @InjectMocks
     private CentralCmTemplateUpdater generator = new CentralCmTemplateUpdater();
 
+    @InjectMocks
+    private HbaseCloudStorageServiceConfigProvider hbaseCloudStorageProvider = new HbaseCloudStorageServiceConfigProvider();
+
     @Spy
     private TemplateProcessor templateProcessor;
 
@@ -88,12 +94,20 @@ public class CentralCmTemplateUpdaterTest {
     @Mock
     private GeneralClusterConfigs generalClusterConfigs;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     private ClouderaManagerRepo clouderaManagerRepo;
 
     @Before
     public void setUp() {
+        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
+            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
+        }
+        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString(), anyString())).thenReturn(true);
+
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider(),
-                new HbaseCloudStorageServiceConfigProvider());
+                hbaseCloudStorageProvider);
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
