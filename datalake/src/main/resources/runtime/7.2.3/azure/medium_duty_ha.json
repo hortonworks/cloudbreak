@@ -16,7 +16,7 @@
           {
             "count": 1,
             "size": 250,
-            "type": "Standard_D8s_v3"
+            "type": "StandardSSD_LRS"
           }
         ],
         "rootVolume": {
