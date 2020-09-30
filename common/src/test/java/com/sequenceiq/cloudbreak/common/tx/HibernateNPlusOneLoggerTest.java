@@ -11,12 +11,12 @@ public class HibernateNPlusOneLoggerTest {
     private HibernateNPlusOneLogger underTest;
 
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         underTest = new HibernateNPlusOneLogger();
     }
 
     @Test
-    void testNoWarning() {
+    public void testNoWarning() {
         callSQL(1000);
         underTest.end();
 
