@@ -102,6 +102,7 @@ import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
@@ -330,7 +331,15 @@ public class ClusterHostServiceRunner {
     private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo)
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        telemetryDecorator.decoratePillar(servicePillar, stack, telemetry);
+        DataBusCredential dataBusCredential = null;
+        if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
+            try {
+                dataBusCredential = new Json(cluster.getDatabusCredential()).get(DataBusCredential.class);
+            } catch (IOException e) {
+                LOGGER.error("Cannot read DataBus secrets from cluster entity. Continue without databus secrets", e);
+            }
+        }
+        telemetryDecorator.decoratePillar(servicePillar, stack, telemetry, dataBusCredential);
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
