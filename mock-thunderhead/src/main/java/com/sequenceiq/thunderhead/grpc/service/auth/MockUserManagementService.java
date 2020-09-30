@@ -212,6 +212,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
 
+    private static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
+
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
@@ -287,6 +289,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.upgrade.internalrepo.enable}")
     private boolean enableInternalRepositoryForUpgrade;
+
+    @Value("${auth.mock.hbase.cloudstorage.enable}")
+    private boolean enableHbaseCloudStorage;
 
     private String cbLicense;
 
@@ -581,6 +586,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableInternalRepositoryForUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE));
+        }
+        if (enableHbaseCloudStorage) {
+            builder.addEntitlements(createEntitlement(CDP_SDX_HBASE_CLOUD_STORAGE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
