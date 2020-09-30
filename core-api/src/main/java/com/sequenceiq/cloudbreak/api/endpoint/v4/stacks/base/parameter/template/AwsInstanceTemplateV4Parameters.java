@@ -93,7 +93,7 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
             }
             spot.setMaxPrice(maxPrice);
         });
-        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
+        encryption = new AwsEncryptionV4Parameters();
         encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
         String type = getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE);
         if (type != null) {
