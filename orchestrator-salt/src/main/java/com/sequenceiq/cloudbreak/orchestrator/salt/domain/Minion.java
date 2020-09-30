@@ -20,6 +20,8 @@ public class Minion {
 
     private String hostName;
 
+    private boolean restartNeeded;
+
     public String getAddress() {
         return address;
     }
@@ -78,6 +80,14 @@ public class Minion {
 
     public String getId() {
         return hostName + '.' + domain;
+    }
+
+    public boolean isRestartNeeded() {
+        return restartNeeded;
+    }
+
+    public void setRestartNeeded(boolean restartNeeded) {
+        this.restartNeeded = restartNeeded;
     }
 
     @Override
