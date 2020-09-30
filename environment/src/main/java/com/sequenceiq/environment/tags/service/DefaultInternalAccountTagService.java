@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.tag.HandleBarModelKey;
 import com.sequenceiq.environment.api.v1.tags.model.AccountTagStatus;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponse;
 import com.sequenceiq.environment.api.v1.tags.model.response.AccountTagResponses;
@@ -100,6 +101,26 @@ public class DefaultInternalAccountTagService {
                 throw new BadRequestException(
                         String.format("The value '%s' can only can not start with microsoft or azure or aws or windows or space", accountTag.getTagValue()));
             }
+            if (isAccountTagContainsTemplate(accountTag.getTagKey()) && isAccountTagInvalid(accountTag.getTagKey())) {
+                throw new BadRequestException(
+                        String.format("The key '%s' of the tag contains invalid templates", accountTag.getTagKey()));
+            }
+            if (isAccountTagContainsTemplate(accountTag.getTagValue()) && isAccountTagInvalid(accountTag.getTagValue())) {
+                throw new BadRequestException(
+                        String.format("The value '%s' of the tag contains invalid templates", accountTag.getTagValue()));
+            }
         }
+    }
+
+    private boolean isAccountTagContainsTemplate(String template) {
+        return template.contains("{{{") || template.contains("}}}");
+    }
+
+    private boolean isAccountTagInvalid(String template) {
+        template = template.replaceAll(" ", "");
+        for (String modelTemplateKey : HandleBarModelKey.modelTemplateKeys()) {
+            template = template.replace(modelTemplateKey, "");
+        }
+        return isAccountTagContainsTemplate(template);
     }
 }
