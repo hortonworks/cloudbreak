@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.ha.domain.Node;
-import com.sequenceiq.cloudbreak.ha.service.NodeService;
 import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
+import com.sequenceiq.cloudbreak.ha.service.NodeService;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -96,10 +96,15 @@ public class HeartbeatService {
             String nodeId = nodeConfig.getId();
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
+                    LOGGER.debug("Node {} is trying to update heartbeat timestamp", nodeId);
                     try {
                         Node self = nodeService.findById(nodeId).orElse(new Node(nodeId));
-                        self.setLastUpdated(clock.getCurrentTimeMillis());
+                        long lastUpdated = self.getLastUpdated();
+                        long currentUpdated = clock.getCurrentTimeMillis();
+                        self.setLastUpdated(currentUpdated);
                         nodeService.save(self);
+                        LOGGER.debug("Node {} has updated heartbeat timestamp from {} to {}", nodeId, lastUpdated, currentUpdated);
+                        metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_SUCCESS);
                         return Boolean.TRUE;
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
