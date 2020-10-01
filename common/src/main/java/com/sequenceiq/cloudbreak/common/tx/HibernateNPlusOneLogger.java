@@ -9,24 +9,24 @@ public class HibernateNPlusOneLogger extends HibernateStatementStatistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateNPlusOneLogger.class);
 
-    private static final int DEFAULT_SESSION_MAX_STATEMENT_WARNING = 1000;
+    private static final int DEFAULT_SESSION_MAX_STATEMENT_WARNING = 500;
+
+    private final int maxStatementWarning;
+
+    public HibernateNPlusOneLogger() {
+        this.maxStatementWarning = StaticApplicationContext.getEnvironmentProperty("hibernate.session.warning.max.count",
+                Integer.class, DEFAULT_SESSION_MAX_STATEMENT_WARNING);
+    }
 
     @Override
     public void end() {
-        super.end();
-        int queryCount = getQueryCount();
-        logStack(queryCount);
+        log(getQueryCount());
     }
 
-    private void logStack(int queryCount) {
+    private void log(int queryCount) {
         String message = constructLogline();
-        int maxStatementWarning = StaticApplicationContext.getEnvironmentProperty("hibernate.session.warning.max.count",
-                Integer.class, DEFAULT_SESSION_MAX_STATEMENT_WARNING);
         if (queryCount > maxStatementWarning) {
-            HibernateNPlusOneException e = new HibernateNPlusOneException(
-                    String.format("You have executed %d queries in a single transaction, " +
-                            "please doublecheck the entity relationship!", queryCount));
-            LOGGER.warn(message, e);
+            LOGGER.warn(message, new HibernateNPlusOneException(queryCount));
         } else {
             LOGGER.debug(message);
         }

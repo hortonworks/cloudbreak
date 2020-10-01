@@ -6,7 +6,8 @@ package com.sequenceiq.cloudbreak.common.tx;
  */
 public class HibernateNPlusOneException extends RuntimeException {
 
-    public HibernateNPlusOneException(String message) {
-        super(message);
+    public HibernateNPlusOneException(int queryCount) {
+        super(String.format("You have executed %d queries in a single transaction, " +
+                "please doublecheck the entity relationship!", queryCount));
     }
 }
