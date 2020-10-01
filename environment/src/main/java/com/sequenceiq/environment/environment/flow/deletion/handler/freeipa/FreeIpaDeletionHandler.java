@@ -40,8 +40,6 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeletionHandler.class);
 
-    private static final int SINGLE_FAILURE = 1;
-
     private final EnvironmentService environmentService;
 
     private final FreeIpaService freeIpaService;
@@ -150,7 +148,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                 new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
-                SINGLE_FAILURE);
+                FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT);
         if (!isSuccess(result.getLeft())) {
             throw new FreeIpaOperationFailedException("Failed to delete FreeIpa! " + getIfNotNull(result.getRight(), Throwable::getMessage));
         }
