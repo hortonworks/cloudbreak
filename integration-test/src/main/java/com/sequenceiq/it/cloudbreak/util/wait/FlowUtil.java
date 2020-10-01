@@ -119,12 +119,9 @@ public class FlowUtil {
     private void sleep(long pollingInterval, String crn, String flowChainId, String flowId) {
         try {
             TimeUnit.MILLISECONDS.sleep(pollingInterval);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            LOGGER.error("Waiting for flowId:flowChainId '{}:{}' has been interrupted at resource {}, because of: {}", flowId, flowChainId, crn,
-                    e.getMessage(), e);
-            throw new TestFailException(String.format(" Waiting for flowId:flowChainId '%s:%s' has been interrupted at resource %s, because of: %s ",
-                    flowId, flowChainId, crn, e.getMessage()));
+        } catch (InterruptedException ignored) {
+            LOGGER.warn("Waiting for flowId:flowChainId '{}:{}' has been interrupted at resource {}, because of: {}", flowId, flowChainId, crn,
+                    ignored.getMessage(), ignored);
         }
     }
 }
