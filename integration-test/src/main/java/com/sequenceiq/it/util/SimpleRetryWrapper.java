@@ -44,6 +44,7 @@ public class SimpleRetryWrapper<T> {
                     try {
                         TimeUnit.SECONDS.sleep(retryWaitSeconds);
                     } catch (InterruptedException ignored) {
+                        LOGGER.warn("[{}] action {} retry has been interrupted, because of: {}", action, timesTried, ignored.getMessage(), ignored);
                     }
                 } else {
                     LOGGER.error("Failed to run [{}] action {} times.", name, retryTimes, e);

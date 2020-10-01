@@ -240,8 +240,8 @@ public class CleanupWaitUtil {
     private void sleep(long pollingInterval) {
         try {
             Thread.sleep(pollingInterval);
-        } catch (InterruptedException e) {
-            LOG.warn("Exception has been occurred during wait: {}", e.getMessage(), e);
+        } catch (InterruptedException ignored) {
+            LOG.warn("Waiting for cleanup has been interrupted, because of: {}", ignored.getMessage(), ignored);
         }
     }
 
