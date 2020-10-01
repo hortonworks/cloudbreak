@@ -46,7 +46,7 @@ public class WaitService<T> {
                 testContext.setStatuses(getStatuses(statusChecker, t));
                 return Result.result(WaitResult.SUCCESS);
             }
-            sleep(interval);
+            sleep(interval, getStatuses(statusChecker, t));
             attempts++;
             timeout = timeoutChecker.checkTimeout();
             LOGGER.info("Checking if wait can exit.");
@@ -67,11 +67,11 @@ public class WaitService<T> {
         return statusChecker.getStatuses(t);
     }
 
-    private void sleep(Duration duration) {
+    private void sleep(Duration duration, Map<String, String> statusMap) {
         try {
             Thread.sleep(duration.toMillis());
         } catch (InterruptedException ignored) {
-            LOGGER.error("Interrupted exception occurred during waiting.", ignored);
+            LOGGER.warn("Waiting for '{}' has been interrupted, because of: {}", statusMap, ignored.getMessage(), ignored);
         }
     }
 }
