@@ -20,6 +20,8 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
 
     public static final int FREEIPA_RETRYING_COUNT = 900;
 
+    public static final int FREEIPA_FAILURE_COUNT = 3;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaDeletionRetrievalTask.class);
 
     private final FreeIpaService freeIpaService;
