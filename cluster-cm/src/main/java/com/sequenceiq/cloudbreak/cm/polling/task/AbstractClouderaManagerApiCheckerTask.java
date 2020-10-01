@@ -3,21 +3,15 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.CollectionUtils;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
-import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiCommandList;
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
@@ -106,36 +100,6 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     }
 
     protected abstract boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException;
-
-    @VisibleForTesting
-    List<String> parseResultMessageFromChildren(ApiCommandList apiCommandList) {
-        if (CollectionUtils.isEmpty(apiCommandList.getItems())) {
-            return Collections.emptyList();
-        }
-        List<String> ret = new ArrayList<>();
-        apiCommandList.getItems().forEach(s -> {
-            if (s.getChildren() == null) {
-                ret.add(formatToLine(s));
-            } else {
-                ret.add(formatToLine(s));
-                ret.addAll(parseResultMessageFromChildren(s.getChildren()));
-            }
-        });
-        return ret;
-    }
-
-    private String formatToLine(ApiCommand s) {
-        LOGGER.debug("ApiCommand to format: {}", s);
-        String ret = "";
-        if (s != null) {
-            ret += s.getName();
-            if (s.getServiceRef() != null) {
-                ret += "(" + s.getServiceRef().getServiceName() + "): ";
-            }
-            ret += s.getResultMessage();
-        }
-        return ret;
-    }
 
     protected abstract String getCommandName();
 
