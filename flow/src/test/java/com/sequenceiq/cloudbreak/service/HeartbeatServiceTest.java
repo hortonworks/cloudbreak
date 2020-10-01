@@ -50,10 +50,11 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.ha.domain.Node;
-import com.sequenceiq.cloudbreak.ha.service.NodeService;
 import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
+import com.sequenceiq.cloudbreak.ha.service.NodeService;
 import com.sequenceiq.cloudbreak.service.ha.HaApplication;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -107,6 +108,9 @@ public class HeartbeatServiceTest {
 
     @Mock
     private ApplicationFlowInformation applicationFlowInformation;
+
+    @Mock
+    private InMemoryCleanup inMemoryCleanup;
 
     @Captor
     private ArgumentCaptor<String> stringCaptor;
@@ -503,23 +507,12 @@ public class HeartbeatServiceTest {
             }
         }
 
-        Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
-
         // When the cloudbreak instance can not reach the db
         ReflectionTestUtils.setField(heartbeatService, "retryService", new TestRetryWithFail());
 
-        // Mock InMemoryStateStore for check method execution success
-        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getResourceId).collect(Collectors.toSet());
-        for (Long myStackId : myStackIds) {
-            InMemoryStateStore.putStack(myStackId, PollGroup.POLLABLE);
-        }
-
         heartbeatService.heartbeat();
 
-        // In case of exception the instance should terminate the flows which are in running state
-        for (Long myStackId : myStackIds) {
-            assertEquals(PollGroup.CANCELLED, InMemoryStateStore.getStack(myStackId));
-        }
+        verify(inMemoryCleanup, times(1)).cancelEveryFlowWithoutDbUpdate();
     }
 
     private List<Node> getClusterNodes() {

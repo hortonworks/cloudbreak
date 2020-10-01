@@ -9,6 +9,7 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,12 +23,14 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.ha.NodeConfig;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -77,6 +80,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     @Inject
     private Tracer tracer;
+
+    @Inject
+    private NodeConfig nodeConfig;
+
+    @Inject
+    private InMemoryCleanup inMemoryCleanup;
 
     @Override
     public void accept(Event<? extends Payload> event) {
@@ -184,11 +193,24 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         LOGGER.debug("flow control event arrived: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
         Flow flow = runningFlows.get(flowId);
         if (flow != null) {
+            MutableBoolean flowCancelled = new MutableBoolean(false);
             transactionService.required(() -> {
                 Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
-                lastFlowLog.ifPresent(flowLog -> updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters));
+                lastFlowLog.ifPresent(flowLog -> {
+                    String nodeId = nodeConfig.getId();
+                    if (flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
+                        updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters);
+                    } else {
+                        LOGGER.info("Flow {} was handled by another node {}, current node ID is {}, abandoning.",
+                                flow.getFlowId(), flowLog.getCloudbreakNodeId(), nodeId);
+                        inMemoryCleanup.cancelFlowWithoutDbUpdate(flow.getFlowId());
+                        flowCancelled.setTrue();
+                    }
+                });
             });
-            flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
+            if (!flowCancelled.booleanValue()) {
+                flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
+            }
         } else {
             LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getResourceId(), flowId, key);
         }
