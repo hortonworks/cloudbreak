@@ -62,7 +62,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
 
     private String createFailedCommandResultString(ApiCommand cmd) {
         String resultMessage = cmd.getResultMessage();
-        List<String> detailedMessages = parseResultMessageFromChildren(cmd.getChildren());
+        List<String> detailedMessages = ApiCommandUtil.getFailedCommandMessages(cmd.getChildren());
         ApiHostRef hostRef = cmd.getHostRef();
         String hostRefStr = hostRef == null ? "Unknown" : hostRef.getHostname();
         return "Command [" + cmd.getName() + ":" + cmd.getId() + "] failed on host [" + hostRefStr + "]: " + resultMessage +

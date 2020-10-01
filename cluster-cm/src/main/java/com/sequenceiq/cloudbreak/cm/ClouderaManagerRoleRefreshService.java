@@ -23,6 +23,7 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -41,16 +42,25 @@ class ClouderaManagerRoleRefreshService {
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
     void refreshClusterRoles(ApiClient client, Stack stack) throws ApiException, CloudbreakException {
-        LOGGER.debug("Cluster role refresh has been started.");
         waitForGenerateCredentialsToFinish(stack, client);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         ApiCommand refreshCommand = clustersResourceApi.refresh(stack.getCluster().getName());
+        LOGGER.debug("Cluster role refresh has been started.");
         pollingRefresh(refreshCommand, client, stack);
         LOGGER.debug("Cluster role refresh finished successfully.");
     }
 
     private void pollingRefresh(ApiCommand command, ApiClient client, Stack stack) throws CloudbreakException {
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, client, command.getId());
+        PollingResult pollingResult = PollingResult.SUCCESS;
+        try {
+            pollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, client, command.getId());
+        } catch (CloudbreakServiceException e) {
+            if (ClouderaManagerOperationFailedException.class.equals(e.getCause().getClass())) {
+                LOGGER.warn("Ignored failed refresh command. Upscale will continue.", e);
+            } else {
+                throw e;
+            }
+        }
         if (isExited(pollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for cluster refresh");
         } else if (isTimeout(pollingResult)) {

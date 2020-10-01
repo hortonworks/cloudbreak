@@ -30,8 +30,8 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
             return true;
         } else {
             String resultMessage = apiCommand.getResultMessage();
-            List<String> detailedMessages = parseResultMessageFromChildren(apiCommand.getChildren());
-            String message = "Command [" + getCommandName() + "] failed: " + resultMessage + ". Detailed messages: " + String.join("\n", detailedMessages);
+            List<String> failedMessages = ApiCommandUtil.getFailedCommandMessages(apiCommand.getChildren());
+            String message = "Command [" + getCommandName() + "] failed: " + resultMessage + ". Detailed messages: " + String.join("\n", failedMessages);
             LOGGER.info(message);
             throw new ClouderaManagerOperationFailedException(message);
         }
@@ -40,4 +40,6 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     protected String getOperationIdentifier(T pollerObject) {
         return String.valueOf(pollerObject.getId());
     }
+
+    protected abstract String getCommandName();
 }
