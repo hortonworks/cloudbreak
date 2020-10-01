@@ -46,6 +46,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
@@ -53,6 +54,7 @@ import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.flow.ha.NodeConfig;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.opentracing.Scope;
@@ -149,6 +151,12 @@ public class Flow2HandlerTest {
 
     @Mock
     private SpanContext spanContext;
+
+    @Mock
+    private NodeConfig nodeConfig;
+
+    @Mock
+    private InMemoryCleanup inMemoryCleanup;
 
     private FlowState flowState;
 
@@ -264,6 +272,26 @@ public class Flow2HandlerTest {
         FlowParameters flowParameters = flowParamsCaptor.getValue();
         assertEquals(FLOW_ID, flowParameters.getFlowId());
         assertNull(flowParameters.getFlowTriggerUserCrn());
+    }
+
+    @Test
+    public void testChangedNodeId() {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setNextEvent("KEY");
+        lastFlowLog.setCloudbreakNodeId("OtherNode");
+        Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(nodeConfig.getId()).willReturn("CurrentNode");
+        given(runningFlows.get(anyString())).willReturn(flow);
+        given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+
+        dummyEvent.setKey("KEY");
+        underTest.accept(dummyEvent);
+        verify(flowLogService, never()).save(any(), any(), any(), any(), any(), any(), any());
+        verify(flow, never()).sendEvent(any(), any(), any(), any());
+        verify(inMemoryCleanup, times(1)).cancelFlowWithoutDbUpdate(FLOW_ID);
     }
 
     @Test

@@ -19,8 +19,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryResourceStateStore;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -31,11 +29,11 @@ import com.sequenceiq.cloudbreak.ha.service.FlowDistributor;
 import com.sequenceiq.cloudbreak.ha.service.NodeService;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.flowlog.RestartFlowService;
+import com.sequenceiq.flow.cleanup.InMemoryCleanup;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -72,9 +70,6 @@ public class HeartbeatService {
     private FlowRegister runningFlows;
 
     @Inject
-    private FlowChains flowChains;
-
-    @Inject
     private MetricService metricService;
 
     @Inject
@@ -89,6 +84,9 @@ public class HeartbeatService {
 
     @Inject
     private ApplicationFlowInformation applicationFlowInformation;
+
+    @Inject
+    private InMemoryCleanup inMemoryCleanup;
 
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
@@ -114,7 +112,7 @@ public class HeartbeatService {
                 });
             } catch (Retry.ActionFailedException af) {
                 LOGGER.error("Failed to update the heartbeat timestamp 5 times for node {}: {}", nodeId, af.getMessage());
-                cancelEveryFlowWithoutDbUpdate();
+                inMemoryCleanup.cancelEveryFlowWithoutDbUpdate();
             }
 
             cancelInvalidFlows();
@@ -260,21 +258,6 @@ public class HeartbeatService {
             }
         }
         return Collections.emptyList();
-    }
-
-    private void cancelEveryFlowWithoutDbUpdate() {
-        for (String resourceType : InMemoryResourceStateStore.getResourceTypes()) {
-            for (Long resourceId : InMemoryResourceStateStore.getAllResourceId(resourceType)) {
-                InMemoryResourceStateStore.putResource(resourceType, resourceId, PollGroup.CANCELLED);
-            }
-        }
-        for (String id : runningFlows.getRunningFlowIds()) {
-            String flowChainId = runningFlows.getFlowChainId(id);
-            if (flowChainId != null) {
-                flowChains.removeFullFlowChain(flowChainId);
-            }
-            runningFlows.remove(id);
-        }
     }
 
     private void cancelRunningFlow(Long resourceId) {
