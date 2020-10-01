@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Properties;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -31,6 +30,8 @@ import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
+import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -78,8 +79,8 @@ public class DatabaseConfig {
     @Value("${environment.hibernate.debug:false}")
     private boolean debug;
 
-    @Value("${environment.hibernate.statistics:true}")
-    private boolean statistics;
+    @Value("${environment.hibernate.circuitbreaker:LOG}")
+    private CircuitBreakerType circuitBreakerType;
 
     @Inject
     @Named("databaseAddress")
@@ -133,7 +134,8 @@ public class DatabaseConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(jpaProperties());
+        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create("hibernate.hbm2denvironment.auto", hbm2ddlStrategy,
+                debug, dbSchemaName, circuitBreakerType));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();
     }
@@ -157,20 +159,4 @@ public class DatabaseConfig {
             }
         }
     }
-
-    private Properties jpaProperties() {
-        Properties properties = new Properties();
-        properties.setProperty("hibernate.hbm2denvironment.auto", hbm2ddlStrategy);
-        properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
-        properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
-        properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
-        if (statistics) {
-            properties.setProperty("hibernate.session.events.auto", "com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneLogger");
-        }
-        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
-        properties.setProperty("hibernate.default_schema", dbSchemaName);
-        properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
-        return properties;
-    }
-
 }

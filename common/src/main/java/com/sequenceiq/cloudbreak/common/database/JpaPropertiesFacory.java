@@ -1,0 +1,44 @@
+package com.sequenceiq.cloudbreak.common.database;
+
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
+import com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneCircuitBreaker;
+import com.sequenceiq.cloudbreak.common.tx.HibernateNPlusOneLogger;
+
+public class JpaPropertiesFacory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JpaPropertiesFacory.class);
+
+    private JpaPropertiesFacory() {
+    }
+
+    public static Properties create(String hbm2ddlPropertyName, String hbm2ddlStrategy,
+            boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType) {
+        Properties properties = new Properties();
+        properties.setProperty(hbm2ddlPropertyName, hbm2ddlStrategy);
+        properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
+        properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        properties.setProperty("hibernate.default_schema", dbSchemaName);
+        properties.setProperty("hibernate.jdbc.lob.non_contextual_creation", Boolean.toString(true));
+
+        LOGGER.info("Hibernate NPlusOne Circuit Breaker type: {}", circuitBreakerType);
+        switch (circuitBreakerType) {
+            case LOG:
+                properties.setProperty("hibernate.session.events.auto", HibernateNPlusOneLogger.class.getName());
+                break;
+            case BREAK:
+                properties.setProperty("hibernate.session.events.auto", HibernateNPlusOneCircuitBreaker.class.getName());
+                break;
+            default:
+                LOGGER.info("Hibernate NPlusOne Circuit Breaker is disabled!");
+        }
+        LOGGER.info("JPA Properties: {}", properties);
+        return properties;
+    }
+}
