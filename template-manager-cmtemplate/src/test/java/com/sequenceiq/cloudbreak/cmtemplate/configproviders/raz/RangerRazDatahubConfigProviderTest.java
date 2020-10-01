@@ -202,4 +202,42 @@ public class RangerRazDatahubConfigProviderTest {
         assertEquals(0, additionalServices.size());
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.2 DH is used and product details contains null as CM details at template generation before datahub cluster creations")
+    void getAdditionalServicesWhenCmDetailsIsNullInProductDetails(String testCaseName, CloudPlatform cloudPlatform) {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(cloudPlatform)
+                .withProductDetails(null, null)
+                .withDataLakeView(new DatalakeView(true))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("razCloudPlatformDataProvider")
+    @DisplayName("CM 7.2.2 DH is used and product details is missing at template generation before datahub cluster creations")
+    void getAdditionalServicesWhenProductDetailsIsMissing(String testCaseName, CloudPlatform cloudPlatform) {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        HostgroupView master = new HostgroupView("master", 0, InstanceGroupType.GATEWAY, List.of());
+        HostgroupView worker = new HostgroupView("worker", 0, InstanceGroupType.CORE, List.of());
+        TemplatePreparationObject preparationObject = Builder.builder()
+                .withStackType(StackType.WORKLOAD)
+                .withCloudPlatform(cloudPlatform)
+                .withDataLakeView(new DatalakeView(true))
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withHostgroupViews(Set.of(master, worker))
+                .build();
+        Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
+
+        assertEquals(0, additionalServices.size());
+    }
 }
