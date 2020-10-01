@@ -10,8 +10,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
@@ -34,9 +32,6 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private StackDownscaleValidatorService downscaleValidatorService;
-
-    @Inject
-    private CommonPermissionCheckingUtils permissionCheckingUtils;
 
     @Inject
     private CmTemplateValidator cmTemplateValidator;
@@ -138,7 +133,6 @@ public class UpdateNodeCountValidator {
     }
 
     public InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack, Long workspaceId, User user) {
-        permissionCheckingUtils.checkPermissionForUser(AuthorizationResourceAction.DATAHUB_WRITE, user.getUserCrn());
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
