@@ -134,11 +134,8 @@ public class SdxController implements SdxEndpoint {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<SdxCluster> sdxClusters = sdxService.listSdx(userCrn, envName);
         return sdxClusters.stream()
-                .map(sdxCluster -> {
-                    SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-                    sdxService.setAdditionalClusterResponseFields(sdxClusterResponse, sdxCluster);
-                    return sdxClusterResponse;
-                }).collect(Collectors.toList());
+                .map(sdx -> sdxClusterConverter.sdxClusterToResponse(sdx))
+                .collect(Collectors.toList());
     }
 
     @Override

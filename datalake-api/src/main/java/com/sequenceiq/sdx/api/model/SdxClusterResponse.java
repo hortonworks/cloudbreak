@@ -51,7 +51,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
-            boolean rangerRazEnabled, Map<String, String> tags) {
+            boolean rangerRazEnabled, Map<String, String> tags, CloudPlatform cloudPlatform) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -65,6 +65,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.runtime = runtime;
         this.rangerRazEnabled = rangerRazEnabled;
         this.tags = tags;
+        this.cloudPlatform = cloudPlatform;
     }
 
     public String getCrn() {

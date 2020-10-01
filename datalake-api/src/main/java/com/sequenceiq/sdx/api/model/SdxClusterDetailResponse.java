@@ -18,7 +18,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                 sdxClusterResponse.getEnvironmentCrn(), sdxClusterResponse.getStackCrn(),
                 sdxClusterResponse.getClusterShape(), sdxClusterResponse.getCloudStorageBaseLocation(),
                 sdxClusterResponse.getCloudStorageFileSystemType(), sdxClusterResponse.getRuntime(),
-                sdxClusterResponse.getRangerRazEnabled(), sdxClusterResponse.getTags());
+                sdxClusterResponse.getRangerRazEnabled(), sdxClusterResponse.getTags(), stackV4Response.getCloudPlatform());
         this.stackV4Response = stackV4Response;
     }
 

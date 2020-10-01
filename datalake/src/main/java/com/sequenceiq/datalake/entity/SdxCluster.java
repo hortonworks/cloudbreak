@@ -15,12 +15,14 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.converter.CloudPlatformConverter;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
 import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -105,6 +107,10 @@ public class SdxCluster implements AccountIdAwareResource {
 
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
+
+    @Column(name = "cloud_platform")
+    @Convert(converter = CloudPlatformConverter.class)
+    private CloudPlatform cloudPlatform;
 
     public Long getId() {
         return id;
@@ -319,6 +325,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.rangerRazEnabled = rangerRazEnabled;
     }
 
+    public CloudPlatform getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(CloudPlatform cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -345,14 +359,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
                 databaseAvailabilityType == that.databaseAvailabilityType &&
-                rangerRazEnabled == that.rangerRazEnabled;
+                rangerRazEnabled == that.rangerRazEnabled &&
+                cloudPlatform == that.cloudPlatform;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled);
+                databaseAvailabilityType, rangerRazEnabled, cloudPlatform);
     }
 
     @Override
@@ -367,6 +382,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 ", createDatabase=" + createDatabase +
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", cloudPlatform=" + cloudPlatform +
                 '}';
     }
 

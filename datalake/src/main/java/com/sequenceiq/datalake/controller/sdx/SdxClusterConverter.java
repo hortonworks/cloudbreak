@@ -49,6 +49,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setDatabaseServerCrn(sdxCluster.getDatabaseCrn());
         sdxClusterResponse.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
         sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
+        sdxClusterResponse.setCloudPlatform(sdxCluster.getCloudPlatform());
         return sdxClusterResponse;
     }
 
