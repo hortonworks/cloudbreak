@@ -9,6 +9,9 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -27,6 +30,8 @@ public class InstanceGroupV1Request extends InstanceGroupV1Base {
     private InstanceTemplateV1Request template;
 
     @ApiModelProperty(HostGroupModelDescription.RECIPE_NAMES)
+    @ResourceObjectField(action = AuthorizationResourceAction.DESCRIBE_RECIPE,
+            variableType = AuthorizationVariableType.NAME_LIST, skipAuthzOnNull = true)
     private Set<String> recipeNames = new HashSet<>();
 
     public InstanceTemplateV1Request getTemplate() {

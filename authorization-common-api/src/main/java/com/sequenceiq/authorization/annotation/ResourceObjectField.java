@@ -14,4 +14,6 @@ public @interface ResourceObjectField {
     AuthorizationResourceAction action();
 
     AuthorizationVariableType variableType();
+
+    boolean skipAuthzOnNull() default false;
 }

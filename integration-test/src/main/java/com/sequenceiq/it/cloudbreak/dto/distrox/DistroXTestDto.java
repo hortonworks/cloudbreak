@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -268,6 +269,13 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                     spot.setPercentage(spotPercentage);
                     aws.setSpot(spot);
                 });
+        return this;
+    }
+
+    public DistroXTestDto withRecipe(String recipeName) {
+        InstanceGroupV1Request instanceGroupV1Request = getRequest().getInstanceGroups().iterator().next();
+        instanceGroupV1Request.setRecipeNames(Sets.newHashSet());
+        instanceGroupV1Request.getRecipeNames().add(recipeName);
         return this;
     }
 
