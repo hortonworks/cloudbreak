@@ -33,11 +33,14 @@ import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -47,8 +50,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
@@ -167,15 +168,18 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
-                Map<HostName, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
-                LOGGER.debug("Cluster '{}' state check, cm running, hoststates: {}", stack.getId(), hostStatuses);
+                ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+                Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
+                LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
+                        stack.getId(), extendedHostStatuses.isHostCertExpiring(), hostStatuses);
                 reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(hostStatuses, runningInstances),
-                        getNewHealthyHostNames(hostStatuses, runningInstances), InstanceSyncState.RUNNING);
+                        getNewHealthyHostNames(hostStatuses, runningInstances), extendedHostStatuses.isHostCertExpiring());
             } else {
-                syncInstances(stack, runningInstances, InstanceSyncState.DELETED_ON_PROVIDER_SIDE);
+                syncInstances(stack, runningInstances);
             }
         } catch (RuntimeException e) {
-            syncInstances(stack, runningInstances, InstanceSyncState.DELETED_ON_PROVIDER_SIDE);
+            LOGGER.warn("Error during sync", e);
+            syncInstances(stack, runningInstances);
         }
     }
 
@@ -185,20 +189,26 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,
-            Set<String> newHealtyHostNames, InstanceSyncState defaultState) {
+            Set<String> newHealtyHostNames, boolean hostCertExpiring) {
         Set<String> newFailedNodeNames = failedInstances.stream()
                 .filter(i -> !Set.of(SERVICES_UNHEALTHY, STOPPED).contains(i.getInstanceStatus()))
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
-        ifFlowNotRunning(() -> clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames));
-        ifFlowNotRunning(() -> {
-            if (!failedInstances.isEmpty()) {
-                clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
-            } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
-                clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
-            }
-        });
-        syncInstances(stack, runningInstances, failedInstances, defaultState);
+        ifFlowNotRunning(() -> updateStates(stack, failedInstances, newFailedNodeNames, newHealtyHostNames, hostCertExpiring));
+        syncInstances(stack, runningInstances, failedInstances, InstanceSyncState.RUNNING);
+    }
+
+    private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Set<String> newFailedNodeNames, Set<String> newHealtyHostNames,
+            boolean hostCertExpiring) {
+        LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
+                failedInstances, newFailedNodeNames, newHealtyHostNames, hostCertExpiring);
+        clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
+        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
+        if (!failedInstances.isEmpty()) {
+            clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
+        } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
+            clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
+        }
     }
 
     private void ifFlowNotRunning(Runnable function) {
@@ -208,7 +218,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         function.run();
     }
 
-    private EnumSet statesFromAvailabeAllowed() {
+    private EnumSet<Status> statesFromAvailabeAllowed() {
         return EnumSet.of(
                 Status.AMBIGUOUS,
                 Status.STOPPED,
@@ -224,8 +234,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING);
     }
 
-    private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
-        syncInstances(stack, instanceMetaData, instanceMetaData, defaultState);
+    private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData) {
+        syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE);
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,

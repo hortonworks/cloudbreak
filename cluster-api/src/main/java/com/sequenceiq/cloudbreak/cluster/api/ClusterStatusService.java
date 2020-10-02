@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 
 public interface ClusterStatusService {
@@ -18,7 +19,7 @@ public interface ClusterStatusService {
      */
     Map<HostName, ClusterManagerState.ClusterManagerStatus> getHostStatuses();
 
-    Map<HostName, ClusterManagerState> getExtendedHostStatuses();
+    ExtendedHostStatuses getExtendedHostStatuses();
 
     Map<HostName, String> getHostStatusesRaw();
 

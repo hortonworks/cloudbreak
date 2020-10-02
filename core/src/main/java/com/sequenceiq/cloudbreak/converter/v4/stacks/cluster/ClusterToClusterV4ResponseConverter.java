@@ -97,6 +97,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
         clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
+        clusterResponse.setCertExpirationState(source.getCertExpirationState());
         return clusterResponse;
     }
 

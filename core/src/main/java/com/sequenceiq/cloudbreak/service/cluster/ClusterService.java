@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.HOST_CERT_EXPIRING;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.VALID;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -326,7 +329,9 @@ public class ClusterService {
                     Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
             return stack.getCluster();
         } else {
-            Map<HostName, ClusterManagerState> hostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses();
+            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isHostCertExpiring());
+            Map<HostName, ClusterManagerState> hostStatuses = extendedHostStatuses.getHostHealth();
             try {
                 return transactionService.required(() -> {
                     List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, hostStatuses);
@@ -368,6 +373,16 @@ public class ClusterService {
                     instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
                     return instanceMetaData;
                 }).collect(Collectors.toList());
+    }
+
+    public void updateClusterCertExpirationState(Cluster cluster, boolean hostCertificateExpiring) {
+        if (VALID == cluster.getCertExpirationState() && hostCertificateExpiring) {
+            LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), HOST_CERT_EXPIRING);
+            repository.updateCertExpirationState(cluster.getId(), HOST_CERT_EXPIRING);
+        } else if (HOST_CERT_EXPIRING == cluster.getCertExpirationState() && !hostCertificateExpiring) {
+            LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), VALID);
+            repository.updateCertExpirationState(cluster.getId(), VALID);
+        }
     }
 
     public Cluster prepareCluster(Collection<HostGroup> hostGroups, Blueprint blueprint, Stack stack, Cluster cluster) {

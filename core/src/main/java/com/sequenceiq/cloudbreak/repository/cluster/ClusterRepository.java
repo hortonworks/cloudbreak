@@ -8,9 +8,11 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -46,4 +48,8 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
 
     @Query("SELECT COUNT(c) FROM Cluster c WHERE c.workspace.id = :workspaceId AND c.environmentCrn = :environmentCrn AND c.status != 'DELETE_COMPLETED'")
     Long countAliveOnesByWorkspaceAndEnvironment(@Param("workspaceId") Long workspaceId, @Param("environmentCrn") String environmentCrn);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.certExpirationState = :state WHERE c.id = :id")
+    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
 }

@@ -37,6 +37,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ConfigStrategyConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ExecutorTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
@@ -224,6 +226,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
+
+    @Convert(converter = CertExpirationStateConverter.class)
+    private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -744,6 +749,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setIdBroker(IdBroker idBroker) {
         this.idBroker = idBroker;
+    }
+
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
     }
 
     @Override

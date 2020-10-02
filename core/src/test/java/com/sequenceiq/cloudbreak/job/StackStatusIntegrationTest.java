@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
@@ -176,7 +177,7 @@ class StackStatusIntegrationTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
 
         hostStatuses = new HashMap<>();
-        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(hostStatuses);
+        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(new ExtendedHostStatuses(hostStatuses, false));
     }
 
     @Test
@@ -201,6 +202,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
 
         verify(instanceMetaDataService, never()).save(any());
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any());
@@ -229,6 +231,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
 
         assertInstancesSavedWithStatuses(Map.of(INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
@@ -259,6 +262,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
 
         assertInstancesSavedWithStatuses(Map.of(
                 INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
@@ -290,6 +294,7 @@ class StackStatusIntegrationTest {
         verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
+        verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
 
         assertInstancesSavedWithStatuses(Map.of(
                 INSTANCE_1, InstanceStatus.DELETED_BY_PROVIDER,
