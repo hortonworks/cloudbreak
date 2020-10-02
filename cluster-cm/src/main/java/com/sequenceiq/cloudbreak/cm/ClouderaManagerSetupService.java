@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
@@ -330,7 +331,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             try {
                 // addRepositories - if true the parcels repositories in the cluster template
                 // will be added.
-                ApiCommand apiCommand = clouderaManagerResourceApi.importClusterTemplate(!prewarmed, apiClusterTemplate);
+                ApiCommand apiCommand = clouderaManagerResourceApi
+                        .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
                 ClusterCommand clusterCommand = new ClusterCommand();
                 clusterCommand.setClusterId(cluster.getId());
                 clusterCommand.setCommandId(apiCommand.getId());
@@ -343,6 +345,14 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             }
         }
         importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
+    }
+
+    private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {
+        boolean addRepositories = !prewarmed;
+        if (isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_2_0)) {
+            addRepositories = true;
+        }
+        return addRepositories;
     }
 
     private Optional<ApiCluster> getCmClusterByName(String name) throws ApiException {
