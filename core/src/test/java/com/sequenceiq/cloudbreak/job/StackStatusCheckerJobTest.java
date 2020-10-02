@@ -14,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.After;
@@ -30,13 +31,19 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
+import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -46,10 +53,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
-import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
-import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackStatusCheckerJobTest {
@@ -103,12 +107,6 @@ public class StackStatusCheckerJobTest {
     private Workspace workspace;
 
     @Mock
-    private EnvironmentServiceCrnEndpoints environmentServiceCrnEndpoints;
-
-    @Mock
-    private CredentialEndpoint credentialEndpoint;
-
-    @Mock
     private InstanceMetaData instanceMetaData;
 
     @Before
@@ -122,6 +120,7 @@ public class StackStatusCheckerJobTest {
         workspace = new Workspace();
         workspace.setId(1L);
         stack.setWorkspace(workspace);
+        stack.setCluster(new Cluster());
         user = new User();
         user.setUserId("1");
         stack.setCreator(user);
@@ -177,6 +176,7 @@ public class StackStatusCheckerJobTest {
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), anySet(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
     }
 
     @Test
@@ -199,6 +199,9 @@ public class StackStatusCheckerJobTest {
     private void setupForCM() {
         setStackStatus(DetailedStackStatus.AVAILABLE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(clusterStatusResult);
+        ClusterManagerState clusterManagerState = new ClusterManagerState(ClusterManagerStatus.HEALTHY, null);
+        ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), clusterManagerState), true);
+        when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }

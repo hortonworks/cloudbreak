@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -117,6 +118,9 @@ public class ClusterV4Response implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
+
+    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    private CertExpirationState certExpirationState;
 
     public Long getId() {
         return id;
@@ -348,5 +352,13 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setRangerRazEnabled(boolean rangerRazEnabled) {
         this.rangerRazEnabled = rangerRazEnabled;
+    }
+
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
     }
 }

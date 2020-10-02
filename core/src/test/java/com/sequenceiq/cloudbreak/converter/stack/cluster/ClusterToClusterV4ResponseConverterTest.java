@@ -24,6 +24,7 @@ import org.springframework.core.convert.ConversionService;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
@@ -81,6 +82,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         getSource().setBlueprint(new Blueprint());
         getSource().setExtendedBlueprintText("asdf");
         getSource().setFqdn("some.fqdn");
+        getSource().setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
         given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
         given(stackUtil.extractClusterManagerAddress(any(Stack.class))).willReturn("some.fqdn");
         Cluster source = getSource();
@@ -97,6 +99,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         // THEN
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
+        assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
 
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway");
         assertAllFieldsNotNull(result, skippedFields);
