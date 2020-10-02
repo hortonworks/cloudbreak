@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.network;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.HashMap;
@@ -55,7 +56,11 @@ public class CloudNetworkService {
             Map<String, String> filter = new HashMap<>();
             filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
-            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
+            boolean createFireWallRule = false;
+            if (!isNullOrEmpty(environmentDto.getSecurityAccess().getCidr())) {
+                createFireWallRule = true;
+            }
+            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
             buildSubnetIdFilter(network, filter);
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(), network, filter);
@@ -82,7 +87,11 @@ public class CloudNetworkService {
             Map<String, String> filter = new HashMap<>();
             filter.put(GcpStackUtil.NETWORK_ID, network.getGcp().getNetworkId());
             filter.put(GcpStackUtil.SHARED_PROJECT_ID, network.getGcp().getSharedProjectId());
-            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules())));
+            boolean createFireWallRule = false;
+            if (!isNullOrEmpty(environment.getCidr())) {
+                createFireWallRule = true;
+            }
+            filter.put(GcpStackUtil.NO_FIREWALL_RULES, String.valueOf(!createFireWallRule));
             filter.put(GcpStackUtil.NO_PUBLIC_IP, String.valueOf(Boolean.TRUE.equals(network.getGcp().getNoPublicIp())));
             buildSubnetIdFilter(network, filter);
             return fetchCloudNetwork(environment.getRegionSet(), environment.getCredential(), environment.getCloudPlatform(), network, filter);
@@ -127,7 +136,8 @@ public class CloudNetworkService {
     }
 
     private boolean isNetworkNameMatches(NetworkDto network, CloudSubnet cs, String cloudPlatform) {
-        return network.getSubnetIds().contains(cs.getName()) && isGcp(cloudPlatform);
+        return (network.getSubnetIds().contains(cs.getName()) || network.getSubnetIds().contains(cs.getId()))
+                && isGcp(cloudPlatform);
     }
 
     private boolean isNetworkIdMatches(NetworkDto network, CloudSubnet cs, String cloudPlatform) {
