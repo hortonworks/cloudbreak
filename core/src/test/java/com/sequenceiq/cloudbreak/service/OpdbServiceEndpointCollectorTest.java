@@ -256,7 +256,7 @@ public class OpdbServiceEndpointCollectorTest {
         cluster.setGateway(gateway);
         Blueprint blueprint = new Blueprint();
         try {
-            String testBlueprint = FileReaderUtils.readFileFromClasspath("/defaults/blueprints/cdp-opdb-720.bp");
+            String testBlueprint = FileReaderUtils.readFileFromClasspath("/defaults/blueprints/7.2.0/cdp-opdb.bp");
             blueprint.setBlueprintText(testBlueprint);
         } catch (IOException e) {
             throw new RuntimeException(e);
