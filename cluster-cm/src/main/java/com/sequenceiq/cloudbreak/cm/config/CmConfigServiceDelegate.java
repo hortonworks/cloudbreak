@@ -19,4 +19,12 @@ interface CmConfigServiceDelegate {
             apiRole.getConfig().getItems().add(apiConfig);
         }
     }
+
+    default ApiConfig createApiConfig(String name, String value) {
+        ApiConfig apiConfig = new ApiConfig();
+        apiConfig.setName(name);
+        apiConfig.setValue(value);
+        apiConfig.setSensitive(false);
+        return apiConfig;
+    }
 }
