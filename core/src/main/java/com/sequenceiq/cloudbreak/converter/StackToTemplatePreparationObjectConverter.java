@@ -217,7 +217,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withProductDetails(cm, products)
                     .withExposedServices(views)
-                    .withDefaultTags(getStackUserDefinedTags(source))
+                    .withDefaultTags(getStackTags(source))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
@@ -235,7 +235,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         }
     }
 
-    private Map<String, String> getStackUserDefinedTags(Stack source) throws IOException {
+    private Map<String, String> getStackTags(Stack source) throws IOException {
         Map<String, String> userDefinedTags = new HashMap<>();
         if (source.getTags() != null) {
             StackTags stackTags = source.getTags().get(StackTags.class);

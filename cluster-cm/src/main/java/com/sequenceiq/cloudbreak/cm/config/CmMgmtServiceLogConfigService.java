@@ -5,7 +5,6 @@ import java.util.Objects;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
@@ -19,15 +18,8 @@ class CmMgmtServiceLogConfigService implements CmConfigServiceDelegate {
     @Override
     public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
         if (Objects.nonNull(apiRoleList) && !CollectionUtils.isEmpty(apiRoleList.getItems())) {
-            apiRoleList.getItems().forEach(apiRole -> addConfig(apiRole, createApiConfig()));
+            apiRoleList.getItems().forEach(apiRole -> addConfig(apiRole,
+                    createApiConfig(CmMgmtServiceLogConfigService.MAX_LOG_BACKUP_INDEX, CmMgmtServiceLogConfigService.VALUE)));
         }
-    }
-
-    private ApiConfig createApiConfig() {
-        ApiConfig apiConfig = new ApiConfig();
-        apiConfig.setName(CmMgmtServiceLogConfigService.MAX_LOG_BACKUP_INDEX);
-        apiConfig.setValue(CmMgmtServiceLogConfigService.VALUE);
-        apiConfig.setSensitive(false);
-        return apiConfig;
     }
 }

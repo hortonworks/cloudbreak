@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
-import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.MgmtRolesResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -33,8 +31,6 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.config.CmConfigService;
 import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
@@ -55,13 +51,12 @@ public class ClouderaManagerMgmtSetupService {
 
     private static final String MGMT_SERVICE = "MGMT";
 
-    private static final String REPORTSMANAGER = "REPORTSMANAGER";
-
-    // This map contains the roles and their internal config name that's necessary for setting database config values
-    private static final Map<String, String> ROLE_TYPE_TO_INTERNAL_NAME = ImmutableMap.of(REPORTSMANAGER, "headlamp");
-
     private static final List<String> BLACKLISTED_ROLE_TYPES = ImmutableList.of(
-            ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER, "NAVIGATOR", "NAVIGATORMETASERVER", "ACTIVITYMONITOR");
+            ClouderaManagerMgmtTelemetryService.TELEMETRYPUBLISHER,
+            "NAVIGATOR",
+            "NAVIGATORMETASERVER",
+            "ACTIVITYMONITOR",
+            "REPORTSMANAGER");
 
     private static final String GENERATE_CREDENTIALS_COMMAND_NAME = "GenerateCredentials";
 
@@ -127,7 +122,6 @@ public class ClouderaManagerMgmtSetupService {
         telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn, proxyConfig);
-        createMgmtDatabases(apiClient, rdsConfigs);
         waitForGenerateCredentialsToFinish(stack, apiClient);
         setUpAutoConfiguration(mgmtServiceResourceApi);
     }
@@ -177,36 +171,6 @@ public class ClouderaManagerMgmtSetupService {
                 throw ex;
             }
         }
-    }
-
-    private void createMgmtDatabases(ApiClient apiClient, Set<RDSConfig> rdsConfigs) throws ApiException {
-        MgmtRolesResourceApi mgmtRolesResourceApi = clouderaManagerApiFactory.getMgmtRolesResourceApi(apiClient);
-        List<ApiRole> installedRoles = mgmtRolesResourceApi.readRoles().getItems();
-        for (ApiRole role : installedRoles) {
-            String roleType = role.getType();
-            Optional<RDSConfig> rdsConfig = Optional.empty();
-            if (REPORTSMANAGER.equals(roleType)) {
-                rdsConfig = findDbConfig(DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER, rdsConfigs);
-            }
-            if (rdsConfig.isPresent()) {
-                updateDatabaseForComponent(apiClient, roleType, rdsConfig.get());
-            }
-        }
-    }
-
-    private Optional<RDSConfig> findDbConfig(DatabaseType databaseType, Set<RDSConfig> rdsConfigs) {
-        return rdsConfigs.stream()
-                .filter(dbConfig -> databaseType.name().equals(dbConfig.getType()))
-                .findFirst();
-    }
-
-    private void updateDatabaseForComponent(ApiClient apiClient, String roleType, RDSConfig rdsConfig)
-            throws ApiException {
-        MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient);
-        String internalRoleTypeName = ROLE_TYPE_TO_INTERNAL_NAME.get(roleType);
-        mgmtRoleConfigGroupsResourceApi.updateConfig(getBaseRoleConfigGroupName(roleType),
-                "Adding database settings",
-                buildApiConfigList(internalRoleTypeName, rdsConfig));
     }
 
     /**
