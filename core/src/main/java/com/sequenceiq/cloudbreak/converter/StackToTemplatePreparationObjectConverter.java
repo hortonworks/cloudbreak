@@ -58,15 +58,12 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
-import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
-import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -135,9 +132,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
     @Inject
-    private CostTagging defaultCostTaggingService;
-
-    @Inject
     private ServiceEndpointCollector serviceEndpointCollector;
 
     @Inject
@@ -151,9 +145,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
-
-    @Inject
-    private AccountTagClientService accountTagClientService;
 
     @Inject
     private ResourceService resourceService;
@@ -210,18 +201,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                             accountId,
                             source.getEnvironmentCrn(),
                             MDCUtils.getRequestId());
-            boolean internalTenant = entitlementService.internalTenant(source.getCreator().getUserCrn(), accountId);
-            CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
-                    .withCreatorCrn(source.getCreator().getUserCrn())
-                    .withEnvironmentCrn(source.getEnvironmentCrn())
-                    .withPlatform(source.getCloudPlatform())
-                    .withAccountId(accountId)
-                    .withIsInternalTenant(internalTenant)
-                    .withResourceCrn(source.getResourceCrn())
-                    .withUserName(source.getCreator().getUserName())
-                    .withAccountTags(accountTagClientService.list())
-                    .withUserDefinedTags(getStackUserDefinedTags(source))
-                    .build();
 
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
@@ -238,7 +217,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withKerberosConfig(kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null))
                     .withProductDetails(cm, products)
                     .withExposedServices(views)
-                    .withDefaultTags(defaultCostTaggingService.prepareDefaultTags(request))
+                    .withDefaultTags(getStackUserDefinedTags(source))
                     .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
@@ -258,8 +237,19 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     private Map<String, String> getStackUserDefinedTags(Stack source) throws IOException {
         Map<String, String> userDefinedTags = new HashMap<>();
-        if (source.getTags() != null && source.getTags().get(StackTags.class) != null) {
-            userDefinedTags = source.getTags().get(StackTags.class).getUserDefinedTags();
+        if (source.getTags() != null) {
+            StackTags stackTags = source.getTags().get(StackTags.class);
+            if (stackTags != null) {
+                StackTags stackTag = source.getTags().get(StackTags.class);
+                Map<String, String> userDefined = stackTag.getUserDefinedTags();
+                Map<String, String> defaultTags = stackTag.getDefaultTags();
+                if (userDefined != null) {
+                    userDefinedTags.putAll(userDefined);
+                }
+                if (defaultTags != null) {
+                    userDefinedTags.putAll(defaultTags);
+                }
+            }
         }
         return userDefinedTags;
     }
