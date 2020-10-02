@@ -14,6 +14,9 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -60,6 +63,8 @@ public class DistroXClusterV1Request implements Serializable {
     @NotNull
     @NotEmpty
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    @ResourceObjectField(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE,
+            variableType = AuthorizationVariableType.NAME)
     private String blueprintName;
 
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)

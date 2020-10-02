@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,7 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -59,6 +61,7 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
@@ -264,31 +267,45 @@ public class EnforceAuthorizationLogicsUtil {
         return ctx -> {
             Method method = ctx.getKey();
             Class<?> type = ctx.getValue();
-            boolean hasValidField = false;
-            for (Field field : FieldUtils.getFieldsWithAnnotation(type, ResourceObjectField.class)) {
-                ResourceObjectField annotation = field.getAnnotation(ResourceObjectField.class);
-                if (Set.of(CRN, NAME).contains(annotation.variableType())) {
-                    if (String.class.equals(field.getType())) {
-                        hasValidField = true;
-                    } else {
-                        return Optional.of(invalid(method, field.getName()
-                                + " @" + ResourceObjectField.class + " must be a String in " + type.getSimpleName()));
-                    }
-                } else if (Set.of(CRN_LIST, NAME_LIST).contains(annotation.variableType())) {
-                    if (isOneOf(field, list(String.class), set(String.class))) {
-                        hasValidField = true;
-                    } else {
-                        return Optional.of(invalid(method, field.getName()
-                                + " @" + ResourceObjectField.class + " must be a Set<String> or List<String> in " + type.getSimpleName()));
-                    }
+            AtomicInteger annotatedFieldCount = new AtomicInteger(0);
+            List<String> errorMessages = Lists.newArrayList();
+            checkField(type, method, errorMessages, annotatedFieldCount);
+            if (annotatedFieldCount.get() == 0) {
+                return Optional.of(invalid(method, "Missing @" + ResourceObjectField.class + " annotation in " + type.getSimpleName()));
+            } else if (!errorMessages.isEmpty()) {
+                return Optional.of(Joiner.on(",").join(errorMessages));
+            }
+            return Optional.empty();
+        };
+    }
+
+    private static void checkField(Class type, Method method, List<String> errorMessages, AtomicInteger annotatedFieldCount) {
+        for (Field field : FieldUtils.getFieldsWithAnnotation(type, ResourceObjectField.class)) {
+            annotatedFieldCount.incrementAndGet();
+            ResourceObjectField annotation = field.getAnnotation(ResourceObjectField.class);
+            if (Set.of(CRN, NAME).contains(annotation.variableType())) {
+                if (!String.class.equals(field.getType())) {
+                    errorMessages.add(invalid(method, field.getName()
+                            + " @" + ResourceObjectField.class.getSimpleName()
+                            + " must be a String in " + type.getSimpleName()));
+                }
+            } else if (Set.of(CRN_LIST, NAME_LIST).contains(annotation.variableType())) {
+                if (!isOneOf(field, list(String.class), set(String.class))) {
+                    errorMessages.add(invalid(method, field.getName()
+                            + " @" + ResourceObjectField.class.getSimpleName()
+                            + " must be a Set<String> or List<String> in " + type.getSimpleName()));
                 }
             }
-            if (hasValidField) {
-                return Optional.empty();
-            } else {
-                return Optional.of(invalid(method, "Missing @" + ResourceObjectField.class + " annotaion in " + type.getSimpleName()));
+        }
+        if (method.getAnnotation(CheckPermissionByResourceObject.class).deepSearchNeeded()) {
+            for (Field field : FieldUtils.getFieldsWithAnnotation(type, ResourceObjectFieldHolder.class)) {
+                if (Collection.class.isAssignableFrom(field.getType())) {
+                    checkField((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0], method, errorMessages, annotatedFieldCount);
+                } else {
+                    checkField(field.getType(), method, errorMessages, annotatedFieldCount);
+                }
             }
-        };
+        }
     }
 
     private static boolean isOneOf(Field field, GenericType... genericTypes) {

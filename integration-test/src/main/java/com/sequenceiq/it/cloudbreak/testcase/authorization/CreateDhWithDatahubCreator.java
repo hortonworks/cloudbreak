@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -26,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -49,6 +53,9 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
     @Inject
     private UtilTestClient utilTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -88,6 +95,14 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                         RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
                                 "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
                 .validate();
+        String recipe1Name = testContext
+                .given(RecipeTestDto.class).valid()
+                .when(recipeTestClient.createV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .getResponse().getName();
+        String recipe2Name = testContext
+                .given(RecipeTestDto.class).valid()
+                .when(recipeTestClient.createV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .getResponse().getName();
         testContext
                 .given(EnvironmentTestDto.class)
                 .given(UmsTestDto.class)
@@ -98,8 +113,14 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
+                .withRecipe(recipe1Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .awaitForFlow(RunningParameter.key("DistroXCreateAction"))
+                .expect(ForbiddenException.class,
+                        RunningParameter.expectedMessage("You have no right to perform environments/useSharedResource*")
+                                .withKey("DistroXCreateAction"))
+                .withRecipe(recipe2Name)
+                .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .awaitForFlow(key("DistroXCreateAction"))
                 .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .validate();
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());

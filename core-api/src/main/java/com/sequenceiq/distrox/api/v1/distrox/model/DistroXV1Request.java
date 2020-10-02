@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
@@ -33,13 +34,16 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     private String environmentName;
 
     @Valid
+    @ResourceObjectFieldHolder
     private Set<InstanceGroupV1Request> instanceGroups;
 
+    @ResourceObjectFieldHolder
     private DistroXImageV1Request image;
 
     private NetworkV1Request network;
 
     @Valid
+    @ResourceObjectFieldHolder
     private DistroXClusterV1Request cluster;
 
     private SdxV1Request sdx;
