@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -46,6 +49,10 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentNetworkServiceTest {
@@ -166,6 +173,29 @@ class EnvironmentNetworkServiceTest {
         assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
     }
 
+    @ParameterizedTest
+    @EnumSource(value = ResourceGroupUsagePattern.class, names = {"USE_SINGLE", "USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT"})
+    void testDeleteNetworkShouldNotDeleteResourceGroupWhenUsagePatternSingle(ResourceGroupUsagePattern resourceGroupUsagePattern) {
+        CloudCredential cloudCredential = new CloudCredential("1", "credName");
+        EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup", "mySingleRg", resourceGroupUsagePattern);
+
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
+        when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
+        when(networkCreationRequestFactory.getStackName(any())).thenReturn(STACK_NAME);
+
+        underTest.deleteNetwork(environmentDto);
+
+        ArgumentCaptor<NetworkDeletionRequest> argumentCaptor = ArgumentCaptor.forClass(NetworkDeletionRequest.class);
+
+        verify(networkConnector).deleteNetworkWithSubnets(argumentCaptor.capture());
+
+        assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
+        assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
+        assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
+        assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
+        assertTrue(argumentCaptor.getValue().isSingleResourceGroup());
+    }
+
     @Test
     void testGetNetworkCidr() {
         Credential credential = mock(Credential.class);
@@ -204,6 +234,10 @@ class EnvironmentNetworkServiceTest {
     }
 
     private EnvironmentDto createEnvironmentDto(String resourceGroup) {
+        return createEnvironmentDto(resourceGroup, null, ResourceGroupUsagePattern.USE_MULTIPLE);
+    }
+
+    private EnvironmentDto createEnvironmentDto(String resourceGroup, String singleRgName, ResourceGroupUsagePattern resourceGroupUsagePattern) {
         return EnvironmentDto.builder()
                 .withCloudPlatform(CLOUD_PLATFORM)
                 .withCredential(new Credential())
@@ -215,6 +249,16 @@ class EnvironmentNetworkServiceTest {
                                 .withResourceGroupName(resourceGroup)
                                 .build())
                         .build())
+                .withParameters(
+                        ParametersDto.builder().withAzureParameters(
+                                AzureParametersDto.builder().withResourceGroup(
+                                        AzureResourceGroupDto.builder()
+                                                .withResourceGroupUsagePattern(resourceGroupUsagePattern)
+                                                .withName(singleRgName)
+                                                .build()
+                                ).build()
+                        ).build()
+                )
                 .build();
     }
 }
