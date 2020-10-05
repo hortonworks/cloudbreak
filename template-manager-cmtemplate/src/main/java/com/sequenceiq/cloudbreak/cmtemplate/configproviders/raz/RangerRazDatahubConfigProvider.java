@@ -18,6 +18,8 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return StackType.WORKLOAD == source.getStackType()
                 && (CloudPlatform.AWS == source.getCloudPlatform() || CloudPlatform.AZURE == source.getCloudPlatform())
+                && source.getProductDetailsView() != null
+                && source.getProductDetailsView().getCm() != null
                 && CMRepositoryVersionUtil.isRazConfigurationSupportedInDatahub(source.getProductDetailsView().getCm())
                 && source.getDatalakeView().isPresent()
                 && source.getDatalakeView().get().isRazEnabled();

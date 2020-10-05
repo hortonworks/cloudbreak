@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -51,7 +52,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
         Stack stack = stackService.getStackById(stackId);
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null && telemetry.isClusterLogsCollectionEnabled()) {
-            altusMachineUserService.cleanupMachineUser(stack, telemetry);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> altusMachineUserService.cleanupMachineUser(stack, telemetry));
         } else {
             LOGGER.info("Machine user cleanup is not needed.");
         }
