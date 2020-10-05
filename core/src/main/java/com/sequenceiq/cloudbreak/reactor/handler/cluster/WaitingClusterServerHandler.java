@@ -39,7 +39,7 @@ public class WaitingClusterServerHandler implements EventHandler<WaitForClusterS
         Selectable response;
         try {
             Stack stack = stackService.getByIdWithTransaction(stackId);
-            clusterApiConnectors.getConnector(stack).waitForServer(stack);
+            clusterApiConnectors.getConnector(stack).waitForServer(stack, true);
             response = new WaitForAmbariServerSuccess(stackId);
         } catch (Exception e) {
             response = new WaitForAmbariServerFailed(stackId, e);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT;
 
 import java.util.Map;
@@ -19,6 +20,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterManagerServerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterManagerServerSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCMCARotationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterHostCertificatesRotationSuccess;
@@ -62,11 +67,43 @@ public class ClusterCertificatesRotationActions {
         };
     }
 
-    @Bean(name = "CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE")
-    public Action<?, ?> clusterCertificatesRotationFinishedAction() {
+    @Bean(name = "CLUSTER_CERTIFICATES_RESTART_CM_STATE")
+    public Action<?, ?> clusterManagerRestartAction() {
         return new AbstractStackCreationAction<>(ClusterHostCertificatesRotationSuccess.class) {
             @Override
             protected void doExecute(StackContext context, ClusterHostCertificatesRotationSuccess payload, Map<Object, Object> variables) {
+                clusterCertificatesRotationService.restartClusterManager(payload.getResourceId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new RestartClusterManagerServerRequest(context.getStack().getId(), false, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_CERTIFICATES_RESTART_CLUSTER_SERVICES_STATE")
+    public Action<?, ?> clusterServicesRestartAction() {
+        return new AbstractStackCreationAction<>(RestartClusterManagerServerSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, RestartClusterManagerServerSuccess payload, Map<Object, Object> variables) {
+                clusterCertificatesRotationService.restartClusterServices(payload.getResourceId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new RestartClusterServicesRequest(context.getStack().getId(), true, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE")
+    public Action<?, ?> clusterCertificatesRotationFinishedAction() {
+        return new AbstractStackCreationAction<>(RestartClusterServicesSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, RestartClusterServicesSuccess payload, Map<Object, Object> variables) {
                 clusterCertificatesRotationService.certificatesRotationFinished(payload.getResourceId());
                 sendEvent(context);
             }

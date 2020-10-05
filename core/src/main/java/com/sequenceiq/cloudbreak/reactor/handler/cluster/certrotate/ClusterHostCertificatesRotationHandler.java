@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.certrotate.ClusterCertificatesRotationFailed;
@@ -45,7 +46,8 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            apiConnectors.getConnector(stack).rotateHostCertificates();
+            ClusterApi clusterApi = apiConnectors.getConnector(stack);
+            clusterApi.rotateHostCertificates();
             result = new ClusterHostCertificatesRotationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager host certificates rotation failed", e);

@@ -293,6 +293,8 @@ public enum ResourceEvent {
     CLUSTER_CERTIFICATE_RENEWAL_FAILED("cluster.certificate.renewal.failed"),
     CLUSTER_CERTIFICATES_ROTATION_STARTED("cluster.certificates.rotation.started"),
     CLUSTER_HOST_CERTIFICATES_ROTATION("cluster.host.certificates.rotation"),
+    CLUSTER_MANAGER_SERVER_RESTARTING("cluster.manager.server.restarting"),
+    CLUSTER_SERVICES_RESTARTING("cluster.services.restarting"),
     CLUSTER_CERTIFICATES_ROTATION_FINISHED("cluster.certificates.rotation.finished"),
     CLUSTER_CERTIFICATES_ROTATION_FAILED("cluster.certificates.rotation.failed"),
 

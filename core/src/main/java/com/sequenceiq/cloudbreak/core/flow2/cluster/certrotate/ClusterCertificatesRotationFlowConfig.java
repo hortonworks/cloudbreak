@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_CLUSTER_SERVICES_RESTART_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_CM_RESTART_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_HOST_CERTIFICATES_ROTATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_HOST_CERTIFICATES_ROTATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_RESTART_CLUSTER_SERVICES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_RESTART_CM_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_ROTATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CMCA_ROTATION_STATE;
@@ -31,8 +35,12 @@ public class ClusterCertificatesRotationFlowConfig extends AbstractFlowConfigura
                         .noFailureEvent()
                     .from(CLUSTER_CMCA_ROTATION_STATE).to(CLUSTER_HOST_CERTIFICATES_ROTATION_STATE).event(CLUSTER_HOST_CERTIFICATES_ROTATION_EVENT)
                         .defaultFailureEvent()
-                    .from(CLUSTER_HOST_CERTIFICATES_ROTATION_STATE).to(CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE)
+                    .from(CLUSTER_HOST_CERTIFICATES_ROTATION_STATE).to(CLUSTER_CERTIFICATES_RESTART_CM_STATE)
                         .event(CLUSTER_HOST_CERTIFICATES_ROTATION_FINISHED_EVENT).defaultFailureEvent()
+                    .from(CLUSTER_CERTIFICATES_RESTART_CM_STATE).to(CLUSTER_CERTIFICATES_RESTART_CLUSTER_SERVICES_STATE)
+                        .event(CLUSTER_CERTIFICATES_CM_RESTART_FINISHED_EVENT).defaultFailureEvent()
+                    .from(CLUSTER_CERTIFICATES_RESTART_CLUSTER_SERVICES_STATE).to(CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE)
+                        .event(CLUSTER_CERTIFICATES_CLUSTER_SERVICES_RESTART_FINISHED_EVENT).defaultFailureEvent()
                     .from(CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_CERTIFICATES_ROTATION_FINISHED_EVENT)
                         .defaultFailureEvent()
                     .build();

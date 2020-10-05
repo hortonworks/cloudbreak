@@ -20,8 +20,8 @@ public interface ClusterApi {
 
     String CLOUDERA_MANAGER = "CLOUDERA_MANAGER";
 
-    default void waitForServer(Stack stack) throws CloudbreakException, ClusterClientInitException {
-        clusterSetupService().waitForServer();
+    default void waitForServer(Stack stack, boolean defaultClusterManagerAuth) throws CloudbreakException, ClusterClientInitException {
+        clusterSetupService().waitForServer(defaultClusterManagerAuth);
     }
 
     default String getSdxContext() {
@@ -104,8 +104,8 @@ public interface ClusterApi {
         clusterModificationService().cleanupCluster(telemetry);
     }
 
-    default void restartAll() throws CloudbreakException {
-        clusterModificationService().restartAll();
+    default void restartAll(boolean withMgmtServices) throws CloudbreakException {
+        clusterModificationService().restartAll(withMgmtServices);
     }
 
     default void rotateHostCertificates() throws CloudbreakException {

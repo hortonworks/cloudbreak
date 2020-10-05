@@ -70,7 +70,7 @@ class ClusterUpscaleServiceTest {
         clusterUpscaleService.installServicesOnNewHosts(1L, "master", true, true);
 
         verify(clusterApi, times(1)).upscaleCluster(eq(hostGroup), any());
-        verify(clusterApi, times(1)).restartAll();
+        verify(clusterApi, times(1)).restartAll(false);
     }
 
     @Test
@@ -98,7 +98,7 @@ class ClusterUpscaleServiceTest {
         clusterUpscaleService.installServicesOnNewHosts(1L, "master", true, true);
 
         verify(clusterApi, times(1)).upscaleCluster(eq(hostGroup), any());
-        verify(clusterApi, times(0)).restartAll();
+        verify(clusterApi, times(0)).restartAll(false);
     }
 
 }

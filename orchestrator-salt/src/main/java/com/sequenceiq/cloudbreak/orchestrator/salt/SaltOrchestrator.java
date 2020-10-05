@@ -101,6 +101,8 @@ SaltOrchestrator implements HostOrchestrator {
 
     private static final String DATABASE_RESTORE = "postgresql.disaster_recovery.restore";
 
+    private static final String CM_SERVER_RESTART = "cloudera.manager.restart";
+
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
     private static final String DISK_COMMON = "format-and-mount-common.sh";
@@ -571,6 +573,20 @@ SaltOrchestrator implements HostOrchestrator {
     @Override
     public void startClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) {
         LOGGER.debug("Start cluster manager is not implemented, yet");
+    }
+
+    @Override
+    public void restartClusterManagerOnMaster(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            StateRunner stateRunner = new StateRunner(target, allNodes, CM_SERVER_RESTART);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during CM Server restart", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
