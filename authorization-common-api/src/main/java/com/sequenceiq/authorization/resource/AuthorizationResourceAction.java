@@ -77,6 +77,7 @@ public enum AuthorizationResourceAction {
     DESCRIBE_AUDIT_CREDENTIAL("environments/describeAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     MODIFY_AUDIT_CREDENTIAL("environments/modifyAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     POWERUSER_ONLY("cloudbreak/allowPowerUserOnly", null),
+    LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),
