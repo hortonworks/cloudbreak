@@ -44,6 +44,22 @@ public class ClusterCertificatesRotationService {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_HOST_CERTIFICATES_ROTATION);
     }
 
+    void restartClusterManager(long stackId) {
+        String statusReason = "The restart of CM server after the host certificates rotation has been started.";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, statusReason);
+        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_MANAGER_SERVER_RESTARTING);
+    }
+
+    void restartClusterServices(long stackId) {
+        String statusReason = "The restart of cluster services after the host certificates rotation has been started.";
+        LOGGER.debug(statusReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, statusReason);
+        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SERVICES_RESTARTING);
+    }
+
     void certificatesRotationFinished(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Rotation of the cluster's certificates finished.");

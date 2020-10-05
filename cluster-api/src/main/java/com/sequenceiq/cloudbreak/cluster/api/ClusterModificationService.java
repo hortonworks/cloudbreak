@@ -59,7 +59,7 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    default void restartAll() {
+    default void restartAll(boolean withMgmtServices) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

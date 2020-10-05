@@ -106,7 +106,7 @@ public class ClusterUpscaleService {
         if (shouldRestartServices(repair, restartServices, stack)) {
             try {
                 LOGGER.info("Trying to restart services");
-                connector.restartAll();
+                connector.restartAll(false);
             } catch (RuntimeException e) {
                 LOGGER.info("Restart services failed", e);
             }
@@ -174,7 +174,7 @@ public class ClusterUpscaleService {
     public void restartAll(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Restart all in ambari");
-        getClusterConnector(stack).restartAll();
+        getClusterConnector(stack).restartAll(false);
     }
 
     private ClusterApi getClusterConnector(Stack stack) {

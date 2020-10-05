@@ -146,8 +146,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForServer() throws CloudbreakException, ClusterClientInitException {
-        ApiClient client = createApiClient();
+    public void waitForServer(boolean defaultClusterManagerAuth) throws CloudbreakException, ClusterClientInitException {
+        ApiClient client = defaultClusterManagerAuth ? createApiClient() : apiClient;
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, client);
         if (isSuccess(pollingResult)) {
             LOGGER.debug("Cloudera Manager server has successfully started! Polling result: {}", pollingResult);

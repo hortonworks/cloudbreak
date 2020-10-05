@@ -18,7 +18,7 @@ public interface ClusterSetupService {
 
     String BEAN_POST_TAG = "PRE_CLUSTER";
 
-    void waitForServer() throws CloudbreakException, ClusterClientInitException;
+    void waitForServer(boolean defaultClusterManagerAuth) throws CloudbreakException, ClusterClientInitException;
 
     String prepareTemplate(
         Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
