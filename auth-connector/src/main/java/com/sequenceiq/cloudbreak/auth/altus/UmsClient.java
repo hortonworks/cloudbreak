@@ -253,10 +253,12 @@ public class UmsClient {
      * @param accountId                the account ID
      * @param machineUserNameOrCrnList a list of users to list. If null or empty then all users will be listed
      * @param includeInternal          whether to include internal machine users
+     * @param includeWorkloadMachineUsers whether to include workload machine users
      * @return the list of machine users
      */
     public List<MachineUser> listMachineUsers(
-            String requestId, String accountId, List<String> machineUserNameOrCrnList, boolean includeInternal) {
+            String requestId, String accountId, List<String> machineUserNameOrCrnList,
+            boolean includeInternal, boolean includeWorkloadMachineUsers) {
 
         checkNotNull(requestId);
         checkNotNull(accountId);
@@ -266,6 +268,7 @@ public class UmsClient {
         ListMachineUsersRequest.Builder requestBuilder = ListMachineUsersRequest.newBuilder()
                 .setAccountId(accountId)
                 .setIncludeInternal(includeInternal)
+                .setIncludeWorkloadMachineUsers(includeWorkloadMachineUsers)
                 .setPageSize(umsClientConfig.getListMachineUsersPageSize());
 
         if (machineUserNameOrCrnList != null && !machineUserNameOrCrnList.isEmpty()) {
