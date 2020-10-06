@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigService;
@@ -46,7 +48,6 @@ import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigService;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 
 @Service
 public class FreeIpaInstallService {
@@ -159,7 +160,8 @@ public class FreeIpaInstallService {
                     databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
-                Optional<AltusCredential> credential = altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry);
+                Optional<AltusCredential> credential = ThreadBasedUserCrnProvider
+                        .doAsInternalActor(() -> altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry));
                 String accessKey = credential.map(AltusCredential::getAccessKey).orElse(null);
                 char[] privateKey = credential.map(AltusCredential::getPrivateKey).orElse(null);
                 DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,

@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -31,34 +32,24 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
     public <T extends Annotation> void checkPermissions(T rawMethodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
             MethodSignature methodSignature, long startTime) {
         // check fields of resourceObject
+        CheckPermissionByResourceObject methodAnnotation = (CheckPermissionByResourceObject) rawMethodAnnotation;
         Object resourceObject = getCommonPermissionCheckingUtils().getParameter(proceedingJoinPoint, methodSignature, ResourceObject.class, Object.class);
-        checkPermissionOnResourceObjectFields(userCrn, resourceObject);
+        checkPermissionOnResourceObjectFields(userCrn, resourceObject, methodAnnotation.deepSearchNeeded());
     }
 
-    private void checkPermissionOnResourceObjectFields(String userCrn, Object resourceObject) {
+    private void checkPermissionOnResourceObjectFields(String userCrn, Object resourceObject, boolean deepSearchNeeded) {
         Arrays.stream(FieldUtils.getFieldsWithAnnotation(resourceObject.getClass(), ResourceObjectField.class)).forEach(field -> {
             try {
                 field.setAccessible(true);
+                Object fieldObject = field.get(resourceObject);
                 ResourceObjectField resourceObjectField = field.getAnnotation(ResourceObjectField.class);
-                Object resultObject = field.get(resourceObject);
                 AuthorizationResourceAction action = resourceObjectField.action();
                 AuthorizationVariableType authorizationVariableType = resourceObjectField.variableType();
-                switch (authorizationVariableType) {
-                    case NAME:
-                        checkPermissionForResourceName(userCrn, resultObject, action);
-                        break;
-                    case CRN:
-                        checkPermissionForResourceCrn(userCrn, resultObject, action);
-                        break;
-                    case NAME_LIST:
-                        checkPermissionForResourceNameList(userCrn, resultObject, action);
-                        break;
-                    case CRN_LIST:
-                        checkPermissionForResourceCrnList(userCrn, resultObject, action);
-                        break;
-                    default:
-                        throw new AccessDeniedException("We cannot determine the type of field from authorization point of view, " +
-                                "thus access is denied!");
+                if (fieldObject != null) {
+                    checkObject(userCrn, action, authorizationVariableType, fieldObject);
+                } else if (!resourceObjectField.skipAuthzOnNull()) {
+                    throw new AccessDeniedException("One of the requestObject's field is null and it should be authorized, " +
+                            "thus should be filled in.");
                 }
             } catch (NotFoundException nfe) {
                 LOGGER.warn("Resource not found during permission check of resource object, this should be handled by microservice.");
@@ -70,6 +61,46 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
                 throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", t);
             }
         });
+        if (deepSearchNeeded) {
+            Arrays.stream(FieldUtils.getFieldsWithAnnotation(resourceObject.getClass(), ResourceObjectFieldHolder.class)).forEach(field -> {
+                try {
+                    field.setAccessible(true);
+                    Object fieldObject = field.get(resourceObject);
+                    if (Collection.class.isAssignableFrom(fieldObject.getClass())) {
+                        ((Collection) fieldObject).stream().forEach(collectionObject ->
+                                checkPermissionOnResourceObjectFields(userCrn, collectionObject, deepSearchNeeded));
+                    } else {
+                        checkPermissionOnResourceObjectFields(userCrn, fieldObject, deepSearchNeeded);
+                    }
+                } catch (Error | RuntimeException unchecked) {
+                    LOGGER.error("Error happened while traversing the resource object: ", unchecked);
+                    throw unchecked;
+                } catch (Throwable t) {
+                    LOGGER.error("Error happened while traversing the resource object: ", t);
+                    throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", t);
+                }
+            });
+        }
+    }
+
+    private void checkObject(String userCrn, AuthorizationResourceAction action, AuthorizationVariableType authorizationVariableType, Object resultObject) {
+        switch (authorizationVariableType) {
+            case NAME:
+                checkPermissionForResourceName(userCrn, resultObject, action);
+                break;
+            case CRN:
+                checkPermissionForResourceCrn(userCrn, resultObject, action);
+                break;
+            case NAME_LIST:
+                checkPermissionForResourceNameList(userCrn, resultObject, action);
+                break;
+            case CRN_LIST:
+                checkPermissionForResourceCrnList(userCrn, resultObject, action);
+                break;
+            default:
+                throw new AccessDeniedException("We cannot determine the type of field from authorization point of view, " +
+                        "thus access is denied!");
+        }
     }
 
     private void checkPermissionForResourceCrnList(String userCrn, Object resultObject, AuthorizationResourceAction action) {

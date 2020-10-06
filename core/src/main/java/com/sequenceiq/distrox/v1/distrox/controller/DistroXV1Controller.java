@@ -121,7 +121,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
+    @CheckPermissionByResourceObject(deepSearchNeeded = true)
     public StackV4Response post(@Valid @ResourceObject DistroXV1Request request) {
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),

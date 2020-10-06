@@ -71,10 +71,11 @@ public class GrpcUmsClient {
     @Inject
     private Tracer tracer;
 
-    public static GrpcUmsClient createClient(UmsConfig config, UmsClientConfig clientConfig) {
+    public static GrpcUmsClient createClient(UmsConfig config, UmsClientConfig clientConfig, Tracer tracer) {
         GrpcUmsClient client = new GrpcUmsClient();
         client.setUmsConfig(config);
         client.setUmsClientConfig(clientConfig);
+        client.setTracer(tracer);
         return client;
     }
 
@@ -853,6 +854,10 @@ public class GrpcUmsClient {
 
     private void setUmsConfig(UmsConfig umsConfig) {
         this.umsConfig = umsConfig;
+    }
+
+    public void setTracer(Tracer tracer) {
+        this.tracer = tracer;
     }
 
     private void setUmsClientConfig(UmsClientConfig umsClientConfig) {

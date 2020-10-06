@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceObjectField;
+import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 
@@ -67,7 +68,7 @@ public class ResourceObjectPermissionCheckerTest {
     public void testCheckPermissionsWithResourceObjectWithoutFieldAnnotation() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithoutAnnotation());
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), anyString(), anyString());
@@ -82,7 +83,7 @@ public class ResourceObjectPermissionCheckerTest {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("Annotated field within resource object is not string, thus access is denied!");
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils, times(0)).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
@@ -97,7 +98,7 @@ public class ResourceObjectPermissionCheckerTest {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithCrnAnnotation());
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString());
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         ArgumentCaptor<Map<String, AuthorizationResourceAction>> captor = ArgumentCaptor.forClass(Map.class);
@@ -110,11 +111,40 @@ public class ResourceObjectPermissionCheckerTest {
     }
 
     @Test
+    public void testCheckPermissionsWithResourceObjectWithDeeperFieldAnnotationOnCrnStringField() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithDeepCrnAnnotation());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString());
+
+        underTest.checkPermissions(getAnnotation(true), USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
+        ArgumentCaptor<Map<String, AuthorizationResourceAction>> captor = ArgumentCaptor.forClass(Map.class);
+        verify(commonPermissionCheckingUtils, times(2)).checkPermissionForUserOnResource(captor.capture(), eq(USER_CRN));
+        Map<String, AuthorizationResourceAction> capturedActions = captor.getValue();
+        assertEquals(1, capturedActions.keySet().size());
+        assertThat(capturedActions, IsMapContaining.hasEntry(RESOURCE_CRN, AuthorizationResourceAction.EDIT_CREDENTIAL));
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnByResourceName(anyString());
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnListByResourceNameList(any());
+    }
+
+    @Test
+    public void testCheckPermissionsWithResourceObjectWithDeeperFieldAnnotationOnCrnStringFieldWithoutDeepSearch() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithDeepCrnAnnotation());
+
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), any());
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnByResourceName(anyString());
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnListByResourceNameList(any());
+    }
+
+    @Test
     public void testCheckPermissionsWithResourceObjectWithFieldAnnotationOnCrnListStringField() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithCrnListAnnotation());
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), anyString(), any());
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
@@ -131,7 +161,7 @@ public class ResourceObjectPermissionCheckerTest {
         when(resourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(eq(datahubCrn))).thenReturn(Optional.of(envCrn));
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString());
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         ArgumentCaptor<Map<String, AuthorizationResourceAction>> captor = ArgumentCaptor.forClass(Map.class);
@@ -149,7 +179,7 @@ public class ResourceObjectPermissionCheckerTest {
         when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(any())).thenReturn(Lists.newArrayList(RESOURCE_CRN));
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResources(any(), anyString(), any());
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(eq(AuthorizationResourceAction.EDIT_CREDENTIAL), eq(USER_CRN), any());
@@ -167,7 +197,7 @@ public class ResourceObjectPermissionCheckerTest {
         thrown.expect(ForbiddenException.class);
         thrown.expectMessage("some error");
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
@@ -186,7 +216,7 @@ public class ResourceObjectPermissionCheckerTest {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("get out!");
 
-        underTest.checkPermissions(getAnnotation(), USER_CRN, null, null, 0L);
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
 
         verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
@@ -195,8 +225,13 @@ public class ResourceObjectPermissionCheckerTest {
         verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
     }
 
-    private CheckPermissionByResourceObject getAnnotation() {
+    private CheckPermissionByResourceObject getAnnotation(boolean deepSearch) {
         return new CheckPermissionByResourceObject() {
+
+            @Override
+            public boolean deepSearchNeeded() {
+                return deepSearch;
+            }
 
             @Override
             public Class<? extends Annotation> annotationType() {
@@ -240,6 +275,33 @@ public class ResourceObjectPermissionCheckerTest {
         }
     }
 
+    private static class ResourceObjectWithDeepCrnAnnotation {
+
+        @ResourceObjectFieldHolder
+        private InnerClass field = new InnerClass();
+
+        @ResourceObjectFieldHolder
+        private Set<InnerClass> fields = Sets.newHashSet(new InnerClass());
+
+        public InnerClass getField() {
+            return field;
+        }
+
+        public Set<InnerClass> getFields() {
+            return fields;
+        }
+
+        private static class InnerClass {
+
+            @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.CRN)
+            private String innerCrn = RESOURCE_CRN;
+
+            public String getInnerCrn() {
+                return innerCrn;
+            }
+        }
+    }
+
     private static class ResourceObjectWithNameListAnnotation {
         @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.NAME_LIST)
         private Set<String> field = Sets.newHashSet("resource");
@@ -260,7 +322,7 @@ public class ResourceObjectPermissionCheckerTest {
 
     private static class ResourceObjectWithNonStringAnnotation {
         @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.CRN)
-        private Object field;
+        private Object field = Integer.valueOf(0);
 
         public Object getField() {
             return field;
