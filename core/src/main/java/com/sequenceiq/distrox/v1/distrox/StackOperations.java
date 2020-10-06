@@ -359,9 +359,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return Optional.of(stackService.getByCrn(resourceCrn).getEnvironmentCrn());
     }
 
-    public CertificatesRotationV4Response rotateClusterCertificates(@NotNull NameOrCrn nameOrCrn, Long workspaceId,
+    public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, Long workspaceId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
-        LOGGER.debug("Starting cluster certificates rotation: " + nameOrCrn);
-        return clusterCommonService.rotateClusterCertificates(nameOrCrn, workspaceId, certificatesRotationV4Request);
+        LOGGER.debug("Starting cluster autotls certificates rotation: " + nameOrCrn);
+        return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, workspaceId, certificatesRotationV4Request);
     }
 }

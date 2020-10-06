@@ -36,6 +36,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -66,6 +67,9 @@ public class SdxRepairService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private AvailabilityChecker availabilityChecker;
 
     public FlowIdentifier triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
@@ -151,7 +155,7 @@ public class SdxRepairService {
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
-        if (stackAndClusterAvailable(stackV4Response, cluster)) {
+        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
@@ -176,12 +180,5 @@ public class SdxRepairService {
     private AttemptResult<StackV4Response> sdxRepairFailed(SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("SDX repair failed: " + statusReason);
         return AttemptResults.breakFor("SDX repair failed '" + sdxCluster.getClusterName() + "', " + statusReason);
-    }
-
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
     }
 }

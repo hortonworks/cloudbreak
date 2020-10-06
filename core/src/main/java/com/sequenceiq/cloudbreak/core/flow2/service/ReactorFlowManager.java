@@ -286,7 +286,7 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId));
     }
 
-    public FlowIdentifier triggerClusterCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
+    public FlowIdentifier triggerAutoTlsCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
         String selector = ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event();
         ClusterCertificatesRotationTriggerEvent clusterCertificatesRotationTriggerEvent = new ClusterCertificatesRotationTriggerEvent(selector, stackId,
                 certificatesRotationV4Request.getRotateCertificatesType());

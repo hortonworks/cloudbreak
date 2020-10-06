@@ -37,6 +37,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -66,6 +67,9 @@ public class SdxStartService {
 
     @Inject
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private AvailabilityChecker availabilityChecker;
 
     public FlowIdentifier triggerStartIfClusterNotRunning(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
@@ -129,7 +133,7 @@ public class SdxStartService {
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
-        if (stackAndClusterAvailable(stackV4Response, cluster)) {
+        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.START_FAILED.equals(stackV4Response.getStatus())) {
@@ -159,13 +163,6 @@ public class SdxStartService {
 
     private AttemptResult<StackV4Response> sdxStartFailed(SdxCluster sdxCluster, String statusReason) {
         return AttemptResults.breakFor("SDX start failed '" + sdxCluster.getClusterName() + "', " + statusReason);
-    }
-
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
     }
 
     private void checkFreeipaRunning(String envCrn) {

@@ -417,10 +417,10 @@ public interface StackV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
-    @Path("internal/{name}/rotate_certificates")
+    @Path("internal/{name}/rotate_autotls_certificates")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateCertificates")
-    CertificatesRotationV4Response rotateCertificates(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificates")
+    CertificatesRotationV4Response rotateAutoTlsCertificates(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @POST

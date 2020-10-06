@@ -44,6 +44,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -78,6 +79,9 @@ public class SdxStartServiceTest {
 
     @Mock
     private CloudbreakFlowService cloudbreakFlowService;
+
+    @Mock
+    private AvailabilityChecker availabilityChecker;
 
     @Test
     public void testTriggerStart() {
@@ -182,6 +186,7 @@ public class SdxStartServiceTest {
 
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
                 .thenReturn(stackV4Response);
+        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.TRUE);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -216,6 +221,7 @@ public class SdxStartServiceTest {
 
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
                 .thenReturn(stackV4Response);
+        when(availabilityChecker.stackAndClusterAvailable(eq(stackV4Response), any())).thenReturn(Boolean.FALSE);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -237,6 +243,7 @@ public class SdxStartServiceTest {
 
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
                 .thenReturn(stackV4Response);
+        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.FALSE);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -254,6 +261,7 @@ public class SdxStartServiceTest {
 
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
                 .thenReturn(stackV4Response);
+        when(availabilityChecker.stackAndClusterAvailable(eq(stackV4Response), any())).thenReturn(Boolean.FALSE);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 
@@ -275,6 +283,7 @@ public class SdxStartServiceTest {
 
         when(stackV4Endpoint.get(eq(0L), eq(sdxCluster.getClusterName()), eq(Collections.emptySet()), anyString()))
                 .thenReturn(stackV4Response);
+        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, clusterV4Response)).thenReturn(Boolean.FALSE);
 
         AttemptResult<StackV4Response> actual = underTest.checkClusterStatusDuringStart(sdxCluster);
 

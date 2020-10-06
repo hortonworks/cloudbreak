@@ -35,7 +35,10 @@ public enum DatalakeStatusEnum {
     STOP_FAILED(ResourceEvent.SDX_STOP_FAILED),
     STOPPED(ResourceEvent.SDX_STOP_FINISHED),
     CLUSTER_AMBIGUOUS(ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED),
-    SYNC_FAILED(ResourceEvent.SDX_SYNC_FAILED);
+    SYNC_FAILED(ResourceEvent.SDX_SYNC_FAILED),
+    CERT_ROTATION_IN_PROGRESS(ResourceEvent.SDX_CERT_ROTATION_STARTED),
+    CERT_ROTATION_FAILED(ResourceEvent.SDX_CERT_ROTATION_FAILED),
+    CERT_ROTATION_FINISHED(ResourceEvent.SDX_CERT_ROTATION_FINISHED);
 
     private ResourceEvent resourceEvent;
 
@@ -66,14 +69,15 @@ public enum DatalakeStatusEnum {
                 return PROVISIONING_FAILED;
             case STACK_DELETION_IN_PROGRESS:
             case EXTERNAL_DATABASE_DELETION_IN_PROGRESS:
+            case DELETE_REQUESTED:
                 return DELETE_FAILED;
             case REPAIR_IN_PROGRESS:
                 return REPAIR_FAILED;
             case CHANGE_IMAGE_IN_PROGRESS:
-            case DELETE_REQUESTED:
-                return DELETE_FAILED;
             case DATALAKE_UPGRADE_IN_PROGRESS:
                 return DATALAKE_UPGRADE_FAILED;
+            case CERT_ROTATION_IN_PROGRESS:
+                return CERT_ROTATION_FAILED;
             default:
                 return this;
         }

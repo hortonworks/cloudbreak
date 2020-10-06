@@ -499,7 +499,7 @@ public class ClusterOperationService {
         return flowManager.triggerPillarConfigurationUpdate(stack.getId());
     }
 
-    public FlowIdentifier rotateClusterCertificates(Stack stack, CertificatesRotationV4Request certificatesRotationV4Request) {
-        return flowManager.triggerClusterCertificatesRotation(stack.getId(), certificatesRotationV4Request);
+    public FlowIdentifier rotateAutoTlsCertificates(Stack stack, CertificatesRotationV4Request certificatesRotationV4Request) {
+        return flowManager.triggerAutoTlsCertificatesRotation(stack.getId(), certificatesRotationV4Request);
     }
 }

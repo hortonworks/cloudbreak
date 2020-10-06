@@ -278,12 +278,12 @@ public class ClusterCommonService {
         return clusterOperationService.updatePillarConfiguration(stack);
     }
 
-    public CertificatesRotationV4Response rotateClusterCertificates(NameOrCrn nameOrCrn, Long workspaceId,
+    public CertificatesRotationV4Response rotateAutoTlsCertificates(NameOrCrn nameOrCrn, Long workspaceId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         validateOperationOnStack(stack, "Certificates rotation");
-        return new CertificatesRotationV4Response(clusterOperationService.rotateClusterCertificates(stack, certificatesRotationV4Request));
+        return new CertificatesRotationV4Response(clusterOperationService.rotateAutoTlsCertificates(stack, certificatesRotationV4Request));
     }
 
     private void validateOperationOnStack(Stack stack, String operationDescription) {

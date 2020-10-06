@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CLI_COMMAND;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
@@ -52,6 +53,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -359,4 +362,17 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
             nickname = "renewDistroXCertificate")
     FlowIdentifier renewCertificate(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/rotate_autotls_certificates")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByName")
+    CertificatesRotationV4Response rotateAutoTlsCertificatesByName(@PathParam("name") String name,
+            @Valid CertificatesRotationV4Request rotateCertificateRequest);
+
+    @PUT
+    @Path("crn/{crn}/rotate_autotls_certificates")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
+    CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
 }
