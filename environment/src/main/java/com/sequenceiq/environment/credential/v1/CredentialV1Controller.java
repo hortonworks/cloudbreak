@@ -12,7 +12,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -42,7 +41,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@AuthorizationResource
 public class CredentialV1Controller extends NotificationController implements CredentialEndpoint {
 
     private final CredentialService credentialService;

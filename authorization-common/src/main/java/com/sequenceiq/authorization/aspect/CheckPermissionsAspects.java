@@ -21,8 +21,7 @@ public class CheckPermissionsAspects {
     @Inject
     private PermissionCheckService permissionCheckerService;
 
-    @Pointcut("within(@org.springframework.stereotype.Controller *) "
-            + "&& within(@com.sequenceiq.authorization.annotation.AuthorizationResource *)")
+    @Pointcut("within(@org.springframework.stereotype.Controller *)")
     public void allEndpoints() {
     }
 

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -48,7 +47,6 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Controller
-@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class EnvironmentPlatformResourceController implements EnvironmentPlatformResourceEndpoint {
 

@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -67,7 +66,6 @@ import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliReq
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
-@AuthorizationResource
 public class DistroXV1Controller implements DistroXV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXV1Controller.class);

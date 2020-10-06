@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -33,7 +32,6 @@ import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 
 @Controller
-@AuthorizationResource
 public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClusterV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXAutoScaleClusterV1Controller.class);

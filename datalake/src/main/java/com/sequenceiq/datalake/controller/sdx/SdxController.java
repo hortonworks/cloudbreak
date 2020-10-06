@@ -10,7 +10,6 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -51,7 +50,6 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 @Controller
-@AuthorizationResource
 public class SdxController implements SdxEndpoint {
 
     @Inject

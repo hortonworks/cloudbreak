@@ -6,7 +6,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
@@ -26,7 +25,6 @@ import com.sequenceiq.environment.telemetry.v1.converter.AccountTelemetryConvert
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@AuthorizationResource
 @Transactional(Transactional.TxType.NEVER)
 public class AccountTelemetryController extends NotificationController implements AccountTelemetryEndpoint {
 

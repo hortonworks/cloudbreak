@@ -5,7 +5,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -15,7 +14,6 @@ import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConv
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Controller
-@AuthorizationResource
 public class OperationV1Controller implements OperationV1Endpoint {
 
     @Inject

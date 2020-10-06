@@ -12,7 +12,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -57,7 +56,6 @@ import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
-@AuthorizationResource
 @AccountEntityType(Stack.class)
 public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 

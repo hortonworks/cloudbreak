@@ -14,11 +14,6 @@ public class EnforceAuthorizationAnnotationsTest {
     }
 
     @Test
-    public void testIfControllerClassHasAuthorizationAnnotation() {
-        EnforceAuthorizationLogicsUtil.testIfControllerClassHasAuthorizationAnnotation();
-    }
-
-    @Test
     public void testIfControllerMethodsHaveProperAuthorizationAnnotation() {
         EnforceAuthorizationLogicsUtil.testIfControllerMethodsHaveProperAuthorizationAnnotation(Set.of("ExampleAuthorizationResourceClass"));
     }

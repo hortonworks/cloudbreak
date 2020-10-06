@@ -2,8 +2,6 @@
 ## General
 Every controller class should be annotated with `@Controller`.
 
-Every controller should be annotated with `@AuthorizationResource` (or `DisabledCheckPermissions` if no need for authorization on that API).
-
 Every method of a controller should be annotated with one (or more if necessary) of the mentioned annotations below.
 
 ## Account level authorization
@@ -16,18 +14,17 @@ Every user who would like to do something regarding a resource should get an Res
 ### How can I add resource based authorization for my new API?
 
 1. Add `@Controller` annotation to the Controller class
-2. Add `@AuthorizationResource` to the Controller class
-3. Add the related UMS right to the UMS code
-4. Add the related action to the `AuthorizationResourceAction` enum list
-5. For the new enum value, please define
+2. Add the related UMS right to the UMS code
+3. Add the related action to the `AuthorizationResourceAction` enum list
+4. For the new enum value, please define
    - the right (used in UMS)
    - the resourceType, which should be a value from `AuthorizationResourceType` which controls, what logic should be called during authorization check to find out the CRN of the resource
-6. Fill in the necessary information about the action in [legacyRights.json](src/main/resources/legacyRights.json)
+5. Fill in the necessary information about the action in [legacyRights.json](src/main/resources/legacyRights.json)
    - add new entry to the map
    - key should be the same value used for the desired right as in UMS code
    - value should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
-7. Annotate your API method in Controller class with desired annotation, detailed explanation below.
-8. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
+6. Annotate your API method in Controller class with desired annotation, detailed explanation below.
+7. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
 
 ### How can I add resource based authorization for my new API endpoint?
 

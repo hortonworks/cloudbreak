@@ -7,7 +7,6 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceObject;
@@ -19,7 +18,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 
 @Controller
-@AuthorizationResource
 public class DiagnosticsController implements DiagnosticsEndpoint {
 
     @Inject

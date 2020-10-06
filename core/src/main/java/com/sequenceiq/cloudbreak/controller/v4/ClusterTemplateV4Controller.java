@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -47,7 +46,6 @@ import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 @Controller
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(ClusterTemplate.class)
-@AuthorizationResource
 public class ClusterTemplateV4Controller extends NotificationController implements ClusterTemplateV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4Controller.class);

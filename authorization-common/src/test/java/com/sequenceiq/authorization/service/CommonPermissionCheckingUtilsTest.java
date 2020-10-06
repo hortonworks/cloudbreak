@@ -14,7 +14,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -152,25 +150,6 @@ public class CommonPermissionCheckingUtilsTest {
         Assert.assertEquals(expected, result);
         verify(methodSignature, times(0)).toLongString();
         verify(proceedingJoinPoint, times(1)).proceed();
-    }
-
-    @Test
-    public void testGetAnnotation() {
-        assertFalse(underTest.getClassAnnotation(String.class).isPresent());
-        Optional<Annotation> classAnnotation = underTest.getClassAnnotation(ExampleAuthorizationResourceClass.class);
-        assertTrue(classAnnotation.isPresent());
-        assertTrue(classAnnotation.get().annotationType().equals(AuthorizationResource.class));
-    }
-
-    @Test
-    public void testGetAuthorizationClass() {
-        when(proceedingJoinPoint.getTarget()).thenReturn("");
-        assertFalse(underTest.getAuthorizationClass(proceedingJoinPoint).isPresent());
-
-        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleAuthorizationResourceClass());
-        Optional<Class<?>> authorizationClass = underTest.getAuthorizationClass(proceedingJoinPoint);
-        assertTrue(authorizationClass.isPresent());
-        assertEquals(ExampleAuthorizationResourceClass.class, authorizationClass.get());
     }
 
     @Test
@@ -314,7 +293,6 @@ public class CommonPermissionCheckingUtilsTest {
                 AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, List.of(RESOURCE_CRN));
     }
 
-    @AuthorizationResource
     private static class ExampleAuthorizationResourceClass {
 
         @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)

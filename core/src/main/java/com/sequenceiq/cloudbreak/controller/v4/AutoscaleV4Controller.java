@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -46,7 +45,6 @@ import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Controller
 @Transactional(TxType.NEVER)
-@AuthorizationResource
 public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleV4Controller.class);

@@ -2,9 +2,7 @@ package com.sequenceiq.authorization.service;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +26,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -160,17 +157,6 @@ public class CommonPermissionCheckingUtils {
         } catch (Throwable t) {
             throw new AccessDeniedException(t.getMessage(), t);
         }
-    }
-
-    Optional<Annotation> getClassAnnotation(Class<?> repositoryClass) {
-        return Arrays.stream(repositoryClass.getAnnotations())
-                .filter(a -> a.annotationType().equals(AuthorizationResource.class))
-                .findFirst();
-    }
-
-    public Optional<Class<?>> getAuthorizationClass(ProceedingJoinPoint proceedingJoinPoint) {
-        return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(AuthorizationResource.class)
-                ? Optional.of(proceedingJoinPoint.getTarget().getClass()) : Optional.empty();
     }
 
     public boolean isAuthorizationDisabled(ProceedingJoinPoint proceedingJoinPoint) {

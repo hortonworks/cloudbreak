@@ -9,7 +9,6 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -29,7 +28,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCredential
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@AuthorizationResource
 public class AuditCredentialV1Controller extends NotificationController implements AuditCredentialEndpoint {
 
     private final CredentialService credentialService;

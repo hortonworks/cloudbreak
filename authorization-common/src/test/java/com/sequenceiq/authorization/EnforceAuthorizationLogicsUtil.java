@@ -44,7 +44,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -112,25 +111,12 @@ public class EnforceAuthorizationLogicsUtil {
                 controllersWithoutAnnotation.isEmpty());
     }
 
-    public static void testIfControllerClassHasAuthorizationAnnotation() {
-        Set<String> controllersClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class).stream().map(Class::getSimpleName).collect(Collectors.toSet());
-        Set<String> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(AuthorizationResource.class)
-                .stream().map(Class::getSimpleName).collect(Collectors.toSet());
-        Set<String> disabledAuthorizationClasses = Sets.union(
-                REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class).stream().map(Class::getSimpleName).collect(Collectors.toSet()),
-                REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class).stream().map(Class::getSimpleName).collect(Collectors.toSet()));
-        Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses,
-                Sets.union(authorizationResourceClasses, disabledAuthorizationClasses));
-
-        assertTrue("These controllers are missing @AuthorizationResource annotation: " + Joiner.on(",").join(controllersWithoutAnnotation),
-                controllersWithoutAnnotation.isEmpty());
-    }
-
     public static void testIfControllerMethodsHaveProperAuthorizationAnnotation(Set<String> exclude) {
-        Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(AuthorizationResource.class);
-        List<String> validationErrors = authorizationResourceClasses
+        Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class);
+        Set<Class<?>> disabledAuthzOrInternalOnlyClasses = Sets.union(REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class),
+                REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class));
+        List<String> validationErrors = Sets.difference(authorizationResourceClasses, Sets.union(exclude, disabledAuthzOrInternalOnlyClasses))
                 .stream()
-                .filter(clazz -> !exclude.contains(clazz.getSimpleName()))
                 .map(Class::getDeclaredMethods)
                 .flatMap(Arrays::stream)
                 .filter(method -> Modifier.isPublic(method.getModifiers()))

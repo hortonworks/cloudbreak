@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceObject;
@@ -21,7 +20,6 @@ import com.sequenceiq.freeipa.service.diagnostics.DiagnosticsTriggerService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
-@AuthorizationResource
 public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsV1Controller.class);

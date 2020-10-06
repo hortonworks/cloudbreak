@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -71,19 +70,7 @@ public class PermissionCheckServiceTest {
     }
 
     @Test
-    public void testHasPermissionIfAnnotationIsNotPresent() throws NoSuchMethodException {
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.empty());
-        when(methodSignature.getMethod()).thenReturn(String.class.getMethod("length"));
-
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no access to this resource.");
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
-    }
-
-    @Test
     public void testHasPermissionIfAuthorizationDisabled() throws NoSuchMethodException {
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorization"));
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
@@ -94,7 +81,6 @@ public class PermissionCheckServiceTest {
 
     @Test
     public void testHasPermissionIfThereAreTooManyAnnotationOnMethod() throws NoSuchMethodException {
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
@@ -105,7 +91,6 @@ public class PermissionCheckServiceTest {
 
     @Test
     public void testHasPermission() throws NoSuchMethodException {
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("correctMethod"));
         when(permissionChecker.supportedAnnotation()).thenReturn(CheckPermissionByAccount.class);
         doNothing().when(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
@@ -120,7 +105,6 @@ public class PermissionCheckServiceTest {
 
     @Test
     public void testInternalOnlyIfNotInternalActor() throws NoSuchMethodException {
-        when(commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint)).thenReturn(Optional.of(ExampleClass.class));
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
         when(permissionChecker.supportedAnnotation()).thenReturn(InternalOnly.class);
 
