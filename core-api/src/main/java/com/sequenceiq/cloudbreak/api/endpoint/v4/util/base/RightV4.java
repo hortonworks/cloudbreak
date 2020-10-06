@@ -16,14 +16,20 @@ public enum RightV4 {
     ENV_START(AuthorizationResourceAction.START_ENVIRONMENT),
     ENV_STOP(AuthorizationResourceAction.STOP_ENVIRONMENT),
     ENV_DELETE(AuthorizationResourceAction.DELETE_ENVIRONMENT),
+    ENV_DESCRIBE(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT),
     CHANGE_CRED(AuthorizationResourceAction.CHANGE_CREDENTIAL),
     DH_CREATE(AuthorizationResourceAction.CREATE_DATAHUB),
     // dh level
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),
     DH_DELETE(AuthorizationResourceAction.DELETE_DATAHUB),
+    DH_REPAIR(AuthorizationResourceAction.REPAIR_DATAHUB),
+    DH_RESIZE(AuthorizationResourceAction.SCALE_DATAHUB),
+    DH_RETRY(AuthorizationResourceAction.RETRY_DATAHUB_OPERATION),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
+    SDX_REPAIR(AuthorizationResourceAction.REPAIR_DATALAKE),
+    SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     // resource level
     LIST_ASSIGNED_ROLES(AuthorizationResourceAction.LIST_ASSIGNED_ROLES),
     // legacy
