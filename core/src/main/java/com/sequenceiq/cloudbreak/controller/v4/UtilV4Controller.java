@@ -8,7 +8,10 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AuthorizationResource;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckResourceRightsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
@@ -40,7 +43,7 @@ import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
 @Controller
-@DisableCheckPermissions
+@AuthorizationResource
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
 
     @Inject
@@ -77,31 +80,37 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     private String cbVersion;
 
     @Override
+    @DisableCheckPermissions
     public VersionCheckResult checkClientVersion(String version) {
         return ClientVersionUtil.checkClientVersion(cbVersion, version);
     }
 
     @Override
+    @DisableCheckPermissions
     public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform) throws Exception {
         return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(), platform, imageCatalogName);
     }
 
     @Override
+    @DisableCheckPermissions
     public CloudStorageSupportedV4Responses getCloudStorageMatrix(String stackVersion) {
         return new CloudStorageSupportedV4Responses(fileSystemSupportMatrixService.getCloudStorageMatrix(stackVersion));
     }
 
     @Override
+    @DisableCheckPermissions
     public RepoConfigValidationV4Response repositoryConfigValidationRequest(RepoConfigValidationV4Request repoConfigValidationV4Request) {
         return validationService.validate(repoConfigValidationV4Request);
     }
 
     @Override
+    @DisableCheckPermissions
     public SecurityRulesV4Response getDefaultSecurityRules() {
         return securityRuleService.getDefaultSecurityRules();
     }
 
     @Override
+    @DisableCheckPermissions
     public DeploymentPreferencesV4Response deployment() {
         DeploymentPreferencesV4Response response = new DeploymentPreferencesV4Response();
         response.setFeatureSwitchV4s(preferencesService.getFeatureSwitches());
@@ -114,6 +123,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
+    @DisableCheckPermissions
     public ResourceEventResponse postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());
@@ -123,16 +133,19 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
+    @DisableCheckPermissions
     public CheckRightV4Response checkRightInAccount(CheckRightV4Request checkRightV4Request) {
         return utilAuthorizationService.getRightResult(checkRightV4Request);
     }
 
     @Override
+    @DisableCheckPermissions
     public CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkResourceRightsV4Request) {
         return utilAuthorizationService.getResourceRightsResult(checkResourceRightsV4Request);
     }
 
     @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request) {
         stackOperationService.renewCertificate(renewCertificateV4Request.getStackName());
         return Response.ok().build();

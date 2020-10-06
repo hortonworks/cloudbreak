@@ -183,6 +183,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    public void renewCertificate(@ResourceCrn String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        sdxService.renewCertificate(sdxCluster, userCrn);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATALAKE)
     public void sync(@ResourceName String name) {
         sdxService.sync(name, ThreadBasedUserCrnProvider.getAccountId());

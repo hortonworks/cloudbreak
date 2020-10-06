@@ -15,7 +15,9 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
+import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 
 @Service
 public class DistroXTestClient {
@@ -62,5 +64,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> postStackForBlueprint() {
         return new DistroXShowBlueprintAction();
+    }
+
+    public Action<RenewDistroXCertificateTestDto, CloudbreakClient> renewDistroXCertificateV4() {
+        return new RenewDistroXCertificateAction();
     }
 }
