@@ -1,7 +1,6 @@
-package com.sequenceiq.cloudbreak.domain.converter;
+package com.sequenceiq.cloudbreak.converter;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
-import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
+import com.sequenceiq.common.api.type.CertExpirationState;
 
 public class CertExpirationStateConverter extends DefaultEnumConverter<CertExpirationState> {
     @Override

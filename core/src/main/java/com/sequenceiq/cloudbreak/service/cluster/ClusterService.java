@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.HOST_CERT_EXPIRING;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.VALID;
+import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
+import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;

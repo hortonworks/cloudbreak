@@ -15,11 +15,13 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.converter.SdxClusterShapeConverter;
 import com.sequenceiq.datalake.converter.SdxDatabaseAvailabilityTypeConverter;
@@ -105,6 +107,9 @@ public class SdxCluster implements AccountIdAwareResource {
 
     @Column(name = "ranger_raz_enabled")
     private boolean rangerRazEnabled;
+
+    @Convert(converter = CertExpirationStateConverter.class)
+    private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
     public Long getId() {
         return id;
@@ -286,6 +291,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.lastCbFlowId = lastCbFlowId;
     }
 
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
+    }
+
     public SdxDatabaseAvailabilityType getDatabaseAvailabilityType() {
         if (databaseAvailabilityType != null) {
             return databaseAvailabilityType;
@@ -345,14 +358,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 Objects.equals(cloudStorageBaseLocation, that.cloudStorageBaseLocation) &&
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
                 databaseAvailabilityType == that.databaseAvailabilityType &&
-                rangerRazEnabled == that.rangerRazEnabled;
+                rangerRazEnabled == that.rangerRazEnabled &&
+                certExpirationState == that.certExpirationState;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled);
+                databaseAvailabilityType, rangerRazEnabled, certExpirationState);
     }
 
     @Override
@@ -367,6 +381,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 ", createDatabase=" + createDatabase +
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
+                ", certExpirationState=" + certExpirationState +
                 '}';
     }
 

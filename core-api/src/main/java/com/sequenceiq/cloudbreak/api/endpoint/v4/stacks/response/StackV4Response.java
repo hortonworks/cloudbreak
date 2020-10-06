@@ -378,4 +378,41 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     public void setExternalDatabase(DatabaseResponse externalDatabase) {
         this.externalDatabase = externalDatabase;
     }
+
+    @Override
+    public String toString() {
+        return "StackV4Response{ " +
+                super.toString() +
+                " id=" + id +
+                ", crn='" + crn + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", environmentName='" + environmentName + '\'' +
+                ", credentialName='" + credentialName + '\'' +
+                ", credentialCrn='" + credentialCrn + '\'' +
+                ", status=" + status +
+                ", cluster=" + cluster +
+                ", statusReason='" + statusReason + '\'' +
+                ", network=" + network +
+                ", instanceGroups=" + instanceGroups +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", gatewayPort=" + gatewayPort +
+                ", image=" + image +
+                ", cloudbreakDetails=" + cloudbreakDetails +
+                ", authentication=" + authentication +
+                ", nodeCount=" + nodeCount +
+                ", hardwareInfoGroups=" + hardwareInfoGroups +
+                ", cloudbreakEvents=" + cloudbreakEvents +
+                ", tags=" + tags +
+                ", telemetry=" + telemetry +
+                ", workspace=" + workspace +
+                ", customDomains=" + customDomains +
+                ", placement=" + placement +
+                ", sharedService=" + sharedService +
+                ", cloudPlatform=" + cloudPlatform +
+                ", tunnel=" + tunnel +
+                ", flowIdentifier=" + flowIdentifier +
+                ", externalDatabase=" + externalDatabase +
+                '}';
+    }
 }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
+package com.sequenceiq.common.api.type;
 
 public enum CertExpirationState {
     VALID,

@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
 public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
@@ -57,6 +57,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         cluster.ifPresent(sdx -> {
             buildMdcContext(sdx);
             StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
+            updateCertExpirationStateIfDifferent(sdx, stack);
             SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdx);
             switch (status.getStatus()) {
                 case RUNNING:
@@ -82,6 +83,13 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     LOGGER.debug("Sdx StatusChecker Job will ignore state '{}' for datalake: '{}'", status.getStatus(), getLocalId());
             }
         });
+    }
+
+    private void updateCertExpirationStateIfDifferent(SdxCluster sdx, StackStatusV4Response stack) {
+        if (sdx.getCertExpirationState() != stack.getCertExpirationState()) {
+            LOGGER.info("Updating CertExpirationState from [{}] to [{}]", sdx.getCertExpirationState(), stack.getCertExpirationState());
+            sdxClusterRepository.updateCertExpirationState(sdx.getId(), stack.getCertExpirationState());
+        }
     }
 
     private boolean unschedulable() {

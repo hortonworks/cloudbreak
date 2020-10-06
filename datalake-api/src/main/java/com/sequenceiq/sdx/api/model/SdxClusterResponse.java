@@ -4,8 +4,12 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+
+import io.swagger.annotations.ApiModelProperty;
 
 public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
@@ -41,6 +45,9 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     private Map<String, String> tags;
 
+    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    private CertExpirationState certExpirationState;
+
     public SdxClusterResponse() {
     }
 
@@ -48,7 +55,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
-            boolean rangerRazEnabled, Map<String, String> tags) {
+            boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -62,6 +69,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.runtime = runtime;
         this.rangerRazEnabled = rangerRazEnabled;
         this.tags = tags;
+        this.certExpirationState = certExpirationState;
     }
 
     public String getCrn() {
@@ -192,9 +200,40 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.tags = tags;
     }
 
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
+    }
+
     @JsonIgnore
     @Override
     public String getResourceCrn() {
         return crn;
+    }
+
+    @Override
+    public String toString() {
+        return "SdxClusterResponse{" +
+                "crn='" + crn + '\'' +
+                ", name='" + name + '\'' +
+                ", clusterShape=" + clusterShape +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", environmentName='" + environmentName + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", databaseServerCrn='" + databaseServerCrn + '\'' +
+                ", stackCrn='" + stackCrn + '\'' +
+                ", created=" + created +
+                ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
+                ", cloudStorageFileSystemType=" + cloudStorageFileSystemType +
+                ", runtime='" + runtime + '\'' +
+                ", flowIdentifier=" + flowIdentifier +
+                ", rangerRazEnabled=" + rangerRazEnabled +
+                ", tags=" + tags +
+                ", certExpirationState=" + certExpirationState +
+                '}';
     }
 }

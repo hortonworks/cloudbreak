@@ -63,6 +63,7 @@ public class StackListItemToStackApiViewConverter {
         clusterResponse.setBlueprint(getBlueprintView(item));
         clusterResponse.setStatus(item.getClusterStatus());
         clusterResponse.setHostGroups(new HashSet<>(hostGroupViews));
+        clusterResponse.setCertExpirationState(item.getCertExpirationState());
         return clusterResponse;
     }
 

@@ -11,8 +11,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 
+import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -35,6 +37,9 @@ public class ClusterApiView extends CompactView {
     private Status status;
 
     private String environmentCrn;
+
+    @Convert(converter = CertExpirationStateConverter.class)
+    private CertExpirationState certExpirationState;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -82,5 +87,13 @@ public class ClusterApiView extends CompactView {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
     }
 }

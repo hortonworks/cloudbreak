@@ -56,4 +56,14 @@ public class CompactViewV4Response implements JsonEntity {
     public void setCrn(String crn) {
         this.crn = crn;
     }
+
+    @Override
+    public String toString() {
+        return "CompactViewV4Response{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", crn='" + crn + '\'' +
+                '}';
+    }
 }

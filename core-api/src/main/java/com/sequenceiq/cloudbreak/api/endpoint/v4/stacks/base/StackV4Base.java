@@ -152,4 +152,18 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     public void setTimeToLive(Long timeToLive) {
         this.timeToLive = timeToLive;
     }
+
+    @Override
+    public String toString() {
+        return "StackV4Base{" +
+                "name='" + name + '\'' +
+                ", aws=" + aws +
+                ", gcp=" + gcp +
+                ", azure=" + azure +
+                ", openstack=" + openstack +
+                ", yarn=" + yarn +
+                ", mock=" + mock +
+                ", timeToLive=" + timeToLive +
+                '}';
+    }
 }

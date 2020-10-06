@@ -6,6 +6,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
@@ -30,6 +31,9 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     @ApiModelProperty(ModelDescriptions.StackModelDescription.SERVER_IP)
     private String serverIp;
+
+    @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
+    private CertExpirationState certExpirationState;
 
     public Status getStatus() {
         return status;
@@ -69,5 +73,26 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     public void setServerIp(String serverIp) {
         this.serverIp = serverIp;
+    }
+
+    public CertExpirationState getCertExpirationState() {
+        return certExpirationState;
+    }
+
+    public void setCertExpirationState(CertExpirationState certExpirationState) {
+        this.certExpirationState = certExpirationState;
+    }
+
+    @Override
+    public String toString() {
+        return "ClusterViewV4Response{ " +
+                super.toString() +
+                " status=" + status +
+                ", hostGroups=" + hostGroups +
+                ", sharedServiceResponse=" + sharedServiceResponse +
+                ", blueprint=" + blueprint +
+                ", serverIp='" + serverIp + '\'' +
+                ", certExpirationState=" + certExpirationState +
+                '}';
     }
 }
