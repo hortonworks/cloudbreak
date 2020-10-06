@@ -19,7 +19,7 @@ jar {
 dependencies {
   compile project(':common')
   compile project(':flow-api')
-  compile project(':authorization-common-api')
+  compile project(':authorization-common')
   compile project(':auth-connector')
 
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version

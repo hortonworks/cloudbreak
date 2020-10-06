@@ -6,13 +6,11 @@ import java.util.Set;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
+import com.google.common.collect.Sets;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -30,20 +28,16 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(Include.NON_NULL)
 public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
-    @ResourceObjectField(action = AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB, variableType = AuthorizationVariableType.NAME)
     private String environmentName;
 
     @Valid
-    @ResourceObjectFieldHolder
     private Set<InstanceGroupV1Request> instanceGroups;
 
-    @ResourceObjectFieldHolder
     private DistroXImageV1Request image;
 
     private NetworkV1Request network;
 
     @Valid
-    @ResourceObjectFieldHolder
     private DistroXClusterV1Request cluster;
 
     private SdxV1Request sdx;
@@ -148,5 +142,12 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setGatewayPort(Integer port) {
         gatewayPort = port;
+    }
+
+    @JsonIgnore
+    public Set<String> getAllRecipes() {
+        Set<String> recipes = Sets.newHashSet();
+        instanceGroups.stream().forEach(instanceGroup -> recipes.addAll(instanceGroup.getRecipeNames()));
+        return recipes;
     }
 }

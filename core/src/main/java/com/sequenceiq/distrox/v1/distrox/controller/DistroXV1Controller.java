@@ -1,5 +1,16 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DELETE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,13 +32,13 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -126,8 +137,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject(deepSearchNeeded = true)
-    public StackV4Response post(@Valid @ResourceObject DistroXV1Request request) {
+    @CheckPermissionByRequestProperty(path = "environmentName", type = NAME, action = ENVIRONMENT_CREATE_DATAHUB)
+    @CheckPermissionByRequestProperty(path = "image.catalog", type = NAME, action = DESCRIBE_IMAGE_CATALOG, skipOnNull = true)
+    @CheckPermissionByRequestProperty(path = "cluster.blueprintName", type = NAME, action = DESCRIBE_CLUSTER_TEMPLATE)
+    @CheckPermissionByRequestProperty(path = "allRecipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
+    public StackV4Response post(@Valid @RequestObject DistroXV1Request request) {
         return stackOperations.post(
                 workspaceService.getForCurrentUser().getId(),
                 stackRequestConverter.convert(request),
@@ -135,7 +149,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATAHUB)
     public StackV4Response getByName(@ResourceName String name, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofName(name),
@@ -145,7 +159,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public StackV4Response getByCrn(@ResourceCrn @TenantAwareParam String crn, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofCrn(crn),
@@ -155,20 +169,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATAHUB)
+    @CheckPermissionByResourceName(action = DELETE_DATAHUB)
     public void deleteByName(@ResourceName String name, Boolean forced) {
         stackOperations.delete(NameOrCrn.ofName(name), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = DELETE_DATAHUB)
     public void deleteByCrn(@ResourceCrn String crn, Boolean forced) {
         stackOperations.delete(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), forced);
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public void deleteMultiple(@ResourceObject DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
+    @CheckPermissionByRequestProperty(path = "names", type = NAME_LIST, action = DELETE_DATAHUB)
+    @CheckPermissionByRequestProperty(path = "crns", type = CRN_LIST, action = DELETE_DATAHUB)
+    public void deleteMultiple(@RequestObject DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         validateMultidelete(multiDeleteRequest);
         if (CollectionUtils.isNotEmpty(multiDeleteRequest.getNames())) {
             multideleteByNames(multiDeleteRequest, forced);
@@ -324,21 +339,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATAHUB)
     public Object getRequestfromName(@ResourceName String name) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofName(name));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public Object getRequestfromCrn(@ResourceCrn String crn) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
         return getCreateAWSClusterRequest(stackV4Request);
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceName(action = DESCRIBE_DATAHUB)
     public StackStatusV4Response getStatusByName(@ResourceName String name) {
         return stackOperations.getStatus(
                 NameOrCrn.ofName(name),
@@ -346,7 +361,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
     public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
         return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
@@ -411,7 +426,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATAHUB)
+    @CheckPermissionByResourceName(action = DELETE_DATAHUB)
     public void deleteWithKerberosByName(@ResourceName String name, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofName(name),
@@ -421,7 +436,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB)
+    @CheckPermissionByResourceCrn(action = DELETE_DATAHUB)
     public void deleteWithKerberosByCrn(@ResourceCrn String crn, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofCrn(crn),
@@ -441,8 +456,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionV1Request request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATAHUB)
+    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
@@ -456,8 +471,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectCmDiagnostics(@ResourceObject @Valid CmDiagnosticsCollectionV1Request request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATAHUB)
+    public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectCmDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsTriggerService.startCmDiagnostics(request, request.getStackCrn(), userCrn);

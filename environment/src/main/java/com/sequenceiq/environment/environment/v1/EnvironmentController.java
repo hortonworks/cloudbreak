@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.List;
@@ -18,14 +20,14 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -113,8 +115,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
-    @CheckPermissionByResourceObject
-    public DetailedEnvironmentResponse post(@ResourceObject @Valid EnvironmentRequest request) {
+    @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
+    public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentResponseConverter.dtoToDetailedResponse(envDto);
@@ -215,10 +217,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
+    @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.CHANGE_CREDENTIAL)
     public DetailedEnvironmentResponse changeCredentialByEnvironmentName(@ResourceName String environmentName,
-            @ResourceObject @Valid EnvironmentChangeCredentialRequest request) {
+            @RequestObject @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentChangeCredentialDto dto = environmentApiConverter.convertEnvironmentChangeCredentialDto(request);
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentName(accountId, environmentName, dto);
@@ -235,10 +237,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
+    @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.CHANGE_CREDENTIAL)
     public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@ResourceCrn String crn,
-            @ResourceObject @Valid EnvironmentChangeCredentialRequest request) {
+            @RequestObject @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
                 environmentApiConverter.convertEnvironmentChangeCredentialDto(request));

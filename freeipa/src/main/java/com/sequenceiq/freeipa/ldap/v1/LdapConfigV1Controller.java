@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.ldap.v1;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -9,9 +12,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
@@ -51,20 +54,20 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public DescribeLdapConfigResponse create(@ResourceObject CreateLdapConfigRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public DescribeLdapConfigResponse create(@RequestObject CreateLdapConfigRequest request) {
         return ldapConfigV1Service.post(request);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public void delete(@ResourceCrn String environmentCrn) {
         ldapConfigV1Service.delete(environmentCrn);
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public TestLdapConfigResponse test(@ResourceObject TestLdapConfigRequest ldapValidationRequest) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public TestLdapConfigResponse test(@RequestObject TestLdapConfigRequest ldapValidationRequest) {
         return ldapConfigV1Service.testConnection(ldapValidationRequest);
     }
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_IMAGE_CATALOG;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -13,12 +16,12 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
@@ -113,8 +116,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public ImageCatalogV4Response update(Long workspaceId, @ResourceObject UpdateImageCatalogV4Request request) {
+    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    public ImageCatalogV4Response update(Long workspaceId, @RequestObject UpdateImageCatalogV4Request request) {
         ImageCatalog imageCatalog = imageCatalogService.update(workspaceId, converterUtil.convert(request, ImageCatalog.class));
         return converterUtil.convert(imageCatalog, ImageCatalogV4Response.class);
     }

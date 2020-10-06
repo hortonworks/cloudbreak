@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.CREATE_DATABASE;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -14,13 +17,13 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -164,8 +167,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public CreateDatabaseV4Response createDatabase(@ResourceObject CreateDatabaseV4Request request) {
+    @CheckPermissionByRequestProperty(path = "existingDatabaseServerCrn", type = CRN, action = CREATE_DATABASE)
+    public CreateDatabaseV4Response createDatabase(@RequestObject CreateDatabaseV4Request request) {
         String result = databaseServerConfigService.createDatabaseOnServer(
                 request.getExistingDatabaseServerCrn(),
                 request.getDatabaseName(),

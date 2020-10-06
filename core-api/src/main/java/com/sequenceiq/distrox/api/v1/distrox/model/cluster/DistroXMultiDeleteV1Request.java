@@ -5,9 +5,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 
 import io.swagger.annotations.ApiModel;
 
@@ -16,10 +13,8 @@ import io.swagger.annotations.ApiModel;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DistroXMultiDeleteV1Request {
 
-    @ResourceObjectField(action = AuthorizationResourceAction.DELETE_DATAHUB, variableType = AuthorizationVariableType.NAME_LIST)
     private Set<String> names = new HashSet<>();
 
-    @ResourceObjectField(action = AuthorizationResourceAction.DELETE_DATAHUB, variableType = AuthorizationVariableType.CRN_LIST)
     private Set<String> crns = new HashSet<>();
 
     public Set<String> getNames() {

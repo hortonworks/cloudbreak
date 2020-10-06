@@ -3,15 +3,10 @@ package com.sequenceiq.authorization;
 import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.authFilterable;
 import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.list;
 import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.set;
-import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
-import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN_LIST;
-import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
-import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -22,13 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.Path;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -42,28 +36,28 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByCompositeRequestProperty;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.annotation.ResourceObjectFieldHolder;
 import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
+
+import uk.co.jemos.podam.api.PodamFactoryImpl;
 
 public class EnforceAuthorizationLogicsUtil {
 
@@ -75,6 +69,8 @@ public class EnforceAuthorizationLogicsUtil {
             new MethodAnnotationsScanner(),
             new MethodParameterScanner(),
             new MethodParameterNamesScanner());
+
+    private static final PodamFactoryImpl SAMPLE_OBJECT_FACTORY = new PodamFactoryImpl();
 
     private static final Map<Class<? extends Annotation>, Function<Method, Optional<String>>> METHOD_VALIDATORS =
             ImmutableMap.<Class<? extends Annotation>, Function<Method, Optional<String>>>builder()
@@ -91,7 +87,8 @@ public class EnforceAuthorizationLogicsUtil {
                                     list(ResourceCrnAwareApiModel.class),
                                     set(ResourceCrnAwareApiModel.class),
                                     authFilterable(ResourceCrnAwareApiModel.class)))
-                    .put(CheckPermissionByResourceObject.class, hasParamWhere(ResourceObject.class, resourceObject()))
+                    .put(CheckPermissionByRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
+                    .put(CheckPermissionByCompositeRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .build();
 
     private EnforceAuthorizationLogicsUtil() {
@@ -249,58 +246,65 @@ public class EnforceAuthorizationLogicsUtil {
         };
     }
 
-    private static Function<Pair<Method, Class<?>>, Optional<String>> resourceObject() {
+    private static Function<Pair<Method, Class<?>>, Optional<String>> requestObject() {
         return ctx -> {
             Method method = ctx.getKey();
             Class<?> type = ctx.getValue();
-            AtomicInteger annotatedFieldCount = new AtomicInteger(0);
-            List<String> errorMessages = Lists.newArrayList();
-            checkField(type, method, errorMessages, annotatedFieldCount);
-            if (annotatedFieldCount.get() == 0) {
-                return Optional.of(invalid(method, "Missing @" + ResourceObjectField.class + " annotation in " + type.getSimpleName()));
-            } else if (!errorMessages.isEmpty()) {
-                return Optional.of(Joiner.on(",").join(errorMessages));
+            try {
+                Object requestSample = SAMPLE_OBJECT_FACTORY.manufacturePojo(type);
+                Set<String> errorMessages = Sets.newHashSet();
+                Arrays.stream(method.getAnnotations())
+                        .forEach(annotation -> {
+                            if (annotation.annotationType().equals(CheckPermissionByRequestProperty.class)) {
+                                checkRequestPropertyAnnotation(method, requestSample, errorMessages, (CheckPermissionByRequestProperty) annotation);
+                            } else if (annotation.annotationType().equals(CheckPermissionByCompositeRequestProperty.class)) {
+                                Arrays.stream(((CheckPermissionByCompositeRequestProperty) annotation).value()).forEach(byRequestProperty ->
+                                        checkRequestPropertyAnnotation(method, requestSample, errorMessages, byRequestProperty));
+                            }
+                        });
+                if (errorMessages.isEmpty()) {
+                    return Optional.empty();
+                } else {
+                    return Optional.of(Joiner.on(",").join(errorMessages));
+                }
+            } catch (Exception e) {
+                return Optional.of(String.format("Error during checking request object of %s#%s: %s",
+                        method.getDeclaringClass().getSimpleName(), method.getName(), e.getMessage()));
             }
-            return Optional.empty();
         };
     }
 
-    private static void checkField(Class type, Method method, List<String> errorMessages, AtomicInteger annotatedFieldCount) {
-        for (Field field : FieldUtils.getFieldsWithAnnotation(type, ResourceObjectField.class)) {
-            annotatedFieldCount.incrementAndGet();
-            ResourceObjectField annotation = field.getAnnotation(ResourceObjectField.class);
-            if (Set.of(CRN, NAME).contains(annotation.variableType())) {
-                if (!String.class.equals(field.getType())) {
-                    errorMessages.add(invalid(method, field.getName()
-                            + " @" + ResourceObjectField.class.getSimpleName()
-                            + " must be a String in " + type.getSimpleName()));
-                }
-            } else if (Set.of(CRN_LIST, NAME_LIST).contains(annotation.variableType())) {
-                if (!isOneOf(field, list(String.class), set(String.class))) {
-                    errorMessages.add(invalid(method, field.getName()
-                            + " @" + ResourceObjectField.class.getSimpleName()
-                            + " must be a Set<String> or List<String> in " + type.getSimpleName()));
-                }
+    private static void checkRequestPropertyAnnotation(Method method, Object sample, Set<String> errorMessages, CheckPermissionByRequestProperty annotation) {
+        try {
+            Class<?> propertyType = PropertyUtils.getPropertyType(sample, annotation.path());
+            switch (annotation.type()) {
+                case CRN:
+                case NAME:
+                    if (!propertyType.equals(String.class)) {
+                        errorMessages.add(String.format("%s property of request object in %s#%s should be String",
+                                annotation.path(), method.getDeclaringClass().getSimpleName(), method.getName()));
+                    }
+                    break;
+                case NAME_LIST:
+                case CRN_LIST:
+                    if (!Collection.class.isAssignableFrom(propertyType)) {
+                        errorMessages.add(String.format("%s property of request object in %s#%s should be a subType of Collection<String>",
+                                annotation.path(), method.getDeclaringClass().getSimpleName(), method.getName()));
+                        break;
+                    }
+                    Collection property = (Collection) PropertyUtils.getProperty(sample, annotation.path());
+                    if (!property.iterator().next().getClass().equals(String.class)) {
+                        errorMessages.add(String.format("%s collection property of request object in %s#%s should contain Strings",
+                                annotation.path(), method.getDeclaringClass().getSimpleName(), method.getName()));
+                    }
+                    break;
+                default:
+                    break;
             }
+        } catch (Exception e) {
+            errorMessages.add(String.format("Error regarding %s in %s#%s: %s %s", annotation.path(),
+                    method.getDeclaringClass().getSimpleName(), method.getName(), e.getClass().getSimpleName(), e.getMessage()));
         }
-        if (method.getAnnotation(CheckPermissionByResourceObject.class).deepSearchNeeded()) {
-            for (Field field : FieldUtils.getFieldsWithAnnotation(type, ResourceObjectFieldHolder.class)) {
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    checkField((Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0], method, errorMessages, annotatedFieldCount);
-                } else {
-                    checkField(field.getType(), method, errorMessages, annotatedFieldCount);
-                }
-            }
-        }
-    }
-
-    private static boolean isOneOf(Field field, GenericType... genericTypes) {
-        return Arrays.stream(genericTypes)
-                .filter(genericType -> genericType.wrapperType.isAssignableFrom(field.getType()))
-                .anyMatch(genericType -> {
-                    Type[] actualTypeArguments = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-                    return actualTypeArguments.length == 1 && actualTypeArguments[0].equals(genericType.genericType);
-                });
     }
 
     public static class GenericType {

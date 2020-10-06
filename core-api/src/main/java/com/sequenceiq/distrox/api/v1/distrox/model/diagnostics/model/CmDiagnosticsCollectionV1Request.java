@@ -4,9 +4,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 
@@ -20,7 +17,6 @@ public class CmDiagnosticsCollectionV1Request extends BaseCmDiagnosticsCollectio
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.StackModelDescription.CRN)
-    @ResourceObjectField(action = AuthorizationResourceAction.DATAHUB_READ, variableType = AuthorizationVariableType.CRN)
     private String stackCrn;
 
     @Override

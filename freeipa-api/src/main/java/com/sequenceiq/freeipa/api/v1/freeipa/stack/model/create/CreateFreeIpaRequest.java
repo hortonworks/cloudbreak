@@ -11,9 +11,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -35,7 +32,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class CreateFreeIpaRequest implements TaggableRequest {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_ENVIRONMENT, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     @NotNull

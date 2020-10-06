@@ -23,7 +23,7 @@ Every user who would like to do something regarding a resource should get an Res
    - add new entry to the map
    - key should be the same value used for the desired right as in UMS code
    - value should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
-6. Annotate your API method in Controller class with desired annotation, detailed explanation below.
+6. Annotate your API method in Controller class with desired annotation, detailed explanation below. Putting more annotations on the method is allowed.
 7. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
 
 ### How can I add resource based authorization for my new API endpoint?
@@ -33,7 +33,7 @@ When you are planning an API endpoint you should specify one of these parameter 
 - resource name
 - resource CRN list
 - resource name list
-- resource object
+- request object
 
 If it is possible, please use CRN of a resource instead of name, since generally CRN is used in the whole platform to identify a resource and also during authorization it requires additional database query to find out the CRN based on the name, because we need CRN to authorize a call in UMS.
 
@@ -52,11 +52,13 @@ If it is possible, please use CRN of a resource instead of name, since generally
 - add `@CheckPermissionByResourceNameList(action = [a value from AuthorizationResourceAction])` annotation to the method
 - annotate the resource name list method parameter with `@ResourceNameList`, the type of the parameter can be a String
 - implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnListByResourceNameList` method
-#### Resource object
-- add `@CheckPermissionByResourceObject` annotation to the method
-- annotate the resource object method parameter with `@ResourceObject`, the type of the parameter can be any Object
-- annotate any field of object with `@ResourceObjectField`
-- note: by default framework check only 1st level of request object's hierarchy, if you need to authorize some field on deeper level in the request object class' hierarchy, you need to add `deepSearchNeeded = true` to `@CheckPermissionByResourceObject` method annotation and also you need to annotate every parent field in the hierarchy with `@ResourceObjectFieldHolder`, please check [DistroxV1Request](../core-api/src/main/java/com/sequenceiq/distrox/api/v1/distrox/model/DistroXV1Request.java) for example
+#### Request object
+- add `@CheckPermissionByRequestProperty` annotations to the method and you need to fill in parameters of it
+  - `path` is used to identify the target for permission, it can be a resource property (public method, public field, private field with public getter) in the request object. For usage please check JavaDoc of PropertyUtilsBean class.
+  - `type` can be crn, name or crn list, name list
+  - `action` is for defining the permission used for checking property
+  - `skipOnNull` decides whether framework should skip authorization on property if that's null
+- annotate the request object method parameter with `@RequestObject`, the type of the parameter can be any Object
 
 ### Special case: list API endpoints (not used currently)
 
@@ -96,9 +98,9 @@ In this case we are calling the method `getResourceCrnListByResourceNameList` of
 
 [ResourceNameListPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceNameListPermissionChecker.java)
 
-#### Resource Object
+#### Request Object
 
-In this case we are checking annotated fields of the objects and do permission check based on the parameters of the annotation.
+In this case we are checking properties of the request object and do permission check based on the annotations on the method.
 
 [ResourceObjectPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceObjectPermissionChecker.java)
 
