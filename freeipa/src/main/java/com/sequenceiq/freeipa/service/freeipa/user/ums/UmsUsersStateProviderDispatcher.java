@@ -39,19 +39,38 @@ public class UmsUsersStateProviderDispatcher {
 
             boolean fullSync = userCrns.isEmpty() && machineUserCrns.isEmpty();
 
-            Map<String, UmsUsersState> envUsersStateMap;
             if (fullSync && entitlementService.umsUserSyncModelGenerationEnabled(INTERNAL_ACTOR_CRN, accountId)) {
-                envUsersStateMap = bulkUmsUsersStateProvider.get(accountId, environmentCrns, requestIdOptional);
+                return dispatchBulk(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
+                        requestIdOptional, fullSync);
             } else {
-                envUsersStateMap = defaultUmsUsersStateProvider.get(
-                        accountId, actorCrn,
-                        environmentCrns, userCrns, machineUserCrns,
+                return dispatchDefault(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
                         requestIdOptional, fullSync);
             }
-
-            return envUsersStateMap;
         } catch (RuntimeException e) {
             throw new UmsOperationException(String.format("Error during UMS operation: '%s'", e.getLocalizedMessage()), e);
         }
+    }
+
+    private Map<String, UmsUsersState> dispatchBulk(
+            String accountId, String actorCrn, Collection<String> environmentCrns,
+            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
+            boolean fullSync) {
+        try {
+            return bulkUmsUsersStateProvider.get(accountId, environmentCrns, requestIdOptional);
+        } catch (RuntimeException e) {
+            LOGGER.debug("Failed to retrieve UMS user sync state through bulk request. Falling back on default approach");
+            return dispatchDefault(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
+                    requestIdOptional, fullSync);
+        }
+    }
+
+    private Map<String, UmsUsersState> dispatchDefault(
+            String accountId, String actorCrn, Collection<String> environmentCrns,
+            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
+            boolean fullSync) {
+        return defaultUmsUsersStateProvider.get(
+                accountId, actorCrn,
+                environmentCrns, userCrns, machineUserCrns,
+                requestIdOptional, fullSync);
     }
 }
