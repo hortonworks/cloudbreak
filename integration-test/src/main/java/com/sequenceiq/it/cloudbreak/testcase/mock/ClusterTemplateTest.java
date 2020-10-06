@@ -266,6 +266,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
                 .given(ClusterTemplateTestDto.class)
                 .withName(name)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
+                .when(clusterTemplateTestClient.listV4())
                 .then((testContext1, testDto, client) -> clusterTemplateHasCreatedAndCanBeListed(testDto, client, name))
                 .validate();
     }
@@ -442,7 +443,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     private ClusterTemplateTestDto clusterTemplateHasDeletedAlongTheEnvironment(ClusterTemplateTestDto entity, CloudbreakClient client, String templateName) {
         client.getCloudbreakClient()
                 .clusterTemplateV4EndPoint()
-                .list(client.getWorkspaceId())
+                .listByEnv(client.getWorkspaceId(), entity.getResponse().getEnvironmentCrn())
                 .getResponses()
                 .stream()
                 .filter(response -> templateName.equals(response.getName()))
@@ -454,10 +455,7 @@ public class ClusterTemplateTest extends AbstractIntegrationTest {
     }
 
     private ClusterTemplateTestDto clusterTemplateHasCreatedAndCanBeListed(ClusterTemplateTestDto entity, CloudbreakClient client, String templateName) {
-        client.getCloudbreakClient()
-                .clusterTemplateV4EndPoint()
-                .list(client.getWorkspaceId())
-                .getResponses()
+        entity.getResponses()
                 .stream()
                 .filter(response -> templateName.equals(response.getName()))
                 .findFirst().orElseThrow(() -> new TestFailException("The expected cluster definition does not exist in the list!"));

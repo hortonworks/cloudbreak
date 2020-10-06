@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAsInternalActor;
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 
 import java.util.HashSet;
@@ -15,9 +16,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -48,8 +49,12 @@ public class EnvironmentResourceDeletionService {
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
-            Set<String> names = getClusterDefinitionNamesInEnvironment(TEMP_WORKSPACE_ID, environmentCrn);
-            clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, names, null, environmentCrn);
+            Set<String> names = getClusterDefinitionNamesInEnvironment(environmentCrn);
+            if (!names.isEmpty()) {
+                clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, names, null, environmentCrn);
+            } else {
+                LOGGER.info("Cannot find any Cluster Definition for the environment");
+            }
         } catch (WebApplicationException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         } catch (ProcessingException | UnableToDeleteClusterDefinitionException e) {
@@ -57,9 +62,9 @@ public class EnvironmentResourceDeletionService {
         }
     }
 
-    private Set<String> getClusterDefinitionNamesInEnvironment(long tempWorkspaceId, String environmentCrn) {
-        return clusterTemplateV4Endpoint.list(TEMP_WORKSPACE_ID).getResponses().stream()
-                .filter(clusterTemplate -> environmentCrn.equals(clusterTemplate.getEnvironmentCrn()))
+    private Set<String> getClusterDefinitionNamesInEnvironment(String environmentCrn) {
+        ClusterTemplateViewV4Responses responses = doAsInternalActor(() -> clusterTemplateV4Endpoint.listByEnv(TEMP_WORKSPACE_ID, environmentCrn));
+        return responses.getResponses().stream()
                 .map(ClusterTemplateViewV4Response::getName)
                 .collect(Collectors.toSet());
     }
@@ -86,7 +91,7 @@ public class EnvironmentResourceDeletionService {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
-            Set<String> datalakeClusterNames = ThreadBasedUserCrnProvider.doAsInternalActor(() -> datalakeV4Endpoint
+            Set<String> datalakeClusterNames = doAsInternalActor(() -> datalakeV4Endpoint
                     .list(null, environment.getResourceCrn())
                     .getResponses()
                     .stream()
