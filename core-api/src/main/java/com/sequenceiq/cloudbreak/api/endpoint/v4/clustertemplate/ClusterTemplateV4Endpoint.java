@@ -47,6 +47,13 @@ public interface ClusterTemplateV4Endpoint {
     ClusterTemplateViewV4Responses list(@PathParam("workspaceId") Long workspaceId);
 
     @GET
+    @Path("env/{environmentCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ClusterTemplateOpDescription.LIST_BY_ENV, produces = MediaType.APPLICATION_JSON,
+            notes = CLUSTER_TEMPLATE_NOTES, nickname = "listClusterTemplatesByEnv")
+    ClusterTemplateViewV4Responses listByEnv(@PathParam("workspaceId") Long workspaceId, @PathParam("environmentCrn") String environmentCrn);
+
+    @GET
     @Path("name/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ClusterTemplateOpDescription.GET_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = CLUSTER_TEMPLATE_NOTES,
