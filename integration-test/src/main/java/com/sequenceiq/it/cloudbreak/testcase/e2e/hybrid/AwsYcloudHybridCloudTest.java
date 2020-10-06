@@ -171,6 +171,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .validate();
 
         testContext
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging(CHILD_CLOUD_PLATFORM)
+                    .withReportClusterLogs()
                 .given(cmProduct, ClouderaManagerProductTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withName(CDH)
                     .withVersion(cdhVersion.get())
@@ -187,6 +190,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .given(stack, StackTestDto.class, CHILD_CLOUD_PLATFORM).withCluster(cluster)
                     .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                     .withStackAuthentication(STACK_AUTHENTICATION)
+                    .withTelemetry("telemetry")
                 .given(sdxInternal, SdxInternalTestDto.class, CHILD_CLOUD_PLATFORM)
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
