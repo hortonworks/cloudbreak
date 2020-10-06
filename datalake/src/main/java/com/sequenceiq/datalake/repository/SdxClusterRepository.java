@@ -4,15 +4,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
+
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.projection.SdxClusterIdView;
 
 @Repository
+@Transactional(TxType.REQUIRED)
 public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     @Override
@@ -42,4 +48,7 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
     @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.crn = :crn")
     Optional<String> findStackCrnByClusterCrn(@Param("crn") String crn);
 
+    @Modifying
+    @Query("UPDATE SdxCluster s SET s.certExpirationState = :state WHERE s.id = :id")
+    void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
 }

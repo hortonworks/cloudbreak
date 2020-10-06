@@ -30,6 +30,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter extends CompactViewT
         clusterViewResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4ViewResponse.class));
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
+        clusterViewResponse.setCertExpirationState(source.getCertExpirationState());
         addSharedServiceResponse(source, clusterViewResponse);
         return clusterViewResponse;
     }

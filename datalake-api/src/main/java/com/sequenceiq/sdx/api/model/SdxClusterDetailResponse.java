@@ -18,7 +18,7 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                 sdxClusterResponse.getEnvironmentCrn(), sdxClusterResponse.getStackCrn(),
                 sdxClusterResponse.getClusterShape(), sdxClusterResponse.getCloudStorageBaseLocation(),
                 sdxClusterResponse.getCloudStorageFileSystemType(), sdxClusterResponse.getRuntime(),
-                sdxClusterResponse.getRangerRazEnabled(), sdxClusterResponse.getTags());
+                sdxClusterResponse.getRangerRazEnabled(), sdxClusterResponse.getTags(), sdxClusterResponse.getCertExpirationState());
         this.stackV4Response = stackV4Response;
     }
 
@@ -35,5 +35,13 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         return Optional.ofNullable(stackV4Response.getTags())
                 .map(tags -> tags.getTagValue(key))
                 .orElse(null);
+    }
+
+    @Override
+    public String toString() {
+        return "SdxClusterDetailResponse{ " +
+                super.toString() +
+                " stackV4Response=" + stackV4Response +
+                '}';
     }
 }

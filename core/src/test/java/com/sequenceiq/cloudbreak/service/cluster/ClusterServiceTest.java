@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.HOST_CERT_EXPIRING;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState.VALID;
+import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
+import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CertExpirationState;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 

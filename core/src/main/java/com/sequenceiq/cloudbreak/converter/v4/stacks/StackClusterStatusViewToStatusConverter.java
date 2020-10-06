@@ -18,6 +18,7 @@ public class StackClusterStatusViewToStatusConverter extends AbstractConversionS
         response.setStatusReason(source.getStatusReason());
         response.setClusterStatus(source.getClusterStatus());
         response.setClusterStatusReason(source.getClusterStatusReason());
+        response.setCertExpirationState(source.getCertExpirationState());
         return response;
     }
 }

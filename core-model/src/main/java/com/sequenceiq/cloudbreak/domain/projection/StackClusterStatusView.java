@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.projection;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.common.api.type.CertExpirationState;
 
 public interface StackClusterStatusView {
 
@@ -15,4 +16,6 @@ public interface StackClusterStatusView {
     String getClusterStatusReason();
 
     String getCrn();
+
+    CertExpirationState getCertExpirationState();
 }
