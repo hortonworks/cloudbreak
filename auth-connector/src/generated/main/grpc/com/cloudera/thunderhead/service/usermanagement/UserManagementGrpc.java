@@ -1068,6 +1068,43 @@ public final class UserManagementGrpc {
      return getCreateC1CAccountMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getVerifyC1CEmailMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> METHOD_VERIFY_C1CEMAIL = getVerifyC1CEmailMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod() {
+    return getVerifyC1CEmailMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod;
+    if ((getVerifyC1CEmailMethod = UserManagementGrpc.getVerifyC1CEmailMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getVerifyC1CEmailMethod = UserManagementGrpc.getVerifyC1CEmailMethod) == null) {
+          UserManagementGrpc.getVerifyC1CEmailMethod = getVerifyC1CEmailMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "VerifyC1CEmail"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyC1CEmail"))
+                  .build();
+          }
+        }
+     }
+     return getVerifyC1CEmailMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGrantEntitlementMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> METHOD_GRANT_ENTITLEMENT = getGrantEntitlementMethodHelper();
@@ -3584,6 +3621,43 @@ public final class UserManagementGrpc {
      return getListServicePrincipalCloudIdentitiesMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetDefaultIdentityProviderConnectorMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> METHOD_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = getGetDefaultIdentityProviderConnectorMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod() {
+    return getGetDefaultIdentityProviderConnectorMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod;
+    if ((getGetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod) == null) {
+          UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod = getGetDefaultIdentityProviderConnectorMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetDefaultIdentityProviderConnector"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetDefaultIdentityProviderConnector"))
+                  .build();
+          }
+        }
+     }
+     return getGetDefaultIdentityProviderConnectorMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetUserSyncStateModelMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> METHOD_GET_USER_SYNC_STATE_MODEL = getGetUserSyncStateModelMethodHelper();
@@ -3941,6 +4015,17 @@ public final class UserManagementGrpc {
     public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getCreateC1CAccountMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * An endpoint called when a user verifies their email by clicking the link we sent
+     * them.
+     * </pre>
+     */
+    public void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getVerifyC1CEmailMethodHelper(), responseObserver);
     }
 
     /**
@@ -4651,6 +4736,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetDefaultIdentityProviderConnectorMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Get user sync state model, including actors, groups, workload administration groups, etc
      * </pre>
      */
@@ -4857,6 +4952,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>(
                   this, METHODID_CREATE_C1CACCOUNT)))
+          .addMethod(
+            getVerifyC1CEmailMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>(
+                  this, METHODID_VERIFY_C1CEMAIL)))
           .addMethod(
             getGrantEntitlementMethodHelper(),
             asyncUnaryCall(
@@ -5334,6 +5436,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
                   this, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
           .addMethod(
+            getGetDefaultIdentityProviderConnectorMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>(
+                  this, METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
+          .addMethod(
             getGetUserSyncStateModelMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5683,6 +5792,18 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * An endpoint called when a user verifies their email by clicking the link we sent
+     * them.
+     * </pre>
+     */
+    public void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getVerifyC1CEmailMethodHelper(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6461,6 +6582,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Get user sync state model, including actors, groups, workload administration groups, etc
      * </pre>
      */
@@ -6782,6 +6914,17 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
       return blockingUnaryCall(
           getChannel(), getCreateC1CAccountMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * An endpoint called when a user verifies their email by clicking the link we sent
+     * them.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getVerifyC1CEmailMethodHelper(), getCallOptions(), request);
     }
 
     /**
@@ -7492,6 +7635,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Get user sync state model, including actors, groups, workload administration groups, etc
      * </pre>
      */
@@ -7840,6 +7993,18 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * An endpoint called when a user verifies their email by clicking the link we sent
+     * them.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> verifyC1CEmail(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getVerifyC1CEmailMethodHelper(), getCallOptions()), request);
     }
 
     /**
@@ -8618,6 +8783,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Retrieves the CRN of identity provider connector used for CDP initiated logins.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getDefaultIdentityProviderConnector(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Get user sync state model, including actors, groups, workload administration groups, etc
      * </pre>
      */
@@ -8656,75 +8832,77 @@ public final class UserManagementGrpc {
   private static final int METHODID_CREATE_ACCOUNT = 25;
   private static final int METHODID_CREATE_TRIAL_ACCOUNT = 26;
   private static final int METHODID_CREATE_C1CACCOUNT = 27;
-  private static final int METHODID_GRANT_ENTITLEMENT = 28;
-  private static final int METHODID_REVOKE_ENTITLEMENT = 29;
-  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 30;
-  private static final int METHODID_ASSIGN_ROLE = 31;
-  private static final int METHODID_UNASSIGN_ROLE = 32;
-  private static final int METHODID_LIST_ASSIGNED_ROLES = 33;
-  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 34;
-  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 35;
-  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 36;
-  private static final int METHODID_LIST_ROLES = 37;
-  private static final int METHODID_LIST_RESOURCE_ROLES = 38;
-  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 39;
-  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 40;
-  private static final int METHODID_INITIATE_SUPPORT_CASE = 41;
-  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 42;
-  private static final int METHODID_CREATE_MACHINE_USER = 43;
-  private static final int METHODID_LIST_MACHINE_USERS = 44;
-  private static final int METHODID_DELETE_MACHINE_USER = 45;
-  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 46;
-  private static final int METHODID_SET_ACCOUNT_MESSAGES = 47;
-  private static final int METHODID_ACCEPT_TERMS = 48;
-  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 49;
-  private static final int METHODID_DESCRIBE_TERMS = 50;
-  private static final int METHODID_LIST_TERMS = 51;
-  private static final int METHODID_LIST_ENTITLEMENTS = 52;
-  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 53;
-  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 54;
-  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 55;
-  private static final int METHODID_CREATE_GROUP = 56;
-  private static final int METHODID_DELETE_GROUP = 57;
-  private static final int METHODID_LIST_GROUPS = 58;
-  private static final int METHODID_UPDATE_GROUP = 59;
-  private static final int METHODID_ADD_MEMBER_TO_GROUP = 60;
-  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 61;
-  private static final int METHODID_LIST_GROUP_MEMBERS = 62;
-  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 63;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 64;
-  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 65;
-  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 66;
-  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 67;
-  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 68;
-  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 69;
-  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 70;
-  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 71;
-  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 72;
-  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 73;
-  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 74;
-  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 75;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 76;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 77;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 78;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 79;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 82;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 83;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 84;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 85;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 86;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 87;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 88;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 89;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 90;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 91;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 92;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 93;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 94;
-  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 95;
-  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 96;
+  private static final int METHODID_VERIFY_C1CEMAIL = 28;
+  private static final int METHODID_GRANT_ENTITLEMENT = 29;
+  private static final int METHODID_REVOKE_ENTITLEMENT = 30;
+  private static final int METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = 31;
+  private static final int METHODID_ASSIGN_ROLE = 32;
+  private static final int METHODID_UNASSIGN_ROLE = 33;
+  private static final int METHODID_LIST_ASSIGNED_ROLES = 34;
+  private static final int METHODID_ASSIGN_RESOURCE_ROLE = 35;
+  private static final int METHODID_UNASSIGN_RESOURCE_ROLE = 36;
+  private static final int METHODID_LIST_ASSIGNED_RESOURCE_ROLES = 37;
+  private static final int METHODID_LIST_ROLES = 38;
+  private static final int METHODID_LIST_RESOURCE_ROLES = 39;
+  private static final int METHODID_LIST_RESOURCE_ASSIGNEES = 40;
+  private static final int METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = 41;
+  private static final int METHODID_INITIATE_SUPPORT_CASE = 42;
+  private static final int METHODID_NOTIFY_RESOURCE_DELETED = 43;
+  private static final int METHODID_CREATE_MACHINE_USER = 44;
+  private static final int METHODID_LIST_MACHINE_USERS = 45;
+  private static final int METHODID_DELETE_MACHINE_USER = 46;
+  private static final int METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS = 47;
+  private static final int METHODID_SET_ACCOUNT_MESSAGES = 48;
+  private static final int METHODID_ACCEPT_TERMS = 49;
+  private static final int METHODID_CLEAR_ACCEPTED_TERMS = 50;
+  private static final int METHODID_DESCRIBE_TERMS = 51;
+  private static final int METHODID_LIST_TERMS = 52;
+  private static final int METHODID_LIST_ENTITLEMENTS = 53;
+  private static final int METHODID_SET_TERMS_ACCEPTANCE_EXPIRY = 54;
+  private static final int METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = 55;
+  private static final int METHODID_INSERT_AZURE_SUBSCRIPTION = 56;
+  private static final int METHODID_CREATE_GROUP = 57;
+  private static final int METHODID_DELETE_GROUP = 58;
+  private static final int METHODID_LIST_GROUPS = 59;
+  private static final int METHODID_UPDATE_GROUP = 60;
+  private static final int METHODID_ADD_MEMBER_TO_GROUP = 61;
+  private static final int METHODID_REMOVE_MEMBER_FROM_GROUP = 62;
+  private static final int METHODID_LIST_GROUP_MEMBERS = 63;
+  private static final int METHODID_LIST_GROUPS_FOR_MEMBER = 64;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = 65;
+  private static final int METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY = 66;
+  private static final int METHODID_GET_CLUSTER_SSH_PRIVATE_KEY = 67;
+  private static final int METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = 68;
+  private static final int METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR = 69;
+  private static final int METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS = 70;
+  private static final int METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR = 71;
+  private static final int METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = 72;
+  private static final int METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR = 73;
+  private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 74;
+  private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 75;
+  private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 76;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 77;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 78;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 79;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 82;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 83;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 84;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 85;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 86;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 87;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 88;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 89;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 90;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 91;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 92;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 93;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 94;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 95;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 96;
+  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 97;
+  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 98;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -8854,6 +9032,10 @@ public final class UserManagementGrpc {
         case METHODID_CREATE_C1CACCOUNT:
           serviceImpl.createC1CAccount((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>) responseObserver);
+          break;
+        case METHODID_VERIFY_C1CEMAIL:
+          serviceImpl.verifyC1CEmail((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>) responseObserver);
           break;
         case METHODID_GRANT_ENTITLEMENT:
           serviceImpl.grantEntitlement((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest) request,
@@ -9127,6 +9309,10 @@ public final class UserManagementGrpc {
           serviceImpl.listServicePrincipalCloudIdentities((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>) responseObserver);
           break;
+        case METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR:
+          serviceImpl.getDefaultIdentityProviderConnector((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>) responseObserver);
+          break;
         case METHODID_GET_USER_SYNC_STATE_MODEL:
           serviceImpl.getUserSyncStateModel((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>) responseObserver);
@@ -9220,6 +9406,7 @@ public final class UserManagementGrpc {
               .addMethod(getCreateAccountMethodHelper())
               .addMethod(getCreateTrialAccountMethodHelper())
               .addMethod(getCreateC1CAccountMethodHelper())
+              .addMethod(getVerifyC1CEmailMethodHelper())
               .addMethod(getGrantEntitlementMethodHelper())
               .addMethod(getRevokeEntitlementMethodHelper())
               .addMethod(getEnsureDefaultEntitlementsGrantedMethodHelper())
@@ -9288,6 +9475,7 @@ public final class UserManagementGrpc {
               .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
               .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
+              .addMethod(getGetDefaultIdentityProviderConnectorMethodHelper())
               .addMethod(getGetUserSyncStateModelMethodHelper())
               .build();
         }
