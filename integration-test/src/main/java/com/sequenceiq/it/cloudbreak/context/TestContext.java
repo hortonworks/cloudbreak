@@ -87,6 +87,8 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
 import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
+import io.opentracing.Tracer;
+
 public abstract class TestContext implements ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestContext.class);
@@ -191,6 +193,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private ErrorLogMessageProvider errorLogMessageProvider;
+
+    @Inject
+    private Tracer tracer;
 
     private DefaultModel model;
 
@@ -386,7 +391,7 @@ public abstract class TestContext implements ApplicationContextAware {
             FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, acting);
             EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, acting);
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, acting);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(testParameter, acting);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, acting);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,

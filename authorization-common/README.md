@@ -59,6 +59,7 @@ If it is possible, please use CRN of a resource instead of name, since generally
 - add `@CheckPermissionByResourceObject` annotation to the method
 - annotate the resource object method parameter with `@ResourceObject`, the type of the parameter can be any Object
 - annotate any field of object with `@ResourceObjectField`
+- note: by default framework check only 1st level of request object's hierarchy, if you need to authorize some field on deeper level in the request object class' hierarchy, you need to add `deepSearchNeeded = true` to `@CheckPermissionByResourceObject` method annotation and also you need to annotate every parent field in the hierarchy with `@ResourceObjectFieldHolder`, please check [DistroxV1Request](../core-api/src/main/java/com/sequenceiq/distrox/api/v1/distrox/model/DistroXV1Request.java) for example
 
 ### Special case: list API endpoints (not used currently)
 

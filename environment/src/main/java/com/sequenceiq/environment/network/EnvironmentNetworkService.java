@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.network;
 
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
-import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_SINGLE;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,8 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -121,7 +120,7 @@ public class EnvironmentNetworkService {
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
                 .orElse(USE_MULTIPLE);
-        return USE_SINGLE.equals(resourceGroupUsagePattern);
+        return resourceGroupUsagePattern.isSingleResourceGroup();
     }
 
     private Optional<NetworkConnector> getNetworkConnector(String cloudPlatform) {

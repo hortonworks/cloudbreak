@@ -78,14 +78,15 @@ public enum AuthorizationResourceAction {
     MODIFY_AUDIT_CREDENTIAL("environments/modifyAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     POWERUSER_ONLY("cloudbreak/allowPowerUserOnly", null),
     LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),
+    STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),
     DATALAKE_READ("datalake/read", AuthorizationResourceType.DATALAKE),
     DATALAKE_WRITE("datalake/write", AuthorizationResourceType.DATALAKE),
     DATAHUB_READ("datahub/read", AuthorizationResourceType.DATAHUB),
-    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB),
-    STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT);
+    DATAHUB_WRITE("datahub/write", AuthorizationResourceType.DATAHUB);
+
 
     private static final Map<String, List<AuthorizationResourceAction>> BY_RIGHT = Stream.of(AuthorizationResourceAction.values())
             .collect(Collectors.groupingBy(AuthorizationResourceAction::getRight));

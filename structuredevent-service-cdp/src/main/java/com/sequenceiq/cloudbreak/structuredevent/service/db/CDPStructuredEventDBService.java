@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.structuredevent.repository.CDPPagingStructuredE
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredEventService;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Component
 public class CDPStructuredEventDBService extends AbstractAccountAwareResourceService<CDPStructuredEventEntity> implements CDPStructuredEventService {
@@ -45,8 +47,21 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
     public void create(CDPStructuredEvent structuredEvent) {
         LOGGER.info("Stored StructuredEvent type: {}, payload: {}", structuredEvent.getType(),
                 AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(structuredEvent)));
-        CDPStructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, CDPStructuredEventEntity.class);
-        create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+        ValidationResult validationResult = validate(structuredEvent);
+        if (validationResult.hasError()) {
+            LOGGER.warn(validationResult.getFormattedErrors());
+        } else {
+            CDPStructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, CDPStructuredEventEntity.class);
+            create(structuredEventEntityEntity, structuredEventEntityEntity.getAccountId());
+        }
+    }
+
+    private ValidationResult validate(CDPStructuredEvent event) {
+        ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
+        if (StringUtils.isEmpty(event.getOperation().getResourceCrn())) {
+            builder.error("Resource crn cannot be null or empty");
+        }
+        return builder.build();
     }
 
     public boolean isEnabled() {
