@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -54,6 +55,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackOperations stackOperations;
+
+    @Inject
+    private StackOperationService stackOperationService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -344,5 +348,11 @@ public class StackV4Controller extends NotificationController implements StackV4
         FlowIdentifier flowIdentifier = stackOperations.restoreClusterDatabase(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId(), backupLocation, backupId);
         return new RestoreV4Response(flowIdentifier);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier renewCertificate(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.renewCertificate(name);
     }
 }

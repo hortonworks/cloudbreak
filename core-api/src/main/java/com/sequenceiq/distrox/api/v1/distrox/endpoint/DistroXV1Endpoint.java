@@ -20,6 +20,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_CRN;
@@ -351,4 +352,11 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
             nickname = "getDistroxCmRoles")
     List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
+
+    @POST
+    @Path("crn/{crn}/renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
+            nickname = "renewDistroXCertificate")
+    FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 }

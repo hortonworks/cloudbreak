@@ -42,9 +42,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
@@ -108,6 +110,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private ClusterDiagnosticsService clusterDiagnosticsService;
+
+    @Inject
+    private StackOperationService stackOperationService;
 
     @Override
     @DisableCheckPermissions
@@ -462,6 +467,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @DisableCheckPermissions
     public List<String> getCmRoles(String stackCrn) {
         return clusterDiagnosticsService.getClusterComponents(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public FlowIdentifier renewCertificate(@ResourceCrn String crn) {
+        Stack stack = stackOperations.getStackByCrn(crn);
+        return stackOperationService.renewCertificate(stack);
     }
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
