@@ -45,6 +45,7 @@ import com.sequenceiq.it.cloudbreak.dto.SecurityGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 
 public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends AbstractCloudbreakTestDto<StackV4Request, StackV4Response, T> {
 
@@ -402,5 +403,11 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     @Override
     public String getName() {
         return getRequest().getName();
+    }
+
+    public StackTestDtoBase<T> withTelemetry(String key) {
+        TelemetryTestDto telemetry = getTestContext().get(key);
+        getRequest().setTelemetry(telemetry.getRequest());
+        return this;
     }
 }
