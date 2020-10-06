@@ -10,8 +10,8 @@ public class JsonLayoutFormat extends SimpleLayoutFormat {
 
     private final CustomJsonLayout jsonLayout;
 
-    JsonLayoutFormat(String contextName) {
-        this.jsonLayout = new CustomJsonLayout(contextName);
+    JsonLayoutFormat(String contextName, Integer maxChunkLength) {
+        jsonLayout = new CustomJsonLayout(contextName, maxChunkLength);
         jsonLayout.setIncludeMessage(true);
         jsonLayout.setAppendLineSeparator(true);
         jsonLayout.setJsonFormatter(m -> new ObjectMapper().writeValueAsString(m));
@@ -19,8 +19,8 @@ public class JsonLayoutFormat extends SimpleLayoutFormat {
     }
 
     @Override
-    public String format(ILoggingEvent event, String message, String loggerNameFilter) {
-        String filteredLogMessage = super.format(event, message, loggerNameFilter);
-        return jsonLayout.doLayout(event, filteredLogMessage, loggerNameFilter);
+    public String format(ILoggingEvent event, String message) {
+        String filteredLogMessage = super.format(event, message);
+        return jsonLayout.doLayout(event, filteredLogMessage);
     }
 }

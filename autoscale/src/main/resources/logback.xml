@@ -7,7 +7,6 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
-                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
                 <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
             </layout>
         </encoder>
@@ -20,7 +19,6 @@
         </filter>
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
-                <loggerNameFilter>com.sequenceiq</loggerNameFilter>
                 <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
             </layout>
         </encoder>

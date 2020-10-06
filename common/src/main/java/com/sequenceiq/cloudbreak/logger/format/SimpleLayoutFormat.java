@@ -5,7 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 public class SimpleLayoutFormat implements LayoutFormat {
 
     @Override
-    public String format(ILoggingEvent event, String message, String loggerNameFilter) {
+    public String format(ILoggingEvent event, String message) {
         return message;
     }
 }
