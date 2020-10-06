@@ -30,6 +30,17 @@ public class AltusIAMService {
     /**
      * Generate machine user with access keys
      */
+    public AltusCredential generateMachineUserWithAccessKeyForLegacyCm(String machineUserName, String actorCrn, String accountId) {
+        return umsClient.createMachineUserAndGenerateKeys(
+                machineUserName,
+                actorCrn,
+                accountId,
+                umsClient.getBuiltInDatabusRoleCrn());
+    }
+
+    /**
+     * Generate machine user with access keys
+     */
     public Optional<AltusCredential> generateMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId, boolean useSharedCredential) {
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
@@ -75,6 +86,13 @@ public class AltusIAMService {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
         }
+    }
+
+    /**
+     * Delete machine user with its access keys (and unassign databus role if required)
+     */
+    public void clearLegacyMachineUser(String machineUserName, String actorCrn, String accountId) {
+        clearMachineUser(machineUserName, actorCrn, accountId, false);
     }
 
     public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {

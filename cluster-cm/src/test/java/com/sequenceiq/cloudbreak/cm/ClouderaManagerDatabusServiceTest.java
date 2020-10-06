@@ -2,10 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -13,9 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -28,7 +24,7 @@ public class ClouderaManagerDatabusServiceTest {
     private ClouderaManagerDatabusService underTest;
 
     @Mock
-    private GrpcUmsClient umsClient;
+    private AltusIAMService iamService;
 
     private Stack stack;
 
@@ -48,13 +44,7 @@ public class ClouderaManagerDatabusServiceTest {
     public void testGetAltusCredential() {
         // GIVEN
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
-        UserManagementProto.MachineUser machineUser = UserManagementProto.MachineUser.newBuilder()
-                .setMachineUserName("machineUser")
-                .setCrn(USER_CRN)
-                .build();
-        when(umsClient.createMachineUser(any(), any(), any(), any())).thenReturn(Optional.of(machineUser.getCrn()));
-        doNothing().when(umsClient).assignMachineUserRole(any(), any(), any(), any(), any());
-        when(umsClient.createMachineUserAndGenerateKeys(any(), any(), any(), any())).thenReturn(credential);
+        when(iamService.generateMachineUserWithAccessKeyForLegacyCm(any(), any(), any())).thenReturn(credential);
         // WHEN
         AltusCredential result = underTest.getAltusCredential(stack);
         // THEN

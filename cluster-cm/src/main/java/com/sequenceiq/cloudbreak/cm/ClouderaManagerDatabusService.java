@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
@@ -21,20 +21,20 @@ public class ClouderaManagerDatabusService {
     private static final String DATABUS_CRN_PATTERN = "datahub-wa-publisher-%s";
 
     @Inject
-    private GrpcUmsClient umsClient;
+    private AltusIAMService altusIAMService;
 
     /**
      * Generate new machine user (if it is needed) and access api key for this user.
      * Also assign built-in dabaus uploader role for the machine user.
+     *
      * @param stack stack that is used to get user crn
-     * @return cre
+     * @return credential
      */
     AltusCredential createMachineUserAndGenerateKeys(Stack stack) {
         String userCrn = stack.getCreator().getUserCrn();
         String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
         String machineUserName = getWAMachineUserName(userCrn, stack);
-        String builtInDbusRoleCrn = umsClient.getBuiltInDatabusRoleCrn();
-        return umsClient.createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, builtInDbusRoleCrn);
+        return altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(machineUserName, userCrn, accountId);
     }
 
     /**
@@ -46,8 +46,7 @@ public class ClouderaManagerDatabusService {
             String userCrn = stack.getCreator().getUserCrn();
             String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
             String machineUserName = getWAMachineUserName(userCrn, stack);
-            String builtInDbusRoleCrn = umsClient.getBuiltInDatabusRoleCrn();
-            umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, userCrn, accountId, builtInDbusRoleCrn);
+            altusIAMService.clearLegacyMachineUser(machineUserName, userCrn, accountId);
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
