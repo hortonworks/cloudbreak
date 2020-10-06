@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -32,6 +33,7 @@ import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
@@ -82,6 +84,9 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private RangerCloudIdentityService rangerCloudIdentityService;
 
+    @Inject
+    private CertRotationService certRotationService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
@@ -113,16 +118,14 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
     public SdxClusterResponse get(@ResourceName String name) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
     public SdxClusterResponse getByCrn(@TenantAwareParam @ResourceCrn String clusterCrn) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
     }
 
@@ -149,8 +152,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
     public SdxClusterDetailResponse getDetail(@ResourceName String name, Set<String> entries) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         StackV4Response stackV4Response = sdxService.getDetail(name, entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
@@ -159,8 +161,7 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DETAILED_DATALAKE)
     public SdxClusterDetailResponse getDetailByCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Set<String> entries) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
@@ -204,48 +205,42 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RETRY_DATALAKE_OPERATION)
     public FlowIdentifier retry(@ResourceName String name) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxRetryService.retrySdx(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RETRY_DATALAKE_OPERATION)
     public FlowIdentifier retryByCrn(@ResourceCrn String crn) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxRetryService.retrySdx(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
     public FlowIdentifier startByName(@ResourceName String name) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
     public FlowIdentifier startByCrn(@ResourceCrn String crn) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxStartService.triggerStartIfClusterNotRunning(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.STOP_DATALAKE)
     public FlowIdentifier stopByName(@ResourceName String name) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATALAKE)
     public FlowIdentifier stopByCrn(@ResourceCrn String crn) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxStopService.triggerStopIfClusterNotStopped(sdxCluster);
     }
 
@@ -264,32 +259,28 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, backupId, backupLocation);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@ResourceName String name, String operationId) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.getDatabaseBackupStatus(sdxCluster, operationId);
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@ResourceName String name, String operationId) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);    }
 
     @Override
@@ -305,6 +296,30 @@ public class SdxController implements SdxEndpoint {
     @InternalOnly
     public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, long commandId) {
         return rangerCloudIdentityService.getRangerCloudIdentitySyncStatus(envCrn, commandId);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
+    public FlowIdentifier rotateAutoTlsCertificatesByName(@ResourceName String name, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
+    public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
+    }
+
+    private SdxCluster getSdxClusterByName(String name) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxService.getByNameInAccount(userCrn, name);
+    }
+
+    private SdxCluster getSdxClusterByCrn(String crn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxService.getByCrn(userCrn, crn);
     }
 
 }

@@ -48,6 +48,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -85,6 +86,9 @@ class ProvisionerServiceTest {
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private AvailabilityChecker availabilityChecker;
 
     @InjectMocks
     private ProvisionerService underTest;
@@ -170,6 +174,7 @@ class ProvisionerServiceTest {
                 .thenReturn(FlowState.FINISHED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
+        when(availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)).thenReturn(Boolean.TRUE);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
 
         underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig);

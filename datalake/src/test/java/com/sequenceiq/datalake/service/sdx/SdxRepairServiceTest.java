@@ -33,6 +33,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -63,6 +64,9 @@ public class SdxRepairServiceTest {
 
     @Captor
     private ArgumentCaptor<ClusterRepairV4Request> captor;
+
+    @Mock
+    private AvailabilityChecker availabilityChecker;
 
     @InjectMocks
     private SdxRepairService underTest;
@@ -97,6 +101,7 @@ public class SdxRepairServiceTest {
         resp.setStatus(Status.UPDATE_FAILED);
         when(cloudbreakFlowService.getLastKnownFlowState(any())).thenReturn(FlowState.FINISHED);
         when(stackV4Endpoint.get(eq(0L), eq("dummyCluster"), any(), anyString())).thenReturn(resp);
+        when(availabilityChecker.stackAndClusterAvailable(eq(resp), any())).thenReturn(Boolean.FALSE);
         AttemptResult<StackV4Response> attempt = underTest.checkClusterStatusDuringRepair(cluster);
         assertEquals(AttemptState.BREAK, attempt.getState());
     }

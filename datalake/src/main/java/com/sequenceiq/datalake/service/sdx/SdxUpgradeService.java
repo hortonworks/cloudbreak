@@ -32,6 +32,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -54,6 +55,9 @@ public class SdxUpgradeService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
+
+    @Inject
+    private AvailabilityChecker availabilityChecker;
 
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         SdxCluster cluster = sdxService.getById(id);
@@ -175,7 +179,7 @@ public class SdxUpgradeService {
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
-        if (isStackAndClusterAvailable(stackV4Response, cluster)) {
+        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
@@ -200,12 +204,5 @@ public class SdxUpgradeService {
     private AttemptResult<StackV4Response> sdxUpgradeFailed(SdxCluster sdxCluster, String statusReason, String pollingMessage) {
         LOGGER.info("{} failed: {}", pollingMessage, statusReason);
         return AttemptResults.breakFor("SDX " + pollingMessage + " failed '" + sdxCluster.getClusterName() + "', " + statusReason);
-    }
-
-    private boolean isStackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
     }
 }

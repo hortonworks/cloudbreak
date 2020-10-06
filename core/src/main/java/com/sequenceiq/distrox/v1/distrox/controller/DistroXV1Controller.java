@@ -31,8 +31,10 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowResponse.Builder;
@@ -307,7 +309,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATALAKE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public void repairClusterByCrn(@ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
         stackOperations.repairCluster(
                 NameOrCrn.ofCrn(crn),
@@ -474,8 +476,29 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return stackOperationService.renewCertificate(stack);
     }
 
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.ROTATE_AUTOTLS_CERT_DATAHUB)
+    public CertificatesRotationV4Response rotateAutoTlsCertificatesByName(@ResourceName String name,
+            @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+        return stackOperations.rotateAutoTlsCertificates(
+                NameOrCrn.ofName(name),
+                workspaceService.getForCurrentUser().getId(),
+                rotateCertificateRequest
+        );
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_AUTOTLS_CERT_DATAHUB)
+    public CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn,
+            @Valid CertificatesRotationV4Request rotateCertificateRequest) {
+        return stackOperations.rotateAutoTlsCertificates(
+                NameOrCrn.ofCrn(crn),
+                workspaceService.getForCurrentUser().getId(),
+                rotateCertificateRequest
+        );
+    }
+
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
         return delegatingRequestToCliRequestConverter.convertStack(stackV4Request);
     }
-
 }

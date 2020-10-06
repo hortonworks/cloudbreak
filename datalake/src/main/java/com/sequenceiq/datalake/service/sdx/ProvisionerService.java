@@ -35,6 +35,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
+import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -66,17 +67,13 @@ public class ProvisionerService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private AvailabilityChecker availabilityChecker;
+
     private AttemptResult<StackV4Response> sdxCreationFailed(String statusReason) {
         String errorMessage = "Data Lake creation failed: " + statusReason;
         LOGGER.error(errorMessage);
         return AttemptResults.breakFor(errorMessage);
-    }
-
-    private boolean stackAndClusterAvailable(StackV4Response stackV4Response, ClusterV4Response cluster) {
-        return stackV4Response.getStatus().isAvailable()
-                && cluster != null
-                && cluster.getStatus() != null
-                && cluster.getStatus().isAvailable();
     }
 
     public void startStackDeletion(Long id, boolean forced) {
@@ -213,7 +210,7 @@ public class ProvisionerService {
                                 stackV4Response.getStatus().name());
                         LOGGER.debug("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
                         ClusterV4Response cluster = stackV4Response.getCluster();
-                        if (stackAndClusterAvailable(stackV4Response, cluster)) {
+                        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
                             LOGGER.info("Stack and cluster is available.");
                             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STACK_CREATION_FINISHED,
                                     "Stack created for Datalake", sdxCluster);

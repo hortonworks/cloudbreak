@@ -325,7 +325,11 @@ public enum ResourceEvent {
     DATALAKE_DATABASE_RESTORE("datalake.database.restore"),
     DATALAKE_DATABASE_RESTORE_FINISHED("datalake.database.restore.finished"),
     DATALAKE_DATABASE_RESTORE_FAILED("datalake.database.restore.failed"),
-    DATALAKE_DATABASE_RESTORE_COULD_NOT_START("datalake.database.restore.could.not.start");
+    DATALAKE_DATABASE_RESTORE_COULD_NOT_START("datalake.database.restore.could.not.start"),
+
+    SDX_CERT_ROTATION_STARTED("resource.sdx.cert.rotation.started"),
+    SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),
+    SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished");
 
     private final String message;
 

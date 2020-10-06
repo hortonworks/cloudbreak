@@ -352,9 +352,10 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public CertificatesRotationV4Response rotateCertificates(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn,
+    public CertificatesRotationV4Response rotateAutoTlsCertificates(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn,
             @Valid CertificatesRotationV4Request certificatesRotationV4Request) {
-        return stackOperations.rotateClusterCertificates(NameOrCrn.ofName(name), workspaceId, certificatesRotationV4Request);
+        return stackOperations.rotateAutoTlsCertificates(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                certificatesRotationV4Request);
     }
 
     @Override
