@@ -106,6 +106,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private YarnEnvironmentParameters yarn;
 
+        private String cloudbreakVersion;
+
         private Builder() {
         }
 
@@ -263,6 +265,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withCloudbreakVersion(String cloudbreakVersion) {
+            this.cloudbreakVersion = cloudbreakVersion;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -295,6 +302,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setAzure(azure);
             detailedEnvironmentResponse.setGcp(gcp);
             detailedEnvironmentResponse.setYarn(yarn);
+            detailedEnvironmentResponse.setCloudbreakVersion(cloudbreakVersion);
             return detailedEnvironmentResponse;
         }
     }

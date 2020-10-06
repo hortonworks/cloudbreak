@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import java.util.Objects;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.util.NullUtil;
@@ -55,6 +56,9 @@ public class EnvironmentResponseConverter {
 
     private final NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
+    @Value("${info.app.version:}")
+    private String serviceVersion;
+
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
@@ -97,7 +101,8 @@ public class EnvironmentResponseConverter {
                 .withGcp(getIfNotNull(environmentDto.getParameters(), this::gcpEnvParamsToGcpEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
-                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
+                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform())
+                .withCloudbreakVersion(serviceVersion);
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));

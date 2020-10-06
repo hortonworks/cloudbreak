@@ -105,6 +105,9 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.YARN_PARAMETERS)
     private YarnEnvironmentParameters yarn;
 
+    @ApiModelProperty(EnvironmentModelDescription.CLOUDBREAK_VERSION)
+    private String cloudbreakVersion;
+
     public String getCrn() {
         return crn;
     }
@@ -340,5 +343,13 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setYarn(YarnEnvironmentParameters yarn) {
         this.yarn = yarn;
+    }
+
+    public String getCloudbreakVersion() {
+        return cloudbreakVersion;
+    }
+
+    public void setCloudbreakVersion(String cloudbreakVersion) {
+        this.cloudbreakVersion = cloudbreakVersion;
     }
 }
