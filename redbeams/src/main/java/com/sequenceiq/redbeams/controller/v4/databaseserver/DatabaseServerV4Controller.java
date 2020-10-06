@@ -10,7 +10,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -45,7 +44,6 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
 
 @Controller
-@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 

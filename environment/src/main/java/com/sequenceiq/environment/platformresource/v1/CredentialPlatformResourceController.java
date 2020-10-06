@@ -16,7 +16,6 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -57,7 +56,6 @@ import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
 @Controller
-@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class CredentialPlatformResourceController implements CredentialPlatformResourceEndpoint {
 

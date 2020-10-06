@@ -12,7 +12,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -51,7 +50,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
-@AuthorizationResource
 public class StackV4Controller extends NotificationController implements StackV4Endpoint {
 
     @Inject

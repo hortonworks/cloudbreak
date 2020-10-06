@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
@@ -37,7 +36,6 @@ import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-@AuthorizationResource
 public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Controller.class);

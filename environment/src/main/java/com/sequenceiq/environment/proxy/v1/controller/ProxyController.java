@@ -11,7 +11,6 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
@@ -32,7 +31,6 @@ import com.sequenceiq.environment.proxy.v1.converter.ProxyRequestToProxyConfigCo
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
-@AuthorizationResource
 @Transactional(TxType.NEVER)
 public class ProxyController extends NotificationController implements ProxyEndpoint {
 

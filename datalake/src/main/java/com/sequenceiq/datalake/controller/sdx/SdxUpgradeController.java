@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -24,7 +23,6 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 @Controller
-@AuthorizationResource
 public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeController.class);

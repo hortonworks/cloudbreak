@@ -10,7 +10,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -26,7 +25,6 @@ import com.sequenceiq.notification.NotificationController;
 
 @Controller
 @Transactional(TxType.NEVER)
-@AuthorizationResource
 public class KerberosConfigV1Controller extends NotificationController implements KerberosConfigV1Endpoint {
     @Inject
     private KerberosConfigV1Service kerberosConfigV1Service;

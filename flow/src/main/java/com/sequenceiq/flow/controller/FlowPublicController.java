@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -12,7 +11,6 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.service.FlowService;
 
 @Controller
-@AuthorizationResource
 public class FlowPublicController implements FlowPublicEndpoint {
 
     @Inject

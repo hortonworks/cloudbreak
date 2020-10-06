@@ -8,7 +8,6 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -30,7 +29,6 @@ import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
-@AuthorizationResource
 public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Inject

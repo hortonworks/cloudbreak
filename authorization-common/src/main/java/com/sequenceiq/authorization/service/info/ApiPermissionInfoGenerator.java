@@ -31,12 +31,12 @@ import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -70,7 +70,7 @@ public class ApiPermissionInfoGenerator {
     private UmsRightProvider umsRightProvider;
 
     public Set<ApiAuthorizationInfo> generateApiMethodsWithRequiredPermission() {
-        Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(AuthorizationResource.class);
+        Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class);
         Set<ApiAuthorizationInfo> infos = Sets.newHashSet();
         authorizationResourceClasses.stream().forEach(authzClass -> infos.addAll(getMethodInfosForClass(authzClass)));
         return infos;

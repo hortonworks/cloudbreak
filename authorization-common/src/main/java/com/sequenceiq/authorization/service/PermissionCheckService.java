@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
@@ -119,11 +118,6 @@ public class PermissionCheckService {
                 !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             getAccessDeniedAndLogInternalActorRestriction(methodSignature);
         }
-
-        Optional<Class<?>> authorizationClass = commonPermissionCheckingUtils.getAuthorizationClass(proceedingJoinPoint);
-        if (!authorizationClass.isPresent()) {
-            throw getAccessDeniedAndLogMissingAnnotation(methodSignature.getMethod().getDeclaringClass());
-        }
     }
 
     private void checkPrerequisitesOnMethod(MethodSignature methodSignature, List<? extends Annotation> annotations) {
@@ -131,12 +125,6 @@ public class PermissionCheckService {
             !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             throw getAccessDeniedAndLogInternalActorRestriction(methodSignature);
         }
-    }
-
-    private AccessDeniedException getAccessDeniedAndLogMissingAnnotation(Class<?> repositoryClass) {
-        LOGGER.error("Class '{}' should be annotated with @{} and specify the resource!", repositoryClass.getCanonicalName(),
-                AuthorizationResource.class.getName());
-        return new AccessDeniedException("You have no access to this resource.");
     }
 
     private AccessDeniedException getAccessDeniedAndLogInternalActorRestriction(MethodSignature methodSignature) {

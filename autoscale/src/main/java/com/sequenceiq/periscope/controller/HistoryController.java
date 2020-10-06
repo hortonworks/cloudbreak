@@ -6,7 +6,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -21,7 +20,6 @@ import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.NotFoundException;
 
 @Controller
-@AuthorizationResource
 public class HistoryController implements HistoryEndpoint {
 
     @Inject

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceObject;
@@ -25,7 +24,6 @@ import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
-@AuthorizationResource
 public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsV4Controller.class);

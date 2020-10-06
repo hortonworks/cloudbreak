@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
@@ -62,7 +61,6 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseCo
 
 @Controller
 @Transactional(TxType.NEVER)
-@AuthorizationResource
 @AccountEntityType(Environment.class)
 public class EnvironmentController implements EnvironmentEndpoint {
 

@@ -13,7 +13,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.AuthorizationResource;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotifica
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
 
-@AuthorizationResource
 @Controller
 public class CDPStructuredEventV1Controller implements CDPStructuredEventV1Endpoint {
 
