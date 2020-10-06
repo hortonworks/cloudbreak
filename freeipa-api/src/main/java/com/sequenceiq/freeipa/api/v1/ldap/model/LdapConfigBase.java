@@ -9,9 +9,6 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
@@ -85,7 +82,6 @@ public abstract class LdapConfigBase {
 
     @NotEmpty
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_ENVIRONMENT, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     public String getName() {

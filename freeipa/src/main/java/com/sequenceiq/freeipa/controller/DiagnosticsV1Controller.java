@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 
@@ -7,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
@@ -37,8 +40,8 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
     private VmLogsToVmLogsResponseConverter vmlogsConverter;
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
         String accountId = crnService.getCurrentAccountId();
         LOGGER.debug("collectDiagnostics called with accountId '{}'", accountId);
         return diagnosticsTriggerService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());

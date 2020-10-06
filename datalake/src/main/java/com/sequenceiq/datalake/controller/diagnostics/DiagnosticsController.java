@@ -1,5 +1,8 @@
 package com.sequenceiq.datalake.controller.diagnostics;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -7,9 +10,9 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
@@ -24,8 +27,8 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     private DiagnosticsService diagnosticsService;
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
+    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
         return diagnosticsService.collectDiagnostics(request);
     }
 
@@ -36,8 +39,8 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectCmDiagnostics(@ResourceObject @Valid CmDiagnosticsCollectionRequest request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
+    public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
         return diagnosticsService.collectCmDiagnostics(request);
     }
 

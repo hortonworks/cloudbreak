@@ -1,11 +1,9 @@
 package com.sequenceiq.authorization.service.info;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -37,12 +35,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByCompositeRequestProperty;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceObject;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
 import com.sequenceiq.authorization.info.model.ApiAuthorizationInfo;
 import com.sequenceiq.authorization.info.model.ApiAuthorizationInfoBuilder;
 import com.sequenceiq.authorization.info.model.FieldAuthorizationInfo;
@@ -122,9 +119,11 @@ public class ApiPermissionInfoGenerator {
         LegacyAuthorizationInfo legacyAuthorizationInfo = new LegacyAuthorizationInfo();
         String message = null;
         getInfoFromRegularAnnotation(method, newAuthorizationInfo, legacyAuthorizationInfo);
-        if (method.isAnnotationPresent(CheckPermissionByResourceObject.class)) {
+        if (method.isAnnotationPresent(CheckPermissionByRequestProperty.class) ||
+                method.isAnnotationPresent(CheckPermissionByCompositeRequestProperty.class)) {
             getInfoFromResourceObjectAnnotation(method, newAuthorizationInfo, legacyAuthorizationInfo);
-            message = "Authorization happening on specific field(s) of request object, this is happening only in case of new authorization.";
+            message = "Authorization happening on specific field(s) of request object, this is happening only in case of new authorization." +
+                    "Please check request object in Cloudbreak code for more details.";
         }
         if (method.isAnnotationPresent(DisableCheckPermissions.class)) {
             message = "Permission check disabled.";
@@ -146,21 +145,25 @@ public class ApiPermissionInfoGenerator {
 
     private void getInfoFromResourceObjectAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo, LegacyAuthorizationInfo legacyAuthorizationInfo) {
         Set<FieldAuthorizationInfo> fieldPermissions = Sets.newHashSet();
-        Arrays.stream(method.getParameters())
-                .filter(parameter -> parameter.isAnnotationPresent(ResourceObject.class))
-                .forEach(parameter -> {
-                    Class resourceObjectType = parameter.getType();
-                    getAllFields(Lists.newArrayList(), resourceObjectType).stream()
-                            .filter(field -> field.isAnnotationPresent(ResourceObjectField.class))
-                            .forEach(field -> {
-                                ResourceObjectField resourceObjectField = field.getAnnotation(ResourceObjectField.class);
-                                FieldAuthorizationInfo fieldAuthorizationInfo = new FieldAuthorizationInfo(field.getName(),
-                                        umsRightProvider.getNewRight(resourceObjectField.action()));
-                                fieldPermissions.add(fieldAuthorizationInfo);
-                                legacyAuthorizationInfo.getPermissionNeeded().add(umsRightProvider.getLegacyRight(resourceObjectField.action()));
-                            });
+        Arrays.stream(method.getAnnotations())
+                .forEach(annotation -> {
+                    if (annotation.annotationType().equals(CheckPermissionByRequestProperty.class)) {
+                        getAuthorizationInfoFromRequestPropertyAnnotation(legacyAuthorizationInfo,
+                                fieldPermissions, (CheckPermissionByRequestProperty) annotation);
+                    } else if (annotation.annotationType().equals(CheckPermissionByCompositeRequestProperty.class)) {
+                        Arrays.stream(((CheckPermissionByCompositeRequestProperty) annotation).value()).forEach(byRequestProperty ->
+                                getAuthorizationInfoFromRequestPropertyAnnotation(legacyAuthorizationInfo, fieldPermissions, byRequestProperty));
+                    }
                 });
         newAuthorizationInfo.getPermissionsNeededForRequestObject().addAll(fieldPermissions);
+    }
+
+    private void getAuthorizationInfoFromRequestPropertyAnnotation(LegacyAuthorizationInfo legacyAuthorizationInfo, Set<FieldAuthorizationInfo> fieldPermissions,
+            CheckPermissionByRequestProperty annotation) {
+        FieldAuthorizationInfo fieldAuthorizationInfo = new FieldAuthorizationInfo(annotation.path(),
+                umsRightProvider.getNewRight(annotation.action()));
+        fieldPermissions.add(fieldAuthorizationInfo);
+        legacyAuthorizationInfo.getPermissionNeeded().add(umsRightProvider.getLegacyRight(annotation.action()));
     }
 
     private void getInfoFromRegularAnnotation(Method method, NewAuthorizationInfo newAuthorizationInfo, LegacyAuthorizationInfo legacyAuthorizationInfo) {
@@ -181,13 +184,5 @@ public class ApiPermissionInfoGenerator {
                         LOGGER.error("Error: ", e);
                     }
                 });
-    }
-
-    public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
-        fields.addAll(Arrays.asList(type.getDeclaredFields()));
-        if (type.getSuperclass() != null) {
-            getAllFields(fields, type.getSuperclass());
-        }
-        return fields;
     }
 }

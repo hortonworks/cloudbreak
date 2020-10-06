@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.credential.v1;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Map;
@@ -16,12 +18,12 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -140,8 +142,8 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public CredentialResponse put(@ResourceObject @Valid EditCredentialRequest credentialRequest) {
+    @CheckPermissionByRequestProperty(path = "name", type = NAME, action = EDIT_CREDENTIAL)
+    public CredentialResponse put(@RequestObject @Valid EditCredentialRequest credentialRequest) {
         Credential credential = credentialConverter.convert(credentialRequest);
         credential.setType(ENVIRONMENT);
         credential = credentialService.updateByAccountId(credential, ThreadBasedUserCrnProvider.getAccountId(), ENVIRONMENT);
@@ -179,7 +181,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_CREDENTIAL)
+    @CheckPermissionByResourceName(action = EDIT_CREDENTIAL)
     public Response initCodeGrantFlowOnExisting(@ResourceName String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();

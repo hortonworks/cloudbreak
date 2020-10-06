@@ -4,9 +4,6 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
@@ -20,7 +17,6 @@ public class DiagnosticsCollectionRequest extends BaseDiagnosticsCollectionReque
 
     @NotNull
     @ApiModelProperty(ModelDescriptions.ENVIRONMENT_CRN)
-    @ResourceObjectField(action = AuthorizationResourceAction.ENVIRONMENT_READ, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     public String getEnvironmentCrn() {

@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface ResourceObject {
+@Target(ElementType.METHOD)
+public @interface CheckPermissionByCompositeRequestProperty {
+
+    CheckPermissionByRequestProperty[] value();
 }

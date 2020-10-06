@@ -6,9 +6,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
@@ -27,7 +24,6 @@ public class CreateDatabaseV4Request implements Serializable {
     @ValidCrn
     @NotNull
     @ApiModelProperty(DatabaseServer.CRN)
-    @ResourceObjectField(action = AuthorizationResourceAction.CREATE_DATABASE, variableType = AuthorizationVariableType.CRN)
     private String existingDatabaseServerCrn;
 
     @NotNull

@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,11 +17,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -107,8 +111,8 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private ClusterProxyService clusterProxyService;
 
     @Override
-    @CheckPermissionByResourceObject
-    public DescribeFreeIpaResponse create(@ResourceObject @Valid CreateFreeIpaRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public DescribeFreeIpaResponse create(@RequestObject @Valid CreateFreeIpaRequest request) {
         ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -119,8 +123,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public void attachChildEnvironment(@ResourceObject @Valid AttachChildEnvironmentRequest request) {
+    @CheckPermissionByRequestProperty(path = "parentEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "childEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public void attachChildEnvironment(@RequestObject @Valid AttachChildEnvironmentRequest request) {
         ValidationResult validationResult = attachChildEnvironmentRequestValidator.validate(request);
         if (validationResult.hasError()) {
             LOGGER.debug("AttachChildEnvironmentRequest has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -131,8 +136,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public void detachChildEnvironment(@ResourceObject @Valid DetachChildEnvironmentRequest request) {
+    @CheckPermissionByRequestProperty(path = "parentEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "childEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public void detachChildEnvironment(@RequestObject @Valid DetachChildEnvironmentRequest request) {
         String accountId = crnService.getCurrentAccountId();
         childEnvironmentService.detachChildEnvironment(request, accountId);
     }
@@ -185,8 +191,8 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public OperationStatus cleanup(@ResourceObject @Valid CleanupRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public OperationStatus cleanup(@RequestObject @Valid CleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return internalCleanup(request, accountId);
     }
@@ -198,15 +204,15 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public OperationStatus rebootInstances(@ResourceObject @Valid RebootInstancesRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
+    public OperationStatus rebootInstances(@RequestObject @Valid RebootInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.rebootInstances(accountId, request);
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public OperationStatus repairInstances(@ResourceObject @Valid RepairInstancesRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
+    public OperationStatus repairInstances(@RequestObject @Valid RepairInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.repairInstances(accountId, request);
     }
@@ -226,14 +232,14 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public String registerWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         return clusterProxyService.registerFreeIpa(accountId, environmentCrn).toString();
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public void deregisterWithClusterProxy(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         clusterProxyService.deregisterFreeIpa(accountId, environmentCrn);

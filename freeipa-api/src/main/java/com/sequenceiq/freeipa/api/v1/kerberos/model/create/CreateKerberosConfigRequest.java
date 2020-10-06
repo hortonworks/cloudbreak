@@ -8,9 +8,6 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.validation.ValidKerberosRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
@@ -46,7 +43,6 @@ public class CreateKerberosConfigRequest {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_ENVIRONMENT, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     public ActiveDirectoryKerberosDescriptor getActiveDirectory() {

@@ -5,9 +5,6 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
@@ -23,7 +20,6 @@ import io.swagger.annotations.ApiModelProperty;
 public class EditCredentialRequest extends CredentialBase {
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
     private String name;
 
     @Valid

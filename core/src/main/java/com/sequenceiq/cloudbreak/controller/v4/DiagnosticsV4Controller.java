@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATALAKE;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -9,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
@@ -44,8 +47,8 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
     private VmLogsToVmLogsResponseConverter vmlogsConverter;
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectDiagnostics(@ResourceObject @Valid DiagnosticsCollectionRequest request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
+    public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
@@ -59,8 +62,8 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
-    public FlowIdentifier collectCmDiagnostics(@ResourceObject @Valid CmDiagnosticsCollectionRequest request) {
+    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
+    public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectCMDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
         return diagnosticsTriggerService.startCmDiagnostics(request, request.getStackCrn(), userCrn);

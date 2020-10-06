@@ -6,9 +6,6 @@ import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -21,7 +18,6 @@ public class RepairInstancesRequest {
 
     @NotEmpty
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
-    @ResourceObjectField(action = AuthorizationResourceAction.REPAIR_FREEIPA, variableType = AuthorizationVariableType.CRN)
     private String environmentCrn;
 
     @ApiModelProperty(ModelDescriptions.FORCE_REPAIR)

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.List;
 import java.util.Set;
 
@@ -12,9 +15,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.annotation.ResourceObject;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
@@ -39,8 +42,8 @@ public class DnsV1Controller implements DnsV1Endpoint {
     private DnsRecordService dnsRecordService;
 
     @Override
-    @CheckPermissionByResourceObject
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@ResourceObject AddDnsZoneForSubnetsRequest request) {
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnets(@RequestObject AddDnsZoneForSubnetsRequest request) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.addDnsZonesForSubnets(request, accountId);
@@ -50,12 +53,12 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceObject
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@ResourceObject @Valid AddDnsZoneForSubnetIdsRequest request) {
+    public AddDnsZoneForSubnetsResponse addDnsZoneForSubnetIds(@RequestObject @Valid AddDnsZoneForSubnetIdsRequest request) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.addDnsZonesForSubnetIds(request, accountId);
@@ -80,7 +83,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -95,7 +98,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -110,7 +113,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
