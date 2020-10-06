@@ -84,7 +84,9 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                 .thenReturn(testData.users);
 
         when(grpcUmsClient.listAllMachineUsers(eq(ACTOR_CRN), eq(ACCOUNT_ID),
-                eq(DefaultUmsUsersStateProvider.INCLUDE_INTERNAL_MACHINE_USERS), any(Optional.class)))
+                eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
+                eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS),
+                any(Optional.class)))
                 .thenReturn(testData.machineUsers);
 
         doAnswer(invocation -> {
