@@ -31,6 +31,10 @@ public class GcpDatabasePollerProvider {
         return () -> fetchOperationResults(ac, resources, ResourceStatus.CREATED);
     }
 
+    public AttemptMaker<Void> insertUserPoller(AuthenticatedContext ac, List<CloudResource> resources) {
+        return () -> fetchOperationResults(ac, resources, ResourceStatus.CREATED);
+    }
+
     public AttemptMaker<Void> terminateDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
         return () -> fetchOperationResults(ac, resources, ResourceStatus.DELETED);
     }

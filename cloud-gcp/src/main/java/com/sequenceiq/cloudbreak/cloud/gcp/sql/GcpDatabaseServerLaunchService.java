@@ -7,17 +7,22 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.BackupConfiguration;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.InstancesListResponse;
+import com.google.api.services.sqladmin.model.IpConfiguration;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
+import com.google.api.services.sqladmin.model.User;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
@@ -42,21 +47,14 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
 
     public List<CloudResource> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
-        GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        Compute compute = GcpStackUtil.buildCompute(ac.getCloudCredential());
+
         String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = new ArrayList<>();
-        buildableResource.add(
-                new CloudResource.Builder()
-                        .type(ResourceType.GCP_DATABASE)
-                        .name(deploymentName)
-                        .build());
-        buildableResource.add(
-                new CloudResource.Builder()
-                        .type(ResourceType.RDS_PORT)
-                        .name(Integer.toString(POSTGRESQL_SERVER_PORT))
-                        .build());
+        buildableResource.add(getGcpDatabase(deploymentName));
+        buildableResource.add(getRdsPort());
 
         try {
             InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
@@ -68,29 +66,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         .findFirst();
             }
             if (first.isEmpty()) {
-                DatabaseInstance databaseInstance = new DatabaseInstance();
-                databaseInstance.setCurrentDiskSize(databaseServerView.getAllocatedStorageInMb());
-                databaseInstance.setName(deploymentName);
-                databaseInstance.setInstanceType("CLOUD_SQL_INSTANCE");
-                databaseInstance.setBackendType("SECOND_GEN");
-                databaseInstance.setRegion(databaseServerView.getLocation());
-                databaseInstance.setRootPassword(databaseServerView.getAdminPassword());
-                databaseInstance.setConnectionName(databaseServerView.getAdminLoginName());
-                databaseInstance.setGceZone(databaseNetworkView.getAvailabilityZone());
-                databaseInstance.setDatabaseVersion(databaseServerView.getDatabaseVersion());
-                databaseInstance.setSettings(
-                    new Settings()
-                        .setTier(stack.getDatabaseServer().getFlavor())
-                        .setActivationPolicy("ALWAYS")
-                        .setStorageAutoResize(true)
-                        .setDataDiskSizeGb(databaseServerView.getAllocatedStorageInGb())
-                        .setDataDiskType("PD_SSD")
-                        .setBackupConfiguration(
-                            new BackupConfiguration()
-                                .setEnabled(true)
-                                .setBinaryLogEnabled(false)
-                        )
-                );
+                DatabaseInstance databaseInstance = getDatabaseInstance(stack, deploymentName, compute, projectId);
                 SQLAdmin.Instances.Insert insert = sqlAdmin.instances().insert(projectId, databaseInstance);
                 insert.setPrettyPrint(Boolean.TRUE);
                 try {
@@ -100,12 +76,16 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     databasePollerService.launchDatabasePoller(ac, List.of(operationAwareCloudResource));
                     DatabaseInstance instance = sqlAdmin.instances().get(projectId, deploymentName).execute();
                     if (instance != null) {
-                        buildableResource.add(
-                                new CloudResource.Builder()
-                                        .type(ResourceType.RDS_HOSTNAME)
-                                        .name(instance.getIpAddresses().iterator().next().getIpAddress())
-                                        .build()
-                        );
+                        CloudResource.Builder rdsInstance = new CloudResource.Builder();
+                        String instanceName = instance.getName();
+                        buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName));
+                        User rootUser = getRootUser(stack, projectId, instanceName);
+                        operation    = sqlAdmin.users()
+                                .insert(projectId, instanceName, rootUser)
+                                .execute();
+                        verifyOperation(operation, buildableResource);
+                        operationAwareCloudResource = createOperationAwareCloudResource(buildableResource.get(0), operation);
+                        databasePollerService.insertUserPoller(ac, List.of(operationAwareCloudResource));
                     }
                     buildableResource.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
                     return Collections.singletonList(operationAwareCloudResource);
@@ -121,5 +101,76 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
         return List.of();
+    }
+
+    public CloudResource getRdsPort() {
+        return new CloudResource.Builder()
+                .type(ResourceType.RDS_PORT)
+                .name(Integer.toString(POSTGRESQL_SERVER_PORT))
+                .build();
+    }
+
+    public CloudResource getGcpDatabase(String deploymentName) {
+        return new CloudResource.Builder()
+                .type(ResourceType.GCP_DATABASE)
+                .name(deploymentName)
+                .build();
+    }
+
+    public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance, String instanceName) {
+        return rdsInstance
+                .type(ResourceType.RDS_HOSTNAME)
+                .instanceId(instanceName)
+                .name(instance.getIpAddresses().iterator().next().getIpAddress())
+                .build();
+    }
+
+    @NotNull
+    private DatabaseInstance getDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
+        GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
+        GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
+        Subnetwork subnetworkForRedbeams = compute
+                .subnetworks()
+                .get(projectId, databaseServerView.getLocation(), databaseNetworkView.getSubnetId())
+                .execute();
+        DatabaseInstance databaseInstance = new DatabaseInstance();
+        databaseInstance.setCurrentDiskSize(databaseServerView.getAllocatedStorageInMb());
+        databaseInstance.setName(deploymentName);
+        databaseInstance.setInstanceType("CLOUD_SQL_INSTANCE");
+        databaseInstance.setBackendType("SECOND_GEN");
+        databaseInstance.setRegion(databaseServerView.getLocation());
+        databaseInstance.setRootPassword(databaseServerView.getAdminPassword());
+        databaseInstance.setConnectionName(databaseServerView.getAdminLoginName());
+        databaseInstance.setGceZone(databaseNetworkView.getAvailabilityZone());
+        databaseInstance.setDatabaseVersion(databaseServerView.getDatabaseVersion());
+        databaseInstance.setSettings(getSettings(stack, databaseServerView, subnetworkForRedbeams));
+        return databaseInstance;
+    }
+
+    @NotNull
+    public Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
+        return new Settings()
+                .setTier(stack.getDatabaseServer().getFlavor())
+                .setActivationPolicy("ALWAYS")
+                .setStorageAutoResize(true)
+                .setDataDiskSizeGb(databaseServerView.getAllocatedStorageInGb())
+                .setDataDiskType("PD_SSD")
+                .setIpConfiguration(new IpConfiguration()
+                        .setPrivateNetwork(subnetworkForRedbeams.getNetwork()))
+                .setUserLabels(stack.getTags())
+                .setBackupConfiguration(
+                        new BackupConfiguration()
+                                .setEnabled(true)
+                                .setBinaryLogEnabled(false)
+                );
+    }
+
+    @NotNull
+    private User getRootUser(DatabaseStack stack, String projectId, String instanceName) {
+        return new User()
+                .setProject(projectId)
+                .setInstance(instanceName)
+                .setName(stack.getDatabaseServer().getRootUserName())
+                .setPassword(stack.getDatabaseServer().getRootPassword());
     }
 }
