@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class TelemetryDecoratorTest {
@@ -73,6 +74,13 @@ public class TelemetryDecoratorTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         AltusCredential altusCredential = new AltusCredential("myAccessKey", "mySecretKey".toCharArray());
+        DataBusCredential dataBusCredential = new DataBusCredential();
+        dataBusCredential.setAccessKey("myAccessKey");
+        dataBusCredential.setPrivateKey("mySecretKey");
+        given(altusMachineUserService.isMeteringOrAnyDataBusBasedFeatureSupported(any(Stack.class), any(Telemetry.class)))
+                .willReturn(true);
+        given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class)))
+                .willReturn(dataBusCredential);
         given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class)))
                 .willReturn(Optional.of(altusCredential));
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
