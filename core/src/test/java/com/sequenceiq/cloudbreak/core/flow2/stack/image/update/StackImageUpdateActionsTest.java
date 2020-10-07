@@ -322,7 +322,7 @@ public class StackImageUpdateActionsTest {
 
         prepareImageAction.execute(stateContext);
 
-        verify(stackCreationService, times(1)).prepareImage(any(Stack.class));
+        verify(stackCreationService, times(1)).prepareImage(any(Stack.class), eq(variables));
         verify(eventBus, times(1)).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
     }
 

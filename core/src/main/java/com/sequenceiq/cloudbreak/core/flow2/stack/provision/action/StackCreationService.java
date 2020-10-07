@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -67,6 +68,8 @@ import reactor.bus.EventBus;
 public class StackCreationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationService.class);
+
+    private static final String IMAGE_COPY_START_MILLIS = "IMAGE_COPY_START_MILLIS";
 
     @Inject
     private StackService stackService;
@@ -107,17 +110,25 @@ public class StackCreationService {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private CloudbreakMetricService metricService;
+
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
     }
 
-    public void prepareImage(Stack stack) {
+    public void prepareImage(Stack stack, Map<Object, Object> variables) {
+        variables.put(IMAGE_COPY_START_MILLIS, System.currentTimeMillis());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
         flowMessageService.fireEventAndLog(stack.getId(), CREATE_IN_PROGRESS.name(), STACK_IMAGE_SETUP);
     }
 
-    public void startProvisioning(StackContext context) {
+    public void startProvisioning(StackContext context, Map<Object, Object> variables) {
         Stack stack = context.getStack();
+        if (variables.containsKey(IMAGE_COPY_START_MILLIS)) {
+            long startMillis = (long) variables.get(IMAGE_COPY_START_MILLIS);
+            metricService.recordImageCopyTime(stack, startMillis);
+        }
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), CREATE_IN_PROGRESS.name(), STACK_PROVISIONING);
         instanceMetaDataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());

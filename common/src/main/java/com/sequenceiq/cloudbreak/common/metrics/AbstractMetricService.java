@@ -2,14 +2,15 @@ package com.sequenceiq.cloudbreak.common.metrics;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.LongTaskTimer;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Timer;
 
 public abstract class AbstractMetricService implements MetricService {
 
@@ -56,9 +57,11 @@ public abstract class AbstractMetricService implements MetricService {
         return metric.getMetricName().contains("state") || metric.getMetricName().contains("leader") || metric.getMetricName().contains("threadpool");
     }
 
-    protected void recordLongTaskTimer(Metric metric, Runnable func, String... tags) {
-        LongTaskTimer longTaskTimer = Metrics.more().longTaskTimer(getMetricName(metric), tags);
-        longTaskTimer.record(func);
+    protected void recordTimer(long millisToRecord, Metric metric, String... tags) {
+        Timer.builder(getMetricName(metric))
+                .tags(tags)
+                .register(Metrics.globalRegistry)
+                .record(millisToRecord, TimeUnit.MILLISECONDS);
     }
 
     private String getMetricName(Metric metric) {
