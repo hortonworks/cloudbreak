@@ -44,31 +44,29 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
 
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-        getMetricService().recordImageCopyTime(context.getStack(), () -> {
-            CheckImageResult checkImageResult = stackCreationService.checkImage(context);
-            switch (checkImageResult.getImageStatus()) {
-                case IN_PROGRESS:
+        CheckImageResult checkImageResult = stackCreationService.checkImage(context);
+        switch (checkImageResult.getImageStatus()) {
+            case IN_PROGRESS:
+                repeat(context);
+                break;
+            case CREATE_FINISHED:
+                sendEvent(context);
+                break;
+            case CREATE_FAILED:
+                LOGGER.info("Error during image status check: {}", payload);
+                int faultNum = getFaultNum(variables) + 1;
+                if (faultNum == FAULT_TOLERANCE) {
+                    removeFaultNum(variables);
+                    throw new CloudbreakServiceException("Image copy failed.");
+                } else {
+                    setFaultNum(variables, faultNum);
                     repeat(context);
-                    break;
-                case CREATE_FINISHED:
-                    sendEvent(context);
-                    break;
-                case CREATE_FAILED:
-                    LOGGER.info("Error during image status check: {}", payload);
-                    int faultNum = getFaultNum(variables) + 1;
-                    if (faultNum == FAULT_TOLERANCE) {
-                        removeFaultNum(variables);
-                        throw new CloudbreakServiceException("Image copy failed.");
-                    } else {
-                        setFaultNum(variables, faultNum);
-                        repeat(context);
-                    }
-                    break;
-                default:
-                    LOGGER.error("Unknown image status: {}", checkImageResult.getImageStatus());
-                    break;
-            }
-        });
+                }
+                break;
+            default:
+                LOGGER.error("Unknown image status: {}", checkImageResult.getImageStatus());
+                break;
+        }
     }
 
     @Override

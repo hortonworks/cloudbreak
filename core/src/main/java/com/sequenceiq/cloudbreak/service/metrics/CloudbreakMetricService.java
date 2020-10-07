@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.metrics;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
@@ -7,9 +10,6 @@ import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
-
-import java.util.ArrayList;
-import java.util.Optional;
 
 @Service("MetricService")
 public class CloudbreakMetricService extends AbstractMetricService {
@@ -55,13 +55,6 @@ public class CloudbreakMetricService extends AbstractMetricService {
         return METRIC_PREFIX;
     }
 
-    public void recordImageCopyTime(Stack stack, Runnable checkImage) {
-        String[] tags = {MetricTag.TENANT.name(), Optional.ofNullable(stack.getTenant()).map(Tenant::getName).orElse("NA"),
-                MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.cloudPlatform()).orElse("NA"),
-                MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
-        recordLongTaskTimer(MetricType.STACK_IMAGE_COPY, checkImage, tags);
-    }
-
     private String[] nullableValueTags(String... tags) {
         if (tags.length % 2 == 1) {
             throw new IllegalArgumentException("tags size must be even, it is a set of key=value pairs of tags");
@@ -76,5 +69,14 @@ public class CloudbreakMetricService extends AbstractMetricService {
         String[] arrAccumulatedTags = new String[accumulatedTags.size()];
         arrAccumulatedTags = accumulatedTags.toArray(arrAccumulatedTags);
         return arrAccumulatedTags;
+    }
+
+    public void recordImageCopyTime(Stack stack, long startMillis) {
+        String[] tags = {MetricTag.TENANT.name(), Optional.ofNullable(stack.getTenant()).map(Tenant::getName).orElse("NA"),
+                MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.cloudPlatform()).orElse("NA"),
+                MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
+
+        long millispassed = System.currentTimeMillis() - startMillis;
+        recordTimer(millispassed, MetricType.STACK_IMAGE_COPY, tags);
     }
 }

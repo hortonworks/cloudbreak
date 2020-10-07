@@ -108,7 +108,7 @@ public class StackImageUpdateActions {
         return new AbstractStackImageUpdateAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                getStackCreationService().prepareImage(context.getStack());
+                getStackCreationService().prepareImage(context.getStack(), variables);
                 try {
                     CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
                     Image image = getImageService().getImage(context.getCloudContext().getId());

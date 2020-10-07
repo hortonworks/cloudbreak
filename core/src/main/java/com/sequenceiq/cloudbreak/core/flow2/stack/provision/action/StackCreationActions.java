@@ -133,7 +133,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(SetupResult.class) {
             @Override
             protected void doExecute(StackContext context, SetupResult payload, Map<Object, Object> variables) {
-                stackCreationService.prepareImage(context.getStack());
+                stackCreationService.prepareImage(context.getStack(), variables);
                 sendEvent(context);
             }
 
@@ -156,7 +156,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 variables.put(START_DATE, new Date());
-                stackCreationService.startProvisioning(context);
+                stackCreationService.startProvisioning(context, variables);
                 sendEvent(context);
             }
 
