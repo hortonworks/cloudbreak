@@ -74,11 +74,16 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                     failedTargets.addAll(originalTargets.stream().filter(a -> a.getPrivateIp().equals(address)).collect(Collectors.toList()));
                 }
             }
+
             targets = failedTargets;
 
             if (!targets.isEmpty()) {
                 LOGGER.info("Missing nodes to run saltbootstrap: {}", targets);
                 throw new CloudbreakOrchestratorFailedException("There are missing nodes from saltbootstrap: " + targets);
+            }
+
+            if (params.isRestartNeeded()) {
+                params.setRestartNeeded(false);
             }
 
             createMinionAcceptor(saltAction).acceptMinions();
