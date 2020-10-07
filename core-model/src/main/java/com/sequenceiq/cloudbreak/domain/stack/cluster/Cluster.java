@@ -198,6 +198,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret attributes = Secret.EMPTY;
 
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret databusCredential = Secret.EMPTY;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json customContainerDefinition;
@@ -456,6 +460,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setAttributes(String attributes) {
         this.attributes = new Secret(attributes);
+    }
+
+    public String getDatabusCredential() {
+        return databusCredential.getRaw();
+    }
+
+    public void setDatabusCredential(String databusCredential) {
+        this.databusCredential = new Secret(databusCredential);
     }
 
     public Gateway getGateway() {

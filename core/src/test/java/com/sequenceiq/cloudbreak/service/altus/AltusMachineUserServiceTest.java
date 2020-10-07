@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -32,6 +33,9 @@ public class AltusMachineUserServiceTest {
 
     @Mock
     private AltusIAMService altusIAMService;
+
+    @Mock
+    private ClusterService clusterService;
 
     private Stack stack;
 
@@ -53,7 +57,7 @@ public class AltusMachineUserServiceTest {
         Features features = new Features();
         features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
-        underTest = new AltusMachineUserService(altusIAMService);
+        underTest = new AltusMachineUserService(altusIAMService, clusterService);
     }
 
     @Test

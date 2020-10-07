@@ -30,6 +30,17 @@ public class AltusIAMService {
     /**
      * Generate machine user with access keys
      */
+    public AltusCredential generateMachineUserWithAccessKeyForLegacyCm(String machineUserName, String actorCrn, String accountId) {
+        return umsClient.createMachineUserAndGenerateKeys(
+                machineUserName,
+                actorCrn,
+                accountId,
+                umsClient.getBuiltInDatabusRoleCrn());
+    }
+
+    /**
+     * Generate machine user with access keys
+     */
     public Optional<AltusCredential> generateMachineUserWithAccessKey(String machineUserName, String actorCrn, String accountId, boolean useSharedCredential) {
         return Optional.ofNullable(sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential)
                 .orElse(umsClient.createMachineUserAndGenerateKeys(
@@ -38,6 +49,27 @@ public class AltusIAMService {
                         accountId,
                         umsClient.getBuiltInDatabusRoleCrn(),
                         UserManagementProto.AccessKeyType.Value.ED25519)));
+    }
+
+    /**
+     * Checks that machine user has a specific access key on UMS side
+     */
+    public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId, String machineUserName, String accessKey,
+            boolean useSharedAltusCredentialEnabled) {
+        boolean result = false;
+        if (sharedAltusCredentialProvider.isSharedAltusCredentialInUse(useSharedAltusCredentialEnabled)) {
+            LOGGER.debug("Shared altus credential is used, no need for checking databus credentials against UMS");
+            result = true;
+        } else {
+            LOGGER.debug("Query (or create if needed) machine user with name {}", machineUserName);
+            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId, Optional.empty());
+            if (machineUserCrn.isPresent()) {
+                return umsClient.doesMachineUserHasAccessKey(actorCrn, accountId, machineUserCrn.get(), accessKey);
+            } else {
+                LOGGER.debug("Machine user ('{}') does not exist (even after the creation).", machineUserName);
+            }
+        }
+        return result;
     }
 
     /**
@@ -54,6 +86,13 @@ public class AltusIAMService {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
         }
+    }
+
+    /**
+     * Delete machine user with its access keys (and unassign databus role if required)
+     */
+    public void clearLegacyMachineUser(String machineUserName, String actorCrn, String accountId) {
+        clearMachineUser(machineUserName, actorCrn, accountId, false);
     }
 
     public List<AnonymizationRule> getAnonymizationRules(String accountId, String actorCrn) {

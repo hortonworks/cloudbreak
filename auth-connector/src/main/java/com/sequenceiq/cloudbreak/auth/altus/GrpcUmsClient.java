@@ -642,6 +642,24 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Check that machine user has a specific access key in UMS
+     * @param actorCrn actor for the machine user request
+     * @param accountId the account ID
+     * @param machineUserCrn machine user crn that own the access key
+     * @param accessKeyId access key id that we need to check
+     * @return result that is true if the machine user has the queried access key in UMS
+     */
+    public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId,
+            String machineUserCrn, String accessKeyId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            String requestId = UUID.randomUUID().toString();
+            List<String> accessKeys = client.listMachineUserAccessKeys(requestId, actorCrn, accountId, machineUserCrn, true);
+            return accessKeys.contains(accessKeyId);
+        }
+    }
+
+    /**
      * Gather anonymization rules for a specific account
      * NOTE: not supported yet on UMS side
      *
