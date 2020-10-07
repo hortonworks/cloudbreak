@@ -27,6 +27,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.util.StringUtils;
+import org.testng.ITestResult;
+import org.testng.Reporter;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -90,6 +92,10 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import io.opentracing.Tracer;
 
 public abstract class TestContext implements ApplicationContextAware {
+
+    public static final String OUTPUT_FAILURE_TYPE = "outputFailureType";
+
+    public static final String OUTPUT_FAILURE = "outputFailure";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestContext.class);
 
@@ -1132,6 +1138,28 @@ public abstract class TestContext implements ApplicationContextAware {
                     .collect(Collectors.toList());
             String errorMessage = errorLogMessageProvider.getMessage(exceptionMap, clues);
             testErrorLog.report(LOGGER, errorMessage);
+
+            ITestResult testResult = Reporter.getCurrentTestResult();
+            Throwable testFailException = errorLogMessageProvider.getException(exceptionMap);
+
+            if (testFailException != null) {
+                testResult.setThrowable(testFailException);
+                testResult.setTestName(getTestMethodName().get());
+                testResult.setStatus(ITestResult.FAILURE);
+
+                String methodName = testResult.getName();
+                int status = testResult.getStatus();
+                String testFailureType = testResult.getThrowable().getCause().getClass().getName();
+                String message = testResult.getThrowable().getCause().getMessage() != null
+                        ? testResult.getThrowable().getCause().getMessage()
+                        : testResult.getThrowable().getMessage();
+                LOGGER.info("Failed test results are: Test Case: {} | Status: {} | Failure Type: {} | Message: {}", methodName, status,
+                        testFailureType, message);
+                testResult.getTestContext().setAttribute(methodName + OUTPUT_FAILURE_TYPE, testFailureType);
+                testResult.getTestContext().setAttribute(methodName + OUTPUT_FAILURE, testResult.getThrowable());
+            } else {
+                LOGGER.error("Test Context TestFailException is null! So cannot get the correct test fail result!");
+            }
 
             exceptionMap.clear();
         }

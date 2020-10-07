@@ -1,6 +1,6 @@
 name: "sdx-images-tests"
 tests:
-  - name: "sdx e2e images tests"
+  - name: "sdx_e2e_images_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
         includedMethods:

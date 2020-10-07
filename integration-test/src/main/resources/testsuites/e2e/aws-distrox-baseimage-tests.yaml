@@ -1,5 +1,5 @@
 name: "aws-distrox-baseimage-tests"
 tests:
-  - name: "aws distrox e2e base image tests"
+  - name: "aws_distrox_e2e_base_image_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXImagesTests

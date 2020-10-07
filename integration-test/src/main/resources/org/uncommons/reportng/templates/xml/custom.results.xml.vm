@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+#set ($totalTests = $results.passedTests.size() + $results.skippedTests.size() + $results.failedTests.size())
+<testsuite name="$results.testClass.xmlTest.name"
+           tests="$totalTests"
+           failures="$results.failedTests.size()"
+           errors="0"
+           skipped="$results.skippedTests.size()"
+           time="$utils.formatDuration($results.duration)">
+  <properties />
+  #foreach ($testResult in $results.failedTests)
+    #set ($testInstanceName = "")
+    #if ($testResult.testName)
+      #set ($testInstanceName = " ($testResult.testName)")
+    #end
+    #if ($testResult.testName)
+      <testcase name="$testResult.name" time="$utils.formatDuration($testResult.startMillis, $testResult.endMillis)" classname="$results.testClass.name ($testResult.testName)">
+    #else
+      <testcase name="$testResult.name" time="$utils.formatDuration($testResult.startMillis, $testResult.endMillis)" classname="$results.testClass.name">
+    #end
+      #set ($outputFailureTypeKey = "outputFailureType")
+      #set ($outputFailureType = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$outputFailureTypeKey"))
+      #set ($outputFailureKey = "outputFailure")
+      #set ($outputFailure = $testResult.testContext.getAttribute("$testResult.name$testInstanceName$outputFailureKey"))
+      #if ($outputFailure)
+      <failure type="$outputFailureType"
+        #if ($outputFailure.message)
+          message="$utils.escapeString($outputFailure.message)"
+        #else
+          message="(null)"
+        #end
+      >
+<![CDATA[$outputFailure.toString()
+#foreach ($element in $outputFailure.stackTrace)
+  $element.toString()
+#end
+#set ($causes = $utils.getCauses($outputFailure))
+#foreach ($throwable in $causes)
+$messages.getString("causedBy"): $throwable.toString()
+#foreach ($element in $throwable.stackTrace)
+  $element.toString()
+#end
+#end]]>
+      </failure>
+
+      #else
+      <failure type="Unknown"
+        #if ($testResult.status == 3)
+          message="Skipped"
+        #else
+          message="Unknown"
+        #end
+      />
+      #end
+    </testcase>
+  #end
+
+  #foreach ($testResult in $results.skippedTests)
+    #if ($testResult.testName)
+      <testcase name="$testResult.name" time="0.0" classname="$results.testClass.name ($testResult.testName)">
+    #else
+      <testcase name="$testResult.name" time="0.0" classname="$results.testClass.name">
+    #end
+      <skipped />
+    </testcase>
+  #end
+
+  #foreach ($testResult in $results.passedTests)
+    #if ($testResult.testName)
+      <testcase name="$testResult.name" time="$utils.formatDuration($testResult.startMillis, $testResult.endMillis)" classname="$results.testClass.name ($testResult.testName)" />
+    #else
+      <testcase name="$testResult.name" time="$utils.formatDuration($testResult.startMillis, $testResult.endMillis)" classname="$results.testClass.name" />
+    #end
+  #end
+
+</testsuite>

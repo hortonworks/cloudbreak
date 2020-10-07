@@ -1,4 +1,4 @@
-<suite name="Suite1" verbose="1" parallel="methods" thread-count="4">
+<suite name="Suite1" verbose="2" parallel="methods" thread-count="1">
     <test name="all-tests" >
         <packages>
             <package name="com.sequenceiq.it.cloudbreak.newway.testcase.mock"/>

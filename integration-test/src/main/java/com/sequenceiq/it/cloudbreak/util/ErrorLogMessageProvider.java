@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.sequenceiq.it.cloudbreak.context.Clue;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Component
 public class ErrorLogMessageProvider {
@@ -21,6 +22,13 @@ public class ErrorLogMessageProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorLogMessageProvider.class);
 
     private static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writerWithDefaultPrettyPrinter();
+
+    public Throwable getException(Map<String, Exception> exceptionsDuringTest) {
+        return exceptionsDuringTest.values().stream()
+                .filter(exception -> exception.getCause() instanceof TestFailException)
+                .findFirst()
+                .orElse(null);
+    }
 
     public String getMessage(Map<String, Exception> exceptionsDuringTest, List<Clue> clues) {
         StringBuilder messageBuilder = new StringBuilder("All Exceptions that occurred during the test are logged after this message")

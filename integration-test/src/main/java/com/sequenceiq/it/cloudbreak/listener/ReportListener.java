@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
+import org.testng.Reporter;
 import org.testng.TestListenerAdapter;
 
 import com.google.common.collect.Iterables;
@@ -24,21 +23,29 @@ public class ReportListener extends TestListenerAdapter {
 
     public static final String MEASUREMENTS = "measurements";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReportListener.class);
-
     @Override
     public void onTestFailure(ITestResult tr) {
-        super.onTestFailure(tr);
         logUrl(tr);
         logMeasurements(tr);
         log(tr);
+        Reporter.setCurrentTestResult(tr);
+        super.onTestFailure(tr);
     }
 
     @Override
     public void onTestSuccess(ITestResult tr) {
         logUrl(tr);
         logMeasurements(tr);
+        Reporter.setCurrentTestResult(tr);
         super.onTestSuccess(tr);
+    }
+
+    @Override
+    public void onTestSkipped(ITestResult tr) {
+        logUrl(tr);
+        logMeasurements(tr);
+        Reporter.setCurrentTestResult(tr);
+        super.onTestSkipped(tr);
     }
 
     private void logUrl(ITestResult tr) {

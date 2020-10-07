@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
@@ -17,6 +18,8 @@ public class Log<T extends CloudbreakTestDto> {
     public static final String TEST_CONTEXT_REPORTER = "testContextReporter";
 
     public static final String ALTERNATE_LOG = "alternateLog";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Log.class);
 
     private Log() {
     }
@@ -99,21 +102,31 @@ public class Log<T extends CloudbreakTestDto> {
     }
 
     public static void log(ITestResult testResult) {
-        Throwable testResultException = testResult.getThrowable();
-        String methodName = testResult.getMethod().getMethodName();
+        if (testResult != null) {
+            Throwable testResultException = testResult.getThrowable();
+            String methodName = testResult.getName();
+            int status = testResult.getStatus();
 
-        if (testResultException != null) {
-            try {
-                String message = testResultException.getMessage() != null ? testResultException.getMessage() : testResultException.getCause().getMessage();
+            if (testResultException != null) {
+                try {
+                    String message = testResultException.getCause().getMessage() != null
+                            ? testResultException.getCause().getMessage()
+                            : testResultException.getMessage();
+                    String testFailureType = testResultException.getCause().getClass().getName();
 
-                if (message == null || message.isEmpty()) {
-                    log(format(" Test Case: %s have been failed with empty test result! ", methodName));
-                } else {
-                    log(message);
+                    if (message == null || message.isEmpty()) {
+                        log(format(" Test Case: %s have been failed with empty test result! ", methodName));
+                    } else {
+                        LOGGER.info("Failed test results are: Test Case: {} | Status: {} | Failure Type: {} | Message: {}", methodName, status,
+                                testFailureType, message);
+                        log(message);
+                    }
+                } catch (Exception e) {
+                    log(format(" Test Case: %s got Unexpected Exception: %s ", methodName, e.getMessage()));
                 }
-            } catch (Exception e) {
-                log(format(" Test Case: %s got Unexpected Exception: %s ", methodName, e.getMessage()));
             }
+        } else {
+            LOGGER.error("Test result is NULL!");
         }
     }
 
