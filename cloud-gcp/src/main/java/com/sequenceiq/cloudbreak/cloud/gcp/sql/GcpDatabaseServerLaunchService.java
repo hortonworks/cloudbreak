@@ -42,6 +42,8 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     // PostgreSQL server port is fixed for now
     private static final int POSTGRESQL_SERVER_PORT = 5432;
 
+    private static final String GCP_SQL_INSTANCE_PRIVATE_IP_TYPE = "PRIVATE";
+
     @Inject
     private DatabasePollerService databasePollerService;
 
@@ -80,7 +82,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         String instanceName = instance.getName();
                         buildableResource.add(getRdsHostName(instance, rdsInstance, instanceName));
                         User rootUser = getRootUser(stack, projectId, instanceName);
-                        operation    = sqlAdmin.users()
+                        operation = sqlAdmin.users()
                                 .insert(projectId, instanceName, rootUser)
                                 .execute();
                         verifyOperation(operation, buildableResource);
@@ -121,8 +123,18 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return rdsInstance
                 .type(ResourceType.RDS_HOSTNAME)
                 .instanceId(instanceName)
-                .name(instance.getIpAddresses().iterator().next().getIpAddress())
+                .name(getPrivateIpAddressOfDbInstance(instance, instanceName))
                 .build();
+    }
+
+    private String getPrivateIpAddressOfDbInstance(DatabaseInstance instance, String instanceName) {
+        String ipAddress = instance.getIpAddresses()
+                .stream()
+                .filter(i -> GCP_SQL_INSTANCE_PRIVATE_IP_TYPE.equals(i.getType()))
+                .findFirst()
+                .orElseThrow(() -> new GcpResourceException(String.format("Private IP address could not be found for database instance '%s'", instanceName)))
+                .getIpAddress();
+        return ipAddress;
     }
 
     @NotNull
