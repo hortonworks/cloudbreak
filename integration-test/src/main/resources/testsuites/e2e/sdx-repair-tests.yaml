@@ -1,5 +1,5 @@
 name: "sdx-repair-tests"
 tests:
-  - name: "sdx e2e repair tests"
+  - name: "sdx_e2e_repair_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests

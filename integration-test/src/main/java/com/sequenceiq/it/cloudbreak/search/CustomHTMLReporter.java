@@ -63,7 +63,6 @@ public class CustomHTMLReporter extends HTMLReporter {
         } catch (Exception ex) {
             throw new ReportNGException("Failed generating HTML report.", ex);
         }
-
     }
 
     private void createCustomResults(List<ISuite> suites, File outputDirectory,

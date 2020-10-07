@@ -1,10 +1,12 @@
 package com.sequenceiq.it.cloudbreak.listener;
 
+import org.testng.ISuiteListener;
 import org.testng.ITestContext;
 import org.testng.ITestResult;
-import org.testng.internal.IResultListener2;
+import org.testng.Reporter;
+import org.testng.internal.IResultListener;
 
-public class ThreadLocalTestListener implements IResultListener2 {
+public class ThreadLocalTestListener extends TestNgListener implements IResultListener, ISuiteListener {
 
     private static final ThreadLocal<VerboseLogReporter> LOG_REPORTER = ThreadLocal.withInitial(VerboseLogReporter::new);
 
@@ -35,16 +37,19 @@ public class ThreadLocalTestListener implements IResultListener2 {
 
     @Override
     public void onTestSuccess(ITestResult result) {
+        Reporter.setCurrentTestResult(result);
         getLogReporter().onTestSuccess(result);
     }
 
     @Override
     public void onTestFailure(ITestResult result) {
+        Reporter.setCurrentTestResult(result);
         getLogReporter().onTestFailure(result);
     }
 
     @Override
     public void onTestSkipped(ITestResult result) {
+        Reporter.setCurrentTestResult(result);
         getLogReporter().onTestSkipped(result);
     }
 

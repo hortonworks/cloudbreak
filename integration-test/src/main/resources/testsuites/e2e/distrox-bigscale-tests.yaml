@@ -1,6 +1,6 @@
 name: "distrox-bigscale-tests"
 tests:
-  - name: "distrox-bigscale-tests"
+  - name: "distrox_bigscale_tests"
     parameters: {
       hostgroup: compute,
       scale_up: 100,
