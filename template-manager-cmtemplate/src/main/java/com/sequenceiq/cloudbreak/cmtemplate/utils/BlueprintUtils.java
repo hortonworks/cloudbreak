@@ -33,8 +33,8 @@ public class BlueprintUtils {
     // regex for alphanumeric characters and underscores
     private final Pattern validHostGroupNamePattern = Pattern.compile("^\\w+$");
 
-    public String readDefaultBlueprintFromFile(String version, String[] split) throws IOException {
-        return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s/%s.bp", version, split.length == 2
+    public String readDefaultBlueprintFromFile(String[] split) throws IOException {
+        return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2
                 ? split[1].trim() : split[0].trim()));
     }
 

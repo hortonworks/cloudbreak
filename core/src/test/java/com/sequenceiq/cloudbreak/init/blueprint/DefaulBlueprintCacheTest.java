@@ -7,7 +7,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Test;
@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.reflect.Whitebox;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
@@ -32,18 +33,17 @@ public class DefaulBlueprintCacheTest {
     @Mock
     private BlueprintV4RequestToBlueprintConverter converter;
 
-    @Mock
-    private BlueprintEntities blueprintEntities;
-
     @InjectMocks
     private DefaultBlueprintCache underTest;
 
     @Test
     public void testEmptyValues() {
-        when(blueprintEntities.getDefaults()).thenReturn(new HashMap<>());
-
         // GIVEN
         underTest.defaultBlueprints().clear();
+
+        Whitebox.setInternalState(underTest, "releasedBlueprints", Collections.singletonList(""));
+        Whitebox.setInternalState(underTest, "internalBlueprints", Collections.singletonList(" "));
+        Whitebox.setInternalState(underTest, "releasedCMBlueprints", Collections.singletonList(" "));
 
         // WHEN
         underTest.loadBlueprintsFromFile();
@@ -69,7 +69,9 @@ public class DefaulBlueprintCacheTest {
         when(blueprintUtils.convertStringToJsonNode(any())).thenReturn(bpText2);
 
         when(blueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenReturn(true);
-        when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.0.2", "Description2=bp2;Description1=bp1"));
+        Whitebox.setInternalState(underTest, "releasedBlueprints", Collections.singletonList("Description1=bp1"));
+        Whitebox.setInternalState(underTest, "internalBlueprints", Collections.singletonList(" "));
+        Whitebox.setInternalState(underTest, "releasedCMBlueprints", Collections.singletonList("Description2=bp2"));
 
         when(converter.convert(any(BlueprintV4Request.class))).thenAnswer(invocation -> {
             BlueprintV4Request request = invocation.getArgument(0);
