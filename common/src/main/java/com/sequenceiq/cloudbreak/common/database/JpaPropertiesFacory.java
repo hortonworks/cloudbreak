@@ -33,6 +33,7 @@ public class JpaPropertiesFacory {
                 properties.setProperty("hibernate.session.events.auto", HibernateNPlusOneLogger.class.getName());
                 break;
             case BREAK:
+                LOGGER.warn("Hibernate NPlusOne Circuit Breaker has been enabled!");
                 properties.setProperty("hibernate.session.events.auto", HibernateNPlusOneCircuitBreaker.class.getName());
                 break;
             default:

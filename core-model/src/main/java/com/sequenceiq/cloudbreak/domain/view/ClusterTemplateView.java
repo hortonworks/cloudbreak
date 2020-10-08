@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain.stack.cluster;
+package com.sequenceiq.cloudbreak.domain.view;
 
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -13,9 +13,6 @@ import com.sequenceiq.cloudbreak.domain.converter.ClusterTemplateV4TypeConverter
 import com.sequenceiq.cloudbreak.domain.converter.DatalakeRequiredConverter;
 import com.sequenceiq.cloudbreak.domain.converter.FeatureStateConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
-import com.sequenceiq.cloudbreak.domain.view.CompactView;
-import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
-import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 
 @Entity
 @Table(name = "ClusterTemplate")
@@ -88,14 +85,6 @@ public class ClusterTemplateView extends CompactView {
 
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
-    }
-
-    public Integer getFullNodeCount() {
-        return stackTemplate.getInstanceGroups()
-                .stream()
-                .mapToInt(InstanceGroupView::getNodeCount)
-                .sum();
-
     }
 
     public FeatureState getFeatureState() {
