@@ -47,10 +47,6 @@ dependencies {
   testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
-  testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
-    exclude group: 'org.hamcrest'
-  }
   testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
   testCompile project(path: ':cloud-common', configuration: 'tests')
 

@@ -29,7 +29,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.management.storage.implementation.StorageAccountInner;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.client.AzureImageService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
 
 import java.io.IOException;
@@ -29,8 +30,10 @@ import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
+import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
@@ -321,6 +324,35 @@ public class AzureClient {
         } catch (StorageException e) {
             throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
         }
+    }
+
+    public VirtualMachineCustomImage findImage(String resourceGroup, String imageName) {
+        LOGGER.debug("Searching custom image {} in resource group {}", imageName, resourceGroup);
+        return azureAuthExceptionHandler.handleAuthException(() -> azure
+                .virtualMachineCustomImages()
+                .getByResourceGroup(resourceGroup, imageName));
+    }
+
+    public VirtualMachineCustomImage createCustomImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
+        return handleAuthException(() -> {
+            LOGGER.info("check the existence of resource group '{}', creating if it doesn't exist on Azure side", resourceGroup);
+            if (!azure.resourceGroups().contain(resourceGroup)) {
+                LOGGER.info("Creating resource group: {}", resourceGroup);
+                azure.resourceGroups()
+                        .define(resourceGroup)
+                        .withRegion(region)
+                        .create();
+            }
+            LOGGER.debug("Create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
+                    fromVhdUri, imageName, resourceGroup, region);
+            return measure(() -> azure.virtualMachineCustomImages()
+                            .define(imageName)
+                            .withRegion(region)
+                            .withExistingResourceGroup(resourceGroup)
+                            .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                            .create(),
+                    LOGGER, "Custom image has been created under {} ms with name {}", imageName);
+        });
     }
 
     public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob) {
