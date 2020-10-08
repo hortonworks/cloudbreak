@@ -83,7 +83,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     @Test
     public void acceptsBuiltinClouderaManagerTemplate() {
         BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("defaults/blueprints/7.0.2/cdp-sdx.bp"));
+        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("defaults/blueprints/cdp-sdx-702.bp"));
         Blueprint result = underTest.convert(request);
         assertNotNull(result);
         assertEquals("CDH", result.getStackType());
