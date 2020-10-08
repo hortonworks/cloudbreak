@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
 @Component
@@ -24,16 +27,32 @@ public class CredentialToExtendedCloudCredentialConverter {
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
 
-    public ExtendedCloudCredential convert(Credential credential) {
+    public ExtendedCloudCredential convert(Credential credential, Optional<User> optionalUser) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
-        CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
         User user = null;
-        if (cloudbreakUser != null) {
-            user = userService.getOrCreate(cloudbreakUser);
+        if (optionalUser.isPresent()) {
+            user = optionalUser.orElse(null);
         } else {
-            user = userService.findByUserCrn(credential.getCreator()).orElse(null);
+            CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
+            if (cloudbreakUser != null) {
+                user = userService.getOrCreate(cloudbreakUser);
+            } else {
+                Crn crn = Crn.fromString(credential.getCreator());
+                user = userService.getByUserIdAndTenant(crn.getUserId(), crn.getAccountId()).orElse(null);
+            }
         }
-        return new ExtendedCloudCredential(cloudCredential, credential.cloudPlatform(), credential.getDescription(), user.getUserCrn(),
+        if (user == null) {
+            throw new IllegalStateException("The user is not available for the credential: " + credential.getCreator());
+        }
+        return new ExtendedCloudCredential(
+                cloudCredential,
+                credential.cloudPlatform(),
+                credential.getDescription(),
+                user.getUserCrn(),
                 user.getTenant().getName());
+    }
+
+    public ExtendedCloudCredential convert(Credential credential) {
+        return convert(credential, Optional.empty());
     }
 }

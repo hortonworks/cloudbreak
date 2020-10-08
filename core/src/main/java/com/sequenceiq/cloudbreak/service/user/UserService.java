@@ -97,8 +97,8 @@ public class UserService extends InternalUserModifier {
         return userRepository.findByTenantNameAndUserId(tenant, userId);
     }
 
-    public Optional<User> findByUserCrn(String userCrn) {
-        return userRepository.findByUserCrn(userCrn);
+    public Optional<User> getByUserIdAndTenantId(String userId, Long tenantId) {
+        return userRepository.findByTenantIdAndUserId(tenantId, userId);
     }
 
     public Set<User> getByUsersIds(Set<String> userIds) {
