@@ -21,8 +21,8 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.userId = :userId AND t.name = :tenantName")
     Optional<User> findByTenantNameAndUserId(@Param("tenantName") String tenantName, @Param("userId") String userId);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.userCrn = :userCrn")
-    Optional<User> findByUserCrn(@Param("userCrn") String userCrn);
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.userId = :userId AND t.id = :tenantId")
+    Optional<User> findByTenantIdAndUserId(@Param("tenantId") Long tenantId, @Param("userId") String userId);
 
     @Query("SELECT u FROM User u LEFT JOIN FETCH u.tenant t WHERE u.tenant = :tenant")
     Set<User> findAllByTenant(@Param("tenant") Tenant tenant);

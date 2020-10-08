@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.validation.template;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -27,8 +28,10 @@ import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
@@ -49,12 +52,13 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
-    public void validate(Credential credential, Template value, String region, String availabilityZone,
-        String variant, CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+    public void validate(Credential credential, Template value, Stack stack,
+        CdpResourceType stackType, Optional<User> user, ValidationResult.ValidationResultBuilder validationBuilder) {
+
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
-                extendedCloudCredentialConverter.convert(credential),
-                region,
-                variant,
+                extendedCloudCredentialConverter.convert(credential, user),
+                stack.getRegion(),
+                stack.getPlatformVariant(),
                 stackType,
                 new HashMap<>());
 
@@ -64,7 +68,7 @@ public class TemplateValidator {
             VmType vmType = null;
             Platform platform = Platform.platform(value.cloudPlatform());
             Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
-            String locationString = locationService.location(region, availabilityZone);
+            String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
             if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
                 for (VmType type : machines.get(locationString)) {
                     if (type.value().equals(value.getInstanceType())) {
