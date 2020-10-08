@@ -1,16 +1,35 @@
 {
-  "name": "7.2.3 - Data Engineering for Google Cloud",
+  "name": "7.2.3 - Streams Messaging Heavy Duty for Google Cloud",
   "description": "",
-  "type": "DATAENGINEERING",
-  "featureState": "RELEASED",
+  "type": "STREAMING",
+  "featureState": "PREVIEW",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.3 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+      "blueprintName": "7.2.3 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
     },
     "instanceGroups": [
       {
         "name": "master",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "rootVolume": {
+            "size": 100
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "registry",
         "template": {
           "attachedVolumes": [
             {
@@ -25,11 +44,11 @@
           }
         },
         "nodeCount": 1,
-        "type": "GATEWAY",
+        "type": "CORE",
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "compute",
+        "name": "smm",
         "template": {
           "attachedVolumes": [
             {
@@ -43,45 +62,26 @@
             "size": 50
           }
         },
-        "nodeCount": 0,
+        "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
       {
-        "name": "worker",
+        "name": "broker",
         "template": {
+          "instanceType": "e2-standard-8",
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 1000,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8",
           "rootVolume": {
             "size": 50
           }
         },
         "nodeCount": 3,
-        "type": "CORE",
-        "recoveryMode": "MANUAL"
-      },
-      {
-        "name": "gateway",
-        "template": {
-          "attachedVolumes": [
-            {
-              "count": 1,
-              "size": 100,
-              "type": "pd-standard"
-            }
-          ],
-          "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 50
-          }
-        },
-        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       }
