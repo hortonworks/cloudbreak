@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
@@ -122,7 +123,13 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .awaitForFlow(key("DistroXCreateAction"))
                 .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .given(RenewDistroXCertificateTestDto.class)
+                .when(distroXClient.renewDistroXCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .expect(ForbiddenException.class,
+                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datahub/repairDatahub on.*")
+                                .withKey("RenewDistroXCertificateAction"))
                 .validate();
+
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
     }
 

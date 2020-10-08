@@ -113,6 +113,12 @@ public interface SdxEndpoint {
     FlowIdentifier repairClusterByCrn(@PathParam("crn") String crn, SdxRepairRequest clusterRepairRequest);
 
     @POST
+    @Path("/crn/{crn}/renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "renew certificate on SDX cluster by crn", nickname = "renewCertificateOnSdxByCrn")
+    void renewCertificate(@PathParam("crn") String crn);
+
+    @POST
     @Path("{name}/sync")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "sync SDX cluster by name", produces = MediaType.APPLICATION_JSON, nickname = "syncSdx")
