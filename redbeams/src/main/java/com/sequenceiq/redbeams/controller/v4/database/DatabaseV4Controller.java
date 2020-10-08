@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.DatabaseV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
@@ -39,7 +40,7 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     @DisableCheckPermissions
-    public DatabaseV4Responses list(String environmentCrn) {
+    public DatabaseV4Responses list(@TenantAwareParam String environmentCrn) {
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
                 DatabaseV4Response.class));
     }
@@ -53,27 +54,27 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATABASE)
-    public DatabaseV4Response getByCrn(@ResourceCrn String crn) {
+    public DatabaseV4Response getByCrn(@TenantAwareParam @ResourceCrn String crn) {
         DatabaseConfig databaseConfig = databaseConfigService.getByCrn(crn);
         return converterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATABASE)
-    public DatabaseV4Response getByName(String environmentCrn, @ResourceName String name) {
+    public DatabaseV4Response getByName(@TenantAwareParam String environmentCrn, @ResourceName String name) {
         DatabaseConfig databaseConfig = databaseConfigService.getByName(name, environmentCrn);
         return converterUtil.convert(databaseConfig, DatabaseV4Response.class);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATABASE)
-    public DatabaseV4Response deleteByCrn(@ResourceCrn String crn) {
+    public DatabaseV4Response deleteByCrn(@TenantAwareParam @ResourceCrn String crn) {
         return converterUtil.convert(databaseConfigService.deleteByCrn(crn), DatabaseV4Response.class);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATABASE)
-    public DatabaseV4Response deleteByName(String environmentCrn, @ResourceName String name) {
+    public DatabaseV4Response deleteByName(@TenantAwareParam String environmentCrn, @ResourceName String name) {
         return converterUtil.convert(databaseConfigService.deleteByName(name, environmentCrn), DatabaseV4Response.class);
     }
 

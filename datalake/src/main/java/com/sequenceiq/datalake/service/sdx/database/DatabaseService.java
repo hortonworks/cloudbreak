@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -84,7 +85,8 @@ public class DatabaseService {
     public void terminate(SdxCluster sdxCluster, boolean forced) {
         LOGGER.info("Terminating databaseServer of SDX {}", sdxCluster.getClusterName());
         try {
-            DatabaseServerV4Response resp = databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced);
+            DatabaseServerV4Response resp = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    databaseServerV4Endpoint.deleteByCrn(sdxCluster.getDatabaseCrn(), forced));
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                     "External database deletion in progress", sdxCluster);
             waitAndGetDatabase(sdxCluster, resp.getCrn(), SdxDatabaseOperation.DELETION, false);
@@ -97,7 +99,7 @@ public class DatabaseService {
         LOGGER.info("Starting databaseServer of SDX {}", sdxCluster.getClusterName());
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
-            databaseServerV4Endpoint.start(databaseCrn);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> databaseServerV4Endpoint.start(databaseCrn));
             waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.START, false);
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
@@ -108,7 +110,7 @@ public class DatabaseService {
         LOGGER.info("Stopping databaseServer of SDX {}", sdxCluster.getClusterName());
         String databaseCrn = sdxCluster.getDatabaseCrn();
         try {
-            databaseServerV4Endpoint.stop(databaseCrn);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> databaseServerV4Endpoint.stop(databaseCrn));
             waitAndGetDatabase(sdxCluster, databaseCrn, SdxDatabaseOperation.STOP, false);
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
@@ -180,7 +182,8 @@ public class DatabaseService {
     }
 
     private DatabaseServerStatusV4Response getDatabaseStatus(String databaseCrn) {
-        DatabaseServerV4Response response = databaseServerV4Endpoint.getByCrn(databaseCrn);
+        DatabaseServerV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                databaseServerV4Endpoint.getByCrn(databaseCrn));
         DatabaseServerStatusV4Response statusResponse = new DatabaseServerStatusV4Response();
         statusResponse.setEnvironmentCrn(response.getEnvironmentCrn());
         statusResponse.setName(response.getName());
