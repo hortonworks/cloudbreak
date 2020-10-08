@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import org.testng.util.Strings;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -28,18 +29,29 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
     }
 
     @BeforeMethod
-    public void createSourceCatalogIfNotExists(Object[] data) {
+    public void createSourceCatalogIfNotExistsAndValidateDefaultImage(Object[] data) {
         TestContext testContext = (TestContext) data[0];
         createImageValidationSourceCatalog(testContext,
                 commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
                 commonCloudProperties().getImageValidation().getSourceCatalogName());
+
+        String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
+        if (Strings.isNotNullAndNotEmpty(imageUuid)) {
+            validateDefaultImage(testContext, imageUuid);
+        }
     }
 
     @AfterMethod
-    public void setImageId(Object[] data, ITestResult result) {
+    public void validateImageIdAndWriteToFile(Object[] data, ITestResult result) {
         TestContext testContext = (TestContext) data[0];
         if (result.getStatus() == ITestResult.SUCCESS) {
-            LOG.info("The test was successful with this image:  " + getImageId(testContext));
+            String expectedImageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
+            String actualImageUuid = getImageId(testContext);
+            if (Strings.isNotNullAndNotEmpty(expectedImageUuid) && !expectedImageUuid.equalsIgnoreCase(actualImageUuid)) {
+                throw new RuntimeException("The test was successful but the image is not the expected one. Actual: " + actualImageUuid
+                        + " Expected: " + expectedImageUuid);
+            }
+            LOG.info("The test was successful with this image:  " + actualImageUuid);
             writeImageIdToFile(testContext);
         }
     }
