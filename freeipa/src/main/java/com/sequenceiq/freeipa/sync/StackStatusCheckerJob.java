@@ -57,11 +57,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             prepareMdcContextWithStack(stack);
             if (flowLogService.isOtherFlowRunning(stackId)) {
-                LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", stackId);
+                LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
             } else {
                 LOGGER.debug("No flows running, trying to sync freeipa");
                 syncAStack(stack);
             }
+        } catch (InterruptSyncingException e) {
+            LOGGER.info("Syncing was interrupted", e);
         } finally {
             MDCBuilder.cleanupMdc();
         }
@@ -99,7 +101,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
                         List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances);
-                        updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                        if (!results.isEmpty()) {
+                            updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                        } else {
+                            LOGGER.debug("results is empty, skip update");
+                        }
                     }
                 });
                 return null;
@@ -113,7 +119,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         DetailedStackStatus status = getStackStatus(providerSyncResults, result, alreadyDeletedCount);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
-                stackUpdater.updateStackStatus(stack, status, result.getMessage());
+                if (flowLogService.isOtherFlowRunning(stack.getId())) {
+                    throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
+                            stack.getName());
+                } else {
+                    stackUpdater.updateStackStatus(stack, status, result.getMessage());
+                }
             } else {
                 LOGGER.info(":::Auto sync::: The stack status would be had to update from {} to {}",
                         stack.getStackStatus().getDetailedStackStatus(), status);
