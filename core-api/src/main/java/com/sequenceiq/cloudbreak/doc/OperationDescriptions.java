@@ -58,6 +58,7 @@ public class OperationDescriptions {
         public static final String DATABASE_RESTORE = "Performs a restore of the database from a provided location";
         public static final String DATABASE_RESTORE_INTERNAL = "Performs a restore of the database from a provided location, internal only";
         public static final String ROTATE_CERTIFICATES = "Rotates the certificates of the cluster";
+        public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via stack's name";
     }
 
     public static class ClusterOpDescription {

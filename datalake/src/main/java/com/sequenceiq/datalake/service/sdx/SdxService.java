@@ -727,4 +727,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     public SdxCluster save(SdxCluster sdxCluster) {
         return sdxClusterRepository.save(sdxCluster);
     }
+
+    public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
+        stackV4Endpoint.renewCertificate(0L, sdxCluster.getClusterName(), userCrn);
+    }
 }
