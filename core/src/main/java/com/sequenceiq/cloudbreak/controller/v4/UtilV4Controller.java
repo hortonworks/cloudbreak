@@ -43,7 +43,6 @@ import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
 @Controller
-@AuthorizationResource
 public class UtilV4Controller extends NotificationController implements UtilV4Endpoint {
 
     @Inject
