@@ -58,9 +58,9 @@ public class CDPConfigService {
     public void initCdpStackRequests() {
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         try {
-            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:runtime/*/*/*.json");
+            Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath:duties/*/*/*.json");
             for (Resource resource : resources) {
-                Matcher matcher = Pattern.compile(".*/runtime/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
+                Matcher matcher = Pattern.compile(".*/duties/(.*)/(.*)/(.*).json").matcher(resource.getURL().getPath());
                 if (matcher.find()) {
                     String runtimeVersion = matcher.group(RUNTIME_GROUP);
                     if (supportedRuntimes.isEmpty() || supportedRuntimes.contains(runtimeVersion)) {
