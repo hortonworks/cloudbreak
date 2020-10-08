@@ -10,12 +10,14 @@ public class CustomVMImageNameProviderTest {
 
     private static final Pattern IMAGE_NAME_PATTERN = Pattern.compile(AZURE_IMAGE_NAME_REGULAR_EXPRESSION);
 
+    private CustomVMImageNameProvider underTest = new CustomVMImageNameProvider();
+
     @Test
     public void testNameGenerationWhenRegionAndWhdNameWithDelimiterDoesNotExceedMaximumLength() {
         String vhdName = "cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.vhd";
         String region = "West US";
 
-        String actual = CustomVMImageNameProvider.get(region, vhdName);
+        String actual = underTest.get(region, vhdName);
 
         Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
         Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.vhd-westus", actual);
@@ -26,7 +28,7 @@ public class CustomVMImageNameProviderTest {
         String vhdName = "cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.vhd";
         String region = "South East Asia";
 
-        String actual = CustomVMImageNameProvider.get(region, vhdName);
+        String actual = underTest.get(region, vhdName);
 
         Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
         Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a.v-southeastasia", actual);
@@ -37,7 +39,7 @@ public class CustomVMImageNameProviderTest {
         String vhdName = "cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa.vhd";
         String region = "South East Asia";
 
-        String actual = CustomVMImageNameProvider.get(region, vhdName);
+        String actual = underTest.get(region, vhdName);
 
         Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
         Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa.-southeastasia", actual);
@@ -48,7 +50,7 @@ public class CustomVMImageNameProviderTest {
         String vhdName = "cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa-.vhd";
         String region = "South East Asia";
 
-        String actual = CustomVMImageNameProvider.get(region, vhdName);
+        String actual = underTest.get(region, vhdName);
 
         Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
         Assert.assertEquals("cb-hdp-26-1907121707-osDisk.cc5baaaa-717e-4551-b7ae-aaaa03c72a6aa--southeastasia", actual);
@@ -59,7 +61,7 @@ public class CustomVMImageNameProviderTest {
         String vhdName = "cb-hdp-26-1907121707-osDisk123.cc5baaaa-717e-4551-b7ae-aaaa03c72a6a-12345678.vhd";
         String region = "South East Asia";
 
-        String actual = CustomVMImageNameProvider.get(region, vhdName);
+        String actual = underTest.get(region, vhdName);
 
         Assert.assertTrue(IMAGE_NAME_PATTERN.matcher(actual).matches());
         Assert.assertEquals("cb-hdp-26-1907121707-osDisk123.cc5baaaa-717e-4551-b7ae-aaaa03c72a6-southeastasia", actual);
