@@ -29,8 +29,7 @@ public class CmAndStackVersionFilter {
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
 
-    public Predicate<Image> filterCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels,
-            Mutable<String> reason) {
+    public Predicate<Image> filterCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, Mutable<String> reason) {
         return candidateImage -> {
             updateReason(lockComponents, activatedParcels, reason);
             return isUpgradePermitted(currentImage, lockComponents, activatedParcels, candidateImage);
