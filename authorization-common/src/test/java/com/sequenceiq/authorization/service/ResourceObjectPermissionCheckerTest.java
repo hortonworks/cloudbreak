@@ -283,12 +283,19 @@ public class ResourceObjectPermissionCheckerTest {
         @ResourceObjectFieldHolder
         private Set<InnerClass> fields = Sets.newHashSet(new InnerClass());
 
+        @ResourceObjectFieldHolder
+        private InnerClass anotherField;
+
         public InnerClass getField() {
             return field;
         }
 
         public Set<InnerClass> getFields() {
             return fields;
+        }
+
+        public InnerClass getAnotherField() {
+            return anotherField;
         }
 
         private static class InnerClass {
