@@ -4,6 +4,10 @@ import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import org.hibernate.BaseSessionEventListener;
 
+/**
+ * Collecting the most important JDBC statistics. This class is similar to @org.hibernate.engine.internal.StatisticalLoggingSessionEventListener, but
+ * it is more targeted and has less footprint.
+ */
 public class HibernateStatementStatistics extends BaseSessionEventListener {
 
     private int jdbcPrepareStatementCount;
@@ -47,7 +51,7 @@ public class HibernateStatementStatistics extends BaseSessionEventListener {
     }
 
     public String constructLogline() {
-        return String.format("Session Metrics " +
+        return String.format("Hibernate Session Metrics " +
                         "%d s spent preparing %d JDBC statements; " +
                         "%d s spent executing %d JDBC statements",
                 NANOSECONDS.toSeconds(jdbcPrepareStatementTime),

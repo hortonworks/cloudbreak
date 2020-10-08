@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 
 @RunWith(MockitoJUnitRunner.class)
