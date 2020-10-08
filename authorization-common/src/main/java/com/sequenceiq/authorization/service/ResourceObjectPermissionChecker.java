@@ -62,25 +62,31 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
             }
         });
         if (deepSearchNeeded) {
-            Arrays.stream(FieldUtils.getFieldsWithAnnotation(resourceObject.getClass(), ResourceObjectFieldHolder.class)).forEach(field -> {
-                try {
-                    field.setAccessible(true);
-                    Object fieldObject = field.get(resourceObject);
+            traverseResourceObjectFieldHolders(userCrn, resourceObject, deepSearchNeeded);
+        }
+    }
+
+    private void traverseResourceObjectFieldHolders(String userCrn, Object resourceObject, boolean deepSearchNeeded) {
+        Arrays.stream(FieldUtils.getFieldsWithAnnotation(resourceObject.getClass(), ResourceObjectFieldHolder.class)).forEach(field -> {
+            try {
+                field.setAccessible(true);
+                Object fieldObject = field.get(resourceObject);
+                if (fieldObject != null) {
                     if (Collection.class.isAssignableFrom(fieldObject.getClass())) {
                         ((Collection) fieldObject).stream().forEach(collectionObject ->
                                 checkPermissionOnResourceObjectFields(userCrn, collectionObject, deepSearchNeeded));
                     } else {
                         checkPermissionOnResourceObjectFields(userCrn, fieldObject, deepSearchNeeded);
                     }
-                } catch (Error | RuntimeException unchecked) {
-                    LOGGER.error("Error happened while traversing the resource object: ", unchecked);
-                    throw unchecked;
-                } catch (Throwable t) {
-                    LOGGER.error("Error happened while traversing the resource object: ", t);
-                    throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", t);
                 }
-            });
-        }
+            } catch (Error | RuntimeException unchecked) {
+                LOGGER.error("Error happened while traversing the resource object: ", unchecked);
+                throw unchecked;
+            } catch (Throwable t) {
+                LOGGER.error("Error happened while traversing the resource object: ", t);
+                throw new AccessDeniedException("Error happened during permission check of resource object, thus access is denied!", t);
+            }
+        });
     }
 
     private void checkObject(String userCrn, AuthorizationResourceAction action, AuthorizationVariableType authorizationVariableType, Object resultObject) {
