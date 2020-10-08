@@ -39,6 +39,7 @@ public class DistroXOpDescription {
     public static final String CHECK_IMAGE = "checks image in stack by name";
     public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";
     public static final String CLI_COMMAND = "produce cli command input";
+    public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via crn";
 
     private DistroXOpDescription() {
     }

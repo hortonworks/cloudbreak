@@ -248,9 +248,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new MaintenanceModeValidationTriggerEvent(selector, stackId));
     }
 
-    public void triggerClusterCertificationRenewal(Long stackId) {
+    public FlowIdentifier triggerClusterCertificationRenewal(Long stackId) {
         String selector = CLUSTER_CERTIFICATE_REISSUE_EVENT.event();
-        reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
     public void triggerClusterTermination(Stack stack, boolean forced, String userCrn) {

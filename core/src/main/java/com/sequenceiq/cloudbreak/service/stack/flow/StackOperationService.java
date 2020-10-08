@@ -246,10 +246,14 @@ public class StackOperationService {
         return flowIdentifier;
     }
 
-    public void renewCertificate(String stackName) {
+    public FlowIdentifier renewCertificate(String stackName) {
         Workspace workspace = workspaceService.getForCurrentUser();
         Stack stack = stackService.getByNameInWorkspace(stackName, workspace.getId());
-        flowManager.triggerClusterCertificationRenewal(stack.getId());
+        return renewCertificate(stack);
+    }
+
+    public FlowIdentifier renewCertificate(Stack stack) {
+        return flowManager.triggerClusterCertificationRenewal(stack.getId());
     }
 
     private boolean isStopNeeded(Stack stack) {

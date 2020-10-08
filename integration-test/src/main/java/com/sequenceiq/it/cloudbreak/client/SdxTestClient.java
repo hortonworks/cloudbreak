@@ -26,10 +26,12 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 
 @Service
 public class SdxTestClient {
@@ -120,6 +122,10 @@ public class SdxTestClient {
 
     public Action<SdxCMDiagnosticsTestDto, SdxClient> collectCMDiagnostics() {
         return new SdxCollectCMDiagnosticsAction();
+    }
+
+    public Action<RenewDatalakeCertificateTestDto, SdxClient> renewDatalakeCertificateV4() {
+        return new RenewDatalakeCertificateAction();
     }
 
 }

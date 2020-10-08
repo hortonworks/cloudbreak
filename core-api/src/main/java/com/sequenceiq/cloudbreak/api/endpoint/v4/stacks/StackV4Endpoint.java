@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.Notes;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -421,4 +422,13 @@ public interface StackV4Endpoint {
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateCertificates")
     CertificatesRotationV4Response rotateCertificates(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+
+    @POST
+    @Path("internal/{name}/renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.RENEW_CERTIFICATE_NOTES, nickname = "renewStackCertificate")
+    FlowIdentifier renewCertificate(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
 }
