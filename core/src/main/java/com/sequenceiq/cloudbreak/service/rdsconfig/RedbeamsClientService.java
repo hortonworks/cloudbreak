@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -24,7 +25,7 @@ public class RedbeamsClientService {
 
     public DatabaseServerV4Response getByCrn(String dbCrn) {
         try {
-            return redbeamsServerEndpoint.getByCrn(dbCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.getByCrn(dbCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET DatabaseServer properties by dbCrn: %s", dbCrn);
             LOGGER.error(message, e);
@@ -44,7 +45,7 @@ public class RedbeamsClientService {
 
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         try {
-            return redbeamsServerEndpoint.deleteByCrn(crn, force);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.deleteByCrn(crn, force));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to delete DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
