@@ -130,10 +130,6 @@ public class InstanceMetaDataService {
         return repository.save(instanceMetaData);
     }
 
-    public Set<InstanceMetaData> findAllInStack(Long stackId) {
-        return repository.findAllInStack(stackId);
-    }
-
     public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
         return repository.findNotTerminatedForStack(stackId);
     }

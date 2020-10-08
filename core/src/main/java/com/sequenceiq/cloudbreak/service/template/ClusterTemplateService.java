@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.projection.ClusterTemplateStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
