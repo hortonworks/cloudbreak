@@ -7,15 +7,11 @@ export DOCKER_TAG_DATALAKE=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
 export THUNDERHEAD_MOCK_VOLUME_HOST=$(PWD)/../../mock-thunderhead/build/libs/mock-thunderhead.jar
-export CB_JAVA_OPTS="-Dthunderhead.url=thunderhead-mock:8080 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
-export UAA_DEFAULT_SECRET=cbsecret2015
-export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=
 export DPS_VERSION=2.0.0.0-142
 export CB_ENABLEDPLATFORMS=AZURE,AWS,GCP,OPENSTACK,YARN,MOCK
 export ENVIRONMENT_ENABLEDPLATFORMS=AZURE,AWS,YARN,MOCK
 export CB_DEFAULT_SUBSCRIPTION_ADDRESS=""
-export UMS_HOST=thunderhead-mock
 export CB_CLIENT_SECRET=cloudbreak
 export INGRESS_URLS=dev-gateway,localhost
 export CLUSTERPROXY_ENABLED=false
@@ -30,3 +26,11 @@ export CPUS_FOR_CLOUDBREAK=8.0
 export CPUS_FOR_SERVICES=4.0
 export MEMORY_FOR_CLOUDBREAK=4096M
 export MEMORY_FOR_SERVICES=2048M
+
+# *.hibernate.circuitbreake is intended to catch inefficient queries in IT
+#export CB_JAVA_OPTS="-Dcb.hibernate.circuitbreaker=BREAK -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
+#export PERISCOPE_JAVA_OPTS="-Dperiscope.hibernate.circuitbreaker=BREAK"
+#export FREEIPA_JAVA_OPTS="-Dfreeipa.hibernate.circuitbreaker=BREAK"
+#export REDBEAMS_JAVA_OPTS="-Dredbeams.hibernate.circuitbreaker=BREAK"
+#export DATALAKE_JAVA_OPTS="-Ddatalake.hibernate.circuitbreaker=BREAK"
+#export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK"
