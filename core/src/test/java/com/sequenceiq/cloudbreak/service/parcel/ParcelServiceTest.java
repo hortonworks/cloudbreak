@@ -60,8 +60,8 @@ public class ParcelServiceTest {
                         "http://parcel1.com/", OK, "NIFI", Optional.of("{..ewwer"), true, 1},
 
                 {"Trying to download the parcel manifest in case of BASE image, when we can NOT reach the manifest file " +
-                        "then it should NOT assign the parcel because probably not available anymore. (RELENG deleted a released artifact usecase)",
-                        "http://parcel1.com/", NOT_FOUND, "NIFI", Optional.empty(), true, 0},
+                        "then it should assign the parcel, because we can't check that it is required, or not. (authentication required usecase)",
+                        "http://parcel1.com/", NOT_FOUND, "NIFI", Optional.empty(), true, 1},
 
                 {"Trying to download the parcel manifest in case of PREWARMED image, when we can reach the file which is a standard " +
                         "manifest file and it DOES NOT contains the component then DO NOT assign the parcel.",
