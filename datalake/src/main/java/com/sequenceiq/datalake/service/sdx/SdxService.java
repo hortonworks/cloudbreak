@@ -729,6 +729,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
-        stackV4Endpoint.renewCertificate(0L, sdxCluster.getClusterName(), userCrn);
+        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            stackV4Endpoint.renewCertificate(0L, sdxCluster.getClusterName(), userCrn);
+        });
     }
 }
