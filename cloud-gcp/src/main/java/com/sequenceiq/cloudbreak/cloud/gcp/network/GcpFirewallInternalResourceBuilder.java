@@ -51,6 +51,7 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         String projectId = context.getProjectId();
 
         Firewall firewall = new Firewall();
+        firewall.setDescription(description());
         Allowed allowed1 = new Allowed();
         allowed1.setIPProtocol("tcp");
         allowed1.setPorts(Collections.singletonList("1-65535"));

@@ -121,6 +121,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
+        instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
         instance.setHostname(getHostname(cloudStack, buildableResource));
         instance.setCanIpForward(Boolean.TRUE);

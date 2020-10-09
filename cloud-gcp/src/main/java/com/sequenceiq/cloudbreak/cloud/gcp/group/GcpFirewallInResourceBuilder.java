@@ -90,6 +90,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
         Firewall firewall = new Firewall();
         firewall.setSourceRanges(sourceRanges);
+        firewall.setDescription(description());
 
         List<Allowed> allowedRules = new ArrayList<>(createAllowedRules(security));
 

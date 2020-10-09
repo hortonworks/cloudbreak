@@ -48,6 +48,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Location location = context.getLocation();
 
         Disk disk = new Disk();
+        disk.setDescription(description());
         disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.get(0).getName());
         disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
