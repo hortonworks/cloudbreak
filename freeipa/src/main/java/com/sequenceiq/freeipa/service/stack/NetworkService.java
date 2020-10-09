@@ -57,11 +57,11 @@ public class NetworkService {
                     // support for azure
                     String[] splittedNetworkId = cloudNetwork.getId().split("/");
                     String cloudNetworkId = splittedNetworkId[splittedNetworkId.length - 1];
-                    return networkId.equals(cloudNetworkId);
+                    return networkId.equals(cloudNetworkId) || networkId.equals(cloudNetwork.getName());
                 })
                 .flatMap(cloudNetwork -> cloudNetwork.getSubnetsMeta().stream())
                 .filter(cloudSubnet -> StringUtils.isNoneBlank(cloudSubnet.getId(), cloudSubnet.getCidr()))
-                .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()))
+                .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()) || subnetIds.contains(cloudSubnet.getName()))
                 .collect(Collectors.toMap(CloudSubnet::getId, CloudSubnet::getCidr));
     }
 }

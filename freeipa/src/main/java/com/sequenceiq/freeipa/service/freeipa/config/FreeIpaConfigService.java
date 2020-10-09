@@ -52,7 +52,9 @@ public class FreeIpaConfigService {
 
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
+        LOGGER.debug("Subnets for reverse zone calculation : {}", subnetWithCidr);
         String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
+        LOGGER.debug("Reverse zones : {}", reverseZones);
 
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase())
