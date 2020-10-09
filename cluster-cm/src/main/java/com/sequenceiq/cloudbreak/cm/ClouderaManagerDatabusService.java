@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
@@ -34,11 +35,13 @@ public class ClouderaManagerDatabusService {
         String userCrn = stack.getCreator().getUserCrn();
         String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
         String machineUserName = getWAMachineUserName(userCrn, stack);
-        return altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(machineUserName, userCrn, accountId);
+        return ThreadBasedUserCrnProvider
+                .doAsInternalActor(() -> altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(machineUserName, userCrn, accountId));
     }
 
     /**
      * Cleanup machine user related resources (access keys, role, user)
+     *
      * @param stack stack that is used to get user crn
      */
     void cleanUpMachineUser(Stack stack) {
@@ -46,7 +49,8 @@ public class ClouderaManagerDatabusService {
             String userCrn = stack.getCreator().getUserCrn();
             String accountId = Crn.fromString(stack.getCreator().getUserCrn()).getAccountId();
             String machineUserName = getWAMachineUserName(userCrn, stack);
-            altusIAMService.clearLegacyMachineUser(machineUserName, userCrn, accountId);
+            ThreadBasedUserCrnProvider
+                    .doAsInternalActor(() -> altusIAMService.clearLegacyMachineUser(machineUserName, userCrn, accountId));
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed. It is not a fatal issue, "
                     + "but note that you could have remaining UMS resources for your account", e);
