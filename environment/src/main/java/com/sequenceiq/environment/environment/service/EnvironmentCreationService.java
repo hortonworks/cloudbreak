@@ -11,6 +11,7 @@ import javax.ws.rs.BadRequestException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -51,6 +52,9 @@ public class EnvironmentCreationService {
     private final ParametersService parametersService;
 
     private final EntitlementService entitlementService;
+
+    @Value("${info.app.version}")
+    private String environmentServiceVersion;
 
     public EnvironmentCreationService(
             EnvironmentService environmentService,
@@ -113,6 +117,7 @@ public class EnvironmentCreationService {
         proxyConfig.ifPresent(pc -> environment.setProxyConfig(pc));
         environment.setCloudPlatform(credential.getCloudPlatform());
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
+        environment.setEnvironmentServiceVersion(environmentServiceVersion);
         LOGGER.info("Environment is initialized for creation.");
         return environment;
     }

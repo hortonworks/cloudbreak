@@ -89,6 +89,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private YarnEnvironmentParameters yarn;
 
+        private String environmentServiceVersion;
+
         private Builder() {
         }
 
@@ -212,6 +214,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentServiceVersion(String environmentServiceVersion) {
+            this.environmentServiceVersion = environmentServiceVersion;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -238,6 +245,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setTags(tags);
             simpleEnvironmentResponse.setParentEnvironmentName(parentEnvironmentName);
             simpleEnvironmentResponse.setProxyConfig(proxyConfig);
+            simpleEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
             return simpleEnvironmentResponse;
         }
     }

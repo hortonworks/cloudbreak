@@ -79,6 +79,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
 
     private ProxyConfig proxyConfig;
 
+    private String environmentServiceVersion;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -320,6 +322,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
         this.proxyConfig = proxyConfig;
     }
 
+    public String getEnvironmentServiceVersion() {
+        return environmentServiceVersion;
+    }
+
+    public void setEnvironmentServiceVersion(String environmentServiceVersion) {
+        this.environmentServiceVersion = environmentServiceVersion;
+    }
+
     public Map<String, String> mergeTags(CostTagging costTagging) {
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -402,6 +412,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
         private String parentEnvironmentCloudPlatform;
 
         private ProxyConfig proxyConfig;
+
+        private String environmentServiceVersion;
 
         private Builder() {
         }
@@ -551,6 +563,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
             return this;
         }
 
+        public Builder withEnvironmentServiceVersion(String environmentServiceVersion) {
+            this.environmentServiceVersion = environmentServiceVersion;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -582,6 +599,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
             environmentDto.setParentEnvironmentName(parentEnvironmentName);
             environmentDto.setParentEnvironmentCloudPlatform(parentEnvironmentCloudPlatform);
             environmentDto.setProxyConfig(proxyConfig);
+            environmentDto.setEnvironmentServiceVersion(environmentServiceVersion);
             return environmentDto;
         }
     }

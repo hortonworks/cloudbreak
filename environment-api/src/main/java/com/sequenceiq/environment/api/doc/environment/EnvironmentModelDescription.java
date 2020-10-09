@@ -108,6 +108,8 @@ public class EnvironmentModelDescription {
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";
 
+    public static final String ENVIRONMENT_SERVICE_VERSION = "The version of the Cloudbreak build used to create the environment.";
+
     private EnvironmentModelDescription() {
     }
 }
