@@ -82,11 +82,13 @@ public class ParcelService {
             if (manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left)) {
                 Set<String> componentNamesInParcel = getAllComponentNameInParcel(manifest.right);
                 if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
+                    LOGGER.info("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel.getDisplayName());
                     ret.add(parcel);
+                } else {
+                    LOGGER.info("Skip parcel '{}' as there isn't any service both in the manifest and in the blueprint.", parcel.getDisplayName());
                 }
-            } else if (ManifestStatus.COULD_NOT_PARSE.equals(manifest.left)) {
-                ret.add(parcel);
-            } else if (ManifestStatus.FAILED.equals(manifest.left) && !baseImage) {
+            } else {
+                LOGGER.info("Add parcel '{}' as we were unable to check parcel's manifest.", parcel.getDisplayName());
                 ret.add(parcel);
             }
         });
