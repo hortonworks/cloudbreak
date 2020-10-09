@@ -43,7 +43,7 @@ public class TerminationTriggerService {
 
     public void triggerTermination(Stack stack, boolean forced) {
         flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
-        if (!stack.isDeleteCompleted()) {
+        if (!stack.isDeleteCompleted() || stack.getTerminated() == null) {
             handleIfStackIsNotTerminated(stack, forced);
         } else {
             LOGGER.debug("Stack is already deleted.");

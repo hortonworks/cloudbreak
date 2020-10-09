@@ -114,12 +114,18 @@ public class TerminationService {
     }
 
     private void updateToDeleteCompleted(Stack stack, String terminatedName, String statusReason) {
-        stack.setName(terminatedName);
-        stack.setTerminated(clock.getCurrentTimeMillis());
-        stackService.save(stack);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
-        if (stack.getType().equals(StackType.WORKLOAD)) {
-            grpcUmsClient.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
+        try {
+            transactionService.required(() -> {
+                stack.setName(terminatedName);
+                stack.setTerminated(clock.getCurrentTimeMillis());
+                stackService.save(stack);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
+            });
+            if (stack.getType().equals(StackType.WORKLOAD)) {
+                grpcUmsClient.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
+            }
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause();
         }
     }
 

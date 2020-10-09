@@ -200,10 +200,20 @@ public class TerminationTriggerServiceTest {
     @Test
     public void whenStackDeletedShouldNotTerminate() {
         Stack stack = stackWithStatus(Status.DELETE_COMPLETED);
+        stack.setTerminated(2L);
 
         underTest.triggerTermination(stack, true);
 
         verifyNoTerminationEventFired();
+    }
+
+    @Test
+    public void whenStackDeletedButTerminationDateDidNotSetThenItShouldTerminate() {
+        Stack stack = stackWithStatus(Status.DELETE_COMPLETED);
+
+        underTest.triggerTermination(stack, true);
+
+        verifyTerminationEventFired(false, true);
     }
 
     private Stack stackWithStatus(Status status) {
