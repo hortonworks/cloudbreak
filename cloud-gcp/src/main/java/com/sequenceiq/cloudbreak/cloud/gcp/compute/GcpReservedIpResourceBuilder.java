@@ -51,6 +51,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
 
             Address address = new Address();
             address.setName(resource.getName());
+            address.setDescription(description());
 
             Map<String, Object> customTags = new HashMap<>();
             customTags.putAll(cloudStack.getTags());

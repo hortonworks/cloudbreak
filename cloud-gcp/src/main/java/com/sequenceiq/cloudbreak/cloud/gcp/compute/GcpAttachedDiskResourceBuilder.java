@@ -212,6 +212,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     private Disk createDisk(String projectId, VolumeSetAttributes.Volume volume, Map<String, String> tags, VolumeSetAttributes attributes) {
         Disk disk = new Disk();
+        disk.setDescription(description());
         disk.setSizeGb(Long.valueOf(volume.getSize()));
         disk.setName(volume.getId());
         disk.setType(GcpDiskType.getUrl(projectId, attributes.getAvailabilityZone(), volume.getType()));

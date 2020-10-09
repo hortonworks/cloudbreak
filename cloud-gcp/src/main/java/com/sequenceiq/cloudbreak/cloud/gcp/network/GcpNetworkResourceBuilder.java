@@ -37,6 +37,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
 
             com.google.api.services.compute.model.Network gcpNetwork = new com.google.api.services.compute.model.Network();
             gcpNetwork.setName(resource.getName());
+            gcpNetwork.setDescription(description());
             gcpNetwork.setAutoCreateSubnetworks(false);
             Insert networkInsert = compute.networks().insert(projectId, gcpNetwork);
             try {

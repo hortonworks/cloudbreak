@@ -43,6 +43,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
             Subnetwork gcpSubnet = new Subnetwork();
             gcpSubnet.setName(resource.getName());
+            gcpSubnet.setDescription(description());
             gcpSubnet.setIpCidrRange(network.getSubnet().getCidr());
 
             String networkName = context.getStringParameter(GcpNetworkResourceBuilder.NETWORK_NAME);
