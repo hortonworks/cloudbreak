@@ -105,6 +105,9 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.YARN_PARAMETERS)
     private YarnEnvironmentParameters yarn;
 
+    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
+    private String environmentServiceVersion;
+
     public String getCrn() {
         return crn;
     }
@@ -340,5 +343,13 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setYarn(YarnEnvironmentParameters yarn) {
         this.yarn = yarn;
+    }
+
+    public String getEnvironmentServiceVersion() {
+        return environmentServiceVersion;
+    }
+
+    public void setEnvironmentServiceVersion(String environmentServiceVersion) {
+        this.environmentServiceVersion = environmentServiceVersion;
     }
 }

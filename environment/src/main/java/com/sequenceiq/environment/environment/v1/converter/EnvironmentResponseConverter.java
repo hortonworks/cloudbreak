@@ -97,7 +97,8 @@ public class EnvironmentResponseConverter {
                 .withGcp(getIfNotNull(environmentDto.getParameters(), this::gcpEnvParamsToGcpEnvironmentParams))
                 .withParentEnvironmentCrn(environmentDto.getParentEnvironmentCrn())
                 .withParentEnvironmentName(environmentDto.getParentEnvironmentName())
-                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform());
+                .withParentEnvironmentCloudPlatform(environmentDto.getParentEnvironmentCloudPlatform())
+                .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));

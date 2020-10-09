@@ -113,6 +113,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @ApiModelProperty(EnvironmentModelDescription.GCP_PARAMETERS)
     private GcpEnvironmentParameters gcp;
 
+    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
+    private String environmentServiceVersion;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -272,6 +275,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.regions = regions == null ? new HashSet<>() : regions;
     }
 
+    public String getEnvironmentServiceVersion() {
+        return environmentServiceVersion;
+    }
+
+    public void setEnvironmentServiceVersion(String environmentServiceVersion) {
+        this.environmentServiceVersion = environmentServiceVersion;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -294,6 +305,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", azure=" + azure +
                 ", tags=" + tags +
                 ", parentEnvironmentName='" + parentEnvironmentName + '\'' +
+                ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
                 '}';
     }
 

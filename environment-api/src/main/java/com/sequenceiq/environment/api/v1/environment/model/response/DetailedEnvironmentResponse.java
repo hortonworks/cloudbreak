@@ -106,6 +106,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private YarnEnvironmentParameters yarn;
 
+        private String environmentServiceVersion;
+
         private Builder() {
         }
 
@@ -263,6 +265,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentServiceVersion(String environmentServiceVersion) {
+            this.environmentServiceVersion = environmentServiceVersion;
+            return this;
+        }
+
         public DetailedEnvironmentResponse build() {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
@@ -295,6 +302,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setAzure(azure);
             detailedEnvironmentResponse.setGcp(gcp);
             detailedEnvironmentResponse.setYarn(yarn);
+            detailedEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
             return detailedEnvironmentResponse;
         }
     }

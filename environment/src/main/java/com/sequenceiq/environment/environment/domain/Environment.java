@@ -136,6 +136,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @ManyToOne
     private ProxyConfig proxyConfig;
 
+    @Column(name = "environment_service_version")
+    private String environmentServiceVersion;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -443,6 +446,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setProxyConfig(ProxyConfig proxyConfig) {
         this.proxyConfig = proxyConfig;
+    }
+
+    public String getEnvironmentServiceVersion() {
+        return environmentServiceVersion;
+    }
+
+    public void setEnvironmentServiceVersion(String environmentServiceVersion) {
+        this.environmentServiceVersion = environmentServiceVersion;
     }
 
     @Override
