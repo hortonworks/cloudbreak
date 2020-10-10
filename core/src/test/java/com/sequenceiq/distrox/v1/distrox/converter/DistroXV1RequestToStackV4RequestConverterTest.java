@@ -1,15 +1,21 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -102,6 +108,27 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
     }
 
+    @ParameterizedTest
+    @EnumSource(EnvironmentStatus.class)
+    void testStackV4RequestToDistroXV1RequestRegardlessOfTheStateOfTheEnvironment(EnvironmentStatus status) {
+        StackV4Request source = new StackV4Request();
+        source.setName("SomeStack");
+        source.setEnvironmentCrn("SomeEnvCrn");
+
+        DetailedEnvironmentResponse env = createEnvironment();
+        env.setCrn(source.getEnvironmentCrn());
+        env.setEnvironmentStatus(status);
+
+        when(environmentClientService.getByCrn(source.getEnvironmentCrn())).thenReturn(env);
+
+        DistroXV1Request result = assertDoesNotThrow(() -> underTest.convert(source));
+
+        verify(environmentClientService, times(1)).getByCrn(any());
+        verify(environmentClientService, times(1)).getByCrn(source.getEnvironmentCrn());
+
+        Assertions.assertEquals(env.getName(), result.getEnvironmentName());
+    }
+
     @Test
     void convertStackRequest() {
         when(databaseRequestConverter.convert(any(DatabaseRequest.class))).thenReturn(createDistroXDatabaseRequest());
@@ -146,6 +173,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         env.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
         env.setCloudPlatform("AWS");
         env.setNetwork(createNetwork());
+        env.setName("SomeAwesomeEnv");
         env.setRegions(createCompactRegionResponse());
         return env;
     }
