@@ -14,7 +14,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -25,13 +24,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -55,9 +52,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 public class ClusterUpgradeAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
-
-    @Value("${cb.runtimes.upgradeSupported}")
-    private String upgradeSupportedVersion;
 
     @Inject
     private StackService stackService;
@@ -88,7 +82,6 @@ public class ClusterUpgradeAvailabilityService {
 
     public UpgradeV4Response checkForUpgradesByName(Long workspaceId, String stackName, boolean lockComponents) {
         Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
-        checkUpgradeSupported(stack);
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
@@ -141,15 +134,6 @@ public class ClusterUpgradeAvailabilityService {
             }
         }
         upgradeOptions.setUpgradeCandidates(filteredUpgradeCandidates);
-    }
-
-    public void checkUpgradeSupported(Stack stack) throws BadRequestException {
-        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
-        if (clouderaManagerRepoDetails == null
-                || !CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, () -> upgradeSupportedVersion)) {
-            throw new BadRequestException(String.format("Upgrade operation is not supported for %s version of cluster, upgrade supported from %s",
-                    clouderaManagerRepoDetails == null ? "undefined" : clouderaManagerRepoDetails.getVersion(), upgradeSupportedVersion));
-        }
     }
 
     private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents) {
