@@ -30,7 +30,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -192,14 +191,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        DetailedEnvironmentResponse environment = null;
         if (source.getEnvironmentCrn() != null) {
-            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
-            if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
-            }
+            getEnvironmentName(source.getEnvironmentCrn()).ifPresent(envName -> request.setEnvironmentName(envName));
         }
-        request.setEnvironmentName(getIfNotNull(environment, EnvironmentBaseResponse::getName));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
@@ -214,6 +208,11 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         return request;
+    }
+
+    private Optional<String> getEnvironmentName(String envCrn) {
+        DetailedEnvironmentResponse env = environmentClientService.getByCrn(envCrn);
+        return env != null ? Optional.of(env.getName()) : Optional.empty();
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {
