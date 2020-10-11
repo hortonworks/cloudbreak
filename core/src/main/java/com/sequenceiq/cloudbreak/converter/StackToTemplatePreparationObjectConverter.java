@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -127,6 +129,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private AzureMockAccountMappingService azureMockAccountMappingService;
+
+    @Inject
+    private GcpMockAccountMappingService gcpMockAccountMappingService;
 
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
@@ -313,6 +318,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                                 credential, virtualGroup);
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
                                 credential);
+                        break;
+                    case GCP:
+                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getRegion(), credential, virtualGroup);
+                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getRegion(), credential);
                         break;
                     default:
                         return;

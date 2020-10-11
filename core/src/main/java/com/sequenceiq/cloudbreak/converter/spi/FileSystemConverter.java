@@ -1,5 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView;
@@ -11,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
@@ -18,15 +29,6 @@ import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.model.CloudIdentityType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Component
 public class FileSystemConverter {
@@ -55,6 +57,8 @@ public class FileSystemConverter {
                                 return cloudIdentityToWasbView(cloudIdentity);
                             } else if (source.getType().isAdlsGen2()) {
                                 return cloudIdentityToAdlsGen2View(cloudIdentity);
+                            }  else if (source.getType().isGcs()) {
+                                return cloudIdentityToGcsView(cloudIdentity);
                             }
                         }
                         return null;
@@ -63,6 +67,17 @@ public class FileSystemConverter {
                     .collect(Collectors.toList());
         }
         return cloudFileSystemViews;
+    }
+
+    private CloudGcsView cloudIdentityToGcsView(CloudIdentity cloudIdentity) {
+        CloudGcsView cloudGcsView = new CloudGcsView(cloudIdentity.getIdentityType());
+        GcsIdentity gcsIdentity = cloudIdentity.getGcsIdentity();
+        if (Objects.isNull(gcsIdentity)) {
+            LOGGER.warn("GCS identity is null. Identity type is {}", cloudIdentity.getIdentityType());
+            return null;
+        }
+        cloudGcsView.setServiceAccountEmail(gcsIdentity.getServiceAccountEmail());
+        return cloudGcsView;
     }
 
     private CloudS3View cloudIdentityToS3View(CloudIdentity cloudIdentity) {
@@ -114,6 +129,9 @@ public class FileSystemConverter {
             } else if (source.getType().isAdlsGen2()) {
                 AdlsGen2FileSystem adlsGen2FileSystem = source.getConfigurations().get(AdlsGen2FileSystem.class);
                 fileSystemView = convertAdlsGen2Legacy(adlsGen2FileSystem);
+            } else if (source.getType().isGcs()) {
+                GcsFileSystem gcsFileSystem = source.getConfigurations().get(GcsFileSystem.class);
+                fileSystemView = convertGcsLegacy(gcsFileSystem);
             } else {
                 return Collections.emptyList();
             }

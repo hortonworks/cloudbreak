@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -52,9 +51,11 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -120,6 +121,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private AzureMockAccountMappingService azureMockAccountMappingService;
+
+    @Inject
+    private GcpMockAccountMappingService gcpMockAccountMappingService;
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
@@ -262,6 +266,13 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                                 credential,
                                 environment.getAdminGroupName());
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
+                                credential);
+                        break;
+                    case GCP:
+                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(),
+                                credential,
+                                environment.getAdminGroupName());
+                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(),
                                 credential);
                         break;
                     default:

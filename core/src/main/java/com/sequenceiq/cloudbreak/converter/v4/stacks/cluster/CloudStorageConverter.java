@@ -1,5 +1,17 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
+import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
@@ -9,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.WasbIdentity;
@@ -28,16 +41,6 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
 @Component
 public class CloudStorageConverter {
@@ -303,11 +306,12 @@ public class CloudStorageConverter {
             AdlsGen2Identity identity = identityRequestToAdlsGen2(storageIdentityRequest);
             cloudIdentity.setAdlsGen2Identity(identity);
         }
+        if (storageIdentityRequest.getGcs() != null) {
+            GcsIdentity identity = identityRequestToGcs(storageIdentityRequest);
+            cloudIdentity.setGcsIdentity(identity);
+        }
         if (storageIdentityRequest.getAdls() != null) {
             throw new BadRequestException("ADLS cloud storage is not (yet) supported.");
-        }
-        if (storageIdentityRequest.getGcs() != null) {
-            throw new BadRequestException("GCS cloud storage is not (yet) supported.");
         }
         return cloudIdentity;
     }
@@ -330,6 +334,12 @@ public class CloudStorageConverter {
         AdlsGen2Identity adlsGen2Identity = new AdlsGen2Identity();
         adlsGen2Identity.setManagedIdentity(storageIdentityRequest.getAdlsGen2().getManagedIdentity());
         return adlsGen2Identity;
+    }
+
+    private GcsIdentity identityRequestToGcs(StorageIdentityBase storageIdentityRequest) {
+        GcsIdentity gcsIdentity = new GcsIdentity();
+        gcsIdentity.setServiceAccountEmail(storageIdentityRequest.getGcs().getServiceAccountEmail());
+        return gcsIdentity;
     }
 
     private AccountMapping accountMappingRequestToAccountMapping(AccountMappingBase accountMappingRequest) {
