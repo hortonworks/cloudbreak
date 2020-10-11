@@ -42,7 +42,6 @@ import com.google.api.services.compute.model.ServiceAccount;
 import com.google.api.services.compute.model.Tags;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -62,7 +61,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -127,7 +125,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
-        instance.setServiceAccounts(extractServiceAccounts(cloudStack));
+        instance.setServiceAccounts(extractServiceAccounts(group));
         Scheduling scheduling = new Scheduling();
         boolean preemptible = false;
         if (template.getParameter(PREEMPTIBLE, Boolean.class) != null) {
@@ -218,16 +216,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
     }
 
-    private List<ServiceAccount> extractServiceAccounts(CloudStack cloudStack) {
-        if (noFileSystemIsConfigured(cloudStack)) {
-            return null;
-        }
-        List<CloudFileSystemView> cloudFileSystems = cloudStack.getFileSystem().get().getCloudFileSystems();
-        if (cloudFileSystems.size() > 1) {
-            throw new CloudConnectorException("Multiple file systems (identities) are not yet supported on GCP!");
-        }
-        CloudGcsView cloudFileSystem = (CloudGcsView) cloudFileSystems.get(0);
-        String email = cloudFileSystem.getServiceAccountEmail();
+    private List<ServiceAccount> extractServiceAccounts(Group group) {
+        String email = group.getIdentity().map(cloudFileSystemView -> {
+            CloudGcsView cloudGcsView = CloudGcsView.class.cast(cloudFileSystemView);
+            return cloudGcsView.getServiceAccountEmail();
+        }).orElse(null);
         return StringUtils.isEmpty(email) ? null
                 : singletonList(new ServiceAccount()
                 .setEmail(email)

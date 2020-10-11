@@ -11,9 +11,11 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
+import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -58,6 +60,12 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
 
     @Inject
     private GcpConstants gcpConstants;
+
+    @Inject
+    private GcpIdentityService gcpIdentityService;
+
+    @Inject
+    private GcpObjectStorageConnector gcpObjectStorageConnector;
 
     @Override
     public Authenticator authentication() {
@@ -110,6 +118,11 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
+    public IdentityService identityService() {
+        return gcpIdentityService;
+    }
+
+    @Override
     public Platform platform() {
         return GcpConstants.GCP_PLATFORM;
     }
@@ -124,4 +137,8 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
         return gcpNetworkConnector;
     }
 
+    @Override
+    public ObjectStorageConnector objectStorage() {
+        return gcpObjectStorageConnector;
+    }
 }

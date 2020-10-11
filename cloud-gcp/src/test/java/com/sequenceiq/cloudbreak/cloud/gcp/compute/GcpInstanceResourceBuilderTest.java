@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -253,10 +254,6 @@ public class GcpInstanceResourceBuilderTest {
     @Test
     public void extraxtServiceAccountWhenServiceEmailNotEmpty() throws Exception {
         // GIVEN
-        Group group = newGroupWithParams(ImmutableMap.of());
-        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
-        context.addComputeResources(0L, buildableResources);
-
         String email = "service@email.com";
         CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
         cloudGcsView.setServiceAccountEmail(email);
@@ -264,6 +261,10 @@ public class GcpInstanceResourceBuilderTest {
         CloudStack cloudStack = new CloudStack(Collections.emptyList(), new Network(null), image,
                 emptyMap(), emptyMap(), null, null, null, null,
                 new SpiFileSystem("test", FileSystemType.GCS, List.of(cloudGcsView)));
+
+        Group group = newGroupWithParams(ImmutableMap.of(), cloudGcsView);
+        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -280,10 +281,22 @@ public class GcpInstanceResourceBuilderTest {
     }
 
     public Group newGroupWithParams(Map<String, Object> params) {
+        return newGroupWithParams(params, null);
+    }
+
+    public Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
-        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
+        return new Group(name,
+                InstanceGroupType.CORE,
+                Collections.singletonList(cloudInstance),
+                security,
+                null,
+                instanceAuthentication,
+                instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(),
+                50,
+                Optional.ofNullable(cloudFileSystemView));
     }
 
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
