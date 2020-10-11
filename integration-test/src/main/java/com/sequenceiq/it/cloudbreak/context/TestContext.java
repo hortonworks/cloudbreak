@@ -1155,8 +1155,10 @@ public abstract class TestContext implements ApplicationContextAware {
                         : testResult.getThrowable().getMessage();
                 LOGGER.info("Failed test results are: Test Case: {} | Status: {} | Failure Type: {} | Message: {}", methodName, status,
                         testFailureType, message);
-                testResult.getTestContext().setAttribute(methodName + OUTPUT_FAILURE_TYPE, testFailureType);
-                testResult.getTestContext().setAttribute(methodName + OUTPUT_FAILURE, testResult.getThrowable());
+
+                testResult.setTestName(String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(), methodName));
+                testResult.getTestContext().setAttribute(testResult.getTestName() + OUTPUT_FAILURE_TYPE, testFailureType);
+                testResult.getTestContext().setAttribute(testResult.getTestName() + OUTPUT_FAILURE, testResult.getThrowable());
             } else {
                 LOGGER.error("Test Context TestFailException is null! So cannot get the correct test fail result!");
             }

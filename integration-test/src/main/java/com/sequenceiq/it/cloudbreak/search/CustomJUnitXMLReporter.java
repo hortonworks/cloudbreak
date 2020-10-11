@@ -15,9 +15,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.inject.Inject;
+
 import org.apache.velocity.VelocityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.testng.IClass;
 import org.testng.ISuite;
 import org.testng.ISuiteResult;
@@ -27,15 +31,20 @@ import org.testng.xml.XmlSuite;
 import org.uncommons.reportng.JUnitXMLReporter;
 import org.uncommons.reportng.ReportNGException;
 
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.performance.KeyPerformanceIndicator;
 import com.sequenceiq.it.cloudbreak.performance.Measure;
 import com.sequenceiq.it.cloudbreak.performance.Util;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 /**
  * JUnit XML reporter for TestNG that uses Velocity templates to generate its
  * output.
  * @author Daniel Dyer
  */
+@Component
+@EnableConfigurationProperties(CommonCloudProperties.class)
 public class CustomJUnitXMLReporter extends JUnitXMLReporter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomJUnitXMLReporter.class);
@@ -46,7 +55,15 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
 
     private static final String REPORT_DIRECTORY = "xml";
 
+    private static CommonCloudProperties commonCloudProperties;
+
     private KeyPerformanceIndicator<?> keyPerformanceIndicator;
+
+    @Inject
+    @SuppressFBWarnings("ST")
+    public void setCommonCloudProperties(CommonCloudProperties commonCloudProperties) {
+        this.commonCloudProperties = commonCloudProperties;
+    }
 
     @Override
     public void generateReport(List<XmlSuite> xmlSuites, List<ISuite> suites, String outputDirectoryName) {
@@ -62,8 +79,8 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
             context.put(Util.KEY_PERFORMANCE_INDICATOR, getPerformanceIndicator());
 
             try {
-                generateFile(new File(outputDirectory, results.getTestClass().getName() + '_' + RESULTS_FILE),
-                        "custom." + RESULTS_FILE + TEMPLATE_EXTENSION, context);
+                generateFile(new File(outputDirectory, String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(),
+                        results.getTestClassName(), RESULTS_FILE)), "custom." + RESULTS_FILE + TEMPLATE_EXTENSION, context);
             } catch (Exception ex) {
                 throw new ReportNGException("Failed generating JUnit XML report.", ex);
             }
@@ -166,6 +183,7 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
                     getTestErrorFromTestOutput(testResult, methodName, status);
                 }
 
+                testResult.setTestName(String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(), methodName));
                 getResultsForClass(flattenedResults, testResult).addResult(testResult);
             } else {
                 LOGGER.error("Test result is NULL!");
@@ -239,6 +257,10 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
 
         public IClass getTestClass() {
             return testClass;
+        }
+
+        public String getTestClassName() {
+            return testClass.getRealClass().getSimpleName();
         }
 
         /**
