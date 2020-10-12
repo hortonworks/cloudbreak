@@ -16,6 +16,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceObject;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -23,6 +24,7 @@ import com.sequenceiq.authorization.annotation.ResourceObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
@@ -101,6 +103,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public DatabaseServerStatusV4Response createInternal(AllocateDatabaseServerV4Request request,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return create(request);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATABASE_SERVER)
     public DatabaseServerV4Response release(@TenantAwareParam @ResourceCrn String crn) {
         DatabaseServerConfig server = databaseServerConfigService.release(crn);
@@ -167,13 +176,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATABASE_SERVER)
-    public void start(@ResourceCrn @ValidCrn @NotNull String crn) {
+    public void start(@TenantAwareParam @ResourceCrn @ValidCrn @NotNull String crn) {
         redbeamsStartService.startDatabaseServer(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATABASE_SERVER)
-    public void stop(@ResourceCrn @ValidCrn @NotNull String crn) {
+    public void stop(@TenantAwareParam @ResourceCrn @ValidCrn @NotNull String crn) {
         redbeamsStopService.stopDatabaseServer(crn);
     }
 }

@@ -35,7 +35,8 @@ public class RedbeamsClientService {
 
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         try {
-            return redbeamsServerEndpoint.create(request);
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.createInternal(request, initiatorUserCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to create DatabaseServer %s", request.getName());
             LOGGER.error(message, e);
