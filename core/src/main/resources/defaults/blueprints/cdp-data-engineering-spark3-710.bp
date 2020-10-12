@@ -7,6 +7,12 @@
       {
         "refName": "hdfs",
         "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "core_site_safety_valve",
+            "value": "<property><name>fs.s3a.committer.name</name><value>directory</value></property>"
+          }
+        ],
         "roleConfigGroups": [
           {
             "refName": "hdfs-NAMENODE-BASE",
@@ -62,6 +68,10 @@
           {
             "name": "yarn_admin_acl",
             "value": "yarn,hdfs"
+          },
+          {
+            "name": "yarn_service_mapred_safety_valve",
+            "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property>"
           }
         ],
         "roleConfigGroups": [
@@ -117,7 +127,13 @@
           {
             "refName": "spark3_on_yarn-GATEWAY-BASE",
             "roleType": "GATEWAY",
-            "base": true
+            "base": true,
+            "configs": [
+              {
+                "name": "spark-conf/spark-defaults.conf_client_config_safety_valve",
+                "value": "spark.hadoop.mapreduce.fileoutputcommitter.algorithm.version=1"
+              }
+            ]
           }
         ]
       },
