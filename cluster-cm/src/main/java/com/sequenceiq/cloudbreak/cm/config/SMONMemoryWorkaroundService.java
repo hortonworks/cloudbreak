@@ -14,37 +14,37 @@ public class SMONMemoryWorkaroundService {
     private static final long GB_IN_BYTE = 1073741824;
 
     //Data lake heapsize
-    @Value("${cb.cm.datalake.normal.smon.firehose.heapsize:2}")
+    @Value("${cb.cm.datalake.normal.smon.firehose.heapsize:}")
     private long datalakeNormalFirehoseHeapsize;
 
-    @Value("${cb.cm.datalake.extensive.smon.firehose.heapsize:2}")
+    @Value("${cb.cm.datalake.extensive.smon.firehose.heapsize:}")
     private long datalakeExtensiveFirehoseHeapsize;
 
     //Data lake nonJavaMemoryBytes
-    @Value("${cb.cm.datalake.normal.smon.firehose.nonJavaMemoryBytes:2}")
+    @Value("${cb.cm.datalake.normal.smon.firehose.nonJavaMemoryBytes:}")
     private long datalakeNormalFirehoseNonJavaMemoryBytes;
 
-    @Value("${cb.cm.datalake.extensive.smon.firehose.nonJavaMemoryBytes:2}")
+    @Value("${cb.cm.datalake.extensive.smon.firehose.nonJavaMemoryBytes:}")
     private long datalakeExtensiveFirehoseNonJavaMemoryBytes;
 
     @Value("${cb.cm.datalake.extensive.smon.services:}")
     private Set<String> datalakeMemoryExtensiveServices;
 
     //Data hub heapsize
-    @Value("${cb.cm.datahub.normal.smon.firehose.heapsize:2}")
+    @Value("${cb.cm.datahub.normal.smon.firehose.heapsize:}")
     private long datahubNormalFirehoseHeapsize;
 
-    @Value("${cb.cm.datahub.extensive.smon.firehose.heapsize:4}")
+    @Value("${cb.cm.datahub.extensive.smon.firehose.heapsize:}")
     private long datahubExtensiveFirehoseHeapsize;
 
     //Data hub nonJavaMemoryBytes
-    @Value("${cb.cm.datahub.normal.smon.firehose.nonJavaMemoryBytes:2}")
+    @Value("${cb.cm.datahub.normal.smon.firehose.nonJavaMemoryBytes:}")
     private long datahubNormalFirehoseNonJavaMemoryBytes;
 
-    @Value("${cb.cm.datahub.extensive.smon.firehose.nonJavaMemoryBytes:4}")
+    @Value("${cb.cm.datahub.extensive.smon.firehose.nonJavaMemoryBytes:}")
     private long datahubExtensiveFirehoseNonJavaMemoryBytes;
 
-    @Value("${cb.cm.datahub.extensive.smon.services:REGIONSERVER,STREAMS_MESSAGING_MANAGER_SERVER,KAFKA_BROKER,KUDU_MASTER}")
+    @Value("${cb.cm.datahub.extensive.smon.services:}")
     private Set<String> datahubMemoryExtensiveServices;
 
     public String firehoseHeapsize(StackType stackType, Set<String> componentsByHostGroup) {

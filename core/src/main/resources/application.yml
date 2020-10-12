@@ -451,6 +451,30 @@ cb:
       connect.timeout.seconds: 100
       read.timeout.seconds: 100
       write.timeout.seconds: 100
+    datalake:
+      normal:
+        smon:
+          firehose:
+            heapsize: 2
+            nonJavaMemoryBytes: 6
+      extensive:
+        smon:
+          services:
+          firehose:
+            heapsize: 2
+            nonJavaMemoryBytes: 6
+    datahub:
+      normal:
+        smon:
+          firehose:
+            heapsize: 2
+            nonJavaMemoryBytes: 6
+      extensive:
+        smon:
+          services: "REGIONSERVER,STREAMS_MESSAGING_MANAGER_SERVER,KAFKA_BROKER,KUDU_MASTER"
+          firehose:
+            heapsize: 4
+            nonJavaMemoryBytes: 6
 
   workspace.service.cache.ttl: 15
 
