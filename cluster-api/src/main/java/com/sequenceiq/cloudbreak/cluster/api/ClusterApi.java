@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.security.KeyPair;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -108,8 +109,8 @@ public interface ClusterApi {
         clusterModificationService().restartAll(withMgmtServices);
     }
 
-    default void rotateHostCertificates() throws CloudbreakException {
-        clusterSecurityService().rotateHostCertificates();
+    default void rotateHostCertificates(String sshUser, KeyPair sshKeyPair) throws CloudbreakException {
+        clusterSecurityService().rotateHostCertificates(sshUser, sshKeyPair);
     }
 
     default ClusterStatus getStatus(boolean blueprintPresent) {

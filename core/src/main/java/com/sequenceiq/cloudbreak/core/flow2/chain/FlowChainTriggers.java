@@ -39,6 +39,8 @@ public class FlowChainTriggers {
 
     public static final String DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT = "DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT";
 
+    public static final String ROTATE_CLUSTER_CERTIFICATES_CHAIN_TRIGGER_EVENT = "ROTATE_CLUSTER_CERTIFICATES_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

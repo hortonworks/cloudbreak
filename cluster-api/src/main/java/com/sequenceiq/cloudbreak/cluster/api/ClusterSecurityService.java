@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.security.KeyPair;
+
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -40,5 +42,5 @@ public interface ClusterSecurityService {
 
     String getMasterKey();
 
-    void rotateHostCertificates() throws CloudbreakException;
+    void rotateHostCertificates(String sshUser, KeyPair sshKeyPair) throws CloudbreakException;
 }
