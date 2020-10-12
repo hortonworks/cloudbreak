@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
 import org.testng.util.Strings;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -23,22 +22,10 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
+        createSourceCatalogIfNotExistsAndValidateDefaultImage(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
         createEnvironmentWithNetworkAndFreeIpa(testContext);
-    }
-
-    @BeforeMethod
-    public void createSourceCatalogIfNotExistsAndValidateDefaultImage(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-        createImageValidationSourceCatalog(testContext,
-                commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
-                commonCloudProperties().getImageValidation().getSourceCatalogName());
-
-        String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
-        if (Strings.isNotNullAndNotEmpty(imageUuid)) {
-            validateDefaultImage(testContext, imageUuid);
-        }
     }
 
     @AfterMethod
@@ -57,6 +44,17 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
     }
 
     protected abstract String getImageId(TestContext testContext);
+
+    private void createSourceCatalogIfNotExistsAndValidateDefaultImage(TestContext testContext) {
+        createImageValidationSourceCatalog(testContext,
+                commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
+                commonCloudProperties().getImageValidation().getSourceCatalogName());
+
+        String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
+        if (Strings.isNotNullAndNotEmpty(imageUuid)) {
+            validateDefaultImage(testContext, imageUuid);
+        }
+    }
 
     private void writeImageIdToFile(TestContext testContext) {
         try {
