@@ -41,7 +41,7 @@ public class SMONMemoryWorkaroundService {
     @Value("${cb.cm.datahub.normal.smon.firehose.nonJavaMemoryBytes:2}")
     private long datahubNormalFirehoseNonJavaMemoryBytes;
 
-    @Value("${cb.cm.datahub.extensive.smon.firehose.nonJavaMemoryBytes:4}")
+    @Value("${cb.cm.datahub.extensive.smon.firehose.nonJavaMemoryBytes:6}")
     private long datahubExtensiveFirehoseNonJavaMemoryBytes;
 
     @Value("${cb.cm.datahub.extensive.smon.services:REGIONSERVER,STREAMS_MESSAGING_MANAGER_SERVER,KAFKA_BROKER,KUDU_MASTER}")
