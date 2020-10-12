@@ -290,12 +290,13 @@ public class GrpcUmsClient {
      * @param userCrn         actor
      * @param requestId       request id for deleting machine user
      */
-    public void deleteMachineUser(String machineUserName, String userCrn, Optional<String> requestId) {
+    public void deleteMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             String generatedRequestId = requestId.orElse(UUID.randomUUID().toString());
-            LOGGER.debug("Deleting machine user {} by {} using request ID {}", machineUserName, userCrn, generatedRequestId);
-            client.deleteMachineUser(generatedRequestId, userCrn, machineUserName);
+            LOGGER.debug("Deleting machine user {} by {} using request ID {} (for accountId: {})",
+                    machineUserName, userCrn, generatedRequestId, accountId);
+            client.deleteMachineUser(generatedRequestId, userCrn, accountId, machineUserName);
         }
     }
 
@@ -621,7 +622,7 @@ public class GrpcUmsClient {
             unassignMachineUserRole(userCrn, machineUserName, roleCrn, MDCUtils.getRequestId());
         }
         deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, MDCUtils.getRequestId());
-        deleteMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
+        deleteMachineUser(machineUserName, userCrn, accountId, MDCUtils.getRequestId());
     }
 
     /**
