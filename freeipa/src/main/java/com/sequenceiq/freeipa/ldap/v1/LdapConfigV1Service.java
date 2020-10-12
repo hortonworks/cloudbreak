@@ -22,6 +22,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.ldap.LdapConfig;
@@ -202,11 +203,27 @@ public class LdapConfigV1Service {
     private LdapConfig createNewLdapConfig(String environmentCrn, String clusterName, Stack stack) throws FreeIpaClientException {
         LOGGER.debug("Create new LDAP config for environment in FreeIPA");
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        String bindUser = "ldapbind-" + clusterName;
-        Optional<User> existinguser = freeIpaClient.userFind(bindUser);
-        User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
+        User user = createBindUser(clusterName, freeIpaClient);
+        String password = setBindUserPassword(freeIpaClient, user);
+        return ldapConfigRegisterService.createLdapConfig(stack.getId(), user.getDn(), password, clusterName, environmentCrn);
+    }
+
+    private String setBindUserPassword(FreeIpaClient freeIpaClient, User user) throws FreeIpaClientException {
         String password = FreeIpaPasswordUtil.generatePassword();
         freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
-        return ldapConfigRegisterService.createLdapConfig(stack.getId(), user.getDn(), password, clusterName, environmentCrn);
+        LOGGER.debug("Password is set for user: [{}]", user.getUid());
+        return password;
+    }
+
+    private User createBindUser(String clusterName, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+        String bindUser = "ldapbind-" + clusterName;
+        try {
+            User user = freeIpaClient.userAdd(bindUser, "service", "account");
+            LOGGER.debug("LDAP bind user [{}] created", bindUser);
+            return user;
+        } catch (FreeIpaClientException e) {
+            LOGGER.warn("Failed to create bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to create bind user", e);
+        }
     }
 }

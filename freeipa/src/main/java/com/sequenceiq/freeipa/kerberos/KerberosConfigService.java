@@ -37,6 +37,7 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig, String accountId) {
         kerberosConfig.setAccountId(accountId);
         kerberosConfig.setResourceCrn(crnService.createCrn(kerberosConfig.getAccountId(), Crn.ResourceType.KERBEROS));
+        LOGGER.debug("Trying to save KerberosConfig: {}", kerberosConfig);
         checkIfExists(kerberosConfig);
         return kerberosConfigRepository.save(kerberosConfig);
     }

@@ -341,4 +341,35 @@ public class LdapConfig implements ArchivableResource, AuthResource, AccountAwar
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @Override
+    public String toString() {
+        return "LdapConfig{" +
+                "id=" + id +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", clusterName='" + clusterName + '\'' +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                ", serverHost='" + serverHost + '\'' +
+                ", serverPort=" + serverPort +
+                ", protocol='" + protocol + '\'' +
+                ", directoryType=" + directoryType +
+                ", userSearchBase='" + userSearchBase + '\'' +
+                ", userDnPattern='" + userDnPattern + '\'' +
+                ", userNameAttribute='" + userNameAttribute + '\'' +
+                ", userObjectClass='" + userObjectClass + '\'' +
+                ", groupSearchBase='" + groupSearchBase + '\'' +
+                ", groupNameAttribute='" + groupNameAttribute + '\'' +
+                ", groupObjectClass='" + groupObjectClass + '\'' +
+                ", groupMemberAttribute='" + groupMemberAttribute + '\'' +
+                ", domain='" + domain + '\'' +
+                ", adminGroup='" + adminGroup + '\'' +
+                ", userGroup='" + userGroup + '\'' +
+                ", certificate='" + certificate + '\'' +
+                '}';
+    }
 }
