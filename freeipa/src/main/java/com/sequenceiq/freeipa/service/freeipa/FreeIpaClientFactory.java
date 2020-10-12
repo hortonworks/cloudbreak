@@ -179,7 +179,7 @@ public class FreeIpaClientFactory {
         return getFreeIpaClient(stack, false, false, Optional.of(freeIpaFqdn));
     }
 
-    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack, String freeIpaFqdn) throws Exception {
+    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
         LOGGER.debug("Ping the login endpoint and creating FreeIpaClient for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
         return getFreeIpaClient(stack, true, true, Optional.of(freeIpaFqdn));
     }

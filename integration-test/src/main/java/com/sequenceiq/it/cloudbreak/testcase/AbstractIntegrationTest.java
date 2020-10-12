@@ -46,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
+import com.sequenceiq.it.cloudbreak.mock.freeipa.healthcheck.FreeIpaNodeHealthCheckHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
@@ -91,6 +92,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Inject
+    private FreeIpaNodeHealthCheckHandler freeIpaNodeHealthCheckHandler;
+
+    @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
 
     @BeforeMethod
@@ -119,6 +123,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void createDefaultFreeIpa(TestContext testContext) {
         MockedTestContext mockedTestContext = (MockedTestContext) testContext;
         setUpFreeIpaRouteStubbing(mockedTestContext);
+        setUpFreeIpaHealthCheckRouteStubbing(mockedTestContext);
         testContext
                 .given(FreeIpaTestDto.class).withCatalog(mockedTestContext
                     .getImageCatalogMockServerSetup()
@@ -150,6 +155,11 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/host_del", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/role_find", freeIpaRouteHandler);
         dynamicRouteStack.get(ITResponse.FREEIPA_ROOT + "/server_conncheck", freeIpaRouteHandler);
+    }
+
+    protected void setUpFreeIpaHealthCheckRouteStubbing(MockedTestContext mockedTestContext) {
+        DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
+        dynamicRouteStack.get(ITResponse.FREEIPA_HEALTH_CHECK_ROOT, freeIpaNodeHealthCheckHandler);
     }
 
     protected void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
@@ -363,5 +373,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     public FreeIpaRouteHandler getFreeIpaRouteHandler() {
         return freeIpaRouteHandler;
+    }
+
+    public FreeIpaNodeHealthCheckHandler getFreeIpaHealthCheckHandler() {
+        return freeIpaNodeHealthCheckHandler;
     }
 }

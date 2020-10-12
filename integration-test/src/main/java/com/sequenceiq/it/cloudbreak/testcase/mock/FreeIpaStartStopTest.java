@@ -17,7 +17,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.ServerConnCheckFreeipaRpcResponse;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
@@ -58,16 +57,16 @@ public class FreeIpaStartStopTest extends AbstractIntegrationTest {
             return "";
         });
         dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
+        getFreeIpaHealthCheckHandler().setHealthy();
         testContext
                 .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
+        getFreeIpaHealthCheckHandler().setUnreachable();
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.stop())
                 .await(Status.STOPPED);
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
+        getFreeIpaHealthCheckHandler().setHealthy();
         testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)

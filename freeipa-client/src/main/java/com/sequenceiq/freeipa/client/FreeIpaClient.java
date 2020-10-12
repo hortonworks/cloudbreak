@@ -589,12 +589,12 @@ public class FreeIpaClient {
             }
             return response;
         } catch (Exception e) {
-            String message = String.format("Invoke FreeIpa failed: %s", e.getLocalizedMessage());
+            String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
             OptionalInt responseCode = extractResponseCode(e);
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
-            String message = String.format("Invoke FreeIpa failed: %s", throwable.getLocalizedMessage());
+            String message = String.format("Invoke FreeIPA failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
             throw new FreeIpaClientException(message, throwable);
         }

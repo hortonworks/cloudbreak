@@ -17,7 +17,7 @@ auth:
       ha:
         enable: true
         repair.enable: true
-      healthcheck.enable: false
+      healthcheck.enable: true
     cloudstoragevalidation.enable: true
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub

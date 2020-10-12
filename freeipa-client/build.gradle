@@ -23,6 +23,9 @@ dependencies {
   implementation     group: 'org.bouncycastle',                 name: 'bcprov-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.bouncycastle',                 name: 'bcpkix-jdk15on',              version: bouncycastleVersion
   implementation     group: 'org.springframework',              name: 'spring-web',                  version: springFrameworkVersion
+  compile            group: 'org.glassfish.jersey.core',        name: 'jersey-common',               version: jerseyCoreVersion
   testImplementation group: 'org.mockito',                      name: 'mockito-core',                version: mockitoVersion
   testCompile        group: 'junit',                            name: 'junit',                       version: junitVersion
+
+  implementation project(':common')
 }
