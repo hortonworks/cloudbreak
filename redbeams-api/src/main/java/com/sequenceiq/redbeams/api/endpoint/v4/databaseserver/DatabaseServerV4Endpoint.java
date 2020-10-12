@@ -85,6 +85,16 @@ public interface DatabaseServerV4Endpoint {
             @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request
     );
 
+    @POST
+    @Path("internal/managed")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.CREATE_INTERNAL, notes = DatabaseServerNotes.CREATE,
+            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseServerInternal")
+    DatabaseServerStatusV4Response createInternal(
+            @Valid @ApiParam(DatabaseServerParamDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST) AllocateDatabaseServerV4Request request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+    );
+
     @PUT
     @Path("{crn}/release")
     @ApiOperation(value = DatabaseServerOpDescription.RELEASE, notes = DatabaseServerNotes.RELEASE,

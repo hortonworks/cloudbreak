@@ -64,8 +64,9 @@ public class DatabaseService {
             dbResourceCrn = sdxCluster.getDatabaseCrn();
         } else {
             try {
-                dbResourceCrn = databaseServerV4Endpoint.create(getDatabaseRequest(sdxCluster, env))
-                        .getResourceCrn();
+                String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                dbResourceCrn = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn)).getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
