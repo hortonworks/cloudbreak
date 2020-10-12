@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -56,12 +55,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -71,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingSe
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
@@ -122,9 +117,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
 
     @InjectMocks
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
-
-    @Mock
-    private LdapConfigService ldapConfigService;
 
     @Mock
     private RdsConfigService rdsConfigService;
@@ -188,9 +180,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private WorkspaceService workspaceService;
 
     @Mock
-    private KerberosConfigService kerberosConfigService;
-
-    @Mock
     private BlueprintViewProvider blueprintViewProvider;
 
     @Mock
@@ -241,6 +230,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environmentResponse.getAdminGroupName()).thenReturn(ADMIN_GROUP_NAME);
         when(environmentResponse.getIdBrokerMappingSource()).thenReturn(IdBrokerMappingSource.MOCK);
         when(environmentResponse.getCrn()).thenReturn(TEST_ENVIRONMENT_CRN);
+        when(environmentResponse.getName()).thenReturn("testEnvironment");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);
@@ -251,27 +241,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
-    }
-
-    @Test
-    public void testConvertWhenKerberosNameIsNullInAmbariThenEmptyKerberosShouldBeStored() {
-        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN, TEST_CLUSTER_NAME)).thenReturn(Optional.empty());
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertNotNull(result);
-        assertFalse(result.getKerberosConfig().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenKerberosNameIsNotNullInAmbariAndSecurityTrueThenExpectedKerberosConfigShouldBeStored() {
-        KerberosConfig expected = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(kerberosConfigService.get(TEST_ENVIRONMENT_CRN, TEST_CLUSTER_NAME)).thenReturn(Optional.of(expected));
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertNotNull(result);
-        assertTrue(result.getKerberosConfig().isPresent());
-        assertEquals(expected, result.getKerberosConfig().get());
     }
 
     @Test
@@ -377,26 +346,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(source);
 
         assertEquals(expected, result.getGeneralClusterConfigs());
-    }
-
-    @Test
-    public void testConvertWhenLdapConfigNameIsNullThenStoredLdapConfigShouldBeEmpty() {
-        TemplatePreparationObject result = underTest.convert(source);
-        assertFalse(result.getLdapConfig().isPresent());
-    }
-
-    @Test
-    public void testConvertWhenLdapConfigNameIsNotNullThenPublicConfigFromLdapConfigServiceShouldBeStored() {
-        LdapView expected = LdapView.LdapViewBuilder.aLdapView()
-                .withProtocol("")
-                .withBindDn("")
-                .withBindPassword("")
-                .build();
-        when(ldapConfigService.get(TEST_ENVIRONMENT_CRN, source.getName())).thenReturn(Optional.of(expected));
-
-        TemplatePreparationObject result = underTest.convert(source);
-
-        assertTrue(result.getLdapConfig().isPresent());
     }
 
     @Test
