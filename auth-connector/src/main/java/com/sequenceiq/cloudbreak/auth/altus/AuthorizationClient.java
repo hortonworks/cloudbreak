@@ -9,8 +9,10 @@ import org.springframework.util.StringUtils;
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
+import io.opentracing.Tracer;
 
 /**
  * A simple wrapper to the GRPC user management service. This handles setting up
@@ -22,16 +24,19 @@ public class AuthorizationClient {
 
     private final String actorCrn;
 
+    private final Tracer tracer;
+
     /**
      * Constructor.
      *
      * @param channel  the managed channel.
      * @param actorCrn the actor CRN.
+     * @param tracer   tracer
      */
-    AuthorizationClient(ManagedChannel channel,
-            String actorCrn) {
+    AuthorizationClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
         this.channel = checkNotNull(channel);
         this.actorCrn = checkNotNull(actorCrn);
+        this.tracer = tracer;
     }
 
     public void checkRight(String requestId, String userCrn, String right, String resource) {
@@ -71,7 +76,9 @@ public class AuthorizationClient {
      */
     private AuthorizationGrpc.AuthorizationBlockingStub newStub(String requestId) {
         checkNotNull(requestId);
-        return AuthorizationGrpc.newBlockingStub(channel)
-                .withInterceptors(new AltusMetadataInterceptor(requestId, actorCrn));
+        return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
+                GrpcUtil.getTracingInterceptor(tracer),
+                new AltusMetadataInterceptor(requestId, actorCrn)
+        );
     }
 }
