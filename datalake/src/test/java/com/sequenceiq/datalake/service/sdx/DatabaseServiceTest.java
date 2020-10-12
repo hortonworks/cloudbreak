@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -11,8 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
-import com.sequenceiq.redbeams.api.model.common.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -34,8 +34,10 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsServiceCrnClient;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -46,6 +48,8 @@ public class DatabaseServiceTest {
     private static final String DATABASE_CRN = "database crn";
 
     private static final String CLUSTER_CRN = "cluster crn";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @Captor
     public ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
@@ -85,16 +89,16 @@ public class DatabaseServiceTest {
         env.setCloudPlatform("aws");
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
-        when(databaseServerV4Endpoint.create(any())).thenThrow(BadRequestException.class);
+        when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
 
         Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.create(cluster, env);
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
         });
 
-        verify(databaseServerV4Endpoint).create(captor.capture());
+        verify(databaseServerV4Endpoint).createInternal(captor.capture(), anyString());
         AllocateDatabaseServerV4Request dbRequest = captor.getValue();
         assertThat(dbRequest.getDatabaseServer().getInstanceType(), is("instanceType"));
         assertThat(dbRequest.getDatabaseServer().getDatabaseVendor(), is("vendor"));
