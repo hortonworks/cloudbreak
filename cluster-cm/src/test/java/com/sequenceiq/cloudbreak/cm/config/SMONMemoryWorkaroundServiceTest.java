@@ -31,7 +31,7 @@ public class SMONMemoryWorkaroundServiceTest {
         ReflectionTestUtils.setField(underTest, "datahubNormalFirehoseHeapsize", 2);
         ReflectionTestUtils.setField(underTest, "datahubExtensiveFirehoseHeapsize", 4);
         ReflectionTestUtils.setField(underTest, "datahubNormalFirehoseNonJavaMemoryBytes", 2);
-        ReflectionTestUtils.setField(underTest, "datahubExtensiveFirehoseNonJavaMemoryBytes", 4);
+        ReflectionTestUtils.setField(underTest, "datahubExtensiveFirehoseNonJavaMemoryBytes", 6);
         ReflectionTestUtils.setField(underTest, "datahubMemoryExtensiveServices",
                 Sets.newHashSet("REGIONSERVER", "STREAMS_MESSAGING_MANAGER_SERVER", "KAFKA_BROKER", "KUDU_MASTER"));
     }
@@ -56,7 +56,7 @@ public class SMONMemoryWorkaroundServiceTest {
 
     @Test
     public void getFirehoseHeapsizeWhenDHAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
-        Assert.assertEquals("4294967296", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+        Assert.assertEquals("6442450944", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
                 Sets.newHashSet("REGIONSERVER")));
     }
 
@@ -80,7 +80,7 @@ public class SMONMemoryWorkaroundServiceTest {
 
     @Test
     public void getFirehoseNonJavaMemoryBytesWhenDHAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
-        Assert.assertEquals("4294967296", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+        Assert.assertEquals("6442450944", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
                 Sets.newHashSet("REGIONSERVER")));
     }
 
