@@ -2,7 +2,7 @@
   "name": "7.2.3 - Data Engineering Spark3 for Azure",
   "description": "",
   "type": "DATAENGINEERING",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
