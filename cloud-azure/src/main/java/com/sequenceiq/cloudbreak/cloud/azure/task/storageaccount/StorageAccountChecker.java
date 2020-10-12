@@ -29,7 +29,7 @@ public class StorageAccountChecker extends PollBooleanStateTask {
     protected Boolean doCall() {
         LOGGER.info("Waiting for storage account to be created: {}", context.getStorageAccountName());
         AzureClient client = context.getAzureClient();
-        StorageAccount storageAccount = client.getStorageAccountByGroup(context.getResourceGroupName(), context.getResourceGroupName());
+        StorageAccount storageAccount = client.getStorageAccountByGroup(context.getResourceGroupName(), context.getStorageAccountName());
         if (storageAccount == null) {
             LOGGER.info("Storage account creation not finished yet");
             return false;
