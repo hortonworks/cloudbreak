@@ -305,4 +305,29 @@ public class KerberosConfig implements ArchivableResource, AuthResource, Account
     public void setNameServers(String nameServers) {
         this.nameServers = nameServers;
     }
+
+    @Override
+    public String toString() {
+        return "KerberosConfig{" +
+                "id=" + id +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", clusterName='" + clusterName + '\'' +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                ", type=" + type +
+                ", url='" + url + '\'' +
+                ", adminUrl='" + adminUrl + '\'' +
+                ", realm='" + realm + '\'' +
+                ", tcpAllowed=" + tcpAllowed +
+                ", ldapUrl='" + ldapUrl + '\'' +
+                ", containerDn='" + containerDn + '\'' +
+                ", verifyKdcTrust=" + verifyKdcTrust +
+                ", domain='" + domain + '\'' +
+                ", nameServers='" + nameServers + '\'' +
+                '}';
+    }
 }

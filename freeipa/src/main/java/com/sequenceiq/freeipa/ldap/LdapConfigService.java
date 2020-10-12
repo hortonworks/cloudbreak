@@ -40,6 +40,7 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
     public LdapConfig createLdapConfig(LdapConfig ldapConfig, String accountId) {
         ldapConfig.setAccountId(accountId);
         ldapConfig.setResourceCrn(crnService.createCrn(ldapConfig.getAccountId(), Crn.ResourceType.LDAP));
+        LOGGER.debug("Trying to save LdapConfig: {}", ldapConfig);
         checkIfExists(ldapConfig);
         return ldapConfigRepository.save(ldapConfig);
     }

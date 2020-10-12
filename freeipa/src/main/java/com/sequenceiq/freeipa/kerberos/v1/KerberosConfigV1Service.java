@@ -16,13 +16,13 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigR
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.service.config.KerberosConfigRegisterService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaPermissionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -50,9 +50,6 @@ public class KerberosConfigV1Service {
 
     @Inject
     private KerberosConfigRegisterService kerberosConfigRegisterService;
-
-    @Inject
-    private FreeIpaPermissionService freeIpaPermissionService;
 
     public DescribeKerberosConfigResponse post(CreateKerberosConfigRequest createKerberosConfigRequest) {
         KerberosConfig kerberosConfig = createKerberosConfigRequestToKerberosConfigConverter.convert(createKerberosConfigRequest);
@@ -124,13 +121,33 @@ public class KerberosConfigV1Service {
     private KerberosConfig createNewKerberosConfig(String environmentCrn, String clusterName, Stack existingStack) throws FreeIpaClientException {
         LOGGER.debug("Kerberos config doesn't exists for cluster [{}] in env [{}]. Creating new in FreeIPA", clusterName, environmentCrn);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(existingStack);
-        String bindUser = "kerberosbind-" + clusterName;
-        Optional<User> existinguser = freeIpaClient.userFind(bindUser);
-        User user = existinguser.isPresent() ? existinguser.get() : freeIpaClient.userAdd(bindUser, "service", "account");
+        User user = createBindUser(freeIpaClient, clusterName);
+        String password = setPasswordForBindUser(freeIpaClient, user);
+        addEnrollmentAdminRole(freeIpaClient, user);
+        return kerberosConfigRegisterService.createKerberosConfig(existingStack.getId(), user.getUid(), password, clusterName, environmentCrn);
+    }
+
+    private void addEnrollmentAdminRole(FreeIpaClient freeIpaClient, User user) throws FreeIpaClientException {
+        freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
+        LOGGER.debug("Added [Enrollment Administrator] role to [{}]", user.getUid());
+    }
+
+    private String setPasswordForBindUser(FreeIpaClient freeIpaClient, User user) throws FreeIpaClientException {
         String password = FreeIpaPasswordUtil.generatePassword();
         freeIpaClient.userSetPasswordWithExpiration(user.getUid(), password, Optional.empty());
-        freeIpaClient.addRoleMember("Enrollment Administrator", Set.of(user.getUid()), null, null, null, null);
-        freeIpaPermissionService.setPermissions(freeIpaClient);
-        return kerberosConfigRegisterService.createKerberosConfig(existingStack.getId(), user.getUid(), password, clusterName, environmentCrn);
+        LOGGER.debug("Password is set  for [{}]", user.getUid());
+        return password;
+    }
+
+    private User createBindUser(FreeIpaClient freeIpaClient, String clusterName) throws RetryableFreeIpaClientException {
+        String bindUser = "kerberosbind-" + clusterName;
+        try {
+            User user = freeIpaClient.userAdd(bindUser, "service", "account");
+            LOGGER.debug("Kerberos bind user [{}] created", bindUser);
+            return user;
+        } catch (FreeIpaClientException e) {
+            LOGGER.warn("Failed to create bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to create bind user", e);
+        }
     }
 }
