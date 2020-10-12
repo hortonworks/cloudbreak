@@ -8,7 +8,8 @@ public class CustomVMImageNameProvider {
 
     private static final char DELIMITER = '-';
 
-    public String get(String region, String vhdName) {
+    public String get(String region, String vhdUri) {
+        String vhdName = vhdUri.substring(vhdUri.lastIndexOf('/') + 1);
         String name = vhdName + DELIMITER + region.toLowerCase().replaceAll("\\s", "");
         if (name.length() > NAME_MAXIMUM_LENGTH) {
             int diff = name.length() - NAME_MAXIMUM_LENGTH;

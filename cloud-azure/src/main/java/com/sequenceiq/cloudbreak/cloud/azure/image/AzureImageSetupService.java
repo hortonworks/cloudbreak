@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -50,12 +51,15 @@ public class AzureImageSetupService {
     @Inject
     private AzureManagedImageService azureManagedImageService;
 
+    @Inject
+    private CustomVMImageNameProvider customVMImageNameProvider;
+
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         CloudContext cloudContext = ac.getCloudContext();
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        Optional<VirtualMachineCustomImage> customImage = findVirtualMachineCustomImage(image, imageResourceGroupName, client);
+        Optional<VirtualMachineCustomImage> customImage = findVirtualMachineCustomImage(image, imageResourceGroupName, client, ac);
         if (customImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!", customImage.get().id(),
                     imageResourceGroupName);
@@ -95,8 +99,10 @@ public class AzureImageSetupService {
         }
     }
 
-    private Optional<VirtualMachineCustomImage> findVirtualMachineCustomImage(Image image, String imageResourceGroupName, AzureClient client) {
-        return azureManagedImageService.findVirtualMachineCustomImage(imageResourceGroupName, image.getImageName(), client);
+    private Optional<VirtualMachineCustomImage> findVirtualMachineCustomImage(Image image, String imageResourceGroupName, AzureClient client,
+            AuthenticatedContext ac) {
+        String imageName = customVMImageNameProvider.get(ac.getCloudContext().getLocation().getRegion().getRegionName(), image.getImageName());
+        return azureManagedImageService.findVirtualMachineCustomImage(imageResourceGroupName, imageName, client);
     }
 
     private boolean isCustomImageAvailable(AzureImage customImage) {

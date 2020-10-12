@@ -48,7 +48,7 @@ public class AzureImageService {
 
     public AzureImage getCustomImageId(String resourceGroup, String fromVhdUri, AuthenticatedContext ac, boolean createIfNotFound, AzureClient client) {
         String region = getRegion(ac);
-        String imageName = getImageName(fromVhdUri, region);
+        String imageName = getImageName(region, fromVhdUri);
         String imageId = getImageId(resourceGroup, client, imageName);
         AzureManagedImageCreationCheckerContext checkerContext = new AzureManagedImageCreationCheckerContext(client, resourceGroup, imageName);
 
@@ -97,9 +97,8 @@ public class AzureImageService {
         return azureManagedImageService.findVirtualMachineCustomImage(resourceGroup, imageName, client);
     }
 
-    private String getImageName(String fromVhdUri, String region) {
-        String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
-        return customVMImageNameProvider.get(region, vhdName);
+    private String getImageName(String region, String fromVhdUri) {
+        return customVMImageNameProvider.get(region, fromVhdUri);
     }
 
     private void saveImage(AuthenticatedContext ac, String imageName, String imageId) {
