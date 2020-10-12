@@ -321,14 +321,14 @@ public class UmsClient {
      * @param userCrn         actor identifier
      * @param machineUserName machine user to remove
      */
-    public void deleteMachineUser(String requestId, String userCrn, String machineUserName) {
+    public void deleteMachineUser(String requestId, String userCrn, String  accountId, String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         try {
             newStub(requestId).deleteMachineUser(
                     UserManagementProto.DeleteMachineUserRequest.newBuilder()
-                            .setAccountId(Crn.fromString(userCrn).getAccountId())
+                            .setAccountId(accountId)
                             .setMachineUserNameOrCrn(machineUserName)
                             .build());
         } catch (StatusRuntimeException e) {

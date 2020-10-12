@@ -35,6 +35,7 @@ public class ClouderaManagerDatabusServiceTest {
         User creator = new User();
         creator.setUserCrn(USER_CRN);
         stack.setCreator(creator);
+        stack.setResourceCrn(USER_CRN);
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         stack.setCluster(cluster);
