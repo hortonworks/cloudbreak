@@ -420,7 +420,7 @@ public class GrpcUmsClient {
             }
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
+            AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn, tracer);
             LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
             client.checkRight(requestId.orElse(UUID.randomUUID().toString()), userCrn, right, resource);
             LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
@@ -454,7 +454,7 @@ public class GrpcUmsClient {
         }
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             if (!rightChecks.isEmpty()) {
-                AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn);
+                AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn, tracer);
                 List<Boolean> retVal = client.hasRights(requestId.orElse(UUID.randomUUID().toString()), memberCrn, rightChecks);
                 LOGGER.info("member {} has rights {}", memberCrn, retVal);
                 return retVal;
