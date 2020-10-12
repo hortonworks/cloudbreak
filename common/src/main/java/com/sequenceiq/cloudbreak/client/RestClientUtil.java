@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.SSLContext;
@@ -39,6 +40,16 @@ public class RestClientUtil {
     }
 
     public static Client createClient(String serverCert, String clientCert, String clientKey, boolean debug) throws Exception {
+        return createClient(serverCert, clientCert, clientKey, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
+    }
+
+    public static Client createClient(String serverCert, String clientCert, String clientKey, int connectionTimeout, int readTimeout, boolean debug)
+            throws Exception {
+        return createClient(serverCert, clientCert, clientKey, connectionTimeout, OptionalInt.of(readTimeout), debug);
+    }
+
+    public static Client createClient(String serverCert, String clientCert, String clientKey, int connectionTimeout, OptionalInt readTimeout, boolean debug)
+            throws Exception {
         SSLContext sslContext;
         if (StringUtils.isNoneBlank(serverCert, clientCert, clientKey)) {
             sslContext = SSLContexts.custom()
@@ -48,13 +59,18 @@ public class RestClientUtil {
         } else {
             sslContext = CertificateTrustManager.sslContext();
         }
-        return createClient(sslContext, debug);
+        return createClient(sslContext, connectionTimeout, readTimeout, debug);
     }
 
     public static Client createClient(SSLContext sslContext, boolean debug) {
+        return createClient(sslContext, CONNECT_TIMEOUT_MS, OptionalInt.empty(), debug);
+    }
+
+    private static Client createClient(SSLContext sslContext, int connectionTimeout, OptionalInt readTimeout, boolean debug) {
         ClientConfig config = new ClientConfig();
         config.property(ClientProperties.FOLLOW_REDIRECTS, "false");
-        config.property(ClientProperties.CONNECT_TIMEOUT, CONNECT_TIMEOUT_MS);
+        config.property(ClientProperties.CONNECT_TIMEOUT, connectionTimeout);
+        readTimeout.ifPresent(rt -> config.property(ClientProperties.READ_TIMEOUT, rt));
         config.register(MultiPartFeature.class);
 
         ClientBuilder builder = ClientBuilder.newBuilder().withConfig(config);

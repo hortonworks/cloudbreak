@@ -16,11 +16,10 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
 
 @Component
 public class FreeipaChecker {
@@ -28,19 +27,16 @@ public class FreeipaChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaChecker.class);
 
     @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
+    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
 
     private Pair<List<DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
             List<DetailedStackStatus> statuses = new LinkedList<>();
             List<RPCResponse<Boolean>> responses = new LinkedList<>();
             for (InstanceMetaData instanceMetaData : checkableInstances) {
-                String hostname = instanceMetaData.getDiscoveryFQDN();
                 try {
-                    FreeIpaClient freeIpaClient = checkedMeasure(() -> freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, hostname), LOGGER,
-                            ":::Auto sync::: freeipa client is created in {}ms");
-                    RPCResponse<Boolean> response = checkedMeasure(() -> freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), hostname), LOGGER,
-                            ":::Auto sync::: freeipa server_conncheck ran in {}ms");
+                    RPCResponse<Boolean> response = checkedMeasure(() -> freeIpaHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
+                            ":::Auto sync::: FreeIPA health check ran in {}ms");
                     responses.add(response);
                     if (response.getResult()) {
                         statuses.add(DetailedStackStatus.AVAILABLE);

@@ -24,12 +24,16 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFre
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
+import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClientFactory;
+import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
 import com.sequenceiq.freeipa.client.model.RPCMessage;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaHealthServiceTest {
@@ -49,57 +53,89 @@ public class FreeIpaHealthServiceTest {
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Mock
+    private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
+
+    @Mock
+    private FreeIpaHealthCheckClientFactory freeIpaHealthCheckClientFactory;
+
     @InjectMocks
     private FreeIpaHealthDetailsService underTest;
 
-    private List<RPCMessage> getBaseMessages(String host) {
+    private List<RPCMessage> getLegacyBaseMessages(String host) {
         List<RPCMessage> messages = new ArrayList<>();
-        messages.add(newRPCMessage("Check connection from master to remote replica '" + host + "':"));
-        messages.add(newRPCMessage("   Directory Service: Unsecure port (389): OK"));
-        messages.add(newRPCMessage("   Directory Service: Secure port (636): OK"));
-        messages.add(newRPCMessage("   Directory Service: Secure port (636): OK"));
-        messages.add(newRPCMessage("   Kerberos KDC: TCP (88): OK"));
-        messages.add(newRPCMessage("Failed to connect to port 88 udp on 10.1.1.1"));
-        messages.add(newRPCMessage("   Kerberos KDC: UDP (88): WARNING"));
-        messages.add(newRPCMessage("   Kerberos Kpasswd: TCP (464): OK"));
-        messages.add(newRPCMessage("Failed to connect to port 464 udp on 10.1.1.1"));
-        messages.add(newRPCMessage("   Kerberos Kpasswd: UDP (464): WARNING"));
-        messages.add(newRPCMessage("   HTTP Server: Unsecure port (80): OK"));
-        messages.add(newRPCMessage("   HTTP Server: Secure port (443): OK"));
-        messages.add(newRPCMessage("The following UDP ports could not be verified as open: 88, 464"));
-        messages.add(newRPCMessage("This can happen if they are already bound to an application"));
-        messages.add(newRPCMessage("and ipa-replica-conncheck cannot attach own UDP responder."));
-        messages.add(newRPCMessage("Connection from master to replica is OK."));
+        messages.add(newLegacyRPCMessage("Check connection from master to remote replica '" + host + "':"));
+        messages.add(newLegacyRPCMessage("   Directory Service: Unsecure port (389): OK"));
+        messages.add(newLegacyRPCMessage("   Directory Service: Secure port (636): OK"));
+        messages.add(newLegacyRPCMessage("   Directory Service: Secure port (636): OK"));
+        messages.add(newLegacyRPCMessage("   Kerberos KDC: TCP (88): OK"));
+        messages.add(newLegacyRPCMessage("Failed to connect to port 88 udp on 10.1.1.1"));
+        messages.add(newLegacyRPCMessage("   Kerberos KDC: UDP (88): WARNING"));
+        messages.add(newLegacyRPCMessage("   Kerberos Kpasswd: TCP (464): OK"));
+        messages.add(newLegacyRPCMessage("Failed to connect to port 464 udp on 10.1.1.1"));
+        messages.add(newLegacyRPCMessage("   Kerberos Kpasswd: UDP (464): WARNING"));
+        messages.add(newLegacyRPCMessage("   HTTP Server: Unsecure port (80): OK"));
+        messages.add(newLegacyRPCMessage("   HTTP Server: Secure port (443): OK"));
+        messages.add(newLegacyRPCMessage("The following UDP ports could not be verified as open: 88, 464"));
+        messages.add(newLegacyRPCMessage("This can happen if they are already bound to an application"));
+        messages.add(newLegacyRPCMessage("and ipa-replica-conncheck cannot attach own UDP responder."));
+        messages.add(newLegacyRPCMessage("Connection from master to replica is OK."));
         return messages;
     }
 
-    private RPCResponse<Boolean> getGoodPayload(String host) {
+    private RPCResponse<Boolean> getLegacyGoodPayload(String host) {
         RPCResponse<Boolean> goodResponse;
         goodResponse = new RPCResponse<>();
         goodResponse.setResult(Boolean.TRUE);
         goodResponse.setValue(host);
-        goodResponse.setMessages(getBaseMessages(host));
+        goodResponse.setMessages(getLegacyBaseMessages(host));
         return goodResponse;
     }
 
-    private RPCResponse<Boolean> getErrorPayload(String host) {
+    private RPCResponse<Boolean> getLegacyErrorPayload(String host) {
         RPCResponse<Boolean> errorResponse;
         errorResponse = new RPCResponse<>();
         errorResponse.setResult(Boolean.TRUE);
         errorResponse.setValue(host);
-        errorResponse.setMessages(getBaseMessages(host));
-        errorResponse.getMessages().add(newRPCMessage("Failed to connect to port 464 tcp on 10.1.1.1"));
-        errorResponse.getMessages().add(newRPCMessage("   Kerberos Kpasswd: TCP (464): FAILED"));
-        errorResponse.getMessages().add(newRPCMessage("Failed to connect to port 636 tcp on 10.1.1.1"));
-        errorResponse.getMessages().add(newRPCMessage("   Directory Service: Secure port (636): OK"));
+        errorResponse.setMessages(getLegacyBaseMessages(host));
+        errorResponse.getMessages().add(newLegacyRPCMessage("Failed to connect to port 464 tcp on 10.1.1.1"));
+        errorResponse.getMessages().add(newLegacyRPCMessage("   Kerberos Kpasswd: TCP (464): FAILED"));
+        errorResponse.getMessages().add(newLegacyRPCMessage("Failed to connect to port 636 tcp on 10.1.1.1"));
+        errorResponse.getMessages().add(newLegacyRPCMessage("   Directory Service: Secure port (636): OK"));
         return errorResponse;
     }
 
-    private RPCMessage newRPCMessage(String message) {
+    private RPCMessage newLegacyRPCMessage(String message) {
         RPCMessage msg = new RPCMessage();
         msg.setMessage(message);
         msg.setName("ExternalCommandOutput");
         return msg;
+    }
+
+    private RPCResponse<CheckResult> getGoodPayload(String host) {
+        CheckResult checkResult = new CheckResult();
+        checkResult.setHost(host);
+        RPCResponse<CheckResult> goodResponse;
+        goodResponse = new RPCResponse<>();
+        goodResponse.setResult(checkResult);
+        RPCMessage message = new RPCMessage();
+        message.setCode(200);
+        message.setMessage("success");
+        goodResponse.setMessages(List.of(message));
+        return goodResponse;
+    }
+
+    private RPCResponse<CheckResult> getErrorPayload(String host) {
+        CheckResult checkResult = new CheckResult();
+        checkResult.setHost(host);
+        RPCResponse<CheckResult> badResponse;
+        badResponse = new RPCResponse<>();
+        badResponse.setResult(checkResult);
+        RPCMessage message = new RPCMessage();
+        message.setCode(503);
+        message.setMessage("failure");
+        badResponse.setMessages(List.of(message));
+        return badResponse;
     }
 
     private Stack getGoodStack() {
@@ -160,12 +196,13 @@ public class FreeIpaHealthServiceTest {
     }
 
     @Test
-    public void testHealthySingleNode() throws Exception {
+    public void testLegacyHealthySingleNode() throws Exception {
         FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any(), any())).thenReturn(mockIpaClient);
-        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getGoodPayload(HOST1));
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyGoodPayload(HOST1));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.AVAILABLE, response.getStatus());
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
@@ -176,12 +213,13 @@ public class FreeIpaHealthServiceTest {
     }
 
     @Test
-    public void testUnhealthySingleNode() throws Exception {
+    public void testLegacyUnhealthySingleNode() throws Exception {
         FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any(), any())).thenReturn(mockIpaClient);
-        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getErrorPayload(HOST1));
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyErrorPayload(HOST1));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
@@ -192,11 +230,12 @@ public class FreeIpaHealthServiceTest {
     }
 
     @Test
-    public void testUnresponsiveSingleNode() throws Exception {
+    public void testLegacyUnresponsiveSingleNode() throws Exception {
         FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
@@ -210,12 +249,13 @@ public class FreeIpaHealthServiceTest {
     }
 
     @Test
-    public void testUnresponsiveSecondaryNode() throws Exception {
+    public void testLegacyUnresponsiveSecondaryNode() throws Exception {
         FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStackTwoInstances());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStack(any(), any())).thenReturn(mockIpaClient);
-        Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST1))).thenReturn(getGoodPayload(HOST1));
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST1))).thenReturn(getLegacyGoodPayload(HOST1));
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST2))).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.AVAILABLE, response.getStatus());
@@ -230,4 +270,69 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         Assert.assertTrue(response.getNodeHealthDetails().stream().findFirst().get().getStatus() == InstanceStatus.TERMINATED);
     }
+
+    @Test
+    public void testHealthySingleNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getGoodPayload(HOST1));
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+        Assert.assertEquals(Status.AVAILABLE, response.getStatus());
+        Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
+        for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
+            Assert.assertTrue(nodeHealth.getIssues().isEmpty());
+            Assert.assertEquals(InstanceStatus.CREATED, nodeHealth.getStatus());
+        }
+    }
+
+    @Test
+    public void testUnhealthySingleNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayload(HOST1));
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
+        Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
+        for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
+            Assert.assertFalse(nodeHealth.getIssues().isEmpty());
+            Assert.assertEquals(InstanceStatus.FAILED, nodeHealth.getStatus());
+        }
+    }
+
+    @Test
+    public void testUnresponsiveSingleNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenThrow(ipaClientException);
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
+        Assert.assertTrue(response.getNodeHealthDetails().size() == 1);
+        for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
+            Assert.assertTrue(!nodeHealth.getIssues().isEmpty());
+            Assert.assertEquals(InstanceStatus.UNREACHABLE, nodeHealth.getStatus());
+            Assert.assertTrue(nodeHealth.getIssues().size() == 1);
+            Assert.assertTrue(nodeHealth.getIssues().get(0).equals("failure"));
+        }
+    }
+
+    @Test
+    public void testUnresponsiveSecondaryNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient1 = Mockito.mock(FreeIpaHealthCheckClient.class);
+        FreeIpaHealthCheckClient mockIpaHealthClient2 = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStackTwoInstances());
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient1).thenReturn(mockIpaHealthClient2);
+        Mockito.when(mockIpaHealthClient1.nodeHealth()).thenReturn(getGoodPayload(HOST1));
+        Mockito.when(mockIpaHealthClient2.nodeHealth()).thenReturn(getErrorPayload(HOST2));
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+        Assert.assertEquals(Status.AVAILABLE, response.getStatus());
+        Assert.assertTrue(response.getNodeHealthDetails().size() == 2);
+    }
+
 }

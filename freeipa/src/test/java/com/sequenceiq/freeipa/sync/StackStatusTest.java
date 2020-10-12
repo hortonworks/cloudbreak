@@ -36,7 +36,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -63,7 +63,7 @@ class StackStatusTest {
     private FlowLogService flowLogService;
 
     @MockBean
-    private FreeIpaClientFactory freeIpaClientFactory;
+    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
 
     @MockBean
     private StackInstanceProviderChecker stackInstanceProviderChecker;
@@ -114,7 +114,8 @@ class StackStatusTest {
         notTerminatedInstances = instances;
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(notTerminatedInstances);
 
-        setUpFreeIpaClient();
+        rpcResponse = new RPCResponse<>();
+        when(freeIpaHealthDetailsService.checkFreeIpaHealth(eq(stack), any())).thenReturn(rpcResponse);
     }
 
     private InstanceMetaData createInstance(String instanceName) {
@@ -123,15 +124,6 @@ class StackStatusTest {
         instanceMetaData.setInstanceId(instanceName);
         instanceMetaData.setDiscoveryFQDN(instanceName);
         return instanceMetaData;
-    }
-
-    private void setUpFreeIpaClient() throws Exception {
-        when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, INSTANCE_1)).thenReturn(freeIpaClient);
-        String freeIpaClientHostname = "freeIpaClientHostname";
-        when(freeIpaClient.getHostname()).thenReturn(freeIpaClientHostname);
-
-        rpcResponse = new RPCResponse<>();
-        when(freeIpaClient.serverConnCheck(freeIpaClientHostname, INSTANCE_1)).thenReturn(rpcResponse);
     }
 
     @Test

@@ -100,6 +100,9 @@ freeipa:
     poller:
       timeoutMs: 4000
       sleepIntervalMs: 400
+  healthcheck:
+    connectionTimeoutMs: 5000
+    readTimeoutMs: 5000
 
 info:
   app:

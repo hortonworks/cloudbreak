@@ -8,6 +8,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,15 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFre
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
+import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClientFactory;
+import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
 import com.sequenceiq.freeipa.client.model.RPCMessage;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
 @Service
 public class FreeIpaHealthDetailsService {
@@ -51,6 +56,12 @@ public class FreeIpaHealthDetailsService {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private HealthCheckAvailabilityChecker healthCheckAvailabilityChecker;
+
+    @Inject
+    private FreeIpaHealthCheckClientFactory freeIpaHealthCheckClientFactory;
+
     public HealthDetailsFreeIpaResponse getHealthDetails(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
@@ -60,8 +71,13 @@ public class FreeIpaHealthDetailsService {
         for (InstanceMetaData instance: instances) {
             if (instance.isAvailable()) {
                 try {
-                    RPCResponse<Boolean> rpcResponse = checkFreeIpaHealth(stack,  instance);
-                    parseMessages(rpcResponse, response);
+                    if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
+                        RPCResponse<CheckResult> rpcResponse = freeIpaHealthCheck(stack, instance);
+                        parseMessages(rpcResponse, response, instance);
+                    } else {
+                        RPCResponse<Boolean> rpcResponse = legacyFreeIpaHealthCheck(stack, instance);
+                        legacyParseMessages(rpcResponse, response);
+                    }
                 } catch (FreeIpaClientException e) {
                     addUnreachableResponse(instance, response, e.getLocalizedMessage());
                     LOGGER.error(String.format("Unable to check the health of FreeIPA instance: %s", instance.getInstanceId()), e);
@@ -111,9 +127,43 @@ public class FreeIpaHealthDetailsService {
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getInstanceId));
     }
 
-    private RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack, instance.getDiscoveryFQDN());
+    public RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        RPCResponse<Boolean> result;
+        if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
+            result = toBooleanRpcResponse(freeIpaHealthCheck(stack, instance));
+        } else {
+            result = legacyFreeIpaHealthCheck(stack, instance);
+        }
+        return result;
+    }
+
+    private RPCResponse<CheckResult> freeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        try (FreeIpaHealthCheckClient client = freeIpaHealthCheckClientFactory.getClient(stack, instance)) {
+            return client.nodeHealth();
+        } catch (FreeIpaClientException e) {
+            throw e;
+        } catch (Exception e) {
+            LOGGER.error("FreeIPA health check failed", e);
+            throw new FreeIpaClientException("FreeIPA health check failed", e);
+        }
+    }
+
+    private RPCResponse<Boolean> legacyFreeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, instance.getDiscoveryFQDN());
         return freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), instance.getDiscoveryFQDN());
+    }
+
+    private RPCResponse<Boolean> toBooleanRpcResponse(RPCResponse<CheckResult> nodeHealth) {
+        RPCResponse<Boolean> response = new RPCResponse<>();
+        response.setSummary(nodeHealth.getSummary());
+        response.setResult(isHealthCheckPassing(nodeHealth));
+        response.setCount(nodeHealth.getCount());
+        response.setTruncated(nodeHealth.getTruncated());
+        response.setMessages(nodeHealth.getMessages());
+        response.setCompleted(nodeHealth.getCompleted());
+        response.setFailed(nodeHealth.getFailed());
+        response.setValue(nodeHealth.getValue());
+        return response;
     }
 
     private boolean isOverallHealthy(HealthDetailsFreeIpaResponse response) {
@@ -125,7 +175,20 @@ public class FreeIpaHealthDetailsService {
         return false;
     }
 
-    private void parseMessages(RPCResponse<Boolean> rpcResponse, HealthDetailsFreeIpaResponse response) {
+    private void parseMessages(RPCResponse<CheckResult> rpcResponse, HealthDetailsFreeIpaResponse response, InstanceMetaData instanceMetaData) {
+        NodeHealthDetails nodeResponse = new NodeHealthDetails();
+        nodeResponse.setName(instanceMetaData.getDiscoveryFQDN());
+        nodeResponse.setInstanceId(instanceMetaData.getInstanceId());
+        if (isHealthCheckPassing(rpcResponse)) {
+            nodeResponse.setStatus(InstanceStatus.CREATED);
+        } else {
+            nodeResponse.setStatus(InstanceStatus.FAILED);
+            nodeResponse.setIssues(rpcResponse.getMessages().stream().map(RPCMessage::getMessage).collect(Collectors.toList()));
+        }
+        response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
+    }
+
+    private void legacyParseMessages(RPCResponse<Boolean> rpcResponse, HealthDetailsFreeIpaResponse response) {
         String precedingMessage = MESSAGE_UNAVAILABLE;
         NodeHealthDetails nodeResponse = null;
         for (RPCMessage message : rpcResponse.getMessages()) {
@@ -153,5 +216,15 @@ public class FreeIpaHealthDetailsService {
                 }
             }
         }
+    }
+
+    private boolean isHealthCheckPassing(RPCResponse<CheckResult> rpcResponse) {
+        return rpcResponse.getMessages().stream()
+                .map(RPCMessage::getCode)
+                .filter(Objects::nonNull)
+                .map(Response.Status.Family::familyOf)
+                .map(f -> f.equals(Response.Status.Family.SUCCESSFUL))
+                .reduce(Boolean::logicalAnd)
+                .orElse(Boolean.FALSE);
     }
 }

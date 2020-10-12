@@ -26,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.ServerConnCheckFreeipaRpcResponse;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -71,6 +70,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
             then = "should be stopped first and started after it and validate the flow events")
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         setUpFreeIpaRouteStubbing(testContext);
+        setUpFreeIpaHealthCheckRouteStubbing(testContext);
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
@@ -105,8 +105,8 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 // await stopped datalake
                 .given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.STOPPED);
-        // mock stopped freeipa server_conncheck response
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", ServerConnCheckFreeipaRpcResponse.unreachable());
+        // mock stopped freeipa health check response
+        getFreeIpaHealthCheckHandler().setUnreachable();
         testContext
                 // await stopped freeipa
                 .given(FreeIpaTestDto.class)
@@ -114,8 +114,8 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 // await stopped env
                 .given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
-        // mock started freeipa server_conncheck response
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
+        // mock started freeipa health check response
+        getFreeIpaHealthCheckHandler().setHealthy();
         testContext.given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 // await started freeipa
@@ -143,6 +143,6 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
                 .then(environmentListStructuredEventAssertions::checkStartEvents)
                 .then(environmentListStructuredEventAssertions::checkDeleteEvents)
                 .validate();
-        getFreeIpaRouteHandler().updateResponse("server_conncheck", new ServerConnCheckFreeipaRpcResponse());
+        getFreeIpaHealthCheckHandler().setHealthy();
     }
 }

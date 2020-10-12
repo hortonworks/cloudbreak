@@ -23,6 +23,8 @@ public abstract class ITResponse implements Route {
 
     public static final String FREEIPA_ROOT = "/ipa";
 
+    public static final String FREEIPA_HEALTH_CHECK_ROOT = "/freeipahealthcheck";
+
     public static final String IMAGE_CATALOG = "/imagecatalog";
 
     public static final String FREEIPA_IMAGE_CATALOG = "/freeipaimagecatalog";
