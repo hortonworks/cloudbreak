@@ -54,6 +54,39 @@ class AllHostPublicDnsEntryServiceTest {
         Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
     }
 
+    @Test
+    void getComponentLocationWhenPrimaryGatewayDoesNotExist() {
+        Stack stack = new Stack();
+
+        Map<String, List<String>> result = underTest.getComponentLocation(stack);
+
+        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as primary gateway does not exist");
+    }
+
+    @Test
+    void getComponentLocationWhenNodesDoesNotHaveDiscoveryFQDN() {
+        Stack stack = TestUtil.stack();
+        stack.getNotTerminatedInstanceMetaDataList()
+                .forEach(im -> im.setDiscoveryFQDN(null));
+
+        Map<String, List<String>> result = underTest.getComponentLocation(stack);
+
+        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN");
+    }
+
+    @Test
+    void getComponentLocationWhenTheGatewayNodeHaveOnlyDiscoveryFQDN() {
+        Stack stack = TestUtil.stack();
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        stack.getNotTerminatedInstanceMetaDataList().stream()
+                .filter(im -> !primaryGatewayInstance.getId().equals(im.getId()))
+                .forEach(im -> im.setDiscoveryFQDN(null));
+
+        Map<String, List<String>> result = underTest.getComponentLocation(stack);
+
+        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN except gateway");
+    }
+
     private boolean resultContainsInstanceMetadata(InstanceMetaData primaryGatewayInstance, Map<String, List<String>> result) {
         return result
                 .values()
