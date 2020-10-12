@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
@@ -64,11 +66,13 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
@@ -947,6 +951,36 @@ SaltOrchestrator implements HostOrchestrator {
     public void restoreDatabase(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
                                 ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
         callBackupRestore(primaryGateway, target, allNodes, saltConfig, exitModel, DATABASE_RESTORE);
+    }
+
+    @Override
+    public void runOrchestratorState(OrchestratorStateParams stateParams) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(stateParams.getPrimaryGatewayConfig())) {
+            StateRunner stateRunner = createStateRunner(stateParams);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
+            Optional<OrchestratorStateRetryParams> stateRetryParams = stateParams.getStateRetryParams();
+            Callable<Boolean> saltJobRunBootstrapRunner = stateRetryParams.isPresent() ?
+                saltRunner.runner(saltJobIdTracker, exitCriteria, stateParams.getExitCriteriaModel(), stateRetryParams.get()) :
+                saltRunner.runner(saltJobIdTracker, exitCriteria, stateParams.getExitCriteriaModel());
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.error(stateParams.getErrorMessage(), e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    private StateRunner createStateRunner(OrchestratorStateParams stateParams) {
+        if (stateParams.isParameterized()) {
+            if (stateParams.isConcurrent()) {
+                return new ConcurrentParameterizedStateRunner(stateParams.getTargetHostNames(), stateParams.getAllNodes(), stateParams.getState(),
+                        stateParams.getStateParams());
+            } else {
+                return new ParameterizedStateRunner(stateParams.getTargetHostNames(), stateParams.getAllNodes(), stateParams.getState(),
+                        stateParams.getStateParams());
+            }
+        } else {
+            return new StateRunner(stateParams.getTargetHostNames(), stateParams.getAllNodes(), stateParams.getState());
+        }
     }
 
     private void callBackupRestore(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,

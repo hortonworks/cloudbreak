@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -40,5 +41,11 @@ public class SaltRunner {
 
     public Callable<Boolean> runnerWithUsingErrorCount(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
         return runner(bootstrap, exitCriteria, exitCriteriaModel, maxRetry, true);
+    }
+
+    public Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel,
+            OrchestratorStateRetryParams orchestratorStateRetryParams) {
+        return runner(bootstrap, exitCriteria, exitCriteriaModel, orchestratorStateRetryParams.getMaxRetry(),
+                orchestratorStateRetryParams.getMaxRetryOnError());
     }
 }

@@ -105,4 +105,5 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void uploadGatewayPillar(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel, SaltConfig saltConfig)
             throws CloudbreakOrchestratorFailedException;
 
+    void runOrchestratorState(OrchestratorStateParams stateParameters) throws CloudbreakOrchestratorFailedException;
 }

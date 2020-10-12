@@ -85,6 +85,11 @@ public class CMRepositoryVersionUtil {
         return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_3);
     }
 
+    public static boolean isRootSshAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepo is compared for Host certs rotation root ssh access");
+        return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_1);
+    }
+
     public static boolean isVersionNewerOrEqualThanLimited(Versioned currentVersion, Versioned limitedAPIVersion) {
         LOGGER.info("Compared: Versioned {} with Versioned {}", currentVersion.getVersion(), limitedAPIVersion.getVersion());
         Comparator<Versioned> versionComparator = new VersionComparator();

@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -37,9 +38,9 @@ public class ClusterCertificatesRotationActions {
 
     @Bean(name = "CLUSTER_CMCA_ROTATION_STATE")
     public Action<?, ?> clusterCMCARotationAction() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new AbstractStackCreationAction<>(ClusterCertificatesRotationTriggerEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterCertificatesRotationTriggerEvent payload, Map<Object, Object> variables) {
                 clusterCertificatesRotationService.initClusterCertificatesRotation(payload.getResourceId());
                 sendEvent(context);
             }
