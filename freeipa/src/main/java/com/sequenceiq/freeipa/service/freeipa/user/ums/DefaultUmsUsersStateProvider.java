@@ -36,7 +36,10 @@ import io.grpc.StatusRuntimeException;
 @Component
 public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     @VisibleForTesting
-    static final boolean INCLUDE_INTERNAL_MACHINE_USERS = true;
+    static final boolean DONT_INCLUDE_INTERNAL_MACHINE_USERS = false;
+
+    @VisibleForTesting
+    static final boolean INCLUDE_WORKLOAD_MACHINE_USERS = true;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUmsUsersStateProvider.class);
 
@@ -168,10 +171,12 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
             return grpcUmsClient.listAllMachineUsers(actorCrn, accountId,
-                    INCLUDE_INTERNAL_MACHINE_USERS, requestIdOptional);
+                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
+                    requestIdOptional);
         } else if (!machineUserCrns.isEmpty()) {
             return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns),
-                    INCLUDE_INTERNAL_MACHINE_USERS, requestIdOptional);
+                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
+                    requestIdOptional);
         } else {
             return List.of();
         }
