@@ -1,10 +1,14 @@
 package com.sequenceiq.datalake.cm;
 
-import com.cloudera.api.swagger.client.ApiClient;
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
+import com.cloudera.api.swagger.client.ApiClient;
+import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 
 // TODO Use ClouderaManagerApiClientProvider in client-cm instad of relying on this class
 @Component
@@ -19,12 +23,16 @@ public class ClouderaManagerProxiedClientFactory {
     @Value("${clusterProxy.url:}")
     private String clusterProxyUrl;
 
+    @Inject
+    private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
+
     private String getClusterProxyCloderaManagerBasePath(String clusterCrn) {
         return String.format("%s/proxy/%s/cloudera-manager/api/%s", clusterProxyUrl, clusterCrn, API_VERSION_31);
     }
 
     public ApiClient getProxiedClouderaManagerClient(String clouderaManagerStackCrn) {
         ApiClient apiClient = new ApiClient();
+        apiClient.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
         apiClient.setBasePath(getClusterProxyCloderaManagerBasePath(clouderaManagerStackCrn));
         apiClient.setConnectTimeout(CM_READ_TIMEOUT_MS);
         apiClient.getHttpClient().setReadTimeout(CM_CONNECT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
