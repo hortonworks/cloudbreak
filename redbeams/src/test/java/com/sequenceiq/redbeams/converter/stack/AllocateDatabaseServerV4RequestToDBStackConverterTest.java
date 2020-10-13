@@ -51,12 +51,16 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSSlCertificateConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.service.AccountTagService;
@@ -153,6 +157,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Mock
     private DistroXV1Endpoint distroXV1Endpoint;
 
+    @Mock
+    private DatabaseServerSSlCertificateConfig databaseServerSSlCertificateConfig;
+
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
 
@@ -169,6 +176,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         initMocks(this);
         ReflectionTestUtils.setField(underTest, "version", VERSION);
         ReflectionTestUtils.setField(underTest, "dbServiceSupportedPlatforms", Set.of("AWS", "AZURE"));
+        ReflectionTestUtils.setField(underTest, "sslEnabled", true);
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
@@ -185,6 +193,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(databaseServerSSlCertificateConfig.getCertsByPlatform(any())).thenReturn(Set.of("super-cert"));
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
         when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder()
@@ -239,7 +248,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
+        assertEquals(dbStack.getSslConfig().getSslCertificates(), Set.of("super-cert"));
+        assertEquals(dbStack.getSslConfig().getSslCertificateType(), SslCertificateType.CLOUD_PROVIDER_OWNED);
 
+        verify(databaseServerSSlCertificateConfig).getCertsByPlatform(any());
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator).get(networkRequest);
         verify(subnetListerService, never()).listSubnets(any(), any());
@@ -305,7 +317,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), hasSize(1));
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
+        assertEquals(dbStack.getSslConfig().getSslCertificates(), Set.of("super-cert"));
+        assertEquals(dbStack.getSslConfig().getSslCertificateType(), SslCertificateType.CLOUD_PROVIDER_OWNED);
 
+        verify(databaseServerSSlCertificateConfig).getCertsByPlatform(any());
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetListerService).listSubnets(any(), any());
@@ -359,6 +374,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
             allocateRequest.setNetwork(null);
             allocateRequest.getDatabaseServer().setSecurityGroup(null);
         }
+        SslConfigurationV4Request sslConfigurationV4Request = new SslConfigurationV4Request();
+        sslConfigurationV4Request.setSslMode(SslMode.ENABLED);
+        allocateRequest.setSslConfiguration(sslConfigurationV4Request);
 
         databaseServerRequest.setInstanceType("db.m3.medium");
         databaseServerRequest.setDatabaseVendor("postgres");
