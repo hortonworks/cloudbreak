@@ -33,7 +33,7 @@ public class ClusterNodeNameGenerator {
                         instantGroup -> new AtomicLong(0L));
             do {
                 generatedHostName = hostDiscoveryService.calculateHostname(stack.getCustomHostname(), im.getShortHostname(),
-                        im.getInstanceGroupName(), hostGroupNodeIndex.getAndIncrement(), stack.isHostgroupNameAsHostname());
+                        im.getInstanceGroupName(), hostGroupNodeIndex.getAndIncrement());
             } while (clusterNodeNames.contains(generatedHostName));
 
             LOGGER.debug("Generated hostname {} for address: {}", generatedHostName, im.getPrivateIp());

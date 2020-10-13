@@ -249,7 +249,7 @@ public class ClusterBootstrapper {
 
     private Set<Node> collectNodesForBootstrap(Stack stack) {
         Set<Node> nodes = new HashSet<>();
-        String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
+        String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain());
 
         Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()

@@ -127,8 +127,7 @@ public class CloudConfigValidationActions {
                         cloudCredential,
                         stack.getParameters(),
                         stack.getCreator().getUserId(),
-                        stack.getWorkspace().getId(),
-                        validationBuilder);
+                        stack.getWorkspace().getId());
                 parametersValidator.waitResult(parametersValidationRequest, validationBuilder);
 
                 dataLakeValidator.validate(stack, validationBuilder);

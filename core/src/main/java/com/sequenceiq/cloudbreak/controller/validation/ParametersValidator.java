@@ -29,7 +29,7 @@ public class ParametersValidator {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     public ParametersValidationRequest validate(String platform, CloudCredential cloudCredential, Map<String, String> parameters, String userId,
-            Long workspaceId, ValidationResult.ValidationResultBuilder validationBuilder) {
+            Long workspaceId) {
         if (parameters == null || parameters.isEmpty()) {
             return null;
         }

@@ -126,7 +126,7 @@ public class SaltOrchestratorTest {
 
         saltConnector = mock(SaltConnector.class);
         whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
-        when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
+        when(hostDiscoveryService.determineDomain("test")).thenReturn(".example.com");
         Callable<Boolean> callable = mock(Callable.class);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))

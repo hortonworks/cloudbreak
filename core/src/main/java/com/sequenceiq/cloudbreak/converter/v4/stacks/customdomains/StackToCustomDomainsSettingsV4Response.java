@@ -13,8 +13,6 @@ public class StackToCustomDomainsSettingsV4Response extends AbstractConversionSe
         CustomDomainSettingsV4Response response = new CustomDomainSettingsV4Response();
         response.setDomainName(source.getCustomDomain());
         response.setHostname(source.getCustomHostname());
-        response.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
-        response.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
         return response;
     }
 }

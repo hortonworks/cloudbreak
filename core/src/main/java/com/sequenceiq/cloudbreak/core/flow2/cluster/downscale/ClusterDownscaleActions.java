@@ -74,7 +74,7 @@ public class ClusterDownscaleActions {
                 Selectable event;
                 DecommissionRequest decommissionRequest =
                         new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(), payload.getRequest().getDetails());
-                if (repair && stack.hasCustomHostname()) {
+                if (repair) {
                     event = new DecommissionResult(decommissionRequest, getHostNamesForPrivateIds(payload.getPrivateIds(), stack));
                 } else {
                     event = decommissionRequest;

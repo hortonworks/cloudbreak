@@ -42,8 +42,6 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -100,15 +98,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = TunnelConverter.class)
     private Tunnel tunnel = Tunnel.DIRECT;
 
-    private int consulServers;
-
     private String customDomain;
 
     private String customHostname;
-
-    private boolean hostgroupNameAsHostname;
-
-    private boolean clusterNameAsSubdomain;
 
     private String displayName;
 
@@ -117,6 +109,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
+    /*
+     * Don't use, since it will highly increase your returned result set size
+     */
+    @Deprecated
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
     @Column(name = "value", columnDefinition = "TEXT", length = 100000)
@@ -306,14 +302,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.resources.clear();
         Optional.ofNullable(resources).ifPresent(this.resources::addAll);
         return this;
-    }
-
-    public int getConsulServers() {
-        return consulServers;
-    }
-
-    public void setConsulServers(int consulServers) {
-        this.consulServers = consulServers;
     }
 
     public OnFailureAction getOnFailureActionAction() {
@@ -549,10 +537,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return START_FAILED.equals(getStatus());
     }
 
+    @Deprecated
     public Map<String, String> getParameters() {
         return parameters;
     }
 
+    @Deprecated
     public void setParameters(Map<String, String> parameters) {
         this.parameters = parameters;
     }
@@ -706,22 +696,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.customHostname = customHostname;
     }
 
-    public boolean isHostgroupNameAsHostname() {
-        return hostgroupNameAsHostname;
-    }
-
-    public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
-        this.hostgroupNameAsHostname = hostgroupNameAsHostname;
-    }
-
-    public boolean isClusterNameAsSubdomain() {
-        return clusterNameAsSubdomain;
-    }
-
-    public void setClusterNameAsSubdomain(boolean clusterNameAsSubdomain) {
-        this.clusterNameAsSubdomain = clusterNameAsSubdomain;
-    }
-
     public StackAuthentication getStackAuthentication() {
         return stackAuthentication;
     }
@@ -776,10 +750,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isDatalake() {
         return type == StackType.DATALAKE;
-    }
-
-    public boolean hasCustomHostname() {
-        return !StringUtils.isEmpty(customHostname) || hostgroupNameAsHostname;
     }
 
     public boolean isClusterProxyRegistered() {
