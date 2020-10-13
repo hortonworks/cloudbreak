@@ -1,9 +1,11 @@
 package com.sequenceiq.freeipa.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
@@ -31,6 +33,15 @@ public class AltusMachineUserService {
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
+    public void cleanupMachineUser(String machineUserName, String accountId) {
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> altusIAMService.clearMachineUser(machineUserName,
+                        ThreadBasedUserCrnProvider.getUserCrn(),
+                        accountId
+                )
+        );
+    }
+
     public void cleanupMachineUser(Stack stack, Telemetry telemetry) {
         String machineUserName = getFluentMachineUser(stack);
         ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -40,7 +51,15 @@ public class AltusMachineUserService {
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
-    private String getFluentMachineUser(Stack stack) {
+    public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> altusIAMService.getAllMachineUsersForAccount(
+                        ThreadBasedUserCrnProvider.getUserCrn(),
+                        accountId)
+        );
+    }
+
+    public String getFluentMachineUser(Stack stack) {
         return String.format(FREEIPA_FLUENT_DATABUS_MACHINE_USER_PATTERN,
                 Crn.fromString(stack.getResourceCrn()).getResource());
     }
