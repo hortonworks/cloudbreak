@@ -1,5 +1,19 @@
 package com.sequenceiq.datalake.cm;
 
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.RoleCommandsResourceApi;
@@ -18,20 +32,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Joiner.MapJoiner;
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Iterables;
-
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class ClouderaManagerRangerUtil {

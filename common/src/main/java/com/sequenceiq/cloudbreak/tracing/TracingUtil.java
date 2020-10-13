@@ -20,6 +20,8 @@ public class TracingUtil {
 
     public static final String MESSAGE = "message";
 
+    public static final String URL = "url";
+
     private TracingUtil() {
     }
 
