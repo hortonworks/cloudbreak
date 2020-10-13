@@ -50,6 +50,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
     @ApiModelProperty(DatabaseServer.STATUS_REASON)
     private String statusReason;
 
+    @ApiModelProperty(DatabaseServer.SSL_CONFIG)
+    private SslConfigV4Response sslConfig;
+
     public Long getId() {
         return id;
     }
@@ -130,6 +133,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
         this.statusReason = statusReason;
     }
 
+    public SslConfigV4Response getSslConfig() {
+        return sslConfig;
+    }
+
+    public void setSslConfig(SslConfigV4Response sslConfig) {
+        this.sslConfig = sslConfig;
+    }
+
     @JsonIgnore
     @Override
     public String getResourceCrn() {
@@ -148,6 +159,7 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
                 .add("creationDate=" + creationDate)
                 .add("resourceStatus=" + resourceStatus)
                 .add("status=" + status)
+                .add("sslConfig=" + sslConfig)
                 .add("statusReason='" + statusReason + "'")
                 .toString();
     }
