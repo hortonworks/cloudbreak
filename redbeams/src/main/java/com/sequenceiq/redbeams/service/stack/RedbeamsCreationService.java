@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.service.stack;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -22,8 +24,6 @@ import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.provision.RedbeamsProvisionEvent;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
-
-import java.util.Optional;
 
 @Service
 public class RedbeamsCreationService {

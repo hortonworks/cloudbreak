@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.doc;
 public final class ModelDescriptions {
 
     public static final String ALLOCATE_DATABASE_SERVER_REQUEST = "Request for allocating a new database server in a provider";
+    public static final String SSL_CONFIGURATION_REQUEST = "Request for SSL configuration";
     public static final String CREATE_DATABASE_REQUEST = "Request for creating a new database on a registered database server";
     public static final String CREATE_DATABASE_RESPONSE = "Response for creating a new database on a registered database server";
     public static final String DATABASE_IDENTIFIERS = "Identifiers that together identify a database in an environment";
@@ -13,6 +14,7 @@ public final class ModelDescriptions {
     public static final String DATABASE_SERVER_RESPONSE = "Response containing information about a database server that was acted upon, e.g., retrieved, "
         + "deleted, listed";
     public static final String DATABASE_SERVER_RESPONSES = "A set of multiple database server responses";
+    public static final String SSL_CONFIG_RESPONSE = "SSL Config response";
     public static final String DATABASE_SERVER_STATUS_RESPONSE = "Response containing status information about a database server";
     public static final String DATABASE_SERVER_TEST_REQUEST = "Request for testing connectivity to a database server";
     public static final String DATABASE_SERVER_TEST_RESPONSE = "Response for testing connectivity to a database server";
@@ -61,6 +63,9 @@ public final class ModelDescriptions {
         public static final String RESOURCE_STATUS = "Ownership status of the database server";
         public static final String STATUS = "Status of the database server stack";
         public static final String STATUS_REASON = "Additional status information about the database server stack";
+        public static final String SSL_CERTIFICATES = "SSL certificate for the actual database server";
+        public static final String SSL_CERTIFICATE_TYPE = "SSL certificate type";
+        public static final String SSL_CONFIG = "SSL config";
     }
 
     public static class DatabaseServerTest {
@@ -75,6 +80,7 @@ public final class ModelDescriptions {
         public static final String DATABASE_SERVER = "Database server information for the database stack";
         public static final String AWS_PARAMETERS = "AWS-specific parameters for the database stack";
         public static final String AZURE_PARAMETERS = "Azure-specific parameters for the database stack";
+        public static final String SSL_CONFIGURATION = "SSL configuration for the database stack";
     }
 
     public static class NetworkModelDescriptions {
