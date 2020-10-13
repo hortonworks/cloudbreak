@@ -106,6 +106,18 @@
               {
                 "name": "role_config_suppression_ranger_admin_max_heap_size",
                 "value": "true"
+              },
+              {
+                "name": "ranger.audit.solr.no.replica",
+                "value": "2"
+              },
+              {
+                "name": "ranger.audit.solr.no.shards",
+                "value": "1"
+              },
+              {
+                "name": "ranger.audit.solr.max.shards.per.node",
+                "value": "2"
               }
             ]
           }
@@ -151,6 +163,14 @@
               {
                 "name": "atlas_authentication_method_file",
                 "value": "false"
+              },
+              {
+                "name": "atlas_solr_shards",
+                "value": "2"
+              },
+              {
+                "name": "atlas_solr_replication_factor",
+                "value": "2"
               }
             ],
             "refName": "atlas-ATLAS_SERVER-BASE",
