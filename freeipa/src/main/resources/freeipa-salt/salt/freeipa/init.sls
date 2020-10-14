@@ -51,3 +51,11 @@ net.ipv6.conf.lo.disable_ipv6:
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/update_cnames.sh
+
+/opt/salt/scripts/repair.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/repair.sh
