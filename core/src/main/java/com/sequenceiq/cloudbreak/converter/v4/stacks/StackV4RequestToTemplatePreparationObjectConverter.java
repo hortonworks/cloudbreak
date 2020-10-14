@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -42,8 +43,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -67,6 +66,7 @@ import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
+import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
@@ -77,8 +77,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 @Component
 public class StackV4RequestToTemplatePreparationObjectConverter extends AbstractConversionServiceAwareConverter<StackV4Request, TemplatePreparationObject> {
 
-    @Inject
-    private LdapConfigService ldapConfigService;
+    private static final int SERVER_PORT = 636;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -106,9 +105,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private EnvironmentClientService environmentClientService;
-
-    @Inject
-    private KerberosConfigService kerberosConfigService;
 
     @Inject
     private BlueprintViewProvider blueprintViewProvider;
@@ -145,7 +141,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
             Credential credential = getCredential(source, environment);
-            LdapView ldapConfig = getLdapConfig(source);
+            LdapView ldapConfig = getLdapConfig(source, environment);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
             Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
@@ -171,7 +167,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
                     .withGeneralClusterConfigs(generalClusterConfigs)
                     .withLdapConfig(ldapConfig)
                     .withCustomInputs(source.getInputs())
-                    .withKerberosConfig(getKerberosConfig(source))
+                    .withKerberosConfig(getKerberosConfig(source, environment))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
             decorateBuilderWithPlacement(source, builder);
@@ -222,12 +218,66 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
         return fileSystemConfigurationView;
     }
 
-    private LdapView getLdapConfig(StackV4Request source) {
-        return ldapConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
+    private LdapView getLdapConfig(StackV4Request source, DetailedEnvironmentResponse environment) {
+        return LdapView.LdapViewBuilder.aLdapView()
+                .withBindDn(String.format("uid=ldapbind-%s,cn=users,cn=accounts,dc=%s,dc=%s,dc=wl,dc=<account-name>,dc=site",
+                        source.getName(),
+                        environment.getName(),
+                        source.getName()))
+                .withBindPassword("dummy-password")
+                .withDirectoryType(DirectoryType.LDAP)
+                .withUserSearchBase(String.format("cn=users,cn=accounts,dc=%s,dc=%s,dc=wl,dc=<account-name>,dc=site",
+                        environment.getName(),
+                        source.getName()))
+                .withUserNameAttribute("uid")
+                .withUserObjectClass("posixAccount")
+                .withGroupSearchBase(String.format("cn=groups,cn=accounts,dc=%s,dc=%s,dc=wl,dc=<account-name>,dc=site",
+                        environment.getName(),
+                        source.getName()))
+                .withGroupMemberAttribute("cn")
+                .withGroupObjectClass("posixGroup")
+                .withGroupMemberAttribute("member")
+                .withDomain(String.format("%s.%s.<account-name>.site",
+                        environment.getName(),
+                        source.getName()))
+                .withProtocol("ldaps")
+                .withAdminGroup("")
+                .withUserGroup("ipausers")
+                .withUserDnPattern(String.format("uid={0},cn=users,cn=accounts,dc=%s,dc=%s,dc=wl,dc=<account-name>,dc=site",
+                        environment.getName(),
+                        source.getName()))
+                .withServerHost(String.format("ldap.%s.%s.wl.<account-name>.site",
+                        environment.getName(),
+                        source.getName()))
+                .withConnectionURL(String.format("ldaps://ldap.%s.%s.wl.<account-name>.site:636",
+                        environment.getName(),
+                        source.getName()))
+                .withServerPort(SERVER_PORT)
+                .withCertificate(null)
+                .build();
     }
 
-    private KerberosConfig getKerberosConfig(StackV4Request source) {
-        return kerberosConfigService.get(source.getEnvironmentCrn(), source.getName()).orElse(null);
+    private KerberosConfig getKerberosConfig(StackV4Request source, DetailedEnvironmentResponse environment) {
+        return KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
+                .withType(KerberosType.FREEIPA)
+                .withPassword("dummy-password")
+                .withUrl(String.format("kdc.%s.%s.wl.<account-name>.site",
+                        environment.getName(),
+                        source.getName()))
+                .withAdminUrl(String.format("kerberos.%s.%s.wl.<account-name>.site",
+                        environment.getName(),
+                        source.getName()))
+                .withRealm(String.format("%s.%s.WL.<ACCOUNT-NAME>.SITE",
+                        environment.getName().toUpperCase(),
+                        source.getName().toUpperCase()))
+                .withTcpAllowed(false)
+                .withPrincipal("kerberosbind-sdfsdfsf")
+                .withVerifyKdcTrust(true)
+                .withDomain(String.format("%s.%s.wl.<account-name>.site",
+                        environment.getName(),
+                        source.getName()))
+                .withNameServers("10.112.23.17")
+                .build();
     }
 
     private String getEnvironmentCrnForVirtualGroups(DetailedEnvironmentResponse environment) {

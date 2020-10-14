@@ -17,16 +17,19 @@ jar {
 }
 
 dependencies {
-  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger', version: cmClientVersion)
   compile project(':common')
+
+  compile group: 'com.cloudera.api.swagger',                name: 'cloudera-manager-api-swagger',             version: cmClientVersion
 
   testCompile (group: 'junit', name: 'junit', version: junitVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
+  testCompile (group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
-  testCompile        group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
+
+  testCompile group: 'org.hamcrest',                        name: 'java-hamcrest',                            version: hamcrestVersion
+  testCompile group: 'org.springframework.boot',            name: 'spring-boot-starter-test',                 version: springBootVersion
+  testCompile group: 'org.mockito',                         name: 'mockito-inline',                           version: mockitoVersion
 }
 

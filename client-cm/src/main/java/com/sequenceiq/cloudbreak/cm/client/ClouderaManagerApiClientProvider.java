@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm.client;
 
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
@@ -15,6 +16,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
+import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 
 @Component
 public class ClouderaManagerApiClientProvider {
@@ -38,8 +40,12 @@ public class ClouderaManagerApiClientProvider {
     @Value("${cb.cm.client.write.timeout.seconds}")
     private Integer writeTimeoutSeconds;
 
+    @Inject
+    private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
+
     public ApiClient getDefaultClient(Integer gatewayPort, HttpClientConfig clientConfig, String apiVersion) throws ClouderaManagerClientInitException {
         ApiClient client = getClouderaManagerClient(clientConfig, gatewayPort, "admin", "admin", apiVersion);
+        client.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
         if (clientConfig.isClusterProxyEnabled()) {
             client.addDefaultHeader("Proxy-Ignore-Auth", "true");
         }
@@ -103,7 +109,6 @@ public class ClouderaManagerApiClientProvider {
         cmClient.setUsername(userName);
         cmClient.setPassword(password);
         cmClient.setVerifyingSsl(true);
-
         try {
             if (isCmSslConfigValidClientConfigValid(clientConfig) && !clientConfig.isClusterProxyEnabled()) {
                 SSLContext sslContext = SSLContexts.custom()
@@ -113,6 +118,7 @@ public class ClouderaManagerApiClientProvider {
                 cmClient.getHttpClient().setSslSocketFactory(sslContext.getSocketFactory());
                 cmClient.getHttpClient().setHostnameVerifier(CertificateTrustManager.hostnameVerifier());
             }
+            cmClient.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
             cmClient.getHttpClient().setConnectTimeout(Long.valueOf(connectTimeoutSeconds), TimeUnit.SECONDS);
             cmClient.getHttpClient().setReadTimeout(Long.valueOf(readTimeoutSeconds), TimeUnit.SECONDS);
             cmClient.getHttpClient().setWriteTimeout(Long.valueOf(writeTimeoutSeconds), TimeUnit.SECONDS);
