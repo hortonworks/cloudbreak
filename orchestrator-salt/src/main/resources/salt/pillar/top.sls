@@ -16,6 +16,7 @@ base:
     - fluent
     - metering
     - mount.disk
+    - postgresql.root-certs
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound
