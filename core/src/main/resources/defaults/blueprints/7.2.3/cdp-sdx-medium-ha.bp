@@ -9,7 +9,7 @@
     "hostTemplates": [
       {
         "cardinality": 2,
-        "refName": "master",
+        "refName": "main",
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-JOURNALNODE-BASE",
@@ -27,17 +27,14 @@
         ]
       },
       {
-        "cardinality": 1,
+        "cardinality": 2,
         "refName": "gateway",
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-JOURNALNODE-BASE",
           "ranger-RANGER_ADMIN-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
-          "ranger-RANGER_TAGSYNC-BASE",
           "zookeeper-SERVER-BASE",
           "knox-KNOX_GATEWAY-BASE",
-          "atlas-ATLAS_SERVER-BASE",
           "hbase-REGIONSERVER-BASE",
           "hbase-MASTER-BASE",
           "solr-GATEWAY-BASE",
@@ -45,6 +42,16 @@
           "kafka-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hbase-GATEWAY-BASE"
+        ]
+      },
+      {
+        "cardinality": 1,
+        "refName": "auxiliary",
+        "roleConfigGroupsRefNames": [
+        "hdfs-JOURNALNODE-BASE",
+        "ranger-RANGER_USERSYNC-BASE",
+        "ranger-RANGER_TAGSYNC-BASE",
+        "atlas-ATLAS_SERVER-BASE"
         ]
       },
       {
