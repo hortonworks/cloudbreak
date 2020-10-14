@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.validation.network.azure;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT;
+import static com.sequenceiq.common.api.type.ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
@@ -52,7 +52,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
         Map<String, CloudSubnet> cloudNetworks = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
-        checkPrivateEndpointNetworkPolicies(networkDto, cloudNetworks, resultBuilder);
+        checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
         checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
     }
 
@@ -99,15 +99,23 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkPrivateEndpointNetworkPolicies(NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
-        if (ENABLED_PRIVATE_ENDPOINT.equals(networkDto.getServiceEndpointCreation())) {
-            if (cloudNetworks.values().stream().noneMatch(azureCloudSubnetParametersService::isPrivateEndpointNetworkPoliciesDisabled)) {
-                String errorMessage = String.format("It is not possible to create private endpoints: existing network with id '%s' in resource group '%s' " +
-                                "has no subnet with privateEndpointNetworkPolicies disabled.",
-                        networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName());
-                LOGGER.warn(errorMessage);
-                resultBuilder.error(errorMessage);
-            }
+    private void checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
+        if (!ENABLED_PRIVATE_ENDPOINT.equals(networkDto.getServiceEndpointCreation())) {
+            LOGGER.debug("No private endpoint network policies validation requested");
+            return;
+        }
+
+        if (StringUtils.isEmpty(networkDto.getNetworkId()) || StringUtils.isEmpty(networkDto.getAzure().getResourceGroupName())) {
+            LOGGER.debug("Using new network -- bypassing private endpoint network policies validation");
+            return;
+        }
+
+        if (cloudNetworks.values().stream().noneMatch(azureCloudSubnetParametersService::isPrivateEndpointNetworkPoliciesDisabled)) {
+            String errorMessage = String.format("It is not possible to create private endpoints: existing network with id '%s' in resource group '%s' " +
+                            "has no subnet with privateEndpointNetworkPolicies disabled.",
+                    networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName());
+            LOGGER.warn(errorMessage);
+            resultBuilder.error(errorMessage);
         }
     }
 

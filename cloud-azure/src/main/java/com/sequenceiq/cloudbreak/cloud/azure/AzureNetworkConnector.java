@@ -211,8 +211,8 @@ public class AzureNetworkConnector implements NetworkConnector {
     }
 
     @Override
-    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
-        return azureSubnetSelectorService.selectForPrivateEndpoint(subnetMetas);
+    public SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
+        return azureSubnetSelectorService.selectForPrivateEndpoint(subnetMetas, existingNetwork);
     }
 
     @Override

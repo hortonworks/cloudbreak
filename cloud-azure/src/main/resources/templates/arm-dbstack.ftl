@@ -202,7 +202,7 @@
             "type": "Microsoft.Network/privateEndpoints",
             "apiVersion": "2020-05-01",
             "name": "${privateEndpointName}",
-            "location": "westus",
+            "location": "[parameters('location')]",
             "dependsOn": [
                 "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
             ],

@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.model.EndpointType;
-import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 
 @Component
 public class ServiceEndpointCreationToEndpointTypeConverter {

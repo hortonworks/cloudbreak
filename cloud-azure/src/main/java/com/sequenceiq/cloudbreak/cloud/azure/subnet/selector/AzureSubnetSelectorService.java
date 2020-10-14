@@ -45,10 +45,15 @@ public class AzureSubnetSelectorService {
         return Optional.empty();
     }
 
-    public SubnetSelectionResult selectForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
-        List<CloudSubnet> suitableCloudSubnet = subnetMetas.stream()
-                .filter(sn -> azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(sn))
-                .collect(Collectors.toList());
+    public SubnetSelectionResult selectForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
+        List<CloudSubnet> suitableCloudSubnet;
+        if (existingNetwork) {
+            suitableCloudSubnet = subnetMetas.stream()
+                    .filter(sn -> azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(sn))
+                    .collect(Collectors.toList());
+        } else {
+            suitableCloudSubnet = new ArrayList<>(subnetMetas);
+        }
         return suitableCloudSubnet.isEmpty() ?
                 new SubnetSelectionResult("No suitable subnets found for placing a private endpoint") :
                 new SubnetSelectionResult(suitableCloudSubnet);

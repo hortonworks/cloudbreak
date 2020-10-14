@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.service.network;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -94,7 +95,7 @@ public class NetworkParameterAdderTest {
                 .build();
         CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
-        when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any())).thenReturn(List.of(subnetForPrivateEndpoint));
+        when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
         when(serviceEndpointCreationToEndpointTypeConverter.convert(any())).thenReturn(EndpointType.USE_PRIVATE_ENDPOINT);
 
         parameters = underTest.addParameters(parameters, environment, CloudPlatform.AZURE, dbStack);

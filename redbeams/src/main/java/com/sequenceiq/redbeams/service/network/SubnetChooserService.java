@@ -42,9 +42,9 @@ public class SubnetChooserService {
         return subnetSelectionResult.getResult();
     }
 
-    public List<CloudSubnet> chooseSubnetForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, DBStack dbStack) {
+    public List<CloudSubnet> chooseSubnetForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, DBStack dbStack, boolean existingNetwork) {
         NetworkConnector networkConnector = cloudPlatformConnectors.get(new CloudPlatformVariant(dbStack.getCloudPlatform(), dbStack.getPlatformVariant()))
                 .networkConnector();
-        return networkConnector.chooseSubnetsForPrivateEndpoint(subnetMetas).getResult();
+        return networkConnector.chooseSubnetsForPrivateEndpoint(subnetMetas, existingNetwork).getResult();
     }
 }

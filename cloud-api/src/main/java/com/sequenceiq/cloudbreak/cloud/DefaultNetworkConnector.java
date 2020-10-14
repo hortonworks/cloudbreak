@@ -41,7 +41,7 @@ public interface DefaultNetworkConnector extends NetworkConnector {
     }
 
     @Override
-    default SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas) {
+    default SubnetSelectionResult chooseSubnetsForPrivateEndpoint(Collection<CloudSubnet> subnetMetas, boolean existingNetwork) {
         return new SubnetSelectionResult(new ArrayList<>(subnetMetas));
     }
 

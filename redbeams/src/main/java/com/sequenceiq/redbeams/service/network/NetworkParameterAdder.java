@@ -97,7 +97,8 @@ public class NetworkParameterAdder {
 
     private String getAzureSubnetToUseWithPrivateEndpoint(DetailedEnvironmentResponse detailedEnvironmentResponse, DBStack dbStack) {
         String subscriptionId = subnetListerService.getAzureSubscriptionId(detailedEnvironmentResponse.getCrn());
-        return subnetChooserService.chooseSubnetForPrivateEndpoint(detailedEnvironmentResponse.getNetwork().getSubnetMetas().values(), dbStack).stream()
+        return subnetChooserService.chooseSubnetForPrivateEndpoint(
+                detailedEnvironmentResponse.getNetwork().getSubnetMetas().values(), dbStack, detailedEnvironmentResponse.getNetwork().isExistingNetwork()).stream()
                 .findFirst()
                 .map(csn -> SubnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
                 .map(sn -> sn.getId()).orElse(null);
