@@ -137,7 +137,12 @@ service UserManagement {
 
   // Create an email based account.
   rpc CreateC1CAccount (CreateC1CAccountRequest)
-  returns (CreateC1CAccountResponse) {}
+    returns (CreateC1CAccountResponse) {}
+
+  // An endpoint called when a user verifies their email by clicking the link we sent
+  // them.
+  rpc VerifyC1CEmail (VerifyC1CEmailRequest)
+    returns (VerifyC1CEmailResponse) {}
 
   // Grant Entitlement to an Account
   rpc GrantEntitlement (GrantEntitlementRequest)
@@ -438,6 +443,10 @@ service UserManagement {
   // List cloud identity mappings for service principals.
   rpc ListServicePrincipalCloudIdentities (ListServicePrincipalCloudIdentitiesRequest)
     returns (ListServicePrincipalCloudIdentitiesResponse) {}
+
+  // Retrieves the CRN of identity provider connector used for CDP initiated logins.
+  rpc GetDefaultIdentityProviderConnector (GetDefaultIdentityProviderConnectorRequest)
+      returns (GetDefaultIdentityProviderConnectorResponse) {}
 
   // Get user sync state model, including actors, groups, workload administration groups, etc
   rpc GetUserSyncStateModel (GetUserSyncStateModelRequest)
@@ -1328,10 +1337,21 @@ message CreateC1CAccountRequest {
   string firstName = 2;
   // This may be an empty string.
   string lastName = 3;
+  // The user's password;
+  string password = 4 [(options.FieldExtension.sensitive) = true];
 }
 
 message CreateC1CAccountResponse {
   Account account = 1;
+}
+
+message VerifyC1CEmailRequest {
+  // The registration token passed by the caller
+  string registrationToken = 1 [(options.FieldExtension.sensitive) = true];
+}
+
+message VerifyC1CEmailResponse {
+  string userCrn = 1;
 }
 
 message AccountId {
@@ -1419,6 +1439,7 @@ message AssignRoleRequest {
 }
 
 message AssignRoleResponse {
+  string assigneeCrn = 1;
 }
 
 message UnassignRoleRequest {
@@ -1430,6 +1451,7 @@ message UnassignRoleRequest {
 }
 
 message UnassignRoleResponse {
+  string assigneeCrn = 1;
 }
 
 message ListAssignedRolesRequest {
@@ -1458,6 +1480,7 @@ message AssignResourceRoleRequest {
 }
 
 message AssignResourceRoleResponse {
+  string assigneeCrn = 1;
 }
 
 message UnassignResourceRoleRequest {
@@ -1470,6 +1493,7 @@ message UnassignResourceRoleRequest {
 }
 
 message UnassignResourceRoleResponse {
+  string assigneeCrn = 1;
 }
 
 message ListAssignedResourceRolesRequest {
@@ -1703,6 +1727,13 @@ message ListMachineUsersRequest {
   bool includeInternal = 5;
   // Whether to include deleted machine users.
   bool includeDeleted = 6;
+  // Whether to include workload machine users. All regular machine users are
+  // workload machine users. This is a subset of the internal machine users,
+  // which have a password set. This field has no effect if internal machine
+  // users are requested because all workload machine users will already be
+  // included in the results. Note that this has no impact when listing by name
+  // or CRN. For those calls, internal machine users are always returned.
+  bool includeWorkloadMachineUsers = 7;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 3;
   paging.PageToken pageToken = 4;
@@ -1981,6 +2012,7 @@ message AddMemberToGroupRequest {
 }
 
 message AddMemberToGroupResponse {
+  string memberCrn = 1;
 }
 
 message RemoveMemberFromGroupRequest {
@@ -1991,6 +2023,7 @@ message RemoveMemberFromGroupRequest {
 }
 
 message RemoveMemberFromGroupResponse {
+  string memberCrn = 1;
 }
 
 message ListGroupMembersRequest {
@@ -2872,6 +2905,7 @@ message GetActorWorkloadCredentialsRequest {
   string actorCrn = 1;
 }
 
+// TODO CDPCP-3033 - migrate this object to use ActorWorkloadCredentials
 message GetActorWorkloadCredentialsResponse {
   // The password hash.
   string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
@@ -3163,26 +3197,43 @@ message ListServicePrincipalCloudIdentitiesResponse {
   paging.PageToken nextPageToken = 2;
 }
 
+message GetDefaultIdentityProviderConnectorRequest {
+  // The account ID for which default identity provider connector is retrieved.
+  string accountId = 1;
+}
+
+message GetDefaultIdentityProviderConnectorResponse {
+  // The CRN of the identity provider connector used for CDP initiated logins. The CRN is a user defined
+  // identity provider or one of the CDP built-ins (like Cloudera SSO).
+  string crn = 1;
+}
+
 message GetUserSyncStateModelRequest {
   // The account id.
   string accountId = 1;
-  // The rights checks to be performed on each actor.
+  // The rights checks to be performed on each actor. The response model contains
+  // all actors and the results of these rights checks for each actor.
   repeated RightsCheck rightsCheck = 2;
 }
 
 message GetUserSyncStateModelResponse {
+  // Event generation ids when the user sync state model is created. The responses are guaranteed
+  // to be at least as recent as the event generation ids.
   EventGenerationIds eventGenerationIds = 1;
-  // Users and machine users, along with supporting information needed for user sync.
+  // All users and machine users in this account, along with supporting information needed for
+  // user sync.
   repeated UserSyncActor actor = 2;
-  // Groups.
+  // All groups in this account.
   repeated Group group = 3;
-  // Workload administration groups.
+  // All workload administration groups in this account.
   repeated WorkloadAdministrationGroup workloadAdministrationGroup = 4;
 }
 
 // Actor workload credentials object. This contains fields needed to set
 // workload credentials through user sync.
+// TODO CDPCP-3033 - migrate GetActorWorkloadCredentialsResponse to use this object
 message ActorWorkloadCredentials {
+  reserved 4;
   // The password hash.
   string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
   // The date, in ms from the Java epoch of 1970-01-01T00:00:00Z, when the
@@ -3219,9 +3270,14 @@ message UserSyncActor {
 }
 
 message UserSyncActorDetails {
+  // The name user sync will store in the first name field
   string firstName = 1;
+  // The name user sync will store in the last name field
   string lastName = 2;
+  // The actor's CRN
   string crn = 3;
+  // The actor's workload username
   string workloadUsername = 4;
+  // The actor's cloud identities
   repeated CloudIdentity cloudIdentity = 5;
 }
