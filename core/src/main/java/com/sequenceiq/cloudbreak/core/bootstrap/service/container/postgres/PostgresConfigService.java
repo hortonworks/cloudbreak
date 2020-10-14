@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 
 @Service
@@ -27,8 +29,16 @@ public class PostgresConfigService {
     @Inject
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
+    @Inject
+    private RedbeamsDbCertificateProvider dbCertificateProvider;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, Stack stack, Cluster cluster) {
         Map<String, Object> postgresConfig = initPostgresConfig(stack, cluster);
+
+        Set<String> rootCerts = dbCertificateProvider.getRelatedSslCerts(stack, cluster);
+        if (CollectionUtils.isNotEmpty(rootCerts)) {
+            postgresConfig.put("remote_databases_root_ssl_certs", String.join("\n", rootCerts));
+        }
 
         if (!postgresConfig.isEmpty()) {
             servicePillar.put("postgresql-server", new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
