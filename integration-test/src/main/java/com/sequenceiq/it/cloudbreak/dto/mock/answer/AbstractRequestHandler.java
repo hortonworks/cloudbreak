@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.answer;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.dto.mock.Verification;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 abstract class AbstractRequestHandler<T> {
     private final Method method;
@@ -23,11 +25,16 @@ abstract class AbstractRequestHandler<T> {
 
     private final Class<T> requestType;
 
-    AbstractRequestHandler(Method method, String path, Class<T> requestType, HttpMock mock) {
+    private final ExecuteQueryToMockInfrastructure executeQuery;
+
+    private final Map<String, String> pathVariables = new HashMap<>();
+
+    AbstractRequestHandler(Method method, String path, Class<T> requestType, HttpMock mock, ExecuteQueryToMockInfrastructure executeQuery) {
         this.method = method;
         this.path = path;
         this.mock = mock;
         this.requestType = requestType;
+        this.executeQuery = executeQuery;
     }
 
     public Method getMethod() {
@@ -94,11 +101,23 @@ abstract class AbstractRequestHandler<T> {
                 .collect(Collectors.toList());
     }
 
+    protected ExecuteQueryToMockInfrastructure executeQuery() {
+        return executeQuery;
+    }
+
     void save(T requestBody, Map<String, String> uriParameters) {
         mock.getRequestList().add(new RequestData(requestBody, uriParameters, path, method));
     }
 
     public String getFullUrl() {
         return getMock().getSparkServer().getEndpoint() + getPath();
+    }
+
+    protected void pathVariableInternal(String name, String value) {
+        pathVariables.put(name, value);
+    }
+
+    protected Map<String, String> pathVariables() {
+        return pathVariables;
     }
 }

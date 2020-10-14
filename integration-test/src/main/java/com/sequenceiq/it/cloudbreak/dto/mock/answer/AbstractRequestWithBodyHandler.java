@@ -14,23 +14,19 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.mock.GenericRequestResponse;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 
-abstract class AbstractRequestWithBodyHandler<S, T> extends AbstractRequestHandler<T> {
+abstract class AbstractRequestWithBodyHandler<S, T, R> extends AbstractRequestHandler<T> {
     private Map<String, String> headers = new HashMap<>();
 
-    AbstractRequestWithBodyHandler(Method method, String path, Class<T> requestType, HttpMock mock) {
-        super(method, path, requestType, mock);
+    AbstractRequestWithBodyHandler(Method method, String path, Class<T> requestType, HttpMock mock, ExecuteQueryToMockInfrastructure executeQuery) {
+        super(method, path, requestType, mock, executeQuery);
     }
 
     public HttpMock thenReturn(GenericRequestResponse<S, T> genericResponse) {
-        getMock().getDynamicRouteStack().route(getMethod().getHttpMethod(), getPath(), (request, response, model) -> {
-            Map<String, String> uriParameters = request.params();
-            T requestBody = prepareRequestInstance(request);
-            save(requestBody, uriParameters);
-
-            return genericResponse.handle(requestBody, model, uriParameters);
-        });
-
+        S handle = genericResponse.handle(null, null, null);
+        executeQuery().executeConfigure(getPath(), pathVariables(), new MockResponse(handle, getMethod().getHttpMethod().name(), getPath()));
         return getMock();
     }
 
@@ -50,6 +46,11 @@ abstract class AbstractRequestWithBodyHandler<S, T> extends AbstractRequestHandl
     public AbstractRequestWithBodyHandler thenReturnHeader(String header, String value) {
         headers.put(header, value);
         return this;
+    }
+
+    public R pathVariable(String name, String value) {
+        pathVariableInternal(name, value);
+        return (R) this;
     }
 
     private List<T> requestBodies() {

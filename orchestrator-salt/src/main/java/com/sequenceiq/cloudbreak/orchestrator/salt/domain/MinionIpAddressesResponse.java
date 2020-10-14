@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Streams;
@@ -13,6 +14,7 @@ public class MinionIpAddressesResponse {
     @JsonProperty("return")
     private List<Map<String, JsonNode>> result;
 
+    @JsonIgnore
     public List<String> getAllIpAddresses() {
         return result.stream()
                 .flatMap(result -> result.entrySet().stream())

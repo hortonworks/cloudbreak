@@ -68,6 +68,7 @@ import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
@@ -202,6 +203,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private Tracer tracer;
+
+    @Inject
+    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
 
     private DefaultModel model;
 
@@ -1312,6 +1316,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudProviderProxy getCloudProvider() {
         return cloudProvider;
+    }
+
+    public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {
+        return executeQueryToMockInfrastructure;
     }
 
     @Override

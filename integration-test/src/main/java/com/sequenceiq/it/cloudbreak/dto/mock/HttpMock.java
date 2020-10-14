@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.RequestData;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 import com.sequenceiq.it.cloudbreak.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
@@ -52,6 +53,9 @@ public class HttpMock implements CloudbreakTestDto {
 
     @Inject
     private SparkServerPool sparkServerPool;
+
+    @Inject
+    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
 
     private String name;
 
@@ -151,8 +155,8 @@ public class HttpMock implements CloudbreakTestDto {
                 (proxy, method, args) -> {
                     Method httpMethod = Method.build(method.getName());
                     SparkUriParameters parameters = new SparkUriAnnotationHandler(endpoint, method).getParameters();
-                    return method.getReturnType().getConstructor(Method.class, String.class, Class.class, HttpMock.class)
-                            .newInstance(httpMethod, parameters.getUri(), parameters.getType(), this);
+                    return method.getReturnType().getConstructor(Method.class, String.class, Class.class, HttpMock.class, ExecuteQueryToMockInfrastructure.class)
+                            .newInstance(httpMethod, parameters.getUri(), parameters.getType(), this, executeQueryToMockInfrastructure);
 
                 });
     }
