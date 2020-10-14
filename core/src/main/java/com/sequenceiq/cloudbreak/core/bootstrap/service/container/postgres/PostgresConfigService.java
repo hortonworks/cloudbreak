@@ -37,7 +37,9 @@ public class PostgresConfigService {
 
         Set<String> rootCerts = dbCertificateProvider.getRelatedSslCerts(stack, cluster);
         if (CollectionUtils.isNotEmpty(rootCerts)) {
-            postgresConfig.put("remote_databases_root_ssl_certs", String.join("\n", rootCerts));
+            Map<String, String> rootSslCertsMap = Map.of("ssl_certs", String.join("\n", rootCerts));
+            servicePillar.put("postgres-common", new SaltPillarProperties("/postgresql/root-certs.sls",
+                    singletonMap("postgres_root_certs", rootSslCertsMap)));
         }
 
         if (!postgresConfig.isEmpty()) {
