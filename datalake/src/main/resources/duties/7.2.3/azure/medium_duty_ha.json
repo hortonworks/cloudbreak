@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "instanceType": "Standard_D16s_v3",
         "attachedVolumes": [
@@ -43,8 +43,28 @@
           "size": 100
         }
       },
-      "nodeCount": 1,
+      "nodeCount": 2,
       "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "instanceType": "Standard_D4s_v3",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 250,
+            "type": "StandardSSD_LRS"
+          }
+        ],
+        "rootVolume": {
+          "size": 100
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
     },
