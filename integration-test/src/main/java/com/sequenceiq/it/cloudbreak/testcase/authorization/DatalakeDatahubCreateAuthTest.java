@@ -89,13 +89,14 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datalake/describeDetailedDatalake.*")
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'datalake/describeDetailedDatalake'.*")
                                 .withKey("SdxDetailedDescribeInternalAction"))
                 .given(RenewDatalakeCertificateTestDto.class)
                 .withStackCrn(testContext.get(sdxInternal).getCrn())
                 .when(sdxTestClient.renewDatalakeCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datalake/repairDatalake on.*")
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: 'datalake/repairDatalake'.*")
                                 .withKey("RenewDatalakeCertificateAction"))
                 .validate();
     }

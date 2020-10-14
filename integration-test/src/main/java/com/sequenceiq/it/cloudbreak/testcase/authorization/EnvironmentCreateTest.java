@@ -78,12 +78,14 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
+                                .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"));
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
+                                .withKey("EnvironmentGetAction"));
         testFreeipaCreation(testContext, mockedTestContext);
         testContext
                 //after assignment describe should work for the environment
@@ -144,16 +146,19 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 //testing unathorized freeipa calls for the environment
                 .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment on " +
-                                "crn:cdp:environments:.*").withKey("FreeIpaDescribeAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
+                                .withKey("FreeIpaDescribeAction"))
                 .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/stopEnvironment on " +
-                                "crn:cdp:environments:.*").withKey("FreeIpaStopAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/stopEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
+                                .withKey("FreeIpaStopAction"))
                 .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/startEnvironment on " +
-                                "crn:cdp:environments:.*").withKey("FreeIpaStartAction"));
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/startEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
+                                .withKey("FreeIpaStartAction"));
     }
 
 }

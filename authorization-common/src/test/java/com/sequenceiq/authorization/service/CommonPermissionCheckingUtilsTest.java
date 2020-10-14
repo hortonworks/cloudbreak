@@ -24,7 +24,9 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,11 +49,14 @@ public class CommonPermissionCheckingUtilsTest {
 
     private static final String USER_CRN = "USER_CRN";
 
-    private static final String RESOURCE_CRN = "RESOURCE_CRN";
+    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:environment:1";
 
-    private static final String DEFAULT_RESOURCE_CRN = "DEFAULT_RESOURCE_CRN";
+    private static final String DEFAULT_RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:environment:2";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonPermissionCheckingUtilsTest.class);
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private UmsAccountAuthorizationService umsAccountAuthorizationService;
@@ -232,11 +237,13 @@ public class CommonPermissionCheckingUtilsTest {
 
     @Test
     public void testCheckPermissionFailForUserOnDefaultResource() {
-        AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
-            underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
-        });
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have insufficient rights to perform the following action(s): ");
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+                AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", DEFAULT_RESOURCE_CRN));
 
-        assertEquals(exception.getMessage(), "You have no right to perform environments/deleteImageCatalog on resources [DEFAULT_RESOURCE_CRN]");
+        underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
+
         verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
         verifyZeroInteractions(umsResourceAuthorizationService);
@@ -268,12 +275,16 @@ public class CommonPermissionCheckingUtilsTest {
     public void testCheckPermissionFailForUserOnMixedResources() {
         List<String> resourceCrns = List.of(DEFAULT_RESOURCE_CRN, RESOURCE_CRN);
 
-        AccessDeniedException exception = Assert.assertThrows(AccessDeniedException.class, () -> {
-            underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
-        });
 
-        assertEquals(exception.getMessage(), "You have no right to perform environments/deleteImageCatalog on resources " +
-                "[DEFAULT_RESOURCE_CRN,RESOURCE_CRN]");
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have insufficient rights to perform the following action(s): ");
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+                AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", DEFAULT_RESOURCE_CRN));
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+                AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", RESOURCE_CRN));
+
+        underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);
+
         verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
         verifyZeroInteractions(umsResourceAuthorizationService);

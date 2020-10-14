@@ -89,12 +89,14 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: .*")
+                                .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: .*")
+                                .withKey("EnvironmentGetAction"))
                 .validate();
         String recipe1Name = testContext
                 .given(RecipeTestDto.class).valid()
@@ -117,7 +119,8 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .withRecipe(recipe1Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform environments/useSharedResource*")
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/useSharedResource'.*")
                                 .withKey("DistroXCreateAction"))
                 .withRecipe(recipe2Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
@@ -126,7 +129,8 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .given(RenewDistroXCertificateTestDto.class)
                 .when(distroXClient.renewDistroXCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: datahub/repairDatahub on.*")
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'datahub/repairDatahub'.*")
                                 .withKey("RenewDistroXCertificateAction"))
                 .validate();
 
