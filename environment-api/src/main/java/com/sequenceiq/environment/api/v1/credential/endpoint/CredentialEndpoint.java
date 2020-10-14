@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.credential.CredentialDescriptor;
 import com.sequenceiq.environment.api.doc.credential.CredentialOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
@@ -105,7 +106,7 @@ public interface CredentialEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CredentialOpDescription.PUT, produces = MediaType.APPLICATION_JSON, notes = CredentialDescriptor.CREDENTIAL_NOTES,
             nickname = "putCredentialV1", httpMethod = "PUT")
-    CredentialResponse put(@Valid CredentialRequest credentialRequest);
+    CredentialResponse put(@Valid EditCredentialRequest credentialRequest);
 
     @POST
     @Path("interactive_login")

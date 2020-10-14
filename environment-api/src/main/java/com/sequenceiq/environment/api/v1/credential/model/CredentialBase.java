@@ -4,12 +4,8 @@ import java.io.Serializable;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.authorization.annotation.ResourceObjectField;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.credential.CredentialModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
@@ -25,13 +21,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(subTypes = {CredentialRequest.class, CredentialResponse.class})
 public abstract class CredentialBase implements Serializable {
-
-    @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
-            message = "The name of the credential can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
-    @ResourceObjectField(action = AuthorizationResourceAction.EDIT_CREDENTIAL, variableType = AuthorizationVariableType.NAME)
-    private String name;
 
     @NotNull
     @ApiModelProperty(value = CredentialModelDescription.CLOUD_PLATFORM, required = true)
@@ -81,14 +70,6 @@ public abstract class CredentialBase implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getCloudPlatform() {

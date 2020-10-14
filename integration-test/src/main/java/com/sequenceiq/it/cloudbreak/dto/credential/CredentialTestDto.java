@@ -13,6 +13,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockPa
 import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
@@ -56,6 +57,23 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     @Override
     public String getResourceNameType() {
         return CREDENTIAL_RESOURCE_NAME;
+    }
+
+    public EditCredentialRequest modifyRequest() {
+        EditCredentialRequest editRequest = new EditCredentialRequest();
+        CredentialRequest request = getRequest();
+
+        editRequest.setName(request.getName());
+        editRequest.setAzure(request.getAzure());
+        editRequest.setAws(request.getAws());
+        editRequest.setGcp(request.getGcp());
+        editRequest.setMock(request.getMock());
+        editRequest.setOpenstack(request.getOpenstack());
+        editRequest.setYarn(request.getYarn());
+        editRequest.setCloudPlatform(request.getName());
+        editRequest.setDescription(request.getName());
+        editRequest.setCloudPlatform(getCloudPlatform().name());
+        return editRequest;
     }
 
     public CredentialTestDto withDescription(String description) {

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -92,7 +93,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.MODIFY_AUDIT_CREDENTIAL)
-    public CredentialResponse put(@Valid CredentialRequest credentialRequest) {
+    public CredentialResponse put(@Valid EditCredentialRequest credentialRequest) {
         Credential credential = credentialConverter.convert(credentialRequest);
         credential.setType(AUDIT);
         credential = credentialService.updateByAccountId(credential, ThreadBasedUserCrnProvider.getAccountId(), AUDIT);

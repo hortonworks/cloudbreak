@@ -19,7 +19,7 @@ public class CredentialModifyAction implements Action<CredentialTestDto, Environ
         testDto.setResponse(
                 cloudbreakClient.getEnvironmentClient()
                         .credentialV1Endpoint()
-                        .put(testDto.getRequest()));
+                        .put(testDto.modifyRequest()));
         Log.whenJson(LOGGER, " Credential modified successfully:\n", testDto.getResponse());
         Log.when(LOGGER, String.format(" CRN: %s", testDto.getResponse().getCrn()));
 

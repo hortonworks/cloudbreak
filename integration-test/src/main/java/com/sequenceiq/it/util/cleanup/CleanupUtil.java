@@ -30,7 +30,7 @@ import org.springframework.util.MultiValueMap;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.environment.api.v1.credential.model.CredentialBase;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.client.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
@@ -165,7 +165,7 @@ public class CleanupUtil extends CleanupClientUtil {
 
     public List<String> getCredentials(EnvironmentClient environment) {
         return environment.credentialV1Endpoint().list().getResponses().stream()
-                .map(CredentialBase::getName)
+                .map(CredentialResponse::getName)
                 .collect(Collectors.toList());
     }
 

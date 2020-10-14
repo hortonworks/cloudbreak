@@ -43,6 +43,7 @@ import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBasedParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
+import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -148,7 +149,7 @@ public class CredentialAuthorizationIntegrationTest {
 
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByName(wrongCredentialName));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().getByResourceCrn(wrongCredentialCrn));
-        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().put(getAwsCredentialRequest(wrongCredentialName)));
+        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().put(getAwsEditCredentialRequest(wrongCredentialName)));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteMultiple(Sets.newHashSet(wrongCredentialName)));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByName(wrongCredentialName));
         assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().deleteByResourceCrn(wrongCredentialCrn));
@@ -250,6 +251,14 @@ public class CredentialAuthorizationIntegrationTest {
 
     private CredentialRequest getAwsCredentialRequest(String name) {
         CredentialRequest credentialRequest = new CredentialRequest();
+        credentialRequest.setAws(getAwsKeyBasedCredentialParameters());
+        credentialRequest.setCloudPlatform("AWS");
+        credentialRequest.setName(name);
+        return credentialRequest;
+    }
+
+    private EditCredentialRequest getAwsEditCredentialRequest(String name) {
+        EditCredentialRequest credentialRequest = new EditCredentialRequest();
         credentialRequest.setAws(getAwsKeyBasedCredentialParameters());
         credentialRequest.setCloudPlatform("AWS");
         credentialRequest.setName(name);
