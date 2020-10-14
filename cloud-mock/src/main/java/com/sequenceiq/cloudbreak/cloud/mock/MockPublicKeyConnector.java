@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import java.security.KeyManagementException;
+
 import javax.inject.Inject;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Service;
 
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyDescribeRequest;
@@ -20,51 +21,43 @@ import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyUnregisterReques
 public class MockPublicKeyConnector implements PublicKeyConnector {
 
     @Inject
-    private MockCredentialViewFactory mockCredentialViewFactory;
+    private MockUrlFactory mockUrlFactory;
 
     @Override
     public void register(PublicKeyRegisterRequest request) {
-        try {
-            String mockEndpoint = getMockEndpoint(request.getCredential());
-            HttpResponse<String> response = Unirest.post(mockEndpoint + "/spi/register_public_key").body(request.getPublicKeyId()).asString();
+        try (Response response = mockUrlFactory.get("/spi/register_public_key")
+                .post(Entity.entity(request.getPublicKeyId(), MediaType.APPLICATION_JSON_TYPE))) {
             if (response.getStatus() != 200) {
-                throw new CloudConnectorException(response.getStatusText());
+                throw new CloudConnectorException(response.readEntity(String.class));
             }
-        } catch (UnirestException e) {
+        } catch (KeyManagementException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
     @Override
     public void unregister(PublicKeyUnregisterRequest request) {
-        try {
-            String mockEndpoint = getMockEndpoint(request.getCredential());
-            HttpResponse<String> response = Unirest.post(mockEndpoint + "/spi/unregister_public_key").body(request.getPublicKeyId()).asString();
+        try (Response response = mockUrlFactory.get("/spi/unregister_public_key")
+                .post(Entity.entity(request.getPublicKeyId(), MediaType.APPLICATION_JSON_TYPE))) {
             if (response.getStatus() != 200) {
-                throw new CloudConnectorException(response.getStatusText());
+                throw new CloudConnectorException(response.readEntity(String.class));
             }
-        } catch (UnirestException e) {
+        } catch (KeyManagementException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
     @Override
     public boolean exists(PublicKeyDescribeRequest request) {
-        try {
-            String mockEndpoint = getMockEndpoint(request.getCredential());
-            HttpResponse<Boolean> response = Unirest.get(mockEndpoint + "/spi/get_public_key/" + request.getPublicKeyId()).asObject(Boolean.class);
+        try (Response response = mockUrlFactory.get("/spi/get_public_key/" + request.getPublicKeyId()).get()) {
             if (response.getStatus() != 200) {
-                throw new CloudConnectorException(response.getStatusText());
+                throw new CloudConnectorException(response.readEntity(String.class));
             }
-            return response.getBody() != null && response.getBody();
-        } catch (UnirestException e) {
+            Boolean entity = response.readEntity(Boolean.class);
+            return entity != null && entity;
+        } catch (KeyManagementException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
-    }
-
-    private String getMockEndpoint(CloudCredential cloudCredential) {
-        MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(cloudCredential);
-        return mockCredentialView.getMockEndpoint();
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Volume {
 
     private final String mount;
@@ -8,7 +11,10 @@ public class Volume {
 
     private final int size;
 
-    public Volume(String mount, String type, int size) {
+    @JsonCreator
+    public Volume(@JsonProperty("mount") String mount,
+            @JsonProperty("type") String type,
+            @JsonProperty("size") int size) {
         this.mount = mount;
         this.type = type;
         this.size = size;

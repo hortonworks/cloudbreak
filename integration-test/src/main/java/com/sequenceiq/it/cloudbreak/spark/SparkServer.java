@@ -143,7 +143,7 @@ public class SparkServer {
     }
 
     public int getPort() {
-        return port;
+        return 10090;
     }
 
     public boolean isSecure() {
