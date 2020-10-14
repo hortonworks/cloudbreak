@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -32,6 +31,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
+import com.sequenceiq.authorization.utils.AuthorizationMessageUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
@@ -188,9 +188,9 @@ public class CommonPermissionCheckingUtils {
             DefaultResourceChecker defaultResourceChecker) {
         if (!defaultResourceChecker.isAllowedAction(action)) {
             String right = umsRightProvider.getRight(action);
-            String msg = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
-            LOGGER.error(msg);
-            throw new AccessDeniedException(msg);
+            String unauthorizedMessage = AuthorizationMessageUtils.formatTemplate(right, resourceCrns);
+            LOGGER.error(unauthorizedMessage);
+            throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 

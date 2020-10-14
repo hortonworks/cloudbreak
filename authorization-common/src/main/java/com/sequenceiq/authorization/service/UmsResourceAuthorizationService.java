@@ -15,9 +15,9 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.utils.AuthorizationMessageUtils;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -40,8 +40,7 @@ public class UmsResourceAuthorizationService {
 
     public void checkRightOfUserOnResource(String userCrn, AuthorizationResourceAction action, String resourceCrn) {
         String right = umsRightProvider.getRight(action);
-        String unauthorizedMessage = String.format("You have no right to perform %s on resource %s.", right, resourceCrn);
-        checkRightOfUserOnResource(userCrn, right, resourceCrn, unauthorizedMessage);
+        checkRightOfUserOnResource(userCrn, right, resourceCrn, AuthorizationMessageUtils.formatTemplate(right, resourceCrn));
     }
 
     public Map<String, Boolean> getRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, List<String> resourceCrns) {
@@ -54,8 +53,7 @@ public class UmsResourceAuthorizationService {
             return;
         }
         String right = umsRightProvider.getRight(action);
-        String unauthorizedMessage = String.format("You have no right to perform %s on resources [%s]", right, Joiner.on(",").join(resourceCrns));
-        checkRightOfUserOnResources(userCrn, right, resourceCrns, unauthorizedMessage);
+        checkRightOfUserOnResources(userCrn, right, resourceCrns, AuthorizationMessageUtils.formatTemplate(right, resourceCrns));
     }
 
     public void checkIfUserHasAtLeastOneRight(String userCrn, Map<String, AuthorizationResourceAction> checkedRightsForResources) {
@@ -68,10 +66,7 @@ public class UmsResourceAuthorizationService {
         List<Boolean> rightCheckResults = umsClient.hasRights(userCrn, userCrn, rightCheckList, getRequestId());
         LOGGER.info("Right check results: {}", rightCheckResults);
         if (rightCheckResults.stream().noneMatch(Boolean::booleanValue)) {
-            String rightResultsAsString = rightCheckList.stream()
-                    .map(rightCheck -> rightCheck.getRight() + " on " + rightCheck.getResource())
-                    .collect(Collectors.joining(","));
-            throw new AccessDeniedException(String.format("You have no right to perform any of these actions: %s", rightResultsAsString));
+            throw new AccessDeniedException(AuthorizationMessageUtils.formatTemplate(rightCheckList));
         }
     }
 
