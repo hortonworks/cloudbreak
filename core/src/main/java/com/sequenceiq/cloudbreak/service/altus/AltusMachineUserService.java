@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.service.altus;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -47,7 +45,7 @@ public class AltusMachineUserService {
     }
 
     /**
-     * Delete machine user for fluent based upload with its access keys (and unassign databus role if required)
+     * Delete machine user with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
         if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
@@ -59,18 +57,6 @@ public class AltusMachineUserService {
                             Crn.fromString(stack.getResourceCrn()).getAccountId(),
                             telemetry.isUseSharedAltusCredentialEnabled()));
         }
-    }
-
-    /**
-     * Delete machine user with access keys (and unassign databus role if required) by provided machine user name and account id
-     */
-    public void cleanupMachineUser(String machineUserName, String accountId) {
-        ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> altusIAMService.clearMachineUser(machineUserName,
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        accountId
-                )
-        );
     }
 
     /**
@@ -117,18 +103,6 @@ public class AltusMachineUserService {
                 && !StackType.DATALAKE.equals(stack.getType())));
     }
 
-    public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> altusIAMService.getAllMachineUsersForAccount(
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        accountId)
-        );
-    }
-
-    public String getFluentDatabusMachineUserName(String clusterType, String resource) {
-        return String.format(FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN, clusterType, resource);
-    }
-
     private String getFluentDatabusMachineUserName(Stack stack) {
         String clusterType = "cb";
         if (StackType.DATALAKE.equals(stack.getType())) {
@@ -136,6 +110,7 @@ public class AltusMachineUserService {
         } else if (StackType.WORKLOAD.equals(stack.getType())) {
             clusterType = "datahub";
         }
-        return getFluentDatabusMachineUserName(clusterType, Crn.fromString(stack.getResourceCrn()).getResource());
+        return String.format(FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN, clusterType,
+                Crn.fromString(stack.getResourceCrn()).getResource());
     }
 }
