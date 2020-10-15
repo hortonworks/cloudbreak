@@ -131,7 +131,7 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get instance group due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            LOGGER.error("Exit waiting! Failed to get instance group, because of: {}", e.getMessage(), e);
+            LOGGER.warn("Exit waiting! Failed to get instance group, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;

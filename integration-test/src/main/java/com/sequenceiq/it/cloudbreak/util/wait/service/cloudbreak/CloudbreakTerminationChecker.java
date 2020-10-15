@@ -84,7 +84,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get cluster due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            LOGGER.error("Exit waiting! Failed to get cluster, because of: {}", e.getMessage(), e);
+            LOGGER.warn("Exit waiting! Failed to get cluster, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;

@@ -11,23 +11,23 @@ public class ThreadLocalTestListener extends TestNgListener implements IResultLi
     private static final ThreadLocal<VerboseLogReporter> LOG_REPORTER = ThreadLocal.withInitial(VerboseLogReporter::new);
 
     @Override
-    public void beforeConfiguration(ITestResult tr) {
-        getLogReporter().beforeConfiguration(tr);
+    public void beforeConfiguration(ITestResult result) {
+        getLogReporter().beforeConfiguration(result);
     }
 
     @Override
-    public void onConfigurationSuccess(ITestResult itr) {
-        getLogReporter().onConfigurationSuccess(itr);
+    public void onConfigurationSuccess(ITestResult result) {
+        getLogReporter().onConfigurationSuccess(result);
     }
 
     @Override
-    public void onConfigurationFailure(ITestResult itr) {
-        getLogReporter().onConfigurationFailure(itr);
+    public void onConfigurationFailure(ITestResult result) {
+        getLogReporter().onConfigurationFailure(result);
     }
 
     @Override
-    public void onConfigurationSkip(ITestResult itr) {
-        getLogReporter().onConfigurationSkip(itr);
+    public void onConfigurationSkip(ITestResult result) {
+        getLogReporter().onConfigurationSkip(result);
     }
 
     @Override

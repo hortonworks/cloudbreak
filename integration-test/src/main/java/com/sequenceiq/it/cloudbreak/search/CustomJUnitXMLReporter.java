@@ -166,10 +166,12 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
 
                 if (testResultException != null) {
                     try {
-                        String message = testResultException.getCause().getMessage() != null
+                        String message = testResultException.getCause() != null
                                 ? testResultException.getCause().getMessage()
                                 : testResultException.getMessage();
-                        String testFailureType = testResultException.getCause().getClass().getName();
+                        String testFailureType = testResultException.getCause() != null
+                                ? testResultException.getCause().getClass().getName()
+                                : testResultException.getClass().getName();
 
                         if (message == null || message.isEmpty()) {
                             LOGGER.warn("Test Case: {} have been failed with empty test result!", methodName);
