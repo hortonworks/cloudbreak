@@ -108,6 +108,7 @@ public class CloudFormationTemplateBuilder {
     public String build(RDSModelContext context) {
         Map<String, Object> model = new HashMap<>();
         model.put("hasPort", context.hasPort);
+        model.put("useSslEnforcement", context.useSslEnforcement);
         model.put("hasSecurityGroup", context.hasSecurityGroup);
         model.put("networkCidrs", context.networkCidrs);
         try {
@@ -263,6 +264,8 @@ public class CloudFormationTemplateBuilder {
 
         private boolean hasPort;
 
+        private boolean useSslEnforcement;
+
         private boolean hasSecurityGroup;
 
         private List<String> networkCidrs = new ArrayList<>();
@@ -274,6 +277,11 @@ public class CloudFormationTemplateBuilder {
 
         public RDSModelContext withHasPort(boolean hasPort) {
             this.hasPort = hasPort;
+            return this;
+        }
+
+        public RDSModelContext withUseSslEnforcement(boolean useSslEnforcement) {
+            this.useSslEnforcement = useSslEnforcement;
             return this;
         }
 

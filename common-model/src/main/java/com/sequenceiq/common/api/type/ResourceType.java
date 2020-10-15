@@ -20,6 +20,7 @@ public enum ResourceType {
     RDS_HOSTNAME,
     RDS_PORT,
     RDS_DB_SUBNET_GROUP,
+    RDS_DB_PARAMETER_GROUP,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

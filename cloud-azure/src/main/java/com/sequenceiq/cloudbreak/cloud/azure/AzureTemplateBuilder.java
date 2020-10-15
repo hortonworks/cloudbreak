@@ -148,8 +148,7 @@ public class AzureTemplateBuilder {
             model.put("skuName", azureDatabaseServerView.getSkuName());
             model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb());
             model.put("skuTier", getSkuTier(azureDatabaseServerView));
-            // FUTURE: When CM scm_prepare_database.sh supports it, use TLS
-            model.put("sslEnforcement", false);
+            model.put("useSslEnforcement", azureDatabaseServerView.isUseSslEnforcement());
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
             model.put("subnets", azureNetworkView.getSubnets());
             // if subnet number is 1 then Azure does not create the endpoints if the batchsize is 5

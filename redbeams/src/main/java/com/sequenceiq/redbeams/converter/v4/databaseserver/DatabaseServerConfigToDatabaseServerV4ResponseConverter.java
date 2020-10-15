@@ -49,15 +49,17 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
                 sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
                 sslConfigV4Response.setSslMode(NONE.equals(sslConfig.getSslCertificateType()) ? DISABLED : ENABLED);
                 response.setSslConfig(sslConfigV4Response);
-            } else {
-                response.setSslConfig(new SslConfigV4Response());
             }
         } else if (source.getHost() != null && source.getPort() != null) {
             response.setStatus(Status.AVAILABLE);
         } else {
             response.setStatus(Status.UNKNOWN);
         }
+        if (response.getSslConfig() == null) {
+            response.setSslConfig(new SslConfigV4Response());
+        }
 
         return response;
     }
+
 }
