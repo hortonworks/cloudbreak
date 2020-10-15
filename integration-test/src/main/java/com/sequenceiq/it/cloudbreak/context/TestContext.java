@@ -655,14 +655,22 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
         String accessKey;
+        String accountAdminuser = AuthUserKeys.ACCOUNT_ADMIN;
         if (CloudbreakUserCache.getInstance().isInitialized()) {
-            accessKey = CloudbreakUserCache.getInstance().getByName(AuthUserKeys.ACCOUNT_ADMIN).getAccessKey();
+            boolean legacyAuthorizationUsed = org.apache.commons.lang3.StringUtils.equals(getActingUserAccessKey(),
+                    CloudbreakUserCache.getInstance().getByName(AuthUserKeys.LEGACY_POWER).getAccessKey())
+                    || org.apache.commons.lang3.StringUtils.equals(getActingUserAccessKey(),
+                    CloudbreakUserCache.getInstance().getByName(AuthUserKeys.LEGACY_NON_POWER).getAccessKey());
+            if (legacyAuthorizationUsed) {
+                accountAdminuser = AuthUserKeys.LEGACY_POWER;
+            }
+            accessKey = CloudbreakUserCache.getInstance().getByName(accountAdminuser).getAccessKey();
         } else {
             accessKey = INTERNAL_ACTOR_ACCESS_KEY;
         }
         U microserviceClient = (U) clients.getOrDefault(accessKey, Map.of()).get(msClientClass);
         if (microserviceClient == null) {
-            throw new IllegalStateException("Should create a client for this user: " + AuthUserKeys.ACCOUNT_ADMIN);
+            throw new IllegalStateException("Should create a client for this user: " + accountAdminuser);
         }
         return microserviceClient;
     }

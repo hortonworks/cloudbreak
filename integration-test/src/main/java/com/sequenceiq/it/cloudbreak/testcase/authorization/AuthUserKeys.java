@@ -10,6 +10,10 @@ public class AuthUserKeys {
 
     public static final String ZERO_RIGHTS = "CB-zero-roles";
 
+    public static final String LEGACY_NON_POWER = "legacy-authz-CB-nonpower";
+
+    public static final String LEGACY_POWER = "legacy-authz-CB-power";
+
     private AuthUserKeys() {
 
     }
