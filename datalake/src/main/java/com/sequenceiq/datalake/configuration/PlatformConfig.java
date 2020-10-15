@@ -39,6 +39,9 @@ public class PlatformConfig {
     @Value("${datalake.supported.externaldb.pause.platform:AWS}")
     private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
 
+    @Value("${datalake.supported.externaldb.sslenforcement.platform:AWS,AZURE}")
+    private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
+
     @Inject
     private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
 
@@ -50,6 +53,10 @@ public class PlatformConfig {
 
     public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
         return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
+    }
+
+    public boolean isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform cloudPlatform) {
+        return dbServiceSslEnforcementSupportedPlatforms.contains(cloudPlatform);
     }
 
     public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {

@@ -87,11 +87,11 @@
                 "description": "The administrator password for the database server."
             }
         },
-        "sslEnforcement": {
+        "useSslEnforcement": {
             "type": "bool",
-            "defaultValue": ${(sslEnforcement!true)?c},
+            "defaultValue": ${(useSslEnforcement!false)?c},
             "metadata": {
-                "description": "Enable ssl enforcement or not when connecting to the server."
+                "description": "Enable SSL enforcement or not when connecting to the server."
             }
         },
         "backupRetentionDays": {
@@ -156,10 +156,10 @@
         "subnetList": "[split(parameters('subnets'),',')]",
         "apiVersionMSSql":"2015-05-01-preview",
         "apiVersion":"2017-12-01",
-        "sslEnforcementString":"[if(parameters('sslEnforcement'), 'Enabled', 'Disabled')]",
+        "sslEnforcementString":"[if(parameters('useSslEnforcement'), 'Enabled', 'Disabled')]",
+        "minimalTlsVersionString":"[if(parameters('useSslEnforcement'), 'TLS1_2', 'TLSEnforcementDisabled')]",
         "geoRedundantBackupString":"[if(parameters('geoRedundantBackup'), 'Enabled', 'Disabled')]",
         "storageAutoGrowString":"[if(parameters('storageAutoGrow'), 'Enabled', 'Disabled')]"
-
     },
     "resources": [
         {
@@ -181,6 +181,7 @@
                 "administratorLogin": "[parameters('adminLoginName')]",
                 "administratorLoginPassword": "[parameters('adminPassword')]",
                 "sslEnforcement": "[variables('sslEnforcementString')]",
+                "minimalTlsVersion": "[variables('minimalTlsVersionString')]",
                 "storageProfile": {
                     "backupRetentionDays": "[parameters('backupRetentionDays')]",
                     "geoRedundantBackup": "[variables('geoRedundantBackupString')]",
