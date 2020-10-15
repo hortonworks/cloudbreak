@@ -1,20 +1,20 @@
-package com.sequenceiq.datalake.service.sdx;
+package com.sequenceiq.datalake.service.sdx.database;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -24,16 +24,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSetter;
-import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
+import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDatabaseServerV4Parameters;
@@ -52,7 +52,8 @@ public class DatabaseServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @Captor
-    public ArgumentCaptor<AllocateDatabaseServerV4Request> captor = ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
+    public ArgumentCaptor<AllocateDatabaseServerV4Request> allocateDatabaseServerV4RequestCaptor =
+            ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
@@ -75,11 +76,23 @@ public class DatabaseServiceTest {
     @Mock
     private Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetterMap;
 
+    @Mock
+    private PlatformConfig platformConfig;
+
     @InjectMocks
     private DatabaseService underTest;
 
-    @Test
-    public void shouldSetDbConfigBasedOnClusterShape() {
+    static Object[][] sslEnforcementDataProvider() {
+        return new Object[][]{
+                // testCaseName useSslEnforcement
+                {"useSslEnforcement=false", false},
+                {"useSslEnforcement=true", true},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sslEnforcementDataProvider")
+    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean useSslEnforcement) {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
@@ -93,21 +106,30 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
+        when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(useSslEnforcement);
 
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
-        });
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
 
-        verify(databaseServerV4Endpoint).createInternal(captor.capture(), anyString());
-        AllocateDatabaseServerV4Request dbRequest = captor.getValue();
-        assertThat(dbRequest.getDatabaseServer().getInstanceType(), is("instanceType"));
-        assertThat(dbRequest.getDatabaseServer().getDatabaseVendor(), is("vendor"));
-        assertThat(dbRequest.getDatabaseServer().getStorageSize(), is(100L));
-        assertThat(dbRequest.getClusterCrn(), is(CLUSTER_CRN));
-        assertNotNull(dbRequest.getDatabaseServer().getAws());
-        verifyZeroInteractions(sdxClusterRepository);
-        verifyZeroInteractions(sdxStatusService);
-        verifyZeroInteractions(notificationService);
+        verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
+        AllocateDatabaseServerV4Request dbRequest = allocateDatabaseServerV4RequestCaptor.getValue();
+        assertThat(dbRequest).isNotNull();
+        DatabaseServerV4StackRequest databaseServer = dbRequest.getDatabaseServer();
+        assertThat(databaseServer).isNotNull();
+        assertThat(databaseServer.getInstanceType()).isEqualTo("instanceType");
+        assertThat(databaseServer.getDatabaseVendor()).isEqualTo("vendor");
+        assertThat(databaseServer.getStorageSize()).isEqualTo(100L);
+        assertThat(dbRequest.getClusterCrn()).isEqualTo(CLUSTER_CRN);
+        assertThat(databaseServer.getAws()).isNotNull();
+        SslConfigurationV4Request sslConfiguration = dbRequest.getSslConfiguration();
+        if (useSslEnforcement) {
+            assertThat(sslConfiguration).isNotNull();
+            assertThat(sslConfiguration.getSslMode()).isEqualTo(SslMode.ENABLED);
+        } else {
+            assertThat(sslConfiguration).isNull();
+        }
+        verifyNoInteractions(sdxClusterRepository);
+        verifyNoInteractions(sdxStatusService);
+        verifyNoInteractions(notificationService);
     }
 
     @Test
@@ -157,4 +179,5 @@ public class DatabaseServiceTest {
             }
         };
     }
+
 }

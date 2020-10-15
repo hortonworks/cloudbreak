@@ -1,9 +1,9 @@
 package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
@@ -13,7 +13,7 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
 
     private DatabaseServerV4RequestToDatabaseServerConfigConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         converter = new DatabaseServerV4RequestToDatabaseServerConfigConverter();
     }
@@ -33,15 +33,17 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverterTest {
 
         DatabaseServerConfig server = converter.convert(request);
 
-        assertEquals(request.getName(), server.getName());
-        assertEquals(request.getDescription(), server.getDescription());
-        assertEquals(request.getHost(), server.getHost());
-        assertEquals(request.getPort(), server.getPort());
-        assertEquals(request.getDatabaseVendor(), server.getDatabaseVendor().databaseType());
-        assertEquals(request.getConnectionUserName(), server.getConnectionUserName());
-        assertEquals(request.getConnectionPassword(), server.getConnectionPassword());
-        assertEquals(request.getConnectionDriver(), server.getConnectionDriver());
-        assertEquals(request.getEnvironmentCrn(), server.getEnvironmentId());
-        assertEquals(ResourceStatus.USER_MANAGED, server.getResourceStatus());
+        assertThat(server).isNotNull();
+        assertThat(server.getName()).isEqualTo(request.getName());
+        assertThat(server.getDescription()).isEqualTo(request.getDescription());
+        assertThat(server.getHost()).isEqualTo(request.getHost());
+        assertThat(server.getPort()).isEqualTo(request.getPort());
+        assertThat(server.getDatabaseVendor().databaseType()).isEqualTo(request.getDatabaseVendor());
+        assertThat(server.getConnectionUserName()).isEqualTo(request.getConnectionUserName());
+        assertThat(server.getConnectionPassword()).isEqualTo(request.getConnectionPassword());
+        assertThat(server.getConnectionDriver()).isEqualTo(request.getConnectionDriver());
+        assertThat(server.getEnvironmentId()).isEqualTo(request.getEnvironmentCrn());
+        assertThat(server.getResourceStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
     }
+
 }

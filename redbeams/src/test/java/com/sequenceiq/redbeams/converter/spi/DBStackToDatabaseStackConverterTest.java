@@ -2,12 +2,10 @@ package com.sequenceiq.redbeams.converter.spi;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,10 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
@@ -28,12 +28,15 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
+import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 
+@ExtendWith(MockitoExtension.class)
 public class DBStackToDatabaseStackConverterTest {
 
     private static final String NETWORK_ATTRIBUTES = "{ \"foo\": \"bar\" }";
@@ -55,11 +58,8 @@ public class DBStackToDatabaseStackConverterTest {
     @Mock
     private EnvironmentService environmentService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        // the converter will probably get mocks soon
-        initMocks(this);
-
         dbStack = new DBStack();
         dbStack.setId(1L);
         dbStack.setName("mystack");
@@ -95,27 +95,27 @@ public class DBStackToDatabaseStackConverterTest {
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
-        assertEquals(1, convertedStack.getNetwork().getParameters().size());
-        assertEquals("bar", convertedStack.getNetwork().getParameters().get("foo"));
+        assertThat(convertedStack.getNetwork().getParameters().size()).isEqualTo(1);
+        assertThat(convertedStack.getNetwork().getParameters().get("foo")).isEqualTo("bar");
 
-        assertEquals("myserver", convertedStack.getDatabaseServer().getServerId());
-        assertEquals("db.m3.medium", convertedStack.getDatabaseServer().getFlavor());
-        assertEquals(DatabaseEngine.POSTGRESQL, convertedStack.getDatabaseServer().getEngine());
-        assertEquals("org.postgresql.Driver", convertedStack.getDatabaseServer().getConnectionDriver());
-        assertEquals("root", convertedStack.getDatabaseServer().getRootUserName());
-        assertEquals("cloudera", convertedStack.getDatabaseServer().getRootPassword());
-        assertEquals(50L, convertedStack.getDatabaseServer().getStorageSize().longValue());
-        assertEquals(List.of("sg-1234"), convertedStack.getDatabaseServer().getSecurity().getCloudSecurityIds());
-        // FIXME test instanceStatus
-        assertEquals(2, convertedStack.getDatabaseServer().getParameters().size());
-        assertEquals("that", convertedStack.getDatabaseServer().getParameters().get("this"));
-        assertEquals("template", convertedStack.getTemplate());
+        assertThat(convertedStack.getDatabaseServer().getServerId()).isEqualTo("myserver");
+        assertThat(convertedStack.getDatabaseServer().getFlavor()).isEqualTo("db.m3.medium");
+        assertThat(convertedStack.getDatabaseServer().getEngine()).isEqualTo(DatabaseEngine.POSTGRESQL);
+        assertThat(convertedStack.getDatabaseServer().getConnectionDriver()).isEqualTo("org.postgresql.Driver");
+        assertThat(convertedStack.getDatabaseServer().getRootUserName()).isEqualTo("root");
+        assertThat(convertedStack.getDatabaseServer().getRootPassword()).isEqualTo("cloudera");
+        assertThat(convertedStack.getDatabaseServer().getStorageSize()).isEqualTo(50L);
+        assertThat(convertedStack.getDatabaseServer().getSecurity().getCloudSecurityIds()).isEqualTo(List.of("sg-1234"));
+        assertThat(convertedStack.getDatabaseServer().getStatus()).isEqualTo(CREATE_REQUESTED);
+        assertThat(convertedStack.getDatabaseServer().getParameters().size()).isEqualTo(2);
+        assertThat(convertedStack.getDatabaseServer().getParameters().get("this")).isEqualTo("that");
+        assertThat(convertedStack.getTemplate()).isEqualTo("template");
 
         Map<String, String> tags = convertedStack.getTags();
-        assertEquals(3, tags.size());
-        assertEquals("uvalue1", tags.get("ukey1"));
-        assertEquals("dvalue1", tags.get("dkey1"));
-        assertEquals("value1", tags.get("key1"));
+        assertThat(tags.size()).isEqualTo(3);
+        assertThat(tags.get("ukey1")).isEqualTo("uvalue1");
+        assertThat(tags.get("dkey1")).isEqualTo("dvalue1");
+        assertThat(tags.get("key1")).isEqualTo("value1");
     }
 
     @Test
@@ -128,10 +128,10 @@ public class DBStackToDatabaseStackConverterTest {
 
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
-        assertNull(convertedStack.getNetwork());
-        assertNull(convertedStack.getDatabaseServer());
-        assertNull(convertedStack.getTemplate());
-        assertEquals(0, convertedStack.getTags().size());
+        assertThat(convertedStack.getNetwork()).isNull();
+        assertThat(convertedStack.getDatabaseServer()).isNull();
+        assertThat(convertedStack.getTemplate()).isNull();
+        assertThat(convertedStack.getTags().size()).isEqualTo(0);
     }
 
     @Test
@@ -159,9 +159,9 @@ public class DBStackToDatabaseStackConverterTest {
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
         Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
-        assertFalse(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER));
-        assertFalse(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER));
-        assertEquals(2, parameters.size());
+        assertThat(parameters.containsKey(RESOURCE_GROUP_NAME_PARAMETER)).isFalse();
+        assertThat(parameters.containsKey(RESOURCE_GROUP_USAGE_PARAMETER)).isFalse();
+        assertThat(parameters.size()).isEqualTo(2);
     }
 
     @Test
@@ -190,8 +190,60 @@ public class DBStackToDatabaseStackConverterTest {
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
         Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
-        assertEquals(RESOURCE_GROUP, parameters.get(RESOURCE_GROUP_NAME_PARAMETER).toString());
-        assertEquals(ResourceGroupUsage.SINGLE.name(), parameters.get(RESOURCE_GROUP_USAGE_PARAMETER).toString());
-        assertEquals(4, parameters.size());
+        assertThat(parameters.get(RESOURCE_GROUP_NAME_PARAMETER).toString()).isEqualTo(RESOURCE_GROUP);
+        assertThat(parameters.get(RESOURCE_GROUP_USAGE_PARAMETER).toString()).isEqualTo(ResourceGroupUsage.SINGLE.name());
+        assertThat(parameters.size()).isEqualTo(4);
     }
+
+    @Test
+    void testConversionWithNullSslConfig() {
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        dbStack.setDatabaseServer(server);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isFalse();
+    }
+
+    @Test
+    void testConversionWithSslCertificateNone() {
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        dbStack.setDatabaseServer(server);
+        dbStack.setSslConfig(new SslConfig());
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isFalse();
+    }
+
+    @Test
+    void testConversionWithSslCertificateBringYourOwn() {
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        dbStack.setDatabaseServer(server);
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setSslCertificateType(SslCertificateType.BRING_YOUR_OWN);
+        dbStack.setSslConfig(sslConfig);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isTrue();
+    }
+
+    @Test
+    void testConversionWithSslCertificateCloudProviderOwned() {
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        dbStack.setDatabaseServer(server);
+        SslConfig sslConfig = new SslConfig();
+        sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        dbStack.setSslConfig(sslConfig);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isTrue();
+    }
+
 }

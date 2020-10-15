@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -45,9 +44,6 @@ public class RedbeamsCreationService {
 
     @Inject
     private RedbeamsFlowManager flowManager;
-
-    @Inject
-    private CostTagging costTagging;
 
     public DBStack launchDatabaseServer(DBStack dbStack, String clusterCrn) {
         if (LOGGER.isDebugEnabled()) {
@@ -118,9 +114,10 @@ public class RedbeamsCreationService {
             throw new RedbeamsException("Failed to retrieve database stack template for cloud platform", e);
         }
 
-        if (dbStack.getDatabaseServer().getConnectionDriver() == null) {
-            String connectionDriver = dbStack.getDatabaseServer().getDatabaseVendor().connectionDriver();
-            dbStack.getDatabaseServer().setConnectionDriver(connectionDriver);
+        DatabaseServer databaseServer = dbStack.getDatabaseServer();
+        if (databaseServer.getConnectionDriver() == null) {
+            String connectionDriver = databaseServer.getDatabaseVendor().connectionDriver();
+            databaseServer.setConnectionDriver(connectionDriver);
             LOGGER.info("Database server allocation request lacked a connection driver; defaulting to {}", connectionDriver);
         }
 
@@ -136,11 +133,11 @@ public class RedbeamsCreationService {
         dbServerConfig.setName(dbStack.getName());
         dbServerConfig.setDescription(dbStack.getDescription());
         dbServerConfig.setEnvironmentId(dbStack.getEnvironmentId());
-        dbServerConfig.setConnectionDriver(dbStack.getDatabaseServer().getConnectionDriver());
+        dbServerConfig.setConnectionDriver(databaseServer.getConnectionDriver());
         // username and password are set during conversion to DBStack
-        dbServerConfig.setConnectionUserName(dbStack.getDatabaseServer().getRootUserName());
-        dbServerConfig.setConnectionPassword(dbStack.getDatabaseServer().getRootPassword());
-        dbServerConfig.setDatabaseVendor(dbStack.getDatabaseServer().getDatabaseVendor());
+        dbServerConfig.setConnectionUserName(databaseServer.getRootUserName());
+        dbServerConfig.setConnectionPassword(databaseServer.getRootPassword());
+        dbServerConfig.setDatabaseVendor(databaseServer.getDatabaseVendor());
         dbServerConfig.setDbStack(dbStack);
         // host and port are set after allocation is complete, so leave as null
         dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
@@ -148,4 +145,5 @@ public class RedbeamsCreationService {
 
         databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE, false);
     }
+
 }

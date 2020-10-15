@@ -72,8 +72,7 @@ public class AzureDatabaseTemplateBuilder {
             model.put("skuName", azureDatabaseServerView.getSkuName());
             model.put("skuSizeMB", azureDatabaseServerView.getAllocatedStorageInMb());
             model.put("skuTier", getSkuTier(azureDatabaseServerView));
-            // FUTURE: When CM scm_prepare_database.sh supports it, use TLS
-            model.put("sslEnforcement", false);
+            model.put("useSslEnforcement", azureDatabaseServerView.isUseSslEnforcement());
             model.put("storageAutoGrow", azureDatabaseServerView.getStorageAutoGrow());
             model.put("subnets", azureNetworkView.getSubnets());
             String[] subnets = azureNetworkView.getSubnets().split(",");

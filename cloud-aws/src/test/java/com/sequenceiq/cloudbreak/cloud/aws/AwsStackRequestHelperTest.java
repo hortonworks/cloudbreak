@@ -134,21 +134,22 @@ public class AwsStackRequestHelperTest {
     }
 
     @Test
-    public void testGetStackParameters() {
+    public void testGetStackParametersDb() {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
-        when(databaseServer.getStorageSize()).thenReturn(Long.valueOf(50L));
-        when(databaseServer.getParameter("backupRetentionPeriod", Integer.class)).thenReturn(Integer.valueOf(1));
+        when(databaseServer.getStorageSize()).thenReturn(50L);
+        when(databaseServer.getParameter("backupRetentionPeriod", Integer.class)).thenReturn(1);
         when(databaseServer.getFlavor()).thenReturn("db.m3.medium");
         when(databaseServer.getServerId()).thenReturn("myserver");
         when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
         when(databaseServer.getStringParameter("engineVersion")).thenReturn("10.6");
         when(databaseServer.getStringParameter("multiAZ")).thenReturn("true");
         when(databaseServer.getStringParameter("storageType")).thenReturn("gp2");
-        when(databaseServer.getPort()).thenReturn(Integer.valueOf(5432));
+        when(databaseServer.getPort()).thenReturn(5432);
         when(databaseServer.getRootUserName()).thenReturn("root");
         when(databaseServer.getRootPassword()).thenReturn("cloudera");
         when(databaseServer.getSecurity().getCloudSecurityIds()).thenReturn(List.of("sg-1234", "sg-5678"));
+        when(databaseServer.isUseSslEnforcement()).thenReturn(true);
 
         when(cloudContext.getUserName()).thenReturn("bob@cloudera.com");
 
@@ -169,13 +170,15 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "StorageTypeParameter", "gp2");
         assertContainsParameter(parameters, "VPCSecurityGroupsParameter", "sg-1234,sg-5678");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
+        assertContainsParameter(parameters, "DBParameterGroupNameParameter", "dpg-myserver");
+        assertContainsParameter(parameters, "DBParameterGroupFamilyParameter", "postgres10");
 
         parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
         assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 
     @Test
-    public void testGetMinimalStackParameters() {
+    public void testGetMinimalStackParametersDb() {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
         when(databaseServer.getStorageSize()).thenReturn(null);
@@ -201,6 +204,8 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "MultiAZParameter");
         assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
+        assertDoesNotContainParameter(parameters, "DBParameterGroupNameParameter");
+        assertDoesNotContainParameter(parameters, "DBParameterGroupFamilyParameter");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
 
         parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
@@ -211,6 +216,8 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "MultiAZParameter");
         assertDoesNotContainParameter(parameters, "StorageTypeParameter");
         assertDoesNotContainParameter(parameters, "PortParameter");
+        assertDoesNotContainParameter(parameters, "DBParameterGroupNameParameter");
+        assertDoesNotContainParameter(parameters, "DBParameterGroupFamilyParameter");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 

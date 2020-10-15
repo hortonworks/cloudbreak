@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
@@ -29,6 +30,8 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -53,6 +56,9 @@ public class DatabaseService {
 
     @Inject
     private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
+
+    @Inject
+    private PlatformConfig platformConfig;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
@@ -121,8 +127,14 @@ public class DatabaseService {
     private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(env.getCrn());
-        req.setDatabaseServer(getDatabaseServerRequest(CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US)), sdxCluster));
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US));
+        req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster));
         req.setClusterCrn(sdxCluster.getCrn());
+        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform)) {
+            SslConfigurationV4Request sslConfigurationV4Request = new SslConfigurationV4Request();
+            sslConfigurationV4Request.setSslMode(SslMode.ENABLED);
+            req.setSslConfiguration(sslConfigurationV4Request);
+        }
         return req;
     }
 
