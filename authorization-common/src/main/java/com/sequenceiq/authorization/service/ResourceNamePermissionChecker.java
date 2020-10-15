@@ -26,8 +26,12 @@ public class ResourceNamePermissionChecker extends ResourcePermissionChecker<Che
         String resourceName = getCommonPermissionCheckingUtils().getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
         ResourceBasedCrnProvider resourceBasedCrnProvider = getCommonPermissionCheckingUtils().getResourceBasedCrnProvider(action);
         String resourceCrn = resourceBasedCrnProvider.getResourceCrnByResourceName(resourceName);
-        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
-        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        if (getCommonPermissionCheckingUtils().legacyAuthorizationNeeded()) {
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        } else {
+            Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        }
     }
 
     @Override
