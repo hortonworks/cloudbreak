@@ -32,9 +32,6 @@ public class RedbeamsCreationService {
     @VisibleForTesting
     static final long DEFAULT_WORKSPACE = 0L;
 
-    @VisibleForTesting
-    static final String USE_PRIVATE_ENDPOINT = "usePrivateEndpoint";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsCreationService.class);
 
     @Inject

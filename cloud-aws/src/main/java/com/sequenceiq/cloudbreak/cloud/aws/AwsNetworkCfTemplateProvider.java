@@ -85,7 +85,7 @@ public class AwsNetworkCfTemplateProvider {
     }
 
     private List<AwsServiceEndpointView> createInterfaceServiceEndpointsIfNeeded(NetworkCreationRequest networkCreationRequest, List<SubnetRequest> subnets) {
-        if (USE_SERVICE_ENDPOINT.equals(networkCreationRequest.getEndpointType()) && CollectionUtils.isNotEmpty(interfaceServices)) {
+        if (USE_SERVICE_ENDPOINT == networkCreationRequest.getEndpointType() && CollectionUtils.isNotEmpty(interfaceServices)) {
             List<AwsServiceEndpointView> interfaceServiceEndpoints = createInterfaceServiceEndpoints(networkCreationRequest, subnets);
             LOGGER.debug("The following interface service endpoints will be created in the new vpc: {}", interfaceServiceEndpoints);
             return interfaceServiceEndpoints;

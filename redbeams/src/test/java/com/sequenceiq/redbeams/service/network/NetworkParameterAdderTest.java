@@ -18,12 +18,12 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.model.EndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder;
-import com.sequenceiq.redbeams.converter.spi.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
 public class NetworkParameterAdderTest {

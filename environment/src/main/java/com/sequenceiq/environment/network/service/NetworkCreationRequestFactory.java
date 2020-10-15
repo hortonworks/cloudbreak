@@ -21,7 +21,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCre
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.v1.converter.ServiceEndpointCreationToEndpointTypeConverter;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;

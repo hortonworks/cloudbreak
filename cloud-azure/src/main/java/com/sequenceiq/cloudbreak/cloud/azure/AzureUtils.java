@@ -449,11 +449,6 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Optional<String> deleteVirtualNetworkLink(AzureClient azureClient, String databaseServerId, boolean cancelException) {
-        return handleDeleteErrors(azureClient::deleteGenericResourceById, "VirtualNetworkLink", databaseServerId, cancelException);
-    }
-
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Optional<String> deletePrivateDnsZone(AzureClient azureClient, String privateDnsZoneId, boolean cancelException) {
         return handleDeleteErrors(azureClient::deletePrivateDnsZone, "PrivateDnsZone", privateDnsZoneId, cancelException);
     }

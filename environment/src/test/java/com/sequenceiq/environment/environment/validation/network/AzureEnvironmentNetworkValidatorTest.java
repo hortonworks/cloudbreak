@@ -23,8 +23,13 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.network.azure.AzureEnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkValidatorTest {
@@ -79,22 +84,15 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenPrivateEndpointAndPrivateEndpointNetworkPoliciesEnabled() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         AzureParams azureParams = AzureParams.builder()
-                .withNetworkId("")
+                .withNetworkId("networkId")
                 .withResourceGroupName("networkResourceGroupName")
                 .build();
-
-        NetworkDto networkDto = NetworkDto.builder()
-                .withId(1L)
-                .withName("networkName")
-                .withResourceCrn("aResourceCRN")
-                .withAzure(azureParams)
-                .withSubnetMetas(Map.of())
-                .withNetworkId("networkId")
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, RegistrationType.EXISTING)
                 .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
                 .build();
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(true));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        EnvironmentDto environmentDto = new EnvironmentDto();
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
@@ -123,11 +121,40 @@ class AzureEnvironmentNetworkValidatorTest {
                 .build();
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        EnvironmentDto environmentDto = new EnvironmentDto();
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
+    }
+
+    @Test
+    void testValidateDuringFlowWhenPrivateEndpointAndMultipleResourceGroup() {
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        AzureParams azureParams = AzureParams.builder()
+                .withNetworkId("")
+                .withResourceGroupName("networkResourceGroupName")
+                .build();
+
+        NetworkDto networkDto = NetworkDto.builder()
+                .withId(1L)
+                .withName("networkName")
+                .withResourceCrn("aResourceCRN")
+                .withAzure(azureParams)
+                .withSubnetMetas(Map.of())
+                .withNetworkId("networkId")
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
+        when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg(null, ResourceGroupUsagePattern.USE_MULTIPLE);
+
+        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+
+        assertTrue(validationResultBuilder.build().hasError());
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
+                "Private endpoint creation is not supported for multiple resource group deployment model, please use single single " +
+                        "resource groups to be able to use private endpoints in Azure!"));
     }
 
     @Test
@@ -299,9 +326,37 @@ class AzureEnvironmentNetworkValidatorTest {
                 "If networkId is specified, then resourceGroupName must be specified too."));
     }
 
+    @Test
+    void testValidateDuringRequestWhenServiceEndpointCreationIsDisabled() {
+        AzureParams azureParams = NetworkTestUtils.getAzureParams(true, true, true);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDtoBuilder(azureParams, null, null, azureParams.getNetworkId(), null, 1, RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.DISABLED)
+                .build();
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateDuringRequest(networkDto, resultBuilder);
+
+        NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
+                "Service endpoint creation cannot be DISABLED, it should be either ENABLED or ENABLED_PRIVATE_ENDPOINT"));
+    }
+
     private Map<String, CloudSubnet> getCloudSubnets(boolean privateEndpointNetworkPoliciesEnabled) {
         CloudSubnet cloudSubnetOne = new CloudSubnet();
         cloudSubnetOne.putParameter("privateEndpointNetworkPolicies", privateEndpointNetworkPoliciesEnabled ? "enabled" : "disabled");
         return Map.of("subnet-one", cloudSubnetOne);
+    }
+
+    private EnvironmentDto environmentDtoWithSingleRg(String name, ResourceGroupUsagePattern resourceGroupUsagePattern) {
+        return EnvironmentDto.builder()
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(
+                                AzureParametersDto.builder()
+                                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                                .withName(name)
+                                                .withResourceGroupUsagePattern(resourceGroupUsagePattern)
+                                                .build())
+                                        .build()
+                        ).build())
+                .build();
     }
 }

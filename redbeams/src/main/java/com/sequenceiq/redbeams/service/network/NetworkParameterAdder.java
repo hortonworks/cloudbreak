@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.redbeams.converter.spi.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 
@@ -100,7 +100,7 @@ public class NetworkParameterAdder {
         return subnetChooserService.chooseSubnetForPrivateEndpoint(
                 detailedEnvironmentResponse.getNetwork().getSubnetMetas().values(), dbStack, detailedEnvironmentResponse.getNetwork().isExistingNetwork()).stream()
                 .findFirst()
-                .map(csn -> SubnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
+                .map(csn -> subnetListerService.expandAzureResourceId(csn, detailedEnvironmentResponse, subscriptionId))
                 .map(sn -> sn.getId()).orElse(null);
     }
 }

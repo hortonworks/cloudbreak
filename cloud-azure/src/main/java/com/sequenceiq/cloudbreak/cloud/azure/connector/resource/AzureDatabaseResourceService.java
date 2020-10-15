@@ -4,7 +4,6 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -161,25 +160,25 @@ public class AzureDatabaseResourceService {
 
         // TODO simplify after final form of template is reached
 
-        List<CloudResourceStatus> deletedResourcesList = new ArrayList<>();
-
         List<CloudResource> azureGenericResources = findResources(resources, List.of(AZURE_PRIVATE_ENDPOINT));
         LOGGER.debug("Deleting dns zone groups and azure private endpoints {}", azureGenericResources);
         azureUtils.deleteGenericResources(client, azureGenericResources.stream().map(CloudResource::getReference).collect(Collectors.toList()));
         azureGenericResources.forEach(cr -> persistenceNotifier.notifyDeletion(cr, cloudContext));
 
-        findResources(resources, List.of(AZURE_DATABASE))
-                .forEach(r -> {
-                    LOGGER.debug("Deleting postgres server {}", r.getReference());
-                    azureUtils.deleteDatabaseServer(client, r.getReference(), force);
-                    persistenceNotifier.notifyDeletion(r, cloudContext);
-                    deletedResourcesList.add(new CloudResourceStatus(CloudResource.builder()
-                            .type(AZURE_DATABASE)
-                            .name(r.getReference())
-                            .build(), ResourceStatus.DELETED));
-                });
+        return findResources(resources, List.of(AZURE_DATABASE)).stream()
+                .map(r -> deleteDatabaseServerAndNotify(r, cloudContext, client, persistenceNotifier, force))
+                .collect(Collectors.toList());
+    }
 
-        return deletedResourcesList;
+    private CloudResourceStatus deleteDatabaseServerAndNotify(
+            CloudResource r, CloudContext cloudContext, AzureClient client, PersistenceNotifier persistenceNotifier, boolean force) {
+        LOGGER.debug("Deleting postgres server {}", r.getReference());
+        azureUtils.deleteDatabaseServer(client, r.getReference(), force);
+        persistenceNotifier.notifyDeletion(r, cloudContext);
+        return new CloudResourceStatus(CloudResource.builder()
+                .type(AZURE_DATABASE)
+                .name(r.getReference())
+                .build(), ResourceStatus.DELETED);
     }
 
     private List<CloudResource> findResources(List<CloudResource> resources, List<ResourceType> resourceTypes) {

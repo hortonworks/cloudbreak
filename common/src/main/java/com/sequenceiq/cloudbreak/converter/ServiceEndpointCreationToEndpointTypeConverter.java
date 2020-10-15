@@ -1,4 +1,4 @@
-package com.sequenceiq.redbeams.converter.spi;
+package com.sequenceiq.cloudbreak.converter;
 
 import org.springframework.stereotype.Component;
 
@@ -10,15 +10,16 @@ public class ServiceEndpointCreationToEndpointTypeConverter {
 
     public EndpointType convert(ServiceEndpointCreation serviceEndpointCreation) {
         if (serviceEndpointCreation == null) {
-            return EndpointType.USE_SERVICE_ENDPOINT;
+            return EndpointType.NONE;
         }
         switch (serviceEndpointCreation) {
             case ENABLED_PRIVATE_ENDPOINT:
                 return EndpointType.USE_PRIVATE_ENDPOINT;
             case ENABLED:
+                return EndpointType.USE_SERVICE_ENDPOINT;
             case DISABLED:
             default:
-                return EndpointType.USE_SERVICE_ENDPOINT;
+                return EndpointType.NONE;
         }
     }
 }

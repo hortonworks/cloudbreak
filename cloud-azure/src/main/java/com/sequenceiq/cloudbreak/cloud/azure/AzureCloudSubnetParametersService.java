@@ -16,7 +16,7 @@ public class AzureCloudSubnetParametersService {
     private static final String DISABLED = "disabled";
 
     public void addPrivateEndpointNetworkPolicies(CloudSubnet cloudSubnet, String state) {
-        cloudSubnet.putParameter(PRIVATE_ENDPOINT_NETWORK_POLICIES, "Disabled".equals(state) ? DISABLED : ENABLED);
+        cloudSubnet.putParameter(PRIVATE_ENDPOINT_NETWORK_POLICIES, "Disabled".equalsIgnoreCase(state) ? DISABLED : ENABLED);
     }
 
     public boolean isPrivateEndpointNetworkPoliciesDisabled(CloudSubnet cloudSubnet) {

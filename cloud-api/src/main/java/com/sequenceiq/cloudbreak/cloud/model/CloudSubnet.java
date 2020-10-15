@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-
-import org.apache.commons.collections.map.HashedMap;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -31,7 +30,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
     private boolean igwAvailable;
 
-    private Map<String, String> properties;
+    private Map<String, String> properties = new HashMap<>();
 
     public CloudSubnet() {
     }
@@ -129,16 +128,10 @@ public class CloudSubnet extends DynamicModel implements Serializable {
     }
 
     public void withProperty(String key, String value) {
-        if (properties == null) {
-            properties = new HashedMap();
-        }
         properties.put(key, value);
     }
 
     public String getProperty(String key) {
-        if (properties == null) {
-            return "";
-        }
         return properties.get(key);
     }
 

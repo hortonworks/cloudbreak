@@ -32,7 +32,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
-import com.sequenceiq.environment.environment.v1.converter.ServiceEndpointCreationToEndpointTypeConverter;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
