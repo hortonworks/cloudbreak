@@ -23,6 +23,8 @@ public class DatabaseServer extends DynamicModel {
 
     private final Integer port;
 
+    private final boolean useSslEnforcement;
+
     private final Long storageSize;
 
     private final Security security;
@@ -35,7 +37,7 @@ public class DatabaseServer extends DynamicModel {
 
     private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver,
             String connectorJarUrl, String rootUserName, String rootPassword,
-            Integer port, Long storageSize, Security security, InstanceStatus status, String location, boolean highAvailability,
+            Integer port, boolean useSslEnforcement, Long storageSize, Security security, InstanceStatus status, String location, boolean highAvailability,
             Map<String, Object> parameters) {
         super(parameters);
         this.serverId = serverId;
@@ -46,6 +48,7 @@ public class DatabaseServer extends DynamicModel {
         this.rootUserName = rootUserName;
         this.rootPassword = rootPassword;
         this.port = port;
+        this.useSslEnforcement = useSslEnforcement;
         this.storageSize = storageSize;
         this.security = security;
         this.status = status;
@@ -85,6 +88,10 @@ public class DatabaseServer extends DynamicModel {
         return port;
     }
 
+    public boolean isUseSslEnforcement() {
+        return useSslEnforcement;
+    }
+
     public Long getStorageSize() {
         return storageSize;
     }
@@ -115,6 +122,7 @@ public class DatabaseServer extends DynamicModel {
                 + ", connectorJarUrl='" + connectorJarUrl + '\''
                 + ", rootUserName='" + rootUserName + '\''
                 + ", port='" + port + '\''
+                + ", useSslEnforcement='" + useSslEnforcement + '\''
                 + ", storageSize=" + storageSize
                 + ", security=" + security
                 + ", status=" + status
@@ -143,6 +151,8 @@ public class DatabaseServer extends DynamicModel {
         private String rootPassword;
 
         private Integer port;
+
+        private boolean useSslEnforcement;
 
         private Long storageSize;
 
@@ -201,6 +211,11 @@ public class DatabaseServer extends DynamicModel {
             return this;
         }
 
+        public Builder useSslEnforcement(boolean useSslEnforcement) {
+            this.useSslEnforcement = useSslEnforcement;
+            return this;
+        }
+
         public Builder storageSize(Long storageSize) {
             this.storageSize = storageSize;
             return this;
@@ -228,8 +243,9 @@ public class DatabaseServer extends DynamicModel {
 
         public DatabaseServer build() {
             return new DatabaseServer(serverId, flavor, engine, connectionDriver, connectorJarUrl, rootUserName, rootPassword,
-                port, storageSize, security, status, location, highAvailability, params);
+                port, useSslEnforcement, storageSize, security, status, location, highAvailability, params);
         }
 
     }
+
 }

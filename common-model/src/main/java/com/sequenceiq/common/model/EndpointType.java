@@ -22,7 +22,7 @@ public enum EndpointType {
     public static EndpointType safeValueOf(String value) {
         try {
             return valueOf(value);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | NullPointerException e) {
             return NONE;
         }
     }
