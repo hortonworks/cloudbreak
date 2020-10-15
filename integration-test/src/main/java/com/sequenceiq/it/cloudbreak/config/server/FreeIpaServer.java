@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.FreeIpaTest;
 
 @Component
@@ -33,6 +34,12 @@ public class FreeIpaServer {
 
     @Value("${integrationtest.user.secretkey:}")
     private String secretKey;
+
+    @Value("${integrationtest.user.crn:}")
+    private String userCrn;
+
+    @Value("${integrationtest.user.name:}")
+    private String userName;
 
     @Inject
     private TestParameter testParameter;
@@ -55,6 +62,8 @@ public class FreeIpaServer {
         testParameter.put(FreeIpaTest.FREEIPA_SERVER_ROOT, server + freeIpaRootContextPath);
         testParameter.put(FreeIpaTest.ACCESS_KEY, accessKey);
         testParameter.put(FreeIpaTest.SECRET_KEY, secretKey);
+        testParameter.put(CloudbreakTest.USER_CRN, userCrn);
+        testParameter.put(CloudbreakTest.USER_NAME, userName);
     }
 
     private void configureFromCliProfile() throws IOException {

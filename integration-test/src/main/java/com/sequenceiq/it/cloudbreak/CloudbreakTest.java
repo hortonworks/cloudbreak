@@ -38,6 +38,10 @@ public class CloudbreakTest extends GherkinTest {
 
     public static final String SECRET_KEY = "SECRET_KEY";
 
+    public static final String USER_CRN = "USER_CRN";
+
+    public static final String USER_NAME = "USER_NAME";
+
     public static final String SECONDARY_ACCESS_KEY = "SECONDARY_ACCESS_KEY";
 
     public static final String SECONDARY_SECRET_KEY = "SECONDARY_SECRET_KEY";
@@ -61,6 +65,12 @@ public class CloudbreakTest extends GherkinTest {
 
     @Value("${integrationtest.user.secretkey}")
     private String secretkey;
+
+    @Value("${integrationtest.user.crn}")
+    private String userCrn;
+
+    @Value("${integrationtest.user.name}")
+    private String userName;
 
     @Value("${mock.imagecatalog.server:localhost}")
     private String mockImageCatalogAddr;
@@ -96,6 +106,8 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testContext.putContextParam(ACCESS_KEY, accesskey);
         testContext.putContextParam(SECRET_KEY, secretkey);
+        testContext.putContextParam(USER_CRN, userCrn);
+        testContext.putContextParam(USER_NAME, userName);
 
         testContext.putContextParam(IMAGE_CATALOG_MOCK_SERVER_ROOT, mockImageCatalogAddr);
 

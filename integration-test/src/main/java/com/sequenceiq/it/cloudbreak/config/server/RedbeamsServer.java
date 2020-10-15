@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.RedBeamsTest;
 
 @Component
@@ -33,6 +34,12 @@ public class RedbeamsServer {
 
     @Value("${integrationtest.user.secretkey:}")
     private String secretKey;
+
+    @Value("${integrationtest.user.crn:}")
+    private String userCrn;
+
+    @Value("${integrationtest.user.name:}")
+    private String userName;
 
     @Inject
     private TestParameter testParameter;
@@ -55,6 +62,8 @@ public class RedbeamsServer {
         testParameter.put(RedBeamsTest.REDBEAMS_SERVER_ROOT, server + rootContextPath);
         testParameter.put(RedBeamsTest.ACCESS_KEY, accessKey);
         testParameter.put(RedBeamsTest.SECRET_KEY, secretKey);
+        testParameter.put(CloudbreakTest.USER_CRN, userCrn);
+        testParameter.put(CloudbreakTest.USER_NAME, userName);
     }
 
     private void configureFromCliProfile() throws IOException {

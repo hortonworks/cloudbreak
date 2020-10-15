@@ -39,6 +39,8 @@ integrationtest:
   user:
     accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlcg==
     secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
+    crn:
+    name:
   testsuite:
     pollingInterval: 1000
     threadPoolSize: 8

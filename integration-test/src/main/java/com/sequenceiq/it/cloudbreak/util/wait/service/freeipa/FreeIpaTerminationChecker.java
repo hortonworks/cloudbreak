@@ -74,7 +74,7 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get freeIpa due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            LOGGER.error("Exit waiting! Failed to get freeIpa, because of: {}", e.getMessage(), e);
+            LOGGER.warn("Exit waiting! Failed to get freeIpa, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;

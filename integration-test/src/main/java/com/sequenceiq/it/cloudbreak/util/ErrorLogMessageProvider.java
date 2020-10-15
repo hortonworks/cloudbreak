@@ -25,7 +25,7 @@ public class ErrorLogMessageProvider {
 
     public Throwable getException(Map<String, Exception> exceptionsDuringTest) {
         return exceptionsDuringTest.values().stream()
-                .filter(exception -> exception.getCause() instanceof TestFailException)
+                .filter(exception -> exception.getCause() instanceof TestFailException || exception instanceof TestFailException)
                 .findFirst()
                 .orElse(null);
     }

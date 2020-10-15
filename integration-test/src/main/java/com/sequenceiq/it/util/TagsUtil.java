@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.testng.asserts.SoftAssert;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -109,14 +110,17 @@ public class TagsUtil {
     }
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
-        if (response.getTagValue(tag).contains(testContext.getActingUserName())) {
-            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] contains [%s] acting user name! ", tag, response.getTagValue(tag),
-                    testContext.getActingUserName()));
+        Crn actingUserCrn = testContext.getActingUserCrn();
+        Crn clouderaCreatorResourceName = Crn.fromString(response.getTagValue(tag));
+
+        if (clouderaCreatorResourceName.equals(actingUserCrn)) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, clouderaCreatorResourceName,
+                    actingUserCrn));
         } else {
-            LOGGER.error("Default tag: [{}] value is: [{}] NOT contains [{}] acting user name!", tag, response.getTagValue(tag),
-                    testContext.getActingUserName());
-            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT contains [%s] acting user name! ", tag,
-                    response.getTagValue(tag), testContext.getActingUserName()));
+            LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user CRN!", tag, clouderaCreatorResourceName,
+                    actingUserCrn);
+            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user CRN! ", tag,
+                    clouderaCreatorResourceName, actingUserCrn));
         }
     }
 

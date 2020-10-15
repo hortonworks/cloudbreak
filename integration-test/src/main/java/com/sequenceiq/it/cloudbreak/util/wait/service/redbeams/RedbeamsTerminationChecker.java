@@ -77,7 +77,7 @@ public class RedbeamsTerminationChecker<T extends RedbeamsWaitObject> extends Ex
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get redbeams due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            LOGGER.error("Exit waiting! Failed to get redbeams, because of: {}", e.getMessage(), e);
+            LOGGER.warn("Exit waiting! Failed to get redbeams, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;

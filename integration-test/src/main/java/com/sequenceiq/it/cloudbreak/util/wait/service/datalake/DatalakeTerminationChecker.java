@@ -77,7 +77,7 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get datalake due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
-            LOGGER.error("Exit waiting! Failed to get datalake, because of: {}", e.getMessage(), e);
+            LOGGER.warn("Exit waiting! Failed to get datalake, because of: {}", e.getMessage(), e);
             return true;
         }
         return false;

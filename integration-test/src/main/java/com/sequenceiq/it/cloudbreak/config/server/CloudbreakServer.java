@@ -41,6 +41,12 @@ public class CloudbreakServer {
     @Value("${integrationtest.user.secretkey:}")
     private String secretKey;
 
+    @Value("${integrationtest.user.crn:}")
+    private String userCrn;
+
+    @Value("${integrationtest.user.name:}")
+    private String userName;
+
     @Value("${integrationtest.dp.profile:}")
     private String profile;
 
@@ -71,6 +77,8 @@ public class CloudbreakServer {
         testParameter.put(CloudbreakTest.CLOUDBREAK_SERVER_INTERNAL_ROOT, "http://" + cloudbreakUrl + cbRootContextPath);
         testParameter.put(CloudbreakTest.ACCESS_KEY, accessKey);
         testParameter.put(CloudbreakTest.SECRET_KEY, secretKey);
+        testParameter.put(CloudbreakTest.USER_CRN, userCrn);
+        testParameter.put(CloudbreakTest.USER_NAME, userName);
 
         testParameter.put(IMAGE_CATALOG_MOCK_SERVER_ROOT, mockImageCatalogAddr);
     }
