@@ -102,7 +102,7 @@ public class DatabaseConfig {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
         config.setDriverClassName("io.opentracing.contrib.jdbc.TracingDriver");
-        config.setJdbcUrl(String.format("jdbc:tracing:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
+        config.setJdbcUrl(String.format("jdbc:tracing:postgresql://%s/%s?currentSchema=%s&traceWithActiveSpanOnly=true", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
         config.setPassword(dbPassword);
         config.setMaximumPoolSize(poolSize);
