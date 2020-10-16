@@ -28,6 +28,7 @@ import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.resources.Subscription;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureResourceIdProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationPoller;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
@@ -66,7 +67,7 @@ public class AzureImageServiceTest {
     private PersistenceNotifier persistenceNotifier;
 
     @Mock
-    private AzureImageIdProviderService azureImageIdProviderService;
+    private AzureResourceIdProviderService azureResourceIdProviderService;
 
     @Mock
     private AzureManagedImageCreationPoller azureManagedImageCreationPoller;
@@ -95,7 +96,7 @@ public class AzureImageServiceTest {
         setupAuthenticatedContext();
         setupAzureClient();
         when(customVMImageNameProvider.get(anyString(), anyString())).thenReturn(CUSTOM_IMAGE_NAME);
-        when(azureImageIdProviderService.generateImageId(anyString(), anyString(), anyString())).thenReturn(CUSTOM_IMAGE_ID);
+        when(azureResourceIdProviderService.generateImageId(anyString(), anyString(), anyString())).thenReturn(CUSTOM_IMAGE_ID);
     }
 
     @Test

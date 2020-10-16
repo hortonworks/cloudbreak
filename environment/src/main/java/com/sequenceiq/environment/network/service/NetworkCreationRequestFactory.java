@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.network.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -8,14 +10,20 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
@@ -72,12 +80,35 @@ public class NetworkCreationRequestFactory {
         return builder.build();
     }
 
+    public NetworkResourcesCreationRequest createProviderSpecificNetworkResources(EnvironmentDto environment, BaseNetwork baseNetwork) {
+        NetworkDto networkDto = environment.getNetwork();
+        NetworkResourcesCreationRequest.Builder builder = new NetworkResourcesCreationRequest.Builder()
+                .withNetworkId(NullUtil.getIfNotNull(baseNetwork, BaseNetwork::getNetworkId))
+                .withNetworkResourceGroup(NullUtil.getIfNotNull(baseNetwork, this::getNetworkResourceGroupName))
+                .withExistingNetwork(NullUtil.getIfNotNull(baseNetwork, this::isExistingNetwork))
+                .withCloudCredential(getCredential(environment))
+                .withCloudContext(getCloudContext(environment))
+                .withRegion(Region.region(environment.getLocation().getName()))
+                .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
+                .withTags(networkTagProvider.getTags(environment));
+                getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
+        return builder.build();
+    }
+
+    private boolean isExistingNetwork(BaseNetwork baseNetwork) {
+        return baseNetwork.getRegistrationType() == RegistrationType.EXISTING;
+    }
+
     private CloudCredential getCredential(EnvironmentDto environment) {
         return credentialToCloudCredentialConverter.convert(environment.getCredential());
     }
 
     public String getStackName(EnvironmentDto environment) {
         return String.join("-", environment.getName(), String.valueOf(environment.getNetwork().getId()));
+    }
+
+    private String getNetworkResourceGroupName(BaseNetwork baseNetwork) {
+        return baseNetwork instanceof AzureNetwork ? ((AzureNetwork) baseNetwork).getResourceGroupName() : null;
     }
 
     private boolean getPrivateSubnetEnabled(EnvironmentDto environmentDto) {
@@ -108,5 +139,16 @@ public class NetworkCreationRequestFactory {
 
     private String getUserFromCrn(String crn) {
         return Optional.ofNullable(Crn.fromString(crn)).map(Crn::getUserId).orElse(null);
+    }
+
+    private CloudContext getCloudContext(EnvironmentDto environment) {
+        return new CloudContext(
+                environment.getId(),
+                environment.getName(),
+                environment.getCloudPlatform(),
+                environment.getCloudPlatform(),
+                location(Region.region(environment.getLocation().getName())),
+                environment.getCreator(),
+                environment.getAccountId());
     }
 }

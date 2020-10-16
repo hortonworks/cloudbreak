@@ -2,5 +2,6 @@ package com.sequenceiq.environment.api.v1.environment.model.base;
 
 public enum ServiceEndpointCreation {
     ENABLED,
-    DISABLED
+    DISABLED,
+    ENABLED_PRIVATE_ENDPOINT
 }

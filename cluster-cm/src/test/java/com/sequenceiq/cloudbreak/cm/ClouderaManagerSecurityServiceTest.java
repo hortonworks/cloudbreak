@@ -299,7 +299,7 @@ ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
         // WHEN
-        underTest.rotateHostCertificates();
+        underTest.rotateHostCertificates(null, null);
         // THEN no exception
         Assert.assertEquals(2, batchRequestArgumentCaptor.getValue().getItems().size());
     }
@@ -319,7 +319,7 @@ ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, false));
         // WHEN
-        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates());
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates(null, null));
         // THEN exception
     }
 
@@ -340,7 +340,7 @@ ClouderaManagerSecurityServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
                 .thenReturn(PollingResult.EXIT);
         // WHEN
-        assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates());
+        assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates(null, null));
         // THEN exception
     }
 
@@ -361,7 +361,7 @@ ClouderaManagerSecurityServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
                 .thenReturn(PollingResult.TIMEOUT);
         // WHEN
-        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates());
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.rotateHostCertificates(null, null));
         // THEN exception
     }
 
@@ -377,7 +377,7 @@ ClouderaManagerSecurityServiceTest {
         when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenThrow(new ApiException());
         // WHEN
-        assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates());
+        assertThrows(CloudbreakException.class, () -> underTest.rotateHostCertificates(null, null));
         // THEN exception
     }
 

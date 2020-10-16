@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
@@ -48,6 +49,7 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.AwsEnvironmentNetworkConverter;
+import com.sequenceiq.environment.network.v1.converter.AzureEnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
@@ -60,6 +62,8 @@ class EnvironmentNetworkServiceTest {
     private static final String CLOUD_PLATFORM = "AZURE";
 
     private static final String STACK_NAME = "stackName";
+
+    private static final String NETWORK_ID = "networkId";
 
     private static final String USER_NAME = "name";
 
@@ -75,12 +79,12 @@ class EnvironmentNetworkServiceTest {
 
     private final NetworkCreationRequestFactory networkCreationRequestFactory = Mockito.mock(NetworkCreationRequestFactory.class);
 
-    private Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(Map.class);
+    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(Map.class);
 
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
     @InjectMocks
-    private EnvironmentNetworkService underTest = new EnvironmentNetworkService(
+    private final EnvironmentNetworkService underTest = new EnvironmentNetworkService(
             cloudPlatformConnectors,
             networkCreationRequestFactory,
             environmentNetworkConverterMap,
@@ -115,6 +119,27 @@ class EnvironmentNetworkServiceTest {
         verify(environmentNetworkConverterMap).get(CloudPlatform.valueOf(CLOUD_PLATFORM));
         verify(networkConverter).setCreatedCloudNetwork(baseNetwork, createdCloudNetwork);
         assertEquals(baseNetwork, actual);
+    }
+
+    @Test
+    void testCreateProviderSpecificNetworkResources() {
+        EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).withCreator(USER_CRN).build();
+        NetworkResourcesCreationRequest networkResourcesCreationRequest
+                = new NetworkResourcesCreationRequest.Builder().build();
+        AzureEnvironmentNetworkConverter networkConverter = mock(AzureEnvironmentNetworkConverter.class);
+        BaseNetwork baseNetwork = getNetwork();
+
+        when(cloudConnector.networkConnector()).thenReturn(networkConnector);
+        when(networkCreationRequestFactory.createProviderSpecificNetworkResources(environmentDto, baseNetwork))
+                .thenReturn(networkResourcesCreationRequest);
+        when(environmentNetworkConverterMap.get(CloudPlatform.valueOf(CLOUD_PLATFORM))).thenReturn(networkConverter);
+
+        underTest.createProviderSpecificNetworkResources(environmentDto, baseNetwork);
+
+        verify(cloudConnector).networkConnector();
+        verify(cloudPlatformConnectors).get(any(CloudPlatformVariant.class));
+        verify(networkCreationRequestFactory).createProviderSpecificNetworkResources(environmentDto, baseNetwork);
+        verify(networkConnector).createProviderSpecificNetworkResources(networkResourcesCreationRequest);
     }
 
     @Test
@@ -260,5 +285,11 @@ class EnvironmentNetworkServiceTest {
                         ).build()
                 )
                 .build();
+    }
+
+    private BaseNetwork getNetwork() {
+        AzureNetwork azureNetwork = new AzureNetwork();
+        azureNetwork.setNetworkId(NETWORK_ID);
+        return azureNetwork;
     }
 }

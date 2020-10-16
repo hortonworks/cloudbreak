@@ -162,6 +162,7 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
                 Throwable testResultException = testResult.getThrowable();
                 String methodName = testResult.getName();
                 int status = testResult.getStatus();
+                String testName = String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(), methodName);
 
                 if (testResultException != null) {
                     try {
@@ -173,8 +174,8 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
                         if (message == null || message.isEmpty()) {
                             LOGGER.warn("Test Case: {} have been failed with empty test result!", methodName);
                         } else {
-                            LOGGER.info("Failed test results are: Test Case: {} | Status: {} | Failure Type: {} | Message: {}",
-                                    methodName, status, testFailureType, message);
+                            LOGGER.info("Failed test results are: Test Case: {} | Test Name: {} | Status: {} | Failure Type: {} | Message: {}",
+                                    methodName, testName, status, testFailureType, message);
                         }
                     } catch (Exception e) {
                         LOGGER.error("Test case: {} got Unexpected Exception: {}", methodName, e.getMessage());
@@ -183,7 +184,7 @@ public class CustomJUnitXMLReporter extends JUnitXMLReporter {
                     getTestErrorFromTestOutput(testResult, methodName, status);
                 }
 
-                testResult.setTestName(String.join("_", commonCloudProperties.getCloudProvider().toLowerCase(), methodName));
+                testResult.setTestName(testName);
                 getResultsForClass(flattenedResults, testResult).addResult(testResult);
             } else {
                 LOGGER.error("Test result is NULL!");

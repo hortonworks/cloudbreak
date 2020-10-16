@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
@@ -287,7 +286,7 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerAutoTlsCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
-        String selector = ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event();
+        String selector = FlowChainTriggers.ROTATE_CLUSTER_CERTIFICATES_CHAIN_TRIGGER_EVENT;
         ClusterCertificatesRotationTriggerEvent clusterCertificatesRotationTriggerEvent = new ClusterCertificatesRotationTriggerEvent(selector, stackId,
                 certificatesRotationV4Request.getRotateCertificatesType());
         return reactorNotifier.notify(stackId, selector, clusterCertificatesRotationTriggerEvent);
