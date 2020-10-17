@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -52,6 +54,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
     @Override
     public void accept(Event<UpscaleStackRequest> upscaleStackRequestEvent) {
         LOGGER.debug("Received event: {}", upscaleStackRequestEvent);
+        Instant start = Instant.now();
         UpscaleStackRequest<UpscaleStackResult> request = upscaleStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -69,10 +72,13 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
             LOGGER.debug("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            LOGGER.error("Upscaling stack failed", e);
+            LOGGER.error("Upscaling stack failed for {}", cloudContext, e);
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());
             request.getResult().onNext(result);
             eventBus.notify(CloudPlatformResult.failureSelector(UpscaleStackResult.class), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
+        } finally {
+            LOGGER.debug("UpscaleStackRequest for event: [{}] finished in {}ms", upscaleStackRequestEvent,
+                    Duration.between(start, Instant.now()).toMillis());
         }
     }
 

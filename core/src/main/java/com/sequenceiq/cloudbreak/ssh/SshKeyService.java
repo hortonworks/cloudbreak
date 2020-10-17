@@ -27,7 +27,7 @@ public class SshKeyService {
 
     private static final String ADD_SSH_PUBLICKEY_STATE = "ssh.add_ssh_publickey";
 
-    private static final int SSH_KEY_OPERATION_RETRY_COUNT = 10;
+    private static final int SSH_KEY_OPERATION_RETRY_COUNT = 20;
 
     @Inject
     private HostOrchestrator hostOrchestrator;

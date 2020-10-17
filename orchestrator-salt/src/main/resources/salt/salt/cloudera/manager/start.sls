@@ -22,9 +22,11 @@ update_frontend_url_of_cm:
 restart_cm_after_fronted_url_change:
   service.running:
     - name: cloudera-scm-server
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 {% if "ipa_member" in grains.get('roles', []) %}
     - require:
         - pkg: ipa_packages_install
+{% endif %}
 {% endif %}
     - watch:
       - file: update_frontend_url_of_cm
@@ -34,7 +36,9 @@ start_server:
   service.running:
     - enable: True
     - name: cloudera-scm-server
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 {% if "ipa_member" in grains.get('roles', []) %}
     - require:
         - pkg: ipa_packages_install
+{% endif %}
 {% endif %}

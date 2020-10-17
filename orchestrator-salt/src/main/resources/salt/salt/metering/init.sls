@@ -11,10 +11,12 @@
 
 {% if metering.is_systemd %}
 
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 install_metering_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ metering_rpm_location }}"
     - onlyif: "! rpm -q {{ metering_package_name }}"
+{% endif %}
 
 stop_metering_heartbeat_application_if_needed:
   service.dead:

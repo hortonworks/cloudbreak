@@ -8,6 +8,8 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -133,6 +135,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> instanceMetaDatas)
             throws CloudbreakException {
+        LOGGER.debug("Invoking CM requests for upscale for hostGroup={}, insteanceCount={}",
+                hostGroup.getName(), instanceMetaDatas == null ? 0 : instanceMetaDatas.size());
+        int hostCount = -1;
+        Instant start = Instant.now();
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             String clusterName = stack.getName();
@@ -140,6 +146,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (!upscaleHostNames.isEmpty()) {
                 List<ApiHost> hosts = clouderaManagerApiFactory.getHostsResourceApi(apiClient).readHosts(null, null, SUMMARY).getItems();
                 ApiHostRefList body = createUpscaledHostRefList(upscaleHostNames, hosts);
+                hostCount = body.getItems().size();
                 clustersResourceApi.addHosts(clusterName, body);
                 activateParcel(clustersResourceApi);
                 applyHostGroupRolesOnUpscaledHosts(body, hostGroup.getName());
@@ -152,6 +159,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } catch (ApiException e) {
             LOGGER.warn("Failed to upscale: {}", e.getResponseBody(), e);
             throw new CloudbreakException("Failed to upscale", e);
+        } finally {
+            LOGGER.debug("CM upscale request finished for {} hosts in {} ms", hostCount == -1 ? "NA" : hostCount,
+                    Duration.between(start, Instant.now()).toMillis());
         }
     }
 

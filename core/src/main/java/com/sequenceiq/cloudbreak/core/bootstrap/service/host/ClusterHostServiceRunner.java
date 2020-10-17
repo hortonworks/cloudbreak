@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -203,20 +205,27 @@ public class ClusterHostServiceRunner {
     private EnvironmentConfigProvider environmentConfigProvider;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
+        LOGGER.debug("runClusterServices for #candidates={}", candidateAddresses == null ? "NA" : candidateAddresses.size());
+        Stopwatch stopwatch = Stopwatch.createStarted();
         try {
             Set<Node> nodes = stackUtil.collectReachableNodes(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            logSplitAndRestartStopwatch("createSaltConfigs finished in {}ms", stopwatch);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
             hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            logSplitAndRestartStopwatch("initServiceRun finished in {}ms", stopwatch);
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
                 mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses));
             }
+            logSplitAndRestartStopwatch("diskMount finished in {}ms", stopwatch);
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
+            logSplitAndRestartStopwatch("executePreClusterManagerRecipes finished in {}ms", stopwatch);
             hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            logSplitAndRestartStopwatch("runService finished in {}ms", stopwatch);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
@@ -740,5 +749,10 @@ public class ClusterHostServiceRunner {
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    private void logSplitAndRestartStopwatch(String message, Stopwatch sw) {
+        LOGGER.debug(message, sw.elapsed(TimeUnit.MILLISECONDS));
+        sw.reset().start();
     }
 }

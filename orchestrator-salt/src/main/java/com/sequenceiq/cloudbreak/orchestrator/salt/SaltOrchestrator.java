@@ -91,7 +91,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 public class
 SaltOrchestrator implements HostOrchestrator {
 
-    private static final int SLEEP_TIME = 10000;
+    private static final int SLEEP_TIME = 5000;
 
     private static final int SLEEP_TIME_IN_SEC = SLEEP_TIME / 1000;
 
@@ -135,10 +135,10 @@ SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry.forced:2}")
     private int maxRetryRecipeForced;
 
-    @Value("${cb.max.salt.database.dr.retry:60}")
+    @Value("${cb.max.salt.database.dr.retry:120}")
     private int maxDatabaseDrRetry;
 
-    @Value("${cb.max.salt.database.dr.retry.onerror:5}")
+    @Value("${cb.max.salt.database.dr.retry.onerror:10}")
     private int maxDatabaseDrRetryOnError;
 
     @Inject
