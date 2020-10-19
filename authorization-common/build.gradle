@@ -26,7 +26,6 @@ dependencies {
 
   compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  compile group: 'org.reflections',               name: 'reflections',                    version: '0.9.11'
 
   testCompile(group: 'junit',                     name: 'junit',                          version: junitVersion) {
     exclude group: 'org.hamcrest'

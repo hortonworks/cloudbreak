@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Collection;
@@ -16,8 +17,8 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.flow.core.FlowLogService;
 
+@DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
 
@@ -86,24 +88,26 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext context) {
         if (flowLogService.isOtherFlowRunning(getStackId())) {
             LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", getStackId());
             return;
         }
         try {
-            Stack stack = stackService.get(getStackId());
-            buildMdcContext(stack);
-            if (unshedulableStates().contains(stack.getStatus())) {
-                LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stack.getStatus());
-                jobService.unschedule(getLocalId());
-            } else if (null == stack.getStatus() || ignoredStates().contains(stack.getStatus())) {
-                LOGGER.debug("Stack sync is skipped, stack state is {}", stack.getStatus());
-            } else if (syncableStates().contains(stack.getStatus())) {
-                ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
-            } else {
-                LOGGER.warn("Unhandled stack status, {}", stack.getStatus());
-            }
+            measure(() -> {
+                Stack stack = stackService.get(getStackId());
+                buildMdcContext(stack);
+                if (unshedulableStates().contains(stack.getStatus())) {
+                    LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stack.getStatus());
+                    jobService.unschedule(getLocalId());
+                } else if (null == stack.getStatus() || ignoredStates().contains(stack.getStatus())) {
+                    LOGGER.debug("Stack sync is skipped, stack state is {}", stack.getStatus());
+                } else if (syncableStates().contains(stack.getStatus())) {
+                    ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
+                } else {
+                    LOGGER.warn("Unhandled stack status, {}", stack.getStatus());
+                }
+            }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
         } finally {
