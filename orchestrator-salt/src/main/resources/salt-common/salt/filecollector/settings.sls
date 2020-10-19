@@ -6,6 +6,7 @@
 {% set adlsv2_storage_account = salt['pillar.get']('filecollector:adlsv2_storage_account') %}
 {% set adlsv2_storage_container = salt['pillar.get']('filecollector:adlsv2_storage_container') %}
 {% set adlsv2_storage_location = salt['pillar.get']('filecollector:adlsv2_storage_location') %}
+{% set account_id = salt['pillar.get']('filecollector:accountId') %}
 {% set destination = salt['pillar.get']('filecollector:destination') %}
 {% set issue = salt['pillar.get']('filecollector:issue') %}
 {% set description = salt['pillar.get']('filecollector:description') %}
@@ -17,6 +18,7 @@
 {% set skip_test_cloud_storage = salt['pillar.get']('filecollector:skipTestCloudStorage') %}
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
 {% set mode = salt['pillar.get']('filecollector:mode') %}
+{% set uuid = salt['pillar.get']('filecollector:uuid') %}
 
 {% if s3_location and not s3_region %}
   {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
@@ -60,6 +62,27 @@
   {% endif %}
 {% endif %}
 
+{% if salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+   {% set resource_crn = salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+{% endif %}
+{% if salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
+   {% set creator_crn = salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
+{% endif %}
+{% if salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
+   {% set environment_crn = salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
+{% endif %}
+
+{% if  salt['pillar.get']('filecollector:clusterType') %}
+   {% set cluster_type = salt['pillar.get']('filecollector:clusterType') %}
+{% else %}
+   {% set cluster_type = '' %}
+{% endif %}
+{% if  salt['pillar.get']('filecollector:clusterVersion') %}
+   {% set cluster_version = salt['pillar.get']('filecollector:clusterVersion') %}
+{% else %}
+   {% set cluster_version = '' %}
+{% endif %}
+
 {% do filecollector.update({
     "destination": destination,
     "cloudStorageUploadParams": cloud_storage_upload_params,
@@ -75,5 +98,12 @@
     "skipValidation": skip_validation,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
-    "mode": mode
+    "mode": mode,
+    "resourceCrn": resource_crn,
+    "creatorCrn": creator_crn,
+    "environmentCrn": environment_crn,
+    "clusterType": cluster_type,
+    "clusterVersion": cluster_version,
+    "uuid": uuid,
+    "accountId": account_id
 }) %}

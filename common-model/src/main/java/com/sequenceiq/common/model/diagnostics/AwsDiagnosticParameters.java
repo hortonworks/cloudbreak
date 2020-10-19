@@ -1,14 +1,9 @@
 package com.sequenceiq.common.model.diagnostics;
 
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
-import com.sequenceiq.common.api.telemetry.model.VmLog;
-
-public class AwsDiagnosticParameters extends DiagnosticParameters {
+public class AwsDiagnosticParameters implements CloudStorageDiagnosticsParameters {
 
     private String s3Bucket;
 
@@ -16,12 +11,12 @@ public class AwsDiagnosticParameters extends DiagnosticParameters {
 
     private String s3Location;
 
+    @Override
     public Map<String, Object> toMap() {
-        Map<String, Object> map = super.toMap();
-        Map<String, Object> parameters = (Map<String, Object>) map.get(FILECOLLECTOR_ROOT);
-        parameters.put("s3_bucket", s3Bucket);
-        parameters.put("s3_location", s3Location);
-        parameters.put("s3_region", s3Region);
+        Map<String, Object> map = new HashMap<>();
+        map.put("s3_bucket", s3Bucket);
+        map.put("s3_location", s3Location);
+        map.put("s3_region", s3Region);
         return map;
     }
 
@@ -53,7 +48,7 @@ public class AwsDiagnosticParameters extends DiagnosticParameters {
         return new AwsDiagnosticParametersBuilder();
     }
 
-    public static final class AwsDiagnosticParametersBuilder extends DiagnosticParametersBuilder {
+    public static final class AwsDiagnosticParametersBuilder {
         private AwsDiagnosticParameters awsDiagnosticParameters;
 
         private AwsDiagnosticParametersBuilder() {
@@ -72,61 +67,6 @@ public class AwsDiagnosticParameters extends DiagnosticParameters {
 
         public AwsDiagnosticParametersBuilder withS3Location(String s3Location) {
             awsDiagnosticParameters.setS3Location(s3Location);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withIssue(String issue) {
-            awsDiagnosticParameters.setIssue(issue);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withDescription(String description) {
-            awsDiagnosticParameters.setDescription(description);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withLabels(List<String> labels) {
-            awsDiagnosticParameters.setLabels(labels);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withStartTime(Date startTime) {
-            awsDiagnosticParameters.setStartTime(startTime);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withEndTime(Date endTime) {
-            awsDiagnosticParameters.setEndTime(endTime);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withDestination(DiagnosticsDestination destination) {
-            awsDiagnosticParameters.setDestination(destination);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withHostGroups(Set<String> hostGroups) {
-            awsDiagnosticParameters.setHostGroups(hostGroups);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withHosts(Set<String> hosts) {
-            awsDiagnosticParameters.setHosts(hosts);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withAdditionalLogs(List<VmLog> additionalLogs) {
-            awsDiagnosticParameters.setAdditionalLogs(additionalLogs);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withIncludeSaltLogs(Boolean includeSaltLogs) {
-            awsDiagnosticParameters.setIncludeSaltLogs(includeSaltLogs);
-            return this;
-        }
-
-        public AwsDiagnosticParametersBuilder withUpdatePackage(Boolean updatePackage) {
-            awsDiagnosticParameters.setUpdatePackage(updatePackage);
             return this;
         }
 

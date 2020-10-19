@@ -3,7 +3,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% set cdp_telemetry_version = '0.1.0' %}
+{% set cdp_telemetry_version = '0.2.3' %}
 {% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
 {% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
 {% set cdp_telemetry_package_name = 'cdp-telemetry' %}
@@ -63,14 +63,24 @@ fail_if_telemetry_rpm_is_not_installed:
         destination: "ENG"
 {% endif %}
 
-/opt/cdp-telemetry/conf/bundle_info.json:
+/opt/cdp-telemetry/conf/diagnostics_request.json:
    file.managed:
-    - source: salt://filecollector/template/bundle_info.json.j2
+    - source: salt://filecollector/template/diagnostics_request.json.j2
     - template: jinja
     - user: "root"
     - group: "root"
     - mode: '0750'
     - failhard: True
+
+/opt/cdp-telemetry/conf/cdp-doctor-commands.yaml:
+   file.managed:
+    - source: salt://filecollector/template/cdp-doctor-commands.yaml.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: '0750'
+    - failhard: True
+
 {% if not filecollector.skipValidation and filecollector.destination == "CLOUD_STORAGE" %}
 create_test_cloud_storage_file:
   cmd.run:

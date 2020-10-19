@@ -9,4 +9,7 @@ move_support_bundle_to_filecollector:
 filecollector_upload_to_cloud_storage:
   cmd.run:
     - name: "cdp-telemetry storage {{ filecollector.cloudStorageUploadParams }}"
+    - failhard: True
+    - env:
+        - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"
 {% endif %}

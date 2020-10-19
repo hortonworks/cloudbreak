@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.model.diagnostics.AwsDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters;
+import com.sequenceiq.common.model.diagnostics.CloudStorageDiagnosticsParameters;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
@@ -142,11 +143,12 @@ public class DiagnosticsCollectionActions {
 
             private String getStorageLocation(DiagnosticParameters parameters) {
                 String storageLocation;
-                if (parameters instanceof AwsDiagnosticParameters) {
-                    AwsDiagnosticParameters awsParameters = (AwsDiagnosticParameters) parameters;
+                CloudStorageDiagnosticsParameters csDiagnosticsParams = parameters.getCloudStorageDiagnosticsParameters();
+                if (csDiagnosticsParams instanceof AwsDiagnosticParameters) {
+                    AwsDiagnosticParameters awsParameters = (AwsDiagnosticParameters) csDiagnosticsParams;
                     storageLocation = "s3://" + Paths.get(awsParameters.getS3Bucket(), awsParameters.getS3Location()).toString();
                 } else {
-                    AzureDiagnosticParameters azureParameters = (AzureDiagnosticParameters) parameters;
+                    AzureDiagnosticParameters azureParameters = (AzureDiagnosticParameters) csDiagnosticsParams;
                     storageLocation = "abfs://" + Paths.get(azureParameters.getAdlsv2StorageContainer(),
                             azureParameters.getAdlsv2StorageLocation()).toString();
                 }
