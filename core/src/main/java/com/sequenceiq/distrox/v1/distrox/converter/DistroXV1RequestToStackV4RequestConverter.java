@@ -192,8 +192,14 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public DistroXV1Request convert(StackV4Request source) {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
-        Optional<DetailedEnvironmentResponse> environment = getEnvironmentName(source.getEnvironmentCrn());
-        environment.ifPresent(env -> request.setEnvironmentName(getIfNotNull(env, EnvironmentBaseResponse::getName)));
+        DetailedEnvironmentResponse environment = null;
+        if (source.getEnvironmentCrn() != null) {
+            environment = environmentClientService.getByCrn(source.getEnvironmentCrn());
+            if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
+                throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
+            }
+        }
+        request.setEnvironmentName(getIfNotNull(environment, EnvironmentBaseResponse::getName));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroupConverter::convertFrom));
@@ -208,10 +214,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         return request;
-    }
-
-    private Optional<DetailedEnvironmentResponse> getEnvironmentName(String envCrn) {
-        return Optional.ofNullable(environmentClientService.getByCrn(envCrn));
     }
 
     private CloudPlatform getCloudPlatform(DetailedEnvironmentResponse environment) {
