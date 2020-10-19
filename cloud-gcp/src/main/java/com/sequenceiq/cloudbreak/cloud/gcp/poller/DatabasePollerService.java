@@ -35,6 +35,14 @@ public class DatabasePollerService {
         executeLaunchDatabasePollerPolling(provider.launchDatabasePoller(ac, resources), resources);
     }
 
+    public void startDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
+        executeLaunchDatabasePollerPolling(provider.stopStartDatabasePoller(ac, resources), resources);
+    }
+
+    public void stopDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
+        executeLaunchDatabasePollerPolling(provider.stopStartDatabasePoller(ac, resources), resources);
+    }
+
     public void insertUserPoller(AuthenticatedContext ac, List<CloudResource> resources) {
         executeUserInsertPollerPolling(provider.insertUserPoller(ac, resources), resources);
     }

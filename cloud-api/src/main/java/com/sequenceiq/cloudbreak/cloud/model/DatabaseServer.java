@@ -31,9 +31,12 @@ public class DatabaseServer extends DynamicModel {
 
     private final String location;
 
+    private final boolean highAvailability;
+
     private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver,
             String connectorJarUrl, String rootUserName, String rootPassword,
-            Integer port, Long storageSize, Security security, InstanceStatus status, String location, Map<String, Object> parameters) {
+            Integer port, Long storageSize, Security security, InstanceStatus status, String location, boolean highAvailability,
+            Map<String, Object> parameters) {
         super(parameters);
         this.serverId = serverId;
         this.flavor = flavor;
@@ -47,6 +50,7 @@ public class DatabaseServer extends DynamicModel {
         this.security = security;
         this.status = status;
         this.location = location;
+        this.highAvailability = highAvailability;
     }
 
     public String getServerId() {
@@ -97,6 +101,10 @@ public class DatabaseServer extends DynamicModel {
         return location;
     }
 
+    public boolean getHighAvailability() {
+        return highAvailability;
+    }
+
     @Override
     public String toString() {
         return "DatabaseServer{"
@@ -110,6 +118,7 @@ public class DatabaseServer extends DynamicModel {
                 + ", storageSize=" + storageSize
                 + ", security=" + security
                 + ", status=" + status
+                + ", highAvailability=" + highAvailability
                 + '}';
     }
 
@@ -142,6 +151,8 @@ public class DatabaseServer extends DynamicModel {
         private InstanceStatus status;
 
         private String location;
+
+        private boolean highAvailability;
 
         private Map<String, Object> params = new HashMap<>();
 
@@ -185,6 +196,11 @@ public class DatabaseServer extends DynamicModel {
             return this;
         }
 
+        public Builder highAvailability(boolean highAvailability) {
+            this.highAvailability = highAvailability;
+            return this;
+        }
+
         public Builder storageSize(Long storageSize) {
             this.storageSize = storageSize;
             return this;
@@ -212,7 +228,7 @@ public class DatabaseServer extends DynamicModel {
 
         public DatabaseServer build() {
             return new DatabaseServer(serverId, flavor, engine, connectionDriver, connectorJarUrl, rootUserName, rootPassword,
-                port, storageSize, security, status, location, params);
+                port, storageSize, security, status, location, highAvailability, params);
         }
 
     }

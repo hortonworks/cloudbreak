@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerLaunchService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerStartService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerStopService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerTerminateService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
@@ -61,6 +63,12 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Inject
     private DatabaseServerCheckerService databaseServerCheckerService;
+
+    @Inject
+    private DatabaseServerStopService databaseServerStopService;
+
+    @Inject
+    private DatabaseServerStartService databaseServerStartService;
 
     @Inject
     private ContextBuilders contextBuilders;
@@ -131,18 +139,18 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     }
 
     @Override
-    public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server start operation is not supported for " + getClass().getName());
+    public void startDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        databaseServerStartService.start(authenticatedContext, stack);
     }
 
     @Override
-    public void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server stop operation is not supported for " + getClass().getName());
+    public void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        databaseServerStopService.stop(authenticatedContext, stack);
     }
 
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
-        throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
+        return databaseServerCheckerService.check(authenticatedContext, stack);
     }
 
     @Override
