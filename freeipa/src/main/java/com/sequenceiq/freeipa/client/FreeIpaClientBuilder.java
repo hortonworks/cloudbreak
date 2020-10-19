@@ -33,7 +33,6 @@ import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -54,6 +53,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.freeipa.client.auth.InvalidPasswordException;
 import com.sequenceiq.freeipa.client.auth.InvalidUserOrRealmException;
 import com.sequenceiq.freeipa.client.auth.PasswordExpiredException;
+import com.sequenceiq.freeipa.util.FreeIpaCookieStore;
 
 public class FreeIpaClientBuilder {
 
@@ -201,7 +201,7 @@ public class FreeIpaClientBuilder {
         stickyHeaders.forEach(post::addHeader);
         post.setEntity(new UrlEncodedFormEntity(List.of(new BasicNameValuePair("user", user), new BasicNameValuePair("password", pass))));
 
-        CookieStore cookieStore = new BasicCookieStore();
+        CookieStore cookieStore = new FreeIpaCookieStore();
         try (CloseableHttpResponse response = execute(post, cookieStore)) {
             stickyId = getStickIdFromHeaders(response);
             if (response.getStatusLine().getStatusCode() != HttpStatus.OK.value()) {
@@ -231,8 +231,32 @@ public class FreeIpaClientBuilder {
                         response.getStatusLine().getStatusCode()));
             }
         }
-        Cookie sessionCookie = cookieStore.getCookies().stream().filter(cookie -> "ipa_session".equalsIgnoreCase(cookie.getName())).findFirst().get();
+        Cookie sessionCookie = extractIpaSessionCookie(cookieStore);
         return new CookieAndStickyId(sessionCookie.getValue(), stickyId);
+    }
+
+    private Cookie extractIpaSessionCookie(CookieStore cookieStore) throws FreeIpaClientException {
+        List<Cookie> sortedCookies = cookieStore.getCookies().stream()
+                .filter(cookie -> "ipa_session".equalsIgnoreCase(cookie.getName()))
+                .collect(Collectors.toList());
+        if (sortedCookies.isEmpty()) {
+            throw new FreeIpaClientException("Unable to obtain FreeIPA session cookie");
+        } else if (sortedCookies.size() > 1) {
+            List<String> cookieDetails = sortedCookies.stream()
+                            .map(this::cookieString)
+                            .collect(Collectors.toList());
+            LOGGER.debug("Found multiple cookies [{}]", cookieDetails);
+        }
+        return sortedCookies.get(0);
+    }
+
+    private String cookieString(Cookie cookie) {
+        return "{" +
+                "\"name\":\"" + cookie.getName() + "\"," +
+                "\"domain\":\"" + cookie.getDomain() + "\"," +
+                "\"path\":\"" + cookie.getPath() + "\"," +
+                "\"expiry\":\"" + cookie.getExpiryDate() + "\"" +
+                "}";
     }
 
     private SSLContext setupSSLContext(String clientCert, String clientKey, String serverCert) throws Exception {
