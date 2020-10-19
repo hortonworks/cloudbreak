@@ -26,6 +26,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -134,6 +135,9 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     @Inject
     private EntitlementService entitlementService;
 
+    @Value("${info.app.version}")
+    private String sdxClusterServiceVersion;
+
     public String getStackCrnByClusterCrn(String crn) {
         return sdxClusterRepository.findStackCrnByClusterCrn(crn)
                 .orElseThrow(notFound("SdxCluster", crn));
@@ -207,6 +211,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         sdxCluster.setEnvName(environment.getName());
         sdxCluster.setEnvCrn(environment.getCrn());
         sdxCluster.setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
+        sdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
