@@ -39,6 +39,16 @@ public class DiagnosticParameters {
 
     private Boolean skipValidation = Boolean.FALSE;
 
+    private String uuid;
+
+    private String accountId;
+
+    private String clusterType;
+
+    private String clusterVersion;
+
+    private CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters;
+
     public Map<String, Object> toMap() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("destination", destination.toString());
@@ -55,7 +65,16 @@ public class DiagnosticParameters {
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
         parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
         parameters.put("additionalLogs", additionalLogs);
+        parameters.put("uuid", uuid);
+        parameters.put("accountId", accountId);
+        parameters.put("clusterType", clusterType);
+        parameters.put("clusterVersion", clusterVersion);
         parameters.put("mode", null);
+        if (cloudStorageDiagnosticsParameters != null) {
+            for (Map.Entry<String, Object> cloudStorageEntry : cloudStorageDiagnosticsParameters.toMap().entrySet()) {
+                parameters.put(cloudStorageEntry.getKey(), cloudStorageEntry.getValue());
+            }
+        }
         Map<String, Object> fileCollector = new HashMap<>();
         fileCollector.put(FILECOLLECTOR_ROOT, parameters);
         return fileCollector;
@@ -109,6 +128,26 @@ public class DiagnosticParameters {
         this.skipValidation = skipValidation;
     }
 
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
+    public void setClusterVersion(String clusterVersion) {
+        this.clusterVersion = clusterVersion;
+    }
+
+    public void setCloudStorageDiagnosticsParameters(CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters) {
+        this.cloudStorageDiagnosticsParameters = cloudStorageDiagnosticsParameters;
+    }
+
     public String getIssue() {
         return issue;
     }
@@ -157,6 +196,26 @@ public class DiagnosticParameters {
         return skipValidation;
     }
 
+    public String getUuid() {
+        return uuid;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public String getClusterType() {
+        return clusterType;
+    }
+
+    public String getClusterVersion() {
+        return clusterVersion;
+    }
+
+    public CloudStorageDiagnosticsParameters getCloudStorageDiagnosticsParameters() {
+        return cloudStorageDiagnosticsParameters;
+    }
+
     public static DiagnosticParametersBuilder builder() {
         return new DiagnosticParametersBuilder();
     }
@@ -179,6 +238,26 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withDescription(String description) {
             diagnosticParameters.setDescription(description);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withUuid(String uuid) {
+            diagnosticParameters.setUuid(uuid);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withClusterType(String clusterType) {
+            diagnosticParameters.setClusterType(clusterType);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withClusterVersion(String clusterVersion) {
+            diagnosticParameters.setClusterVersion(clusterVersion);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withAccountId(String accountId) {
+            diagnosticParameters.setAccountId(accountId);
             return this;
         }
 
@@ -229,6 +308,12 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withSkipValidation(Boolean skipValidation) {
             diagnosticParameters.setSkipValidation(skipValidation);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withCloudStorageDiagnosticsParameters(
+                CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters) {
+            diagnosticParameters.setCloudStorageDiagnosticsParameters(cloudStorageDiagnosticsParameters);
             return this;
         }
 

@@ -28,6 +28,8 @@ public class DiagnosticsTriggerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsTriggerService.class);
 
+    private static final String FREEIPA_CLUSTER_TYPE = "FREEIPA";
+
     @Inject
     private StackService stackService;
 
@@ -41,7 +43,8 @@ public class DiagnosticsTriggerService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
-        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, stack.getTelemetry(), stack.getRegion());
+        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, stack.getTelemetry(), FREEIPA_CLUSTER_TYPE,
+                stack.getAppVersion(), stack.getAccountId(), stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

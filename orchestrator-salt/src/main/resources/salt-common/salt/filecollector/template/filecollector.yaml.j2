@@ -5,28 +5,32 @@ collector:
     useFullPath: true
     outputLocation: "/var/lib/filecollector"
     files:{% for logfile in telemetry.logs %}{% if not ("type" in logfile and logfile["type"] == "salt" and not filecollector.includeSaltLogs) %}
-    - path: {{ logfile["path"] }}
+    - path: {{ logfile["path"] }}{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+      compress: true{% endif %}
       folderPrefix: logs
       label: "{{ logfile["label"] }}"{% endif %}{% endfor %}
     - path: /var/log/td-agent/td-agent.log
       label: fluentd
-      folderPrefix: logs
+      folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+      compress: true{% endif %}
       useFullPath: false
-    - path: /var/lib/cdp/cdp_info.json
-      label: cdp_info
+      {% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}{% endif %}
+    - path: /opt/cdp-telemetry/conf/diagnostics_request.json
+      label: diagnostics_request
       mandatory: true
       skipLabelFromPath: true
       skipAnonymization: true
       useFullPath: false
-    - path: /opt/cdp-telemetry/conf/bundle_info.json
-      label: bundle_info
-      mandatory: true
+    - path: /tmp/doctor*.txt
+      label: doctor
       skipLabelFromPath: true
       skipAnonymization: true
       useFullPath: false
+      folderPrefix: doctor
 {% if filecollector.additionalLogs %}{% for extra_log in filecollector.additionalLogs %}
     - path: "{{ extra_log["path"] }}"
-      folderPrefix: logs
+      folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+      compress: true{% endif %}
       label: {{ extra_log["label"] }}{% endfor %}{% endif %}
 {% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
     rules:{% for rule in telemetry.anonymizationRules %}{% set regex_value = rule["value"] %}{% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
@@ -35,7 +39,28 @@ collector:
     compress: true
     compressFormat: gztar
     deleteCompressedFile: false
+    useExternalCommandForCompression: true
+    usePerlScriptForAnonymization: true
+    workspaceLimitBytes: 524288000
+    workspaceWorkers: 1
+    logProcessorWorkers: 5
     requiredDiskSpaceRatio: 1.7{% endif %}
+    includeWorkspaceMetadata: true
+    workspaceMetadataFileName: filecollector-metadata.json
+    additionalWorkspaceMetadataFileNmae: bundle-info.json
+    additionalWorkspaceMetadata:
+        type: {{ filecollector.clusterType }}{% if filecollector.description %}
+        name: {{ filecollector.description }}{% endif %}
+        product-version: {{ filecollector.clusterVersion }}{% if filecollector.uuid %}
+        uuid: {{ filecollector.uuid }} {% endif %}
+        crns:
+           Cloudera-Creator-Resource-Name: {{ filecollector.creatorCrn }}
+           Cloudera-Resource-Name: {{ filecollector.resourceCrn }}
+           Cloudera-Environment-Resource-Name: {{ filecollector.environmentCrn }}
+        customer:
+            accountId: {{ filecollector.accountId }}
+            licenseId:{% if filecollector.issue %}
+        Case_number: {{ filecollector.issue }}{% endif %}
 {% if destination == "ENG" and fluent.dbusClusterLogsCollection %}
     compress: false
     deleteProcessedTempFilesOneByOne: true

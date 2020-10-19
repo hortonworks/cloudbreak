@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.nio.file.Paths;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -31,28 +32,31 @@ public class DiagnosticsDataToParameterConverter {
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
-    public DiagnosticParameters convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry, String region) {
+    public DiagnosticParameters convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry,
+            String clusterType, String clusterVersion, String accountId, String region) {
         Logging logging = telemetry.getLogging();
-        DiagnosticParametersBuilder builder;
+        DiagnosticParametersBuilder builder = DiagnosticParameters.builder();
         if (logging.getS3() != null) {
             AwsDiagnosticParametersBuilder awsBuilder = AwsDiagnosticParameters.builder();
-            builder = awsBuilder;
             S3Config s3Config = s3ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
             awsBuilder.withS3Bucket(s3Config.getBucket());
             awsBuilder.withS3Location(Paths.get(s3Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
             awsBuilder.withS3Region(region);
+            builder.withCloudStorageDiagnosticsParameters(awsBuilder.build());
         } else if (logging.getAdlsGen2() != null) {
             AzureDiagnosticParametersBuilder azureBuilder = AzureDiagnosticParameters.builder();
-            builder = azureBuilder;
             AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(logging.getStorageLocation());
             azureBuilder.withAdlsv2StorageAccount(adlsGen2Config.getAccount());
             azureBuilder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
             azureBuilder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
-        } else {
-            builder = DiagnosticParameters.builder();
+            builder.withCloudStorageDiagnosticsParameters(azureBuilder.build());
         }
         builder.withDestination(request.getDestination());
         builder.withDescription(request.getDescription());
+        builder.withUuid(UUID.randomUUID().toString());
+        builder.withClusterType(clusterType);
+        builder.withClusterVersion(clusterVersion);
+        builder.withAccountId(accountId);
         builder.withIssue(request.getIssue());
         builder.withLabels(request.getLabels());
         builder.withStartTime(request.getStartTime());

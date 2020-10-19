@@ -4,10 +4,13 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.controller.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors;
@@ -35,6 +38,9 @@ public class DiagnosticsTriggerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsTriggerService.class);
 
+    @Value("${info.app.version:}")
+    private String version;
+
     @Inject
     private StackService stackService;
 
@@ -53,13 +59,20 @@ public class DiagnosticsTriggerService {
     @Inject
     private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
 
-    public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {
+    public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn,
+            String userCrn) {
         Stack stack = stackService.getByCrn(stackCrn);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
-        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry, stack.getRegion());
+        String clusterVersion = version;
+        if (stack.getCluster() != null && stack.getCluster().getBlueprint() != null
+                && StringUtils.isNotBlank(stack.getCluster().getBlueprint().getStackVersion())) {
+            clusterVersion = stack.getCluster().getBlueprint().getStackVersion();
+        }
+        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry, stack.getType().name(), clusterVersion,
+                Crn.fromString(stack.getResourceCrn()).getAccountId(), stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())
