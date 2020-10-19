@@ -7,7 +7,9 @@
 /opt/salt/scripts/init_db_remote.sh:
   file.managed:
     - makedirs: True
-    - mode: 755
+    - user: root
+    - group: postgres
+    - mode: 750
     - source: salt://postgresql/scripts/init_db_remote.sh
     - template: jinja
 
@@ -35,7 +37,9 @@ start-postgresql:
 /opt/salt/scripts/conf_pgsql_listen_address.sh:
   file.managed:
     - makedirs: True
-    - mode: 755
+    - user: root
+    - group: postgres
+    - mode: 750
     - source: salt://postgresql/scripts/conf_pgsql_listen_address.sh
 
 configure-listen-address:
@@ -49,7 +53,9 @@ configure-listen-address:
 /opt/salt/scripts/conf_pgsql_max_connections.sh:
   file.managed:
     - makedirs: True
-    - mode: 755
+    - user: root
+    - group: postgres
+    - mode: 750
     - source: salt://postgresql/scripts/conf_pgsql_max_connections.sh
 
 configure-max-connections:
@@ -66,7 +72,9 @@ configure-max-connections:
     - require:
       - cmd: configure-listen-address
       - cmd: configure-max-connections
-    - mode: 755
+    - mode: 750
+    - user: root
+    - group: postgres
     - source: salt://postgresql/scripts/init_db.sh
     - template: jinja
 
