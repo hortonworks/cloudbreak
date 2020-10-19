@@ -75,4 +75,33 @@ public class ResourceNamePermissionCheckerTest {
         assertEquals(1, capturedActions.keySet().size());
         assertThat(capturedActions, IsMapContaining.hasEntry(USER_CRN, AuthorizationResourceAction.EDIT_CREDENTIAL));
     }
+
+    @Test
+    public void testCheckPermissionsIfEntitlementDisabled() {
+        when(commonPermissionCheckingUtils.legacyAuthorizationNeeded()).thenReturn(Boolean.TRUE);
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
+        when(resourceBasedCrnProvider.getResourceCrnByResourceName(any())).thenReturn(USER_CRN);
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(AuthorizationResourceAction.EDIT_CREDENTIAL)).thenReturn(resourceBasedCrnProvider);
+
+        CheckPermissionByResourceName rawMethodAnnotation = new CheckPermissionByResourceName() {
+
+            @Override
+            public AuthorizationResourceAction action() {
+                return AuthorizationResourceAction.EDIT_CREDENTIAL;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return CheckPermissionByResourceName.class;
+            }
+        };
+
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceName.class), eq(String.class));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.EDIT_CREDENTIAL),
+                eq(USER_CRN), eq(USER_CRN));
+    }
 }
