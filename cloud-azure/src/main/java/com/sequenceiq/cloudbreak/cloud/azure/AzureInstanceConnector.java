@@ -109,4 +109,12 @@ public class AzureInstanceConnector implements InstanceConnector {
         azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, cloudInstances, statuses);
         return statuses;
     }
+
+    @Override
+    public List<CloudVmInstanceStatus> checkWithoutRetry(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+        LOGGER.info("Check instances on Azure: {}", cloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
+        azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(ac, cloudInstances, statuses);
+        return statuses;
+    }
 }

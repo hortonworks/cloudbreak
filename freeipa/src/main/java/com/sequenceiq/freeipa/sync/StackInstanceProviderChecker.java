@@ -54,7 +54,7 @@ public class StackInstanceProviderChecker {
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         List<CloudInstance> instances = metadataConverter.convert(notTerminatedForStack);
         try {
-            return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, instances), LOGGER,
+            return checkedMeasure(() -> instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(cloudCredential, cloudContext, instances), LOGGER,
                     ":::Auto sync::: get instance statuses in {}ms");
         } catch (Exception e) {
             LOGGER.info(":::Auto sync::: Could not fetch vm statuses: " + e.getMessage(), e);
