@@ -84,19 +84,26 @@ public class DatabaseServiceTest {
 
     static Object[][] sslEnforcementDataProvider() {
         return new Object[][]{
-                // testCaseName useSslEnforcement
-                {"useSslEnforcement=false", false},
-                {"useSslEnforcement=true", true},
+                // testCaseName useSslEnforcement runtime sslEnforcementAppliedExpected
+                {"useSslEnforcement=false", false, null, false},
+                {"useSslEnforcement=true and runtime=null", true, null, true},
+                {"useSslEnforcement=true and runtime=7.0.0", true, "7.0.0", false},
+                {"useSslEnforcement=true and runtime=7.1.0", true, "7.1.0", false},
+                {"useSslEnforcement=true and runtime=7.2.0", true, "7.2.0", false},
+                {"useSslEnforcement=true and runtime=7.2.1", true, "7.2.1", false},
+                {"useSslEnforcement=true and runtime=7.2.2", true, "7.2.2", true},
+                {"useSslEnforcement=true and runtime=7.2.3", true, "7.2.3", true},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sslEnforcementDataProvider")
-    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean useSslEnforcement) {
+    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean useSslEnforcement, String runtime, boolean sslEnforcementAppliedExpected) {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         cluster.setCrn(CLUSTER_CRN);
+        cluster.setRuntime(runtime);
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
@@ -121,7 +128,7 @@ public class DatabaseServiceTest {
         assertThat(dbRequest.getClusterCrn()).isEqualTo(CLUSTER_CRN);
         assertThat(databaseServer.getAws()).isNotNull();
         SslConfigurationV4Request sslConfiguration = dbRequest.getSslConfiguration();
-        if (useSslEnforcement) {
+        if (sslEnforcementAppliedExpected) {
             assertThat(sslConfiguration).isNotNull();
             assertThat(sslConfiguration.getSslMode()).isEqualTo(SslMode.ENABLED);
         } else {

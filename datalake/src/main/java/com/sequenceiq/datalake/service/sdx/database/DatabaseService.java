@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +18,11 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -44,6 +48,10 @@ public class DatabaseService {
     public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
+
+    private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
+
+    private final Comparator<Versioned> versionComparator = new VersionComparator();
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -130,12 +138,34 @@ public class DatabaseService {
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US));
         req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster));
         req.setClusterCrn(sdxCluster.getCrn());
-        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform)) {
+
+        String runtime = sdxCluster.getRuntime();
+        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
+            LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigurationV4Request sslConfigurationV4Request = new SslConfigurationV4Request();
             sslConfigurationV4Request.setSslMode(SslMode.ENABLED);
             req.setSslConfiguration(sslConfigurationV4Request);
+        } else {
+            LOGGER.info("Skipping external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
         }
+
         return req;
+    }
+
+    private boolean isSslEnforcementSupportedForRuntime(String runtime) {
+        if (StringUtils.isBlank(runtime)) {
+            // This may happen for custom data lakes
+            LOGGER.info("Runtime is NOT specified, external DB SSL enforcement is permitted");
+            return true;
+        }
+        boolean permitted = isVersionNewerThanOrEqualTo(() -> runtime, () -> SSL_ENFORCEMENT_MIN_RUNTIME_VERSION);
+        LOGGER.info("External DB SSL enforcement {} permitted for runtime version {}", permitted ? "is" : "is NOT", runtime);
+        return permitted;
+    }
+
+    private boolean isVersionNewerThanOrEqualTo(Versioned currentVersion, Versioned baseVersion) {
+        LOGGER.info("Comparing current version {} with base version {}", currentVersion.getVersion(), baseVersion.getVersion());
+        return versionComparator.compare(currentVersion, baseVersion) > -1;
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerRequest(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
