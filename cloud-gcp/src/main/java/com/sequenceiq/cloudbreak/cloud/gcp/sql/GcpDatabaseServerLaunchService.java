@@ -164,6 +164,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return new Settings()
                 .setTier(stack.getDatabaseServer().getFlavor())
                 .setActivationPolicy("ALWAYS")
+                .setAvailabilityType(stack.getDatabaseServer().getHighAvailability() ? "REGIONAL" : "ZONAL")
                 .setStorageAutoResize(true)
                 .setDataDiskSizeGb(databaseServerView.getAllocatedStorageInGb())
                 .setDataDiskType("PD_SSD")

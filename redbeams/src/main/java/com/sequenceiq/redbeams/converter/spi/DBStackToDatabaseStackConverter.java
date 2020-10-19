@@ -92,6 +92,7 @@ public class DBStackToDatabaseStackConverter {
             .rootUserName(dbStackDatabaseServer.getRootUserName())
             .rootPassword(dbStackDatabaseServer.getRootPassword())
             .port(dbStackDatabaseServer.getPort())
+            .highAvailability(dbStack.isHa())
             .storageSize(dbStackDatabaseServer.getStorageSize())
             .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
             // TODO / FIXME converter caller decides this?

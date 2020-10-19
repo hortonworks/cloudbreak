@@ -1,23 +1,62 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
-import java.util.List;
+import java.io.IOException;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.sqladmin.SQLAdmin;
+import com.google.api.services.sqladmin.model.DatabaseInstance;
+import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerService;
 
 @Service
 public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService implements DatabaseServerCheckerService {
 
     @Override
-    public List<CloudResourceStatus> check(AuthenticatedContext ac, List<CloudResource> resources, ResourceStatus waitedStatus) {
+    public ExternalDatabaseStatus check(AuthenticatedContext ac, DatabaseStack stack) {
+        GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
+        String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
-        return checkResources(resourceType(), sqlAdmin, ac, resources, waitedStatus);
+        String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
+
+        try {
+            InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
+            Optional<DatabaseInstance> first = Optional.empty();
+            if (!list.isEmpty()) {
+                first = list.getItems()
+                        .stream()
+                        .filter(e -> e.getName().equals(deploymentName))
+                        .findFirst();
+            }
+            if (!first.isEmpty()) {
+                switch (first.get().getState()) {
+                    case "RUNNABLE":
+                        if ("ALWAYS".equals(first.get().getSettings().getActivationPolicy())) {
+                            return ExternalDatabaseStatus.STARTED;
+                        } else {
+                            return ExternalDatabaseStatus.STOPPED;
+                        }
+                    case "SUSPENDED":
+                        return ExternalDatabaseStatus.STOPPED;
+                    case "UNKNOWN_STATE":
+                        return ExternalDatabaseStatus.DELETED;
+                    case "FAILED":
+                        return ExternalDatabaseStatus.DELETED;
+                    default:
+                        return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
+                }
+            } else {
+                return ExternalDatabaseStatus.DELETED;
+            }
+        } catch (IOException ex) {
+            throw new CloudConnectorException(ex.getMessage(), ex);
+        }
     }
 }
