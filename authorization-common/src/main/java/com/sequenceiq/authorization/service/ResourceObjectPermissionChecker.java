@@ -138,8 +138,12 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
             throw new AccessDeniedException("Annotated field within resource object is not string, thus access is denied!");
         }
         String resourceCrn = (String) resultObject;
-        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
-        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        if (getCommonPermissionCheckingUtils().legacyAuthorizationNeeded()) {
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        } else {
+            Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        }
     }
 
     private void checkPermissionForResourceName(String userCrn, Object resultObject, AuthorizationResourceAction action) {
@@ -148,8 +152,12 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
         }
         String resourceName = (String) resultObject;
         String resourceCrn = getCommonPermissionCheckingUtils().getResourceBasedCrnProvider(action).getResourceCrnByResourceName(resourceName);
-        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
-        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        if (getCommonPermissionCheckingUtils().legacyAuthorizationNeeded()) {
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        } else {
+            Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        }
     }
 
     @Override

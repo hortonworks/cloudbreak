@@ -111,6 +111,22 @@ public class ResourceObjectPermissionCheckerTest {
     }
 
     @Test
+    public void testCheckPermissionsWithResourceObjectWithCrnStringFieldIfEntitlementDisabled() {
+        when(commonPermissionCheckingUtils.legacyAuthorizationNeeded()).thenReturn(Boolean.TRUE);
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithCrnAnnotation());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString());
+
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.EDIT_CREDENTIAL),
+                eq(USER_CRN), eq(RESOURCE_CRN));
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnByResourceName(anyString());
+        verify(resourceBasedCrnProvider, times(0)).getResourceCrnListByResourceNameList(any());
+    }
+
+    @Test
     public void testCheckPermissionsWithResourceObjectWithDeeperFieldAnnotationOnCrnStringField() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new ResourceObjectWithDeepCrnAnnotation());
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), anyString());
@@ -171,6 +187,22 @@ public class ResourceObjectPermissionCheckerTest {
         assertThat(capturedActions, IsMapContaining.hasEntry(datahubCrn, AuthorizationResourceAction.DELETE_DATAHUB));
         assertThat(capturedActions, IsMapContaining.hasEntry(envCrn, AuthorizationResourceAction.DELETE_DATAHUB));
         verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
+    }
+
+    @Test
+    public void testCheckPermissionsWithResourceObjectWithNameStringFieldIfEntitlementDisabled() {
+        when(commonPermissionCheckingUtils.legacyAuthorizationNeeded()).thenReturn(Boolean.TRUE);
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new DatahubResourceObjectWithNameAnnotation());
+        doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), anyString());
+        when(resourceBasedCrnProvider.getResourceCrnByResourceName(eq("resource"))).thenReturn(RESOURCE_CRN);
+
+        underTest.checkPermissions(getAnnotation(false), USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceObject.class), eq(Object.class));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), eq(USER_CRN));
+        verify(resourceBasedCrnProvider).getResourceCrnByResourceName(eq("resource"));
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.DELETE_DATAHUB),
+                eq(USER_CRN), eq(RESOURCE_CRN));
     }
 
     @Test

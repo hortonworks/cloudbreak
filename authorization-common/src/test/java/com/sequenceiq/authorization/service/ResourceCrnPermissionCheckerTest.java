@@ -68,6 +68,32 @@ public class ResourceCrnPermissionCheckerTest {
     }
 
     @Test
+    public void testCheckPermissionsIfEntitlementDisabled() {
+        when(commonPermissionCheckingUtils.legacyAuthorizationNeeded()).thenReturn(Boolean.TRUE);
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(USER_CRN);
+
+        CheckPermissionByResourceCrn rawMethodAnnotation = new CheckPermissionByResourceCrn() {
+
+            @Override
+            public AuthorizationResourceAction action() {
+                return AuthorizationResourceAction.EDIT_CREDENTIAL;
+            }
+
+            @Override
+            public Class<? extends Annotation> annotationType() {
+                return CheckPermissionByResourceCrn.class;
+            }
+        };
+        underTest.checkPermissions(rawMethodAnnotation, USER_CRN, null, null, 0L);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceCrn.class), eq(String.class));
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUser(any(), anyString());
+        verify(commonPermissionCheckingUtils, times(0)).checkPermissionForUserOnResource(any(), eq(USER_CRN));
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResource(eq(AuthorizationResourceAction.EDIT_CREDENTIAL),
+                eq(USER_CRN), eq(USER_CRN));
+    }
+
+    @Test
     public void testCheckPermissionsWithDatahub() {
         String datahubCrn = "crn:cdp:datalake:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:datahub:614a791a-a100-4f83-8c65-968fe9b06d47";
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(datahubCrn);

@@ -24,8 +24,12 @@ public class ResourceCrnPermissionChecker extends ResourcePermissionChecker<Chec
         CheckPermissionByResourceCrn methodAnnotation = (CheckPermissionByResourceCrn) rawMethodAnnotation;
         String resourceCrn = getCommonPermissionCheckingUtils().getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
         AuthorizationResourceAction action = methodAnnotation.action();
-        Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
-        getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        if (getCommonPermissionCheckingUtils().legacyAuthorizationNeeded()) {
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(action, userCrn, resourceCrn);
+        } else {
+            Map<String, AuthorizationResourceAction> authorizationActions = getAuthorizationActions(resourceCrn, action);
+            getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(authorizationActions, userCrn);
+        }
     }
 
     @Override
