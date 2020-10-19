@@ -111,6 +111,9 @@ public class SdxCluster implements AccountIdAwareResource {
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
+    @Column(name = "sdx_cluster_service_version")
+    private String sdxClusterServiceVersion;
+
     public Long getId() {
         return id;
     }
@@ -332,6 +335,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.rangerRazEnabled = rangerRazEnabled;
     }
 
+    public String getSdxClusterServiceVersion() {
+        return sdxClusterServiceVersion;
+    }
+
+    public void setSdxClusterServiceVersion(String sdxClusterServiceVersion) {
+        this.sdxClusterServiceVersion = sdxClusterServiceVersion;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -359,14 +370,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 cloudStorageFileSystemType == that.cloudStorageFileSystemType &&
                 databaseAvailabilityType == that.databaseAvailabilityType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
-                certExpirationState == that.certExpirationState;
+                certExpirationState == that.certExpirationState &&
+                Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled, certExpirationState);
+                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion);
     }
 
     @Override
@@ -382,6 +394,7 @@ public class SdxCluster implements AccountIdAwareResource {
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
                 ", rangerRazEnabled=" + rangerRazEnabled +
                 ", certExpirationState=" + certExpirationState +
+                ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 '}';
     }
 

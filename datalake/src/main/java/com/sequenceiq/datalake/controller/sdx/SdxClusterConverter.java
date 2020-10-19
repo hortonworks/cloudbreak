@@ -50,6 +50,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setRangerRazEnabled(sdxCluster.isRangerRazEnabled());
         sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
         sdxClusterResponse.setCertExpirationState(sdxCluster.getCertExpirationState());
+        sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());
         return sdxClusterResponse;
     }
 

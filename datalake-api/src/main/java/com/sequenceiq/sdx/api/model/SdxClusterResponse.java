@@ -48,6 +48,8 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
     @ApiModelProperty(ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
+    private String sdxClusterServiceVersion;
+
     public SdxClusterResponse() {
     }
 
@@ -55,7 +57,8 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
             String statusReason, String environmentName, String environmentCrn, String stackCrn,
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
-            boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState) {
+            boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState,
+            String sdxClusterServiceVersion) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -70,6 +73,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.rangerRazEnabled = rangerRazEnabled;
         this.tags = tags;
         this.certExpirationState = certExpirationState;
+        this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
     public String getCrn() {
@@ -208,6 +212,14 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
         this.certExpirationState = certExpirationState;
     }
 
+    public String getSdxClusterServiceVersion() {
+        return sdxClusterServiceVersion;
+    }
+
+    public void setSdxClusterServiceVersion(String sdxClusterServiceVersion) {
+        this.sdxClusterServiceVersion = sdxClusterServiceVersion;
+    }
+
     @JsonIgnore
     @Override
     public String getResourceCrn() {
@@ -234,6 +246,7 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
                 ", rangerRazEnabled=" + rangerRazEnabled +
                 ", tags=" + tags +
                 ", certExpirationState=" + certExpirationState +
+                ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 '}';
     }
 }
