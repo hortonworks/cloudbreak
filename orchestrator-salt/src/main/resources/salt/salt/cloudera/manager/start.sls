@@ -9,6 +9,18 @@ init-cloudera-manager-db:
         - user: {{ cloudera_manager.cloudera_manager_database.connectionUserName }}
         - pass: {{ cloudera_manager.cloudera_manager_database.connectionPassword }}
 
+#Configure JDBC URL for CM if client side certification validation is enabled for the Datalake cluster
+{% if salt['pillar.get']('postgres_root_certs:ssl_certs') is defined and salt['pillar.get']('postgres_root_certs:ssl_certs')|length > 1 and salt['pillar.get']('telemetry:clusterType') == "datalake" %}
+replace-db-connection-url:
+  file.replace:
+    - name: /etc/cloudera-scm-server/db.properties
+    - pattern: "(#UPDATED BY CDP CP:\n)?com.cloudera.cmf.orm.hibernate.connection.url=.*"
+    - repl: "#UPDATED BY CDP CP:\ncom.cloudera.cmf.orm.hibernate.connection.url=jdbc:{{ cloudera_manager.cloudera_manager_database.subprotocol }}://{{ cloudera_manager.cloudera_manager_database.host }}/{{ cloudera_manager.cloudera_manager_database.databaseName }}?sslmode=verify-full&sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem"
+    - append_if_not_found: True
+    - require:
+        - cmd: init-cloudera-manager-db
+{% endif %}
+
 # We need to restart the CM if the frontend URL has been changed (e.g. switching to PEM based DNS name)
 
 {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
