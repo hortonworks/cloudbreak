@@ -98,6 +98,19 @@ class AwsRdsLaunchServiceTest {
 
     private static final String CF_TEMPLATE = "{\"template\" : \"foo\"}";
 
+    private static final Map<String, String> CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP = Map.ofEntries(
+            entry(HOSTNAME, OUT_HOSTNAME),
+            entry(PORT, OUT_PORT),
+            entry(CREATED_DB_INSTANCE, OUT_DB_INSTANCE),
+            entry(CREATED_DB_SUBNET_GROUP, OUT_DB_SUBNET_GROUP));
+
+    private static final Map<String, String> CF_OUTPUTS_WITH_DB_PARAMETER_GROUP = Map.ofEntries(
+            entry(HOSTNAME, OUT_HOSTNAME),
+            entry(PORT, OUT_PORT),
+            entry(CREATED_DB_INSTANCE, OUT_DB_INSTANCE),
+            entry(CREATED_DB_SUBNET_GROUP, OUT_DB_SUBNET_GROUP),
+            entry(CREATED_DB_PARAMETER_GROUP, OUT_DB_PARAMETER_GROUP));
+
     @Mock
     private CloudFormationStackUtil cfStackUtil;
 
@@ -153,14 +166,6 @@ class AwsRdsLaunchServiceTest {
         when(cfClient.waiters()).thenReturn(cfWaiters);
         when(cfWaiters.stackCreateComplete()).thenReturn(creationWaiter);
 
-        Map<String, String> cfOutputs = Map.ofEntries(
-                entry(HOSTNAME, OUT_HOSTNAME),
-                entry(PORT, OUT_PORT),
-                entry(CREATED_DB_INSTANCE, OUT_DB_INSTANCE),
-                entry(CREATED_DB_SUBNET_GROUP, OUT_DB_SUBNET_GROUP),
-                entry(CREATED_DB_PARAMETER_GROUP, OUT_DB_PARAMETER_GROUP));
-        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient)).thenReturn(cfOutputs);
-
         when(cloudFormationTemplateBuilder.build(isA(RDSModelContext.class))).thenReturn(CF_TEMPLATE);
     }
 
@@ -175,20 +180,27 @@ class AwsRdsLaunchServiceTest {
     }
 
     private void launchTestUseSslEnforcementInternal(boolean useSslEnforcement) throws Exception {
+        when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient))
+                .thenReturn(useSslEnforcement ? CF_OUTPUTS_WITH_DB_PARAMETER_GROUP : CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
+
         List<CloudResourceStatus> cloudResourceStatuses = underTest.launch(authenticatedContext, createDatabaseStack(useSslEnforcement), resourceNotifier);
 
         assertThat(cloudResourceStatuses).isNotNull();
-        assertThat(cloudResourceStatuses).hasSize(6);
+        assertThat(cloudResourceStatuses).hasSize(useSslEnforcement ? 6 : 5);
 
         cloudResourceStatuses.forEach(status -> assertThat(status).isNotNull());
         cloudResourceStatuses.forEach(status -> assertThat(status.getCloudResource()).isNotNull());
 
-        checkOutputResource(cloudResourceStatuses, ResourceType.RDS_HOSTNAME, OUT_HOSTNAME);
-        checkOutputResource(cloudResourceStatuses, ResourceType.RDS_PORT, OUT_PORT);
-        checkOutputResource(cloudResourceStatuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
-        checkOutputResource(cloudResourceStatuses, ResourceType.RDS_DB_SUBNET_GROUP, OUT_DB_SUBNET_GROUP);
-        checkOutputResource(cloudResourceStatuses, ResourceType.RDS_DB_PARAMETER_GROUP, OUT_DB_PARAMETER_GROUP);
-        checkOutputResource(cloudResourceStatuses, ResourceType.CLOUDFORMATION_STACK, STACK_NAME_CF);
+        checkOutputResourceExists(cloudResourceStatuses, ResourceType.RDS_HOSTNAME, OUT_HOSTNAME);
+        checkOutputResourceExists(cloudResourceStatuses, ResourceType.RDS_PORT, OUT_PORT);
+        checkOutputResourceExists(cloudResourceStatuses, ResourceType.RDS_INSTANCE, OUT_DB_INSTANCE);
+        checkOutputResourceExists(cloudResourceStatuses, ResourceType.RDS_DB_SUBNET_GROUP, OUT_DB_SUBNET_GROUP);
+        if (useSslEnforcement) {
+            checkOutputResourceExists(cloudResourceStatuses, ResourceType.RDS_DB_PARAMETER_GROUP, OUT_DB_PARAMETER_GROUP);
+        } else {
+            checkOutputResourceIsAbsent(cloudResourceStatuses, ResourceType.RDS_DB_PARAMETER_GROUP, OUT_DB_PARAMETER_GROUP);
+        }
+        checkOutputResourceExists(cloudResourceStatuses, ResourceType.CLOUDFORMATION_STACK, STACK_NAME_CF);
 
         verify(cloudFormationTemplateBuilder).build(rdsModelContextCaptor.capture());
         RDSModelContext rdsModelContext = rdsModelContextCaptor.getValue();
@@ -210,13 +222,26 @@ class AwsRdsLaunchServiceTest {
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), null);
     }
 
-    private void checkOutputResource(List<CloudResourceStatus> cloudResourceStatuses, ResourceType type, String expectedName) {
+    private void checkOutputResourceExists(List<CloudResourceStatus> cloudResourceStatuses, ResourceType type, String nameExpected) {
+        checkOutputResourceInternal(cloudResourceStatuses, type, nameExpected, true);
+    }
+
+    private void checkOutputResourceIsAbsent(List<CloudResourceStatus> cloudResourceStatuses, ResourceType type, String nameExpected) {
+        checkOutputResourceInternal(cloudResourceStatuses, type, nameExpected, false);
+    }
+
+    private void checkOutputResourceInternal(List<CloudResourceStatus> cloudResourceStatuses, ResourceType type, String nameExpected,
+            boolean existenceExpected) {
         Optional<CloudResourceStatus> cloudResourceStatusOptional =
                 cloudResourceStatuses.stream().filter(resource -> resource.getCloudResource().getType() == type).findFirst();
-        assertThat(cloudResourceStatusOptional.isPresent()).isTrue();
-        CloudResourceStatus cloudResourceStatus = cloudResourceStatusOptional.get();
-        assertThat(cloudResourceStatus.getStatus()).isEqualTo(ResourceStatus.CREATED);
-        assertThat(cloudResourceStatus.getCloudResource().getName()).isEqualTo(expectedName);
+        if (existenceExpected) {
+            assertThat(cloudResourceStatusOptional.isPresent()).isTrue();
+            CloudResourceStatus cloudResourceStatus = cloudResourceStatusOptional.get();
+            assertThat(cloudResourceStatus.getStatus()).isEqualTo(ResourceStatus.CREATED);
+            assertThat(cloudResourceStatus.getCloudResource().getName()).isEqualTo(nameExpected);
+        } else {
+            assertThat(cloudResourceStatusOptional.isEmpty()).isTrue();
+        }
     }
 
 }
