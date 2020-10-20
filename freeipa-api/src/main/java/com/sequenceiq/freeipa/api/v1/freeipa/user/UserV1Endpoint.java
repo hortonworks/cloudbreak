@@ -56,6 +56,13 @@ public interface UserV1Endpoint {
     SyncOperationStatus getSyncOperationStatus(@QueryParam("operationId") @NotNull String operationId);
 
     @GET
+    @Path("lastStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.LAST_SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
+            nickname = "getLastSyncOperationStatusV1")
+    SyncOperationStatus getLastSyncOperationStatus(@QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @GET
     @Path("syncState")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UserOperationDescriptions.ENVIRONMENT_USERSYNC_STATE, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
