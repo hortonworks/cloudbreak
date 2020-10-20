@@ -80,6 +80,8 @@ public class AwsRdsLaunchService {
         AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+        DatabaseServer databaseServer = stack.getDatabaseServer();
+        boolean useSslEnforcement = databaseServer.isUseSslEnforcement();
         try {
             cfRetryClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
@@ -92,12 +94,11 @@ public class AwsRdsLaunchService {
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
-            DatabaseServer databaseServer = stack.getDatabaseServer();
             RDSModelContext rdsModelContext = new RDSModelContext()
                     .withTemplate(stack.getTemplate())
                     .withNetworkCidrs(awsNetworkView.getExistingVpcCidrs())
                     .withHasPort(databaseServer.getPort() != null)
-                    .withUseSslEnforcement(databaseServer.isUseSslEnforcement())
+                    .withUseSslEnforcement(useSslEnforcement)
                     .withHasSecurityGroup(!databaseServer.getSecurity().getCloudSecurityIds().isEmpty());
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
@@ -111,7 +112,7 @@ public class AwsRdsLaunchService {
         run(creationWaiter, describeStacksRequest, stackCancellationCheck, String.format("RDS CloudFormation stack %s creation failed", cFStackName),
                 () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, CREATE_FAILED));
 
-        List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        List<CloudResource> databaseResources = getCreatedOutputs(ac, stack, cFStackName, cfRetryClient, resourceNotifier, useSslEnforcement);
         databaseResources.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
         // FIXME: For now, just return everything wrapped in a status object
         return databaseResources.stream()
@@ -122,7 +123,7 @@ public class AwsRdsLaunchService {
     }
 
     private List<CloudResource> getCreatedOutputs(AuthenticatedContext ac, DatabaseStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
-        PersistenceNotifier resourceNotifier) {
+            PersistenceNotifier resourceNotifier, boolean useSslEnforcement) {
         List<CloudResource> resources = new ArrayList<>();
 
         Map<String, String> outputs = getCfStackOutputs(cFStackName, client);
@@ -131,7 +132,9 @@ public class AwsRdsLaunchService {
         resources.add(new Builder().type(ResourceType.RDS_PORT).name(getPort(outputs, cFStackName)).build());
         resources.add(new Builder().type(ResourceType.RDS_INSTANCE).name(getCreatedDBInstance(outputs, cFStackName)).build());
         resources.add(new Builder().type(ResourceType.RDS_DB_SUBNET_GROUP).name(getCreatedDBSubnetGroup(outputs, cFStackName)).build());
-        resources.add(new Builder().type(ResourceType.RDS_DB_PARAMETER_GROUP).name(getCreatedDBParameterGroup(outputs, cFStackName)).build());
+        if (useSslEnforcement) {
+            resources.add(new Builder().type(ResourceType.RDS_DB_PARAMETER_GROUP).name(getCreatedDBParameterGroup(outputs, cFStackName)).build());
+        }
         // The idea here is to record the CloudFormation stack name so that we can later manipulate it.
         // This may be unnecessary, but for now this is trivial to add.
         CloudResource cfNameResource = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
