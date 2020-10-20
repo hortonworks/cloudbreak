@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Objects;
@@ -32,16 +31,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
-import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
@@ -67,9 +65,6 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
-    @Inject
-    private ClusterTemplateViewService clusterTemplateViewService;
-
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
@@ -83,18 +78,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
-        measure(() -> blueprintService.updateDefaultBlueprintCollection(workspaceId), LOGGER, "Blueprints fetched in {}ms");
-        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(workspaceId), LOGGER, "Cluster templates fetched in {}ms");
-        Set<ClusterTemplateViewV4Response> result = measure(() -> clusterTemplateService.listInWorkspaceAndCleanUpInvalids(workspaceId),
-                LOGGER, "cluster templates cleaned in {}ms");
-        return new ClusterTemplateViewV4Responses(result);
-    }
-
-    @Override
-    @DisableCheckPermissions
-    public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, String environmentCrn) {
-        Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllByEnvironmentCrn(environmentCrn);
-        Set<ClusterTemplateViewV4Response> result = converterUtil.convertAllAsSet(clusterTemplateViews, ClusterTemplateViewV4Response.class);
+        blueprintService.updateDefaultBlueprintCollection(workspaceId);
+        clusterTemplateService.updateDefaultClusterTemplates(workspaceId);
+        Set<ClusterTemplateViewV4Response> result = clusterTemplateService.listInWorkspaceAndCleanUpInvalids(workspaceId);
         return new ClusterTemplateViewV4Responses(result);
     }
 
@@ -151,10 +137,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         } else {
+            NameOrCrn environmentNameOrCrn = NameOrCrn.ofCrn(environmentCrn);
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(environmentCrn)
+                    .findAllByEnvironment(environmentNameOrCrn)
                     .stream()
-                    .map(ClusterTemplateView::getName)
+                    .map(ClusterTemplate::getName)
                     .collect(toSet());
             clusterTemplates = clusterTemplateService.deleteMultiple(namesByEnv, workspaceId);
         }

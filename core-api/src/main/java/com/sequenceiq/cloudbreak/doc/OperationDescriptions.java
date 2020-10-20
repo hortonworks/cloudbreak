@@ -77,7 +77,6 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete cluster template by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete cluster template by crn in workspace";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple cluster templates by name in workspace";
-        public static final String LIST_BY_ENV = "list cluster templates by environment crn";
     }
 
     public static class RecipeOpDescription {
