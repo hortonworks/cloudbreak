@@ -68,12 +68,17 @@ public class RedbeamsDbCertificateProvider {
             String stackResourceCrn = cluster.getStack().getResourceCrn();
             String clusterName = cluster.getName();
             LOGGER.info("Gathering cluster's(crn:'{}', name: '{}') remote database root certificates", stackResourceCrn, clusterName);
-            DatabaseServerV4Response databaseServer = dbServerConfigurer.getDatabaseServer(cluster.getDatabaseServerCrn());
-            SslMode sslMode = databaseServer.getSslConfig().getSslMode();
-            if (SslMode.ENABLED.equals(sslMode)) {
-                Set<String> sslCertificates = databaseServer.getSslConfig().getSslCertificates();
-                result.addAll(sslCertificates);
-                LOGGER.info("Number of certificates found:'{}' for cluster(crn:'{}', name: '{}')", sslCertificates.size(), stackResourceCrn, clusterName);
+            String databaseServerCrn = cluster.getDatabaseServerCrn();
+            DatabaseServerV4Response databaseServer = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
+            if (databaseServer.getSslConfig() != null) {
+                SslMode sslMode = databaseServer.getSslConfig().getSslMode();
+                if (SslMode.ENABLED.equals(sslMode)) {
+                    Set<String> sslCertificates = databaseServer.getSslConfig().getSslCertificates();
+                    result.addAll(sslCertificates);
+                    LOGGER.info("Number of certificates found:'{}' for cluster(crn:'{}', name: '{}')", sslCertificates.size(), stackResourceCrn, clusterName);
+                }
+            } else {
+                LOGGER.info("There no SSL config could be found for the remote database('{}').", databaseServerCrn);
             }
         }
         return result;
