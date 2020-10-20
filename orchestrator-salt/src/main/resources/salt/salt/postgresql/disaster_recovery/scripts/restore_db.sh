@@ -30,6 +30,11 @@ echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
 
+if [[ -f /hadoopfs/fs1/database-cacerts/certs.pem ]]; then
+  export PGSSLROOTCERT=/hadoopfs/fs1/database-cacerts/certs.pem
+  export PGSSLMODE=verify-full
+fi
+
 doLog() {
   set +x
   type_of_msg=$(echo "$@" | cut -d" " -f1)
