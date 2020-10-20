@@ -9,5 +9,7 @@ public enum MetricTag {
     TARGET_API,
     TARGET_METHOD,
     TENANT,
-    REGION;
+    REGION,
+    URI,
+    CALLER_ID
 }
