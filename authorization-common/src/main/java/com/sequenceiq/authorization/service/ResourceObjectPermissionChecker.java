@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -152,6 +153,9 @@ public class ResourceObjectPermissionChecker extends ResourcePermissionChecker<C
         }
         String resourceName = (String) resultObject;
         String resourceCrn = getCommonPermissionCheckingUtils().getResourceBasedCrnProvider(action).getResourceCrnByResourceName(resourceName);
+        if (StringUtils.isEmpty(resourceCrn)) {
+            throw new NotFoundException(String.format("Could not find resourceCrn for resource by name: %s", resourceName));
+        }
         if (getCommonPermissionCheckingUtils().legacyAuthorizationNeeded()) {
             getCommonPermissionCheckingUtils().checkPermissionForUserOnResource(action, userCrn, resourceCrn);
         } else {
