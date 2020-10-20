@@ -1,6 +1,5 @@
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 
-
 include:
   - postgresql.disaster_recovery
 

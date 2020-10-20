@@ -29,6 +29,11 @@ RANGERGROUP="$5"
 LOGFILE=${6:-/var/log/}/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
+if [[ -f /hadoopfs/fs1/database-cacerts/certs.pem ]]; then
+  export PGSSLROOTCERT=/hadoopfs/fs1/database-cacerts/certs.pem
+  export PGSSLMODE=verify-full
+fi
+
 doLog() {
   set +x
   type_of_msg=$(echo "$@" | cut -d" " -f1)
