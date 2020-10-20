@@ -304,7 +304,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             AccountMapping accountMapping = isCloudStorageConfigured(source) ? source.getCluster().getFileSystem().getCloudStorage().getAccountMapping() : null;
             if (accountMapping != null) {
                 builder.withAccountMappingView(new AccountMappingView(accountMapping.getGroupMappings(), accountMapping.getUserMappings()));
-            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
+            } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCluster().getFileSystem() != null) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
                 String virtualGroup = getMockVirtualGroup(virtualGroupRequest);
