@@ -229,10 +229,11 @@ public class UmsClient {
     }
 
     public MachineUser getMachineUser(String requestId, String userCrn, String accountId) {
-        return getMachineUserForUser(requestId, userCrn, accountId, userCrn);
+        return getMachineUserForUser(requestId, userCrn, accountId, userCrn, true, true);
     }
 
-    public MachineUser getMachineUserForUser(String requestId, String userCrn, String accountId, String machineUserName) {
+    public MachineUser getMachineUserForUser(String requestId, String userCrn, String accountId, String machineUserName,
+            boolean includeWorkloadMachineUser, boolean includeInternal) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         Crn crn = Crn.fromString(userCrn);
@@ -240,6 +241,8 @@ public class UmsClient {
                 ListMachineUsersRequest.newBuilder()
                         .setAccountId(accountId)
                         .addMachineUserNameOrCrn(machineUserName)
+                        .setIncludeWorkloadMachineUsers(includeWorkloadMachineUser)
+                        .setIncludeInternal(includeInternal)
                         .build()
         ).getMachineUserList();
         checkSingleUserResponse(machineUsers, crn.getResource());
@@ -297,8 +300,8 @@ public class UmsClient {
         checkNotNull(machineUserName);
         Optional<String> emptyResponse = Optional.empty();
         try {
-            UserManagementProto.CreateMachineUserResponse response = newStub(requestId).createMachineUser(
-                    UserManagementProto.CreateMachineUserRequest.newBuilder()
+            UserManagementProto.CreateWorkloadMachineUserResponse response = newStub(requestId).createWorkloadMachineUser(
+                    UserManagementProto.CreateWorkloadMachineUserRequest.newBuilder()
                             .setAccountId(accountId)
                             .setMachineUserName(machineUserName)
                             .build());
