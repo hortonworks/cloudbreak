@@ -21,9 +21,6 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
             "WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     Set<ClusterTemplateView> findAllActive(@Param("workspaceId") Long workspaceId);
 
-    @Query("SELECT c FROM ClusterTemplateView c WHERE c.stackTemplate.environmentCrn= :environmentCrn AND c.status <> 'DEFAULT_DELETED'")
-    Set<ClusterTemplateView> getAllByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
-
     @Override
     default <S extends ClusterTemplateView> S save(S entity) {
         throw new UnsupportedOperationException("Creation is not supported from ClusterTemplateViewRepository");
