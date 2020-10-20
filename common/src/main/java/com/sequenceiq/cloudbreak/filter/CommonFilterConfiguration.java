@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.CrnFilter;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 
 import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
@@ -43,5 +45,13 @@ public class CommonFilterConfiguration {
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
         filterRegistrationBean.addUrlPatterns("*");
         return filterRegistrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<RequestHeaderMetricFilter> requestHeaderMetricFilter(MetricService metricService) {
+        FilterRegistrationBean<RequestHeaderMetricFilter> registrationBean = new FilterRegistrationBean<>();
+        RequestHeaderMetricFilter filter = new RequestHeaderMetricFilter(metricService);
+        registrationBean.setFilter(filter);
+        return registrationBean;
     }
 }
