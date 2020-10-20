@@ -82,7 +82,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .buildMdc();
     }
 
-    private void syncAStack(Stack stack) {
+    public void syncAStack(Stack stack) {
         try {
             checkedMeasure(() -> {
                 ThreadBasedUserCrnProvider.doAsInternalActor(() -> {

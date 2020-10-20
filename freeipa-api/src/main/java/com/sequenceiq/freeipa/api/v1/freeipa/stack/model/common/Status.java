@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 import java.util.Collection;
 import java.util.List;
 
+//if statuses are added in this enum class, please also add them in cloudbreak-ui repository
+//https://github.com/hortonworks/hortonworks-cloud/blob/master/web/cloudbreak-ui/src/app/helpers/freeipa.helpers.ts
 public enum Status {
     REQUESTED,
     CREATE_IN_PROGRESS,
@@ -12,6 +14,9 @@ public enum Status {
     UPDATE_IN_PROGRESS,
     UPDATE_REQUESTED,
     UPDATE_FAILED,
+    UPSCALE_FAILED,
+    DOWNSCALE_FAILED,
+    REPAIR_FAILED,
     CREATE_FAILED,
     DELETE_IN_PROGRESS,
     DELETE_FAILED,
@@ -33,10 +38,10 @@ public enum Status {
     public static final Collection<Status> AVAILABLE_STATUSES = List.of(AVAILABLE, MAINTENANCE_MODE_ENABLED);
 
     public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED,
-            DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED);
+            DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, REPAIR_FAILED, UPSCALE_FAILED, DOWNSCALE_FAILED);
 
     public static final Collection<Status> FAILED_STATUSES = List.of(UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED, START_FAILED,
-            STOP_FAILED);
+            STOP_FAILED, REPAIR_FAILED, UPSCALE_FAILED, DOWNSCALE_FAILED);
 
     public static final Collection<Status> FREEIPA_UNREACHABLE_STATUSES = List.of(REQUESTED, UNREACHABLE, STOPPED, DELETED_ON_PROVIDER_SIDE,
             DELETE_IN_PROGRESS, DELETE_COMPLETED);
