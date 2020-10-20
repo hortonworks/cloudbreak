@@ -469,12 +469,23 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testMockAccountMappings() {
         when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
         assertNotNull(accountMappingView);
         assertEquals(MOCK_GROUP_MAPPINGS, accountMappingView.getGroupMappings());
         assertEquals(MOCK_USER_MAPPINGS, accountMappingView.getUserMappings());
+    }
+
+    @Test
+    public void testMockAccountMappingsWhenNoFileSystemShouldReturnEmptyList() {
+        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(stackMock.getCluster().getFileSystem()).thenReturn(null);
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        AccountMappingView accountMappingView = result.getAccountMappingView();
+        assertNull(accountMappingView);
     }
 
     @Test
