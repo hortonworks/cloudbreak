@@ -135,6 +135,15 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
+    public SyncOperationStatus getLastSyncOperationStatus(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
+        Crn envCrn = Crn.safeFromString(environmentCrn);
+        EnvironmentUserSyncState userSyncState = environmentUserSyncStateCalculator.calculateEnvironmentUserSyncState(envCrn.getAccountId(), envCrn);
+        return operationToSyncOperationStatus.convert(
+                operationService.getOperationForAccountIdAndOperationId(envCrn.getAccountId(), userSyncState.getLastUserSyncOperationId()));
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public EnvironmentUserSyncState getUserSyncState(@ResourceCrn @TenantAwareParam @NotEmpty String environmentCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
