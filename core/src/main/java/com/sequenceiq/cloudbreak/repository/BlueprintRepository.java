@@ -33,7 +33,7 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     Blueprint findByResourceCrn(String resourceCrn);
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.name = :name AND b.workspace.tenant.name = :accountId")
-    String findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+    Optional<String> findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId")
     List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
