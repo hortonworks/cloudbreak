@@ -145,6 +145,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -157,6 +158,7 @@ public class CloudFormationTemplateBuilderTest {
                 .contains("AmbariNodesmaster")
                 .matches(template -> template.contains("AmbariNodeLaunchConfigmaster") || template.contains("ClusterManagerNodeLaunchTemplatemaster"))
                 .contains("ClusterNodeSecurityGroupmaster")
+                .contains("SecurityGroupIngress")
                 .contains("AmbariNodesgateway")
                 .matches(template -> template.contains("AmbariNodeLaunchConfiggateway") || template.contains("ClusterManagerNodeLaunchTemplategateway"))
                 .contains("ClusterNodeSecurityGroupgateway")
@@ -180,6 +182,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -210,6 +213,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -235,6 +239,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -251,6 +256,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("EIP"));
     }
 
@@ -264,6 +270,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -280,6 +287,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("EIP"));
     }
 
@@ -293,6 +301,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -309,6 +318,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("EIP"));
     }
 
@@ -321,6 +331,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -337,6 +348,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("EIP"));
     }
 
@@ -350,6 +362,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -366,6 +379,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -402,6 +416,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
         assertThat(templateString, containsString("{ \"IpProtocol\" : \"icmp\", \"FromPort\" : \"-1\", \"ToPort\" : \"-1\", \"CidrIp\" : "
                 + "\"10.0.0.0/24\"} ,{ \"IpProtocol\" : \"tcp\", \"FromPort\" : \"0\", \"ToPort\" : \"65535\", \"CidrIp\" : \"10.0.0.0/24\"} ,{ \"IpProtocol\" "
@@ -418,6 +433,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -434,6 +450,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -447,6 +464,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -462,6 +480,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("SubnetConfig")));
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("AvailabilitySet"));
         assertThat(templateString, not(containsString("EIP")));
     }
@@ -475,6 +494,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -490,6 +510,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("SubnetConfig")));
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("AvailabilitySet"));
         assertThat(templateString, not(containsString("EIP")));
     }
@@ -504,6 +525,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -519,6 +541,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("SubnetConfig")));
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, containsString("AvailabilitySet"));
         assertThat(templateString, not(containsString("EIP")));
     }
@@ -533,6 +556,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -549,6 +573,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -562,6 +587,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -578,6 +604,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -590,6 +617,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -606,6 +634,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, not(containsString("\"AttachGateway\"")));
         assertThat(templateString, not(containsString("\"InternetGateway\"")));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -619,6 +648,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(false)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -635,6 +665,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("\"AttachGateway\""));
         assertThat(templateString, containsString("\"InternetGateway\""));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -648,6 +679,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(false)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(false)
@@ -664,6 +696,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("\"AttachGateway\""));
         assertThat(templateString, containsString("\"InternetGateway\""));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -677,6 +710,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(false)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(true)
@@ -693,6 +727,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("\"AttachGateway\""));
         assertThat(templateString, containsString("\"InternetGateway\""));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -706,6 +741,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(false)
                 .withExistingIGW(false)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(false)
                 .withEnableInstanceProfile(false)
                 .withInstanceProfileAvailable(false)
@@ -722,6 +758,7 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("\"AttachGateway\""));
         assertThat(templateString, containsString("\"InternetGateway\""));
         assertThat(templateString, containsString("AvailabilitySet"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("EIP")));
     }
 
@@ -741,6 +778,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
@@ -749,6 +787,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("VPCId"));
+        assertThat(templateString, not(containsString("SecurityGroupIngress")));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
 
@@ -770,6 +809,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
@@ -778,6 +818,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("VPCId"));
+        assertThat(templateString, not(containsString("SecurityGroupIngress")));
         assertThat(templateString, containsString("\"single-sg-id\""));
     }
 
@@ -797,6 +838,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .withStack(cloudStack)
                 .mapPublicIpOnLaunch(false)
                 .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
@@ -805,6 +847,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, containsString("\"multi-sg-id1\",\"multi-sg-id2\""));
+        assertThat(templateString, not(containsString("SecurityGroupIngress")));
         assertThat(templateString, containsString("VPCId"));
     }
 
@@ -829,6 +872,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -839,6 +883,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
         assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("SpotMaxPrice")));
     }
 
@@ -864,6 +909,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -874,6 +920,7 @@ public class CloudFormationTemplateBuilderTest {
         //THEN
         Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
         assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, stringContainsInOrder("SpotMaxPrice", "0.9"));
     }
 
@@ -887,6 +934,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -898,6 +946,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
@@ -911,6 +960,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -922,6 +972,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
@@ -935,6 +986,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -946,6 +998,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2"));
     }
 
@@ -959,6 +1012,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -970,6 +1024,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "prefix1", "prefix2"));
     }
 
@@ -983,6 +1038,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -994,6 +1050,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, stringContainsInOrder("SecurityGroupEgress", "vpccidr1", "vpccidr2", "prefix1", "prefix2"));
     }
 
@@ -1007,6 +1064,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1018,6 +1076,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(JsonUtil.isValid(templateString)).overridingErrorMessage("Invalid JSON: " + templateString).isTrue();
+        assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, not(containsString("SecurityGroupEgress")));
     }
 
@@ -1031,6 +1090,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1041,6 +1101,7 @@ public class CloudFormationTemplateBuilderTest {
         Assertions.assertThat(templateString)
                 .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
                 .doesNotContain("\"Encrypted\"")
+                .contains("SecurityGroupIngress")
                 .contains("{ \"Ref\" : \"AMI\" }");
     }
 
@@ -1057,6 +1118,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1070,6 +1132,7 @@ public class CloudFormationTemplateBuilderTest {
                 .doesNotContain("\"Encrypted\"")
                 .contains("\"masterAMI\"")
                 .contains("\"gatewayAMI\"")
+                .contains("SecurityGroupIngress")
                 .doesNotContain("{ \"Ref\" : \"AMI\" }");
     }
 
@@ -1087,6 +1150,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1100,6 +1164,7 @@ public class CloudFormationTemplateBuilderTest {
                 .doesNotContain("\"Encrypted\"")
                 .contains("\"masterAMI\"")
                 .contains("\"gatewayAMI\"")
+                .contains("SecurityGroupIngress")
                 .doesNotContain("{ \"Ref\" : \"AMI\" }");
     }
 
@@ -1117,6 +1182,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1128,6 +1194,7 @@ public class CloudFormationTemplateBuilderTest {
                 .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
                 .contains("\"Encrypted\"")
                 .contains("{ \"Ref\" : \"AMI\" }")
+                .contains("SecurityGroupIngress")
                 .doesNotContain("\"KmsKeyId\"");
     }
 
@@ -1146,6 +1213,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withExistingVpc(true)
                 .withExistingIGW(true)
                 .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
                 .mapPublicIpOnLaunch(true)
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
@@ -1157,6 +1225,7 @@ public class CloudFormationTemplateBuilderTest {
                 .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
                 .contains("\"Encrypted\"")
                 .contains("{ \"Ref\" : \"AMI\" }")
+                .contains("SecurityGroupIngress")
                 .contains("\"KmsKeyId\" : \"customEncryptionKeyArn\"");
     }
 
