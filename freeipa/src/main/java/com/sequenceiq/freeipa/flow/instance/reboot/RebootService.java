@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.flow.instance.reboot;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REPAIR_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REPAIR_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REPAIR_IN_PROGRESS;
 
@@ -15,11 +14,15 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
 
 @Component
 public class RebootService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RebootService.class);
+
+    @Inject
+    private StackStatusCheckerJob stackStatusCheckerJob;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -42,7 +45,7 @@ public class RebootService {
 
     public void finishInstanceReboot(RebootContext context, RebootInstancesResult rebootInstancesResult) {
         Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), REPAIR_COMPLETED, "Finished rebooting instances");
+        stackStatusCheckerJob.syncAStack(stack);
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.CREATED);
     }
 }

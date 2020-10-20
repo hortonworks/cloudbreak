@@ -45,11 +45,15 @@ import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.failure.Cluste
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
 
 @Configuration
 public class ChangePrimaryGatewayActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChangePrimaryGatewayActions.class);
+
+    @Inject
+    private StackStatusCheckerJob stackStatusCheckerJob;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -150,11 +154,13 @@ public class ChangePrimaryGatewayActions {
                 Stack stack = context.getStack();
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
 
-                stackUpdater.updateStackStatus(stack.getId(), getChangePrimaryGatewayCompleteStatus(variables), "Finished changing the primary gateway");
                 if (isFinalChain(variables)) {
+                    stackStatusCheckerJob.syncAStack(stack);
                     successDetails.getAdditionalDetails().put("DownscaleHosts", getDownscaleHosts(variables));
                     successDetails.getAdditionalDetails().put("UpscaleHosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                } else {
+                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Finished changing the primary gateway");
                 }
 
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));

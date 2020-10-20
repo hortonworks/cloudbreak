@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.action;
 
-import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -10,7 +9,6 @@ import org.springframework.statemachine.StateContext;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
@@ -43,13 +41,4 @@ public abstract class AbstractChangePrimaryGatewayAction<P extends Payload> exte
         return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
-    protected DetailedStackStatus getChangePrimaryGatewayCompleteStatus(Map<Object, Object> variables) {
-        DetailedStackStatus stackStatus;
-        if (isFinalChain(variables)) {
-            stackStatus = DetailedStackStatus.REPAIR_COMPLETED;
-        } else {
-            stackStatus = DetailedStackStatus.REPAIR_IN_PROGRESS;
-        }
-        return stackStatus;
-    }
 }
