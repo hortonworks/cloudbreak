@@ -1,0 +1,10 @@
+/var/log/krb5kdc.log {
+    missingok
+    notifempty
+    monthly
+    size 1G
+    rotate 12
+    postrotate
+	    /bin/kill -HUP `cat /var/run/krb5kdc.pid 2>/dev/null` 2> /dev/null || true
+    endscript
+}
