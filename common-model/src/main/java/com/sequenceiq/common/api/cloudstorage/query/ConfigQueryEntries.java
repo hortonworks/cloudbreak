@@ -9,7 +9,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfigQueryEntries {
 
-    private final Set<ConfigQueryEntry> entries = new HashSet<>();
+    private final Set<ConfigQueryEntry> entries;
+
+    public ConfigQueryEntries() {
+        entries = new HashSet<>();
+    }
+
+    public ConfigQueryEntries(Set<ConfigQueryEntry> entries) {
+        this.entries = entries;
+    }
 
     public Set<ConfigQueryEntry> getEntries() {
         return entries
@@ -17,4 +25,5 @@ public class ConfigQueryEntries {
                 .map(ConfigQueryEntry::copy)
                 .collect(Collectors.toSet());
     }
+
 }
