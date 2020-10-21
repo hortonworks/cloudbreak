@@ -2,6 +2,8 @@
 
 set -ex
 
+secret_version="92e72b83dc3847048cb56c6f1345812f"
+
 USER_JSON_LOCATION="./src/main/resources/ums-users/api-credentials.json"
 
 if [[ -z $AZURE_CLIENT_ID ]]; then
@@ -14,7 +16,7 @@ fi
 mkdir -p ./src/main/resources/ums-users
 
 echo "Executing secret fetching from Azure 'jenkins-secret' store"
-az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --query 'value' -o tsv | jq > $USER_JSON_LOCATION
+az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --version $secret_version --query 'value' -o tsv | jq > $USER_JSON_LOCATION
 
 echo "Checking if valid json file was fetched: $USER_JSON_LOCATION"
 cat $USER_JSON_LOCATION | jq type
