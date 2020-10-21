@@ -21,6 +21,11 @@ public class StackUpdaterService {
     public void updateStatus(Long stackId, DetailedStackStatus detailedStackStatus, ResourceEvent resourceEvent, String statusReason) {
         stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
         flowMessageService.fireEventAndLog(stackId, detailedStackStatus.getStatus().name(), resourceEvent);
+    }
 
+    public void updateStatusAndSendEventWithArgs(Long stackId, DetailedStackStatus detailedStackStatus, ResourceEvent resourceEvent, String statusReason,
+            String eventArgs) {
+        stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
+        flowMessageService.fireEventAndLog(stackId, detailedStackStatus.getStatus().name(), resourceEvent, eventArgs);
     }
 }
