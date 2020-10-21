@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
@@ -47,6 +48,10 @@ public class RedbeamsClientService {
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.deleteByCrn(crn, force));
+        } catch (NotFoundException e) {
+            String message = String.format("DatabaseServer with CRN %s was not found by Redbeams service in the deleteByCrn call.", crn);
+            LOGGER.warn(message, e);
+            throw e;
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to delete DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);

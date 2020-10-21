@@ -75,8 +75,8 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
                 DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
                 terminationService.terminateDatabase(stack.getCluster(), externalDatabase, environment, request.isForced());
                 LOGGER.debug("Updating stack {} status from {} to {}",
-                        stack.getName(), stack.getStatus().name(), DetailedStackStatus.DELETE_COMPLETED.name());
-                stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED,
+                        stack.getName(), stack.getStatus().name(), DetailedStackStatus.AVAILABLE.name());
+                stackUpdaterService.updateStatus(stack.getId(), DetailedStackStatus.AVAILABLE,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FINISHED, "External database deletion finished");
                 result = new TerminateExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_WAIT_TERMINATION_SUCCESS_EVENT.event(),
                         stack.getName(), stack.getCluster().getDatabaseServerCrn());
