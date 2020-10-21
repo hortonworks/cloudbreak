@@ -18,6 +18,7 @@ import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailed
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 import reactor.bus.Event;
@@ -36,7 +37,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
 
     @Override
     public String selector() {
-        return "DatalakeChangeImageWaitRequest";
+        return EventSelectorUtil.selector(DatalakeChangeImageWaitRequest.class);
     }
 
     @Override

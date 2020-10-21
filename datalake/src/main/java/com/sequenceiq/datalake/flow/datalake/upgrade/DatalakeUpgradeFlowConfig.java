@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_IMAGE_CHANGE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_IMAGE_CHANGE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_COULD_NOT_START_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_EVENT;
@@ -9,7 +10,10 @@ import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_IMAGE_CHANGE_STATE;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_REPLACE_VMS_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_REPLACE_VMS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_COULD_NOT_START_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_FAILED_STATE;
@@ -49,10 +53,22 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
                     .event(DATALAKE_IMAGE_CHANGE_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_IMAGE_CHANGE_STATE)
+                    .to(DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE)
+                    .event(DATALAKE_IMAGE_CHANGE_IN_PROGRESS_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE)
                     .to(DATALAKE_REPLACE_VMS_STATE)
                     .event(DATALAKE_VM_REPLACE_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_REPLACE_VMS_STATE)
+                    .to(DATALAKE_UPGRADE_FINISHED_STATE)
+                    .event(DATALAKE_UPGRADE_SUCCESS_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_REPLACE_VMS_STATE)
+                    .to(DATALAKE_REPLACE_VMS_IN_PROGRESS_STATE)
+                    .event(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_REPLACE_VMS_IN_PROGRESS_STATE)
                     .to(DATALAKE_UPGRADE_FINISHED_STATE)
                     .event(DATALAKE_UPGRADE_SUCCESS_EVENT).defaultFailureEvent()
 

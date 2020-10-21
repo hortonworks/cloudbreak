@@ -1,9 +1,11 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade;
 
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_IMAGE_CHANGE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -118,17 +120,40 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeImageChangeEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Datalake upgrade image change is in progress for {} ", payload.getResourceId());
+                LOGGER.info("Start Datalake upgrade image change for {} ", payload.getResourceId());
                 String catalogName = sdxUpgradeService.getCurrentImageCatalogName(payload.getResourceId());
                 UpgradeOptionV4Response upgrade = new UpgradeOptionV4Response().upgrade(
                         new ImageInfoV4Response().imageId(payload.getImageId()).imageCatalogName(catalogName)
                 );
                 sdxUpgradeService.changeImage(payload.getResourceId(), upgrade);
-                sendEvent(context, DatalakeChangeImageWaitRequest.from(context, upgrade));
+                sendEvent(context,
+                        new DatalakeChangeImageWaitRequest(DATALAKE_IMAGE_CHANGE_IN_PROGRESS_EVENT.event(), context.getSdxId(), context.getUserId(), upgrade));
             }
 
             @Override
             protected Object getFailurePayload(DatalakeImageChangeEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeUpgradeFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE")
+    public Action<?, ?> imageChangeWait() {
+        return new AbstractSdxAction<>(DatalakeChangeImageWaitRequest.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    DatalakeChangeImageWaitRequest payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, DatalakeChangeImageWaitRequest payload, Map<Object, Object> variables) {
+                LOGGER.info("Datalake upgrade image change is in progress for {} ", payload.getResourceId());
+                sendEvent(context, new DatalakeChangeImageWaitRequest(context, payload.getUpgradeOption()));
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeChangeImageWaitRequest payload, Optional<SdxContext> flowContext, Exception ex) {
                 return DatalakeUpgradeFailedEvent.from(payload, ex);
             }
         };
@@ -146,9 +171,9 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
-                    LOGGER.info("Datalake upgrade vm replacement is in progress for {} ", payload.getResourceId());
+                    LOGGER.info("Start Datalake upgrade vm replacement for {} ", payload.getResourceId());
                     sdxUpgradeService.upgradeOs(payload.getResourceId());
-                    sendEvent(context, DatalakeVmReplaceWaitRequest.from(context));
+                    sendEvent(context, new SdxEvent(DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT.event(), context));
                 } else {
                     LOGGER.info("Vm replacement is not required for {} ", payload.getResourceId());
                     sendEvent(context, DATALAKE_UPGRADE_SUCCESS_EVENT.event(), new DatalakeUpgradeSuccessEvent(payload.getResourceId(), payload.getUserId()));
@@ -157,6 +182,27 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected Object getFailurePayload(DatalakeVmReplaceEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeUpgradeFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_REPLACE_VMS_IN_PROGRESS_STATE")
+    public Action<?, ?> replaceVmsWait() {
+        return new AbstractSdxAction<>(SdxEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Datalake upgrade vm replacement is in progress for {} ", payload.getResourceId());
+                sendEvent(context, new DatalakeVmReplaceWaitRequest(context));
+            }
+
+            @Override
+            protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return DatalakeUpgradeFailedEvent.from(payload, ex);
             }
         };
