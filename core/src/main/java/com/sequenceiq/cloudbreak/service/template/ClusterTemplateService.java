@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toSet;
@@ -28,7 +29,6 @@ import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -50,20 +50,18 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> implements ResourceBasedCrnProvider {
@@ -105,9 +103,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     @Inject
     private TransactionService transactionService;
@@ -162,7 +157,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     protected void prepareCreation(ClusterTemplate resource) {
 
-        validateBeforeCreate(resource);
+        measure(() -> validateBeforeCreate(resource), LOGGER, "Cluster template validated in {}ms");
 
         Stack stackTemplate = resource.getStackTemplate();
         stackTemplate.setName(UUID.randomUUID().toString());
@@ -226,10 +221,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
-    public Set<ClusterTemplate> findAllByEnvironment(NameOrCrn environmentNameOrCrn) {
-        DetailedEnvironmentResponse env = getEnvironmentByNameOrCrn(environmentNameOrCrn);
-        LOGGER.debug("About to collect cluster definitions by environment: {} - [crn: {}]", env.getName(), env.getCrn());
-        return clusterTemplateRepository.getAllByEnvironmentCrn(env.getCrn());
+    public Set<ClusterTemplateView> findAllByEnvironment(String environmenCrn) {
+        LOGGER.debug("About to collect cluster definitions by environment: [crn: {}]", environmenCrn);
+        return clusterTemplateViewService.findAllByEnvironmentCrn(environmenCrn);
     }
 
     @Override
@@ -314,9 +308,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
             LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
+            LOGGER.debug("Outdated clusterTemplates collected: '{}'.", outdatedTemplates.size());
             delete(new HashSet<>(outdatedTemplates));
+            LOGGER.debug("Outdated clusterTemplates deleted: '{}'.", outdatedTemplates.size());
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
+            LOGGER.debug("None deleted clusterTemplates collected: '{}'.", clusterTemplates.size());
+            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
     }
@@ -325,7 +322,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return StreamSupport.stream(clusterTemplates.spliterator(), false)
                 .map(ct -> {
                     try {
-                        return create(ct, ct.getWorkspace(), userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser()));
+                        return measure(() -> create(ct, ct.getWorkspace(), userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser())),
+                                LOGGER, "Cluster template created in {}ms");
                     } catch (DuplicateClusterTemplateException duplicateClusterTemplateException) {
                         LOGGER.info("Template was found, try to get it", duplicateClusterTemplateException);
                         return getByNameForWorkspace(ct.getName(), ct.getWorkspace());
@@ -364,12 +362,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         clusterTemplate = delete(clusterTemplate);
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
-    }
-
-    private DetailedEnvironmentResponse getEnvironmentByNameOrCrn(NameOrCrn environmentNameOrCrn) {
-        return environmentNameOrCrn.hasCrn()
-                ? environmentClientService.getByCrn(environmentNameOrCrn.getCrn())
-                : environmentClientService.getByName(environmentNameOrCrn.getName());
     }
 
     private void cleanUpInvalidClusterDefinitions(final long workspaceId, Set<ClusterTemplateViewV4Response> envPreparedTemplates) {
