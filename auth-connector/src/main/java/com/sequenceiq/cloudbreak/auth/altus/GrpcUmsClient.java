@@ -538,11 +538,12 @@ public class GrpcUmsClient {
      * @param roleCrn        role that will be removed
      * @param requestId      id for the request
      */
-    public void unassignMachineUserRole(String userCrn, String machineUserCrn, String roleCrn, Optional<String> requestId) {
+    public void unassignMachineUserRole(String userCrn, String machineUserCrn,
+            String roleCrn, Optional<String> requestId, String accountId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
             client.unassignMachineUserRole(requestId.orElse(UUID.randomUUID().toString()),
-                    userCrn, machineUserCrn, roleCrn);
+                    machineUserCrn, roleCrn, accountId);
         }
     }
 
@@ -618,7 +619,7 @@ public class GrpcUmsClient {
      */
     public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String accountId, String roleCrn) {
         if (StringUtils.isNotEmpty(roleCrn)) {
-            unassignMachineUserRole(userCrn, machineUserName, roleCrn, MDCUtils.getRequestId());
+            unassignMachineUserRole(userCrn, machineUserName, roleCrn, MDCUtils.getRequestId(), accountId);
         }
         deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, MDCUtils.getRequestId());
         deleteMachineUser(machineUserName, userCrn, MDCUtils.getRequestId());
@@ -637,7 +638,7 @@ public class GrpcUmsClient {
             LOGGER.info("Getting access keys for {}", machineUserCrn);
             List<String> accessKeys = client.listMachineUserAccessKeys(requestId.orElse(UUID.randomUUID().toString()), actorCrn, accountId, machineUserCrn);
             LOGGER.info("Deleting access keys for {}", machineUserCrn);
-            client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, actorCrn);
+            client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, accountId);
         }
     }
 
