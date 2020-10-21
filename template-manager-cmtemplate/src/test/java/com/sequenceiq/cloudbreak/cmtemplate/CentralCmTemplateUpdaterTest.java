@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
+import com.sequenceiq.cloudbreak.template.views.ProductDetailsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -125,10 +126,13 @@ public class CentralCmTemplateUpdaterTest {
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
                 new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
+
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
+        ProductDetailsView productDetailsView = new ProductDetailsView(clouderaManagerRepo, List.of());
+        when(templatePreparationObject.getProductDetailsView()).thenReturn(productDetailsView);
         ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
         ReflectionTestUtils.setField(cmTemplateConfigInjectorProcessor, "injectors", List.of());
         ReflectionTestUtils.setField(cmHostGroupRoleConfigProviderProcessor, "providers", List.of());

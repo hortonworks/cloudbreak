@@ -17,6 +17,8 @@ public class RdsDetails implements Serializable {
 
     private String connectionURL;
 
+    private String sslMode;
+
     private String databaseEngine;
 
     private String connectionDriver;
@@ -79,6 +81,14 @@ public class RdsDetails implements Serializable {
 
     public void setConnectionURL(String connectionURL) {
         this.connectionURL = connectionURL;
+    }
+
+    public String getSslMode() {
+        return sslMode;
+    }
+
+    public void setSslMode(String sslMode) {
+        this.sslMode = sslMode;
     }
 
     public String getDatabaseEngine() {
@@ -168,4 +178,5 @@ public class RdsDetails implements Serializable {
     public void setExternal(Boolean external) {
         externalDatabase = external;
     }
+
 }

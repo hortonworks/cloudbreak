@@ -85,4 +85,9 @@ public class ConfigUtils {
         }
         return DatabaseVendor.POSTGRES.name();
     }
+
+    public static String getCmVersion(TemplatePreparationObject source) {
+        return source.getProductDetailsView().getCm().getVersion();
+    }
+
 }

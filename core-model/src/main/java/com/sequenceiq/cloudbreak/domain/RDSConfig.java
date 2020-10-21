@@ -15,12 +15,13 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
-import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
+import com.sequenceiq.cloudbreak.domain.converter.RdsSslModeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -46,6 +47,9 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
 
     @Column(nullable = false)
     private String connectionURL;
+
+    @Convert(converter = RdsSslModeConverter.class)
+    private RdsSslMode sslMode;
 
     @Column(nullable = false)
     @Convert(converter = DatabaseVendorConverter.class)
@@ -120,6 +124,14 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
 
     public void setConnectionURL(String connectionURL) {
         this.connectionURL = connectionURL;
+    }
+
+    public RdsSslMode getSslMode() {
+        return sslMode;
+    }
+
+    public void setSslMode(RdsSslMode sslMode) {
+        this.sslMode = sslMode;
     }
 
     public DatabaseVendor getDatabaseEngine() {
