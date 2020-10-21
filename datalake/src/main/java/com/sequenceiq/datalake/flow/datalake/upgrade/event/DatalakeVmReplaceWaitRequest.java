@@ -9,12 +9,7 @@ public class DatalakeVmReplaceWaitRequest extends SdxEvent {
         super(sdxId, userId);
     }
 
-    public static DatalakeVmReplaceWaitRequest from(SdxContext context) {
-        return new DatalakeVmReplaceWaitRequest(context.getSdxId(), context.getUserId());
-    }
-
-    @Override
-    public String selector() {
-        return "DatalakeVmReplaceWaitRequest";
+    public DatalakeVmReplaceWaitRequest(SdxContext context) {
+        super(context);
     }
 }

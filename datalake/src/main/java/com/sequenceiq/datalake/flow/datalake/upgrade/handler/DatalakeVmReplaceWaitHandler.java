@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeSucces
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 import reactor.bus.Event;
@@ -35,7 +36,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
 
     @Override
     public String selector() {
-        return "DatalakeVmReplaceWaitRequest";
+        return EventSelectorUtil.selector(DatalakeVmReplaceWaitRequest.class);
     }
 
     @Override

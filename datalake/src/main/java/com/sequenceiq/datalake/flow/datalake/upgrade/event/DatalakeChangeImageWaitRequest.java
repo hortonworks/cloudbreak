@@ -6,23 +6,24 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeChangeImageWaitRequest extends SdxEvent {
 
-    private UpgradeOptionV4Response upgradeOption;
+    private final UpgradeOptionV4Response upgradeOption;
 
     public DatalakeChangeImageWaitRequest(Long sdxId, String userId, UpgradeOptionV4Response upgradeOption) {
         super(sdxId, userId);
         this.upgradeOption = upgradeOption;
     }
 
-    public static DatalakeChangeImageWaitRequest from(SdxContext context, UpgradeOptionV4Response upgradeOption) {
-        return new DatalakeChangeImageWaitRequest(context.getSdxId(), context.getUserId(), upgradeOption);
+    public DatalakeChangeImageWaitRequest(String selector, Long sdxId, String userId, UpgradeOptionV4Response upgradeOption) {
+        super(selector, sdxId, userId);
+        this.upgradeOption = upgradeOption;
+    }
+
+    public DatalakeChangeImageWaitRequest(SdxContext context, UpgradeOptionV4Response upgradeOption) {
+        super(context);
+        this.upgradeOption = upgradeOption;
     }
 
     public UpgradeOptionV4Response getUpgradeOption() {
         return upgradeOption;
-    }
-
-    @Override
-    public String selector() {
-        return "DatalakeChangeImageWaitRequest";
     }
 }
