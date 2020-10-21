@@ -111,7 +111,7 @@ public class DnsRecord {
         String reversedIp = idnsname + '.' + ipStart;
         List<String> ipParts = Arrays.asList(reversedIp.split("\\."));
         Collections.reverse(ipParts);
-        String recordIp = StringUtils.joinWith(".", ipParts.toArray(new String[ipParts.size()]));
+        String recordIp = StringUtils.joinWith(".", (Object[]) ipParts.toArray(new String[ipParts.size()]));
         return ip.equals(recordIp);
     }
 
