@@ -646,7 +646,7 @@ public class GrpcUmsClient {
             LOGGER.info("Getting access keys for {}", machineUserCrn);
             List<String> accessKeys = client.listMachineUserAccessKeys(requestId.orElse(UUID.randomUUID().toString()), actorCrn, accountId, machineUserCrn);
             LOGGER.info("Deleting access keys for {}", machineUserCrn);
-            client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, actorCrn);
+            client.deleteAccessKeys(UUID.randomUUID().toString(), accessKeys, accountId);
         }
     }
 

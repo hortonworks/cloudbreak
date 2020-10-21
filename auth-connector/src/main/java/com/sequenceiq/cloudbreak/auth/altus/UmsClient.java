@@ -663,17 +663,17 @@ public class UmsClient {
      *
      * @param requestId     id of the request
      * @param accessKeyCrns list of access key CRNs
-     * @param actorCrn      user that executes the deletion
+     * @param accountId     accountId where you want to delete
      */
-    void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String actorCrn) {
+    void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(actorCrn);
+        checkNotNull(accountId);
         checkNotNull(accessKeyCrns);
         accessKeyCrns.forEach(accessKeyCrn -> {
             try {
                 LOGGER.info("Deleting access key {}...", accessKeyCrn);
                 newStub(requestId).deleteAccessKey(UserManagementProto.DeleteAccessKeyRequest.newBuilder()
-                        .setAccountId(Crn.fromString(actorCrn).getAccountId())
+                        .setAccountId(accountId)
                         .setAccessKeyIdOrCrn(accessKeyCrn)
                         .build());
                 LOGGER.info("Access key {} deleted.", accessKeyCrn);
