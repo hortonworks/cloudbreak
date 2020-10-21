@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspa
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
@@ -114,6 +115,27 @@ public class DefaultClusterTemplateCache {
             DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
             ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
             defaultTemplates.put(key, clusterTemplate);
+        });
+        return defaultTemplates;
+    }
+
+    public List<ClusterTemplate> defaultClusterTemplatesByNames(Collection<String> templateNamesMissingFromDb) {
+        List<ClusterTemplate> defaultTemplates = new ArrayList<>();
+        defaultClusterTemplateRequests().forEach((key, value) -> {
+            if (templateNamesMissingFromDb.contains(key)) {
+                String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
+                DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
+                ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
+                defaultTemplates.add(clusterTemplate);
+            }
+        });
+        return defaultTemplates;
+    }
+
+    public Collection<String> defaultClusterTemplateNames() {
+        Collection<String> defaultTemplates = new ArrayList<>();
+        defaultClusterTemplateRequests().forEach((key, value) -> {
+            defaultTemplates.add(key);
         });
         return defaultTemplates;
     }

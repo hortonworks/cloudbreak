@@ -37,4 +37,7 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
         return repository.findAllActive(workspaceId);
     }
 
+    public Set<ClusterTemplateView> findAllByEnvironmentCrn(String environmentCrn) {
+        return repository.getAllByEnvironmentCrn(environmentCrn);
+    }
 }
