@@ -98,7 +98,7 @@ class TerminateExternalDatabaseHandlerTest {
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_DELETION_IN_PROGRESS),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_STARTED), eq("External database deletion in progress"));
 
-        verify(stackUpdaterService, never()).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.PROVISION_REQUESTED),
+        verify(stackUpdaterService, never()).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.AVAILABLE),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FINISHED), anyString());
 
         verify(eventBus).notify(eq("TerminateExternalDatabaseFailed"), any(Event.class));
@@ -130,7 +130,7 @@ class TerminateExternalDatabaseHandlerTest {
         verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.EXTERNAL_DATABASE_DELETION_IN_PROGRESS),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_STARTED), eq("External database deletion in progress"));
 
-        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.DELETE_COMPLETED),
+        verify(stackUpdaterService).updateStatus(eq(STACK_ID), eq(DetailedStackStatus.AVAILABLE),
                 eq(ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FINISHED), eq("External database deletion finished"));
 
         ArgumentCaptor<Event<TerminateExternalDatabaseResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -161,7 +161,7 @@ class TerminateExternalDatabaseHandlerTest {
 
     private Stack buildStack(DatabaseAvailabilityType databaseAvailabilityType) {
         StackStatus status = new StackStatus();
-        status.setStatus(Status.REQUESTED);
+        status.setStatus(Status.AVAILABLE);
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
         stack.setStackStatus(status);

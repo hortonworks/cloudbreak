@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterPollingCheckerService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -45,11 +46,19 @@ class DatabaseObtainerService {
         if (result.isEmpty()) {
             checkArgument(cluster != null, "Cluster must not be null");
             try {
-                LOGGER.info("Creation polling redbeams for database status: '{}'", cluster.getName());
+                LOGGER.info("Polling redbeams for database status: '{}'", cluster.getName());
                 DatabaseServerV4Response rdsStatus = redbeamsClient.getByCrn(databaseCrn);
                 LOGGER.info("Response from redbeams: {}", JsonUtil.writeValueAsString(rdsStatus));
                 result = Optional.of(databaseCriteriaResolver.resolveResultByCriteria(databaseOperation, rdsStatus, cluster));
+            } catch (CloudbreakServiceException e) {
+                if (e.getCause() instanceof NotFoundException) {
+                    LOGGER.info("Not found returned for database crn: {}", databaseCrn);
+                    result = Optional.of(AttemptResults.finishWith(null));
+                } else {
+                    throw e;
+                }
             } catch (NotFoundException e) {
+                LOGGER.info("Not found returned for database crn: {}", databaseCrn);
                 result = Optional.of(AttemptResults.finishWith(null));
             }
         }

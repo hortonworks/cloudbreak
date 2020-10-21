@@ -24,8 +24,8 @@ public class ProperTerminationFlowEventChainFactory implements FlowEventChainFac
     public Queue<Selectable> createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new TerminationEvent(ClusterTerminationEvent.PROPER_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
-        flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
-        flowEventChain.add(new TerminationEvent(START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(), event.accepted()));
+        flowEventChain.add(new TerminationEvent(START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced()));
+        flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(), event.accepted()));
         return flowEventChain;
     }
 }
