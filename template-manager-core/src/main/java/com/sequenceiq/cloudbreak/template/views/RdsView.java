@@ -6,6 +6,7 @@ import java.util.regex.Pattern;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.template.views.dialect.DefaultRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.OracleRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.RdsViewDialect;
@@ -15,9 +16,23 @@ public class RdsView {
 
     public static final String WITHOUT_JDBC_PREFIX_REGEX = "^(.*?):(\\d*)[:/]?(\\w+)?";
 
-    private static final int MAX_GROUP_COUNT_NUMBER = 3;
+    private static final Pattern WITHOUT_JDBC_PREFIX_PATTERN = Pattern.compile(WITHOUT_JDBC_PREFIX_REGEX);
+
+    private static final int HOST_GROUP_INDEX = 1;
+
+    private static final int PORT_GROUP_INDEX = 2;
+
+    private static final int DATABASE_GROUP_INDEX = 3;
+
+    private static final String SSL_CERTIFICATE_FILE = "/hadoopfs/fs1/database-cacerts/certs.pem";
+
+    private static final String SSL_OPTIONS = "sslmode=verify-full&sslrootcert=" + SSL_CERTIFICATE_FILE;
 
     private final String connectionURL;
+
+    private final boolean useSsl;
+
+    private final String sslCertificateFile;
 
     private final String connectionDriver;
 
@@ -44,7 +59,24 @@ public class RdsView {
     private final RdsViewDialect rdsViewDialect;
 
     public RdsView(RDSConfig rdsConfig) {
-        connectionURL = rdsConfig.getConnectionURL();
+        useSsl = RdsSslMode.isEnabled(rdsConfig.getSslMode());
+        if (useSsl) {
+            String configConnectionURL = rdsConfig.getConnectionURL();
+            StringBuilder sb = new StringBuilder(configConnectionURL);
+            if (configConnectionURL.contains("?")) {
+                char lastChar = configConnectionURL.charAt(configConnectionURL.length() - 1);
+                sb.append(lastChar == '?' || lastChar == '&' ? "" : "&");
+            } else {
+                sb.append('?');
+            }
+            sb.append(SSL_OPTIONS);
+            connectionURL = sb.toString();
+            sslCertificateFile = SSL_CERTIFICATE_FILE;
+        } else {
+            connectionURL = rdsConfig.getConnectionURL();
+            sslCertificateFile = "";
+        }
+
         connectionUserName = rdsConfig.getConnectionUserName();
         connectionPassword = rdsConfig.getConnectionPassword();
         rdsViewDialect = createDialect(rdsConfig);
@@ -53,24 +85,20 @@ public class RdsView {
 
         withoutJDBCPrefix = split[split.length - 1];
 
-        Pattern compile = Pattern.compile(WITHOUT_JDBC_PREFIX_REGEX);
-        Matcher matcher = compile.matcher(withoutJDBCPrefix);
+        Matcher matcher = WITHOUT_JDBC_PREFIX_PATTERN.matcher(withoutJDBCPrefix);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Malformed withoutJDBCPrefix: " + withoutJDBCPrefix);
+        }
+        host = matcher.group(HOST_GROUP_INDEX);
+        port = matcher.group(PORT_GROUP_INDEX);
+        databaseName = matcher.group(DATABASE_GROUP_INDEX);
 
-        int hostGroupIndex = 1;
-        int hostPortIndex = 2;
-        int databaseGroupIndex = MAX_GROUP_COUNT_NUMBER;
-
-        matcher.find();
-        host = matcher.group(hostGroupIndex);
-        port = matcher.group(hostPortIndex);
-        databaseName = matcher.group(databaseGroupIndex);
-
-        hostWithPortWithJdbc = connectionURL.replaceAll(rdsViewDialect.databaseNameSplitter() + databaseName + '$', "");
+        hostWithPortWithJdbc = connectionURL.replaceAll(rdsViewDialect.databaseNameSplitter() + databaseName + "(?:[?].*)?$", "");
         connectionDriver = rdsConfig.getConnectionDriver();
         databaseVendor = rdsConfig.getDatabaseEngine();
-        String pattern;
+
         if (rdsConfig.getType().equalsIgnoreCase(DatabaseType.RANGER.name())) {
-            pattern = databaseVendor == DatabaseVendor.ORACLE11 || databaseVendor == DatabaseVendor.ORACLE12
+            String pattern = databaseVendor == DatabaseVendor.ORACLE11 || databaseVendor == DatabaseVendor.ORACLE12
                     ? "%s:%s" + rdsViewDialect.databaseNameSplitter() + "%s"
                     : "%s:%s";
             connectionString = String.format(pattern, host, port, databaseName);
@@ -91,6 +119,14 @@ public class RdsView {
 
     public String getConnectionURL() {
         return connectionURL;
+    }
+
+    public boolean isUseSsl() {
+        return useSsl;
+    }
+
+    public String getSslCertificateFile() {
+        return sslCertificateFile;
     }
 
     public String getConnectionUserName() {
@@ -185,15 +221,6 @@ public class RdsView {
         return connectionString;
     }
 
-    private String getDatabaseName(String connectionURL) {
-        String dbName = "";
-        String[] split = connectionURL.split(rdsViewDialect.databaseNameSplitter());
-        if (split.length > 1) {
-            dbName = split[split.length - 1];
-        }
-        return dbName;
-    }
-
     private String getSubprotocol(String[] split) {
         String databaseType = "";
         if (split.length > 1) {
@@ -206,4 +233,5 @@ public class RdsView {
         }
         return databaseType;
     }
+
 }
