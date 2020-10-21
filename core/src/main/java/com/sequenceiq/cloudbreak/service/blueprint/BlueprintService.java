@@ -398,7 +398,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+        return blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+                .orElseThrow(NotFoundException.notFound("Blueprint", resourceName));
     }
 
     @Override
@@ -409,7 +410,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return resourceNames.stream()
-                .map(resourceName -> blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()))
+                .map(resourceName -> blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+                        .orElseThrow(NotFoundException.notFound("Blueprint", resourceName)))
                 .collect(Collectors.toList());
     }
 
