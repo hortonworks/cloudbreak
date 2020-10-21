@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,6 +20,7 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.core.AttemptState;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterPollingCheckerService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
@@ -62,6 +64,25 @@ class DatabaseObtainerServiceTest {
         AttemptResult<Object> result = underTest.obtainAttemptResult(cluster, DatabaseOperation.CREATION, "crn", true);
         assertThat(result.getState()).isEqualTo(AttemptState.FINISH);
         assertThat(result.getResult()).isNull();
+    }
+
+    @Test
+    void rdsNotFoundServiceException() throws JsonProcessingException {
+        when(clusterPollingCheckerService.checkClusterCancelledState(any(), anyBoolean())).thenReturn(null);
+        CloudbreakServiceException serviceException = new CloudbreakServiceException("error", new NotFoundException("baseException"));
+        when(redbeamsClient.getByCrn(anyString())).thenThrow(serviceException);
+        AttemptResult<Object> result = underTest.obtainAttemptResult(cluster, DatabaseOperation.CREATION, "crn", true);
+        assertThat(result.getState()).isEqualTo(AttemptState.FINISH);
+        assertThat(result.getResult()).isNull();
+    }
+
+    @Test
+    void rdsNotHandledServiceException() {
+        when(clusterPollingCheckerService.checkClusterCancelledState(any(), anyBoolean())).thenReturn(null);
+        CloudbreakServiceException serviceException = new CloudbreakServiceException("error", new IllegalStateException("baseException"));
+        when(redbeamsClient.getByCrn(anyString())).thenThrow(serviceException);
+        assertThatThrownBy(() -> underTest.obtainAttemptResult(cluster, DatabaseOperation.CREATION, "crn", true))
+                .isEqualTo(serviceException);
     }
 
     @Test
