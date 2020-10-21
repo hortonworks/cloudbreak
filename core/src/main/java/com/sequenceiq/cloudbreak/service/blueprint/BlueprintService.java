@@ -21,6 +21,7 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -357,30 +358,45 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public Set<ConfigQueryEntry> queryFileSystemParameters(String blueprintName, String clusterName,
             String baseLocation, String fileSystemType, String accountName, boolean attachedCluster,
             boolean secure, Long workspaceId) {
-        User user = getLoggedInUser();
-        Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        Blueprint blueprint = getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
-        String blueprintText = blueprint.getBlueprintText();
-        // Not necessarily the best way to figure out whether a DL or not. At the moment, DLs cannot be launched as
-        // workloads, so works fine. Would be better to get this information from the invoking context itself.
-        boolean datalake = blueprintUtils.isSharedServiceReadyBlueprint(blueprint);
-        FileSystemConfigQueryObject fileSystemConfigQueryObject = Builder.builder()
-                .withClusterName(clusterName)
-                .withStorageName(StringUtils.stripEnd(baseLocation, "/"))
-                .withBlueprintText(blueprintText)
-                .withFileSystemType(fileSystemType)
-                .withAccountName(accountName)
-                .withAttachedCluster(attachedCluster)
-                .withDatalakeCluster(datalake)
-                .withSecure(secure)
-                .build();
-
         Set<ConfigQueryEntry> result = new HashSet<>();
 
-        if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
+        Pair<Blueprint, String> bp = getBlueprintAndText(blueprintName, workspaceId);
+
+        if (blueprintUtils.isClouderaManagerClusterTemplate(bp.getRight())) {
+            FileSystemConfigQueryObject fileSystemConfigQueryObject = createFileSystemConfigQueryObject(bp, clusterName, baseLocation, fileSystemType,
+                    accountName, attachedCluster, secure);
             result = cmCloudStorageConfigProvider.queryParameters(fileSystemConfigQueryObject);
         }
         return result;
+    }
+
+    public FileSystemConfigQueryObject createFileSystemConfigQueryObject(Pair<Blueprint, String> bp, String clusterName,
+            String baseLocation, String fileSystemType, String accountName, boolean attachedCluster,
+            boolean secure) {
+        return Builder.builder()
+                .withClusterName(clusterName)
+                .withStorageName(StringUtils.stripEnd(baseLocation, "/"))
+                .withBlueprintText(bp.getRight())
+                .withFileSystemType(fileSystemType)
+                .withAccountName(accountName)
+                .withAttachedCluster(attachedCluster)
+                .withDatalakeCluster(blueprintUtils.isSharedServiceReadyBlueprint(bp.getLeft()))
+                .withSecure(secure)
+                .build();
+    }
+
+    public Pair<Blueprint, String> getBlueprintAndText(String blueprintName, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        Blueprint blueprint = getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace);
+        String blueprintText = getBlueprintText(blueprintName, workspaceId);
+        return Pair.of(blueprint, blueprintText);
+    }
+
+    public String getBlueprintText(String blueprintName, Long workspaceId) {
+        User user = getLoggedInUser();
+        Workspace workspace = getWorkspaceService().get(workspaceId, user);
+        return getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace).getBlueprintText();
     }
 
     private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {

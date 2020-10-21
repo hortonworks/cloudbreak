@@ -53,6 +53,11 @@ public class CmCloudStorageConfigProvider {
         return cloudStorageConfigDetails.queryParameters(cmTemplateProcessor, configQueryEntries, request);
     }
 
+    public Set<ConfigQueryEntry> queryParameters(Set<ConfigQueryEntry> entries, FileSystemConfigQueryObject request) {
+        CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(request.getBlueprintText());
+        return cloudStorageConfigDetails.queryParameters(cmTemplateProcessor, new ConfigQueryEntries(entries), request);
+    }
+
     public ConfigQueryEntries getConfigQueryEntries() {
         return configQueryEntries;
     }
