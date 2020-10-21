@@ -1,32 +1,29 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.runners.Parameterized.Parameters;
-import static org.mockito.Mockito.times;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class RdsConfigToRdsDetailsConverterTest {
 
     private static final Long WORKSPACE_ID_FROM_REQUEST = 4321L;
@@ -39,79 +36,107 @@ public class RdsConfigToRdsDetailsConverterTest {
     @InjectMocks
     private RdsConfigToRdsDetailsConverter underTest;
 
-    private RDSConfig source;
-
-    public RdsConfigToRdsDetailsConverterTest(DatabaseType databaseType, DatabaseVendor vendor) {
-        source = TestUtil.rdsConfig(databaseType, vendor);
-    }
-
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         cloudbreakUser = TestUtil.cbUser();
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID_FROM_REQUEST);
     }
 
-    @Parameters(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
-    public static Object[][] data() {
+    public static Object[][] databaseTypeAndVendorDataProvider() {
         return TestUtil.combinationOf(DatabaseType.values(), DatabaseVendor.values());
     }
 
-    @Test
-    public void testWhenSourceWorkspaceIdIsNotNullThenItsValueShouldBePassedBesideAllLogicIndependentData() {
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenSourceWorkspaceIdIsNotNullThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
         Workspace workspace = new Workspace();
         workspace.setId(23L);
+        RDSConfig source = TestUtil.rdsConfig(databaseType, vendor);
         source.setWorkspace(workspace);
+
         RdsDetails result = underTest.convert(source);
 
-        assertNotNull(result);
-        assertEquals(source.getWorkspace().getId(), result.getWorkspaceId());
-        verify(restRequestThreadLocalService, times(0)).getRequestedWorkspaceId();
+        assertThat(result).isNotNull();
+        assertThat(result.getWorkspaceId()).isEqualTo(source.getWorkspace().getId());
+        verify(restRequestThreadLocalService, never()).getRequestedWorkspaceId();
     }
 
-    @Test
-    public void testWhenSourceWorkspaceIdIsNullThenItsValueShouldBePassedBesideAllLogicIndependentData() {
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenSourceWorkspaceIdIsNullThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
+        RDSConfig source = TestUtil.rdsConfig(databaseType, vendor);
         source.setWorkspace(null);
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID_FROM_REQUEST);
+
         RdsDetails result = underTest.convert(source);
 
-        assertNotNull(result);
-        assertEquals(WORKSPACE_ID_FROM_REQUEST, result.getWorkspaceId());
-        verify(restRequestThreadLocalService, times(1)).getRequestedWorkspaceId();
+        assertThat(result).isNotNull();
+        assertThat(result.getWorkspaceId()).isEqualTo(WORKSPACE_ID_FROM_REQUEST);
+        verify(restRequestThreadLocalService).getRequestedWorkspaceId();
     }
 
-    @Test
-    public void testWhenDatabaseEngineIsEmbeddedThenIsExternalShouldBeFalseOtherwiseTrue() {
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenDatabaseEngineIsEmbeddedThenIsExternalShouldBeFalseOtherwiseTrue(DatabaseType databaseType, DatabaseVendor vendor) {
+        RDSConfig source = TestUtil.rdsConfig(databaseType, vendor);
+
         RdsDetails result = underTest.convert(source);
 
-        assertNotNull(result);
-        if (source.getDatabaseEngine() == DatabaseVendor.EMBEDDED) {
-            assertFalse(result.getExternal());
-        } else {
-            assertTrue(result.getExternal());
-        }
+        assertThat(result).isNotNull();
+        assertThat(result.getExternal()).isEqualTo(source.getDatabaseEngine() != DatabaseVendor.EMBEDDED);
     }
 
-    @Test
-    public void testAllLogicIndependentDataArePassedProperly() {
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenSslModeIsNullThenNullShouldBePassed(DatabaseType databaseType, DatabaseVendor vendor) {
+        testWhenSslModeInternal(databaseType, vendor, null, null);
+    }
+
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenSslModeIsDisabledThenItsNameShouldBePassed(DatabaseType databaseType, DatabaseVendor vendor) {
+        testWhenSslModeInternal(databaseType, vendor, RdsSslMode.DISABLED, RdsSslMode.DISABLED.name());
+    }
+
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testWhenSslModeIsEnabledThenItsNameShouldBePassed(DatabaseType databaseType, DatabaseVendor vendor) {
+        testWhenSslModeInternal(databaseType, vendor, RdsSslMode.ENABLED, RdsSslMode.ENABLED.name());
+    }
+
+    private void testWhenSslModeInternal(DatabaseType databaseType, DatabaseVendor vendor, RdsSslMode sslMode, String sslModeStringExpected) {
+        RDSConfig source = TestUtil.rdsConfig(databaseType, vendor);
+        source.setSslMode(sslMode);
+
         RdsDetails result = underTest.convert(source);
 
-        assertNotNull(result);
-        assertEquals(source.getConnectionDriver(), result.getConnectionDriver());
-        assertEquals(source.getConnectionURL(), result.getConnectionURL());
-        assertEquals(source.getConnectorJarUrl(), result.getConnectorJarUrl());
-        assertEquals(source.getCreationDate(), result.getCreationDate());
-        assertEquals(source.getDatabaseEngine().name(), result.getDatabaseEngine());
-        assertEquals(source.getDescription(), result.getDescription());
-        assertEquals(source.getId(), result.getId());
-        assertEquals(source.getName(), result.getName());
-        assertEquals(source.getStackVersion(), result.getStackVersion());
-        assertEquals(source.getStatus().name(), result.getStatus());
-        assertEquals(source.getType(), result.getType());
-        assertEquals(cloudbreakUser.getUsername(), result.getUserName());
-        assertEquals(cloudbreakUser.getUserId(), result.getUserId());
-        assertEquals(cloudbreakUser.getTenant(), result.getTenantName());
-        verify(restRequestThreadLocalService, times(4)).getCloudbreakUser();
+        assertThat(result).isNotNull();
+        assertThat(result.getSslMode()).isEqualTo(sslModeStringExpected);
+    }
+
+    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
+    @MethodSource("databaseTypeAndVendorDataProvider")
+    public void testAllLogicIndependentDataArePassedProperly(DatabaseType databaseType, DatabaseVendor vendor) {
+        RDSConfig source = TestUtil.rdsConfig(databaseType, vendor);
+
+        RdsDetails result = underTest.convert(source);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getConnectionDriver()).isEqualTo(source.getConnectionDriver());
+        assertThat(result.getConnectionURL()).isEqualTo(source.getConnectionURL());
+        assertThat(result.getConnectorJarUrl()).isEqualTo(source.getConnectorJarUrl());
+        assertThat(result.getCreationDate()).isEqualTo(source.getCreationDate());
+        assertThat(result.getDatabaseEngine()).isEqualTo(source.getDatabaseEngine().name());
+        assertThat(result.getDescription()).isEqualTo(source.getDescription());
+        assertThat(result.getId()).isEqualTo(source.getId());
+        assertThat(result.getName()).isEqualTo(source.getName());
+        assertThat(result.getStackVersion()).isEqualTo(source.getStackVersion());
+        assertThat(result.getStatus()).isEqualTo(source.getStatus().name());
+        assertThat(result.getType()).isEqualTo(source.getType());
+        assertThat(result.getUserName()).isEqualTo(cloudbreakUser.getUsername());
+        assertThat(result.getUserId()).isEqualTo(cloudbreakUser.getUserId());
+        assertThat(result.getTenantName()).isEqualTo(cloudbreakUser.getTenant());
+        verify(restRequestThreadLocalService).getCloudbreakUser();
     }
 
 }

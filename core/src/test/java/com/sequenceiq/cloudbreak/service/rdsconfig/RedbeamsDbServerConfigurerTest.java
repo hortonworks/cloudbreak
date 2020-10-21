@@ -1,31 +1,34 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class RedbeamsDbServerConfigurerTest {
 
     private static final String EXAMPLE_JDBC_URL =
@@ -60,64 +63,121 @@ public class RedbeamsDbServerConfigurerTest {
     private RedbeamsDbServerConfigurer underTest;
 
     @Test
-    public void getRdsConfig() {
-        DatabaseServerV4Response resp = new DatabaseServerV4Response();
-        resp.setPort(1234);
-        resp.setHost(DB_HOST);
-        resp.setDatabaseVendor("postgres");
-        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(resp);
+    public void getRdsConfigWhenAws() {
+        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4Response(DB_HOST));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL);
         when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn(DB_USER);
-        Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
-        metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        testStack.getGatewayInstanceMetadata().add(metaData);
-        Cluster testCluster = TestUtil.cluster();
-        testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
-        testStack.setCluster(testCluster);
+        Cluster testCluster = createCluster(DB_SERVER_CRN);
+        Stack testStack = createStack(testCluster);
 
         RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
 
-        assertEquals("CLOUDERA_MANAGER_simplestack1", config.getName());
-        assertEquals(EXAMPLE_JDBC_URL, config.getConnectionURL());
-        assertEquals(DB_USER, config.getConnectionUserName());
+        assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
+        assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL);
+        assertThat(config.getConnectionUserName()).isEqualTo(DB_USER);
+        assertThat(config.getSslMode()).isEqualTo(RdsSslMode.DISABLED);
+    }
+
+    static Object[][] sslDataProvider() {
+        return new Object[][]{
+                // testCaseName sslMode rdsSslModeExpected
+                {"sslMode=null", null, RdsSslMode.DISABLED},
+                {"sslMode=DISABLED", SslMode.DISABLED, RdsSslMode.DISABLED},
+                {"sslMode=ENABLED", SslMode.ENABLED, RdsSslMode.ENABLED},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sslDataProvider")
+    public void getRdsConfigWhenAwsAndSsl(String testCaseName, SslMode sslMode, RdsSslMode rdsSslModeExpected) {
+        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4ResponseWithSsl(DB_HOST, sslMode));
+        when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL);
+        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn(DB_USER);
+        Cluster testCluster = createCluster(DB_SERVER_CRN);
+        Stack testStack = createStack(testCluster);
+
+        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+
+        assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
+        assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL);
+        assertThat(config.getConnectionUserName()).isEqualTo(DB_USER);
+        assertThat(config.getSslMode()).isEqualTo(rdsSslModeExpected);
     }
 
     @Test
-    public void getRdsConfigForAzure() {
-        DatabaseServerV4Response resp = new DatabaseServerV4Response();
-        resp.setPort(1234);
-        resp.setHost(DB_HOST_AZURE);
-        resp.setDatabaseVendor("postgres");
-        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(resp);
+    public void getRdsConfigWhenAzure() {
+        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4Response(DB_HOST_AZURE));
         when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL_AZURE);
         when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
-        Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
-        metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        testStack.getGatewayInstanceMetadata().add(metaData);
-        Cluster testCluster = TestUtil.cluster();
-        testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
-        testStack.setCluster(testCluster);
+        Cluster testCluster = createCluster(DB_SERVER_CRN);
+        Stack testStack = createStack(testCluster);
 
         RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
 
-        assertEquals("CLOUDERA_MANAGER_simplestack1", config.getName());
-        assertEquals(EXAMPLE_JDBC_URL_AZURE, config.getConnectionURL());
-        assertEquals("cmuser@" + DB_HOST_SHORT_NAME, config.getConnectionUserName());
+        assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
+        assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL_AZURE);
+        assertThat(config.getConnectionUserName()).isEqualTo("cmuser@" + DB_HOST_SHORT_NAME);
+        assertThat(config.getSslMode()).isEqualTo(RdsSslMode.DISABLED);
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("sslDataProvider")
+    public void getRdsConfigWhenAzureAndSsl(String testCaseName, SslMode sslMode, RdsSslMode rdsSslModeExpected) {
+        when(redbeamsClientService.getByCrn(DB_SERVER_CRN)).thenReturn(createDatabaseServerV4ResponseWithSsl(DB_HOST_AZURE, sslMode));
+        when(dbCommon.getJdbcConnectionUrl(any(), any(), anyInt(), any())).thenReturn(EXAMPLE_JDBC_URL_AZURE);
+        when(dbUsernameConverterService.toConnectionUsername(anyString(), anyString())).thenReturn("cmuser@" + DB_HOST_SHORT_NAME);
+        Cluster testCluster = createCluster(DB_SERVER_CRN);
+        Stack testStack = createStack(testCluster);
+
+        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+
+        assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
+        assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL_AZURE);
+        assertThat(config.getConnectionUserName()).isEqualTo("cmuser@" + DB_HOST_SHORT_NAME);
+        assertThat(config.getSslMode()).isEqualTo(rdsSslModeExpected);
     }
 
     @Test
     public void isRemoteDatabaseNeededWhenDbServerCrnIsPresent() {
-        Cluster testCluster = TestUtil.cluster();
-        testCluster.setDatabaseServerCrn(DB_SERVER_CRN);
-        assertTrue(underTest.isRemoteDatabaseNeeded(testCluster));
+        Cluster testCluster = createCluster(DB_SERVER_CRN);
+        assertThat(underTest.isRemoteDatabaseNeeded(testCluster)).isTrue();
     }
 
     @Test
     public void isRemoteDatabaseNeeded() {
-        Cluster testCluster = TestUtil.cluster();
-        testCluster.setDatabaseServerCrn(null);
-        assertFalse(underTest.isRemoteDatabaseNeeded(testCluster));
+        Cluster testCluster = createCluster(null);
+        assertThat(underTest.isRemoteDatabaseNeeded(testCluster)).isFalse();
     }
+
+    private Cluster createCluster(String dbServerCrn) {
+        Cluster testCluster = TestUtil.cluster();
+        testCluster.setDatabaseServerCrn(dbServerCrn);
+        return testCluster;
+    }
+
+    private Stack createStack(Cluster testCluster) {
+        Stack testStack = TestUtil.stack();
+        InstanceMetaData metaData = testStack.getGatewayInstanceMetadata().iterator().next();
+        metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        testStack.getGatewayInstanceMetadata().add(metaData);
+        testStack.setCluster(testCluster);
+        return testStack;
+    }
+
+    private DatabaseServerV4Response createDatabaseServerV4Response(String dbHost) {
+        DatabaseServerV4Response resp = new DatabaseServerV4Response();
+        resp.setPort(1234);
+        resp.setHost(dbHost);
+        resp.setDatabaseVendor("postgres");
+        return resp;
+    }
+
+    private DatabaseServerV4Response createDatabaseServerV4ResponseWithSsl(String dbHost, SslMode sslMode) {
+        SslConfigV4Response sslConfig = new SslConfigV4Response();
+        sslConfig.setSslMode(sslMode);
+        DatabaseServerV4Response response = createDatabaseServerV4Response(dbHost);
+        response.setSslConfig(sslConfig);
+        return response;
+    }
+
 }
