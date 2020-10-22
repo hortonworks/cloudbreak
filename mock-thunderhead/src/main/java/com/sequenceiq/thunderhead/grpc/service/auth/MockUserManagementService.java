@@ -52,6 +52,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Creat
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest;
@@ -784,6 +786,21 @@ public class MockUserManagementService extends UserManagementImplBase {
         String name = request.getMachineUserName();
         LOGGER.info("Create machine user for account {} with name {}", accountId, name);
         responseObserver.onNext(CreateMachineUserResponse.newBuilder()
+                .setMachineUser(MachineUser.newBuilder()
+                        .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
+                        .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void createWorkloadMachineUser(CreateWorkloadMachineUserRequest request,
+            StreamObserver<CreateWorkloadMachineUserResponse> responseObserver) {
+        String accountId = Crn.fromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn()).getAccountId();
+        String name = request.getMachineUserName();
+        LOGGER.info("Create workload machine user for account {} with name {}", accountId, name);
+        responseObserver.onNext(CreateWorkloadMachineUserResponse.newBuilder()
                 .setMachineUser(MachineUser.newBuilder()
                         .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
                         .setCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
