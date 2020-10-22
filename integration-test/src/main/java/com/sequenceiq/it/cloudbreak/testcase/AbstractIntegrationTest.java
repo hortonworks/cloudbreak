@@ -170,7 +170,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(imageCatalogTestClient.createIfNotExistV4());
     }
 
-    protected void validateDefaultImage(TestContext testContext, String imageUuid) {
+    protected void validateDefaultPrewarmedImage(TestContext testContext, String imageUuid) {
         testContext.given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.getV4(true))
                 .valid();
@@ -178,7 +178,21 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         ImageV4Response image = dto.getResponse().getImages().getCdhImages().stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " image is missing from the catalog."));
+                .orElseThrow(() -> new RuntimeException(imageUuid + " cdh image is missing from the catalog."));
+        if (!image.isDefaultImage()) {
+            throw new RuntimeException(imageUuid + " image is not a default image. Validation picks up the default one so it does not make sense to run it.");
+        }
+    }
+
+    protected void validateDefaultBaseImage(TestContext testContext, String imageUuid) {
+        testContext.given(ImageCatalogTestDto.class)
+                .when(imageCatalogTestClient.getV4(true))
+                .valid();
+        ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
+        ImageV4Response image = dto.getResponse().getImages().getBaseImages().stream()
+                .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the catalog."));
         if (!image.isDefaultImage()) {
             throw new RuntimeException(imageUuid + " image is not a default image. Validation picks up the default one so it does not make sense to run it.");
         }

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -18,7 +18,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
-public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
+public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -67,5 +67,10 @@ public class InternalSdxDistroxTest extends ImageValidatorE2ETest {
     @Override
     protected String getImageId(TestContext testContext) {
         return testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId();
+    }
+
+    @Override
+    protected boolean isPrewarmedImageTest() {
+        return true;
     }
 }
