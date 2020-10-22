@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
+package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +14,9 @@ import org.testng.util.Strings;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
-public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
+public abstract class AbstractImageValidatorE2ETest extends AbstractE2ETest {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ImageValidatorE2ETest.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractImageValidatorE2ETest.class);
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -45,6 +45,8 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
     protected abstract String getImageId(TestContext testContext);
 
+    protected abstract boolean isPrewarmedImageTest();
+
     private void createSourceCatalogIfNotExistsAndValidateDefaultImage(TestContext testContext) {
         createImageValidationSourceCatalog(testContext,
                 commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
@@ -52,7 +54,11 @@ public abstract class ImageValidatorE2ETest extends AbstractE2ETest {
 
         String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
         if (Strings.isNotNullAndNotEmpty(imageUuid)) {
-            validateDefaultImage(testContext, imageUuid);
+            if (isPrewarmedImageTest()) {
+                validateDefaultPrewarmedImage(testContext, imageUuid);
+            } else {
+                validateDefaultBaseImage(testContext, imageUuid);
+            }
         }
     }
 

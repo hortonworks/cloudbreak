@@ -1,5 +1,0 @@
-name: "aws-image-validation-tests"
-tests:
-  - name: "aws_image_validation_e2e_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxDistroxTest
