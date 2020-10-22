@@ -5,6 +5,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
+import com.sequenceiq.environment.configuration.telemetry.AccountTelemetryConfig;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
 
@@ -28,28 +30,13 @@ public class AccountTelemetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountTelemetryService.class);
 
-    private static final String EMAIL_PATTERN = "\\b([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-\\._]" +
-            "*[A-Za-z0-9])@(([A-Za-z0-9]|[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])\\.)+([A-Za-z0-9]" +
-            "|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])\\b";
-
-    private static final String EMAIL_REPLACEMENT = "email@redacted.host";
-
-    private static final String CREDIT_CARD_PATTERN = "\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}";
-
-    private static final String CREDIT_CARD_REPLACEMENT = "XXXX-XXXX-XXXX-XXXX";
-
-    private static final String SSN_PATTERN = "\\d{3}[^\\w]\\d{2}[^\\w]\\d{4}";
-
-    private static final String SSN_REPLACEMENT = "XXX-XX-XXXX";
-
-    private static final String FREEIPA_PWD_PATTERN = "FPW\\:\\s+[\\w|\\W].*";
-
-    private static final String FREEIPA_PWD_REPLACEMENT = "FPW: [REDACTED]";
-
     private final AccountTelemetryRepository accountTelemetryRepository;
 
-    public AccountTelemetryService(AccountTelemetryRepository accountTelemetryRepository) {
+    private final List<AnonymizationRule> defaultRules;
+
+    public AccountTelemetryService(AccountTelemetryRepository accountTelemetryRepository, AccountTelemetryConfig accountTelemetryConfig) {
         this.accountTelemetryRepository = accountTelemetryRepository;
+        this.defaultRules = accountTelemetryConfig.getRules();
     }
 
     public AccountTelemetry create(AccountTelemetry telemetry, String accountId) {
@@ -116,36 +103,17 @@ public class AccountTelemetryService {
 
     public AccountTelemetry createDefaultAccuontTelemetry() {
         AccountTelemetry defaultTelemetry = new AccountTelemetry();
-        List<AnonymizationRule> defaultRules = new ArrayList<>();
-
-        AnonymizationRule creditCardWithSepRule = new AnonymizationRule();
-        creditCardWithSepRule.setValue(
-                Base64.getEncoder().encodeToString(CREDIT_CARD_PATTERN.getBytes()));
-        creditCardWithSepRule.setReplacement(CREDIT_CARD_REPLACEMENT);
-
-        AnonymizationRule ssnWithSepRule = new AnonymizationRule();
-        ssnWithSepRule.setValue(
-                Base64.getEncoder().encodeToString(SSN_PATTERN.getBytes()));
-        ssnWithSepRule.setReplacement(SSN_REPLACEMENT);
-
-        AnonymizationRule emailRule = new AnonymizationRule();
-        emailRule.setValue(
-                Base64.getEncoder().encodeToString(EMAIL_PATTERN.getBytes()));
-        emailRule.setReplacement(EMAIL_REPLACEMENT);
-
-        AnonymizationRule freeIpaPwdRule = new AnonymizationRule();
-        freeIpaPwdRule.setValue(
-                Base64.getEncoder().encodeToString(FREEIPA_PWD_PATTERN.getBytes()));
-        freeIpaPwdRule.setReplacement(FREEIPA_PWD_REPLACEMENT);
-
-        defaultRules.add(creditCardWithSepRule);
-        defaultRules.add(ssnWithSepRule);
-        defaultRules.add(emailRule);
-        defaultRules.add(freeIpaPwdRule);
-
+        List<AnonymizationRule> defaultEncodedRules = defaultRules
+                .stream()
+                .map(rule -> {
+                    AnonymizationRule encodedRule = new AnonymizationRule();
+                    encodedRule.setValue(Base64.getEncoder().encodeToString(rule.getValue().getBytes()));
+                    encodedRule.setReplacement(rule.getReplacement());
+                    return encodedRule;
+                }).collect(Collectors.toList());
         Features defaultFeatures = new Features();
         defaultFeatures.addClusterLogsCollection(false);
-        defaultTelemetry.setRules(defaultRules);
+        defaultTelemetry.setRules(defaultEncodedRules);
         defaultTelemetry.setFeatures(defaultFeatures);
         return defaultTelemetry;
     }
@@ -190,4 +158,5 @@ public class AccountTelemetryService {
                 .build()
                 .toString();
     }
+
 }

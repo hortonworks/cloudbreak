@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
+import com.sequenceiq.environment.configuration.telemetry.AccountTelemetryConfig;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.repository.AccountTelemetryRepository;
 
@@ -31,7 +32,7 @@ public class AccountTelemetryServiceTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new AccountTelemetryService(accountTelemetryRepository);
+        underTest = new AccountTelemetryService(accountTelemetryRepository, createAccountTelemetryConfig());
     }
 
     @Test
@@ -145,6 +146,7 @@ public class AccountTelemetryServiceTest {
             testPatternWithOutput(rule, "333-44-2222", "XXX-");
             testPatternWithOutput(rule, "card number: 1111-2222-3333-4444", "XXXX-");
             testPatternWithOutput(rule, "- FPW: secret", "FPW");
+            testPatternWithOutput(rule, "cdpHashedPassword='{SHA512}abcdef'", "[CDP");
         }
         assertThat(result.getFeatures().getClusterLogsCollection().isEnabled()).isEqualTo(false);
     }
@@ -156,6 +158,26 @@ public class AccountTelemetryServiceTest {
             boolean found = p.matcher(input).find();
             assertThat(found).isEqualTo(true);
         }
+    }
+
+    private AccountTelemetryConfig createAccountTelemetryConfig() {
+        AccountTelemetryConfig config = new AccountTelemetryConfig();
+        List<AnonymizationRule> defaultRules = new ArrayList<>();
+        defaultRules.add(createRule("\\b([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-\\._]*[A-Za-z0-9])@(([A-Za-z0-9]|" +
+                "[A-Za-z][A-Za-z0-9\\-]*[A-Za-z0-9])\\.)+([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])\\b", "email@redacted.host"));
+        defaultRules.add(createRule("\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}[^\\w]\\d{4}", "XXXX-XXXX-XXXX-XXXX"));
+        defaultRules.add(createRule("\\d{3}[^\\w]\\d{2}[^\\w]\\d{4}", "XXX-XX-XXXX"));
+        defaultRules.add(createRule("FPW\\:\\s+[\\w|\\W].*", "FPW: [REDACTED]"));
+        defaultRules.add(createRule("cdpHashedPassword=.*[']", "[CDP PWD ATTRS REDACTED]"));
+        config.setRules(defaultRules);
+        return config;
+    }
+
+    private AnonymizationRule createRule(String pattern, String replacement) {
+        AnonymizationRule rule = new AnonymizationRule();
+        rule.setValue(pattern);
+        rule.setReplacement(replacement);
+        return rule;
     }
 
 }
