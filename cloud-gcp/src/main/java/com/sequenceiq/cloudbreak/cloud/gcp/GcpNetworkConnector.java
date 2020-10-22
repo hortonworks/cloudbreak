@@ -24,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.Subnetwork;
+import com.google.api.services.compute.model.SubnetworkList;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -130,11 +132,23 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
         String subnetId = network.getStringParameter(GcpStackUtil.SUBNET_ID);
         String region = network.getStringParameter(GcpStackUtil.REGION);
+        String sharedProjectId = network.getStringParameter(GcpStackUtil.SHARED_PROJECT_ID);
         LOGGER.debug("Getting network cidrs for subnet {} in region {}", subnetId, region);
         Compute compute = GcpStackUtil.buildCompute(credential);
         String projectId = GcpStackUtil.getProjectId(credential);
+        Subnetwork subnet = null;
         try {
-            String ipCidrRange = compute.subnetworks().get(projectId, region, subnetId).execute().getIpCidrRange();
+            SubnetworkList ownProjectSubnets = compute.subnetworks().list(projectId, region).execute();
+            Set<Subnetwork> collect = ownProjectSubnets.getItems()
+                    .stream()
+                    .filter(e -> e.getName().equals(subnetId))
+                    .collect(Collectors.toSet());
+            if (collect.isEmpty()) {
+                subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
+            } else {
+                subnet = compute.subnetworks().get(projectId, region, subnetId).execute();
+            }
+            String ipCidrRange = subnet.getIpCidrRange();
             return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
         } catch (IOException e) {
             throw new GcpResourceException("Describe subnets failed due to IO exception", GCP_NETWORK, subnetId);
