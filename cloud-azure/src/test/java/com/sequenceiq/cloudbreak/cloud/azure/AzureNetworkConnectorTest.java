@@ -123,6 +123,9 @@ public class AzureNetworkConnectorTest {
     @Mock
     private AzureDnsZoneService azureDnsZoneService;
 
+    @Mock
+    private AzureNetworkLinkService azureNetworkLinkService;
+
     @Test
     public void testPlatformShouldReturnAzurePlatform() {
         Platform actual = underTest.platform();
@@ -178,7 +181,14 @@ public class AzureNetworkConnectorTest {
 
         underTest.createProviderSpecificNetworkResources(request);
 
-        verify(azureDnsZoneService).getOrCreateDnsZones(
+        verify(azureDnsZoneService).checkOrCreateDnsZones(
+                authenticatedContext,
+                azureClient,
+                getNetworkView(),
+                RESOURCE_GROUP,
+                getTags()
+        );
+        verify(azureNetworkLinkService).checkOrCreateNetworkLinks(
                 authenticatedContext,
                 azureClient,
                 getNetworkView(),

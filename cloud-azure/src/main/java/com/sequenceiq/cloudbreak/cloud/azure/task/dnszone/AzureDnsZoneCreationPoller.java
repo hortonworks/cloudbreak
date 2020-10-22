@@ -18,11 +18,11 @@ public class AzureDnsZoneCreationPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDnsZoneCreationPoller.class);
 
-    @Value("${cb.azure.poller.dns.checkinterval:1000}")
-    private int dnsZoneCreationCheckingInterval;
+    @Value("${cb.azure.poller.dns.checkinterval:2000}")
+    private int creationCheckInterval;
 
-    @Value("${cb.azure.poller.dns.maxattempt:100}")
-    private int dnsZoneCreationCheckingMaxAttempt;
+    @Value("${cb.azure.poller.dns.maxattempt:60}")
+    private int creationCheckMaxAttempt;
 
     @Value("${cb.azure.poller.dns.maxfailurenumber:5}")
     private int maxTolerableFailureNumber;
@@ -37,8 +37,8 @@ public class AzureDnsZoneCreationPoller {
         PollTask<Boolean> dnsZoneCreationCheckerTask = azurePollTaskFactory.dnsZoneCreationCheckerTask(ac, checkerContext);
         try {
             LOGGER.info("Start polling dns zone and network link creation: {}", checkerContext.getDeploymentName());
-            syncPollingScheduler.schedule(dnsZoneCreationCheckerTask, dnsZoneCreationCheckingInterval,
-                    dnsZoneCreationCheckingMaxAttempt, maxTolerableFailureNumber);
+            syncPollingScheduler.schedule(dnsZoneCreationCheckerTask, creationCheckInterval,
+                    creationCheckMaxAttempt, maxTolerableFailureNumber);
         } catch (Exception e) {
             LOGGER.error("Dns zone and network link creation failed.", e);
             throw new CloudConnectorException(e);

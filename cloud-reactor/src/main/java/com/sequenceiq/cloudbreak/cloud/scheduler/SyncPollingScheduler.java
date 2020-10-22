@@ -50,7 +50,9 @@ public class SyncPollingScheduler<T> {
                         return AttemptResults.justContinue();
                     });
         } catch (PollerStoppedException e) {
-            throw new TimeoutException(String.format("Task (%s) did not finish within %d seconds", task.getClass().getSimpleName(), interval * maxAttempt));
+            int duration = interval * maxAttempt;
+            throw new TimeoutException(String.format("Task (%s) did not finish within %d seconds",
+                    task.getClass().getSimpleName(), TimeUnit.MILLISECONDS.toSeconds(duration)));
         } catch (UserBreakException e) {
             throw (Exception) e.getCause();
         }

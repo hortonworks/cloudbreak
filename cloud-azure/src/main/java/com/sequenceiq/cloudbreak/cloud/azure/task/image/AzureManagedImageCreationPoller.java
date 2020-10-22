@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
@@ -17,11 +18,14 @@ public class AzureManagedImageCreationPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureManagedImageCreationPoller.class);
 
-    private static final int MANAGED_IMAGE_CREATION_CHECKING_INTERVAL = 1000;
+    @Value("${cb.azure.poller.image.checkinterval:1000}")
+    private int creationCheckInterval;
 
-    private static final int MANAGED_IMAGE_CREATION_CHECKING_MAX_ATTEMPT = 100;
+    @Value("${cb.azure.poller.image.maxattempt:100}")
+    private int creationCheckMaxAttempt;
 
-    private static final int MAX_FAILURE_TOLERANT = 5;
+    @Value("${cb.azure.poller.image.maxfailurenumber:5}")
+    private int maxTolerableFailureNumber;
 
     @Inject
     private AzurePollTaskFactory azurePollTaskFactory;
@@ -33,8 +37,8 @@ public class AzureManagedImageCreationPoller {
         PollTask<Boolean> managedImageCreationStatusCheckerTask = azurePollTaskFactory.managedImageCreationCheckerTask(ac, checkerContext);
         try {
             LOGGER.info("Start polling managed image creation: {}", checkerContext.getImageName());
-            syncPollingScheduler.schedule(managedImageCreationStatusCheckerTask, MANAGED_IMAGE_CREATION_CHECKING_INTERVAL,
-                    MANAGED_IMAGE_CREATION_CHECKING_MAX_ATTEMPT, MAX_FAILURE_TOLERANT);
+            syncPollingScheduler.schedule(managedImageCreationStatusCheckerTask, creationCheckInterval,
+                    creationCheckMaxAttempt, maxTolerableFailureNumber);
         } catch (Exception e) {
             LOGGER.error("Managed image creation failed.", e);
             throw new CloudConnectorException(e);

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static com.sequenceiq.common.model.EndpointType.USE_PRIVATE_ENDPOINT;
+import static com.sequenceiq.common.model.PrivateEndpointType.USE_PRIVATE_ENDPOINT;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 import rx.Completable;
@@ -739,8 +740,30 @@ public class AzureClient {
         handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
     }
 
-    public PrivateZone getPrivateDnsZoneByResourceGroup(String resourceGroupName, String dnsZoneName) {
-        return privatednsManager.privateZones().getByResourceGroup(resourceGroupName, dnsZoneName);
+    public PagedList<PrivateZone> getPrivateDnsZoneList() {
+        return privatednsManager.privateZones().list();
+    }
+
+    public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services) {
+        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZoneList();
+        for (AzurePrivateDnsZoneServiceEnum service : services) {
+            String dnsZoneName = service.getDnsZoneName();
+            Optional<PrivateZone> privateZoneWithNetworkLink = privateDnsZoneList.stream()
+                    .filter(privateZone -> privateZone.name().equals(dnsZoneName))
+                    .filter(privateZone -> privateZone.provisioningState().equals(SUCCEEDED))
+                    .filter(privateZone -> Objects.nonNull(getNetworkLinkByPrivateDnsZone(privateZone.resourceGroupName(), dnsZoneName, networkLinkId)))
+                    .findFirst();
+            if (privateZoneWithNetworkLink.isPresent()) {
+                PrivateZone privateZone = privateZoneWithNetworkLink.get();
+                String validationMessage = String.format("Network link for the network %s already exists for Private DNS Zone %s in resource group %s. "
+                            + "Please ensure that there is no existing network link and try again!",
+                    networkLinkId, dnsZoneName, privateZone.resourceGroupName());
+                LOGGER.warn(validationMessage);
+                resultBuilder.error(validationMessage);
+            }
+        }
+        return resultBuilder.build();
     }
 
     public PagedList<PrivateZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
@@ -749,6 +772,11 @@ public class AzureClient {
 
     public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
         return privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+    }
+
+    public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName,
+            String virtualNetworkLinkName) {
+        return privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
     }
 
     public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzurePrivateDnsZoneServiceEnum> services) {

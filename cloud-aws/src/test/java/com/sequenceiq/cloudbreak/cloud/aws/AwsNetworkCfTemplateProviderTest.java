@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -81,7 +81,7 @@ public class AwsNetworkCfTemplateProviderTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(describeVpcEndpointServicesResult);
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, EndpointType.USE_SERVICE_ENDPOINT);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPrivateAndPublicSubnetRequestList();
 
         ReflectionTestUtils.setField(underTest, "gatewayServices", gatewayServices);
@@ -102,7 +102,7 @@ public class AwsNetworkCfTemplateProviderTest {
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
         ReflectionTestUtils.setField(underTest, "gatewayServices", List.of());
         ReflectionTestUtils.setField(underTest, "interfaceServices", List.of());
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, EndpointType.USE_SERVICE_ENDPOINT);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPrivateAndPublicSubnetRequestList();
 
         String actual = underTest.provide(networkCreationRequest, subnetRequestList);
@@ -118,7 +118,7 @@ public class AwsNetworkCfTemplateProviderTest {
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network-privatesubnet-onlygatewayvpcendpoints.json"));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, EndpointType.NONE);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.NONE);
         List<SubnetRequest> subnetRequestList = createPrivateAndPublicSubnetRequestList();
 
         String actual = underTest.provide(networkCreationRequest, subnetRequestList);
@@ -137,7 +137,7 @@ public class AwsNetworkCfTemplateProviderTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(createDescribeVpcEndpointServicesResultWithDifferentAzs());
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, EndpointType.USE_SERVICE_ENDPOINT);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();
 
         String actual = underTest.provide(networkCreationRequest, subnetRequestList);
@@ -156,7 +156,7 @@ public class AwsNetworkCfTemplateProviderTest {
         AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
         when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(createDescribeVpcEndpointServicesResultWithDifferentAzs());
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, EndpointType.USE_SERVICE_ENDPOINT);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();
 
         String actual = underTest.provide(networkCreationRequest, subnetRequestList);
@@ -172,7 +172,7 @@ public class AwsNetworkCfTemplateProviderTest {
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network-publicsubnet-onlygatewayvpcendpoints.json"));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, EndpointType.NONE);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, PrivateEndpointType.NONE);
         List<SubnetRequest> subnetRequestList = createPrivateAndPublicSubnetRequestList();
 
         String actual = underTest.provide(networkCreationRequest, subnetRequestList);
@@ -185,7 +185,7 @@ public class AwsNetworkCfTemplateProviderTest {
     @Test
     public void testProvideShouldThrowExceptionWhenTemplateProcessHasFailed() throws IOException, TemplateException {
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(Template.class), anyMap())).thenThrow(TemplateException.class);
-        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, EndpointType.NONE);
+        NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, PrivateEndpointType.NONE);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();
 
         Assertions.assertThrows(CloudConnectorException.class, () -> underTest.provide(networkCreationRequest, subnetRequestList));
@@ -266,9 +266,9 @@ public class AwsNetworkCfTemplateProviderTest {
         return List.of(subnetRequest1, subnetRequest2, subnetRequest3, subnetRequest4);
     }
 
-    private NetworkCreationRequest createNetworkRequest(boolean privateSubnetEnabled, EndpointType endpointType) {
+    private NetworkCreationRequest createNetworkRequest(boolean privateSubnetEnabled, PrivateEndpointType privateEndpointType) {
         return new NetworkCreationRequest.Builder().withEnvName("envName").withEnvId(1L).withNetworkCidr(VPC_CIDR).withRegion(Region.region("region"))
-                .withPrivateSubnetEnabled(privateSubnetEnabled).withEndpointType(endpointType).build();
+                .withPrivateSubnetEnabled(privateSubnetEnabled).withEndpointType(privateEndpointType).build();
     }
 
     private static DescribeVpcEndpointServicesResult createDescribeVpcEndpointServicesResult(String... services) {

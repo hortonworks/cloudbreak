@@ -161,7 +161,7 @@ public class AzureDatabaseResourceService {
         // TODO simplify after final form of template is reached
 
         List<CloudResource> azureGenericResources = findResources(resources, List.of(AZURE_PRIVATE_ENDPOINT));
-        LOGGER.debug("Deleting dns zone groups and azure private endpoints {}", azureGenericResources);
+        LOGGER.debug("Deleting Azure private endpoints {}", azureGenericResources);
         azureUtils.deleteGenericResources(client, azureGenericResources.stream().map(CloudResource::getReference).collect(Collectors.toList()));
         azureGenericResources.forEach(cr -> persistenceNotifier.notifyDeletion(cr, cloudContext));
 

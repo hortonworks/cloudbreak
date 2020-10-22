@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -29,11 +30,14 @@ public class AzureStorageAccountService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageAccountService.class);
 
-    private static final int STORAGE_ACCOUNT_CREATION_CHECKING_INTERVAL = 1000;
+    @Value("${cb.azure.poller.storage.checkinterval:1000}")
+    private int creationCheckInterval;
 
-    private static final int STORAGE_ACCOUNT_CREATION_CHECKING_MAX_ATTEMPT = 30;
+    @Value("${cb.azure.poller.storage.maxattempt:30}")
+    private int creationCheckMaxAttempt;
 
-    private static final int MAX_FAILURE_TOLERANT = 5;
+    @Value("${cb.azure.poller.storage.maxfailurenumber:5}")
+    private int maxTolerableFailureNumber;
 
     @Inject
     private AzurePollTaskFactory azurePollTaskFactory;
@@ -78,8 +82,8 @@ public class AzureStorageAccountService {
         PollTask<Boolean> storageAccountCreationStatusCheckerTask = azurePollTaskFactory.storageAccountCheckerTask(ac, checkerContext);
         try {
             LOGGER.info("Start polling storage account creation: {}", checkerContext.getStorageAccountName());
-            syncPollingScheduler.schedule(storageAccountCreationStatusCheckerTask, STORAGE_ACCOUNT_CREATION_CHECKING_INTERVAL,
-                    STORAGE_ACCOUNT_CREATION_CHECKING_MAX_ATTEMPT, MAX_FAILURE_TOLERANT);
+            syncPollingScheduler.schedule(storageAccountCreationStatusCheckerTask, creationCheckInterval,
+                    creationCheckMaxAttempt, maxTolerableFailureNumber);
         } catch (Exception e) {
             LOGGER.debug("Storage account creation failed.", e);
         }

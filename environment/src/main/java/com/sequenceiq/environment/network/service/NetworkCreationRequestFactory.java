@@ -73,7 +73,8 @@ public class NetworkCreationRequestFactory {
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withNetworkCidr(networkDto.getNetworkCidr())
                 .withPrivateSubnetEnabled(privateSubnetEnabled)
-                .withEndpointType(serviceEndpointCreationToEndpointTypeConverter.convert(networkDto.getServiceEndpointCreation()))
+                .withEndpointType(serviceEndpointCreationToEndpointTypeConverter.convert(
+                        networkDto.getServiceEndpointCreation(), environment.getCloudPlatform()))
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withAccountId(environment.getAccountId())
                 .withCreatorCrn(environment.getCreator())

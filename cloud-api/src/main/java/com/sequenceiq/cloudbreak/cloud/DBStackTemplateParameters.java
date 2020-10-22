@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud;
 
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class DBStackTemplateParameters {
-    private final EndpointType endpointType;
+    private final PrivateEndpointType privateEndpointType;
 
     private DBStackTemplateParameters(Builder builder) {
-        this.endpointType = builder.endpointType;
+        this.privateEndpointType = builder.privateEndpointType;
     }
 
-    public EndpointType getEndpointType() {
-        return endpointType;
+    public PrivateEndpointType getEndpointType() {
+        return privateEndpointType;
     }
 
     public static Builder builder() {
@@ -18,10 +18,10 @@ public class DBStackTemplateParameters {
     }
 
     public static class Builder {
-        private EndpointType endpointType;
+        private PrivateEndpointType privateEndpointType;
 
-        public Builder setEndpointType(EndpointType endpointType) {
-            this.endpointType = endpointType;
+        public Builder setEndpointType(PrivateEndpointType privateEndpointType) {
+            this.privateEndpointType = privateEndpointType;
             return this;
         }
 

@@ -231,8 +231,16 @@ cb:
     host.name.prefix.length: 255
     poller:
       dns:
+        checkinterval: 2000
+        maxattempt: 60
+        maxfailurenumber: 5
+      image:
         checkinterval: 1000
         maxattempt: 100
+        maxfailurenumber: 5
+      storage:
+        checkinterval: 1000
+        maxattempt: 30
         maxfailurenumber: 5
     database.template.batchSize: 1
     externaldatabase:
