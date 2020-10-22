@@ -98,6 +98,18 @@ environment:
   tunnel:
     default: DIRECT
   admin.group.default.prefix: cdp_
+  telemetry:
+    rules:
+      - value: \b([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\._]*[A-Za-z0-9])@(([A-Za-z0-9]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\.)+([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])\b
+        replacement: "email@redacted.host"
+      - value: \d{4}[^\w]\d{4}[^\w]\d{4}[^\w]\d{4}
+        replacement: "XXXX-XXXX-XXXX-XXXX"
+      - value: \d{3}[^\w]\d{2}[^\w]\d{4}
+        replacement: "XXX-XX-XXXX"
+      - value: FPW\:\s+[\w|\W].*
+        replacement: "FPW: [REDACTED]"
+      - value: cdpHashedPassword=.*[']
+        replacement: "[CDP PWD ATTRS REDACTED]"
 
 cb:
   authentication:
