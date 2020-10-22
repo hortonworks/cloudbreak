@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.doIfNotNull;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
+import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 import io.swagger.annotations.ApiModel;
@@ -33,6 +35,10 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
     private AwsEncryptionV4Parameters encryption;
 
+    @Valid
+    @ApiModelProperty(TemplateModelDescription.AWS_PLACEMENT_GROUP)
+    private AwsPlacementGroupV4Parameters placementGroup;
+
     public AwsInstanceTemplateV4SpotParameters getSpot() {
         return spot;
     }
@@ -49,6 +55,14 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         this.encryption = encryption;
     }
 
+    public AwsPlacementGroupV4Parameters getPlacementGroup() {
+        return placementGroup;
+    }
+
+    public void setPlacementGroup(AwsPlacementGroupV4Parameters placementGroup) {
+        this.placementGroup = placementGroup;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -60,6 +74,10 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
             putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
             putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryption.getType() != EncryptionType.NONE);
         }
+
+        putIfValueNotNull(map, AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, Optional.ofNullable(placementGroup)
+                .map(AwsPlacementGroupV4Parameters::getStrategy)
+                .orElse(AwsPlacementGroupStrategy.NONE).name());
         return map;
     }
 
@@ -98,6 +116,14 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         String type = getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE);
         if (type != null) {
             encryption.setType(EncryptionType.valueOf(type));
+        }
+
+        String placementGroupStrategy = getParameterOrNull(parameters, AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY);
+        placementGroup = new AwsPlacementGroupV4Parameters();
+        if (placementGroupStrategy != null) {
+            placementGroup.setStrategy(AwsPlacementGroupStrategy.valueOf(placementGroupStrategy));
+        } else {
+            placementGroup.setStrategy(AwsPlacementGroupStrategy.NONE);
         }
     }
 }

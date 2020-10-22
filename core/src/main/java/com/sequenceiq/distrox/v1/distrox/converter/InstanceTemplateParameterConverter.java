@@ -7,12 +7,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsEncryptionV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsPlacementGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AzureInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.GcpInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsPlacementGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
@@ -24,6 +26,7 @@ public class InstanceTemplateParameterConverter {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
         response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
+        response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
         return response;
     }
 
@@ -38,6 +41,12 @@ public class InstanceTemplateParameterConverter {
         AwsEncryptionV4Parameters response = new AwsEncryptionV4Parameters();
         response.setKey(source.getKey());
         response.setType(source.getType());
+        return response;
+    }
+
+    private AwsPlacementGroupV4Parameters convert(AwsPlacementGroupV1Parameters source) {
+        AwsPlacementGroupV4Parameters response = new AwsPlacementGroupV4Parameters();
+        response.setStrategy(source.getStrategy());
         return response;
     }
 
@@ -68,6 +77,7 @@ public class InstanceTemplateParameterConverter {
         AwsInstanceTemplateV1Parameters response = new AwsInstanceTemplateV1Parameters();
         response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
+        response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
         return response;
     }
 
@@ -75,6 +85,12 @@ public class InstanceTemplateParameterConverter {
         AwsEncryptionV1Parameters response = new AwsEncryptionV1Parameters();
         response.setKey(source.getKey());
         response.setType(source.getType());
+        return response;
+    }
+
+    private AwsPlacementGroupV1Parameters convert(AwsPlacementGroupV4Parameters source) {
+        AwsPlacementGroupV1Parameters response = new AwsPlacementGroupV1Parameters();
+        response.setStrategy(source.getStrategy());
         return response;
     }
 

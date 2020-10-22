@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
+import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
 
 public class AwsInstanceView {
@@ -80,6 +82,12 @@ public class AwsInstanceView {
 
     public Integer getSpotPercentage() {
         return instanceTemplate.getParameter(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, Integer.class);
+    }
+
+    public AwsPlacementGroupStrategy getPlacementGroupStrategy() {
+        return Optional.ofNullable(instanceTemplate.getStringParameter(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY))
+                .map(placement -> AwsPlacementGroupStrategy.valueOf(placement))
+                .orElse(AwsPlacementGroupStrategy.NONE);
     }
 
     public Double getSpotMaxPrice() {

@@ -12,6 +12,8 @@ public class AwsGroupView {
 
     public static final String LAUNCH_TEMPLATE_NAME_PREFIX = "ClusterManagerNodeLaunchTemplate";
 
+    public static final String PLACEMENT_GROUP_NAME_PREFIX = "PlacementGroup";
+
     private final Integer instanceCount;
 
     private final String type;
@@ -42,6 +44,8 @@ public class AwsGroupView {
 
     private final String launchTemplateName;
 
+    private final String placementGroupName;
+
     private final Boolean useNetworkCidrAsSourceForDefaultRules;
 
     private final Boolean hasInstanceProfile;
@@ -54,10 +58,12 @@ public class AwsGroupView {
 
     private final Double spotMaxPrice;
 
+    private final String placementGroupStrategy;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
             Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
             String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
-            boolean fastEbsEncryptionEnabled, Double spotMaxPrice) {
+            boolean fastEbsEncryptionEnabled, Double spotMaxPrice, String placementGroupStrategy) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -73,16 +79,22 @@ public class AwsGroupView {
         this.volumeCounts = volumeCounts;
         autoScalingGroupName = getAutoScalingGroupName(groupName);
         launchTemplateName = getLaunchTemplateName(groupName);
+        placementGroupName = getPlacementGroupName(groupName);
         this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;
         this.instanceProfile = instanceProfile;
         hasInstanceProfile = instanceProfile != null;
         this.onDemandPercentage = onDemandPercentage;
         this.fastEbsEncryptionEnabled = fastEbsEncryptionEnabled;
         this.spotMaxPrice = spotMaxPrice;
+        this.placementGroupStrategy = placementGroupStrategy;
     }
 
     public static String getAutoScalingGroupName(String groupName) {
         return AUTOSCALING_GROUP_NAME_PREFIX + sanitizeGroupName(groupName);
+    }
+
+    public static String getPlacementGroupName(String groupName) {
+        return PLACEMENT_GROUP_NAME_PREFIX + sanitizeGroupName(groupName);
     }
 
     public static String getLaunchTemplateName(String groupName) {
@@ -165,6 +177,10 @@ public class AwsGroupView {
         return launchTemplateName;
     }
 
+    public String getPlacementGroupName() {
+        return placementGroupName;
+    }
+
     public Boolean getUseNetworkCidrAsSourceForDefaultRules() {
         return useNetworkCidrAsSourceForDefaultRules;
     }
@@ -187,5 +203,9 @@ public class AwsGroupView {
 
     public Double getSpotMaxPrice() {
         return spotMaxPrice;
+    }
+
+    public String getPlacementGroupStrategy() {
+        return placementGroupStrategy.toLowerCase();
     }
 }
