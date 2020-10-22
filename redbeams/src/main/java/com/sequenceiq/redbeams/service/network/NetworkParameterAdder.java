@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
@@ -80,10 +80,11 @@ public class NetworkParameterAdder {
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getAws().getVpcId());
                 break;
             case AZURE:
-                EndpointType endpointType
-                        = serviceEndpointCreationToEndpointTypeConverter.convert(environmentResponse.getNetwork().getServiceEndpointCreation());
-                parameters.put(ENDPOINT_TYPE, endpointType);
-                if (EndpointType.USE_PRIVATE_ENDPOINT == endpointType) {
+                PrivateEndpointType privateEndpointType
+                        = serviceEndpointCreationToEndpointTypeConverter.convert(
+                                environmentResponse.getNetwork().getServiceEndpointCreation(), cloudPlatform.name());
+                parameters.put(ENDPOINT_TYPE, privateEndpointType);
+                if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
                     parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
                 }
                 break;

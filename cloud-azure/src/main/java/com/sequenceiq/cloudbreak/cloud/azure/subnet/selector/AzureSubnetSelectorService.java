@@ -57,7 +57,8 @@ public class AzureSubnetSelectorService {
             suitableCloudSubnet = new ArrayList<>(subnetMetas);
         }
         return suitableCloudSubnet.isEmpty() ?
-                new SubnetSelectionResult("No suitable subnets found for placing a private endpoint") :
+                new SubnetSelectionResult("No suitable subnets found for placing a private endpoint "
+                        + "because of the network policy being enabled, please disable network policies for private endpoints and try again!") :
                 new SubnetSelectionResult(suitableCloudSubnet);
     }
 }

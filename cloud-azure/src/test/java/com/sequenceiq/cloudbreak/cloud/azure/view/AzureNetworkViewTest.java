@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class AzureNetworkViewTest {
 
@@ -43,6 +43,6 @@ public class AzureNetworkViewTest {
     @Test
     public void testGetEndpointType() {
         when(network.getStringParameter(ENDPOINT_TYPE)).thenReturn("USE_PRIVATE_ENDPOINT");
-        assertThat(underTest.getEndpointType()).isEqualTo(EndpointType.USE_PRIVATE_ENDPOINT);
+        assertThat(underTest.getEndpointType()).isEqualTo(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
     }
 }

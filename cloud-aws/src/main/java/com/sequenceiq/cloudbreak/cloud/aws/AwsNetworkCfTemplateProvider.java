@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.common.model.EndpointType.USE_SERVICE_ENDPOINT;
+import static com.sequenceiq.common.model.PrivateEndpointType.USE_VPC_ENDPOINT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -85,13 +86,14 @@ public class AwsNetworkCfTemplateProvider {
     }
 
     private List<AwsServiceEndpointView> createInterfaceServiceEndpointsIfNeeded(NetworkCreationRequest networkCreationRequest, List<SubnetRequest> subnets) {
-        if (USE_SERVICE_ENDPOINT == networkCreationRequest.getEndpointType() && CollectionUtils.isNotEmpty(interfaceServices)) {
+        PrivateEndpointType privateEndpointType = networkCreationRequest.getEndpointType();
+        if (USE_VPC_ENDPOINT == privateEndpointType && CollectionUtils.isNotEmpty(interfaceServices)) {
             List<AwsServiceEndpointView> interfaceServiceEndpoints = createInterfaceServiceEndpoints(networkCreationRequest, subnets);
-            LOGGER.debug("The following interface service endpoints will be created in the new vpc: {}", interfaceServiceEndpoints);
+            LOGGER.debug("The following interface endpoints will be created in the new vpc: {}", interfaceServiceEndpoints);
             return interfaceServiceEndpoints;
         } else {
-            LOGGER.debug("No interface service endpoints will be created in the new vpc. serviceEndpointCreation: {}, interfaceServices: {}",
-                    networkCreationRequest.getEndpointType(), interfaceServices);
+            LOGGER.debug("No interface endpoints will be created in the new vpc. serviceEndpointCreation: {}, interfaceServices: {}",
+                    privateEndpointType, interfaceServices);
             return List.of();
         }
     }

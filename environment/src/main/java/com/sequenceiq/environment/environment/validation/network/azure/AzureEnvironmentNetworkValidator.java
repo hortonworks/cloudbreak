@@ -15,10 +15,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudSubnetParametersService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureNetworkLinkService;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.NullUtil;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
@@ -39,9 +46,21 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private final AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
-    public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService, AzureCloudSubnetParametersService azureCloudSubnetParametersService) {
+    private final AzureNetworkLinkService azureNetworkLinkService;
+
+    private final AzureClientService azureClientService;
+
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    public AzureEnvironmentNetworkValidator(CloudNetworkService cloudNetworkService, AzureCloudSubnetParametersService azureCloudSubnetParametersService,
+            AzureNetworkLinkService azureNetworkLinkService,
+            AzureClientService azureClientService,
+            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
         this.cloudNetworkService = cloudNetworkService;
         this.azureCloudSubnetParametersService = azureCloudSubnetParametersService;
+        this.azureNetworkLinkService = azureNetworkLinkService;
+        this.azureClientService = azureClientService;
+        this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
     }
 
     @Override
@@ -55,6 +74,7 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
         checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
         checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
+        checkPrivateEndpointForExistingNetworkLink(resultBuilder, environmentDto, networkDto);
     }
 
     @Override
@@ -123,6 +143,15 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
                     networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName());
             LOGGER.warn(errorMessage);
             resultBuilder.error(errorMessage);
+        }
+    }
+
+    private void checkPrivateEndpointForExistingNetworkLink(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
+        if (networkDto.getServiceEndpointCreation() ==  ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+            CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
+            AzureClient azureClient = azureClientService.getClient(cloudCredential);
+            ValidationResult validationResult = azureNetworkLinkService.validateExistingNetworkLink(azureClient, networkDto.getAzure().getNetworkId());
+            NullUtil.doIfNotNull(validationResult, resultBuilder::merge);
         }
     }
 

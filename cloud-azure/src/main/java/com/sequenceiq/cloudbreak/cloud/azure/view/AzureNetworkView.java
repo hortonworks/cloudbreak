@@ -7,7 +7,7 @@ import java.util.StringJoiner;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class AzureNetworkView {
 
@@ -97,8 +97,8 @@ public class AzureNetworkView {
         return Objects.hash(networkId, resourceGroupName, existingNetwork, network);
     }
 
-    public EndpointType getEndpointType() {
-        return EndpointType.safeValueOf(network.getStringParameter(ENDPOINT_TYPE));
+    public PrivateEndpointType getEndpointType() {
+        return PrivateEndpointType.safeValueOf(network.getStringParameter(ENDPOINT_TYPE));
     }
 
     public String getSubnetIdForPrivateEndpoint() {

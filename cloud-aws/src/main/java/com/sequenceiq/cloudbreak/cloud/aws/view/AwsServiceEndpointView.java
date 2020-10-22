@@ -5,11 +5,11 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
 public class AwsServiceEndpointView {
-    private String serviceName;
+    private final String serviceName;
 
-    private String serviceEndpointTemplateName;
+    private final String serviceEndpointTemplateName;
 
-    private List<SubnetRequest> subnetRequests;
+    private final List<SubnetRequest> subnetRequests;
 
     public AwsServiceEndpointView(String serviceName, List<SubnetRequest> subnetRequests) {
         this.serviceName = serviceName;

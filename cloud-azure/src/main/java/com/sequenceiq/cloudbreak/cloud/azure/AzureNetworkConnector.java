@@ -74,6 +74,9 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Inject
     private AzureDnsZoneService azureDnsZoneService;
 
+    @Inject
+    private AzureNetworkLinkService azureNetworkLinkService;
+
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
@@ -228,8 +231,8 @@ public class AzureNetworkConnector implements NetworkConnector {
             networkView.setExistingNetwork(request.isExistingNetwork());
             networkView.setNetworkId(request.getNetworkId());
             networkView.setResourceGroupName(request.getNetworkResourceGroup());
-            azureDnsZoneService.getOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags);
-            azureDnsZoneService.getOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags);
+            azureDnsZoneService.checkOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags);
+            azureNetworkLinkService.checkOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags);
         } else {
             LOGGER.debug("Private endpoints are disabled, nothing to do.");
         }

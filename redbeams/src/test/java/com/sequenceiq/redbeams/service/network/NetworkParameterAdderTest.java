@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
-import com.sequenceiq.common.model.EndpointType;
+import com.sequenceiq.common.model.PrivateEndpointType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -97,12 +97,12 @@ public class NetworkParameterAdderTest {
         CloudSubnet subnetForPrivateEndpoint = new CloudSubnet("mySubnet", "");
         when(subnetListerService.getAzureSubscriptionId(any())).thenReturn("mySubscription");
         when(subnetChooserService.chooseSubnetForPrivateEndpoint(any(), any(), anyBoolean())).thenReturn(List.of(subnetForPrivateEndpoint));
-        when(serviceEndpointCreationToEndpointTypeConverter.convert(any())).thenReturn(EndpointType.USE_PRIVATE_ENDPOINT);
+        when(serviceEndpointCreationToEndpointTypeConverter.convert(any(), any())).thenReturn(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
         when(subnetListerService.expandAzureResourceId(any(), any(), anyString())).thenCallRealMethod();
 
         parameters = underTest.addParameters(parameters, environment, CloudPlatform.AZURE, dbStack);
 
-        assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.ENDPOINT_TYPE, EndpointType.USE_PRIVATE_ENDPOINT));
+        assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.ENDPOINT_TYPE, PrivateEndpointType.USE_PRIVATE_ENDPOINT));
         assertThat(parameters, IsMapContaining.hasEntry(NetworkParameterAdder.SUBNET_FOR_PRIVATE_ENDPOINT,
                 "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/networkId/subnets/mySubnet"));
     }
