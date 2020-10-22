@@ -131,8 +131,9 @@ public class CloudConfigValidationActions {
                         validationBuilder);
                 parametersValidator.waitResult(parametersValidationRequest, validationBuilder);
 
-                dataLakeValidator.validate(stack, validationBuilder);
-
+                if (!StackType.LEGACY.equals(stack.getType())) {
+                    dataLakeValidator.validate(stack, validationBuilder);
+                }
 
                 environmentValidator.validate(
                         stack,

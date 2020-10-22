@@ -169,6 +169,7 @@ public class StackCreatorService {
                 "Stack request converted to stack took {} ms for stack {}", stackName);
         stackStub.setWorkspace(workspace);
         stackStub.setCreator(user);
+        stackStub.setType(determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest));
         String platformString = stackStub.getCloudPlatform().toLowerCase();
 
         MDCBuilder.buildMdcContext(stackStub);
@@ -211,7 +212,7 @@ public class StackCreatorService {
                         "Set stacktype for stack object took {} ms");
 
                     measure(() -> clusterCreationService.validate(
-                            stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment, distroxRequest),
+                            stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment),
                             LOGGER,
                             "Validate cluster rds and autotls took {} ms");
                 }
@@ -270,6 +271,16 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    StackType determineStackTypeBasedOnTheUsedApi(Stack stack, boolean distroxRequest) {
+        StackType stackType = stack.getType();
+        boolean stackTypeIsWorkloadAndNotDistroXRequest = stack.getType() != null && StackType.WORKLOAD.equals(stack.getType()) && !distroxRequest;
+        boolean stackTypeIsNullAndNotDistroXRequest = stack.getType() == null && !distroxRequest;
+        if (stackTypeIsWorkloadAndNotDistroXRequest || stackTypeIsNullAndNotDistroXRequest) {
+            stackType = StackType.LEGACY;
+        }
+        return stackType;
     }
 
     private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {

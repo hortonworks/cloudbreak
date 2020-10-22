@@ -71,6 +71,7 @@ public class StackV4Controller extends NotificationController implements StackV4
         } else {
             types.add(StackType.DATALAKE);
             types.add(StackType.WORKLOAD);
+            types.add(StackType.LEGACY);
         }
         return stackOperations.listByEnvironmentCrn(restRequestThreadLocalService.getRequestedWorkspaceId(), environmentCrn, types);
     }
