@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.aws.TestConstants.LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH;
+import static com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
@@ -60,6 +61,7 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -1229,6 +1231,143 @@ public class CloudFormationTemplateBuilderTest {
                 .contains("\"KmsKeyId\" : \"customEncryptionKeyArn\"");
     }
 
+    @Test
+    public void buildTestPlacementGroupWithMixedPlacementGroup() {
+        //GIVEN
+        InstanceTemplate instanceTemplateMaster = createDefaultInstanceTemplate();
+        InstanceTemplate instanceTemplateWorker = createDefaultInstanceTemplate();
+        InstanceTemplate instanceTemplateGateway = createDefaultInstanceTemplate();
+        InstanceTemplate instanceTemplateCustom = createDefaultInstanceTemplate();
+
+        instanceTemplateMaster.putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.SPREAD.name());
+        instanceTemplateWorker.putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.PARTITION.name());
+        instanceTemplateGateway.putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.CLUSTER.name());
+        instanceTemplateCustom.putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.NONE.name());
+
+        List<Group> groups = List.of(createDefaultGroupWithInstanceTemplate("master", instanceTemplateMaster, InstanceGroupType.CORE),
+                createDefaultGroupWithInstanceTemplate("worker", instanceTemplateWorker, InstanceGroupType.CORE),
+                createDefaultGroupWithInstanceTemplate("gateway", instanceTemplateGateway, InstanceGroupType.GATEWAY),
+                createDefaultGroupWithInstanceTemplate("custom", instanceTemplateCustom, InstanceGroupType.CORE));
+        CloudStack cloudStack = createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(JsonUtil.isValid(templateString))
+                .overridingErrorMessage("Invalid JSON: " + templateString)
+                .isTrue();
+
+        Assertions.assertThat(templateString)
+                .contains("\"PlacementGroupmaster\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"spread\"}}")
+                .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupmaster\" } }")
+                .contains("\"PlacementGroupworker\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"partition\"}}")
+                .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupworker\" } }")
+                .contains("\"PlacementGroupgateway\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"cluster\"}}")
+                .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupgateway\" } }")
+                .doesNotContain("\"PlacementGroupcustom\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"cluster\"}}")
+                .doesNotContain("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupcustom\" } }");
+    }
+
+    @Test
+    public void buildTestPlacementGroupWithNonePlacementGroup() {
+        //GIVEN
+        instance.getTemplate().putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.NONE.name());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(JsonUtil.isValid(templateString))
+                .overridingErrorMessage("Invalid JSON: " + templateString)
+                .isTrue();
+
+        Assertions.assertThat(templateString)
+                .doesNotContain("PlacementGroup")
+                .doesNotContain("Placement");
+    }
+
+    @Test
+    public void buildTestPlacementGroupWithPlacementGroupNotSpecified() {
+        //GIVEN
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(JsonUtil.isValid(templateString))
+                .overridingErrorMessage("Invalid JSON: " + templateString)
+                .isTrue();
+
+        Assertions.assertThat(templateString)
+                .doesNotContain("PlacementGroup")
+                .doesNotContain("Placement");
+    }
+
+    @Test
+    public void buildTestPlacementGroupWithPartitionPlacementGroup() {
+        //GIVEN
+        instance.getTemplate().putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.PARTITION.name());
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        Assertions.assertThat(JsonUtil.isValid(templateString))
+                .overridingErrorMessage("Invalid JSON: " + templateString)
+                .isTrue();
+
+        Assertions.assertThat(templateString)
+                .contains("\"PlacementGroupmaster\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"partition\"}}")
+                .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupmaster\" } }")
+                .contains("\"PlacementGroupgateway\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"partition\"}}")
+                .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupgateway\" } }");
+    }
+
     private CloudStack initCloudStackWithInstanceProfile() {
         CloudS3View logView = new CloudS3View(CloudIdentityType.LOG);
         logView.setInstanceProfile(INSTANCE_PROFILE);
@@ -1257,6 +1396,14 @@ public class CloudFormationTemplateBuilderTest {
 
     private Group createDefaultGroupGatewayGroup(Optional<CloudFileSystemView> cloudFileSystemView) {
         return createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, getDefaultCloudStackSecurity(), cloudFileSystemView);
+    }
+
+    private Group createDefaultGroupWithInstanceTemplate(String name, InstanceTemplate instanceTemplate, InstanceGroupType instanceGroupType) {
+        Security security = getDefaultCloudStackSecurity();
+        CloudInstance cloudInstance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);
+        return new Group(name, instanceGroupType, singletonList(cloudInstance), security, null,
+        instanceAuthentication, instanceAuthentication.getLoginUserName(),
+        instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty());
     }
 
     private Group createDefaultGroup(String name, InstanceGroupType type, int rootVolumeSize, Security security,

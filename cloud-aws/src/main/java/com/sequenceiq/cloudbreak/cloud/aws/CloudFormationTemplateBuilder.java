@@ -66,7 +66,8 @@ public class CloudFormationTemplateBuilder {
                     getInstanceProfile(group),
                     awsInstanceView.getOnDemandPercentage(),
                     awsInstanceView.isFastEbsEncryptionEnabled(),
-                    awsInstanceView.getSpotMaxPrice());
+                    awsInstanceView.getSpotMaxPrice(),
+                    awsInstanceView.getPlacementGroupStrategy().name());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

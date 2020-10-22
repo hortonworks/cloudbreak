@@ -368,6 +368,9 @@
           </#if>
           "InstanceType"   : "${group.flavor}",
           "KeyName"        : { "Ref" : "KeyName" },
+          <#if group.placementGroupStrategy?has_content && group.placementGroupStrategy != "none">
+          "Placement" : { "GroupName" : { "Ref" : "${group.placementGroupName}" } },
+          </#if>
           <#if group.type == "CORE">
           "UserData"       : { "Fn::Base64" : { "Fn::Join" : ["", [ { "Ref" : "CBUserData"},
                                                                     { "Ref" : "CBUserData1"},
@@ -383,6 +386,15 @@
         }
       }
     }
+
+    <#if group.placementGroupStrategy?has_content && group.placementGroupStrategy != "none">,
+    "${group.placementGroupName}" : {
+      "Type" : "AWS::EC2::PlacementGroup",
+      "Properties" : {
+        "Strategy" : "${group.placementGroupStrategy}"
+      }
+    }
+    </#if>
 
 	<#if group.cloudSecurityIds?size == 0>,
     "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" : {

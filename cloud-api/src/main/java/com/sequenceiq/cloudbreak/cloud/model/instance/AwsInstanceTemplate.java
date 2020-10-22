@@ -76,6 +76,23 @@ public class AwsInstanceTemplate extends InstanceTemplate {
      */
     public static final String FAST_EBS_ENCRYPTION_ENABLED = "fastEbsEncryption";
 
+    /**
+     * Key of the optional dynamic parameter denoting PlacementGroup Strategy for the instance.
+     *
+     * <p>
+     *     Permitted values:
+     *     <ul>
+     *         <li>{@code "NONE"}: This setting does not configure any placement group.</li>
+     *         <li>{@code "CLUSTER"}: This setting configures placement group strategy as "cluster".</li>
+     *         <li>{@code "PARTITION"}: This setting configures placement group strategy as "partition".</li>
+     *         <li>{@code "SPREAD"}: This setting configures placement group strategy as "spread".</li>
+     *     </ul>
+     * </p>
+     *
+     * @see #putParameter(String, Object)
+     */
+    public static final String PLACEMENT_GROUP_STRATEGY = "placementGroupStrategy";
+
     public AwsInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
         super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId);

@@ -24,6 +24,10 @@ public class AwsInstanceTemplateV1Parameters implements Serializable {
     @ApiModelProperty(TemplateModelDescription.ENCRYPTION)
     private AwsEncryptionV1Parameters encryption;
 
+    @Valid
+    @ApiModelProperty(TemplateModelDescription.AWS_PLACEMENT_GROUP)
+    private AwsPlacementGroupV1Parameters placementGroup;
+
     public AwsInstanceTemplateV1SpotParameters getSpot() {
         return spot;
     }
@@ -38,5 +42,13 @@ public class AwsInstanceTemplateV1Parameters implements Serializable {
 
     public void setEncryption(AwsEncryptionV1Parameters encryption) {
         this.encryption = encryption;
+    }
+
+    public AwsPlacementGroupV1Parameters getPlacementGroup() {
+        return placementGroup;
+    }
+
+    public void setPlacementGroup(AwsPlacementGroupV1Parameters placementGroup) {
+        this.placementGroup = placementGroup;
     }
 }
