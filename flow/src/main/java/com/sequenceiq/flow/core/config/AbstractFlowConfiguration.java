@@ -79,10 +79,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     @Override
-    public Flow createFlow(String flowId, Long stackId) {
+    public Flow createFlow(String flowId, String flowChainId, Long stackId) {
         StateMachine<S, E> sm = stateMachineFactory.getStateMachine();
         FlowEventListener<S, E> fl = (FlowEventListener<S, E>) applicationContext.getBean(FlowEventListener.class, getEdgeConfig().initState,
-                getEdgeConfig().finalState, getClass().getSimpleName(), flowId, stackId);
+                getEdgeConfig().finalState, "", getClass().getSimpleName(), flowChainId, flowId, stackId);
         Flow flow = new FlowAdapter<>(flowId, sm, new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), (Class<? extends FlowConfiguration<E>>) getClass(), fl);
         sm.addStateListener(fl);

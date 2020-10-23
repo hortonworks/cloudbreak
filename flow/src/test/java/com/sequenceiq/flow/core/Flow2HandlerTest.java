@@ -187,7 +187,7 @@ public class Flow2HandlerTest {
     @Test
     public void testNewFlow() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
-        given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(flowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);
@@ -204,7 +204,7 @@ public class Flow2HandlerTest {
     @Test
     public void testFlowCanNotBeSaved() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
-        given(flowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(flowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);
@@ -227,7 +227,7 @@ public class Flow2HandlerTest {
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
 
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(helloWorldFlowConfig);
-        given(helloWorldFlowConfig.createFlow(anyString(), anyLong())).willReturn(flow);
+        given(helloWorldFlowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);

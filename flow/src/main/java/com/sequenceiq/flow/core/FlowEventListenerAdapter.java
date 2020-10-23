@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("prototype")
 public class FlowEventListenerAdapter<S, E> extends StateMachineListenerAdapter<S, E> implements FlowEventListener<S, E> {
-    public FlowEventListenerAdapter(S initState, S finalState, String flowType, String flowId, Long stackId) {
+
+    public FlowEventListenerAdapter(S initState, S finalState, String flowChainType, String flowType,
+            String flowChainId, String flowId, Long resourceId) {
     }
 
     @Override

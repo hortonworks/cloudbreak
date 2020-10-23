@@ -34,6 +34,10 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
 
     private final S finalState;
 
+    private final String flowChainType;
+
+    private final String flowChainId;
+
     private final String flowType;
 
     private final String flowId;
@@ -44,11 +48,14 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
 
     private Exception exception;
 
-    public CDPFlowStructuredEventHandler(S initState, S finalState, String flowType, String flowId, Long resourceId) {
+    public CDPFlowStructuredEventHandler(S initState, S finalState, String flowChainType, String flowType,
+            String flowChainId, String flowId, Long resourceId) {
         this.initState = initState;
         this.finalState = finalState;
         this.flowType = flowType;
         this.flowId = flowId;
+        this.flowChainType = flowChainType;
+        this.flowChainId = flowChainId;
         this.resourceId = resourceId;
     }
 
@@ -83,7 +90,7 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
             String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
             Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
             long duration = lastStateChange == null ? 0L : currentTime - lastStateChange;
-            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, toId, eventId, duration);
+            FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, toId, eventId, duration);
             CDPStructuredEvent structuredEvent;
             if (exception == null) {
                 structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, detailed);
@@ -114,7 +121,7 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
             State<S, E> currentState = stateMachine.getState();
             Long currentTime = System.currentTimeMillis();
             String fromId = currentState != null ? currentState.getId().toString() : "unknown";
-            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, "unknown", "FLOW_CANCEL",
+            FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, "unknown", "FLOW_CANCEL",
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
             CDPStructuredEvent structuredEvent = cdpStructuredFlowEventFactory.createStructuredFlowEvent(resourceId, flowDetails, true);
             cdpDefaultStructuredEventClient.sendStructuredEvent(structuredEvent);

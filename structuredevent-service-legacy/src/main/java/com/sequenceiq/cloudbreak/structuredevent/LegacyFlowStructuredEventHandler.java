@@ -35,6 +35,10 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
 
     private final S finalState;
 
+    private final String flowChainType;
+
+    private final String flowChainId;
+
     private final String flowType;
 
     private final String flowId;
@@ -45,11 +49,14 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
 
     private Exception exception;
 
-    public LegacyFlowStructuredEventHandler(S initState, S finalState, String flowType, String flowId, Long stackId) {
+    public LegacyFlowStructuredEventHandler(S initState, S finalState, String flowChainType, String flowType,
+            String flowChainId, String flowId, Long stackId) {
         this.initState = initState;
         this.finalState = finalState;
         this.flowType = flowType;
         this.flowId = flowId;
+        this.flowChainType = flowChainType;
+        this.flowChainId = flowChainId;
         this.stackId = stackId;
     }
 
@@ -83,7 +90,7 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
             String toId = to != null ? to.getId().toString() : "unknown";
             String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
             Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
-            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, toId, eventId,
+            FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, toId, eventId,
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
             StructuredEvent structuredEvent;
             if (exception == null) {
@@ -115,7 +122,7 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
             State<S, E> currentState = stateMachine.getState();
             Long currentTime = System.currentTimeMillis();
             String fromId = currentState != null ? currentState.getId().toString() : "unknown";
-            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, "unknown", "FLOW_CANCEL",
+            FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, "unknown", "FLOW_CANCEL",
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
             StructuredEvent structuredEvent = legacyStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
             legacyStructuredEventClient.sendStructuredEvent(structuredEvent);
