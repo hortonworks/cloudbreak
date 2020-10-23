@@ -37,6 +37,7 @@ public class AwsRdsStatusLookupService {
         try {
             describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
         } catch (DBInstanceNotFoundException ex) {
+            LOGGER.debug("DB Instance does not exist: {}", ex.getMessage());
             return ExternalDatabaseStatus.DELETED;
         } catch (RuntimeException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
@@ -61,6 +62,9 @@ public class AwsRdsStatusLookupService {
         try {
             LOGGER.debug("RDS Checking if delete protection is enabled");
             describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
+        } catch (DBInstanceNotFoundException ex) {
+            LOGGER.debug("DB Instance does not exist! Therefore termination protection check is not relevant anymore: {}", ex.getMessage());
+            return false;
         } catch (RuntimeException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }
