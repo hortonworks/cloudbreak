@@ -34,6 +34,7 @@ public class SlowStartDelayStrategy implements PollingStrategy.DelayStrategy {
     private final int expectedRuntimeSeconds;
 
     private final long msToWaitRequest0;
+
     private final long msToWaitRequest1;
 
     public SlowStartDelayStrategy(int expectedRuntimeSeconds) {
