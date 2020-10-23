@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -158,11 +158,12 @@ public class AwsRdsStatusLookupServiceTest {
 
     }
 
-    @Test(expected = CloudConnectorException.class)
     public void isDeleteProtectionEnabledShouldThrowCloudConnectorExceptionInCaseOfDBInstanceNotFoundException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
         victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
-        fail("Exception should be been thrown");
+
+        //if AWS returns that DBInstance does not exist, then we shall consider this as the termination protection is not enabled
+        assertFalse(victim.isDeleteProtectionEnabled(authenticatedContext, dbStack));
     }
 
     @Test(expected = CloudConnectorException.class)
