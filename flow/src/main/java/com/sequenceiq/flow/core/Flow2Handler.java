@@ -150,7 +150,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                             acceptResult = FlowAcceptResult.runningInFlow(flowId);
                         }
                         flowParameters.setFlowId(flowId);
-                        Flow flow = flowConfig.createFlow(flowId, payload.getResourceId());
+                        Flow flow = flowConfig.createFlow(flowId, flowChainId, payload.getResourceId());
                         flow.initialize(contextParams);
                         runningFlows.put(flow, flowChainId);
                         try {
@@ -294,7 +294,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
                 try {
                     Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                    Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), payload.getResourceId());
+                    Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId());
                     runningFlows.put(flow, flowLog.getFlowChainId());
                     if (flowLog.getFlowChainId() != null) {
                         flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());

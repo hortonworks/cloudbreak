@@ -26,7 +26,7 @@ public class CDPFlowStructuredEventHandlerTest {
 
     @InjectMocks
     private final CDPFlowStructuredEventHandler<String, String> underTest = new CDPFlowStructuredEventHandler<>(
-            "init", "final", "flowType", "flowId", 0L);
+            "init", "final", "flowChainType", "flowType", "flowChainId", "flowId", 0L);
 
     @Mock
     private CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient;

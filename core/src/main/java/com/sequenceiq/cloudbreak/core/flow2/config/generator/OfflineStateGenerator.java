@@ -189,7 +189,7 @@ public class OfflineStateGenerator {
 
     private Flow initializeFlow() throws Exception {
         ((AbstractFlowConfiguration<?, ?>) flowConfiguration).init();
-        Flow flow = flowConfiguration.createFlow("", 0L);
+        Flow flow = flowConfiguration.createFlow("", "", 0L);
         flow.initialize(Map.of());
         return flow;
     }
@@ -259,8 +259,8 @@ public class OfflineStateGenerator {
         @Override
         public <T> T getBean(Class<T> requiredType, Object... args) throws BeansException {
             LegacyFlowStructuredEventHandler<?, ?> bean = new LegacyFlowStructuredEventHandler(args[FlowStructuredEventHandlerParams.INIT_STATE.ordinal()],
-                    args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
-                    (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
+                    args[FlowStructuredEventHandlerParams.FINAL_STATE.ordinal()], "", (String) args[FlowStructuredEventHandlerParams.FLOW_TYPE.ordinal()],
+                    "", (String) args[FlowStructuredEventHandlerParams.FLOW_ID.ordinal()], (Long) args[FlowStructuredEventHandlerParams.STACK_ID.ordinal()]);
 
             inject(bean, "legacyStructuredEventClient", (LegacyBaseStructuredEventClient) structuredEvent -> {
             });

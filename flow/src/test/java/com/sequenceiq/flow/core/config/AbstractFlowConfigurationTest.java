@@ -62,8 +62,9 @@ public class AbstractFlowConfigurationTest {
         MockitoAnnotations.initMocks(this);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class))).willReturn(action);
         BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventListener.class), ArgumentMatchers.eq(State.INIT),
-                ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.eq("flowId"),
-                ArgumentMatchers.anyLong())).willReturn(flowEventListener);
+                ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
+                ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
+                .willReturn(flowEventListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
@@ -74,7 +75,7 @@ public class AbstractFlowConfigurationTest {
         edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
         Mockito.verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
-        flow = underTest.createFlow("flowId", 0L);
+        flow = underTest.createFlow("flowId", "flowChainId", 0L);
         flow.initialize(Map.of());
     }
 
@@ -188,7 +189,7 @@ public class AbstractFlowConfigurationTest {
 
         @Override
         public Event[] getInitEvents() {
-            return new Event[]{ Event.START };
+            return new Event[]{Event.START};
         }
 
         @Override
