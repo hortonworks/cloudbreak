@@ -144,8 +144,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
         return legacyStructuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
     }
 
-    public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceType, String resourceCrn) {
-        return legacyStructuredEventRepository.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceType, resourceCrn);
+    public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceCrn) {
+        return legacyStructuredEventRepository.findByWorkspaceAndResourceCrn(workspace, resourceCrn);
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId) {

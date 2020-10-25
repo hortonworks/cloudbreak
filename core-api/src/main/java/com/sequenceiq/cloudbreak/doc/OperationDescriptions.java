@@ -177,9 +177,11 @@ public class OperationDescriptions {
     }
 
     public static class AuditOpDescription {
-        public static final String LIST_IN_WORKSPACE = "List audit events for the given workspace";
+        public static final String LIST_IN_WORKSPACE = "List audit events for the given workspace. Please use the API filter by resource crn, " +
+                "because the resource type and id combination is deprecated.";
         public static final String GET_BY_WORKSPACE = "Get audit event in workspace by id";
-        public static final String LIST_IN_WORKSPACE_ZIP = "List audit events for the given workspace in zip file";
+        public static final String LIST_IN_WORKSPACE_ZIP = "List audit events for the given workspace in zip file. Please use the API filter " +
+                "by resource crn, because the resource type and id combination is deprecated.";
     }
 
     public static class InfoOpDescription {

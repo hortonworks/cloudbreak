@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.service.audit;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,9 +24,9 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.db.LegacyStructuredEventDBService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -157,5 +160,43 @@ public class AuditEventServiceTest {
 
         verify(legacyStructuredEventDBService, times(1)).findByWorkspaceIdAndId(TEST_DEFAULT_ORG_ID, TEST_AUDIT_ID);
         verify(converterUtil, times(0)).convert(any(StructuredEventEntity.class), AuditEventV4Response.class);
+    }
+
+    @Test
+    public void testGetEventsForUserWithTypeAndResourceIdByWorkspaceWhenResourceCrnIsNull() {
+        Workspace workspace = new Workspace();
+        long resourceId = 0L;
+
+        when(legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, null, resourceId)).thenReturn(Collections.emptyList());
+
+        underTest.getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, null, resourceId, null);
+
+        verify(legacyStructuredEventDBService).findByWorkspaceAndResourceTypeAndResourceId(workspace, null, resourceId);
+    }
+
+    @Test
+    public void testGetEventsForUserWithTypeAndResourceIdByWorkspaceWhenResourceCrnIsEmpty() {
+        Workspace workspace = new Workspace();
+        long resourceId = 0L;
+
+        when(legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceId(workspace, null, resourceId)).thenReturn(Collections.emptyList());
+
+        underTest.getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, null, resourceId, "");
+
+        verify(legacyStructuredEventDBService).findByWorkspaceAndResourceTypeAndResourceId(workspace, null, resourceId);
+    }
+
+    @Test
+    public void testGetEventsForUserWithTypeAndResourceIdByWorkspaceWhenResourceCrnIsNotEmpty() {
+        Workspace workspace = new Workspace();
+        long resourceId = 0L;
+        String resourceCrn = "crn";
+
+        when(legacyStructuredEventDBService.findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceCrn)).thenReturn(Collections.emptyList());
+
+        underTest.getEventsForUserWithTypeAndResourceIdByWorkspace(workspace, null, resourceId, resourceCrn);
+
+        verify(legacyStructuredEventDBService, never()).findByWorkspaceAndResourceTypeAndResourceId(workspace, null, resourceId);
+        verify(legacyStructuredEventDBService).findByWorkspaceAndResourceTypeAndResourceCrn(workspace, resourceCrn);
     }
 }

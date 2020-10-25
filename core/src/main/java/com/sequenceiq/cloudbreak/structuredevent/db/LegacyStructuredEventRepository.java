@@ -28,7 +28,7 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
 
     List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId);
 
-    List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceType, String resourceCrn);
+    List<StructuredEventEntity> findByWorkspaceAndResourceCrn(Workspace workspace, String resourceCrn);
 
     List<StructuredEventEntity> findByWorkspaceAndEventType(Workspace workspace, StructuredEventType eventType);
 
