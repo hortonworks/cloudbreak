@@ -75,9 +75,6 @@ public class DistroXV1RequestToStackV4RequestConverter {
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
-        if (environment != null && environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-            throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
-        }
         StackV4Request request = new StackV4Request();
         SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
         request.setName(source.getName());
