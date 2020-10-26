@@ -210,6 +210,9 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     }
                     return dto;
                 })
+                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
+                .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
+                .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
     }
 
