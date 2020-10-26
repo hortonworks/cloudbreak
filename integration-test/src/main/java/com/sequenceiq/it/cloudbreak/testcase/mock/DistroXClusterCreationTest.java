@@ -3,9 +3,12 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpMethod;
@@ -22,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -45,6 +49,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
+
+    private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
 
@@ -72,6 +78,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private EnvironmentTestClient environmentTestClient;
 
     @Inject
     private DatahubAuditGrpcServiceAssertion auditGrpcServiceAssertion;
@@ -116,6 +125,34 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(distroXClient.forceDelete(), withoutLogError())
                 .await(STACK_DELETED)
                 .then(auditGrpcServiceAssertion::delete)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "a stopped environment",
+            when = "a DistroX creation request sent",
+            then = "its creation should not be started due to the unavailability of the environment")
+    public void testWhenEnvIsStoppedUnableToCreateDistroX(MockedTestContext testContext) {
+        givenAnEnvironmentInStoppedState(testContext)
+                .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
+                .given(DIX_IMG_KEY, DistroXImageTestDto.class)
+                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageId(IMAGE_CATALOG_ID)
+                .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
+                .withBlueprintName(getBlueprintName(testContext))
+                .withValidateBlueprint(false)
+                .withClouderaManager(CM_FOR_DISTRO_X)
+                .given(DistroXTestDto.class)
+                .withGatewayPort(testContext.getSparkServer().getPort())
+                .withCluster(CLUSTER_KEY)
+                .withImageSettings(DIX_IMG_KEY)
+                .withNetwork(DIX_NET_KEY)
+                .when(distroXClient.postStackForBlueprint())
+                .then(DistroXClusterCreationTest::distroxClusterGeneratedBlueprintCheck)
+                .when(distroXClient.create(), key("error"))
+                .expect(BadRequestException.class, key("error").withExpectedMessage("Environment state is ENV_STOPPED instead of AVAILABLE"))
                 .validate();
     }
 
@@ -431,6 +468,13 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             throw new TestFailException("Application tag 'Cloudera-Service-Type' needs to exist for DistroX cluster");
         }
         return testDto;
+    }
+
+    private EnvironmentTestDto givenAnEnvironmentInStoppedState(MockedTestContext testContext) {
+        return testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.stop())
+                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
     }
 
     private SdxCloudStorageRequest testStorage() {

@@ -28,17 +28,17 @@ import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -78,6 +78,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClust
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliRequestConverter;
+import com.sequenceiq.distrox.v1.distrox.service.DistroxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
@@ -125,6 +126,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Inject
     private StackOperationService stackOperationService;
 
+    @Inject
+    private DistroxService distroxService;
+
     @Override
     @DisableCheckPermissions
     public StackViewV4Responses list(String environmentName, String environmentCrn) {
@@ -142,10 +146,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(path = "cluster.blueprintName", type = NAME, action = DESCRIBE_CLUSTER_TEMPLATE)
     @CheckPermissionByRequestProperty(path = "allRecipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
     public StackV4Response post(@Valid @RequestObject DistroXV1Request request) {
-        return stackOperations.post(
-                workspaceService.getForCurrentUser().getId(),
-                stackRequestConverter.convert(request),
-                true);
+        return distroxService.post(request);
     }
 
     @Override
