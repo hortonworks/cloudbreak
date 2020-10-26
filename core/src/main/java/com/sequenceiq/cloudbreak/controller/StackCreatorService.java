@@ -277,6 +277,7 @@ public class StackCreatorService {
 
         return response;
     }
+
     private void validateStackVersion(StackV4Request stackRequest, Image image) {
         stackRuntimeVersionValidator.validate(stackRequest, image);
     }
