@@ -24,6 +24,8 @@ public class AzureManagedImageServiceTest {
 
     private static final String RESOURCE_GROUP = "resource-group";
 
+    private static final String IMAGE_NAME_WITH_REGION = "image-name-with-region";
+
     private static final String IMAGE_NAME = "image-name";
 
     @InjectMocks
@@ -37,24 +39,25 @@ public class AzureManagedImageServiceTest {
 
     @Test
     public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenExistsOnProviderSide() {
+        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
         VirtualMachineCustomImage image = Mockito.mock(VirtualMachineCustomImage.class);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(image);
 
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME)).thenReturn(image);
-
-        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(RESOURCE_GROUP, IMAGE_NAME, azureClient);
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
 
         assertTrue(actual.isPresent());
         assertEquals(image, actual.get());
-        verify(azureClient).findImage(RESOURCE_GROUP, IMAGE_NAME);
+        verify(azureClient).findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION);
     }
 
     @Test
-    public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenDoesNotExistsOnProviderSide() {
-        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME)).thenReturn(null);
+    public void testGetVirtualMachineCustomImageShouldReturnTheImageWhenDoesNotExistOnProviderSide() {
+        AzureImageInfo azureImageInfo = new AzureImageInfo(IMAGE_NAME_WITH_REGION, IMAGE_NAME, "imageId", "region", RESOURCE_GROUP);
+        when(azureClient.findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION)).thenReturn(null);
 
-        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(RESOURCE_GROUP, IMAGE_NAME, azureClient);
+        Optional<VirtualMachineCustomImage> actual = underTest.findVirtualMachineCustomImage(azureImageInfo, azureClient);
 
         assertTrue(actual.isEmpty());
-        verify(azureClient).findImage(RESOURCE_GROUP, IMAGE_NAME);
+        verify(azureClient).findImage(RESOURCE_GROUP, IMAGE_NAME_WITH_REGION);
     }
 }

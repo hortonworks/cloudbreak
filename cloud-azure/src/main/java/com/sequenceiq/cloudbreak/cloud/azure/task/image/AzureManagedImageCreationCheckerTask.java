@@ -35,7 +35,7 @@ public class AzureManagedImageCreationCheckerTask extends PollBooleanStateTask {
 
     @Override
     protected Boolean doCall() {
-        LOGGER.info("Waiting for managed image to be created: {}", context.getImageName());
+        LOGGER.info("Waiting for managed image to be created: {}", context.getAzureImageInfo().getImageNameWithRegion());
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = findVirtualMachineCustomImage();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.info("Managed image creation has been finished.");
@@ -47,6 +47,6 @@ public class AzureManagedImageCreationCheckerTask extends PollBooleanStateTask {
     }
 
     private Optional<VirtualMachineCustomImage> findVirtualMachineCustomImage() {
-        return azureManagedImageService.findVirtualMachineCustomImage(context.getResourceGroupName(), context.getImageName(), context.getAzureClient());
+        return azureManagedImageService.findVirtualMachineCustomImage(context.getAzureImageInfo(), context.getAzureClient());
     }
 }
