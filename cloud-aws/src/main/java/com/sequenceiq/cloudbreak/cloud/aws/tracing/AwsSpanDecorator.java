@@ -7,8 +7,6 @@ import java.util.Map;
 
 import com.amazonaws.Request;
 import com.amazonaws.Response;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
 import io.opentracing.Span;
 import io.opentracing.tag.Tags;
@@ -25,7 +23,6 @@ class AwsSpanDecorator {
         Tags.HTTP_METHOD.set(span, request.getHttpMethod().name());
         Tags.HTTP_URL.set(span, request.getEndpoint().toString());
         Tags.PEER_SERVICE.set(span, request.getServiceName());
-        span.setTag(TracingUtil.HEADERS, Json.silent(request.getHeaders()).getValue());
     }
 
     static void onResponse(Response response, Span span) {
