@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.tracing;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.client.ClientRequestContext;
@@ -28,6 +30,8 @@ import io.opentracing.util.GlobalTracer;
 
 @Configuration
 public class TracingConfiguration {
+
+    private static final Set<String> ALLOWED_TRACING_HEADERS = Set.of("uber-trace-id", "cdp-destination-api", "cdp-caller-id");
 
     private final Tracer tracer;
 
@@ -66,32 +70,36 @@ public class TracingConfiguration {
 
         @Override
         public void decorateRequest(ContainerRequestContext requestContext, Span span) {
-            MDCBuilder.addTraceId(span.context().toTraceId());
-            MDCBuilder.addSpanId(span.context().toSpanId());
-            TracingUtil.setTagsFromMdc(span);
-            span.setTag(TracingUtil.HEADERS, Json.silent(requestContext.getHeaders()).getValue());
+            doDecorateRequest(new HashMap<>(requestContext.getHeaders()), span);
         }
 
         @Override
         public void decorateResponse(ContainerResponseContext responseContext, Span span) {
-            Response.StatusType statusInfo = responseContext.getStatusInfo();
-            if (statusInfo.getFamily() != Response.Status.Family.SUCCESSFUL) {
-                span.setTag(TracingUtil.ERROR, true);
-                span.log(Map.of(TracingUtil.RESPONSE_CODE, statusInfo.getStatusCode(), "reasonPhrase", statusInfo.getReasonPhrase()));
-            }
+            doDecorateResponse(span, responseContext.getStatusInfo());
         }
 
         @Override
         public void decorateRequest(ClientRequestContext requestContext, Span span) {
-            MDCBuilder.addTraceId(span.context().toTraceId());
-            MDCBuilder.addSpanId(span.context().toSpanId());
-            TracingUtil.setTagsFromMdc(span);
-            span.setTag(TracingUtil.HEADERS, Json.silent(requestContext.getHeaders()).getValue());
+            doDecorateRequest(new HashMap<>(requestContext.getHeaders()), span);
         }
 
         @Override
         public void decorateResponse(ClientResponseContext responseContext, Span span) {
-            Response.StatusType statusInfo = responseContext.getStatusInfo();
+            doDecorateResponse(span, responseContext.getStatusInfo());
+        }
+
+        private void doDecorateRequest(Map<String, Object> headers, Span span) {
+            MDCBuilder.addTraceId(span.context().toTraceId());
+            MDCBuilder.addSpanId(span.context().toSpanId());
+            TracingUtil.setTagsFromMdc(span);
+            headers.keySet().retainAll(ALLOWED_TRACING_HEADERS);
+            span.setTag(TracingUtil.HEADERS, Json.silent(headers).getValue());
+        }
+
+        private void doDecorateResponse(Span span, Response.StatusType statusInfo2) {
+            MDCBuilder.addTraceId(span.context().toTraceId());
+            MDCBuilder.addSpanId(span.context().toSpanId());
+            Response.StatusType statusInfo = statusInfo2;
             if (statusInfo.getFamily() != Response.Status.Family.SUCCESSFUL) {
                 span.setTag(TracingUtil.ERROR, true);
                 span.log(Map.of(TracingUtil.RESPONSE_CODE, statusInfo.getStatusCode(), "reasonPhrase", statusInfo.getReasonPhrase()));

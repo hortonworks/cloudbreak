@@ -9,7 +9,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.squareup.okhttp.Interceptor;
 import com.squareup.okhttp.Request;
@@ -59,7 +58,6 @@ public class CmOkHttpTracingInterceptor implements Interceptor {
         span.setTag(TracingUtil.COMPONENT, CLOUDERA_MANAGER);
         span.setTag(TracingUtil.URL, request.url().toString());
         span.setTag(TracingUtil.HTTP_METHOD, request.method());
-        span.setTag(TracingUtil.HEADERS, Json.silent(chain.request().headers().toMultimap()).getValue());
         TracingUtil.setTagsFromMdc(span);
         return span;
     }
