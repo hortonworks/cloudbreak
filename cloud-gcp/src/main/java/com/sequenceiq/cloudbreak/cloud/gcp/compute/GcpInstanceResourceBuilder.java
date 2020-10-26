@@ -145,6 +145,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        tagList.add(GcpStackUtil.getGroupTypeTag(group.getType()));
         cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         labels.putAll(cloudStack.getTags());
@@ -158,7 +159,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items sshMetaData = new Items();
         sshMetaData.setKey("ssh-keys");
-        sshMetaData.setValue(group.getInstanceAuthentication().getLoginUserName() + ':' + group.getInstanceAuthentication().getPublicKey());
+        sshMetaData.setValue(group.getInstanceAuthentication().getPublicKey() + " " + group.getInstanceAuthentication().getLoginUserName());
 
         Items blockProjectWideSsh = new Items();
         blockProjectWideSsh.setKey("block-project-ssh-keys");

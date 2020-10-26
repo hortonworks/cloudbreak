@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -23,7 +24,6 @@ import com.google.api.services.compute.ComputeRequest;
 import com.google.api.services.compute.model.Firewall;
 import com.google.api.services.compute.model.Firewall.Allowed;
 import com.google.api.services.compute.model.Operation;
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -60,8 +60,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             throws Exception {
         String projectId = context.getProjectId();
 
-        ComputeRequest<Operation> firewallRequest = StringUtils.isNotBlank(security.getCloudSecurityId()) && isExistingNetwork(network)
-                ? updateExistingFirewallForNewTargets(context, auth, group, security)
+        ComputeRequest<Operation> firewallRequest = StringUtils.isNotBlank(group.getSecurity().getCloudSecurityId()) && isExistingNetwork(network)
+                ? updateExistingFirewallForNewTargets(context, auth, group)
                 : createNewFirewallRule(context, auth, group, network, security, buildableResource, projectId);
         try {
             Operation operation = firewallRequest.execute();
@@ -74,25 +74,27 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         }
     }
 
-    private Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group, Security security)
+    private Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group)
             throws java.io.IOException {
-        Firewall firewall = context.getCompute().firewalls().get(context.getProjectId(), security.getCloudSecurityId()).execute();
+        Firewall firewall = context.getCompute().firewalls().get(context.getProjectId(), group.getSecurity().getCloudSecurityId()).execute();
+        String groupTypeTag = GcpStackUtil.getGroupTypeTag(group.getType());
         if (firewall.getTargetTags() == null) {
-            firewall.setTargetTags(Lists.newArrayListWithCapacity(1));
+            firewall.setTargetTags(List.of(groupTypeTag));
+        } else if (firewall.getTargetTags().stream().filter(e -> e.equals(groupTypeTag)).collect(Collectors.toSet()).isEmpty()) {
+            firewall.getTargetTags().add(groupTypeTag);
         }
-        firewall.getTargetTags().add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
         return context.getCompute().firewalls().update(context.getProjectId(), firewall.getName(), firewall);
     }
 
     private ComputeRequest<Operation> createNewFirewallRule(GcpContext context, AuthenticatedContext auth, Group group, Network network, Security security,
             CloudResource buildableResource, String projectId) throws IOException {
-        List<String> sourceRanges = getSourceRanges(security);
+        List<String> sourceRanges = getSourceRanges(group);
 
         Firewall firewall = new Firewall();
         firewall.setSourceRanges(sourceRanges);
         firewall.setDescription(description());
 
-        List<Allowed> allowedRules = new ArrayList<>(createAllowedRules(security));
+        List<Allowed> allowedRules = new ArrayList<>(createAllowedRules(group));
 
         firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
         firewall.setAllowed(allowedRules);
@@ -116,7 +118,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         String resourceName = resource.getName();
         try {
             Firewall fireWall = compute.firewalls().get(projectId, resourceName).execute();
-            List<String> sourceRanges = getSourceRanges(security);
+            List<String> sourceRanges = getSourceRanges(group);
             fireWall.setSourceRanges(sourceRanges);
             Operation operation = compute.firewalls().update(projectId, resourceName, fireWall).execute();
             CloudResource cloudResource = createOperationAwareCloudResource(resource, operation);
@@ -147,8 +149,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         return ORDER;
     }
 
-    private List<String> getSourceRanges(Security security) {
-        List<SecurityRule> rules = security.getRules();
+    private List<String> getSourceRanges(Group group) {
+        List<SecurityRule> rules = group.getSecurity().getRules();
         List<String> sourceRanges = new ArrayList<>(rules.size());
         for (SecurityRule securityRule : rules) {
             sourceRanges.add(securityRule.getCidr());
@@ -156,9 +158,9 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
         return sourceRanges;
     }
 
-    private Collection<Allowed> createAllowedRules(Security security) {
+    private Collection<Allowed> createAllowedRules(Group group) {
         Collection<Allowed> rules = new LinkedList<>();
-        List<SecurityRule> securityRules = security.getRules();
+        List<SecurityRule> securityRules = group.getSecurity().getRules();
         for (SecurityRule securityRule : securityRules) {
             Allowed rule = new Allowed();
             rule.setIPProtocol(securityRule.getProtocol());
