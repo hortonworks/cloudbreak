@@ -26,6 +26,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -388,6 +389,56 @@ public class StackCreatorServiceTest {
 
         privateIdStart = 5L;
         validateInstanceMetadataPrivateId("worker", 3, privateIdStart, hostGroupInstances.get("worker"));
+    }
+
+    @Test
+    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndNotDistroXRequest() {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+
+        StackType actual = underTest.determineStackTypeBasedOnTheUsedApi(stack, false);
+
+        assertEquals(StackType.DATALAKE, actual);
+    }
+
+    @Test
+    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenDatalakeStackTypeAndDistroXRequest() {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+
+        StackType actual = underTest.determineStackTypeBasedOnTheUsedApi(stack, true);
+
+        assertEquals(StackType.DATALAKE, actual);
+    }
+
+    @Test
+    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndDistroXRequest() {
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        StackType actual = underTest.determineStackTypeBasedOnTheUsedApi(stack, true);
+
+        assertEquals(StackType.WORKLOAD, actual);
+    }
+
+    @Test
+    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenWorkloadStackTypeAndNotDistroXRequest() {
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        StackType actual = underTest.determineStackTypeBasedOnTheUsedApi(stack, false);
+
+        assertEquals(StackType.LEGACY, actual);
+    }
+
+    @Test
+    public void testDetermineStackTypeBasedOnTheUsedApiShouldReturnWhenStackTypeIsNullAndNotDistroXRequest() {
+        Stack stack = new Stack();
+        stack.setType(null);
+
+        StackType actual = underTest.determineStackTypeBasedOnTheUsedApi(stack, false);
+
+        assertEquals(StackType.LEGACY, actual);
     }
 
     private void validateInstanceMetadataPrivateId(String hostGroup, int nodeCount,

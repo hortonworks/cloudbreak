@@ -57,6 +57,15 @@ public class AzureVirtualMachineService {
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, VirtualMachine> getVmsFromAzureAndFillStatuses(AuthenticatedContext ac, List<CloudInstance> cloudInstances,
             List<CloudVmInstanceStatus> statuses) {
+        return getUpdatedVMs(ac, cloudInstances, statuses);
+    }
+
+    public Map<String, VirtualMachine> getVmsFromAzureAndFillStatusesWithoutRetry(AuthenticatedContext ac, List<CloudInstance> cloudInstances,
+            List<CloudVmInstanceStatus> statuses) {
+        return getUpdatedVMs(ac, cloudInstances, statuses);
+    }
+
+    private Map<String, VirtualMachine> getUpdatedVMs(AuthenticatedContext ac, List<CloudInstance> cloudInstances, List<CloudVmInstanceStatus> statuses) {
         Map<String, VirtualMachine> virtualMachines = getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(ac, cloudInstances, statuses);
         LOGGER.info("VirtualMachines from Azure: {}", virtualMachines.keySet());
         refreshInstanceViews(virtualMachines);

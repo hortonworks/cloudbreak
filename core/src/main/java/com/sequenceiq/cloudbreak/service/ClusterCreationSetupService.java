@@ -81,13 +81,13 @@ public class ClusterCreationSetupService {
     private CloudStorageConverter cloudStorageConverter;
 
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace,
-        DetailedEnvironmentResponse environment, boolean distroxRequest) {
-        validate(request, null, stack, user, workspace, environment, distroxRequest);
+        DetailedEnvironmentResponse environment) {
+        validate(request, null, stack, user, workspace, environment);
     }
 
     @Measure(ClusterCreationSetupService.class)
     public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
-            Workspace workspace, DetailedEnvironmentResponse environment, boolean distroxRequest) {
+            Workspace workspace, DetailedEnvironmentResponse environment) {
         MdcContext.builder().userCrn(user.getUserCrn()).tenant(user.getTenant().getName()).buildMdc();
         CloudCredential credential = cloudCredential;
         if (credential == null) {

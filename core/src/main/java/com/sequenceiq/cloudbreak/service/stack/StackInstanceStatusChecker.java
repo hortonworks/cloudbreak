@@ -63,7 +63,7 @@ public class StackInstanceStatusChecker {
             CloudContext cloudContext, CloudCredential cloudCredential) {
         List<CloudVmInstanceStatus> instanceStatuses;
         try {
-            instanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(cloudCredential, cloudContext, cloudInstances);
+            instanceStatuses = instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(cloudCredential, cloudContext, cloudInstances);
         } catch (RuntimeException e) {
             instanceStatuses = cloudInstances.stream()
                     .map(instance -> new CloudVmInstanceStatus(instance, InstanceStatus.UNKNOWN))

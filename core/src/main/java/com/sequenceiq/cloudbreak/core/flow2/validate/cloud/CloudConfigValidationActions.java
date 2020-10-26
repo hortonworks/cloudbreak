@@ -131,8 +131,9 @@ public class CloudConfigValidationActions {
                         validationBuilder);
                 parametersValidator.waitResult(parametersValidationRequest, validationBuilder);
 
-                dataLakeValidator.validate(stack, validationBuilder);
-
+                if (!StackType.LEGACY.equals(stack.getType())) {
+                    dataLakeValidator.validate(stack, validationBuilder);
+                }
 
                 environmentValidator.validate(
                         stack,
@@ -144,11 +145,17 @@ public class CloudConfigValidationActions {
                 ValidationResult validationResult = validationBuilder.build();
                 if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
                     LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
+                    StackFailureEvent failureEvent = new StackFailureEvent(CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FAILED_EVENT.selector(),
+                            payload.getResourceId(),
+                            new IllegalStateException(validationResult.getFormattedErrors()));
                     sendEvent(context,
                             CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FAILED_EVENT.selector(),
-                            new IllegalStateException(validationResult.getFormattedErrors()));
+                            failureEvent);
+
+                } else {
+                    LOGGER.debug("Stack validation has been finished without any error.");
+                    sendEvent(context, CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FINISHED_EVENT.selector(), payload);
                 }
-                sendEvent(context, CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FINISHED_EVENT.selector(), payload);
             }
 
             @Override
@@ -173,9 +180,10 @@ public class CloudConfigValidationActions {
             }
 
             @Override
-            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackUpdaterService.updateStatus(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
-                        ResourceEvent.CLOUD_CONFIG_VALIDATION_FAILED, payload.getException().getMessage());
+            protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                String statusReason = payload.getException().getMessage();
+                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
+                        ResourceEvent.CLOUD_CONFIG_VALIDATION_FAILED, statusReason, statusReason);
                 sendEvent(context);
             }
 

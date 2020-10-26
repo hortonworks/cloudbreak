@@ -59,6 +59,17 @@ public interface InstanceConnector {
     List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms);
 
     /**
+     * Invoked to check whether the instances have already reached a StatusGroup.PERMANENT state. (Retry logic won't be used in this case)
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param vms                  the VM instances for which the status needs to be checked
+     * @return status of instances
+     */
+    default List<CloudVmInstanceStatus> checkWithoutRetry(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+        return check(authenticatedContext, vms);
+    }
+
+    /**
      * Gets the Consol output of a particular VM, useful for debugging and also required for setting up a secure connection between Cloudbreak and VM instances
      * since the SSH fingerprint is written into the console output.
      *

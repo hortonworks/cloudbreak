@@ -140,7 +140,6 @@ dependencies {
   compile (group: 'com.hierynomus',                name: 'sshj',                           version: '0.27.0') {
     exclude group: "net.i2p.crypto"
   }
-  testCompile group: 'org.reflections',           name: 'reflections',                    version:  '0.9.11'
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
   runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }

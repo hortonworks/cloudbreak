@@ -24,12 +24,8 @@ public class CloudConfigValidationFlowConfig extends AbstractFlowConfiguration<C
     private static final List<Transition<CloudConfigValidationState, CloudConfigValidationEvent>> TRANSITIONS =
             new Builder<CloudConfigValidationState, CloudConfigValidationEvent>()
             .defaultFailureEvent(VALIDATE_CLOUD_CONFIG_FAILED_EVENT)
-            .from(INIT_STATE)
-            .to(VALIDATE_CLOUD_CONFIG_STATE)
-            .event(VALIDATE_CLOUD_CONFIG_EVENT).defaultFailureEvent()
-            .from(VALIDATE_CLOUD_CONFIG_STATE)
-            .to(FINAL_STATE)
-            .event(VALIDATE_CLOUD_CONFIG_FINISHED_EVENT).defaultFailureEvent()
+            .from(INIT_STATE).to(VALIDATE_CLOUD_CONFIG_STATE).event(VALIDATE_CLOUD_CONFIG_EVENT).defaultFailureEvent()
+            .from(VALIDATE_CLOUD_CONFIG_STATE).to(FINAL_STATE).event(VALIDATE_CLOUD_CONFIG_FINISHED_EVENT).defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<CloudConfigValidationState, CloudConfigValidationEvent> EDGE_CONFIG =
