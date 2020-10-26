@@ -114,7 +114,7 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, true, repairableHostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, false, repairableHostGroups);
     }
 
     public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly, boolean restartServices) {
