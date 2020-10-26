@@ -146,7 +146,13 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             if (collect.isEmpty()) {
                 subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
             } else {
-                subnet = compute.subnetworks().get(projectId, region, subnetId).execute();
+                subnet = collect
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
+            }
+            if (subnet == null) {
+                throw new GcpResourceException(String.format("Subnet with id %s did not found.", subnetId));
             }
             String ipCidrRange = subnet.getIpCidrRange();
             return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
