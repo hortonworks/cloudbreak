@@ -531,9 +531,4 @@ public class AzureUtils {
         }
     }
 
-    public String getImageNameFromConnectionString(String connectionString) {
-        int begin = connectionString.lastIndexOf('/') + 1;
-        int end = connectionString.contains("?") ? connectionString.indexOf('?') : connectionString.length();
-        return connectionString.substring(begin, end);
-    }
 }

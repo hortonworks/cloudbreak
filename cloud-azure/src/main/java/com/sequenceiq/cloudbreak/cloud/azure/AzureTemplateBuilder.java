@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
@@ -50,6 +51,9 @@ public class AzureTemplateBuilder {
     private AzureUtils azureUtils;
 
     @Inject
+    private CustomVMImageNameProvider customVMImageNameProvider;
+
+    @Inject
     private AzureStorage azureStorage;
 
     @Inject
@@ -62,7 +66,7 @@ public class AzureTemplateBuilder {
             CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
-            String imageName = azureUtils.getImageNameFromConnectionString(imageUrl);
+            String imageName = customVMImageNameProvider.getImageNameFromConnectionString(imageUrl);
 
             Network network = cloudStack.getNetwork();
             Map<String, Object> model = new HashMap<>();

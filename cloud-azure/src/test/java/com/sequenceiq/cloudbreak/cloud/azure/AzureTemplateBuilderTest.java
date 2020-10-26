@@ -42,6 +42,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
+import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -102,6 +103,9 @@ public class AzureTemplateBuilderTest {
 
     @Mock
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
+
+    @Mock
+    private CustomVMImageNameProvider customVMImageNameProvider;
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -194,7 +198,7 @@ public class AzureTemplateBuilderTest {
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
                 ImmutableMap.of("existingSubnet", 100L));
         reset(azureUtils);
-        when(azureUtils.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
+        when(customVMImageNameProvider.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
     }
 
     @Test

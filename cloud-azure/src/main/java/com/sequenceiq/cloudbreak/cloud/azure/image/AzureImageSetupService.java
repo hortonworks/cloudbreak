@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.storage.blob.CopyState;
@@ -20,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -53,17 +51,18 @@ public class AzureImageSetupService {
     private AzureManagedImageService azureManagedImageService;
 
     @Inject
-    private CustomVMImageNameProvider customVMImageNameProvider;
+    private AzureImageInfoService azureImageInfoService;
 
     @Inject
-    private AzureUtils azureUtils;
+    private CustomVMImageNameProvider customVMImageNameProvider;
 
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         CloudContext cloudContext = ac.getCloudContext();
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
 
-        Optional<VirtualMachineCustomImage> customImage = findVirtualMachineCustomImage(image, imageResourceGroupName, client, ac);
+        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
+        Optional<VirtualMachineCustomImage> customImage = azureManagedImageService.findVirtualMachineCustomImage(azureImageInfo, client);
         if (customImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD copy check!", customImage.get().id(),
                     imageResourceGroupName);
@@ -71,10 +70,9 @@ public class AzureImageSetupService {
         }
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, cloudContext, stack);
-        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
-            boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, imageName);
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, azureImageInfo.getImageName());
+            boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName());
             if (copyState == null && storageContainsImage) {
                 LOGGER.debug("The copy has been finished because the storage account already contains the image.");
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
@@ -105,16 +103,6 @@ public class AzureImageSetupService {
         }
     }
 
-    private Optional<VirtualMachineCustomImage> findVirtualMachineCustomImage(Image image, String imageResourceGroupName, AzureClient client,
-            AuthenticatedContext ac) {
-        String imageName = customVMImageNameProvider.get(ac.getCloudContext().getLocation().getRegion().getRegionName(), image.getImageName());
-        return azureManagedImageService.findVirtualMachineCustomImage(imageResourceGroupName, imageName, client);
-    }
-
-    private boolean isCustomImageAvailable(AzureImage customImage) {
-        return customImage != null && !StringUtils.isEmpty(customImage.getId());
-    }
-
     private boolean isCopyStatusFailed(CopyState copyState) {
         return CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus());
     }
@@ -125,10 +113,11 @@ public class AzureImageSetupService {
         String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
 
-        AzureImage customImage = azureImageService.getCustomImageId(imageResourceGroupName, image.getImageName(), ac, false, client);
-        if (isCustomImageAvailable(customImage)) {
+        AzureImageInfo azureImageInfo = azureImageInfoService.getImageInfo(imageResourceGroupName, image.getImageName(), ac, client);
+        Optional<AzureImage> foundImage = azureImageService.findImage(azureImageInfo, client, ac);
+        if (foundImage.isPresent()) {
             LOGGER.info("Custom image with id {} already exists in the target resource group {}, bypassing VHD check!",
-                    customImage.getId(), imageResourceGroupName);
+                    foundImage.get().getId(), imageResourceGroupName);
             return;
         }
 
@@ -136,11 +125,11 @@ public class AzureImageSetupService {
         createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
         azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
         azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
-        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
-        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, imageName)) {
+        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName())) {
             try {
                 LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), imageName);
+                client.copyImageBlobInStorageContainer(
+                        imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Something happened during start image copy.", e);
             }
@@ -152,7 +141,7 @@ public class AzureImageSetupService {
     private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String imageName) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
-            if (azureUtils.getImageNameFromConnectionString(listBlobItem.getUri().getPath()).equals(imageName)) {
+            if (customVMImageNameProvider.getImageNameFromConnectionString(listBlobItem.getUri().getPath()).equals(imageName)) {
                 LOGGER.info("The storage account {} in {} resource group contains the requested image {}", storageName, resourceGroupName, imageName);
                 return true;
             }
