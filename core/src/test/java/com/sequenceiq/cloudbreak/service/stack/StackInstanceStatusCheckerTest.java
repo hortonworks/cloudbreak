@@ -76,6 +76,7 @@ class StackInstanceStatusCheckerTest {
     void shouldNotQueryWithEmptyInstances() {
         underTest.queryInstanceStatuses(stack, instanceMetaData);
 
+        verify(instanceStateQuery, never()).getCloudVmInstanceStatusesWithoutRetry(any(), any(), any());
         verify(instanceStateQuery, never()).getCloudVmInstanceStatuses(any(), any(), any());
     }
 
@@ -86,19 +87,21 @@ class StackInstanceStatusCheckerTest {
 
         underTest.queryInstanceStatuses(stack, instanceMetaData);
 
-        verify(instanceStateQuery).getCloudVmInstanceStatuses(any(), any(), any());
+        verify(instanceStateQuery).getCloudVmInstanceStatusesWithoutRetry(any(), any(), any());
+        verify(instanceStateQuery, never()).getCloudVmInstanceStatuses(any(), any(), any());
     }
 
     @Test
     void shouldReportUnknownStatusWhenStatusQueryFails() {
         setUpCredentials();
         instanceMetaData.add(new InstanceMetaData());
-        when(instanceStateQuery.getCloudVmInstanceStatuses(any(), any(), any())).thenThrow(RuntimeException.class);
+        when(instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(any(), any(), any())).thenThrow(RuntimeException.class);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = underTest.queryInstanceStatuses(stack, instanceMetaData);
 
         Assertions.assertThat(cloudVmInstanceStatuses)
                 .allMatch(cloudVmInstanceStatus -> cloudVmInstanceStatus.getStatus().equals(InstanceStatus.UNKNOWN));
+        verify(instanceStateQuery, never()).getCloudVmInstanceStatuses(any(), any(), any());
     }
 
 }

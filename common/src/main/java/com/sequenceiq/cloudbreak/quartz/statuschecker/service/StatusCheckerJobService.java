@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 
 @Service
 public class StatusCheckerJobService {
@@ -116,7 +116,7 @@ public class StatusCheckerJobService {
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(properties.getIntervalInSeconds())
                         .repeatForever()
-                        .withMisfireHandlingInstructionIgnoreMisfires())
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
                 .build();
     }
 

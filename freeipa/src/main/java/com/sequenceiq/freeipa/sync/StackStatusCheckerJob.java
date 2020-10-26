@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
+@DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
 
@@ -51,7 +52,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private AutoSyncConfig autoSyncConfig;
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected void executeInternal(JobExecutionContext context) {
         Long stackId = getStackId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {

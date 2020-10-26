@@ -431,26 +431,26 @@ public class UmsClient {
      * Remove a role (from machine user) - if role exists
      *
      * @param requestId      id of the request
-     * @param userCrn        actor user (account & assignee)
+     * @param accountId      account id for user
      * @param machineUserCrn machine user identifier
      * @param roleCrn        role identifier
      */
-    public void unassignMachineUserRole(String requestId, String userCrn, String machineUserCrn, String roleCrn) {
+    public void unassignMachineUserRole(String requestId, String machineUserCrn, String roleCrn, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(userCrn);
         checkNotNull(machineUserCrn);
         checkNotNull(roleCrn);
+        checkNotNull(accountId);
         try {
             newStub(requestId).unassignRole(
                     UserManagementProto.UnassignRoleRequest.newBuilder()
                             .setActor(
                                     UserManagementProto.Actor.newBuilder()
-                                            .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                            .setAccountId(accountId)
                                             .setMachineUserNameOrCrn(machineUserCrn)
                                             .build())
                             .setAssignee(
                                     UserManagementProto.Assignee.newBuilder()
-                                            .setAccountId(Crn.fromString(userCrn).getAccountId())
+                                            .setAccountId(accountId)
                                             .setMachineUserNameOrCrn(machineUserCrn)
                                             .build())
                             .setRoleNameOrCrn(roleCrn)
@@ -666,17 +666,17 @@ public class UmsClient {
      *
      * @param requestId     id of the request
      * @param accessKeyCrns list of access key CRNs
-     * @param actorCrn      user that executes the deletion
+     * @param accountId     account id for the user
      */
-    void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String actorCrn) {
+    void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(actorCrn);
+        checkNotNull(accountId);
         checkNotNull(accessKeyCrns);
         accessKeyCrns.forEach(accessKeyCrn -> {
             try {
                 LOGGER.info("Deleting access key {}...", accessKeyCrn);
                 newStub(requestId).deleteAccessKey(UserManagementProto.DeleteAccessKeyRequest.newBuilder()
-                        .setAccountId(Crn.fromString(actorCrn).getAccountId())
+                        .setAccountId(accountId)
                         .setAccessKeyIdOrCrn(accessKeyCrn)
                         .build());
                 LOGGER.info("Access key {} deleted.", accessKeyCrn);

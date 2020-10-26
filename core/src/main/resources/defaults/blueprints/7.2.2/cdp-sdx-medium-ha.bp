@@ -367,16 +367,40 @@
             "ref": "zookeeper"
           },
           {
+            "name": "default.replication.factor",
+            "value": "2"
+          },
+          {
             "name": "offsets.topic.replication.factor",
-            "value": "1"
+            "value": "2"
           },
           {
             "name": "transaction.state.log.replication.factor",
-            "value": "1"
+            "value": "2"
+          },
+          {
+            "name": "offset.storage.replication.factor",
+            "value": "2"
+          },
+          {
+            "name": "config.storage.replication.factor",
+            "value": "2"
+          },
+          {
+            "name": "status.storage.replication.factor",
+            "value": "2"
           },
           {
             "name": "transaction.state.log.min.isr",
             "value": "1"
+          },
+          {
+            "name": "min.insync.replicas",
+            "value": "1"
+          },
+          {
+            "name": "unclean.leader.election.enable",
+            "value": "true"
           },
           {
             "name": "service_config_suppression_offsets.topic.replication.factor",
