@@ -176,7 +176,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     public SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
         SslConfig sslConfig = new SslConfig();
-        if (sslEnabled && source.getSslConfiguration() != null && SslMode.isEnabled(source.getSslConfiguration().getSslMode())) {
+        if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
             sslConfig.setSslCertificates(databaseServerSSlCertificateConfig.getCertsByPlatform(dbStack.getCloudPlatform()));
             sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         }

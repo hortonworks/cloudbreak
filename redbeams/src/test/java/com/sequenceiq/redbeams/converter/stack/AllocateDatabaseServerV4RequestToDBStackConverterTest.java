@@ -51,7 +51,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.LocationResp
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -374,9 +374,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
             allocateRequest.setNetwork(null);
             allocateRequest.getDatabaseServer().setSecurityGroup(null);
         }
-        SslConfigurationV4Request sslConfigurationV4Request = new SslConfigurationV4Request();
-        sslConfigurationV4Request.setSslMode(SslMode.ENABLED);
-        allocateRequest.setSslConfiguration(sslConfigurationV4Request);
+        SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
+        sslConfigV4Request.setSslMode(SslMode.ENABLED);
+        allocateRequest.setSslConfig(sslConfigV4Request);
 
         databaseServerRequest.setInstanceType("db.m3.medium");
         databaseServerRequest.setDatabaseVendor("postgres");

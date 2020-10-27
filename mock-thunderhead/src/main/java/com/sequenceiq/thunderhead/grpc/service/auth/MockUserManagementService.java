@@ -223,6 +223,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
+    private static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -301,6 +303,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.hbase.cloudstorage.enable}")
     private boolean enableHbaseCloudStorage;
+
+    @Value("${auth.mock.database.wire.encryption.enable}")
+    private boolean enableDatabaseWireEncryption;
 
     private String cbLicense;
 
@@ -601,6 +606,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableHbaseCloudStorage) {
             builder.addEntitlements(createEntitlement(CDP_SDX_HBASE_CLOUD_STORAGE));
+        }
+        if (enableDatabaseWireEncryption) {
+            builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AUTOMA
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CB_FAST_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.EntitlementService.CDP_CLOUD_STORAGE_VALIDATION;
@@ -138,6 +139,11 @@ class EntitlementServiceTest {
                         (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, false},
                 {"CDP_SDX_HBASE_CLOUD_STORAGE == true", CDP_SDX_HBASE_CLOUD_STORAGE,
                         (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, true},
+
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION == false", CDP_CB_DATABASE_WIRE_ENCRYPTION,
+                        (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION == true", CDP_CB_DATABASE_WIRE_ENCRYPTION,
+                        (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
         };
     }
 

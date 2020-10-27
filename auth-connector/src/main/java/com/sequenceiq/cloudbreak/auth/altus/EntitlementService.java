@@ -86,6 +86,9 @@ public class EntitlementService {
     @VisibleForTesting
     static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
 
+    @VisibleForTesting
+    static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
+
     @Inject
     private GrpcUmsClient umsClient;
 
@@ -179,6 +182,10 @@ public class EntitlementService {
 
     public boolean sdxHbaseCloudStorageEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
+    }
+
+    public boolean databaseWireEncryptionEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

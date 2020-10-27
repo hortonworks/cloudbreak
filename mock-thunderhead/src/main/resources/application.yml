@@ -30,3 +30,4 @@ auth:
     mediumdutysdx.enable: true
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: true
+    database.wire.encryption.enable: true

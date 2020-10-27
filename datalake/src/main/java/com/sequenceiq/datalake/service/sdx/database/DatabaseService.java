@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +20,8 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -34,7 +38,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -70,6 +74,9 @@ public class DatabaseService {
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
@@ -134,17 +141,19 @@ public class DatabaseService {
 
     private AllocateDatabaseServerV4Request getDatabaseRequest(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
-        req.setEnvironmentCrn(env.getCrn());
+        String environmentCrn = env.getCrn();
+        req.setEnvironmentCrn(environmentCrn);
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US));
         req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster));
         req.setClusterCrn(sdxCluster.getCrn());
 
         String runtime = sdxCluster.getRuntime();
-        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)) {
+        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
+                && entitlementService.databaseWireEncryptionEnabled(INTERNAL_ACTOR_CRN, Crn.safeFromString(environmentCrn).getAccountId())) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
-            SslConfigurationV4Request sslConfigurationV4Request = new SslConfigurationV4Request();
-            sslConfigurationV4Request.setSslMode(SslMode.ENABLED);
-            req.setSslConfiguration(sslConfigurationV4Request);
+            SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
+            sslConfigV4Request.setSslMode(SslMode.ENABLED);
+            req.setSslConfig(sslConfigV4Request);
         } else {
             LOGGER.info("Skipping external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
         }

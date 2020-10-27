@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
@@ -32,7 +34,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigurationV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslConfigV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
@@ -49,7 +51,11 @@ public class DatabaseServiceTest {
 
     private static final String CLUSTER_CRN = "cluster crn";
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+    private static final String ACCOUNT_ID = "1234";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:1";
+
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:2";
 
     @Captor
     public ArgumentCaptor<AllocateDatabaseServerV4Request> allocateDatabaseServerV4RequestCaptor =
@@ -79,26 +85,33 @@ public class DatabaseServiceTest {
     @Mock
     private PlatformConfig platformConfig;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private DatabaseService underTest;
 
     static Object[][] sslEnforcementDataProvider() {
         return new Object[][]{
-                // testCaseName useSslEnforcement runtime sslEnforcementAppliedExpected
-                {"useSslEnforcement=false", false, null, false},
-                {"useSslEnforcement=true and runtime=null", true, null, true},
-                {"useSslEnforcement=true and runtime=7.0.0", true, "7.0.0", false},
-                {"useSslEnforcement=true and runtime=7.1.0", true, "7.1.0", false},
-                {"useSslEnforcement=true and runtime=7.2.0", true, "7.2.0", false},
-                {"useSslEnforcement=true and runtime=7.2.1", true, "7.2.1", false},
-                {"useSslEnforcement=true and runtime=7.2.2", true, "7.2.2", true},
-                {"useSslEnforcement=true and runtime=7.2.3", true, "7.2.3", true},
+                // testCaseName supportedPlatform runtime entitled sslEnforcementAppliedExpected
+                {"supportedPlatform=false", false, null, null, false},
+                {"supportedPlatform=true and runtime=null and entitled=false", true, null, false, false},
+                {"supportedPlatform=true and runtime=null and entitled=true", true, null, true, true},
+                {"supportedPlatform=true and runtime=7.0.0", true, "7.0.0", null, false},
+                {"supportedPlatform=true and runtime=7.1.0", true, "7.1.0", null, false},
+                {"supportedPlatform=true and runtime=7.2.0", true, "7.2.0", null, false},
+                {"supportedPlatform=true and runtime=7.2.1", true, "7.2.1", null, false},
+                {"supportedPlatform=true and runtime=7.2.2 and entitled=false", true, "7.2.2", false, false},
+                {"supportedPlatform=true and runtime=7.2.2 and entitled=true", true, "7.2.2", true, true},
+                {"supportedPlatform=true and runtime=7.2.3 and entitled=false", true, "7.2.3", false, false},
+                {"supportedPlatform=true and runtime=7.2.3 and entitled=true", true, "7.2.3", true, true},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("sslEnforcementDataProvider")
-    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean useSslEnforcement, String runtime, boolean sslEnforcementAppliedExpected) {
+    public void shouldSetDbConfigBasedOnClusterShape(String testCaseName, boolean supportedPlatform, String runtime, Boolean entitled,
+            boolean sslEnforcementAppliedExpected) {
         SdxCluster cluster = new SdxCluster();
         cluster.setClusterName("NAME");
         cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
@@ -107,13 +120,17 @@ public class DatabaseServiceTest {
         DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
         env.setName("ENV");
         env.setCloudPlatform("aws");
+        env.setCrn(ENV_CRN);
         DatabaseConfig databaseConfig = getDatabaseConfig();
 
         when(databaseServerV4Endpoint.createInternal(any(), any())).thenThrow(BadRequestException.class);
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(useSslEnforcement);
+        when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
+        if (entitled != null) {
+            when(entitlementService.databaseWireEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(entitled);
+        }
 
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
 
@@ -127,12 +144,12 @@ public class DatabaseServiceTest {
         assertThat(databaseServer.getStorageSize()).isEqualTo(100L);
         assertThat(dbRequest.getClusterCrn()).isEqualTo(CLUSTER_CRN);
         assertThat(databaseServer.getAws()).isNotNull();
-        SslConfigurationV4Request sslConfiguration = dbRequest.getSslConfiguration();
+        SslConfigV4Request sslConfig = dbRequest.getSslConfig();
         if (sslEnforcementAppliedExpected) {
-            assertThat(sslConfiguration).isNotNull();
-            assertThat(sslConfiguration.getSslMode()).isEqualTo(SslMode.ENABLED);
+            assertThat(sslConfig).isNotNull();
+            assertThat(sslConfig.getSslMode()).isEqualTo(SslMode.ENABLED);
         } else {
-            assertThat(sslConfiguration).isNull();
+            assertThat(sslConfig).isNull();
         }
         verifyNoInteractions(sdxClusterRepository);
         verifyNoInteractions(sdxStatusService);
