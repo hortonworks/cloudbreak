@@ -554,6 +554,24 @@
         }
       ],
       "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
+    },
+    {
+      "name": "STREAMS_REPLICATION_MANAGER",
+      "displayName": "Stream Replication Manager",
+      "componentNameInParcel": "srm",
+      "components": [
+        {
+          "name": "STREAMS_REPLICATION_MANAGER_SERVICE",
+          "groups": ["srm"],
+          "base" : true
+        },
+        {
+          "name": "STREAMS_REPLICATION_MANAGER_DRIVER",
+          "groups": ["srm"],
+          "base" : true
+        }
+      ],
+      "dependencies": ["ZOOKEEPER", "HDFS", "HBASE"]
     }
   ]
 }
