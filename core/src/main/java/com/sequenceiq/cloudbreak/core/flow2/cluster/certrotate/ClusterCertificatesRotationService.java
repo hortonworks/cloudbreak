@@ -33,6 +33,7 @@ public class ClusterCertificatesRotationService {
         LOGGER.debug(statusReason);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, statusReason);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        clusterService.updateClusterCertExpirationState(stackId, false);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CERTIFICATES_ROTATION_STARTED);
     }
 

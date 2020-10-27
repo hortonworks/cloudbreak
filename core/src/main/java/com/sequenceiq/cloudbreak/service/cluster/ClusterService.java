@@ -384,6 +384,11 @@ public class ClusterService {
                 }).collect(Collectors.toList());
     }
 
+    public void updateClusterCertExpirationState(Long stackId, boolean hostCertificateExpiring) {
+        Optional<Cluster> cluster = findOneByStackId(stackId);
+        cluster.ifPresent(c -> updateClusterCertExpirationState(c, hostCertificateExpiring));
+    }
+
     public void updateClusterCertExpirationState(Cluster cluster, boolean hostCertificateExpiring) {
         if (VALID == cluster.getCertExpirationState() && hostCertificateExpiring) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), HOST_CERT_EXPIRING);
