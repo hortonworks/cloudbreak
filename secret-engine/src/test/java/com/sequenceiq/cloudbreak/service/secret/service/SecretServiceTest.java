@@ -63,7 +63,7 @@ public class SecretServiceTest {
 
     @Test
     public void testPutExists() throws Exception {
-        when(persistentEngine.isExists(anyString())).thenReturn(true);
+        when(persistentEngine.exists(anyString())).thenReturn(true);
 
         thrown.expect(InvalidKeyException.class);
 
@@ -78,7 +78,7 @@ public class SecretServiceTest {
     @Test
     public void testPutOk() throws Exception {
         when(persistentEngine.put("key", "value")).thenReturn("secret");
-        when(persistentEngine.isExists("key")).thenReturn(false);
+        when(persistentEngine.exists("key")).thenReturn(false);
 
         String result = underTest.put("key", "value");
 

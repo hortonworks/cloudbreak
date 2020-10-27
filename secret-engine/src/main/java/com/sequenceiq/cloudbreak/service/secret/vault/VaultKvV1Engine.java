@@ -48,7 +48,7 @@ public class VaultKvV1Engine extends AbstractVaultEngine<VaultKvV1Engine> {
     }
 
     @Override
-    public boolean isExists(String secret) {
+    public boolean exists(String secret) {
         return Optional.ofNullable(convertToVaultSecret(secret)).map(s -> {
             VaultResponse response = template.read(s.getPath());
             return response != null && response.getData() != null;

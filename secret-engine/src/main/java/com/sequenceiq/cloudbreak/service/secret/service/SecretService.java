@@ -41,7 +41,7 @@ public class SecretService {
 
     private SecretEngine persistentEngine;
 
-    private VaultRetryService vaultRetryService;
+    private final VaultRetryService vaultRetryService;
 
     public SecretService(MetricService metricService, List<SecretEngine> engines, VaultRetryService vaultRetryService) {
         this.metricService = metricService;
@@ -66,7 +66,7 @@ public class SecretService {
      */
     public String put(String key, String value) throws Exception {
         long start = System.currentTimeMillis();
-        boolean exists = vaultRetryService.tryReadingVault(() -> persistentEngine.isExists(key));
+        boolean exists = vaultRetryService.tryReadingVault(() -> persistentEngine.exists(key));
         long duration = System.currentTimeMillis() - start;
         metricService.submit(MetricType.VAULT_READ, duration);
         LOGGER.trace("Secret read took {} ms", duration);

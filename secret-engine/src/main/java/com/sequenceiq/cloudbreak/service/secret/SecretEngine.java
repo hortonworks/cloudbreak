@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 public interface SecretEngine {
     String put(String key, String value);
 
-    boolean isExists(String secret);
+    boolean exists(String secret);
 
     String get(String secret);
 
