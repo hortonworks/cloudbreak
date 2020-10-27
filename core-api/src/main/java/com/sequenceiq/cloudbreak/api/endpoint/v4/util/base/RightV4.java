@@ -18,7 +18,7 @@ public enum RightV4 {
     ENV_DELETE(AuthorizationResourceAction.DELETE_ENVIRONMENT),
     ENV_DESCRIBE(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT),
     CHANGE_CRED(AuthorizationResourceAction.CHANGE_CREDENTIAL),
-    DH_CREATE(AuthorizationResourceAction.CREATE_DATAHUB),
+    DH_CREATE(AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB),
     // dh level
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),

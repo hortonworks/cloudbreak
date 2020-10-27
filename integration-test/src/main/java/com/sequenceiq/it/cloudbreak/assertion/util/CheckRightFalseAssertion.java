@@ -9,6 +9,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckRightTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class CheckRightFalseAssertion implements Assertion<CheckRightTestDto, CloudbreakClient> {
 
@@ -24,7 +25,7 @@ public class CheckRightFalseAssertion implements Assertion<CheckRightTestDto, Cl
         Optional<CheckRightV4SingleResponse> checkRightV4SingleResponse = responseList.stream()
                 .filter(response -> response.getRight().getAction().equals(rightV4.getAction())).findFirst();
         if (!checkRightV4SingleResponse.isPresent() || checkRightV4SingleResponse.get().getResult()) {
-            throw new AssertionError(String.format("Checking right for %s should have returned with false",
+            throw new TestFailException(String.format("Checking right for %s should have returned with false",
                     checkRightV4SingleResponse.get().getRight().getAction().getRight()));
         }
     }
