@@ -71,7 +71,7 @@ public class EnvironmentTerminationChecker<T extends EnvironmentWaitObject> exte
             DetailedEnvironmentResponse environment = waitObject.getEndpoint().getByCrn(crn);
             EnvironmentStatus status = environment.getEnvironmentStatus();
             if (status.equals(DELETE_FAILED)) {
-                return true;
+                return false;
             }
             return status.isFailed();
         } catch (ProcessingException clientException) {

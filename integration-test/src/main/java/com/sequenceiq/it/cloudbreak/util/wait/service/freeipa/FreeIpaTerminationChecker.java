@@ -68,7 +68,7 @@ public class FreeIpaTerminationChecker<T extends FreeIpaWaitObject> extends Exce
             DescribeFreeIpaResponse freeIpa = waitObject.getEndpoint().describe(environmentCrn);
             Status status = freeIpa.getStatus();
             if (status.equals(DELETE_FAILED)) {
-                return true;
+                return false;
             }
             return status.isFailed();
         } catch (ProcessingException clientException) {
