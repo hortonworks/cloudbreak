@@ -4,11 +4,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * Generic mode to hold dynamic data, any data stored in the DynamicModel must be threadsafe in that sense that multiple threads might be
  * using it, but of course it is never used concurrently. In other words if you store anything in thread local then it might not be available
  * in a subsequent calls.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DynamicModel {
 
     private final Map<String, Object> parameters;
@@ -57,4 +62,5 @@ public class DynamicModel {
                 "parameters=" + parameters +
                 '}';
     }
+
 }
