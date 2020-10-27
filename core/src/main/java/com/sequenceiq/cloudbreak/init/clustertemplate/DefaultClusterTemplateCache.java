@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -28,7 +30,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class DefaultClusterTemplateCache {
@@ -44,6 +53,15 @@ public class DefaultClusterTemplateCache {
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private WorkspaceService workspaceService;
+
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
@@ -119,13 +137,23 @@ public class DefaultClusterTemplateCache {
         return defaultTemplates;
     }
 
-    public List<ClusterTemplate> defaultClusterTemplatesByNames(Collection<String> templateNamesMissingFromDb) {
+    public List<ClusterTemplate> defaultClusterTemplatesByNames(Collection<String> templateNamesMissingFromDb, Set<Blueprint> blueprints) {
         List<ClusterTemplate> defaultTemplates = new ArrayList<>();
+        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+        User user = userService.getOrCreate(cloudbreakUser);
+        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
                 String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
                 DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
                 ClusterTemplate clusterTemplate = converterUtil.convert(defaultClusterTemplate, ClusterTemplate.class);
+                clusterTemplate.setWorkspace(workspace);
+                Optional<Blueprint> blueprint = blueprints.stream()
+                        .filter(e -> e.getName().equals(defaultClusterTemplate.getDistroXTemplate().getCluster().getBlueprintName()))
+                        .findFirst();
+                if (blueprint.isPresent()) {
+                    clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                }
                 defaultTemplates.add(clusterTemplate);
             }
         });

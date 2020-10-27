@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
+import java.util.HashSet;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
@@ -65,6 +68,7 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         StackV4Request stackV4Request = stackV4RequestConverter.convert(source.getDistroXTemplate());
         stackV4Request.setType(StackType.TEMPLATE);
         Stack stack = converterUtil.convert(stackV4Request, Stack.class);
+        prepareEmptyInstanceMetadata(stack);
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setCloudPlatform(getCloudPlatform(source, stack));
         clusterTemplate.setName(source.getName());
@@ -72,12 +76,19 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         clusterTemplate.setDatalakeRequired(DatalakeRequired.OPTIONAL);
         clusterTemplate.setFeatureState(FeatureState.RELEASED);
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
+        clusterTemplate.setClouderaRuntimeVersion(stack.getCluster().getBlueprint().getStackVersion());
         if (source.getType() == null) {
             clusterTemplate.setType(ClusterTemplateV4Type.OTHER);
         } else {
             clusterTemplate.setType(source.getType());
         }
         return clusterTemplate;
+    }
+
+    public void prepareEmptyInstanceMetadata(Stack stack) {
+        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+            instanceGroup.setInstanceMetaData(new HashSet<>());
+        }
     }
 
     private String getCloudPlatform(ClusterTemplateV4Request source, Stack stack) {

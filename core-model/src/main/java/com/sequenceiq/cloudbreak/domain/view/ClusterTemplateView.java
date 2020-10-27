@@ -35,9 +35,13 @@ public class ClusterTemplateView extends CompactView {
     private FeatureState featureState;
 
     @OneToOne
-    private StackApiView stackTemplate;
+    private ClusterTemplateStackApiView stackTemplate;
+
+    private String templateContent;
 
     private Long created;
+
+    private String clouderaRuntimeVersion;
 
     public ResourceStatus getStatus() {
         return status;
@@ -71,11 +75,11 @@ public class ClusterTemplateView extends CompactView {
         this.type = type;
     }
 
-    public StackApiView getStackTemplate() {
+    public ClusterTemplateStackApiView getStackTemplate() {
         return stackTemplate;
     }
 
-    public void setStackTemplate(StackApiView stackTemplate) {
+    public void setStackTemplate(ClusterTemplateStackApiView stackTemplate) {
         this.stackTemplate = stackTemplate;
     }
 
@@ -101,5 +105,21 @@ public class ClusterTemplateView extends CompactView {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getTemplateContent() {
+        return templateContent;
+    }
+
+    public void setTemplateContent(String templateContent) {
+        this.templateContent = templateContent;
+    }
+
+    public String getClouderaRuntimeVersion() {
+        return clouderaRuntimeVersion;
+    }
+
+    public void setClouderaRuntimeVersion(String clouderaRuntimeVersion) {
+        this.clouderaRuntimeVersion = clouderaRuntimeVersion;
     }
 }

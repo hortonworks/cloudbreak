@@ -26,7 +26,11 @@ import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
@@ -90,6 +94,18 @@ public class AllowedInstanceTypeTest {
 
         @MockBean
         private StackToTemplatePreparationObjectConverter mockPreparationObject;
+
+        @MockBean
+        private WorkspaceService workspaceService;
+
+        @MockBean
+        private UserService userService;
+
+        @MockBean
+        private CloudbreakRestRequestThreadLocalService cloudbreakRestRequestThreadLocalService;
+
+        @MockBean
+        private BlueprintService blueprintService;
 
     }
 }

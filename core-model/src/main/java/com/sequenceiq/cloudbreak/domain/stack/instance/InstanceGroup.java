@@ -20,12 +20,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -67,6 +67,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    private int initialNodeCount;
 
     public String getGroupName() {
         return groupName;
@@ -180,6 +182,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public int getInitialNodeCount() {
+        return initialNodeCount;
+    }
+
+    public void setInitialNodeCount(int initialNodeCount) {
+        this.initialNodeCount = initialNodeCount;
     }
 
     public Optional<CloudIdentityType> getCloudIdentityType() {

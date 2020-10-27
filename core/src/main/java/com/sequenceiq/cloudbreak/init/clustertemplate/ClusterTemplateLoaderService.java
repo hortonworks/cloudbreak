@@ -21,8 +21,11 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class ClusterTemplateLoaderService {
@@ -33,6 +36,9 @@ public class ClusterTemplateLoaderService {
 
     @Inject
     private ClusterTemplateService clusterTemplateService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
@@ -78,13 +84,13 @@ public class ClusterTemplateLoaderService {
         return defaultTemplatesInDb.stream().allMatch(s -> defaultTemplates.keySet().contains(s.getName()));
     }
 
-    public Set<ClusterTemplate> loadClusterTemplatesForWorkspace(Set<ClusterTemplate> templatesInDb,
+    public Set<ClusterTemplate> loadClusterTemplatesForWorkspace(Set<ClusterTemplate> templatesInDb, Workspace workspace,
             Function<Iterable<ClusterTemplate>, Collection<ClusterTemplate>> saveMethod) {
-        Set<ClusterTemplate> clusterTemplatesToSave = collectClusterTemplatesToSaveInDb(templatesInDb);
+        Set<ClusterTemplate> clusterTemplatesToSave = collectClusterTemplatesToSaveInDb(templatesInDb, workspace);
         LOGGER.debug("{} cluster templates in the db and {} cluster templates want to save", templatesInDb.size(), clusterTemplatesToSave.size());
         decorateWithCrn(clusterTemplatesToSave);
         Iterable<ClusterTemplate> savedClusterTemplates = measure(() -> saveMethod.apply(clusterTemplatesToSave), LOGGER,
-                "saved in {}ms {} cluster templates", clusterTemplatesToSave.size());
+                "saved in {} ms {} cluster templates", clusterTemplatesToSave.size());
         return unifyTemplatesUpdatedAndUnmodified(templatesInDb, clusterTemplatesToSave, savedClusterTemplates);
     }
 
@@ -108,7 +114,7 @@ public class ClusterTemplateLoaderService {
         return unionOfTemplates;
     }
 
-    private Set<ClusterTemplate> collectClusterTemplatesToSaveInDb(Set<ClusterTemplate> templatesInDb) {
+    private Set<ClusterTemplate> collectClusterTemplatesToSaveInDb(Set<ClusterTemplate> templatesInDb, Workspace workspace) {
         Collection<String> defaultTemplateNames = measure(() -> defaultClusterTemplateCache.defaultClusterTemplateNames(), LOGGER,
                 "Default cluster templates fetched in {}ms");
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(templatesInDb);
@@ -117,8 +123,9 @@ public class ClusterTemplateLoaderService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Templates missing from DB: {}", templateNamesMissingFromDb);
         }
+        Set<Blueprint> blueprints = blueprintService.getAllAvailableInWorkspaceWithoutUpdate(workspace);
         Collection<ClusterTemplate> templatesMissingFromDb = measure(() ->
-                        defaultClusterTemplateCache.defaultClusterTemplatesByNames(templateNamesMissingFromDb), LOGGER,
+                        defaultClusterTemplateCache.defaultClusterTemplatesByNames(templateNamesMissingFromDb, blueprints), LOGGER,
                 "Missed cluster templates fetched in {}ms");
         return Stream.concat(templatesMissingFromDb.stream(), updatedTemplates.stream()).collect(Collectors.toSet());
     }

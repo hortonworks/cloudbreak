@@ -90,23 +90,26 @@ class ClusterTemplateServiceCreationValidationTest {
     }
 
     @Test
-    void testWhenClusterTemplateDoesNotContainBlueprintBadRequestExceptionComes() {
+    void testWhenClusterTemplateDoesNotContainAnExistingBlueprintBadRequestExceptionComes() {
         Cluster cluster = new Cluster();
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName("apple");
+        cluster.setBlueprint(blueprint);
         Stack stack = new Stack();
         stack.setEnvironmentCrn("someCrn");
         stack.setCluster(cluster);
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setStackTemplate(stack);
-        clusterTemplate.setStatus(ResourceStatus.DEFAULT);
+        clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("Cluster definition should contain a cluster template!", e.getMessage());
+        Assert.assertEquals("The cluster template in the cluster definition should be exists!", e.getMessage());
     }
 
     @Test
-    void testWhenClusterTemplateDoesNotContainAnExistingBlueprintBadRequestExceptionComes() {
+    void testWhenClusterTemplateDoesNotContainBlueprintBadRequestExceptionComes() {
         Workspace workspace = new Workspace();
         Blueprint blueprint = new Blueprint();
         Cluster cluster = new Cluster();
@@ -116,14 +119,14 @@ class ClusterTemplateServiceCreationValidationTest {
         stack.setCluster(cluster);
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setStackTemplate(stack);
-        clusterTemplate.setStatus(ResourceStatus.DEFAULT);
+        clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         clusterTemplate.setWorkspace(workspace);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
         when(blueprintService.getAllAvailableInWorkspace(workspace)).thenReturn(Collections.emptySet());
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("The cluster template (aka blueprint) in the cluster definition should be an existing one!", e.getMessage());
+        Assert.assertEquals("Cluster definition should contain a cluster template!", e.getMessage());
     }
 
 }

@@ -33,6 +33,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         instanceGroup.setGroupName(source.getName());
         setAttributes(source, instanceGroup);
         instanceGroup.setInstanceGroupType(source.getType());
+        instanceGroup.setInitialNodeCount(source.getNodeCount());
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }
