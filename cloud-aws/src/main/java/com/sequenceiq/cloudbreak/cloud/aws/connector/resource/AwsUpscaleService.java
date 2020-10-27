@@ -109,7 +109,7 @@ public class AwsUpscaleService {
 
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
 
-        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
+        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
 
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }

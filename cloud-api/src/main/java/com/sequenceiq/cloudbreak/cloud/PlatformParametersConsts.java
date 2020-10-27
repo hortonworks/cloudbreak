@@ -22,8 +22,6 @@ public class PlatformParametersConsts {
 
     public static final String FREEIPA_STACK_TYPE = "freeipa";
 
-    public static final String CLOUDWATCH_CREATE_PARAMETER = "createCloudWatchAlarm";
-
     public static final String CLOUD_STACK_TYPE_PARAMETER = "cloudStackType";
 
     public static final String RESOURCE_GROUP_NAME_PARAMETER = "resourceGroupName";

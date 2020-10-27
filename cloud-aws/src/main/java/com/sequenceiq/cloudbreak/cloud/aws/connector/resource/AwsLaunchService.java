@@ -169,7 +169,7 @@ public class AwsLaunchService {
 
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
 
-        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
+        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
 
         return awsResourceConnector.check(ac, instances);
     }

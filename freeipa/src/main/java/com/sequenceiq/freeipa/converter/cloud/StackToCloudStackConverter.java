@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.converter.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUDWATCH_CREATE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER;
@@ -27,7 +26,6 @@ import javax.inject.Inject;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
@@ -88,9 +86,6 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
 
     @Inject
     private ImageConverter imageConverter;
-
-    @Value("${freeipa.aws.cloudwatch.enabled:true}")
-    private boolean enableCloudwatch;
 
     @Inject
     private CachedEnvironmentClientService cachedEnvironmentClientService;
@@ -362,7 +357,6 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     private Map<String, String> buildCloudStackParameters(String environmentCrn) {
         Map<String, String> params = new HashMap<>();
         params.put(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE);
-        params.put(CLOUDWATCH_CREATE_PARAMETER, Boolean.toString(enableCloudwatch));
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environmentCrn);
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();

@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -148,6 +149,9 @@ public class AwsLaunchTest {
     private AwsClient awsClient;
 
     @MockBean
+    private AmazonCloudWatchClient cloudWatchClient;
+
+    @MockBean
     private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
 
     @MockBean
@@ -211,6 +215,7 @@ public class AwsLaunchTest {
         when(ecWaiters.instanceTerminated()).thenReturn(instanceWaiter);
         when(customAmazonWaiterProvider.getAutoscalingInstancesInServiceWaiter(any(), any())).thenReturn(describeAutoScalingGroupsRequestWaiter);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
+        when(awsClient.createCloudWatchClient(any(), anyString())).thenReturn(cloudWatchClient);
     }
 
     private void setupRetryService() {
