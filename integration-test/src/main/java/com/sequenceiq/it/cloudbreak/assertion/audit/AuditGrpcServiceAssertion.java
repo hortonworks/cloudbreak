@@ -74,6 +74,10 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         }
     }
 
+    protected AuditClient getAuditClient() {
+        return auditClient;
+    }
+
     private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, String eventName) {
         if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
             throw new TestFailException(eventName + " flow audit log must contains minimum 2 items but has " + flowEvents.size());

@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -103,6 +104,12 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
+    public Map<String, Pair<Integer, String>> executeSshCommand(SdxTestDto testDto, SdxClient sdxClient, List<String> hostGroupNames, String sshCommand,
+            boolean publicIp) {
+        return getSdxInstanceGroupIps(testDto.getName(), sdxClient, hostGroupNames, publicIp).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
+    }
+
     public SdxTestDto checkNoOutboundInternetTraffic(SdxTestDto testDto, SdxClient sdxClient, List<String> hostGroupNames) {
         getSdxInstanceGroupIps(testDto.getName(), sdxClient, hostGroupNames, true).forEach(instanceIP -> checkNoOutboundInternetTraffic(instanceIP));
         return testDto;
@@ -114,17 +121,21 @@ public class SshJClientActions extends SshJClient {
         return testDto;
     }
 
-    private void checkNoOutboundInternetTraffic(String instanceIP) {
-        String checkInternetCommand = "curl --max-time 30 cloudera.com";
-        try (SSHClient sshClient = createSshClient(instanceIP)) {
-            Pair<Integer, String> cmdOut = execute(sshClient, checkInternetCommand);
+    private void checkNoOutboundInternetTraffic(String instanceIp) {
+        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp, "curl --max-time 30 cloudera.com");
+        if (cmdOut.getKey() == 0) {
+            throw new TestFailException("Instance [" + instanceIp + "] has internet coonection but shouldn't have!");
+        }
+    }
+
+    private Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
+        try (SSHClient sshClient = createSshClient(instanceIp)) {
+            Pair<Integer, String> cmdOut = execute(sshClient, command);
             Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
-            if (cmdOut.getKey() == 0) {
-                throw new TestFailException("Instance [" + instanceIP + "] has internet coonection but shouldn't have!");
-            }
+            return cmdOut;
         } catch (Exception e) {
-            LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIP, checkInternetCommand);
-            throw new TestFailException(" SSH fail on [" + instanceIP + "] while executing command [" + checkInternetCommand + "].", e);
+            LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIp, command);
+            throw new TestFailException(" SSH fail on [" + instanceIp + "] while executing command [" + command + "].", e);
         }
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
@@ -100,6 +101,10 @@ public class SdxTestClient {
         return new SdxUpgradeAction();
     }
 
+    public Action<SdxTestDto, SdxClient> rotateAutotlsCertificates() {
+        return new SdxAutotlsCertRotationAction();
+    }
+
     public Action<SdxInternalTestDto, SdxClient> repairInternal() {
         return new SdxRepairInternalAction();
     }
@@ -127,5 +132,4 @@ public class SdxTestClient {
     public Action<RenewDatalakeCertificateTestDto, SdxClient> renewDatalakeCertificateV4() {
         return new RenewDatalakeCertificateAction();
     }
-
 }
