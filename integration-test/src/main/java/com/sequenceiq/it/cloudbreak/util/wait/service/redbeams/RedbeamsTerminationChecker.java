@@ -71,7 +71,7 @@ public class RedbeamsTerminationChecker<T extends RedbeamsWaitObject> extends Ex
             DatabaseServerV4Response redbeams = waitObject.getEndpoint().getByCrn(crn);
             Status status = redbeams.getStatus();
             if (status.equals(DELETE_FAILED)) {
-                return true;
+                return false;
             }
             return waitObject.isFailed(status);
         } catch (ProcessingException clientException) {

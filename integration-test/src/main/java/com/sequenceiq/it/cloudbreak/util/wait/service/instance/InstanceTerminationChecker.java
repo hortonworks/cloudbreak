@@ -117,7 +117,7 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
                     InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
                     InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
                     if (waitObject.isDeleteFailed(instanceStatus)) {
-                        return true;
+                        return false;
                     }
                     return waitObject.isFailed(instanceStatus);
                 } else {
