@@ -21,6 +21,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -43,13 +44,16 @@ public class UmsResourceAuthorizationServiceTest {
     @Mock
     private UmsRightProvider umsRightProvider;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private UmsResourceAuthorizationService underTest;
 
     @Before
     public void init() {
         when(umsRightProvider.getRight(any())).thenReturn("environments/describeEnvironment");
-        when(umsClient.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
     }
 
     @Test

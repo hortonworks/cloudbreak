@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -25,7 +25,7 @@ public class UmsRightProvider {
     private Map<String, String> legacyRights = new HashMap<>();
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private EntitlementService entitlementService;
 
     @PostConstruct
     public void init() {
@@ -37,7 +37,7 @@ public class UmsRightProvider {
     }
 
     public String getRight(AuthorizationResourceAction action, String actorCrn, String accountId) {
-        if (grpcUmsClient.isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
+        if (entitlementService.isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
             return getNewRight(action);
         }
         return getLegacyRight(action);

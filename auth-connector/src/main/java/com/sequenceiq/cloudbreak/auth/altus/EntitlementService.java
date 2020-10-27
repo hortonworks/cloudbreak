@@ -1,98 +1,53 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FAST_EBS_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DL_EBS_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HEALTH_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UMS_USER_SYNC_MODEL_GENERATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.annotations.VisibleForTesting;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class EntitlementService {
 
-    public static final String DATAHUB_FLOW_SCALING = "DATAHUB_FLOW_SCALING";
-
-    public static final String DATAHUB_STREAMING_SCALING = "DATAHUB_STREAMING_SCALING";
-
-    public static final String DATAHUB_DEFAULT_SCALING = "DATAHUB_DEFAULT_SCALING";
-
-    @VisibleForTesting
-    static final String CDP_AZURE = "CDP_AZURE";
-
-    @VisibleForTesting
-    static final String CDP_GCP = "CDP_GCP";
-
-    @VisibleForTesting
-    static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
-
-    @VisibleForTesting
-    static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
-
-    @VisibleForTesting
-    static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
-
-    @VisibleForTesting
-    static final String CDP_FREEIPA_HA_REPAIR = "CDP_FREEIPA_HA_REPAIR";
-
-    @VisibleForTesting
-    static final String CDP_FREEIPA_HEALTH_CHECK = "CDP_FREEIPA_HEALTH_CHECK";
-
-    @VisibleForTesting
-    static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
-
-    @VisibleForTesting
-    static final String CDP_FMS_CLUSTER_PROXY = "CDP_FMS_CLUSTER_PROXY";
-
-    @VisibleForTesting
-    static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
-
-    @VisibleForTesting
-    static final String CDP_RAZ = "CDP_RAZ";
-
-    @VisibleForTesting
-    static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
-
-    @VisibleForTesting
-    static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
-
-    @VisibleForTesting
-    static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
-
-    @VisibleForTesting
-    static final String LOCAL_DEV = "LOCAL_DEV";
-
-    @VisibleForTesting
-    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
-
-    @VisibleForTesting
-    static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
-
-    @VisibleForTesting
-    static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
-
-    @VisibleForTesting
-    static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
-
-    @VisibleForTesting
-    static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
-
-    @VisibleForTesting
-    static final String CDP_UMS_USER_SYNC_MODEL_GENERATION = "CDP_UMS_USER_SYNC_MODEL_GENERATION";
-
-    @VisibleForTesting
-    static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
-
-    @VisibleForTesting
-    static final String CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE = "CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE";
+    private static final Logger LOGGER = LoggerFactory.getLogger(EntitlementService.class);
 
     @Inject
     private GrpcUmsClient umsClient;
 
-    public boolean scalingServiceEnabled(String actorCrn, String accountId, String entitledFor) {
+    public boolean isEntitledFor(String actorCrn, String accountId, Entitlement entitledFor) {
         return isEntitlementRegistered(actorCrn, accountId, entitledFor);
     }
 
@@ -188,6 +143,18 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
     }
 
+    public boolean awsAutoScalingEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, DATAHUB_AWS_AUTOSCALING);
+    }
+
+    public boolean azureAutoScalingEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, DATAHUB_AZURE_AUTOSCALING);
+    }
+
+    public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, Entitlement.CB_AUTHZ_POWER_USERS);
+    }
+
     public List<String> getEntitlements(String actorCrn, String accountId) {
         return getAccount(actorCrn, accountId).getEntitlementsList()
                 .stream()
@@ -195,14 +162,13 @@ public class EntitlementService {
                 .collect(Collectors.toList());
     }
 
-    private UserManagementProto.Account getAccount(String actorCrn, String accountId) {
+    private boolean isEntitlementRegistered(String actorCrn, String accountId, Entitlement entitlement) {
+        boolean entitled = umsClient.isEntitled(actorCrn, accountId, entitlement);
+        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
+        return entitled;
+    }
+
+    private Account getAccount(String actorCrn, String accountId) {
         return umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
     }
-
-    private boolean isEntitlementRegistered(String actorCrn, String accountId, String entitlement) {
-        return getEntitlements(actorCrn, accountId)
-                .stream()
-                .anyMatch(e -> e.equalsIgnoreCase(entitlement));
-    }
-
 }

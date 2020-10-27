@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -214,10 +215,10 @@ public class GrpcUmsClient {
     /**
      * Retrieves list of all machine users from UMS.
      *
-     * @param accountId the account Id
-     * @param includeInternal whether to include internal machine users
+     * @param accountId                   the account Id
+     * @param includeInternal             whether to include internal machine users
      * @param includeWorkloadMachineUsers whether to include workload machine users
-     * @param requestId an optional request Id
+     * @param requestId                   an optional request Id
      * @return the user associated with this user CRN
      */
     public List<MachineUser> listAllMachineUsers(
@@ -232,11 +233,11 @@ public class GrpcUmsClient {
     /**
      * Retrieves machine user list from UMS.
      *
-     * @param accountId       the account Id
-     * @param machineUserCrns machine users to list. if null or empty then all machine users will be listed
-     * @param includeInternal whether to include internal machine users
+     * @param accountId                   the account Id
+     * @param machineUserCrns             machine users to list. if null or empty then all machine users will be listed
+     * @param includeInternal             whether to include internal machine users
      * @param includeWorkloadMachineUsers whether to include workload machine users
-     * @param requestId       an optional request Id
+     * @param requestId                   an optional request Id
      * @return the user associated with this user CRN
      */
     public List<MachineUser> listMachineUsers(
@@ -418,7 +419,7 @@ public class GrpcUmsClient {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (!isAuthorizationEntitlementRegistered(actorCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (!isEntitledAndLogResult(actorCrn, ThreadBasedUserCrnProvider.getAccountId(), Entitlement.CB_AUTHZ_POWER_USERS)) {
             if (isReadRight(right)) {
                 LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
                         ThreadBasedUserCrnProvider.getAccountId());
@@ -503,15 +504,24 @@ public class GrpcUmsClient {
         }
     }
 
-    @Cacheable(cacheNames = "umsAuthorizationEntitlementRegisteredCache", key = "{ #actorCrn, #accountId }")
-    public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
-        if (StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
-            return false;
+    @Cacheable(cacheNames = "umsEntitlementRegisteredCache", key = "{ #actorCrn, #accountId, #entitlement }")
+    public boolean isEntitled(String actorCrn, String accountId, Entitlement entitlement) {
+        boolean entitled;
+        if (Entitlement.CB_AUTHZ_POWER_USERS.equals(entitlement) && StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
+            entitled = false;
+        } else {
+            return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
+                    .stream()
+                    .map(e -> e.getEntitlementName().toUpperCase())
+                    .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         }
-        return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
-                .stream()
-                .map(e -> e.getEntitlementName().toUpperCase())
-                .anyMatch(e -> e.equalsIgnoreCase("CB_AUTHZ_POWER_USERS"));
+        return entitled;
+    }
+
+    private boolean isEntitledAndLogResult(String actorCrn, String accountId, Entitlement entitlement) {
+        boolean entitled = isEntitled(actorCrn, accountId, entitlement);
+        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
+        return entitled;
     }
 
     /**
@@ -654,10 +664,11 @@ public class GrpcUmsClient {
 
     /**
      * Check that machine user has a specific access key in UMS
-     * @param actorCrn actor for the machine user request
-     * @param accountId the account ID
+     *
+     * @param actorCrn       actor for the machine user request
+     * @param accountId      the account ID
      * @param machineUserCrn machine user crn that own the access key
-     * @param accessKeyId access key id that we need to check
+     * @param accessKeyId    access key id that we need to check
      * @return result that is true if the machine user has the queried access key in UMS
      */
     public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId,
@@ -730,7 +741,7 @@ public class GrpcUmsClient {
 
     public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
         try {
-            if (isAuthorizationEntitlementRegistered(userCrn, accountId)) {
+            if (isEntitledAndLogResult(userCrn, accountId, Entitlement.CB_AUTHZ_POWER_USERS)) {
                 assignResourceRole(userCrn, resourceCrn, getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
                 LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
             }
@@ -817,9 +828,9 @@ public class GrpcUmsClient {
     /**
      * Retrieves user sync state model from UMS.
      *
-     * @param accountId        the account Id
-     * @param requestId        an optional request Id
-     * @param rightsChecks     list of rights checks for resources. a List is used to preserve order.
+     * @param accountId    the account Id
+     * @param requestId    an optional request Id
+     * @param rightsChecks list of rights checks for resources. a List is used to preserve order.
      * @return the user sync state for this account and rights checks
      */
     public GetUserSyncStateModelResponse getUserSyncStateModel(

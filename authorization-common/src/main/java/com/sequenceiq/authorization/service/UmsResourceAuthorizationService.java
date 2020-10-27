@@ -19,6 +19,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -34,6 +35,9 @@ public class UmsResourceAuthorizationService {
     @Inject
     private UmsRightProvider umsRightProvider;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void checkRightOfUserOnResource(String userCrn, AuthorizationResourceAction action, String resourceCrn) {
         String right = umsRightProvider.getRight(action);
         String unauthorizedMessage = String.format("You have no right to perform %s on resource %s.", right, resourceCrn);
@@ -45,7 +49,7 @@ public class UmsResourceAuthorizationService {
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
-        if (!umsClient.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (!entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
             checkRightOfUserOnResource(userCrn, action, null);
             return;
         }
