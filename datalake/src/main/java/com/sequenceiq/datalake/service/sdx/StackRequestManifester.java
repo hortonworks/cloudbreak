@@ -10,8 +10,10 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -76,6 +78,9 @@ public class StackRequestManifester {
     @Inject
     private EntitlementService entitlementService;
 
+    @Value("${sdx.aws.cloudwatch.enabled:true}")
+    private boolean enableCloudwatch;
+
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
         gatewayManifester.configureGatewayForSdxCluster(generatedStackV4Request);
@@ -130,6 +135,12 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
             setupInstanceVolumeEncryption(stackRequest, environment.getCloudPlatform(), Crn.safeFromString(environment.getCrn()).getAccountId());
+
+            // Set Cloudwatch alarm creation boolean.
+            if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
+                setupCloudwatchAlarmCreation(stackRequest);
+            }
+
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
@@ -285,6 +296,12 @@ public class StackRequestManifester {
                 }
             });
         }
+    }
+
+    @VisibleForTesting
+    void setupCloudwatchAlarmCreation(StackV4Request stackRequest) {
+        AwsStackV4Parameters aws = stackRequest.createAws();
+        aws.setCreateCloudwatch(enableCloudwatch);
     }
 
 }

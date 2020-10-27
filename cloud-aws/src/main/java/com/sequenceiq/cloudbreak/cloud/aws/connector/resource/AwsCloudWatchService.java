@@ -34,19 +34,19 @@ public class AwsCloudWatchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudWatchService.class);
 
-    @Value("${freeipa.aws.cloudwatch.suffix:-Status-Check-Failed-System}")
+    @Value("${aws.cloudwatch.suffix:-Status-Check-Failed-System}")
     private String alarmSuffix;
 
-    @Value("${freeipa.aws.cloudwatch.period:60}")
+    @Value("${aws.cloudwatch.period:60}")
     private int cloudwatchPeriod;
 
-    @Value("${freeipa.aws.cloudwatch.evaluationPeriods:2}")
+    @Value("${aws.cloudwatch.evaluationPeriods:2}")
     private int cloudwatchEvaluationPeriods;
 
-    @Value("${freeipa.aws.cloudwatch.threshold:1.0}")
+    @Value("${aws.cloudwatch.threshold:1.0}")
     private double cloudwatchThreshhold;
 
-    @Value("${freeipa.aws.cloudwatch.max-batchsize:100}")
+    @Value("${aws.cloudwatch.max-batchsize:100}")
     private int maxBatchsize;
 
     @Inject
