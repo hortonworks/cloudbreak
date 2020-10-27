@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.testcase.legacy.authorization;
+package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import javax.inject.Inject;
 
@@ -19,10 +19,9 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
-public class EnvironmentGetTest extends AbstractIntegrationTest {
+public class EnvironmentLegacyAuthzGetTest extends AbstractIntegrationTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;

@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -213,7 +214,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private boolean hasFlow() {
         try {
-            return ((CloudbreakClient) getTestContext().getAdminMicroserviceClient(CloudbreakClient.class))
+            return ((CloudbreakClient) getTestContext().getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(getCrn()).getAccountId()))
                     .getCloudbreakClient()
                     .flowPublicEndpoint()
                     .hasFlowRunningByChainId(getLastKnownFlowChainId(), getCrn()).getHasActiveFlow();
