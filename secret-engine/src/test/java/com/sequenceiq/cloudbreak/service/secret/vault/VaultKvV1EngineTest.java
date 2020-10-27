@@ -38,7 +38,7 @@ public class VaultKvV1EngineTest {
     public void testIsExistsNull() {
         when(template.read(anyString())).thenReturn(null);
 
-        Assert.assertFalse(underTest.isExists(gson.toJson(secret)));
+        Assert.assertFalse(underTest.exists(gson.toJson(secret)));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class VaultKvV1EngineTest {
         when(vaultResponse.getData()).thenReturn(null);
         when(template.read(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertFalse(underTest.isExists(gson.toJson(secret)));
+        Assert.assertFalse(underTest.exists(gson.toJson(secret)));
     }
 
     @Test
@@ -54,7 +54,7 @@ public class VaultKvV1EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
         when(template.read(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertTrue(underTest.isExists(gson.toJson(secret)));
+        Assert.assertTrue(underTest.exists(gson.toJson(secret)));
     }
 
     @Test

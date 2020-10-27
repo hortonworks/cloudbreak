@@ -49,7 +49,7 @@ public class VaultKvV2EngineTest {
     public void testIsExistsNull() {
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(null);
 
-        Assert.assertFalse(underTest.isExists(gson.toJson(secret)));
+        Assert.assertFalse(underTest.exists(gson.toJson(secret)));
     }
 
     @Test
@@ -57,7 +57,7 @@ public class VaultKvV2EngineTest {
         when(vaultResponse.getData()).thenReturn(null);
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertFalse(underTest.isExists(gson.toJson(secret)));
+        Assert.assertFalse(underTest.exists(gson.toJson(secret)));
     }
 
     @Test
@@ -65,7 +65,7 @@ public class VaultKvV2EngineTest {
         when(vaultResponse.getData()).thenReturn(Collections.emptyMap());
         when(vaultVersionedKeyValueOperations.get(anyString())).thenReturn(vaultResponse);
 
-        Assert.assertTrue(underTest.isExists(gson.toJson(secret)));
+        Assert.assertTrue(underTest.exists(gson.toJson(secret)));
     }
 
     @Test
