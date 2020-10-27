@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toSet;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -24,8 +25,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.io.BaseEncoding;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -34,6 +37,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -59,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
@@ -159,52 +164,54 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
         measure(() -> validateBeforeCreate(resource), LOGGER, "Cluster template validated in {}ms");
 
-        Stack stackTemplate = resource.getStackTemplate();
-        stackTemplate.setName(UUID.randomUUID().toString());
-        if (stackTemplate.getOrchestrator() != null) {
-            orchestratorService.save(stackTemplate.getOrchestrator());
-        }
+        if (resource.getStatus().isNonDefault()) {
+            Stack stackTemplate = resource.getStackTemplate();
+            stackTemplate.setName(UUID.randomUUID().toString());
+            if (stackTemplate.getOrchestrator() != null) {
+                orchestratorService.save(stackTemplate.getOrchestrator());
+            }
 
-        Network network = stackTemplate.getNetwork();
-        if (network != null) {
-            network.setWorkspace(stackTemplate.getWorkspace());
-            networkService.pureSave(network);
-        }
+            Network network = stackTemplate.getNetwork();
+            if (network != null) {
+                network.setWorkspace(stackTemplate.getWorkspace());
+                networkService.pureSave(network);
+            }
 
-        Cluster cluster = stackTemplate.getCluster();
-        if (cluster != null) {
-            cluster.setWorkspace(stackTemplate.getWorkspace());
-            clusterService.saveWithRef(cluster);
-        }
+            Cluster cluster = stackTemplate.getCluster();
+            if (cluster != null) {
+                cluster.setWorkspace(stackTemplate.getWorkspace());
+                clusterService.saveWithRef(cluster);
+            }
 
-        stackTemplate.setResourceCrn(createCRN(ThreadBasedUserCrnProvider.getAccountId()));
+            stackTemplate.setResourceCrn(createCRN(ThreadBasedUserCrnProvider.getAccountId()));
 
-        stackTemplate = stackTemplateService.pureSave(stackTemplate);
+            stackTemplate = stackTemplateService.pureSave(stackTemplate);
 
-        componentConfigProviderService.store(new ArrayList<>(stackTemplate.getComponents()));
+            componentConfigProviderService.store(new ArrayList<>(stackTemplate.getComponents()));
 
-        if (cluster != null) {
-            cluster.setStack(stackTemplate);
-            clusterService.save(cluster);
-        }
+            if (cluster != null) {
+                cluster.setStack(stackTemplate);
+                clusterService.save(cluster);
+            }
 
-        if (stackTemplate.getInstanceGroups() != null && !stackTemplate.getInstanceGroups().isEmpty()) {
-            instanceGroupService.saveAll(stackTemplate.getInstanceGroups(), stackTemplate.getWorkspace());
+            if (stackTemplate.getInstanceGroups() != null && !stackTemplate.getInstanceGroups().isEmpty()) {
+                instanceGroupService.saveAll(stackTemplate.getInstanceGroups(), stackTemplate.getWorkspace());
+            }
         }
         resource.setCreated(System.currentTimeMillis());
     }
 
     private void validateBeforeCreate(ClusterTemplate resource) {
 
-        if (resource.getStackTemplate() == null) {
-            throw new BadRequestException("The stack tempalte cannot be null.");
+        if (resource.getStackTemplate() == null && resource.getStatus() != ResourceStatus.DEFAULT) {
+            throw new BadRequestException("The stack template cannot be null.");
         }
 
         if (resource.getStatus() != ResourceStatus.DEFAULT && resource.getStackTemplate().getEnvironmentCrn() == null) {
             throw new BadRequestException("The environment cannot be null.");
         }
 
-        if (clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
+        if (resource.getStatus().isNonDefault() &&  clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
             throw new DuplicateClusterTemplateException(
                     format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
         }
@@ -264,23 +271,40 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     private Optional<String> getMessageIfBlueprintIsInvalidInCluster(ClusterTemplate clusterTemplate) {
-        if (Objects.isNull(clusterTemplate.getStackTemplate().getCluster())) {
+        if (!clusterTemplate.getStatus().isDefault() && Objects.isNull(clusterTemplate.getStackTemplate().getCluster())) {
             String msg = "Stack template in cluster definition should contain a – valid – cluster request!";
             return Optional.of(msg);
         }
         String msg = null;
-        boolean hasBlueprint = nonNull(clusterTemplate.getStackTemplate().getCluster().getBlueprint());
-        if (!hasBlueprint) {
-            msg = "Cluster definition should contain a cluster template!";
+        String blueprintName = null;
+        if (clusterTemplate.getStatus().isDefault()) {
+            try {
+                blueprintName = new Json(getTemplateString(clusterTemplate)).get(DefaultClusterTemplateV4Request.class)
+                        .getDistroXTemplate()
+                        .getCluster()
+                        .getBlueprintName();
+            } catch (IOException e) {
+                msg = "The cluster template in the cluster definition should be an existing one!";
+            }
         } else {
+            blueprintName = clusterTemplate.getStackTemplate().getCluster().getBlueprint().getName();
+        }
+        if (!nonNull(blueprintName)) {
+            msg = "Cluster definition should contain a cluster template!";
+        } else if (clusterTemplate.getStatus().isNonDefault()) {
+            String finalBlueprintName = blueprintName;
             boolean hasExistingBlueprint = blueprintService.getAllAvailableInWorkspace(clusterTemplate.getWorkspace())
                     .stream()
-                    .anyMatch(blueprint -> blueprint.getName().equals(clusterTemplate.getStackTemplate().getCluster().getBlueprint().getName()));
+                    .anyMatch(blueprint -> blueprint.getName().equals(finalBlueprintName));
             if (!hasExistingBlueprint) {
-                msg = "The cluster template (aka blueprint) in the cluster definition should be an existing one!";
+                msg = "The cluster template in the cluster definition should be exists!";
             }
         }
         return Optional.ofNullable(msg);
+    }
+
+    private String getTemplateString(ClusterTemplate clusterTemplate) {
+        return new String(BaseEncoding.base64().decode(clusterTemplate.getTemplateContent()));
     }
 
     public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
@@ -313,16 +337,17 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             LOGGER.debug("Outdated clusterTemplates deleted: '{}'.", outdatedTemplates.size());
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
             LOGGER.debug("None deleted clusterTemplates collected: '{}'.", clusterTemplates.size());
-            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, this::createAll);
+            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
             LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
     }
 
     private Collection<ClusterTemplate> createAll(Iterable<ClusterTemplate> clusterTemplates) {
+        User user = userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser());
         return StreamSupport.stream(clusterTemplates.spliterator(), false)
                 .map(ct -> {
                     try {
-                        return measure(() -> create(ct, ct.getWorkspace(), userService.getOrCreate(legacyRestRequestThreadLocalService.getCloudbreakUser())),
+                        return measure(() -> create(ct, ct.getWorkspace(), user),
                                 LOGGER, "Cluster template created in {}ms");
                     } catch (DuplicateClusterTemplateException duplicateClusterTemplateException) {
                         LOGGER.info("Template was found, try to get it", duplicateClusterTemplateException);

@@ -67,6 +67,8 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(nullable = false)
     private String resourceCrn;
 
+    private String clouderaRuntimeVersion;
+
     private Long created = System.currentTimeMillis();
 
     public ClusterTemplate() {
@@ -187,5 +189,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     public void setFeatureState(FeatureState featureState) {
         this.featureState = featureState;
+    }
+
+    public String getClouderaRuntimeVersion() {
+        return clouderaRuntimeVersion;
+    }
+
+    public void setClouderaRuntimeVersion(String clouderaRuntimeVersion) {
+        this.clouderaRuntimeVersion = clouderaRuntimeVersion;
     }
 }
