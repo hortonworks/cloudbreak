@@ -135,6 +135,10 @@
     {
       "name": "LIVY_FOR_SPARK3",
       "version": "0.6.0"
+    },
+    {
+      "name": "STREAMS_REPLICATION_MANAGER",
+      "version": "1.0.0"
     }
   ],
   "version": "7.2.2",
