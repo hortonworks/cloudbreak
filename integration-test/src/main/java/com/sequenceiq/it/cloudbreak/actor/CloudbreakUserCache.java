@@ -1,11 +1,14 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class CloudbreakUserCache {
 
@@ -13,7 +16,7 @@ public class CloudbreakUserCache {
 
     private static Object mutex = new Object();
 
-    private List<CloudbreakUser> users;
+    private Map<String, List<CloudbreakUser>> usersByAccount;
 
     private CloudbreakUserCache() {
     }
@@ -33,25 +36,31 @@ public class CloudbreakUserCache {
     }
 
     public CloudbreakUser getByName(String name) {
-        if (users == null) {
+        if (usersByAccount == null) {
             initUsers();
         }
-        return users.stream().filter(u -> u.getDisplayName().equals(name)).findFirst().get();
+        return usersByAccount.values().stream().flatMap(Collection::stream)
+                .filter(u -> u.getDisplayName().equals(name)).findFirst().get();
     }
 
     public void initUsers() {
         String userConfigPath = "ums-users/api-credentials.json";
         try {
-            this.users = JsonUtil.readValue(
+            this.usersByAccount = JsonUtil.readValue(
                     FileReaderUtils.readFileFromClasspathQuietly(userConfigPath), new TypeReference<>() {
                     });
         } catch (IOException e) {
             throw new RuntimeException(String.format("Can't read file: %s It's possible you did run make fetch-secrets", userConfigPath));
         }
-        users.stream().forEach(u -> CloudbreakUser.validateRealUmsUser(u));
+        usersByAccount.values().stream().flatMap(Collection::stream).forEach(u -> CloudbreakUser.validateRealUmsUser(u));
+    }
+
+    public String getAdminAccessKeyByAccountId(String accountId) {
+        return usersByAccount.get(accountId).stream().filter(CloudbreakUser::getAdmin).findFirst()
+                .orElseThrow(() -> new TestFailException(String.format("There is no account admin test user for account %s", accountId))).getAccessKey();
     }
 
     public boolean isInitialized() {
-        return users != null;
+        return usersByAccount != null;
     }
 }

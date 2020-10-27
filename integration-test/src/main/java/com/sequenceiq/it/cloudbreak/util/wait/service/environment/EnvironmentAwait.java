@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -34,7 +35,7 @@ public class EnvironmentAwait implements Await<EnvironmentTestDto, EnvironmentSt
                 throw new RuntimeException("Environment key has been provided but no result in resource map!");
             }
             Log.await(LOGGER, String.format("%s for %s", entity.getResponse().getName(), desiredStatus));
-            EnvironmentClient client = testContext.getAdminMicroserviceClient(EnvironmentClient.class);
+            EnvironmentClient client = testContext.getAdminMicroserviceClient(EnvironmentClient.class, Crn.fromString(entity.getCrn()).getAccountId());
             String crn = entity.getResponse().getCrn();
             if (desiredStatus.equals(ARCHIVED)) {
                 waitForEnvironmentStatus(new EnvironmentTerminationChecker<>(), client, crn, testContext, desiredStatus,

@@ -68,7 +68,6 @@ import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
-import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
@@ -332,11 +331,6 @@ public abstract class TestContext implements ApplicationContextAware {
     protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
     T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
         return action.action(getTestContext(), entity, getMicroserviceClient(clientClass, who));
-    }
-
-    protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
-    T doActionAsAdmin(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
-        return action.action(getTestContext(), entity, getAdminMicroserviceClient(clientClass));
     }
 
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -732,24 +726,16 @@ public abstract class TestContext implements ApplicationContextAware {
         return sdxClient;
     }
 
-    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String accountId) {
         String accessKey;
-        String accountAdminuser = AuthUserKeys.ACCOUNT_ADMIN;
         if (CloudbreakUserCache.getInstance().isInitialized()) {
-            boolean legacyAuthorizationUsed = org.apache.commons.lang3.StringUtils.equals(getActingUserAccessKey(),
-                    CloudbreakUserCache.getInstance().getByName(AuthUserKeys.LEGACY_POWER).getAccessKey())
-                    || org.apache.commons.lang3.StringUtils.equals(getActingUserAccessKey(),
-                    CloudbreakUserCache.getInstance().getByName(AuthUserKeys.LEGACY_NON_POWER).getAccessKey());
-            if (legacyAuthorizationUsed) {
-                accountAdminuser = AuthUserKeys.LEGACY_POWER;
-            }
-            accessKey = CloudbreakUserCache.getInstance().getByName(accountAdminuser).getAccessKey();
+            accessKey = CloudbreakUserCache.getInstance().getAdminAccessKeyByAccountId(accountId);
         } else {
             accessKey = INTERNAL_ACTOR_ACCESS_KEY;
         }
         U microserviceClient = (U) clients.getOrDefault(accessKey, Map.of()).get(msClientClass);
         if (microserviceClient == null) {
-            throw new IllegalStateException("Should create a client for this user: " + accountAdminuser);
+            throw new IllegalStateException("Should create an admin client for the acting user.");
         }
         return microserviceClient;
     }
@@ -804,7 +790,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (awaitEntity == null) {
                 throw new RuntimeException("Cloudbreak key provided but no result in resource map, key=" + key);
             }
-            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class);
+            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -830,7 +816,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (awaitEntity == null) {
                 throw new RuntimeException("Sdx key provided but no result in resource map, key=" + key);
             }
-            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class);
+            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
             try {
                 awaitEntity.setResponse(
@@ -864,7 +850,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (awaitEntity == null) {
                 throw new RuntimeException("Sdx internal key provided but no result in resource map, key=" + key);
             }
-            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class);
+            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
             try {
                 awaitEntity.setResponse(
@@ -898,7 +884,7 @@ public abstract class TestContext implements ApplicationContextAware {
             if (awaitEntity == null) {
                 throw new RuntimeException("Distrox key provided but no result in resource map, key=" + key);
             }
-            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class);
+            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
             try {
                 awaitEntity.setResponse(
@@ -933,7 +919,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 throw new RuntimeException("Environment key provided but no result in resource map, key=" + key);
             }
 
-            EnvironmentClient environmentClient = getAdminMicroserviceClient(EnvironmentClient.class);
+            EnvironmentClient environmentClient = getAdminMicroserviceClient(EnvironmentClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
             flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, environmentClient);
             try {
                 awaitEntity.setResponse(
@@ -1312,7 +1298,7 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getAdminMicroserviceClient(CloudbreakClient.class));
+                testDto.cleanUp(this, getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(testDto.getCrn()).getAccountId()));
             } catch (Exception e) {
                 LOGGER.error("Cleaning up of {} resource is failing, because of: {}", testDto.getName(), e.getMessage(), e);
             }

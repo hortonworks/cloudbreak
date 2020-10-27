@@ -218,8 +218,8 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass) {
-        return wrappedTestContext.getAdminMicroserviceClient(msClientClass);
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String accountId) {
+        return wrappedTestContext.getAdminMicroserviceClient(msClientClass, accountId);
     }
 
     @Override
