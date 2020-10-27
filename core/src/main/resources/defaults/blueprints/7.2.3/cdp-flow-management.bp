@@ -74,7 +74,7 @@
               },
               {
                 "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
-                "value": "nifi|cloudbreak|users"
+                "value": "nifi|cloudbreak|users|hadoop"
               },
               {
                 "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.enabled",
@@ -212,7 +212,7 @@
               },
               {
                 "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
-                "value": "nifiregistry|cloudbreak|users"
+                "value": "nifiregistry|cloudbreak|users|hadoop"
               },
               {
                 "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.enabled",
