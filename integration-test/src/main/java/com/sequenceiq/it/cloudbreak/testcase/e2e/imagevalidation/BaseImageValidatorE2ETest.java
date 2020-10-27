@@ -20,6 +20,7 @@ import javax.inject.Inject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
@@ -31,6 +32,8 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
         put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
+
+    private AtomicReference<String> selectedImageID;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -50,9 +53,14 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
         String stack = resourcePropertyProvider().getName();
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
+        selectedImageID = new AtomicReference<>();
 
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
+                .when((tc, dto, client) -> {
+                    selectedImageID.set(testContext.getCloudProvider().getLatestBaseImageID(tc, dto, client));
+                    return dto;
+                })
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
@@ -75,7 +83,7 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
 
     @Override
     protected String getImageId(TestContext testContext) {
-        return testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId();
+        return selectedImageID.get();
     }
 
     @Override
