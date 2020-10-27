@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -87,8 +86,13 @@ public class EnvironmentNetworkService {
     }
 
     public void deleteNetwork(EnvironmentDto environment) {
-        NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
-        networkConnector.deleteNetworkWithSubnets(createNetworkDeletionRequest(environment));
+        try {
+            NetworkConnector networkConnector = getNetworkConnector(environment.getCloudPlatform());
+            networkConnector.deleteNetworkWithSubnets(createNetworkDeletionRequest(environment));
+        } catch (NetworkConnectorNotFoundException connectorNotFoundException) {
+            LOGGER.debug("Exiting from network deletion gracefully as Network connector couldn't be found for environment:'{}' and platform:'{}'",
+                    environment.getName(), environment.getCloudPlatform());
+        }
     }
 
     private NetworkDeletionRequest createNetworkDeletionRequest(EnvironmentDto environment) {
@@ -131,7 +135,7 @@ public class EnvironmentNetworkService {
     private NetworkConnector getNetworkConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).networkConnector())
-                .orElseThrow(() -> new BadRequestException("No network connector for cloud platform: " + cloudPlatform));
+                .orElseThrow(() -> new NetworkConnectorNotFoundException("No network connector for cloud platform: " + cloudPlatform));
     }
 
     private CloudPlatform getCloudPlatform(EnvironmentDto environment) {

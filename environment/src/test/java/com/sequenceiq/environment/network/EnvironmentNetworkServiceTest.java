@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -144,14 +143,14 @@ class EnvironmentNetworkServiceTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    void testCreateNetworkIfUnableToObtainNetworkConnectorThenBadRequestExceptionComes() {
+    void testCreateNetworkIfUnableToObtainNetworkConnectorThenNetworkConnectorNotFoundExceptionComes() {
         EnvironmentDto environmentDto = EnvironmentDto.builder().withCloudPlatform(CLOUD_PLATFORM).build();
         CloudConnector<Object> cloudConnector = mock(CloudConnector.class);
 
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.networkConnector()).thenReturn(null);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createCloudNetwork(environmentDto, new AzureNetwork()));
+        Assertions.assertThrows(NetworkConnectorNotFoundException.class, () -> underTest.createCloudNetwork(environmentDto, new AzureNetwork()));
 
         verify(cloudPlatformConnectors, times(1)).get(any());
     }
@@ -222,6 +221,16 @@ class EnvironmentNetworkServiceTest {
     }
 
     @Test
+    void testDeleteNetworkShouldNotThrowExceptionWhenNoNetworkConnectorForPlatform() {
+        EnvironmentDto environmentDto = createEnvironmentDto(null);
+        when(cloudConnector.networkConnector()).thenReturn(null);
+
+        underTest.deleteNetwork(environmentDto);
+
+        verify(networkConnector, times(0)).deleteNetworkWithSubnets(any());
+    }
+
+    @Test
     void testGetNetworkCidr() {
         Credential credential = mock(Credential.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
@@ -254,7 +263,8 @@ class EnvironmentNetworkServiceTest {
 
         when(cloudConnector.networkConnector()).thenReturn(null);
 
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getNetworkCidr(network, "AWS", credential));
+        NetworkConnectorNotFoundException exception = assertThrows(NetworkConnectorNotFoundException.class,
+                () -> underTest.getNetworkCidr(network, "AWS", credential));
         assertEquals("No network connector for cloud platform: AWS", exception.getMessage());
     }
 

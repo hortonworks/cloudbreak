@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.util;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
@@ -12,6 +14,8 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public class GcpStackUtilTest {
 
@@ -64,6 +68,13 @@ public class GcpStackUtilTest {
         parameters.put(GcpStackUtil.SUBNET_ID, "asdf");
         Network network = new Network(new Subnet(""), parameters);
         assertFalse(GcpStackUtil.isNewSubnetInExistingNetwork(network));
+    }
+
+    @Test
+    public void testGetGroupTypeTag() {
+        assertEquals("gateway", GcpStackUtil.getGroupTypeTag(InstanceGroupType.GATEWAY));
+        assertEquals("core", GcpStackUtil.getGroupTypeTag(InstanceGroupType.CORE));
+        assertThrows(CloudbreakServiceException.class, () -> GcpStackUtil.getGroupTypeTag(null));
     }
 
 }

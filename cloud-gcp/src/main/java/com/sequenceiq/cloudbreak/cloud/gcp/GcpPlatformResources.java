@@ -130,19 +130,18 @@ public class GcpPlatformResources implements PlatformResources {
 
         String networkId = null;
         String subnetId = null;
+        String sharedProjectId = null;
         if (filters != null) {
             networkId = filters.getOrDefault("networkId", null);
             subnetId = filters.getOrDefault("subnetId", null);
+            sharedProjectId = filters.getOrDefault("sharedProjectId", null);
         }
 
         LOGGER.debug("Get subnets with filter values, networkId : {}, subnetId : {}", networkId, subnetId);
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        NetworkList networkList = StringUtils.isEmpty(networkId) ?
-                compute.networks().list(projectId).execute() :
-                new NetworkList().setItems(Collections.singletonList(compute.networks().get(projectId, networkId).execute()));
-        SubnetworkList subnetworkList = StringUtils.isEmpty(subnetId) ?
-                compute.subnetworks().list(projectId, region.value()).execute() :
-                new SubnetworkList().setItems(Collections.singletonList(compute.subnetworks().get(projectId, region.value(), subnetId).execute()));
+        NetworkList networkList = getNetworkList(compute, projectId, networkId, sharedProjectId);
+        SubnetworkList subnetworkList = getSubnetworkList(region, compute, projectId, subnetId, sharedProjectId);
+
         // GCP VPCs are global. Subnets have a global scope in region. So picking the first availability zone in the region for subnet.
         String zone = compute.regions().get(projectId, region.value())
                 .execute()
@@ -183,6 +182,40 @@ public class GcpPlatformResources implements PlatformResources {
         result.put(region.value(), cloudNetworks);
 
         return new CloudNetworks(result);
+    }
+
+    public SubnetworkList getSubnetworkList(Region region, Compute compute, String projectId, String subnetId, String sharedProjectId) throws IOException {
+        SubnetworkList subnetworkList;
+        if (StringUtils.isEmpty(subnetId)) {
+            subnetworkList = compute.subnetworks()
+                    .list(projectId, region.value()).execute();
+        } else {
+            if (!Strings.isNullOrEmpty(sharedProjectId)) {
+                subnetworkList = new SubnetworkList()
+                        .setItems(Collections.singletonList(compute.subnetworks().get(sharedProjectId, region.value(), subnetId).execute()));
+            } else {
+                subnetworkList = new SubnetworkList()
+                        .setItems(Collections.singletonList(compute.subnetworks().get(projectId, region.value(), subnetId).execute()));
+            }
+        }
+        return subnetworkList;
+    }
+
+    public NetworkList getNetworkList(Compute compute, String projectId, String networkId, String sharedProjectId) throws IOException {
+        NetworkList networkList;
+        if (StringUtils.isEmpty(networkId)) {
+            networkList = compute.networks()
+                    .list(projectId).execute();
+        } else {
+            if (!Strings.isNullOrEmpty(sharedProjectId)) {
+                networkList = new NetworkList()
+                        .setItems(Collections.singletonList(compute.networks().get(sharedProjectId, networkId).execute()));
+            } else {
+                networkList = new NetworkList()
+                        .setItems(Collections.singletonList(compute.networks().get(projectId, networkId).execute()));
+            }
+        }
+        return networkList;
     }
 
     @Override
