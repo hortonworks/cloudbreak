@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
+import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,13 +13,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel(description = ModelDescriptions.SSL_CONFIG_RESPONSE)
 public class SslConfigV4Response implements Serializable {
 
-    @ApiModelProperty(ModelDescriptions.DatabaseServer.SSL_CERTIFICATES)
+    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATES)
     private Set<String> sslCertificates;
 
-    @ApiModelProperty(ModelDescriptions.DatabaseServer.SSL_CERTIFICATE_TYPE)
+    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_TYPE)
     private SslCertificateType sslCertificateType = SslCertificateType.NONE;
 
-    @ApiModelProperty(ModelDescriptions.DatabaseServer.SSL_CONFIG)
+    @ApiModelProperty(DatabaseServer.SSL_MODE)
     private SslMode sslMode = SslMode.DISABLED;
 
     public Set<String> getSslCertificates() {
@@ -44,4 +45,5 @@ public class SslConfigV4Response implements Serializable {
     public void setSslMode(SslMode sslMode) {
         this.sslMode = sslMode;
     }
+
 }
