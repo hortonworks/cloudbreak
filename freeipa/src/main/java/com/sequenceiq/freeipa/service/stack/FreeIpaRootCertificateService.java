@@ -2,9 +2,12 @@ package com.sequenceiq.freeipa.service.stack;
 
 import javax.inject.Inject;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.freeipa.cache.cert.Cert;
+import com.sequenceiq.freeipa.cache.cert.CertCacheConfiguration;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -23,12 +26,13 @@ public class FreeIpaRootCertificateService {
     @Inject
     private StackService stackService;
 
-    public String getRootCertificate(String environmentCrn, String accountId) throws FreeIpaClientException {
+    @Cacheable(cacheNames = CertCacheConfiguration.NAME)
+    public Cert getRootCertificate(String environmentCrn, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
 
-        return convertToPemFormat(client.getRootCertificate());
+        return new Cert(convertToPemFormat(client.getRootCertificate()));
     }
 
     private String convertToPemFormat(String certificate) {

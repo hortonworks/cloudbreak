@@ -177,7 +177,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public String getRootCertificate(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
-            return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId);
+            return freeIpaRootCertificateService.getRootCertificate(environmentCrn, accountId).getCert();
         } catch (FreeIpaClientException e) {
             throw new FreeIpaClientExceptionWrapper(e);
         }
