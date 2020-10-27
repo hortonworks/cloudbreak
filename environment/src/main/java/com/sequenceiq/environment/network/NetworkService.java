@@ -103,13 +103,17 @@ public class NetworkService {
                 .withSubnetMetas(editDto.getNetworkDto().getSubnetMetas())
                 .build();
 
-        Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
-        originalNetwork.setSubnetMetas(subnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
+        try {
+            Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
+            originalNetwork.setSubnetMetas(subnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
 
-        Network network = environmentNetworkConverter.convertToNetwork(originalNetwork);
-        NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
-        originalNetwork.setNetworkCidr(networkCidr.getCidr());
-        originalNetwork.setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
+            Network network = environmentNetworkConverter.convertToNetwork(originalNetwork);
+            NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
+            originalNetwork.setNetworkCidr(networkCidr.getCidr());
+            originalNetwork.setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
+        } catch (NetworkConnectorNotFoundException connectorNotFoundException) {
+            throw new BadRequestException(connectorNotFoundException.getMessage());
+        }
         return originalNetwork;
     }
 

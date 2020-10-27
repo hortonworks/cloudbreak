@@ -47,7 +47,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public final class GcpStackUtil {
 
@@ -295,7 +297,7 @@ public final class GcpStackUtil {
 
     public static String getBucket(String image) {
         if (!StringUtils.isEmpty(image) && createParts(image).length > 1) {
-            String[] parts = createParts(image);
+            String[] parts = createParts(image.replaceAll("https://storage.googleapis.com/", ""));
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
         } else {
             LOGGER.debug("No bucket found in source image path.");
@@ -414,6 +416,13 @@ public final class GcpStackUtil {
 
     public static String getGroupClusterTag(CloudContext cloudContext, Group group) {
         return group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
+    }
+
+    public static String getGroupTypeTag(InstanceGroupType type) {
+        if (type == null) {
+            throw new CloudbreakServiceException("Type of the group must not be null");
+        }
+        return type.name().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
     }
 
     private static String[] createParts(String splittable) {

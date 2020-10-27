@@ -7,6 +7,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class CheckResourceRightTrueAssertion implements Assertion<CheckResourceRightTestDto, CloudbreakClient> {
 
@@ -16,7 +17,7 @@ public class CheckResourceRightTrueAssertion implements Assertion<CheckResourceR
             Optional<CheckResourceRightV4SingleResponse> resourceRightV4SingleResponse = testDto.getResponse().getResponses().stream()
                     .filter(checkResourceRightV4SingleResponse -> checkResourceRightV4SingleResponse.getResourceCrn().equals(entry.getKey())).findFirst();
             if (!resourceRightV4SingleResponse.isPresent()) {
-                throw new AssertionError(String.format("Checking resource right for resource %s should have returned with a result", entry.getKey()));
+                throw new TestFailException(String.format("Checking resource right for resource %s should have returned with a result", entry.getKey()));
             }
             entry.getValue().forEach(rightV4 -> {
                 CheckRightTrueAssertion.checkRightSingleResponseAssertion(resourceRightV4SingleResponse.get().getRights(), rightV4);
