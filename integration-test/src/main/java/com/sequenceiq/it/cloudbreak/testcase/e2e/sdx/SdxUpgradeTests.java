@@ -34,7 +34,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "upgrade called on the SDX cdluster",
+            when = "upgrade called on the SDX cluster",
             then = "SDX upgrade should be successful, the cluster should be up and running"
     )
     public void testSDXUpgrade(TestContext testContext) {
