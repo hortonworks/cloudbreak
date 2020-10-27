@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Service
-public class UmsAuthorizationEntitlementRegisteredCache extends AbstractCacheDefinition {
+public class UmsEntitlementRegisteredCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
@@ -17,7 +17,7 @@ public class UmsAuthorizationEntitlementRegisteredCache extends AbstractCacheDef
 
     @Override
     protected String getName() {
-        return "umsAuthorizationEntitlementRegisteredCache";
+        return "umsEntitlementRegisteredCache";
     }
 
     @Override

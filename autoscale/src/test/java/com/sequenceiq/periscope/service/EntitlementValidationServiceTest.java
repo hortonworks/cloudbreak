@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -44,7 +42,7 @@ public class EntitlementValidationServiceTest {
 
     @Test
     public void testWhenAWSAndEntitled() {
-        when(entitlementService.getEntitlements(anyString(), anyString())).thenReturn(List.of("DATAHUB_AWS_AUTOSCALING"));
+        when(entitlementService.awsAutoScalingEnabled(anyString(), anyString())).thenReturn(true);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AWS");
         assertTrue("isEntitled should be true when entitlement found", entitled);
@@ -52,7 +50,7 @@ public class EntitlementValidationServiceTest {
 
     @Test
     public void testWhenAWSAndNotEntitled() {
-        when(entitlementService.getEntitlements(anyString(), anyString())).thenReturn(List.of("DATAHUB_AZURE_AUTOSCALING"));
+        when(entitlementService.awsAutoScalingEnabled(anyString(), anyString())).thenReturn(false);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AWS");
         assertFalse("isEntitled should be false when entitlement is not found", entitled);
@@ -60,7 +58,7 @@ public class EntitlementValidationServiceTest {
 
     @Test
     public void testWhenAzureAndEntitled() {
-        when(entitlementService.getEntitlements(anyString(), anyString())).thenReturn(List.of("DATAHUB_AWS_AUTOSCALING", "DATAHUB_AZURE_AUTOSCALING"));
+        when(entitlementService.azureAutoScalingEnabled(anyString(), anyString())).thenReturn(true);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AZURE");
         assertTrue("isEntitled should be true when entitlement found", entitled);
@@ -68,7 +66,7 @@ public class EntitlementValidationServiceTest {
 
     @Test
     public void testWhenAzureAndNotEntitled() {
-        when(entitlementService.getEntitlements(anyString(), anyString())).thenReturn(List.of());
+        when(entitlementService.azureAutoScalingEnabled(anyString(), anyString())).thenReturn(false);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AZURE");
         assertFalse("isEntitled should be false when entitlement is not found", entitled);

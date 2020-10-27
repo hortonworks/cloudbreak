@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 @Component
 public class CmTemplateValidator implements BlueprintValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateValidator.class);
 
     @Inject
     private CmTemplateProcessorFactory processorFactory;
@@ -49,7 +49,7 @@ public class CmTemplateValidator implements BlueprintValidator {
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
-                if (!entitlementService.scalingServiceEnabled(userCrn, accountId, role.getEntitledFor())) {
+                if (!entitlementService.isEntitledFor(userCrn, accountId, role.getEntitledFor())) {
                     throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                             role.name()));
                 } else {
@@ -59,7 +59,7 @@ public class CmTemplateValidator implements BlueprintValidator {
         }
         for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
             if (services.contains(role.name()) && adjustment > 0) {
-                if (!entitlementService.scalingServiceEnabled(userCrn, accountId, role.getEntitledFor())) {
+                if (!entitlementService.isEntitledFor(userCrn, accountId, role.getEntitledFor())) {
                     throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                             role.name()));
                 } else {
