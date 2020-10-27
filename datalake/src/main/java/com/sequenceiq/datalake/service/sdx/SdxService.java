@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -733,4 +734,9 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
             stackV4Endpoint.renewCertificate(0L, sdxCluster.getClusterName(), userCrn);
         });
     }
+
+    public void updateCertExpirationState(Long id, CertExpirationState state) {
+        sdxClusterRepository.updateCertExpirationState(id, state);
+    }
+
 }
