@@ -95,9 +95,12 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .when(environmentTestClient.delete())
                 .validate();
         testCheckRightUtil(testContext, testContext.given(EnvironmentTestDto.class).getCrn());
+        testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete())
+                .validate();
     }
 
     private void testCheckRightUtil(TestContext testContext, String envCrn) {
