@@ -198,7 +198,7 @@ public class ModelDescriptions {
         public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String CLOUD_STORAGE = "external cloud storage configuration";
-        public static final String INSTANCE_GROUPS = "collection of instance groupst";
+        public static final String INSTANCE_GROUPS = "collection of instance groups";
         public static final String IMAGE_SETTINGS = "settings for custom images";
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
