@@ -9,8 +9,11 @@ collector:
       compress: true{% endif %}
       folderPrefix: logs
       label: "{{ logfile["label"] }}"{% endif %}{% endfor %}
-    - path: /var/log/td-agent/td-agent.log
+    - path: /var/log/cdp-logging-agent/cdp-logging-agent.log
       label: fluentd
+      folderPrefix: logs
+    - path: /var/log/td-agent/td-agent.log
+      label: td-agent
       folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
       compress: true{% endif %}
       useFullPath: false
