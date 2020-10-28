@@ -67,8 +67,8 @@ public class CertRotationService {
             CertificatesRotationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     stackV4Endpoint.rotateAutoTlsCertificates(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, response.getFlowIdentifier());
+            updateCertExpirationState(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Datalake cert rotation in progress", sdxCluster);
-            sdxService.updateCertExpirationState(id, CertExpirationState.VALID);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Couldn't start certiificate rotation in CB: {}", errorMessage, e);
@@ -93,5 +93,10 @@ public class CertRotationService {
                 .run(() -> statusChecker.checkClusterStatusDuringRotate(sdxCluster));
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_FINISHED, ResourceEvent.SDX_CERT_ROTATION_FINISHED,
                 "Datalake is running", sdxCluster);
+    }
+
+    private void updateCertExpirationState(SdxCluster sdxCluster) {
+        sdxService.updateCertExpirationState(sdxCluster.getId(), CertExpirationState.VALID);
+        sdxCluster.setCertExpirationState(CertExpirationState.VALID);
     }
 }
