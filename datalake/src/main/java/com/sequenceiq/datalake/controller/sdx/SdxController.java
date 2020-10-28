@@ -299,14 +299,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
     public FlowIdentifier rotateAutoTlsCertificatesByName(@ResourceName String name, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_CERT_DATALAKE)
     public FlowIdentifier rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return certRotationService.rotateAutoTlsCertificates(sdxCluster, rotateCertificateRequest);
