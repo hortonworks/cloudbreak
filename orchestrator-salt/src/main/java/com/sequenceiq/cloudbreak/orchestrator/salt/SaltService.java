@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 
+import io.opentracing.Tracer;
+
 @Service
 public class SaltService {
 
@@ -22,11 +24,14 @@ public class SaltService {
     @Inject
     private SaltErrorResolver saltErrorResolver;
 
+    @Inject
+    private Tracer tracer;
+
     @Value("${rest.debug}")
     private boolean restDebug;
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
-        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug);
+        return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, tracer);
     }
 
     public GatewayConfig getPrimaryGatewayConfig(List<GatewayConfig> allGatewayConfigs) throws CloudbreakOrchestratorFailedException {
