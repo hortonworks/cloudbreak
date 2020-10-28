@@ -42,10 +42,10 @@ public class AzureDnsZoneCreationCheckerTask extends PollBooleanStateTask {
         ResourceStatus templateDeploymentStatus = azureClient.getTemplateDeploymentStatus(resourceGroupName, deploymentName);
 
         if (templateDeploymentStatus == ResourceStatus.DELETED) {
-            throw new CloudConnectorException(String.format("Deployment %s is either deleted of does not exist", deploymentName));
+            throw new CloudConnectorException(String.format("Deployment %s is either deleted or does not exist", deploymentName));
         }
 
-        if (templateDeploymentStatus.isPermanent() && templateDeploymentStatus != ResourceStatus.DELETED) {
+        if (templateDeploymentStatus.isPermanent()) {
             LOGGER.info("Deployment has been finished with status {}", templateDeploymentStatus);
 
             if (StringUtils.isNotEmpty(networkId)) {
