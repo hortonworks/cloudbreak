@@ -78,7 +78,7 @@ public class CloudbreakTerminationChecker<T extends CloudbreakWaitObject> extend
             StackStatusV4Response stackStatus = waitObject.getStackEndpoint().getStatusByName(waitObject.getWorkspaceId(), name, waitObject.getAccountId());
             Map<String, Status> actualStatuses = Map.of("status", stackStatus.getStatus(), "clusterStatus", stackStatus.getClusterStatus());
             if (isDeleteFailed(actualStatuses)) {
-                return true;
+                return false;
             }
             return waitObject.isFailed(actualStatuses);
         } catch (ProcessingException clientException) {

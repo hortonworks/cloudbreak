@@ -71,7 +71,7 @@ public class DatalakeTerminationChecker<T extends DatalakeWaitObject> extends Ex
             SdxClusterResponse sdx = waitObject.getEndpoint().get(name);
             SdxClusterStatusResponse status = sdx.getStatus();
             if (status.equals(DELETE_FAILED)) {
-                return true;
+                return false;
             }
             return waitObject.isFailed(status);
         } catch (ProcessingException clientException) {
