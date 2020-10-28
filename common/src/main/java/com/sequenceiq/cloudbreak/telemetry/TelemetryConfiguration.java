@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 
 @Configuration
@@ -13,17 +14,17 @@ public class TelemetryConfiguration {
 
     private final MeteringConfiguration meteringConfiguration;
 
-    private final boolean clusterLogsCollection;
+    private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
 
     private final boolean monitoringEnabled;
 
     public TelemetryConfiguration(AltusDatabusConfiguration altusDatabusConfiguration,
             MeteringConfiguration meteringConfiguration,
-            @Value("${cluster.logs.collection.enabled:false}") boolean clusterLogsCollection,
+            ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration,
             @Value("${cluster.monitoring.enabled:false}") boolean monitoringEnabled) {
         this.altusDatabusConfiguration = altusDatabusConfiguration;
         this.meteringConfiguration = meteringConfiguration;
-        this.clusterLogsCollection = clusterLogsCollection;
+        this.clusterLogsCollectionConfiguration = clusterLogsCollectionConfiguration;
         this.monitoringEnabled = monitoringEnabled;
     }
 
@@ -35,8 +36,8 @@ public class TelemetryConfiguration {
         return meteringConfiguration;
     }
 
-    public boolean isClusterLogsCollection() {
-        return clusterLogsCollection;
+    public ClusterLogsCollectionConfiguration getClusterLogsCollectionConfiguration() {
+        return clusterLogsCollectionConfiguration;
     }
 
     public boolean isMonitoringEnabled() {

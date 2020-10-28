@@ -11,10 +11,10 @@
     credential_file_reload_interval  60
     debug                            false
     endpoint                         "{{ databus.endpoint }}"
-    headers                          app:{{ fluent.clusterType }},clusterName:{{ fluent.clusterName }},clusterType:{{ fluent.clusterType }},clusterCrn:{{ fluent.clusterCrn }},clusterOwner:{{ fluent.clusterOwner}},clusterVersion:{{ fluent.clusterVersion }}
+    headers                          {{ fluent.dbusClusterLogsCollectionAppHeaders }},clusterName:{{ fluent.clusterName }},clusterType:{{ fluent.clusterType }},clusterCrn:{{ fluent.clusterCrn }},clusterOwner:{{ fluent.clusterOwner}},clusterVersion:{{ fluent.clusterVersion }}
     extra_headers_field              bundleContext
     event_message_field              message
-    stream_name                      LogCollection
+    stream_name                      {{ fluent.dbusClusterLogsCollectionStreamName }}
     partition_key                    "#{Socket.gethostname}"
     {%- if fluent.proxyUrl %}
     proxy_url                        "{{ fluent.proxyUrl }}"

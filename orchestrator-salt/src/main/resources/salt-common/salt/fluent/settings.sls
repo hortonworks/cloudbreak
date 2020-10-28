@@ -158,6 +158,19 @@
   {% set dbus_metering_stream_name = None %}
 {% endif %}
 
+{% if dbus_cluster_logs_collection_enabled %}
+  {% if salt['pillar.get']('fluent:dbusClusterLogsCollectionAppName') and salt['pillar.get']('fluent:dbusClusterLogsCollectionStreamName') %}
+    {% set dbus_cluster_logs_collection_app_headers = 'app:' + cluster_type + ',@logging-app:' + salt['pillar.get']('fluent:dbusClusterLogsCollectionAppName') %}
+    {% set dbus_cluster_logs_collection_stream_name = salt['pillar.get']('fluent:dbusClusterLogsCollectionStreamName') %}
+  {% else %}
+    {% set dbus_cluster_logs_collection_app_headers = 'app:' + cluster_type %}
+    {% set dbus_cluster_logs_collection_stream_name = 'LogCollection' %}
+  {% endif %}
+{% else %}
+  {% set dbus_cluster_logs_collection_app_headers = None %}
+  {% set dbus_cluster_logs_collection_stream_name = None %}
+{% endif %}
+
 {% set forward_port = 24224 %}
 
 {% set version_data = namespace(entities=[]) %}
@@ -216,6 +229,8 @@
     "gcsProjectId": gcs_project_id,
     "dbusClusterLogsCollection": dbus_cluster_logs_collection_enabled,
     "dbusClusterLogsCollectionDisableStop": dbus_cluster_logs_collection_disable_stop,
+    "dbusClusterLogsCollectionAppHeaders": dbus_cluster_logs_collection_app_headers,
+    "dbusClusterLogsCollectionStreamName": dbus_cluster_logs_collection_stream_name,
     "dbusMeteringEnabled": dbus_metering_enabled,
     "dbusMeteringAppHeaders": dbus_metering_app_headers,
     "dbusMeteringStreamName": dbus_metering_stream_name,

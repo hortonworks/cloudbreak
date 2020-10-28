@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -49,16 +51,20 @@ public class FluentConfigService {
 
     private final MeteringConfiguration meteringConfiguration;
 
+    private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
+
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
             AnonymizationRuleResolver anonymizationRuleResolver,
-            MeteringConfiguration meteringConfiguration) {
+            TelemetryConfiguration telemetryConfiguration) {
         this.s3ConfigGenerator = s3ConfigGenerator;
         this.adlsGen2ConfigGenerator = adlsGen2ConfigGenerator;
         this.gcsConfigGenerator = gcsConfigGenerator;
         this.anonymizationRuleResolver = anonymizationRuleResolver;
-        this.meteringConfiguration = meteringConfiguration;
+        this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
+        this.clusterLogsCollectionConfiguration = telemetryConfiguration.getClusterLogsCollectionConfiguration();
+
     }
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
@@ -134,6 +140,8 @@ public class FluentConfigService {
             if (databusEnabled && telemetry.isClusterLogsCollectionEnabled()) {
                 builder.withClusterLogsCollection(true);
                 LOGGER.debug("Fluent based cluster log collection is enabled.");
+                builder.withClusterLogsCollectionAppName(clusterLogsCollectionConfiguration.getDbusAppName())
+                        .withClusterLogsCollectionStreamName(clusterLogsCollectionConfiguration.getDbusAppName());
                 validDatabusLogging = true;
             }
             if (databusEnabled && telemetry.isMonitoringFeatureEnabled()) {
