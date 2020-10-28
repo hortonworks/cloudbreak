@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {% set os = salt['grains.get']('os') %}
 {% set dbus_lock_exists = salt['file.file_exists' ]('/etc/cdp-logging-agent/databus_bundle.lock') %}
+{% set restart_sleep_time = 1200 %}
 
 {% if fluent.uninstallTdAgent %}
 td_agent_stop:
@@ -197,14 +198,6 @@ copy_cdp_logging_agent_conf:
         accessKeySecretName: "databus_access_secret_key"
         accessKeySecretAlgoName: "databus_access_secret_key_algo"
 
-{%- if (not dbus_lock_exists) and fluent.dbusClusterLogsCollection %}
-/etc/cdp-logging-agent/databus_bundle.lock:
-   file.managed:
-     - user: "{{ fluent.user }}"
-     - group: "{{ fluent.group }}"
-     - mode: '0640'
-{% endif %}
-
 {%- if fluent.is_systemd %}
 /etc/systemd/system/cdp-logging-agent.d:
   file.directory:
@@ -213,18 +206,11 @@ copy_cdp_logging_agent_conf:
     - group: "{{ fluent.group }}"
     - mode: 740
 
-/etc/systemd/system/cdp-logging-agent.d/override.conf:
-   file.managed:
-    - source: salt://fluent/template/override.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-
 fluentd_systemd_reload_and_run:
   file.copy:
     - name: /etc/systemd/system/cdp-logging-agent.service
     - source: /lib/systemd/system/cdp-logging-agent.service
+    - mode: 0644
   module.wait:
     - name: service.systemctl_reload
     - watch:
@@ -258,14 +244,13 @@ fluent_start:
     - env:
       - CDP_LOGGING_AGENT_USER: "{{ fluent.user }}"
       - CDP_LOGGING_AGENT_GROUP: "{{ fluent.group }}"
-      {%- if not fluent.dbusClusterLogsCollectionDisableStop %}
-      - CDP_LOGGING_AGENT_POST_START_SCRIPT: /etc/cdp-logging-agent/post-start.sh
-      - CDP_LOGGING_AGENT_POST_START_SCRIPT_PARAMS: 1200{% endif %}
 {% endif %}
 
 {%- if not fluent.dbusClusterLogsCollectionDisableStop %}
-fluentd_write_simple_config_delayed:
+fluentd_delalyed_restart:
    cmd.run:
-    - name: "nohup sleep 30; cp /etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf &"
-    - onlyif: "test -f /etc/cdp-logging-agent/cdp-logging-agent.conf && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/cdp-logging-agent/cdp-logging-agentt.conf"
+    - names:
+        - "nohup sleep 30; cp /etc/cdp-logging-agent/cdp-logging-agent_simple_profile.conf /etc/cdp-logging-agent/cdp-logging-agent.conf &"
+        - "nohup sh /etc/cdp-logging-agent/post-start.sh {{ restart_sleep_time }} > /etc/cdp-logging-agent/delayed_restart.out 2>&1 &"
+    - onlyif: "test -f /etc/cdp-logging-agent/cdp-logging-agent.conf && ! test -f /etc/cdp-logging-agent/databus_bundle.lock && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/cdp-logging-agent/cdp-logging-agent.conf"
 {% endif %}

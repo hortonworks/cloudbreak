@@ -1,6 +1,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {% set sleep_time = 1200 %}
 #!/bin/sh
+# deprecated - use only for td-agent
 export TD_AGENT_USER="{{ fluent.user }}"
 export TD_AGENT_GROUP="{{ fluent.group }}"
 SLEEP_TIME={{ sleep_time }}
