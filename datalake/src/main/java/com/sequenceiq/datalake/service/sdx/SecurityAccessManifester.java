@@ -26,8 +26,7 @@ public class SecurityAccessManifester {
     public void overrideSecurityAccess(InstanceGroupType instanceGroupType, List<InstanceGroupV4Request> instanceGroups, String securityGroupId, String cidrs) {
         instanceGroups.stream()
                 .filter(ig -> ig.getType() == instanceGroupType)
-                .findFirst()
-                .ifPresent(ig -> {
+                .forEach(ig -> {
                     SecurityGroupV4Request securityGroup = ig.getSecurityGroup();
                     if (securityGroup == null) {
                         securityGroup = new SecurityGroupV4Request();

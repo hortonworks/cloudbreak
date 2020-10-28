@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.service.sdx;
 
 
+import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -40,7 +43,7 @@ class SecurityAccessManifesterTest {
 
     @Test
     void overrideSecurityAccessWhenOneCidrRangeProvidedThenShouldUpdateTheCidrRange() {
-        InstanceGroupType gateway = InstanceGroupType.GATEWAY;
+        InstanceGroupType gateway = GATEWAY;
         List<InstanceGroupV4Request> instanceGroups = getInstanceGroups();
         String theWholeWorld = "0.0.0.0/0";
 
@@ -52,7 +55,7 @@ class SecurityAccessManifesterTest {
 
     @Test
     void overrideSecurityAccessWhenMultipleCidrRangeProvidedThenShouldUpdateTheCidrRanges() {
-        InstanceGroupType gateway = InstanceGroupType.GATEWAY;
+        InstanceGroupType gateway = GATEWAY;
         List<InstanceGroupV4Request> instanceGroups = getInstanceGroups();
         String theWholeWorldAndASimpleCidr = "0.0.0.0/0,172.16.0.0/16";
 
@@ -60,6 +63,19 @@ class SecurityAccessManifesterTest {
 
         assertEquals(2, instanceGroups.get(0).getSecurityGroup().getSecurityRules().size());
         assertEquals(List.of(theWholeWorldAndASimpleCidr.split(",")), collectSubnets(instanceGroups));
+    }
+
+    @Test
+    void overrideSecurityGroupForDatalakeMediumDuty() {
+        List<InstanceGroupV4Request> instanceGroups = getMediumDutyInstanceGroups();
+        String theWholeWorldAndASimpleCidr = "0.0.0.0/0,172.16.0.0/16";
+
+        securityAccessManifester.overrideSecurityAccess(GATEWAY, instanceGroups, "sg-gateway", theWholeWorldAndASimpleCidr);
+        securityAccessManifester.overrideSecurityAccess(CORE, instanceGroups, "sg-others", theWholeWorldAndASimpleCidr);
+
+        assertArrayEquals(new String[]{"sg-gateway"}, instanceGroups.get(0).getSecurityGroup().getSecurityGroupIds().toArray(new String[]{""}));
+        assertArrayEquals(new String[]{"sg-others"}, instanceGroups.get(1).getSecurityGroup().getSecurityGroupIds().toArray(new String[]{""}));
+        assertArrayEquals(new String[]{"sg-others"}, instanceGroups.get(2).getSecurityGroup().getSecurityGroupIds().toArray(new String[]{""}));
     }
 
     private List<String> collectSubnets(List<InstanceGroupV4Request> instanceGroups) {
@@ -78,15 +94,24 @@ class SecurityAccessManifesterTest {
 
     private List<InstanceGroupV4Request> getInstanceGroups() {
         List<InstanceGroupV4Request> instanceGroupRequests = new ArrayList<>();
-        instanceGroupRequests.add(instanceGroupRequest(1));
+        instanceGroupRequests.add(instanceGroupRequest(1, GATEWAY));
         return instanceGroupRequests;
     }
 
-    private InstanceGroupV4Request instanceGroupRequest(int index) {
+    private List<InstanceGroupV4Request> getMediumDutyInstanceGroups() {
+        List<InstanceGroupV4Request> instanceGroupRequests = new ArrayList<>();
+        instanceGroupRequests.add(instanceGroupRequest(1, GATEWAY));
+        instanceGroupRequests.add(instanceGroupRequest(2, CORE));
+        instanceGroupRequests.add(instanceGroupRequest(3, CORE));
+
+        return instanceGroupRequests;
+    }
+
+    private InstanceGroupV4Request instanceGroupRequest(int index, InstanceGroupType groupType) {
         InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
         instanceGroup.setName("ig-" + index);
         instanceGroup.setNodeCount(1);
-        instanceGroup.setType(InstanceGroupType.GATEWAY);
+        instanceGroup.setType(groupType);
 
         SecurityGroupV4Request securityGroupV4Request = new SecurityGroupV4Request();
 
@@ -96,7 +121,6 @@ class SecurityAccessManifesterTest {
         securityGroupV4Request.setSecurityRules(Lists.newArrayList(securityRuleV4Request));
 
         instanceGroup.setSecurityGroup(securityGroupV4Request);
-
 
         return instanceGroup;
     }
