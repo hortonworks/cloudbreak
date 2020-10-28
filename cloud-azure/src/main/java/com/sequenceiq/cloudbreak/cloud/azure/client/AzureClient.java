@@ -373,12 +373,12 @@ public class AzureClient {
         });
     }
 
-    public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+    public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob, String sourceBlobName) {
         LOGGER.debug("copy image in storage container: RG={}, storageName={}, containerName={}, sourceBlob={}",
                 resourceGroup, storageName, containerName, sourceBlob);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlobName);
             String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
             LOGGER.debug("Image copy started, copy id: {}", copyId);
         } catch (URISyntaxException e) {
@@ -388,12 +388,12 @@ public class AzureClient {
         }
     }
 
-    public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+    public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlobName) {
         LOGGER.debug("get image copy status: RG={}, storageName={}, containerName={}, sourceBlob={}",
-                resourceGroup, storageName, containerName, sourceBlob);
+                resourceGroup, storageName, containerName, sourceBlobName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlobName);
             LOGGER.debug("Downloading {} container attributes.", container.getName());
             container.downloadAttributes();
             LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
@@ -406,9 +406,8 @@ public class AzureClient {
         }
     }
 
-    public String getImageBlobUri(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+    public String getImageBlobUri(String resourceGroup, String storageName, String containerName, String vhdName) {
         CloudBlobContainer blobContainer = getBlobContainer(resourceGroup, storageName, containerName);
-        String vhdName = sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1);
         try {
             CloudPageBlob pageBlobReference = blobContainer.getPageBlobReference(vhdName);
             return pageBlobReference.getUri().toString();

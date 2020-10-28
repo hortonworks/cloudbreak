@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 
 @Component
 public class CustomVMImageNameProvider {
@@ -8,8 +12,11 @@ public class CustomVMImageNameProvider {
 
     private static final char DELIMITER = '-';
 
+    @Inject
+    private AzureUtils azureUtils;
+
     public String get(String region, String vhdUri) {
-        String vhdName = vhdUri.substring(vhdUri.lastIndexOf('/') + 1);
+        String vhdName = azureUtils.getImageNameFromConnectionString(vhdUri);
         String name = vhdName + DELIMITER + region.toLowerCase().replaceAll("\\s", "");
         if (name.length() > NAME_MAXIMUM_LENGTH) {
             int diff = name.length() - NAME_MAXIMUM_LENGTH;

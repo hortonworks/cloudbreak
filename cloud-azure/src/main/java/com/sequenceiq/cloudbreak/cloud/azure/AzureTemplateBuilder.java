@@ -62,7 +62,7 @@ public class AzureTemplateBuilder {
             CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
-            String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+            String imageName = azureUtils.getImageNameFromConnectionString(imageUrl);
 
             Network network = cloudStack.getNetwork();
             Map<String, Object> model = new HashMap<>();

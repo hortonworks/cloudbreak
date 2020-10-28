@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -54,6 +55,9 @@ public class AzureImageSetupService {
     @Inject
     private CustomVMImageNameProvider customVMImageNameProvider;
 
+    @Inject
+    private AzureUtils azureUtils;
+
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         CloudContext cloudContext = ac.getCloudContext();
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
@@ -67,17 +71,19 @@ public class AzureImageSetupService {
         }
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, cloudContext, stack);
+        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
-            if (copyState == null && storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
+            boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, imageName);
+            if (copyState == null && storageContainsImage) {
                 LOGGER.debug("The copy has been finished because the storage account already contains the image.");
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (copyState == null && !storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+            } else if (copyState == null && !storageContainsImage) {
                 throw new CloudConnectorException(
                         "Image copy failed because the copy state is not available and the storage account does not contains the image.");
             }
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+                if (!storageContainsImage) {
                     LOGGER.error("The image has not been found in the storage account.");
                     return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
                 }
@@ -130,10 +136,11 @@ public class AzureImageSetupService {
         createResourceGroupIfNotExists(client, imageResourceGroupName, region, stack);
         azureStorageAccountService.createStorageAccount(ac, client, imageResourceGroupName, imageStorageName, region, stack);
         azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
-        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
+        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, imageName)) {
             try {
                 LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
+                client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), imageName);
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Something happened during start image copy.", e);
             }
@@ -142,20 +149,16 @@ public class AzureImageSetupService {
         }
     }
 
-    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String image) {
+    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String imageName) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
-            if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(getNameFromConnectionString(image))) {
-                LOGGER.info("The storage account {} in {} resource group contains the requested image {}", storageName, resourceGroupName, image);
+            if (azureUtils.getImageNameFromConnectionString(listBlobItem.getUri().getPath()).equals(imageName)) {
+                LOGGER.info("The storage account {} in {} resource group contains the requested image {}", storageName, resourceGroupName, imageName);
                 return true;
             }
         }
-        LOGGER.info("The storage account {} in {} resource group does not contains the requested image {}", storageName, resourceGroupName, image);
+        LOGGER.info("The storage account {} in {} resource group does not contains the requested image {}", storageName, resourceGroupName, imageName);
         return false;
-    }
-
-    private String getNameFromConnectionString(String connection) {
-        return connection.split("/")[connection.split("/").length - 1];
     }
 
     private void createResourceGroupIfNotExists(AzureClient client, String resourceGroupName, String region, CloudStack stack) {

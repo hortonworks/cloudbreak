@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -193,6 +194,7 @@ public class AzureTemplateBuilderTest {
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
                 ImmutableMap.of("existingSubnet", 100L));
         reset(azureUtils);
+        when(azureUtils.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
     }
 
     @Test
