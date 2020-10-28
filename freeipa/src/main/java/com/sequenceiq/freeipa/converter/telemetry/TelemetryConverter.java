@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.converter.telemetry;
 
-import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -36,7 +36,7 @@ public class TelemetryConverter {
     public TelemetryConverter(TelemetryConfiguration configuration,
             @Value("${freeipa.telemetry.enabled:true}") boolean freeIpaTelemetryEnabled) {
         this.freeIpaTelemetryEnabled = freeIpaTelemetryEnabled;
-        this.clusterLogsCollection = configuration.isClusterLogsCollection();
+        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.databusEndpoint = configuration.getAltusDatabusConfiguration().getAltusDatabusEndpoint();
     }

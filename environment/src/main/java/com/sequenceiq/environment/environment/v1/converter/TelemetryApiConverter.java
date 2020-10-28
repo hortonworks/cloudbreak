@@ -2,11 +2,11 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.HashMap;
 
-import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -34,7 +34,7 @@ public class TelemetryApiConverter {
     private final boolean useSharedAltusCredential;
 
     public TelemetryApiConverter(TelemetryConfiguration configuration) {
-        this.clusterLogsCollection = configuration.isClusterLogsCollection();
+        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
         this.monitoringEnabled = configuration.isMonitoringEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }

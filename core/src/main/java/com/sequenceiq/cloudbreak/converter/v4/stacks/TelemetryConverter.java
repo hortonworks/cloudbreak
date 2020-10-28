@@ -62,7 +62,7 @@ public class TelemetryConverter {
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
         this.meteringEnabled = configuration.getMeteringConfiguration().isEnabled();
         this.monitoringEnabled = configuration.isMonitoringEnabled();
-        this.clusterLogsCollection = configuration.isClusterLogsCollection();
+        this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
     }
 
     public TelemetryResponse convert(Telemetry telemetry) {

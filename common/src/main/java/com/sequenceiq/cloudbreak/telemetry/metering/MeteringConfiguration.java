@@ -3,32 +3,14 @@ package com.sequenceiq.cloudbreak.telemetry.metering;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
+
 @Configuration
-public class MeteringConfiguration {
-
-    private final boolean enabled;
-
-    private final String dbusAppName;
-
-    private final String dbusStreamName;
+public class MeteringConfiguration extends AbstractDatabusStreamConfiguration {
 
     public MeteringConfiguration(@Value("${metering.enabled:false}") boolean enabled,
             @Value("${metering.dbus.app.name:}") String dbusAppName,
             @Value("${metering.dbus.stream.name:Metering}") String dbusStreamName) {
-        this.enabled = enabled;
-        this.dbusAppName = dbusAppName;
-        this.dbusStreamName = dbusStreamName;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public String getDbusAppName() {
-        return dbusAppName;
-    }
-
-    public String getDbusStreamName() {
-        return dbusStreamName;
+        super(enabled, dbusAppName, dbusStreamName);
     }
 }

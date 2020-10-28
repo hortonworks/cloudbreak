@@ -9,10 +9,12 @@ import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.common.AnonymizationRuleResolver;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -34,9 +36,14 @@ public class FluentConfigServiceTest {
 
     @Before
     public void setUp() {
-        MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
+        MeteringConfiguration meteringConfiguration =
+                new MeteringConfiguration(false, null, null);
+        ClusterLogsCollectionConfiguration logCollectionConfig =
+                new ClusterLogsCollectionConfiguration(false, null, null);
+        TelemetryConfiguration telemetryConfiguration =
+                new TelemetryConfiguration(null, meteringConfiguration, logCollectionConfig, false);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
-                new AnonymizationRuleResolver(), meteringConfiguration);
+                new AnonymizationRuleResolver(), telemetryConfiguration);
     }
 
     @Test
