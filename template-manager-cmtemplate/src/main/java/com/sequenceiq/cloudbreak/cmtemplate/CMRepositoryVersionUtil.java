@@ -30,7 +30,7 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_2_2 = () -> "7.2.2";
 
-    public static final Versioned CLOUDERAMANAGER_VERSION_7_2_3 = () -> "7.2.3";
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_2_6 = () -> "7.2.6";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
@@ -82,7 +82,7 @@ public class CMRepositoryVersionUtil {
 
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {
         LOGGER.info("ClouderaManagerRepo is compared for Host certs rotation Sudo access");
-        return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_3);
+        return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_6);
     }
 
     public static boolean isRootSshAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {

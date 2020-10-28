@@ -15,7 +15,7 @@
     },
     {
       "target_runtime":{
-        "version":"7.2.3"
+        "version":"7.2.6"
       },
       "source_runtime":[
         {
