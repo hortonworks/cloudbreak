@@ -106,8 +106,13 @@ public class AzureDnsZoneService {
                     updateCloudResource(authenticatedContext, deploymentName, dnsZoneDeploymentId, CommonStatus.CREATED, AZURE_PRIVATE_DNS_ZONE);
 
                 }
-            } catch (CloudException | DataAccessException e) {
+            } catch (CloudConnectorException e) {
                 LOGGER.warn("Deployment {} failed due to {}", deploymentName, e.getMessage());
+                pollForCreation(authenticatedContext, azureClient, resourceGroup, deploymentName, dnsZoneDeploymentId,
+                        enabledPrivateEndpointServices, null);
+                throw e;
+            } catch (DataAccessException e) {
+                LOGGER.warn("Polling {} deployment due to db unique constraint violation: {}", deploymentName, e.getMessage());
                 pollForCreation(authenticatedContext, azureClient, resourceGroup, deploymentName, dnsZoneDeploymentId,
                         enabledPrivateEndpointServices, null);
             }
@@ -148,8 +153,13 @@ public class AzureDnsZoneService {
                     createMissingNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, enabledPrivateEndpointServices);
                     updateCloudResource(authenticatedContext, deploymentName, networkLinkDeploymentId, CommonStatus.CREATED, AZURE_VIRTUAL_NETWORK_LINK);
                 }
-            } catch (CloudException | DataAccessException e) {
+            } catch (CloudConnectorException e) {
                 LOGGER.warn("Deployment {} failed due to {}", deploymentName, e.getMessage());
+                pollForCreation(authenticatedContext, azureClient, resourceGroup, deploymentName, networkLinkDeploymentId,
+                        enabledPrivateEndpointServices, networkId);
+                throw e;
+            } catch (DataAccessException e) {
+                LOGGER.warn("Polling {} deployment due to db unique constraint violation: {}", deploymentName, e.getMessage());
                 pollForCreation(authenticatedContext, azureClient, resourceGroup, deploymentName, networkLinkDeploymentId,
                         enabledPrivateEndpointServices, networkId);
             }
@@ -163,10 +173,16 @@ public class AzureDnsZoneService {
                 deploymentName,
                 networkId,
                 enabledPrivateEndpointServices);
-        azureDnsZoneCreationPoller.startPolling(authenticatedContext, checkerContext);
-        CommonStatus deploymentStatus = azureClient.getTemplateDeploymentCommonStatus(resourceGroup, deploymentName);
-        ResourceType resouceType = StringUtils.isEmpty(networkId) ? AZURE_PRIVATE_DNS_ZONE : AZURE_VIRTUAL_NETWORK_LINK;
-        updateCloudResource(authenticatedContext, deploymentName, dnsZoneDeploymentId, deploymentStatus, resouceType);
+        try {
+            azureDnsZoneCreationPoller.startPolling(authenticatedContext, checkerContext);
+        } catch (CloudConnectorException e) {
+            LOGGER.warn("Exception during polling: {}", e.getMessage());
+        } finally {
+            CommonStatus deploymentStatus = azureClient.getTemplateDeploymentCommonStatus(resourceGroup, deploymentName);
+            ResourceType resouceType = StringUtils.isEmpty(networkId) ? AZURE_PRIVATE_DNS_ZONE : AZURE_VIRTUAL_NETWORK_LINK;
+            updateCloudResource(authenticatedContext, deploymentName, dnsZoneDeploymentId, deploymentStatus, resouceType);
+        }
+
     }
 
     private void createDnsZonesAndNetworkLinks(AzureClient azureClient, String azureNetworkId, String resourceGroup,
