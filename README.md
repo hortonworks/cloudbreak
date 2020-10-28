@@ -20,9 +20,14 @@ Therefore dumping your database is **mandatory** before proceeding. After the up
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
-As a prerequisite you need to have Java 11 installed. You can get it with the following command:
+As a prerequisite you need to have Java 11 (version <= 11.0.2) installed. You can get it with the following command:
 ```
 brew cask install java
+```
+
+Make sure you java version is <= 11.0.2, as with newer versions you may experience issues like this:
+```
+javax.net.ssl.SSLHandshakeException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
 ```
 
 You'll need [Docker for mac](https://docs.docker.com/docker-for-mac/install/) too.
