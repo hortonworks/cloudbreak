@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
-import io.opentracing.References;
 import io.opentracing.Scope;
 import io.opentracing.Span;
 import io.opentracing.Tracer;
@@ -56,41 +55,21 @@ public class VaultRetryService {
     }
 
     private <T> T executeVaultOperationWithTrace(Supplier<T> action, String operation, MetricType metricType) {
-        Optional<Span> optionalSpan = initSpan(operation);
-        return optionalSpan.map(span -> {
-            try (Scope ignored = tracer.activateSpan(span)) {
-                try {
-                    return action.get();
-                } catch (RuntimeException e) {
-                    span.setTag(TracingUtil.ERROR, true);
-                    span.setTag(TracingUtil.MESSAGE, e.getMessage());
-                    return handleException(operation, e, metricType);
-                }
-            } finally {
-                span.finish();
-            }
-        }).orElseGet(() -> {
+        Optional<Span> optionalSpan = TracingUtil.initOptionalSpan(tracer, "Vault", operation);
+        try (Scope ignored = optionalSpan.map(tracer::activateSpan).orElse(null)) {
             try {
                 return action.get();
             } catch (RuntimeException e) {
-                return handleException(operation, e, metricType);
+                optionalSpan.ifPresent(span -> {
+                    span.setTag(TracingUtil.ERROR, true);
+                    span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
+                });
+                LOGGER.error("Exception during vault " + operation, e);
+                metricService.incrementMetricCounter(metricType);
+                throw new Retry.ActionFailedException(e.getMessage());
             }
-        });
-    }
-
-    private Optional<Span> initSpan(String operationType) {
-        return Optional.ofNullable(tracer.activeSpan()).map(activeSpan -> {
-            Span span = tracer.buildSpan("Vault - " + operationType)
-                    .addReference(References.FOLLOWS_FROM, activeSpan.context())
-                    .start();
-            span.setTag(TracingUtil.COMPONENT, "Vault");
-            return span;
-        });
-    }
-
-    private <T> T handleException(String operation, RuntimeException e, MetricType metricType) {
-        LOGGER.error("Exception during vault " + operation, e);
-        metricService.incrementMetricCounter(metricType);
-        throw new Retry.ActionFailedException(e.getMessage());
+        } finally {
+            optionalSpan.ifPresent(Span::finish);
+        }
     }
 }

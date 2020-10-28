@@ -35,6 +35,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaHealthServiceTest {
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
@@ -46,6 +48,9 @@ public class FreeIpaHealthServiceTest {
     private static final String HOST1 = "host1.domain";
 
     private static final String HOST2 = "host2.domain";
+
+    @Mock
+    private Tracer tracer;
 
     @Mock
     private StackService stackService;
@@ -187,7 +192,7 @@ public class FreeIpaHealthServiceTest {
     }
 
     private FreeIpaClient getMockFreeIpaClient() {
-        return new FreeIpaClient(null, "1.1.1.1", "testhost");
+        return new FreeIpaClient(null, "1.1.1.1", "testhost", tracer);
     }
 
     @BeforeAll
