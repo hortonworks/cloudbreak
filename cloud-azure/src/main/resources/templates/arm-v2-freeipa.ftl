@@ -1,6 +1,6 @@
 <#setting number_format="computer">
 {
-    "$schema": "https://schema.management.azure.com/schemas/2018-05-01/deploymentTemplate.json#",
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters" : {
         "userImageStorageAccountName": {
