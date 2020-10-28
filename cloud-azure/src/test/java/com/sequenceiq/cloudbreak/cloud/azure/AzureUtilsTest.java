@@ -102,4 +102,19 @@ public class AzureUtilsTest {
         verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
     }
 
+    @Test
+    public void getImageNameFromConnectionStringWithSASToken() {
+        String url = "https://sequenceiqwestus2.blob.core.windows.net/test/cb-hdp-31-1911052024.vhd"
+                + "?sp=rl&st=2020-10-26T11:45:18Z&se=2020-10-27T11:45:18Z&sv=2019-12-12&sr=b&sig=G6hkDHn7GezwXBzZhQBNLZD5kI3LXgWMvlxGbm1T8WU%3D";
+        String result = underTest.getImageNameFromConnectionString(url);
+        assertEquals("cb-hdp-31-1911052024.vhd", result);
+    }
+
+    @Test
+    public void getImageNameFromConnectionStringWithoutSASToken() {
+        String url = "https://sequenceiqwestus2.blob.core.windows.net/test/cb-hdp-31-1911052024.vhd";
+        String result = underTest.getImageNameFromConnectionString(url);
+        assertEquals("cb-hdp-31-1911052024.vhd", result);
+    }
+
 }

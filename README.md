@@ -14,9 +14,14 @@
 # Local Development Setup
 As of now this document is focusing on setting up your development environment on OSX. You'll need brew to install certain components in case you don't have them already. To get brew please follow the install instructions on the brew homepage: https://brew.sh
 
-As a prerequisite you need to have Java 11 installed. You can get it with the following command:
+As a prerequisite you need to have Java 11 (version <= 11.0.2) installed. You can get it with the following command:
 ```
 brew cask install java
+```
+
+Make sure you java version is <= 11.0.2, as with newer versions you may experience issues like this:
+```
+javax.net.ssl.SSLHandshakeException: PKIX path validation failed: java.security.cert.CertPathValidatorException: signature check failed
 ```
 
 You'll need a Hypervisor too. Cloudbreak-Deployer has built-in xhyve setup option, but some of us use VirtualBox instead. Cloudbreak-Deployer works with both, it's up to you which one you prefer.
@@ -120,10 +125,16 @@ If everything went well then Cloudbreak will be available on http://YOUR_IP. For
 
 The deployer has generated a `certs` directory under `cbd-local` directory which will be needed later on to set up IDEA properly.
 
-In order to kill Cloudbreak and Periscope containers running in docker/boot2docker and redirect the Cloudbreak and Periscope related traffic to the Cloudbreak running in IDEA, use the following command:
+In order to kill Cloudbreak and Periscope containers running in docker-for-mac/boot2docker and redirect the Cloudbreak and Periscope related traffic to the Cloudbreak running in IDEA, use the following command:
 
 ```
 cbd util local-dev
+```
+
+If you are on Linux, simply kill the container you want to replace and start the service on port 8080.
+
+```
+docker kill cbreak_cloudbreak_1
 ```
 
 ## IDEA
