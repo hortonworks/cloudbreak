@@ -13,8 +13,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(MockitoExtension.class)
 class FreeIpaClientTest {
+
+    @Mock
+    private Tracer tracer;
 
     @Mock
     private JsonRpcHttpClient jsonRpcHttpClient;
@@ -23,7 +28,7 @@ class FreeIpaClientTest {
 
     @BeforeEach
     void setUp() {
-        freeIpaClient = new FreeIpaClient(jsonRpcHttpClient, "1.1.1.1", "localhost");
+        freeIpaClient = new FreeIpaClient(jsonRpcHttpClient, "1.1.1.1", "localhost", tracer);
     }
 
     @Test

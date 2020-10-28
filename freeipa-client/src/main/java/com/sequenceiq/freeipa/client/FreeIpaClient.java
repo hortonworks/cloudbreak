@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.Config;
@@ -42,6 +43,10 @@ import com.sequenceiq.freeipa.client.model.Service;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.client.model.User;
+
+import io.opentracing.Scope;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 
 public class FreeIpaClient {
 
@@ -65,15 +70,18 @@ public class FreeIpaClient {
 
     private final String hostname;
 
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiAddress, String hostname) {
-        this(jsonRpcHttpClient, DEFAULT_API_VERSION, apiAddress, hostname);
+    private final Tracer tracer;
+
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiAddress, String hostname, Tracer tracer) {
+        this(jsonRpcHttpClient, DEFAULT_API_VERSION, apiAddress, hostname, tracer);
     }
 
-    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion, String apiAddress, String hostname) {
+    public FreeIpaClient(JsonRpcHttpClient jsonRpcHttpClient, String apiVersion, String apiAddress, String hostname, Tracer tracer) {
         this.jsonRpcHttpClient = jsonRpcHttpClient;
         this.apiVersion = apiVersion;
         this.apiAddress = apiAddress;
         this.hostname = hostname;
+        this.tracer = tracer;
     }
 
     public String getApiAddress() {
@@ -205,8 +213,8 @@ public class FreeIpaClient {
     /**
      * Updates the password and password expiration time for the specified user
      *
-     * @param user the user
-     * @param password the password
+     * @param user       the user
+     * @param password   the password
      * @param expiration Optional of the expiration instant. An empty optional implies the max expiration time
      */
     public void userSetPasswordWithExpiration(String user, String password, Optional<Instant> expiration) throws FreeIpaClientException {
@@ -579,7 +587,9 @@ public class FreeIpaClient {
         LOGGER.debug("Issuing JSON-RPC request:\n\n method: {}\n flags: {}\n", method, flags);
         ParameterizedType type = TypeUtils
                 .parameterize(RPCResponse.class, resultType);
-        try {
+
+        Span span = TracingUtil.initSpan(tracer, "FreeIpa", method);
+        try (Scope ignored = tracer.activateSpan(span)) {
             RPCResponse<T> response = (RPCResponse<T>) jsonRpcHttpClient.invoke(method, List.of(flags, parameterMap), type);
             LOGGER.debug("Response object: {}", response);
             if (response == null) {
@@ -592,11 +602,17 @@ public class FreeIpaClient {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
             OptionalInt responseCode = extractResponseCode(e);
+            span.setTag(TracingUtil.ERROR, true);
+            span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
             throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIPA failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
+            span.setTag(TracingUtil.ERROR, true);
+            span.setTag(TracingUtil.MESSAGE, throwable.getLocalizedMessage());
             throw new FreeIpaClientException(message, throwable);
+        } finally {
+            span.finish();
         }
     }
 
@@ -644,9 +660,9 @@ public class FreeIpaClient {
     public TopologySegment addTopologySegment(String topologySuffixCn, TopologySegment topologySegment) throws FreeIpaClientException {
         List<Object> flags = List.of(topologySuffixCn, topologySegment.getCn());
         Map<String, Object> params = Map.of(
-            "iparepltoposegmentleftnode", topologySegment.getLeftNode(),
-            "iparepltoposegmentrightnode", topologySegment.getRightNode(),
-            "iparepltoposegmentdirection", topologySegment.getDirection()
+                "iparepltoposegmentleftnode", topologySegment.getLeftNode(),
+                "iparepltoposegmentrightnode", topologySegment.getRightNode(),
+                "iparepltoposegmentdirection", topologySegment.getDirection()
         );
         return (TopologySegment) invoke("topologysegment_add", flags, params, TopologySegment.class).getResult();
     }

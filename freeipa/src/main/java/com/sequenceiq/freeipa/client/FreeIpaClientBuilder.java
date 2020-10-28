@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
 import com.google.common.collect.ImmutableMap;
-import com.googlecode.jsonrpc4j.JsonRpcClient;
 import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
@@ -54,6 +53,8 @@ import com.sequenceiq.freeipa.client.auth.InvalidPasswordException;
 import com.sequenceiq.freeipa.client.auth.InvalidUserOrRealmException;
 import com.sequenceiq.freeipa.client.auth.PasswordExpiredException;
 import com.sequenceiq.freeipa.util.FreeIpaCookieStore;
+
+import io.opentracing.Tracer;
 
 public class FreeIpaClientBuilder {
 
@@ -91,6 +92,8 @@ public class FreeIpaClientBuilder {
 
     private final RequestListener rpcRequestListener;
 
+    private final Tracer tracer;
+
     private Map<String, String> additionalHeaders;
 
     private Map<String, String> additionalHeadersStickySessionFirstRpc;
@@ -101,13 +104,14 @@ public class FreeIpaClientBuilder {
 
     public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, String hostname, int port, String basePath,
             Map<String, String> additionalHeaders, Map<String, String> additionalHeadersStickySessionFirstRpc,
-            Map<String, String> additionalHeadersStickySession, Optional<String> stickyIdHeader, JsonRpcClient.RequestListener rpcRequestListener)
+            Map<String, String> additionalHeadersStickySession, Optional<String> stickyIdHeader, RequestListener rpcRequestListener, Tracer tracer)
             throws Exception {
         this.user = user;
         this.pass = pass;
         this.clientConfig = clientConfig;
         this.port = port;
         this.hostname = hostname;
+        this.tracer = tracer;
 
         if (clientConfig.hasSSLConfigs()) {
             this.sslContext =
@@ -133,8 +137,8 @@ public class FreeIpaClientBuilder {
         this.rpcRequestListener = rpcRequestListener;
     }
 
-    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname) throws Exception {
-        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), Map.of(), Map.of(), Optional.empty(), null);
+    public FreeIpaClientBuilder(String user, String pass, HttpClientConfig clientConfig, int port, String hostname, Tracer tracer) throws Exception {
+        this(user, pass, clientConfig, hostname, port, DEFAULT_BASE_PATH, Map.of(), Map.of(), Map.of(), Optional.empty(), null, tracer);
     }
 
     public FreeIpaClient build(boolean withPing) throws URISyntaxException, IOException, FreeIpaClientException, FreeIpaHostNotAvailableException {
@@ -187,7 +191,7 @@ public class FreeIpaClientBuilder {
         jsonRpcHttpClient.setHostNameVerifier(hostnameVerifier());
         jsonRpcHttpClient.setReadTimeoutMillis(READ_TIMEOUT_MILLIS);
         jsonRpcHttpClient.setRequestListener(rpcRequestListener);
-        return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname);
+        return new FreeIpaClient(jsonRpcHttpClient, clientConfig.getApiAddress(), hostname, tracer);
     }
 
     private CookieAndStickyId connect(String user, String pass, String apiAddress, int port, Optional<String> stickyIdHeader, Optional<String> stickyId)

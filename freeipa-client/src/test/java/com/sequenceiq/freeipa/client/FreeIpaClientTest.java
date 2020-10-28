@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 
+import io.opentracing.Tracer;
+
 class FreeIpaClientTest {
 
     private FreeIpaClient underTest;
@@ -20,14 +22,14 @@ class FreeIpaClientTest {
                 mock(JsonRpcHttpClient.class),
                 "apiVersion",
                 "apiAddress",
-                "hostname"
-        );
+                "hostname",
+                mock(Tracer.class));
     }
 
     @Test
     void deleteUserThrowsOnProtectedUser() {
         assertThrows(FreeIpaClientException.class, () ->
-            underTest.deleteUser(FreeIpaChecks.IPA_PROTECTED_USERS.get(0))
+                underTest.deleteUser(FreeIpaChecks.IPA_PROTECTED_USERS.get(0))
         );
     }
 
