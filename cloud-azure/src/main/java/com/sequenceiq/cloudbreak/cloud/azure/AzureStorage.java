@@ -72,6 +72,9 @@ public class AzureStorage {
     @Inject
     private AzureImageService azureImageService;
 
+    @Inject
+    private AzureUtils azureUtils;
+
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
         String attachedStorageOption = parameters.get("attachedStorageOption");
         if (Strings.isNullOrEmpty(attachedStorageOption)) {
@@ -84,10 +87,11 @@ public class AzureStorage {
         return getCustomImage(client, ac, stack, stack.getImage().getImageName());
     }
 
-    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
+    public AzureImage getCustomImage(AzureClient client, AuthenticatedContext ac, CloudStack stack, String image) {
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
+        String imageName = azureUtils.getImageNameFromConnectionString(image);
         String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
         return getCustomImage(imageBlobUri, imageResourceGroupName, ac, client);
     }

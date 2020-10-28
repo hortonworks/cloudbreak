@@ -530,4 +530,10 @@ public class AzureUtils {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
         }
     }
+
+    public String getImageNameFromConnectionString(String connectionString) {
+        int begin = connectionString.lastIndexOf('/') + 1;
+        int end = connectionString.contains("?") ? connectionString.indexOf('?') : connectionString.length();
+        return connectionString.substring(begin, end);
+    }
 }

@@ -1,16 +1,35 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+
 import java.util.regex.Pattern;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 
 public class CustomVMImageNameProviderTest {
     private static final String AZURE_IMAGE_NAME_REGULAR_EXPRESSION = "^[^_\\W][\\w-._]{0,79}(?<![-.])$";
 
     private static final Pattern IMAGE_NAME_PATTERN = Pattern.compile(AZURE_IMAGE_NAME_REGULAR_EXPRESSION);
 
-    private CustomVMImageNameProvider underTest = new CustomVMImageNameProvider();
+    @Mock
+    private AzureUtils azureUtils;
+
+    @InjectMocks
+    private CustomVMImageNameProvider underTest;
+
+    @Before
+    public void setUp() {
+        initMocks(this);
+        when(azureUtils.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
+    }
 
     @Test
     public void testNameGenerationWhenRegionAndWhdNameWithDelimiterDoesNotExceedMaximumLength() {
