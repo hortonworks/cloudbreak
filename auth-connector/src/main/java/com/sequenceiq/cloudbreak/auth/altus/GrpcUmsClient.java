@@ -455,6 +455,7 @@ public class GrpcUmsClient {
      * @param requestId   an optional request id
      * @return a list of booleans indicating whether the member has the specified rights
      */
+    @Cacheable(cacheNames = "umsUserHasRightsCache", key = "{ #actorCrn, #memberCrn, #rightChecks }")
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
                 rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
@@ -482,6 +483,7 @@ public class GrpcUmsClient {
         return Joiner.on(" ").join(Lists.newArrayList(right, "for", resource));
     }
 
+    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #actorCrn, #memberCrn, #resources, #right }")
     public Map<String, Boolean> hasRights(String actorCrn, String memberCrn, List<String> resources, String right, Optional<String> requestId) {
         List<AuthorizationProto.RightCheck> rightChecks = resources.stream()
                 .map(resource -> AuthorizationProto.RightCheck.newBuilder()
