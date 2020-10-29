@@ -256,6 +256,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
 
+    CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),
     CLUSTER_SALT_UPDATE_FINISHED("cluster.salt.update.finished"),
     CLUSTER_PILLAR_CONFIG_UPDATE_FAILED("cluster.pillar.config.update.failed"),
