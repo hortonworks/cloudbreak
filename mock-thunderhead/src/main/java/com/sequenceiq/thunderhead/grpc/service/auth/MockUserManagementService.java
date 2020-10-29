@@ -227,6 +227,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
     private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
 
+    private static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -308,6 +310,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.differentdatahubversionthandatalake.enabled}")
     private boolean enableDifferentDataHubVersionThanDataLake;
+
+    @Value("${auth.mock.database.wire.encryption.enable}")
+    private boolean enableDatabaseWireEncryption;
 
     private String cbLicense;
 
@@ -487,7 +492,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void listServicePrincipalCloudIdentities(ListServicePrincipalCloudIdentitiesRequest request,
-        StreamObserver<ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
+            StreamObserver<ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
         mockCrnService.ensureInternalActor();
         LOGGER.info("List service principal cloud identities for account: {}, environment: {}", request.getAccountId(), request.getEnvironmentCrn());
         ListServicePrincipalCloudIdentitiesResponse.Builder responseBuilder = ListServicePrincipalCloudIdentitiesResponse.newBuilder();
@@ -611,6 +616,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDifferentDataHubVersionThanDataLake) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE));
+        }
+        if (enableDatabaseWireEncryption) {
+            builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

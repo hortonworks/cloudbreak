@@ -1,7 +1,5 @@
 package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -13,8 +11,6 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 @Component
 public class DatabaseServerV4RequestToDatabaseServerConfigConverter
     extends AbstractConversionServiceAwareConverter<DatabaseServerV4Request, DatabaseServerConfig> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerV4RequestToDatabaseServerConfigConverter.class);
 
     @Override
     public DatabaseServerConfig convert(DatabaseServerV4Request source) {
@@ -39,4 +35,5 @@ public class DatabaseServerV4RequestToDatabaseServerConfigConverter
 
         return server;
     }
+
 }

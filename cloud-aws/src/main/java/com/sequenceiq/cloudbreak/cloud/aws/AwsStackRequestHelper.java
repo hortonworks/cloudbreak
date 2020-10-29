@@ -26,12 +26,14 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsVpcSecurityGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -189,9 +191,11 @@ public class AwsStackRequestHelper {
     @VisibleForTesting
     Collection<Parameter> getStackParameters(AuthenticatedContext ac, DatabaseStack stack, boolean deleteProtection) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
-        AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(stack.getDatabaseServer());
-        AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(stack.getDatabaseServer());
-        AwsRdsVpcSecurityGroupView awsRdsVpcSecurityGroupView = new AwsRdsVpcSecurityGroupView(stack.getDatabaseServer());
+        DatabaseServer databaseServer = stack.getDatabaseServer();
+        AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(databaseServer);
+        AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(databaseServer);
+        AwsRdsVpcSecurityGroupView awsRdsVpcSecurityGroupView = new AwsRdsVpcSecurityGroupView(databaseServer);
+        AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer);
         List<Parameter> parameters = new ArrayList<>(asList(
                 new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
                 new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
@@ -208,7 +212,11 @@ public class AwsStackRequestHelper {
         addParameterIfNotNull(parameters, "EngineVersionParameter", awsRdsInstanceView.getEngineVersion());
         addParameterIfNotNull(parameters, "MultiAZParameter", awsRdsInstanceView.getMultiAZ());
         addParameterIfNotNull(parameters, "StorageTypeParameter", awsRdsInstanceView.getStorageType());
-        addParameterIfNotNull(parameters, "PortParameter", stack.getDatabaseServer().getPort());
+        addParameterIfNotNull(parameters, "PortParameter", databaseServer.getPort());
+        addParameterIfNotNull(parameters, "DBParameterGroupNameParameter",
+                databaseServer.isUseSslEnforcement() ? awsRdsDbParameterGroupView.getDBParameterGroupName() : null);
+        addParameterIfNotNull(parameters, "DBParameterGroupFamilyParameter",
+                databaseServer.isUseSslEnforcement() ? awsRdsDbParameterGroupView.getDBParameterGroupFamily() : null);
 
         if (awsRdsInstanceView.getVPCSecurityGroups().isEmpty()) {
             // VPC-id and VPC cidr should be filled in

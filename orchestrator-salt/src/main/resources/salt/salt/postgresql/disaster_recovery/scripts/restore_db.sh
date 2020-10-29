@@ -8,15 +8,16 @@ set -o nounset
 set -o pipefail
 set -o xtrace
 
-if [[ $# -ne 5 && $# -ne 6 ]]; then
+if [[ $# -ne 6 && $# -ne 7 ]]; then
   echo "Invalid inputs provided"
-  echo "Script accepts 5 inputs:"
+  echo "Script accepts 6 inputs:"
   echo "  1. Object Storage Service url to retrieve backups."
   echo "  2. PostgreSQL host name."
   echo "  3. PostgreSQL port."
   echo "  4. PostgreSQL user name."
   echo "  5. Ranger admin group."
-  echo "  6. (optional) Log file location."
+  echo "  6. Root certificate path."
+  echo "  7. (optional) Log file location."
   exit 1
 fi
 
@@ -25,10 +26,16 @@ HOST="$2"
 PORT="$3"
 USERNAME="$4"
 RANGERGROUP="$5"
-LOGFILE=${6:-/var/log/}/dl_postgres_restore.log
+ROOT_CERT_PATH="$6"
+LOGFILE=${7:-/var/log/}/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
+
+if [[ -f ${ROOT_CERT_PATH} ]]; then
+  export PGSSLROOTCERT=${ROOT_CERT_PATH}
+  export PGSSLMODE=verify-full
+fi
 
 doLog() {
   set +x

@@ -40,6 +40,7 @@ import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Scheduling;
 import com.google.api.services.compute.model.ServiceAccount;
 import com.google.api.services.compute.model.Tags;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
@@ -159,7 +160,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items sshMetaData = new Items();
         sshMetaData.setKey("ssh-keys");
-        sshMetaData.setValue(group.getInstanceAuthentication().getPublicKey() + " " + group.getInstanceAuthentication().getLoginUserName());
+        sshMetaData.setValue(getPublicKey(group.getPublicKey(), group.getLoginUserName()));
 
         Items blockProjectWideSsh = new Items();
         blockProjectWideSsh.setKey("block-project-ssh-keys");
@@ -184,6 +185,24 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    @VisibleForTesting
+    String getPublicKey(String groupPublicKey, String groupLoginUserName) {
+        String publicKey;
+        String[] publicKeySegments = groupPublicKey.split(" ");
+        if (publicKeySegments.length >= 2) {
+            publicKey = new StringBuilder()
+                    .append(publicKeySegments[0])
+                    .append(" ")
+                    .append(publicKeySegments[1])
+                    .append(" ")
+                    .append(groupLoginUserName)
+                    .toString();
+        } else {
+            publicKey = groupPublicKey;
+        }
+        return publicKey;
     }
 
     private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {

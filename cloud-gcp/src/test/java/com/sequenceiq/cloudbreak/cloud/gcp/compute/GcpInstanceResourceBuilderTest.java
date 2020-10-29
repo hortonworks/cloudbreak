@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -522,6 +523,30 @@ public class GcpInstanceResourceBuilderTest {
         Map<String, Object> params = Map.of(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name(),
                 InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "Hello World");
         doTestCustomEncryption(params, customerEncryptionKey);
+    }
+
+    @Test
+    public void testPublicKeyWhenHasEmailAtTheEndShouldCutTheEmail() throws Exception {
+        String loginName = "cloudbreak";
+        String sshKey = "ssh-rsa key cloudbreak@cloudbreak.com";
+        String publicKey = builder.getPublicKey(sshKey, loginName);
+        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
+    }
+
+    @Test
+    public void testPublicKeyWhenHasNoEmailAtTheEndShouldCutTheEmail() throws Exception {
+        String loginName = "cloudbreak";
+        String sshKey = "ssh-rsa key";
+        String publicKey = builder.getPublicKey(sshKey, loginName);
+        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
+    }
+
+    @Test
+    public void testPublicKeyWhenHasLotOfSegmentAtTheEndShouldCutTheEmail() throws Exception {
+        String loginName = "cloudbreak";
+        String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
+        String publicKey = builder.getPublicKey(sshKey, loginName);
+        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
     }
 
 }

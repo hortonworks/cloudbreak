@@ -37,15 +37,19 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSSlCertificateConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
 import com.sequenceiq.redbeams.domain.stack.Network;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
+import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.service.AccountTagService;
@@ -71,6 +75,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Value("${cb.enabledplatforms:}")
     private Set<String> dbServiceSupportedPlatforms;
+
+    @Value("${redbeams.ssl.enabled:}")
+    private boolean sslEnabled;
 
     @Value("${info.app.version:}")
     private String version;
@@ -123,6 +130,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
 
+    @Inject
+    private DatabaseServerSSlCertificateConfig databaseServerSSlCertificateConfig;
+
     @PostConstruct
     public void initSupportedPlatforms() {
         if (dbServiceSupportedPlatforms.isEmpty()) {
@@ -160,7 +170,17 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
         dbStack.setResourceCrn(crnService.createCrn(dbStack));
         dbStack.setTags(getTags(dbStack, source.getClusterCrn(), environment));
+        dbStack.setSslConfig(getSslConfig(source, dbStack));
         return dbStack;
+    }
+
+    public SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
+        SslConfig sslConfig = new SslConfig();
+        if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
+            sslConfig.setSslCertificates(databaseServerSSlCertificateConfig.getCertsByPlatform(dbStack.getCloudPlatform()));
+            sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        }
+        return sslConfig;
     }
 
     private Json getTags(DBStack dbStack, String clusterCrn, DetailedEnvironmentResponse environment) {

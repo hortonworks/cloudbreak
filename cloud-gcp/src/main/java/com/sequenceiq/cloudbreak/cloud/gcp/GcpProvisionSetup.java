@@ -8,8 +8,10 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 
+import com.google.api.services.compute.model.GuestOsFeature;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +78,8 @@ public class GcpProvisionSetup implements Setup {
                 RawDisk rawDisk = new RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
                 gcpApiImage.setRawDisk(rawDisk);
+                GuestOsFeature guestOsFeature = new GuestOsFeature().setType("UEFI_COMPATIBLE");
+                gcpApiImage.setGuestOsFeatures(Collections.singletonList(guestOsFeature));
                 Insert ins = compute.images().insert(projectId, gcpApiImage);
                 ins.execute();
             }

@@ -1,13 +1,12 @@
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 
-
 include:
   - postgresql.disaster_recovery
 
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:remote_db_url')}} {{salt['pillar.get']('postgres:remote_db_port')}} {{salt['pillar.get']('postgres:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}}
+    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} {{salt['pillar.get']('postgres:remote_db_url')}} {{salt['pillar.get']('postgres:remote_db_port')}} {{salt['pillar.get']('postgres:remote_admin')}} {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:root_cert_path')}}
     - require:
       - sls: postgresql.disaster_recovery
 
@@ -24,7 +23,7 @@ add_root_role_to_database:
 
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} "/var/lib/pgsql"
+    - name: /opt/salt/scripts/backup_db.sh {{salt['pillar.get']('disaster_recovery:object_storage_url')}} "" "" "" {{salt['pillar.get']('disaster_recovery:ranger_admin_group')}} {{salt['pillar.get']('disaster_recovery:root_cert_path')}} "/var/lib/pgsql"
     - require:
       - cmd: add_root_role_to_database
 {% endif %}

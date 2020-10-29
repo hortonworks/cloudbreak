@@ -170,7 +170,7 @@ public class MockUserManagementServiceTest {
         Account account = res.getAccount();
         List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
         assertThat(entitlements).contains("CDP_AZURE", "CDP_GCP", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
-                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV", "CDP_CM_ADMIN_CREDENTIALS");
+                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
     static Object[][] conditionalEntitlementDataProvider() {
@@ -222,6 +222,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableHbaseCloudStorage false", "enableHbaseCloudStorage", false, "CDP_SDX_HBASE_CLOUD_STORAGE", false},
                 {"enableHbaseCloudStorage true", "enableHbaseCloudStorage", true, "CDP_SDX_HBASE_CLOUD_STORAGE", true},
+
+                {"enableDatabaseWireEncryption false", "enableDatabaseWireEncryption", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION", false},
+                {"enableDatabaseWireEncryption true", "enableDatabaseWireEncryption", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION", true},
         };
     }
 

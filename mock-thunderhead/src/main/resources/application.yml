@@ -31,3 +31,4 @@ auth:
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: true
     differentdatahubversionthandatalake.enabled: true
+    database.wire.encryption.enable: true

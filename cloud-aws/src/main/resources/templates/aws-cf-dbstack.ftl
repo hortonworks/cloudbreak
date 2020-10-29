@@ -5,7 +5,6 @@
   "Description" : "Deploys an RDS instance and associated DB subnet group on AWS.",
 
   "Parameters" : {
-
     "AllocatedStorageParameter": {
         "Type": "Number",
         "Default": 10,
@@ -91,6 +90,16 @@
         "MaxValue": 65355
     },
     </#if>
+    <#if useSslEnforcement>
+    "DBParameterGroupNameParameter": {
+        "Type": "String",
+        "Description": "DB parameter group name"
+    },
+    "DBParameterGroupFamilyParameter": {
+        "Type": "String",
+        "Description": "DB parameter group family"
+    },
+    </#if>
     <#if hasSecurityGroup>
     "VPCSecurityGroupsParameter": {
         "Type": "List<AWS::EC2::SecurityGroup::Id>",
@@ -147,6 +156,20 @@
             }
         },
         </#if>
+        <#if useSslEnforcement>
+        "DBParameterGroup": {
+            "Type": "AWS::RDS::DBParameterGroup",
+            "Properties": {
+                "Description": { "Fn::Sub": "DB parameter group for ${r"${DBInstanceIdentifierParameter}"}" },
+                "Family": { "Ref": "DBParameterGroupFamilyParameter" },
+                "Parameters": { "rds.force_ssl": "1" },
+                "Tags": [
+                    { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
+                    { "Key" : "Name", "Value" : { "Ref" : "DBParameterGroupNameParameter" } }
+                ]
+            }
+        },
+        </#if>
         "DBSubnetGroup": {
             "Type": "AWS::RDS::DBSubnetGroup",
             "Properties": {
@@ -165,6 +188,9 @@
                 "BackupRetentionPeriod": { "Ref": "BackupRetentionPeriodParameter" },
                 "DBInstanceClass": { "Ref": "DBInstanceClassParameter" },
                 "DBInstanceIdentifier": { "Ref": "DBInstanceIdentifierParameter" },
+                <#if useSslEnforcement>
+                "DBParameterGroupName": { "Ref": "DBParameterGroup" },
+                </#if>
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
                 "Engine": { "Ref": "EngineParameter" },
                 "CopyTagsToSnapshot":true,
@@ -194,6 +220,9 @@
       "Hostname": { "Value" : { "Fn::GetAtt" : [ "DBInstance", "Endpoint.Address" ]} },
       "Port": { "Value" : { "Fn::GetAtt" : [ "DBInstance", "Endpoint.Port" ]} },
       "CreatedDBInstance": { "Value": { "Ref": "DBInstance" } },
+      <#if useSslEnforcement>
+      "CreatedDBParameterGroup": { "Value": { "Ref": "DBParameterGroup" } },
+      </#if>
       "CreatedDBSubnetGroup": { "Value": { "Ref": "DBSubnetGroup" } }
   }
 }

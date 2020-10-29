@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
@@ -90,6 +91,10 @@ public class DBStack {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "dbStack")
     private DBStackStatus dbStackStatus;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "sslconfig_id", referencedColumnName = "id")
+    private SslConfig sslConfig;
 
     public Long getId() {
         return id;
@@ -253,6 +258,14 @@ public class DBStack {
 
     public String getStatusReason() {
         return dbStackStatus != null ? dbStackStatus.getStatusReason() : null;
+    }
+
+    public SslConfig getSslConfig() {
+        return sslConfig;
+    }
+
+    public void setSslConfig(SslConfig sslConfig) {
+        this.sslConfig = sslConfig;
     }
 
     // careful with toString - it may cause database accesses for nested entities

@@ -98,7 +98,12 @@ public class AzureDatabaseServerView {
         return databaseServer.getPort();
     }
 
+    public boolean isUseSslEnforcement() {
+        return databaseServer.isUseSslEnforcement();
+    }
+
     public String getLocation() {
         return databaseServer.getLocation();
     }
+
 }

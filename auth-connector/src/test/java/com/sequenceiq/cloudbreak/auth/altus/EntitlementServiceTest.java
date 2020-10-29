@@ -43,6 +43,7 @@ class EntitlementServiceTest {
 
     static Object[][] entitlementCheckDataProvider() {
         return new Object[][]{
+
                 // entitlementName, function, enabled
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, false},
                 {"CDP_AZURE", (EntitlementCheckFunction) EntitlementService::azureEnabled, true},
@@ -118,7 +119,10 @@ class EntitlementServiceTest {
                 {"DATAHUB_AWS_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::awsAutoScalingEnabled, true},
 
                 {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, false},
-                {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, true}
+                {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, true},
+
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true}
         };
     }
 
