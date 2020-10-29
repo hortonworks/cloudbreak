@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -86,6 +87,9 @@ public class DatabaseService {
         } else {
             try {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+                if (sdxStatusService.getActualStatusForSdx(sdxCluster).getStatus().isDeleteInProgressOrCompleted()) {
+                    throw new CloudbreakServiceException("Datalake deletion in progress! Do not provision database, create flow cancelled");
+                }
                 dbResourceCrn = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                         databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn)).getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);

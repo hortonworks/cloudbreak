@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,10 +25,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.datalake.controller.exception.BadRequestException;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -132,6 +136,10 @@ public class DatabaseServiceTest {
             when(entitlementService.databaseWireEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(entitled);
         }
 
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.REQUESTED);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
+
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
 
         verify(databaseServerV4Endpoint).createInternal(allocateDatabaseServerV4RequestCaptor.capture(), anyString());
@@ -152,8 +160,26 @@ public class DatabaseServiceTest {
             assertThat(sslConfig).isNull();
         }
         verifyNoInteractions(sdxClusterRepository);
-        verifyNoInteractions(sdxStatusService);
         verifyNoInteractions(notificationService);
+    }
+
+    @Test
+    public void shouldThrowExceptionBecauseSDXIsTerminated() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setClusterName("NAME");
+        cluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        cluster.setCrn(CLUSTER_CRN);
+        DetailedEnvironmentResponse env = new DetailedEnvironmentResponse();
+        env.setName("ENV");
+        env.setCloudPlatform("aws");
+
+        SdxStatusEntity status = new SdxStatusEntity();
+        status.setStatus(DatalakeStatusEnum.DELETE_REQUESTED);
+        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
+
+        Assertions.assertThrows(CloudbreakServiceException.class, () -> {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
+        });
     }
 
     @Test
