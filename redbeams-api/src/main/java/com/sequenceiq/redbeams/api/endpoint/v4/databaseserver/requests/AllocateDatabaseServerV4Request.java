@@ -61,6 +61,9 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     @ApiModelProperty(DBStack.AZURE_PARAMETERS)
     private GcpDBStackV4Parameters gcp;
 
+    @ApiModelProperty(DatabaseServer.SSL_CONFIG)
+    private SslConfigV4Request sslConfig;
+
     public String getName() {
         return name;
     }
@@ -99,6 +102,14 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     public void setClusterCrn(String clusterCrn) {
         this.clusterCrn = clusterCrn;
+    }
+
+    public SslConfigV4Request getSslConfig() {
+        return sslConfig;
+    }
+
+    public void setSslConfig(SslConfigV4Request sslConfig) {
+        this.sslConfig = sslConfig;
     }
 
     @Override

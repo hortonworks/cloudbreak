@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CB_AUTHZ_POWER_USERS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
@@ -7,6 +8,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FAST_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -152,7 +154,11 @@ public class EntitlementService {
     }
 
     public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, Entitlement.CB_AUTHZ_POWER_USERS);
+        return isEntitlementRegistered(actorCrn, accountId, CB_AUTHZ_POWER_USERS);
+    }
+
+    public boolean databaseWireEncryptionEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -214,19 +213,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .validate();
-    }
-
-    @AfterMethod(alwaysRun = true)
-    public void tearDown(Object[] data) {
-        TestContext testContext = (TestContext) data[0];
-
-        testContext
-                .given(CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class, CHILD_CLOUD_PLATFORM)
-                .when(environmentTestClient.cascadingDelete(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .await(EnvironmentStatus.ARCHIVED, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
-                .validate();
-
-        testContext.cleanupTestContext();
     }
 
     private String getDefaultSDXBlueprintName() {

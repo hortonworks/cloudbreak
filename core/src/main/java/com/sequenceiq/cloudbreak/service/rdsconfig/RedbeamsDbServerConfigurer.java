@@ -18,11 +18,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 
 @Service
 public class RedbeamsDbServerConfigurer {
@@ -59,6 +62,7 @@ public class RedbeamsDbServerConfigurer {
 
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setConnectionURL(dbCommon.getJdbcConnectionUrl(resp.getDatabaseVendor(), resp.getHost(), resp.getPort(), Optional.of(dbName)));
+        rdsConfig.setSslMode(getSslMode(resp));
         rdsConfig.setConnectionUserName(dbUsernameConverterService.toConnectionUsername(resp.getHost(), dbUser));
         rdsConfig.setConnectionPassword(PasswordUtil.generatePassword());
         rdsConfig.setConnectionDriver(resp.getConnectionDriver());
@@ -72,6 +76,11 @@ public class RedbeamsDbServerConfigurer {
         LOGGER.info("Created RDS config {} for database type {} with connection URL {}, connection username {}",
                 rdsConfig.getName(), type, rdsConfig.getConnectionURL(), rdsConfig.getConnectionUserName());
         return rdsConfig;
+    }
+
+    private RdsSslMode getSslMode(DatabaseServerV4Response response) {
+        SslMode sslMode = Optional.ofNullable(response.getSslConfig()).map(SslConfigV4Response::getSslMode).orElse(null);
+        return SslMode.isEnabled(sslMode) ? RdsSslMode.ENABLED : RdsSslMode.DISABLED;
     }
 
     public boolean isRemoteDatabaseNeeded(Cluster cluster) {

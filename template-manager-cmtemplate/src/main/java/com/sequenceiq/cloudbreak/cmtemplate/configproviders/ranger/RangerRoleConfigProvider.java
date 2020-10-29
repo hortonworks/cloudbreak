@@ -2,11 +2,22 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.apache.commons.text.StringEscapeUtils;
+import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -16,25 +27,48 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfi
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
-import java.util.ArrayList;
-import java.util.List;
-import javax.inject.Inject;
-import org.springframework.stereotype.Component;
 
 @Component
 public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_HOST = "ranger_database_host";
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_NAME = "ranger_database_name";
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_TYPE = "ranger_database_type";
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_USER = "ranger_database_user";
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_PASSWORD = "ranger_database_password";
+
+    @VisibleForTesting
+    static final String RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE = "conf/ranger-admin-site.xml_role_safety_valve";
+
+    @VisibleForTesting
+    static final String RANGER_DATABASE_PORT = "ranger_database_port";
+
+    @VisibleForTesting
+    static final String RANGER_DEFAULT_POLICY_GROUPS = "ranger.default.policy.groups";
+
+    private static final String RANGER_JPA_JDBC_URL = "ranger.jpa.jdbc.url";
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        String cdhVersion = getCdhVersion(source);
+        String cmVersion = getCmVersion(source);
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
 
-        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
+        if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
             RdsView rangerRdsView = getRdsView(source);
-            addDbConfigs(rangerRdsView, configList, cdhVersion);
-            configList.add(config("ranger_database_port", rangerRdsView.getPort()));
+            addDbConfigs(rangerRdsView, configList, cmVersion);
+            configList.add(config(RANGER_DATABASE_PORT, rangerRdsView.getPort()));
         }
 
         return configList;
@@ -44,19 +78,21 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case RangerRoles.RANGER_ADMIN:
-                String cdhVersion = getCdhVersion(source);
+                String cmVersion = getCmVersion(source);
                 List<ApiClusterTemplateConfig> configList = new ArrayList<>();
 
                 // In CM 7.2.1 and above, the ranger database parameters have moved to the service
                 // config (see above getServiceConfigs).
-                if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
-                    addDbConfigs(getRdsView(source), configList, cdhVersion);
+                RdsView rangerRdsView = getRdsView(source);
+                if (!isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1)) {
+                    addDbConfigs(rangerRdsView, configList, cmVersion);
                 }
+                addDbSslConfigsIfNeeded(rangerRdsView, configList, cmVersion);
 
-                if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
+                if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
                     VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
                     String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.RANGER_ADMIN.getRight());
-                    configList.add(config("ranger.default.policy.groups", adminGroup));
+                    configList.add(config(RANGER_DEFAULT_POLICY_GROUPS, adminGroup));
                 }
                 return configList;
             default:
@@ -82,29 +118,32 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     // There is a bug in CM (OPSAPS-56992) which makes the db names case-sensitive.
     // To workaround this, we have to send the correctly cased ranger_database_type depending
     // on the version of CM.
-    private String versionCorrectedPostgresString(final String cdhVersion) {
-        return isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_1) ? "postgresql" : "PostgreSQL";
+    private String versionCorrectedPostgresString(final String cmVersion) {
+        return isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1) ? "postgresql" : "PostgreSQL";
     }
 
-    private String getRangerDbType(RdsView rdsView, String cdhVersion) {
-        switch (rdsView.getDatabaseVendor()) {
+    private String getRangerDbType(RdsView rangerRdsView, String cmVersion) {
+        switch (rangerRdsView.getDatabaseVendor()) {
             case POSTGRES:
-                return versionCorrectedPostgresString(cdhVersion);
+                return versionCorrectedPostgresString(cmVersion);
             default:
-                throw new CloudbreakServiceException("Unsupported Ranger database type: " + rdsView.getDatabaseVendor().displayName());
+                throw new CloudbreakServiceException("Unsupported Ranger database type: " + rangerRdsView.getDatabaseVendor().displayName());
         }
     }
 
-    private String getCdhVersion(TemplatePreparationObject source) {
-        return source.getBlueprintView().getProcessor().getStackVersion() == null ?
-            "" : source.getBlueprintView().getProcessor().getStackVersion();
+    private void addDbConfigs(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList, final String cmVersion) {
+        configList.add(config(RANGER_DATABASE_HOST, rangerRdsView.getHost()));
+        configList.add(config(RANGER_DATABASE_NAME, rangerRdsView.getDatabaseName()));
+        configList.add(config(RANGER_DATABASE_TYPE, getRangerDbType(rangerRdsView, cmVersion)));
+        configList.add(config(RANGER_DATABASE_USER, rangerRdsView.getConnectionUserName()));
+        configList.add(config(RANGER_DATABASE_PASSWORD, rangerRdsView.getConnectionPassword()));
     }
 
-    private void addDbConfigs(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList, final String cdhVersion) {
-        configList.add(config("ranger_database_host", rangerRdsView.getHost()));
-        configList.add(config("ranger_database_name", rangerRdsView.getDatabaseName()));
-        configList.add(config("ranger_database_type", getRangerDbType(rangerRdsView, cdhVersion)));
-        configList.add(config("ranger_database_user", rangerRdsView.getConnectionUserName()));
-        configList.add(config("ranger_database_password", rangerRdsView.getConnectionPassword()));
+    private void addDbSslConfigsIfNeeded(RdsView rangerRdsView, List<ApiClusterTemplateConfig> configList, String cmVersion) {
+        if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_2) && rangerRdsView.isUseSsl()) {
+            String escapedConnectionURL = StringEscapeUtils.escapeXml10(rangerRdsView.getConnectionURL());
+            configList.add(config(RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE, getSafetyValveProperty(RANGER_JPA_JDBC_URL, escapedConnectionURL)));
+        }
     }
+
 }

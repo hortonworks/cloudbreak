@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.NONE;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -33,6 +34,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SecurityGroup;
+import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.exception.BadRequestException;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 
@@ -66,6 +68,30 @@ public class DBStackToDatabaseStackConverter {
             return null;
         }
 
+        Map<String, Object> params = buildParameters(dbStack);
+        SecurityGroup securityGroup = dbStackDatabaseServer.getSecurityGroup();
+
+        DatabaseServer.Builder builder = DatabaseServer.builder()
+                .serverId(dbStackDatabaseServer.getName())
+                .flavor(dbStackDatabaseServer.getInstanceType())
+                .engine(getDatabaseEngine(dbStackDatabaseServer))
+                .connectionDriver(dbStackDatabaseServer.getConnectionDriver())
+                .rootUserName(dbStackDatabaseServer.getRootUserName())
+                .rootPassword(dbStackDatabaseServer.getRootPassword())
+                .port(dbStackDatabaseServer.getPort())
+                .useSslEnforcement(determineSslEnforcement(dbStack))
+                .storageSize(dbStackDatabaseServer.getStorageSize())
+                .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
+                // TODO / FIXME converter caller decides this?
+                .status(CREATE_REQUESTED)
+                .location(dbStack.getRegion())
+                .highAvailability(dbStack.isHa())
+                .params(params);
+
+        return builder.build();
+    }
+
+    private DatabaseEngine getDatabaseEngine(com.sequenceiq.redbeams.domain.stack.DatabaseServer dbStackDatabaseServer) {
         DatabaseEngine engine;
         switch (dbStackDatabaseServer.getDatabaseVendor()) {
             case POSTGRES:
@@ -80,27 +106,12 @@ public class DBStackToDatabaseStackConverter {
             default:
                 throw new BadRequestException("Unsupported database vendor " + dbStackDatabaseServer.getDatabaseVendor());
         }
+        return engine;
+    }
 
-        Map<String, Object> params = buildParameters(dbStack);
-        SecurityGroup securityGroup = dbStackDatabaseServer.getSecurityGroup();
-
-        DatabaseServer.Builder builder = DatabaseServer.builder()
-            .serverId(dbStackDatabaseServer.getName())
-            .flavor(dbStackDatabaseServer.getInstanceType())
-            .engine(engine)
-            .connectionDriver(dbStackDatabaseServer.getConnectionDriver())
-            .rootUserName(dbStackDatabaseServer.getRootUserName())
-            .rootPassword(dbStackDatabaseServer.getRootPassword())
-            .port(dbStackDatabaseServer.getPort())
-            .highAvailability(dbStack.isHa())
-            .storageSize(dbStackDatabaseServer.getStorageSize())
-            .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
-            // TODO / FIXME converter caller decides this?
-            .status(CREATE_REQUESTED)
-                .location(dbStack.getRegion())
-            .params(params);
-
-        return builder.build();
+    private boolean determineSslEnforcement(DBStack dbStack) {
+        SslConfig sslConfig = dbStack.getSslConfig();
+        return sslConfig != null && !NONE.equals(sslConfig.getSslCertificateType());
     }
 
     private Map<String, String> getUserDefinedTags(DBStack dbStack) {
@@ -145,7 +156,7 @@ public class DBStackToDatabaseStackConverter {
                         .collect(Collectors.toMap(
                                 Map.Entry::getKey,
                                 Map.Entry::getValue,
-                                (existingOne, newOne) ->  existingOne));
+                                (existingOne, newOne) -> existingOne));
             } else {
                 return params;
             }
@@ -159,4 +170,5 @@ public class DBStackToDatabaseStackConverter {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceGroup);
     }
+
 }
