@@ -9,6 +9,6 @@ public class AuditEventComparator implements Comparator<AuditEventV4Response>, S
 
     @Override
     public int compare(AuditEventV4Response o1, AuditEventV4Response o2) {
-        return Long.compare(o1.getOperation().getTimestamp(), o2.getOperation().getTimestamp());
+        return Long.compare(o1.getAuditId(), o2.getAuditId());
     }
 }
