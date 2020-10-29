@@ -664,7 +664,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
         if (!forced && sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
-            throw new BadRequestException(String.format("Can not find external database for Data Lake: %s", sdxCluster.getClusterName()));
+            throw new BadRequestException(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
+                    sdxCluster.getClusterName()));
         }
         Collection<StackViewV4Response> attachedDistroXClusters = null;
         try {
