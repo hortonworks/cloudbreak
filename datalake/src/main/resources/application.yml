@@ -70,7 +70,6 @@ altus:
     endpoint: localhost:8982
   datalakedr:
     enabled: false
-    endpoint: localhost:8982
 
 datalake:
   cert.dir: /certs/
