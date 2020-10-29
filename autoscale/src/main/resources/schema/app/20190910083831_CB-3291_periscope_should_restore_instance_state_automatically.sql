@@ -24,10 +24,8 @@ ALTER TABLE failed_node ALTER COLUMN id SET DEFAULT nextval ('failed_node_id_seq
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-ALTER TABLE ONLY failed_node DROP CONSTRAINT fk_failed_node_cluster_id:
-
-DROP INDEX idx_failed_node_cluster_id;
-
-DROP SEQUENCE failed_node_id_seq;
+ALTER TABLE ONLY failed_node DROP CONSTRAINT fk_failed_node_cluster_id;
 
 DROP TABLE failed_node;
+
+DROP SEQUENCE failed_node_id_seq;

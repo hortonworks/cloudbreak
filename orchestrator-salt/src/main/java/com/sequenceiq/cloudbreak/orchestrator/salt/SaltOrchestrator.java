@@ -300,7 +300,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Change primary gateway: {}", formerGateway);
-        String newAmbariServerHostname = newPrimaryGateway.getPrivateAddress();
+        String newAmbariServerHostname = newPrimaryGateway.getHostname();
         try (SaltConnector sc = new SaltConnector(newPrimaryGateway, restDebug)) {
             SaltStates.stopMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
 
