@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -57,6 +58,7 @@ import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.priv
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentMode;
 import com.microsoft.azure.management.resources.DeploymentOperations;
+import com.microsoft.azure.management.resources.GenericResource;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.Subscription;
@@ -807,4 +809,24 @@ public class AzureClient {
     public Completable deleteGenericResourceByIdAsync(String databaseServerId) {
         return handleAuthException(() -> azure.genericResources().deleteByIdAsync(databaseServerId));
     }
+
+    public List<String> getPostgresPrivateEndpoints(List<String> postgresIdList) {
+        List<String> privateEndpointConnections = new ArrayList<>();
+
+        postgresIdList.forEach(postgresId ->
+                {
+                    GenericResource postgresResource = azure.genericResources().getById(postgresId);
+                    Optional<List<String>> result = Optional.ofNullable(((LinkedHashMap) postgresResource.inner().properties()).get("privateEndpointConnections"))
+                            .map(x -> (List<String>)
+                                    ((ArrayList) x).stream().flatMap(y -> ((LinkedHashMap) y).values().stream())
+                                            .filter(v -> v instanceof String)
+                                            .collect(Collectors.toList())
+                            );
+                    result.ifPresent(privateEndpointConnections::addAll);
+                }
+        );
+
+        return privateEndpointConnections;
+    }
+
 }

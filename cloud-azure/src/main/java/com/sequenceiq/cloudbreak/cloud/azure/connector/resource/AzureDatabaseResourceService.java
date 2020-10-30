@@ -160,6 +160,11 @@ public class AzureDatabaseResourceService {
 
         // TODO simplify after final form of template is reached
 
+        List<CloudResource> postgresCloudresources = findResources(resources, List.of(AZURE_DATABASE));
+        List<String> postgresIds = postgresCloudresources.stream().map(CloudResource::getReference).collect(Collectors.toList());
+        List<String> privateEndpointConnections = client.getPostgresPrivateEndpoints(postgresIds);
+        azureUtils.deleteGenericResources(client, privateEndpointConnections);
+
         List<CloudResource> azureGenericResources = findResources(resources, List.of(AZURE_PRIVATE_ENDPOINT));
         LOGGER.debug("Deleting dns zone groups and azure private endpoints {}", azureGenericResources);
         azureUtils.deleteGenericResources(client, azureGenericResources.stream().map(CloudResource::getReference).collect(Collectors.toList()));
