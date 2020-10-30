@@ -6,6 +6,7 @@ export DOCKER_TAG_ENVIRONMENT=dev
 export DOCKER_TAG_DATALAKE=dev
 export DOCKER_TAG_REDBEAMS=dev
 export DOCKER_TAG_PERISCOPE=dev
+export DOCKER_TAG_MOCK_INFRASTRUCTURE=dev
 export THUNDERHEAD_MOCK_VOLUME_HOST=$(PWD)/../../mock-thunderhead/build/libs/mock-thunderhead.jar
 export REMOVE_CONTAINER=
 export DPS_VERSION=2.0.0.0-142
@@ -20,6 +21,7 @@ export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 
 export CLUSTERPROXY_ENABLED=false
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
+export MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
 
 export CPUS_FOR_CLOUDBREAK=8.0
 export CPUS_FOR_SERVICES=4.0

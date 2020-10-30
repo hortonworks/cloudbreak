@@ -61,6 +61,18 @@ echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
 docker run -v "$(pwd)"/integcb/docker-containers/docker-redbeams:/integcb/docker-containers/docker-redbeams \
  busybox:1.31.1 /bin/sh -c "sed -i '/redbeams-\$VERSION/c\ADD redbeams.jar /' /integcb/docker-containers/docker-redbeams/Dockerfile"
 
+date
+echo -e "\n\033[1;96m--- Copy ../mock-infrastructure/build/libs/mock-infrastructure.jar to docker-mock-infrastructure directory\033[0m\n"
+mkdir ./integcb/docker-containers/docker-mock-infrastructure/
+cp ../mock-infrastructure/build/libs/mock-infrastructure.jar ./integcb/docker-containers/docker-mock-infrastructure
+cp ../mock-infrastructure/deploy.sh ./integcb/docker-containers/docker-mock-infrastructure
+cp ../mock-infrastructure/Dockerfile ./integcb/docker-containers/docker-mock-infrastructure
+cp ../mock-infrastructure/Makefile ./integcb/docker-containers/docker-mock-infrastructure
+date
+echo -e "\n\033[1;96m--- Change Dockerfile \033[0m\n"
+docker run -v "$(pwd)"/integcb/docker-containers/docker-mock-infrastructure:/integcb/docker-containers/docker-mock-infrastructure \
+ busybox:1.31.1 /bin/sh -c "sed -i '/mock-infrastructure-\$VERSION/c\ADD mock-infrastructure.jar /' /integcb/docker-containers/docker-mock-infrastructure/Dockerfile"
+
 echo -e "\n\033[1;96m--- Build docker images\033[0m\n"
 docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./integcb/docker-containers/docker-cloudbreak & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-datalake:dev ./integcb/docker-containers/docker-datalake & \
@@ -68,4 +80,5 @@ docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak:dev ./inte
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-freeipa:dev ./integcb/docker-containers/docker-freeipa & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-environment:dev ./integcb/docker-containers/docker-environment & \
   docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-redbeams:dev ./integcb/docker-containers/docker-redbeams & \
+  docker build -t docker-private.infra.cloudera.com/cloudera/cloudbreak-mock-infrastructure:dev ./integcb/docker-containers/docker-mock-infrastructure & \
   wait
