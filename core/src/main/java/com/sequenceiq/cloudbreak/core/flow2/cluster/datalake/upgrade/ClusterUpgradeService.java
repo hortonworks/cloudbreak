@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_FINISHED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANAGER_UPGRADE_NOT_NEEDED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED;
@@ -43,15 +42,8 @@ public class ClusterUpgradeService {
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
     }
 
-    public boolean upgradeClusterManager(long stackId, StatedImage currentImage, StatedImage targetImage) {
-        String currentCmBuildNumber = currentImage.getImage().getCmBuildNumber();
-        boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentCmBuildNumber, targetImage.getImage().getCmBuildNumber());
-        if (clusterManagerUpdateNeeded) {
-            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
-        } else {
-            flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_NOT_NEEDED, currentCmBuildNumber);
-        }
-        return clusterManagerUpdateNeeded;
+    public void upgradeClusterManager(long stackId) {
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
     }
 
     public boolean upgradeCluster(long stackId, Image currentImage, Image targetImage) {

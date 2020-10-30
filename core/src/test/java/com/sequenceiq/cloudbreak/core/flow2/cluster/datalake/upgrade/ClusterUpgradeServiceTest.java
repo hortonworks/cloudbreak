@@ -84,29 +84,11 @@ public class ClusterUpgradeServiceTest {
     }
 
     @Test
-    public void testClusterManagerUpgradeNotNeeded() {
+    public void testClusterManagerUpgrade() {
         // GIVEN
-        Image currImage = createImage(CURRENT_BUILD_NUMBER, CURRENT_BUILD_NUMBER);
-        StatedImage currentImage = StatedImage.statedImage(currImage, null, null);
-        StatedImage targetImage = StatedImage.statedImage(currImage, null, null);
         // WHEN
-        boolean actualResult = underTest.upgradeClusterManager(STACK_ID, currentImage, targetImage);
+        underTest.upgradeClusterManager(STACK_ID);
         // THEN
-        Assertions.assertFalse(actualResult);
-        verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_NOT_NEEDED, CURRENT_BUILD_NUMBER);
-        verify(flowMessageService, times(0)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
-    }
-
-    @ParameterizedTest
-    @MethodSource("upgradeNeededVersions")
-    public void testClusterManagerUpgradeNeeded(String currentCmVersion, String targetCmVersion) {
-        // GIVEN
-        StatedImage currentImage = StatedImage.statedImage(createImage(currentCmVersion, CURRENT_BUILD_NUMBER), null, null);
-        StatedImage targetImage = StatedImage.statedImage(createImage(targetCmVersion, CURRENT_BUILD_NUMBER), null, null);
-        // WHEN
-        boolean actualResult = underTest.upgradeClusterManager(STACK_ID, currentImage, targetImage);
-        // THEN
-        Assertions.assertTrue(actualResult);
         verify(flowMessageService, times(0))
                 .fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_NOT_NEEDED, CURRENT_BUILD_NUMBER);
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE);
