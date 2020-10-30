@@ -10,10 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -65,7 +65,7 @@ public class TerminationService {
     private Clock clock;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -122,7 +122,7 @@ public class TerminationService {
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, statusReason);
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {
-                grpcUmsClient.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
+                ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
             }
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

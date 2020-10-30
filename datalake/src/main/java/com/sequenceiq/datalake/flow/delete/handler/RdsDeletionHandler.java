@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -42,7 +42,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
     private SdxStatusService sdxStatusService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Override
     public String selector() {
@@ -95,6 +95,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Can not set status to DELETED because data lake was not found");
         }
-        grpcUmsClient.notifyResourceDeleted(cluster.getCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(cluster.getCrn(), MDCUtils.getRequestId());
     }
 }

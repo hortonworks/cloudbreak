@@ -30,12 +30,12 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
@@ -75,7 +75,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private TransactionService transactionService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private BlueprintRepository blueprintRepository;
@@ -117,7 +117,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         try {
             return transactionService.required(() -> {
                 Blueprint created = super.createForLoggedInUser(blueprint, workspaceId);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn(), accountId);
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn(), accountId);
                 return created;
             });
         } catch (TransactionService.TransactionExecutionException e) {
@@ -140,7 +140,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
                 : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
                 .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
-        grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
         return deleted;
     }
 

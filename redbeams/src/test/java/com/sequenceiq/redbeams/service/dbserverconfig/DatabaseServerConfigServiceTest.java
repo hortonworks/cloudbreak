@@ -1,11 +1,13 @@
 package com.sequenceiq.redbeams.service.dbserverconfig;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -28,9 +30,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,10 +39,10 @@ import org.mockito.stubbing.Answer;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.Errors;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -93,9 +93,6 @@ public class DatabaseServerConfigServiceTest {
             .setResource("resourceother")
             .build();
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @InjectMocks
     private DatabaseServerConfigService underTest;
 
@@ -133,7 +130,7 @@ public class DatabaseServerConfigServiceTest {
     private PasswordGeneratorService passwordGeneratorService;
 
     @Mock
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     private DatabaseServerConfig server;
 
@@ -154,7 +151,7 @@ public class DatabaseServerConfigServiceTest {
         server2.setName("myotherserver");
         server2.setResourceCrn(SERVER_2_CRN);
 
-        doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
@@ -208,30 +205,24 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testCreateAlreadyExists() {
-        thrown.expect(BadRequestException.class);
-
         when(repository.findByName(anyString())).thenReturn(Optional.of(server));
 
-        underTest.create(server, 0L, false);
+        assertThrows(BadRequestException.class, () -> underTest.create(server, 0L, false));
     }
 
     @Test
     public void testCreateFailure() {
-        thrown.expect(AccessDeniedException.class);
-
         server.setConnectionDriver("org.postgresql.MyCustomDriver");
         Crn serverCrn = TestData.getTestCrn("databaseServer", "myserver");
         when(crnService.createCrn(server)).thenReturn(serverCrn);
         AccessDeniedException e = new AccessDeniedException("no way");
         when(repository.save(server)).thenThrow(e);
 
-        underTest.create(server, 0L, false);
+        assertThrows(AccessDeniedException.class, () -> underTest.create(server, 0L, false));
     }
 
     @Test
     public void testCreateConnectionFailure() {
-        thrown.expect(IllegalArgumentException.class);
-
         server.setConnectionDriver("org.postgresql.MyCustomDriver");
         doAnswer(new Answer() {
             public Object answer(InvocationOnMock invocation) {
@@ -241,8 +232,7 @@ public class DatabaseServerConfigServiceTest {
                 return null;
             }
         }).when(connectionValidator).validate(eq(server), any(Errors.class));
-
-        underTest.create(server, 0L, true);
+        assertThrows(IllegalArgumentException.class, () -> underTest.create(server, 0L, true));
     }
 
     @Test
@@ -274,10 +264,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testGetByCrnNotFound() {
-        thrown.expect(NotFoundException.class);
         when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.empty());
 
-        underTest.getByCrn(server.getResourceCrn().toString());
+        assertThrows(NotFoundException.class, () -> underTest.getByCrn(server.getResourceCrn().toString()));
     }
 
     @Test
@@ -291,11 +280,8 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testGetByNameNotFound() {
-        thrown.expect(NotFoundException.class);
-
         when(repository.findByNameAndWorkspaceIdAndEnvironmentId(SERVER_NAME, WORKSPACE_ID, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-
-        underTest.getByName(WORKSPACE_ID, ENVIRONMENT_CRN, server.getName());
+        assertThrows(NotFoundException.class, () -> underTest.getByName(WORKSPACE_ID, ENVIRONMENT_CRN, server.getName()));
     }
 
     @Test
@@ -311,11 +297,9 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testDeleteByCrnNotFound() {
-        thrown.expect(NotFoundException.class);
-
         when(repository.findByResourceCrn(SERVER_CRN)).thenReturn(Optional.empty());
 
-        underTest.deleteByCrn(server.getResourceCrn().toString());
+        assertThrows(NotFoundException.class, () -> underTest.deleteByCrn(server.getResourceCrn().toString()));
     }
 
     @Test
@@ -364,14 +348,11 @@ public class DatabaseServerConfigServiceTest {
 
     @Test
     public void testGetByCrnsNotFound() {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage("found with crn(s) " + SERVER_2_CRN);
-
         Set<String> crnSet = Set.of(SERVER_CRN.toString(), SERVER_2_CRN.toString());
         Set<DatabaseServerConfig> serverSet = Set.of(server);
         when(repository.findByResourceCrnIn(Set.of(SERVER_CRN, SERVER_2_CRN))).thenReturn(serverSet);
-
-        underTest.getByCrns(crnSet);
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> underTest.getByCrns(crnSet));
+        assertThat(exception.getMessage(), containsString("found with crn(s) " + SERVER_2_CRN));
     }
 
     @Test

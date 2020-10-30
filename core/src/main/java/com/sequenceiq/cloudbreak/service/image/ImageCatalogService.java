@@ -38,12 +38,12 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -112,7 +112,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     private EntitlementService entitlementService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private TransactionService transactionService;
@@ -155,7 +155,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         try {
             return transactionService.required(() -> {
                 ImageCatalog created = super.createForLoggedInUser(imageCatalog, workspaceId);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, resourceCrn, accountId);
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resourceCrn, accountId);
                 return created;
             });
         } catch (TransactionExecutionException e) {
@@ -335,7 +335,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         setImageCatalogAsDefault(null, user);
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
-        grpcUmsClient.notifyResourceDeleted(imageCatalog.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(imageCatalog.getResourceCrn(), MDCUtils.getRequestId());
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.debug("Image catalog has been archived: {}", imageCatalog);
         return imageCatalog;

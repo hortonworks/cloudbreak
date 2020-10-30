@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
@@ -35,7 +36,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -74,7 +74,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateService.class);
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private ClusterTemplateRepository clusterTemplateRepository;
@@ -144,7 +144,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         try {
             return transactionService.required(() -> {
                 ClusterTemplate created = super.createForLoggedInUser(resource, workspaceId);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn(), accountId);
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, resource.getResourceCrn(), accountId);
                 return created;
             });
         } catch (TransactionExecutionException e) {
@@ -368,7 +368,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate deleteByName(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         clusterTemplate = delete(clusterTemplate);
-        grpcUmsClient.notifyResourceDeleted(clusterTemplate.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(clusterTemplate.getResourceCrn(), MDCUtils.getRequestId());
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
     }

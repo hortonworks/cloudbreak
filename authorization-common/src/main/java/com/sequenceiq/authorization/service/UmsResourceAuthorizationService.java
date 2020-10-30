@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -18,11 +19,14 @@ import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtils;
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class UmsResourceAuthorizationService {
@@ -71,7 +75,13 @@ public class UmsResourceAuthorizationService {
     }
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
-        if (!umsClient.checkRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
+        if (entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            if (!umsClient.checkResourceRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
+                LOGGER.error(unauthorizedMessage);
+                throw new AccessDeniedException(unauthorizedMessage);
+            }
+        }
+        if (!umsClient.checkResourceRightLegacy(userCrn, userCrn, right, resourceCrn, getRequestId())) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
@@ -91,5 +101,24 @@ public class UmsResourceAuthorizationService {
             requestId = UUID.randomUUID().toString();
         }
         return Optional.of(requestId);
+    }
+
+    public boolean isEntitled(String actorCrn, String accountId, Entitlement entitlement) {
+        boolean entitled;
+        if (Entitlement.CB_AUTHZ_POWER_USERS.equals(entitlement) && StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
+            entitled = false;
+        } else {
+            return umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
+                    .stream()
+                    .map(e -> e.getEntitlementName().toUpperCase())
+                    .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
+        }
+        return entitled;
+    }
+
+    private boolean isEntitledAndLogResult(String actorCrn, String accountId, Entitlement entitlement) {
+        boolean entitled = isEntitled(actorCrn, accountId, entitlement);
+        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
+        return entitled;
     }
 }

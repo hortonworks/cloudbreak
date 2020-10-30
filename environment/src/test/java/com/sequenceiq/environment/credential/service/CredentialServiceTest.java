@@ -37,6 +37,7 @@ import org.springframework.test.context.TestPropertySource;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -122,6 +123,9 @@ class CredentialServiceTest {
 
     @MockBean
     private GrpcUmsClient grpcUmsClient;
+
+    @MockBean
+    private OwnerAssignmentService ownerAssignmentService;
 
     @MockBean
     private TransactionService transactionService;

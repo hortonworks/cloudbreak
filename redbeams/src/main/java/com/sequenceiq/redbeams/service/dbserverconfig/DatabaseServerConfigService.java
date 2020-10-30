@@ -24,10 +24,10 @@ import org.springframework.validation.MapBindingResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -93,7 +93,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     private PasswordGeneratorService passwordGeneratorService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     public Set<DatabaseServerConfig> findAll(Long workspaceId, String environmentCrn) {
         if (environmentCrn == null) {
@@ -137,7 +137,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
             resource.setWorkspaceId(workspaceId);
             return transactionService.required(() -> {
                 DatabaseServerConfig saved = repository.save(resource);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
                         saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
                 return saved;
             });
@@ -189,7 +189,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         // Otherwise, JPA/Hibernate pitches a fit
         DatabaseServerConfig resourceToDelete = getByCrn(resource.getResourceCrn()).get();
         DatabaseServerConfig archived = super.delete(resourceToDelete);
-        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
         return archived;
     }
 

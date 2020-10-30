@@ -21,9 +21,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -68,6 +70,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter;
 
+    private final OwnerAssignmentService ownerAssignmentService;
+
     private final GrpcUmsClient grpcUmsClient;
 
     private final TransactionService transactionService;
@@ -78,6 +82,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
             DelegatingCliEnvironmentRequestConverter delegatingCliEnvironmentRequestConverter,
+            OwnerAssignmentService ownerAssignmentService,
             GrpcUmsClient grpcUmsClient,
             TransactionService transactionService) {
         this.validatorService = validatorService;
@@ -85,6 +90,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.delegatingCliEnvironmentRequestConverter = delegatingCliEnvironmentRequestConverter;
+        this.ownerAssignmentService = ownerAssignmentService;
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
     }
@@ -98,7 +104,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         try {
             return transactionService.required(() -> {
                 Environment saved = save(environment);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
                         saved.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
                 return saved;
             });
@@ -350,7 +356,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
-            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, grpcUmsClient.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
+            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, RoleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {
             if (Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {

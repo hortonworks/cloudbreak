@@ -164,7 +164,7 @@ public class EnvironmentServiceIntegrationTest {
             List<RightCheck> rightChecks = i.getArgument(2);
             return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
         });
-        lenient().when(grpcUmsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(true);
+        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
         when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);

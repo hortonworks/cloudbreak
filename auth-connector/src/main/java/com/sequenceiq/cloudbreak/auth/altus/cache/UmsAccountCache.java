@@ -12,8 +12,15 @@ public class UmsAccountCache extends AbstractCacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
+    /**
+     * @deprecated {@link #ttlMinutes} was replaced by {@link #ttlSeconds} because it was not providing enough flexibility on ttl.
+     */
     @Value("${altus.ums.account.cache.ttl:5}")
+    @Deprecated
     private long ttlMinutes;
+
+    @Value("${altus.ums.account.cache.seconds.ttl:0}")
+    private long ttlSeconds;
 
     @Override
     protected String getName() {
@@ -27,6 +34,9 @@ public class UmsAccountCache extends AbstractCacheDefinition {
 
     @Override
     protected long getTimeToLiveSeconds() {
+        if (ttlSeconds != 0) {
+            return ttlSeconds;
+        }
         return ttlMinutes == 0L ? 1 : TimeUnit.MINUTES.toSeconds(ttlMinutes);
     }
 }
