@@ -60,8 +60,24 @@ restart_krb5kdc:
     - mode: 644
     - source: salt://freeipa/templates/ipa-rewrite.conf.j2
 
+/etc/httpd/conf/httpd-log-filter.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/httpd-log-filter.sh
+
+configure_httpd_log_filter:
+  file.replace:
+    - name: /etc/httpd/conf/httpd.conf
+    - pattern: ^ErrorLog.*
+    - repl: ErrorLog "|/etc/httpd/conf/httpd-log-filter.sh"
+    - unless: grep "httpd-log-filter.sh" /etc/httpd/conf/httpd.conf
+
 restart_httpd:
   service.running:
     - name: httpd
     - watch:
       - file: /etc/httpd/conf.d/ipa-rewrite.conf
+      - file: /etc/httpd/conf/httpd.conf
