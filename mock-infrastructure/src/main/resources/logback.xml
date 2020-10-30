@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="CB_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>mock-infrastructure-log/mock-infrastructure.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>cloudbreak-log/cloudbreak-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <root level="${CB_ROOT_LOG_LEVEL:-INFO}">
+        <appender-ref ref="CB_FILE_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.sequenceiq" level="${CB_LOG_LEVEL:-DEBUG}" additivity="false">
+        <appender-ref ref="CB_FILE_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>
