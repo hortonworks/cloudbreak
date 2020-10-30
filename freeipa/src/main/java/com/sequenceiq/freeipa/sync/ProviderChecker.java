@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -38,7 +40,8 @@ public class ProviderChecker {
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
-    public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances) {
+    public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances,
+        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
         return checkedMeasure(() -> {
             List<ProviderSyncResult> results = new ArrayList<>();
             List<CloudVmInstanceStatus> statuses = stackInstanceProviderChecker.checkStatus(stack, checkableInstances);
@@ -51,7 +54,7 @@ public class ProviderChecker {
                             .filter(i -> s.getCloudInstance().getInstanceId().equals(i.getInstanceId()))
                             .findFirst();
                     if (instanceMetaData.isPresent()) {
-                        InstanceStatus instanceStatus = updateStatuses(s, instanceMetaData.get());
+                        InstanceStatus instanceStatus = updateStatuses(s, instanceMetaData.get(), instanceHealthStatusMap);
                         if (instanceStatus != null) {
                             results.add(new ProviderSyncResult("", instanceStatus, false, s.getCloudInstance().getInstanceId()));
                         }
@@ -74,14 +77,23 @@ public class ProviderChecker {
         }, LOGGER, ":::Auto sync::: provider is checked in {}ms");
     }
 
-    private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData) {
+    private InstanceStatus updateStatuses(CloudVmInstanceStatus vmInstanceStatus, InstanceMetaData instanceMetaData,
+        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
         LOGGER.info(":::Auto sync::: {} instance metadata status update in progress, new status: {}",
                 instanceMetaData.getShortHostname(), vmInstanceStatus);
         InstanceStatus status = null;
         switch (vmInstanceStatus.getStatus()) {
             case STARTED:
+                if (DetailedStackStatus.UNREACHABLE == instanceHealthStatusMap.get(instanceMetaData)) {
+                    setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNREACHABLE);
+                    status = InstanceStatus.UNREACHABLE;
+                } else if (DetailedStackStatus.UNHEALTHY == instanceHealthStatusMap.get(instanceMetaData)) {
+                    setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNHEALTHY);
+                    status = InstanceStatus.UNHEALTHY;
+                } else {
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.CREATED);
                 status = InstanceStatus.CREATED;
+                }
                 break;
             case STOPPED:
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.STOPPED);

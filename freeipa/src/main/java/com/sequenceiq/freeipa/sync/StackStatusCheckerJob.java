@@ -101,11 +101,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     }
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
-                        List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances);
-                        if (!results.isEmpty()) {
-                            updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                        if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
+                            updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
                         } else {
-                            LOGGER.debug("results is empty, skip update");
+                            List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
+                                    syncResult.getInstanceStatusMap());
+                            if (!results.isEmpty()) {
+                                updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                            } else {
+                                LOGGER.debug("results is empty, skip update");
+                            }
                         }
                     }
                 });
@@ -117,7 +122,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount) {
-        DetailedStackStatus status = getStackStatus(providerSyncResults, result, alreadyDeletedCount);
+        DetailedStackStatus status = providerSyncResults == null ? result.getStatus() : getStackStatus(providerSyncResults, result, alreadyDeletedCount);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
                 if (flowLogService.isOtherFlowRunning(stack.getId())) {

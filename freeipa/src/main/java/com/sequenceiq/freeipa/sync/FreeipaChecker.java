@@ -2,8 +2,11 @@ package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -29,9 +32,9 @@ public class FreeipaChecker {
     @Inject
     private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
 
-    private Pair<List<DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
+    private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
-            List<DetailedStackStatus> statuses = new LinkedList<>();
+            Map<InstanceMetaData, DetailedStackStatus> statuses = new HashMap<>();
             List<RPCResponse<Boolean>> responses = new LinkedList<>();
             for (InstanceMetaData instanceMetaData : checkableInstances) {
                 try {
@@ -39,13 +42,13 @@ public class FreeipaChecker {
                             ":::Auto sync::: FreeIPA health check ran in {}ms");
                     responses.add(response);
                     if (response.getResult()) {
-                        statuses.add(DetailedStackStatus.AVAILABLE);
+                        statuses.put(instanceMetaData, DetailedStackStatus.AVAILABLE);
                     } else {
-                        statuses.add(DetailedStackStatus.UNHEALTHY);
+                        statuses.put(instanceMetaData, DetailedStackStatus.UNHEALTHY);
                     }
                 } catch (Exception e) {
                     LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
-                    statuses.add(DetailedStackStatus.UNREACHABLE);
+                    statuses.put(instanceMetaData, DetailedStackStatus.UNREACHABLE);
                 }
             }
             String message = getMessages(responses);
@@ -63,8 +66,8 @@ public class FreeipaChecker {
             Set<InstanceMetaData> notTermiatedStackInstances = stack.getAllInstanceMetaDataList().stream()
                     .filter(Predicate.not(InstanceMetaData::isTerminated))
                     .collect(Collectors.toSet());
-            Pair<List<DetailedStackStatus>, String> statusCheckPair = checkStatus(stack, checkableInstances);
-            List<DetailedStackStatus> responses = statusCheckPair.getFirst();
+            Pair<Map<InstanceMetaData, DetailedStackStatus>, String> statusCheckPair = checkStatus(stack, checkableInstances);
+            List<DetailedStackStatus> responses = new ArrayList<>(statusCheckPair.getFirst().values());
             DetailedStackStatus status;
             if (areAllStatusTheSame(responses) && !hasMissingStatus(responses, notTermiatedStackInstances)) {
                 status = responses.get(0);
@@ -72,10 +75,10 @@ public class FreeipaChecker {
                 status = DetailedStackStatus.UNHEALTHY;
             }
 
-            return new SyncResult("FreeIpa is " + status + ", " + statusCheckPair.getSecond(), status);
+            return new SyncResult("FreeIpa is " + status + ", " + statusCheckPair.getSecond(), status, statusCheckPair.getFirst());
         } catch (Exception e) {
             LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);
-            return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE);
+            return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, null);
         }
     }
 
