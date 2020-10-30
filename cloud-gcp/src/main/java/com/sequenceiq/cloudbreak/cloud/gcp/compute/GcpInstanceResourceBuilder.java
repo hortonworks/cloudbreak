@@ -139,15 +139,15 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         List<String> tagList = new ArrayList<>();
         Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
-        tagList.add(groupname);
+        addTag(tagList, groupname);
         // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
         if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
-            tagList.add(group.getSecurity().getCloudSecurityId());
+            addTag(tagList, group.getSecurity().getCloudSecurityId());
         }
-        tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
-        tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        tagList.add(GcpStackUtil.getGroupTypeTag(group.getType()));
-        cloudStack.getTags().forEach((key, value) -> tagList.add(mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
+        addTag(tagList, GcpStackUtil.getClusterTag(auth.getCloudContext()));
+        addTag(tagList, GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        addTag(tagList, GcpStackUtil.getGroupTypeTag(group.getType()));
+        cloudStack.getTags().forEach((key, value) -> addTag(tagList, mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
@@ -187,12 +187,20 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         }
     }
 
+    private void addTag(List<String> tagList, String actualTag) {
+        if (!tagList.contains(actualTag)) {
+            tagList.add(actualTag);
+        }
+    }
+
     @VisibleForTesting
     String getPublicKey(String groupPublicKey, String groupLoginUserName) {
         String publicKey;
         String[] publicKeySegments = groupPublicKey.split(" ");
         if (publicKeySegments.length >= 2) {
             publicKey = new StringBuilder()
+                    .append(groupLoginUserName)
+                    .append(":")
                     .append(publicKeySegments[0])
                     .append(" ")
                     .append(publicKeySegments[1])

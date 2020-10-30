@@ -530,7 +530,7 @@ public class GcpInstanceResourceBuilderTest {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak@cloudbreak.com";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
+        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
     @Test
@@ -538,7 +538,7 @@ public class GcpInstanceResourceBuilderTest {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
+        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
     @Test
@@ -546,7 +546,7 @@ public class GcpInstanceResourceBuilderTest {
         String loginName = "cloudbreak";
         String sshKey = "ssh-rsa key cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak cloudbreak";
         String publicKey = builder.getPublicKey(sshKey, loginName);
-        Assert.assertEquals("ssh-rsa key cloudbreak", publicKey);
+        Assert.assertEquals("cloudbreak:ssh-rsa key cloudbreak", publicKey);
     }
 
 }
