@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ex
+set -e
 
 date
 echo -e "\n\033[1;96m--- Install cbd\033[0m\n"
@@ -41,6 +41,128 @@ Field_Separator=$IFS
 IFS=,
 set +e
 echo "Target branch for swagger check: ${CB_TARGET_BRANCH}"
+
+echo "Checking if there are any API changes between this and the target branch"
+git checkout $ghprbSourceBranch
+git reset --hard ${ghprbActualCommit}
+
+# list of the non-API modules
+declare -a nonApiModules=("cloud-reactor-api"
+  "common-handlebar"
+  "datalake"
+  "environment-log"
+  "idbmms-connector"
+  "redbeams-log"
+  "structuredevent-service-legacy"
+  "audit-connector"
+  "ccm-connector"
+  "cloud-reactor"
+  "docker-autoscale"
+  "environment"
+  "integration-test"
+  "redbeams-model"
+  "structuredevent-service"
+  "auth-connector"
+  "client-cm"
+  "cloud-template"
+  "docker-cloudbreak"
+  "flow-api"
+  "mock-thunderhead"
+  "redbeams"
+  "suites_log"
+  "auth-internal-api"
+  "cloud-api"
+  "cloud-yarn"
+  "config"
+  "docker-datalake"
+  "flow"
+  "mock"
+  "scripts"
+  "template-manager-blueprint"
+  "auth-internal"
+  "cloud-aws"
+  "cloudbreak-log"
+  "docker-environment"
+  "notification-sender"
+  "sdx-log"
+  "template-manager-cmtemplate"
+  "authorization-common-api"
+  "cloud-azure"
+  "cloudera"
+  "core-model"
+  "docker-freeipa"
+  "freeipa-client"
+  "orchestrator-api"
+  "secret-engine"
+  "template-manager-core"
+  "authorization-common"
+  "cloud-common"
+  "cluster-api"
+  "core"
+  "docker-redbeams"
+  "freeipa-log"
+  "orchestrator-salt"
+  "status-checker"
+  "template-manager-recipe"
+  "cloud-gcp"
+  "cluster-cm"
+  "docs"
+  "freeipa"
+  "orchestrator-yarn"
+  "template-manager-tag"
+  "autoscale-log"
+  "cloud-mock"
+  "cluster-dns-connector"
+  "datalake-dr-connector"
+  "gradle"
+  "performance-test"
+  "usage-collection"
+  "autoscale"
+  "cloud-openstack"
+  "cluster-proxy"
+  "datalake-log"
+  "environment-common"
+  "grpc-common"
+  "structuredevent-service-cdp"
+  "workspace"
+)
+
+# list of the changed files
+declare -a changedFiles=(
+  $(git diff --name-only "origin/${CB_TARGET_BRANCH}")
+)
+
+# collector array for those file changes that are not in an API module
+nonApiFileChanges=()
+
+# iterating over all the non-API modules
+for nonApiModule in "${nonApiModules[@]}"; do
+  echo "Currently checking nonApiModule $nonApiModule for file changes:"
+  # iterating over all the changed files
+  for changedFile in "${changedFiles[@]}"; do
+    # extracting the module name of the changed file
+    moduleOfChangedFile=$(echo "$changedFile" | tr "/" " " | awk '{print $1}')
+    if [[ "$moduleOfChangedFile" == "$nonApiModule" ]]; then
+      # if the module name of the changed file is equal to the non-API modules name
+      # then we add this file to the collector array
+      nonApiFileChanges+=("$changedFile")
+      echo "Non-API file change found"
+      echo "$changedFile"
+    fi
+  done
+  echo "--------"
+done
+
+echo "length of nonApiFileChanges" ${#nonApiFileChanges[@]}
+echo "length of changedFiles" ${#changedFiles[@]}
+# if the size of the non-API change collector array is equal with the number of changed files
+# then all the changed files are in non-API modules
+# and swagger check can be skipped
+if [[ ${#nonApiFileChanges[@]} -eq ${#changedFiles[@]} ]]; then
+  echo "All the changes are in non-API modules so swagger check can be skipped"
+  exit 0
+fi
+
 for service in $Services; do
   if [ "${CB_TARGET_BRANCH}" != "master" ] && verlte 2.31.0-b118 $PREVIOUS_BUILD ; then
     echo Downloading ${service} ${PREVIOUS_BUILD} swagger definition, if possible
