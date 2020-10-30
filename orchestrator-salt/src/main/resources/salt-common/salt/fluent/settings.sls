@@ -11,7 +11,7 @@
 {% else %}
     {% set cloud_storage_logging_enabled = False %}
 {% endif %}
-{% if salt['pillar.get']('fluent:cloudLoggingServiceEnabled') %}
+{% if salt['pillar.get']('fluent:cloudLoggingServiceEnabled') or cloud_storage_logging_enabled %}
     {% set cloud_logging_service_enabled = True %}
     {% if salt['pillar.get']('fluent:platform') == "AWS" %}
       {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}

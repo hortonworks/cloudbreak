@@ -10,7 +10,8 @@
     s3_object_key_format %{path}-%{hms_slice}.%{file_extension}
     auto_create_bucket false
     check_apikey_on_start false
-    check_object false
+    check_object false{% if fluent.region %}
+    s3_region {{ fluent.region }}{% endif %}
 
     <buffer tag,time>
       @type file
@@ -37,7 +38,8 @@
     s3_object_key_format %{path}-%{hms_slice}.%{file_extension}
     auto_create_bucket false
     check_object false
-    check_apikey_on_start false
+    check_apikey_on_start false{% if fluent.region %}
+    s3_region {{ fluent.region }}{% endif %}
 
     <buffer tag,time>
       @type file
