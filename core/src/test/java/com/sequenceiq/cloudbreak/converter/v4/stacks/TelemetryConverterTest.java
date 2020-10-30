@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -44,7 +45,9 @@ public class TelemetryConverterTest {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, "app", "stream");
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream");
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, true);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
+        TelemetryConfiguration telemetryConfiguration =
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
         underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
 
@@ -180,7 +183,9 @@ public class TelemetryConverterTest {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, false);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
+        TelemetryConfiguration telemetryConfiguration =
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, true, false);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
@@ -254,7 +259,9 @@ public class TelemetryConverterTest {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(true, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
-        TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, false);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
+        TelemetryConfiguration telemetryConfiguration =
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, false, true);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);

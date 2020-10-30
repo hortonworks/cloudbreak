@@ -13,4 +13,9 @@ public class MeteringConfiguration extends AbstractDatabusStreamConfiguration {
             @Value("${metering.dbus.stream.name:Metering}") String dbusStreamName) {
         super(enabled, dbusAppName, dbusStreamName);
     }
+
+    @Override
+    public String getDbusServiceName() {
+        return "Metering";
+    }
 }

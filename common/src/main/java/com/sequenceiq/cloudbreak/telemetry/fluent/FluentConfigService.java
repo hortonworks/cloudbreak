@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
@@ -53,6 +54,8 @@ public class FluentConfigService {
 
     private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
 
+    private final MonitoringConfiguration monitoringConfiguration;
+
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
@@ -64,6 +67,7 @@ public class FluentConfigService {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
         this.clusterLogsCollectionConfiguration = telemetryConfiguration.getClusterLogsCollectionConfiguration();
+        this.monitoringConfiguration = telemetryConfiguration.getMonitoringConfiguration();
 
     }
 
@@ -84,8 +88,7 @@ public class FluentConfigService {
             }
             if (enabled && meteringEnabled) {
                 builder
-                        .withMeteringAppName(meteringConfiguration.getDbusAppName())
-                        .withMeteringStreamName(meteringConfiguration.getDbusAppName());
+                        .withMeteringConfiguration(meteringConfiguration);
             }
         }
         if (!enabled) {
@@ -140,13 +143,13 @@ public class FluentConfigService {
             if (databusEnabled && telemetry.isClusterLogsCollectionEnabled()) {
                 builder.withClusterLogsCollection(true);
                 LOGGER.debug("Fluent based cluster log collection is enabled.");
-                builder.withClusterLogsCollectionAppName(clusterLogsCollectionConfiguration.getDbusAppName())
-                        .withClusterLogsCollectionStreamName(clusterLogsCollectionConfiguration.getDbusAppName());
+                builder.withClusterLogsCollectionConfiguration(clusterLogsCollectionConfiguration);
                 validDatabusLogging = true;
             }
             if (databusEnabled && telemetry.isMonitoringFeatureEnabled()) {
                 builder.withMonitoringEnabled(true);
                 LOGGER.debug("Fluent based cluster monitoring is enabled.");
+                builder.withMonitoringConfiguration(monitoringConfiguration);
                 validDatabusLogging = true;
             }
         }

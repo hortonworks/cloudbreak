@@ -35,7 +35,7 @@ public class TelemetryApiConverter {
 
     public TelemetryApiConverter(TelemetryConfiguration configuration) {
         this.clusterLogsCollection = configuration.getClusterLogsCollectionConfiguration().isEnabled();
-        this.monitoringEnabled = configuration.isMonitoringEnabled();
+        this.monitoringEnabled = configuration.getMonitoringConfiguration().isEnabled();
         this.useSharedAltusCredential = configuration.getAltusDatabusConfiguration().isUseSharedAltusCredential();
     }
 
