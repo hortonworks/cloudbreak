@@ -171,6 +171,19 @@
   {% set dbus_cluster_logs_collection_stream_name = None %}
 {% endif %}
 
+{% if dbus_monitoring_enabled %}
+  {% if salt['pillar.get']('fluent:dbusMonitoringAppName') and salt['pillar.get']('fluent:dbusMonitoringStreamName') %}
+    {% set dbus_monitoring_app_headers = 'app:' + cluster_type + ',@monitoring-app:' + salt['pillar.get']('fluent:dbusMonitoringAppName') %}
+    {% set dbus_monitoring_stream_name = salt['pillar.get']('fluent:dbusMonitoringStreamName') %}
+  {% else %}
+    {% set dbus_monitoring_app_headers = 'app:' + cluster_type %}
+    {% set dbus_monitoring_stream_name = 'CdpVmMetrics' %}
+  {% endif %}
+{% else %}
+  {% set dbus_monitoring_app_headers = None %}
+  {% set dbus_monitoring_stream_name = None %}
+{% endif %}
+
 {% set forward_port = 24224 %}
 
 {% set version_data = namespace(entities=[]) %}
@@ -235,6 +248,8 @@
     "dbusMeteringAppHeaders": dbus_metering_app_headers,
     "dbusMeteringStreamName": dbus_metering_stream_name,
     "dbusMonitoringEnabled": dbus_monitoring_enabled,
+    "dbusMonitoringAppHeaders": dbus_monitoring_app_headers,
+    "dbusMonitoringStreamName":  dbus_monitoring_stream_name,
     "clouderaPublicGemRepo": cloudera_public_gem_repo,
     "clouderaAzurePluginVersion": cloudera_azure_plugin_version,
     "clouderaAzureGen2PluginVersion": cloudera_azure_gen2_plugin_version,

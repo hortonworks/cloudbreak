@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.telemetry.databus;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public abstract class AbstractDatabusStreamConfiguration {
 
     private final boolean enabled;
@@ -24,5 +27,14 @@ public abstract class AbstractDatabusStreamConfiguration {
 
     public String getDbusStreamName() {
         return dbusStreamName;
+    }
+
+    protected abstract String getDbusServiceName();
+
+    public Map<String, String> getDbusConfigs() {
+        Map<String, String> map = new HashMap<>();
+        map.put(String.format("dbus%sStreamName", getDbusServiceName()), dbusStreamName);
+        map.put(String.format("dbus%sAppName", getDbusServiceName()), dbusAppName);
+        return map;
     }
 }

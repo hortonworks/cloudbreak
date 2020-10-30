@@ -14,4 +14,9 @@ public class ClusterLogsCollectionConfiguration extends AbstractDatabusStreamCon
             @Value("${cluster.logs.collection.dbus.stream.name:LogCollection}") String dbusStreamName) {
         super(enabled, dbusAppName, dbusStreamName);
     }
+
+    @Override
+    public String getDbusServiceName() {
+        return "ClusterLogsCollection";
+    }
 }
