@@ -14,11 +14,11 @@ import io.swagger.annotations.ApiModelProperty;
         message = "Please set either only the CIDR field or both security group id fields")
 public abstract class SecurityAccessBase {
 
-    @Size(max = 255, message = "The length of the security group ID can be maximum 255 characters.")
+    @Size(min = 1, max = 255, message = "The length of the security group ID can be minimum 1 and maximum 255 characters.")
     @ApiModelProperty(EnvironmentModelDescription.KNOX_SECURITY_GROUP)
     private String securityGroupIdForKnox;
 
-    @Size(max = 255, message = "The length of the security group ID can be maximum 255 characters.")
+    @Size(min = 1, max = 255, message = "The length of the security group ID can be minimum 1 and maximum 255 characters.")
     @ApiModelProperty(EnvironmentModelDescription.DEFAULT_SECURITY_GROUP)
     private String defaultSecurityGroupId;
 

@@ -42,7 +42,7 @@ IFS=,
 set +e
 echo "Target branch for swagger check: ${CB_TARGET_BRANCH}"
 for service in $Services; do
-  if [ "${CB_TARGET_BRANCH}" != "master" ] && verlte 2.26.0-b50 $PREVIOUS_BUILD ; then
+  if [ "${CB_TARGET_BRANCH}" != "master" ] && verlte 2.31.0-b118 $PREVIOUS_BUILD ; then
     echo Downloading ${service} ${PREVIOUS_BUILD} swagger definition, if possible
     STATUSCODE=$(curl -kfSs --write-out "%{http_code}" https://${service}-swagger.s3.${zone[$service]}.amazonaws.com/swagger-${PREVIOUS_BUILD}.json -o ./apidefinitions/${service}-swagger-${PREVIOUS_BUILD}.json)
     if [ $STATUSCODE -ne 200 ]; then
@@ -50,7 +50,7 @@ for service in $Services; do
       rm ./apidefinitions/${service}-swagger-${PREVIOUS_BUILD}.json
     fi
   fi
-  if verlte 2.26.0-b50 $PREVIOUS_MINOR_BUILD ; then
+  if verlte 2.31.0-b118 $PREVIOUS_MINOR_BUILD ; then
     echo Downloading ${service} ${PREVIOUS_MINOR_BUILD} swagger definition, if possible
     STATUSCODE=$(curl -kfSs --write-out "%{http_code}" https://${service}-swagger.s3.${zone[$service]}.amazonaws.com/swagger-${PREVIOUS_MINOR_BUILD}.json -o ./apidefinitions/${service}-swagger-${PREVIOUS_MINOR_BUILD}.json)
     if [ $STATUSCODE -ne 200 ]; then

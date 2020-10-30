@@ -31,8 +31,6 @@ public class OperationDetails implements Serializable {
 
     private String userId;
 
-    private String userName;
-
     private String cloudbreakId;
 
     private String cloudbreakVersion;
@@ -64,7 +62,6 @@ public class OperationDetails implements Serializable {
         this.cloudbreakVersion = cloudbreakVersion;
         this.workspaceId = workspaceId;
         this.userId = userId;
-        this.userName = userName;
         this.tenant = tenant;
         this.resourceCrn = resourceCrn;
         this.userCrn = userCrn;
@@ -151,14 +148,6 @@ public class OperationDetails implements Serializable {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getTenant() {
