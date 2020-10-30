@@ -40,10 +40,10 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.MapBindingResult;
 import org.springframework.validation.ObjectError;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -116,7 +116,7 @@ public class DatabaseConfigServiceTest {
     private DatabaseConnectionValidator connectionValidator;
 
     @Mock
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Mock
     private TransactionService transactionService;
@@ -134,8 +134,8 @@ public class DatabaseConfigServiceTest {
         db.setId(1L);
         db.setName("mydb");
 
-        doNothing().when(grpcUmsClient).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(anyString(), any());
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 

@@ -19,11 +19,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -56,19 +56,19 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
     private TransactionService transactionService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
         Recipe toDelete = get(recipeNameOrCrn, workspaceId);
         Recipe deleted = super.delete(toDelete);
-        grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
         return deleted;
     }
 
     @Override
     public Set<Recipe> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
         Set<Recipe> deletedRecipes = super.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        deletedRecipes.stream().forEach(deleted -> grpcUmsClient.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId()));
+        deletedRecipes.stream().forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId()));
         return deletedRecipes;
     }
 
@@ -100,7 +100,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
         try {
             return transactionService.required(() -> {
                 Recipe created = super.createForLoggedInUser(recipe, workspaceId);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
                         ThreadBasedUserCrnProvider.getAccountId());
                 return created;
             });

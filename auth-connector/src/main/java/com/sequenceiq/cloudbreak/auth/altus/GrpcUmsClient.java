@@ -13,9 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -48,7 +46,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
@@ -62,8 +59,6 @@ import io.opentracing.Tracer;
 public class GrpcUmsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcUmsClient.class);
-
-    private static final String ACCOUNT_IN_IAM_CRNS = "altus";
 
     @Inject
     private ManagedChannelWrapper channelWrapper;
@@ -193,7 +188,7 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #actorCrn, #userCrn }")
+    @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #userCrn, #accountId }")
     public MachineUser getMachineUserDetails(String actorCrn, String userCrn, String accountId, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         LOGGER.debug("Getting machine user information for {} using request ID {}", userCrn, requestId);
@@ -366,7 +361,7 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the account associated with this user CRN
      */
-    @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #accountId }")
+    @Cacheable(cacheNames = "umsAccountCache", key = "{ #accountId }")
     public Account getAccountDetails(String actorCrn, String accountId, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         LOGGER.debug("Getting information for account ID {} using request ID {}", accountId, requestId);
@@ -379,24 +374,53 @@ public class GrpcUmsClient {
         return client.listAssigmentsOfUser(RequestIdUtil.getOrGenerate(requestId), userCrn);
     }
 
-    //"#value.concat(#fieldId).concat(#projectId)"
-//    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right, #resource }")
-    public boolean checkRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
+    public boolean checkResourceRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        if (!isEntitledAndLogResult(actorCrn, ThreadBasedUserCrnProvider.getAccountId(), Entitlement.CB_AUTHZ_POWER_USERS)) {
-            if (RightUtil.isReadRight(right)) {
-                LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
-                        ThreadBasedUserCrnProvider.getAccountId());
-                return true;
-            } else {
-                // if legacy authz then we will check permission on account level
-                resource = null;
-            }
+        return makeCheckRightCall(actorCrn, userCrn, right, resource, requestId);
+    }
+
+    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
+    public boolean checkResourceRightLegacy(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+            LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
+            return true;
         }
+        if (isReadRight(right)) {
+            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
+                    ThreadBasedUserCrnProvider.getAccountId());
+            return true;
+        }
+        return makeCheckRightCall(actorCrn, userCrn, right, resource, requestId);
+    }
+
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
+    public boolean checkAccountRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
+        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+            LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
+            return true;
+        }
+        return makeCheckRightCall(actorCrn, userCrn, right, null, requestId);
+    }
+
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
+    public boolean checkAccountRightLegacy(String actorCrn, String userCrn, String right, Optional<String> requestId) {
+        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+            LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
+            return true;
+        }
+        if (isReadRight(right)) {
+            LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
+                    ThreadBasedUserCrnProvider.getAccountId());
+            return true;
+        }
+        return makeCheckRightCall(actorCrn, userCrn, right, null, requestId);
+    }
+
+    private boolean makeCheckRightCall(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         try {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn, tracer);
             LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
@@ -407,11 +431,6 @@ public class GrpcUmsClient {
             LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, e.getMessage());
             return false;
         }
-    }
-
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
-    public boolean checkRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
-        return checkRight(actorCrn, userCrn, right, null, requestId);
     }
 
     /**
@@ -482,26 +501,6 @@ public class GrpcUmsClient {
             String resourceCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         return client.listResourceAssigneesForResource(RequestIdUtil.getOrGenerate(requestId), resourceCrn);
-    }
-
-    @Cacheable(cacheNames = "umsEntitlementRegisteredCache", key = "{ #actorCrn, #accountId, #entitlement }")
-    public boolean isEntitled(String actorCrn, String accountId, Entitlement entitlement) {
-        boolean entitled;
-        if (Entitlement.CB_AUTHZ_POWER_USERS.equals(entitlement) && StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
-            entitled = false;
-        } else {
-            return getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
-                    .stream()
-                    .map(e -> e.getEntitlementName().toUpperCase())
-                    .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
-        }
-        return entitled;
-    }
-
-    private boolean isEntitledAndLogResult(String actorCrn, String accountId, Entitlement entitlement) {
-        boolean entitled = isEntitled(actorCrn, accountId, entitlement);
-        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
-        return entitled;
     }
 
     /**
@@ -683,33 +682,12 @@ public class GrpcUmsClient {
         return client.getIdentityProviderMetadataXml(requestId, accountId);
     }
 
-    // Cache evict does not work with this key, we need to wait 60s
-    @Caching(evict = {
-            @CacheEvict(cacheNames = {"umsUserRoleAssigmentsCache"}, key = "#userCrn"),
-            @CacheEvict(cacheNames = {"umsResourceAssigneesCache"}, key = "#userCrn"),
-            @CacheEvict(cacheNames = {"umsUserRightsCache"}, key = "{ #userCrn, #right, #resource }")
-    })
     public void assignResourceRole(
             String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
         LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
         client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), userCrn, resourceCrn, resourceRoleCrn);
         LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
-    }
-
-    public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
-        try {
-            if (isEntitledAndLogResult(userCrn, accountId, Entitlement.CB_AUTHZ_POWER_USERS)) {
-                assignResourceRole(userCrn, resourceCrn, getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
-                LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
-            }
-        } catch (StatusRuntimeException ex) {
-            if (Status.Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
-                LOGGER.debug("Owner role of {} is already assigned to the {} user", resourceCrn, userCrn);
-            } else {
-                throw ex;
-            }
-        }
     }
 
     // Cache evict does not work with this key, we need to wait 60s
@@ -788,40 +766,18 @@ public class GrpcUmsClient {
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks);
     }
 
-    /**
-     * Get built-in Dbus uploader role
-     * Partition and region is hard coded right now, if it will change use the same as the user crn
-     */
-    public String getBuiltInDatabusRoleCrn() {
-        return getRoleCrn("DbusUploader").toString();
+    protected boolean isReadRight(String action) {
+        if (action == null) {
+            return false;
+        }
+        String[] parts = action.split("/");
+        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
+            return true;
+        }
+        return false;
     }
 
-    public String getBuiltInOwnerResourceRoleCrn() {
-        return getResourceRoleCrn("Owner").toString();
-    }
-
-    public String getBuiltInEnvironmentAdminResourceRoleCrn() {
-        return getResourceRoleCrn("EnvironmentAdmin").toString();
-    }
-
-    public Crn getResourceRoleCrn(String resourceRoleName) {
-        return getBaseIamCrnBuilder()
-                .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
-                .setResource(resourceRoleName)
-                .build();
-    }
-
-    public Crn getRoleCrn(String roleName) {
-        return getBaseIamCrnBuilder()
-                .setResourceType(Crn.ResourceType.ROLE)
-                .setResource(roleName)
-                .build();
-    }
-
-    private Crn.Builder getBaseIamCrnBuilder() {
-        return Crn.builder()
-                .setPartition(Crn.Partition.ALTUS)
-                .setAccountId(ACCOUNT_IN_IAM_CRNS)
-                .setService(Crn.Service.IAM);
+    public void setTracer(Tracer tracer) {
+        this.tracer = tracer;
     }
 }

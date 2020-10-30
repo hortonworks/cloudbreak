@@ -141,8 +141,15 @@ class EntitlementServiceTest {
 
     @SuppressWarnings("unchecked")
     private void setUpUmsClient(String entitlement, boolean entitled) {
-        when(umsClient.isEntitled(eq(ACTOR_CRN), eq(ACCOUNT_ID), eq(com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.valueOf(entitlement))))
-                .thenReturn(entitled);
+        Account.Builder builder = Account.newBuilder();
+        if (entitled) {
+                builder.addEntitlements(
+                        Entitlement.newBuilder()
+                                .setEntitlementName(entitlement)
+                                .build());
+        }
+        when(umsClient.getAccountDetails(eq(ACTOR_CRN), eq(ACCOUNT_ID), any()))
+                .thenReturn(builder.build());
     }
 
     private static Account createAccountForEntitlements(String... entitlementNames) {

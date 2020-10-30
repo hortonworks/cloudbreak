@@ -31,10 +31,10 @@ import org.springframework.stereotype.Service;
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -83,7 +83,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private TransactionService transactionService;
@@ -197,7 +197,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
         try {
             Credential createdCredential = transactionService.required(() -> {
                 Credential created = repository.save(verifiedCredential);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn, accountId);
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creatorUserCrn, credentialCrn, accountId);
                 return created;
             });
             sendCredentialNotification(createdCredential, ResourceEvent.CREDENTIAL_CREATED);

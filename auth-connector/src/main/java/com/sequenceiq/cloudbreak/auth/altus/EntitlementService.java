@@ -184,7 +184,12 @@ public class EntitlementService {
     }
 
     private boolean isEntitlementRegistered(String actorCrn, String accountId, Entitlement entitlement) {
-        boolean entitled = umsClient.isEntitled(actorCrn, accountId, entitlement);
+        Account accountDetails = umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
+        boolean entitled = accountDetails
+                .getEntitlementsList()
+                .stream()
+                .map(e -> e.getEntitlementName().toUpperCase())
+                .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
         return entitled;
     }

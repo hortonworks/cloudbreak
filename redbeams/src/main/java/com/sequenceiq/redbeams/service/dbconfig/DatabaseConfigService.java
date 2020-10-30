@@ -23,10 +23,10 @@ import org.springframework.validation.MapBindingResult;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -69,7 +69,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     private DatabaseConnectionValidator connectionValidator;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private TransactionService transactionService;
@@ -107,7 +107,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
             configToSave.setAccountId(crn.getAccountId());
             return transactionService.required(() -> {
                 DatabaseConfig saved = repository.save(configToSave);
-                grpcUmsClient.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(),
                         saved.getResourceCrn().toString(), ThreadBasedUserCrnProvider.getAccountId());
                 return saved;
             });
@@ -234,7 +234,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
 
         DatabaseConfig archived = super.delete(databaseConfig);
-        grpcUmsClient.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
         return archived;
     }
 

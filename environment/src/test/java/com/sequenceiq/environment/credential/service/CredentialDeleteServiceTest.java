@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.service.EnvironmentViewService;
@@ -52,13 +52,13 @@ class CredentialDeleteServiceTest {
     private EnvironmentViewService environmentViewService;
 
     @Mock
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
         underTest = new CredentialDeleteService(credentialService, notificationSender, messagesService,
-                environmentViewService, grpcUmsClient, Set.of("AWS", "AZURE", "YARN"));
+                environmentViewService, ownerAssignmentService, Set.of("AWS", "AZURE", "YARN"));
     }
 
     @Test
@@ -74,7 +74,7 @@ class CredentialDeleteServiceTest {
                 .thenReturn(Optional.of(secondCred));
         when(credentialService.save(firstCred)).thenReturn(firstCred);
         when(credentialService.save(secondCred)).thenReturn(secondCred);
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(any(), any());
 
         Set<Credential> result = underTest.deleteMultiple(names, ACCOUNT_ID, ENVIRONMENT);
 
@@ -89,7 +89,7 @@ class CredentialDeleteServiceTest {
         verify(credentialService, times(2)).save(any());
         verify(credentialService, times(1)).save(firstCred);
         verify(credentialService, times(1)).save(secondCred);
-        verify(grpcUmsClient, times(2)).notifyResourceDeleted(any(), any());
+        verify(ownerAssignmentService, times(2)).notifyResourceDeleted(any(), any());
     }
 
     @Test
@@ -105,7 +105,7 @@ class CredentialDeleteServiceTest {
 
     @Test
     void testMultipleWhenEnvironmentStillUsesTheCredential2ThenBadRequestShouldComeOnSecondButTheFirstDeletionSuccess() {
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(any(), any());
         String name1 = "something1";
         Credential cred1 = createCredentialWithName(name1);
         cred1.setId(1L);
@@ -126,7 +126,7 @@ class CredentialDeleteServiceTest {
         verify(environmentViewService, times(1)).findAllByCredentialId(anyLong());
         verify(environmentViewService, times(1)).findAllByCredentialId(cred1.getId());
         verify(credentialService, times(1)).save(any());
-        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(any(), any());
         assertTrue(result.size() == 1);
         assertTrue(result.iterator().next().getName().startsWith(name1));
     }
@@ -136,13 +136,13 @@ class CredentialDeleteServiceTest {
         Credential cred = createCredentialWithName("first");
         when(credentialService.findByNameAndAccountId(eq(cred.getName()), eq(ACCOUNT_ID), any(Set.class), any())).thenReturn(Optional.of(cred));
         when(credentialService.save(cred)).thenReturn(cred);
-        doNothing().when(grpcUmsClient).notifyResourceDeleted(any(), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(any(), any());
 
         underTest.deleteMultiple(Set.of(cred.getName()), ACCOUNT_ID, ENVIRONMENT);
 
         notificationSender.send(any(Notification.class), any(List.class), any(Client.class));
 
-        verify(grpcUmsClient, times(1)).notifyResourceDeleted(any(), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(any(), any());
     }
 
     private Credential createCredentialWithName(String name) {

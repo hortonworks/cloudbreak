@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sequenceiq.cloudbreak.auth.altus.service.CrnChecker.warnIfAccountIdIsInternal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -96,7 +97,7 @@ public class UmsClient {
      */
     public List<Group> listGroups(String requestId, String accountId, List<String> groupNameOrCrnList) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
 
         List<Group> groups = new ArrayList<>();
 
@@ -126,7 +127,7 @@ public class UmsClient {
      * @return the list of group CRNs
      */
     public List<String> listGroupsForMembers(String requestId, String accountId, String memberCrn) {
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         checkNotNull(memberCrn);
 
         Crn crn = Crn.safeFromString(memberCrn);
@@ -166,11 +167,13 @@ public class UmsClient {
      * @return the user
      */
     public User getUser(String requestId, String userCrn) {
+        String accountId = Crn.fromString(userCrn).getAccountId();
+        validateAccountIdWithWarning(accountId);
         checkNotNull(requestId);
         checkNotNull(userCrn);
         return newStub(requestId).getUser(
                 GetUserRequest.newBuilder()
-                        .setAccountId(Crn.fromString(userCrn).getAccountId())
+                        .setAccountId(accountId)
                         .setUserIdOrCrn(userCrn)
                         .build()
         ).getUser();
@@ -187,9 +190,12 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         Crn crn = Crn.fromString(userCrn);
+        String accountId = crn.getAccountId();
+        validateAccountIdWithWarning(accountId);
+
         List<User> users = newStub(requestId).listUsers(
                 ListUsersRequest.newBuilder()
-                        .setAccountId(crn.getAccountId())
+                        .setAccountId(accountId)
                         .addUserIdOrCrn(userCrn)
                         .build()
         ).getUserList();
@@ -207,7 +213,7 @@ public class UmsClient {
      */
     public List<User> listUsers(String requestId, String accountId, List<String> userIdOrCrnList) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
 
         List<User> users = new ArrayList<>();
 
@@ -237,6 +243,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         Crn crn = Crn.fromString(userCrn);
+        validateAccountIdWithWarning(accountId);
         List<MachineUser> machineUsers = newStub(requestId).listMachineUsers(
                 ListMachineUsersRequest.newBuilder()
                         .setAccountId(accountId)
@@ -264,7 +271,7 @@ public class UmsClient {
             boolean includeInternal, boolean includeWorkloadMachineUsers) {
 
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
 
         List<MachineUser> machineUsers = new ArrayList<>();
 
@@ -298,6 +305,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
+        validateAccountIdWithWarning(accountId);
         Optional<String> emptyResponse = Optional.empty();
         try {
             UserManagementProto.CreateWorkloadMachineUserResponse response = newStub(requestId).createWorkloadMachineUser(
@@ -331,6 +339,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
+        validateAccountIdWithWarning(accountId);
         try {
             newStub(requestId).deleteMachineUser(
                     UserManagementProto.DeleteMachineUserRequest.newBuilder()
@@ -357,6 +366,7 @@ public class UmsClient {
      */
     public ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(
             String requestId, String accountId, String environmentCrn, Optional<PagingProto.PageToken> pageToken) {
+        validateAccountIdWithWarning(accountId);
         ListServicePrincipalCloudIdentitiesRequest.Builder requestBuilder = ListServicePrincipalCloudIdentitiesRequest.newBuilder()
                 .setAccountId(accountId)
                 .setEnvironmentCrn(environmentCrn)
@@ -404,6 +414,7 @@ public class UmsClient {
         checkNotNull(userCrn);
         checkNotNull(machineUserCrn);
         checkNotNull(roleCrn);
+        validateAccountIdWithWarning(accountId);
         try {
             newStub(requestId).assignRole(
                     UserManagementProto.AssignRoleRequest.newBuilder()
@@ -439,7 +450,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(machineUserCrn);
         checkNotNull(roleCrn);
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         try {
             newStub(requestId).unassignRole(
                     UserManagementProto.UnassignRoleRequest.newBuilder()
@@ -495,7 +506,7 @@ public class UmsClient {
      */
     public Account getAccount(String requestId, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        warnIfAccountIdIsInternal(accountId);
         return newStub(requestId).getAccount(
                 GetAccountRequest.newBuilder()
                         .setAccountId(accountId)
@@ -585,6 +596,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
+        validateAccountIdWithWarning(accountId);
         CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
         builder.setAccountId(accountId)
                 .setMachineUserNameOrCrn(machineUserName)
@@ -622,6 +634,7 @@ public class UmsClient {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
+        warnIfAccountIdIsInternal(accountId);
         List<String> accessKeys = new ArrayList<>();
         UserManagementProto.ListAccessKeysRequest.Builder listAccessKeysRequestBuilder =
                 UserManagementProto.ListAccessKeysRequest.newBuilder()
@@ -671,7 +684,7 @@ public class UmsClient {
      */
     void deleteAccessKeys(String requestId, List<String> accessKeyCrns, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        warnIfAccountIdIsInternal(accountId);
         checkNotNull(accessKeyCrns);
         accessKeyCrns.forEach(accessKeyCrn -> {
             try {
@@ -699,7 +712,6 @@ public class UmsClient {
      */
     UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(String requestId, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
 
         return newStub(requestId).getEventGenerationIds(UserManagementProto.GetEventGenerationIdsRequest.newBuilder()
                 .setAccountId(accountId)
@@ -727,8 +739,7 @@ public class UmsClient {
      * @return metadata as string
      */
     public String getIdentityProviderMetadataXml(String requestId, String accountId) {
-        checkNotNull(accountId);
-
+        validateAccountIdWithWarning(accountId);
         GetIdPMetadataForWorkloadSSORequest request =
                 GetIdPMetadataForWorkloadSSORequest.newBuilder()
                         .setAccountId(accountId)
@@ -738,7 +749,7 @@ public class UmsClient {
     }
 
     public UserManagementProto.ListRolesResponse listRoles(String requestId, String accountId) {
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         return newStub(requestId).listRoles(UserManagementProto.ListRolesRequest.newBuilder()
                 .setAccountId(accountId)
                 .build());
@@ -746,7 +757,7 @@ public class UmsClient {
 
     public UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(String requestId, String accountId,
             String right, String resource) {
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         checkNotNull(right);
         checkNotNull(resource);
         return newStub(requestId).setWorkloadAdministrationGroupName(UserManagementProto.SetWorkloadAdministrationGroupNameRequest.newBuilder()
@@ -758,7 +769,7 @@ public class UmsClient {
 
     public UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(String requestId, String accountId,
             String right, String resource) {
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         checkNotNull(right);
         checkNotNull(resource);
         return newStub(requestId).getWorkloadAdministrationGroupName(UserManagementProto.GetWorkloadAdministrationGroupNameRequest.newBuilder()
@@ -770,7 +781,7 @@ public class UmsClient {
 
     public UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(String requestId, String accountId,
             String right, String resource) {
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
         checkNotNull(right);
         checkNotNull(resource);
         return newStub(requestId).deleteWorkloadAdministrationGroupName(UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.newBuilder()
@@ -789,7 +800,7 @@ public class UmsClient {
      */
     public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String requestId, String accountId) {
         checkNotNull(requestId);
-        checkNotNull(accountId);
+        validateAccountIdWithWarning(accountId);
 
         List<WorkloadAdministrationGroup> wags = new ArrayList<>();
 
@@ -807,8 +818,10 @@ public class UmsClient {
     }
 
     private UserManagementProto.Assignee getAssignee(String userCrn) {
+        String accountId = Crn.fromString(userCrn).getAccountId();
+        validateAccountIdWithWarning(accountId);
         UserManagementProto.Assignee.Builder assignee = UserManagementProto.Assignee.newBuilder()
-                .setAccountId(Crn.fromString(userCrn).getAccountId());
+                .setAccountId(accountId);
         if (Crn.isCrn(userCrn) && Crn.ResourceType.MACHINE_USER.equals(Crn.fromString(userCrn).getResourceType())) {
             assignee.setMachineUserNameOrCrn(userCrn);
         } else {
@@ -827,10 +840,16 @@ public class UmsClient {
      */
     public GetUserSyncStateModelResponse getUserSyncStateModel(
             String requestId, String accountId, List<RightsCheck> rightsChecks) {
+        validateAccountIdWithWarning(accountId);
         GetUserSyncStateModelRequest request = GetUserSyncStateModelRequest.newBuilder()
                 .setAccountId(accountId)
                 .addAllRightsCheck(rightsChecks)
                 .build();
         return newStub(requestId).getUserSyncStateModel(request);
+    }
+
+    private void validateAccountIdWithWarning(String accountId) {
+        checkNotNull(accountId);
+        warnIfAccountIdIsInternal(accountId);
     }
 }

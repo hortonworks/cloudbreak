@@ -10,8 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -28,17 +28,17 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUMSResourceDeleteHandler.class);
 
-    private final GrpcUmsClient umsClient;
+    private final OwnerAssignmentService ownerAssignmentService;
 
     private final EnvironmentService environmentService;
 
     private final VirtualGroupService virtualGroupService;
 
     protected EnvironmentUMSResourceDeleteHandler(EventSender eventSender,
-            EnvironmentService environmentService, GrpcUmsClient umsClient, VirtualGroupService virtualGroupService) {
+            EnvironmentService environmentService, OwnerAssignmentService ownerAssignmentService, VirtualGroupService virtualGroupService) {
         super(eventSender);
         this.environmentService = environmentService;
-        this.umsClient = umsClient;
+        this.ownerAssignmentService = ownerAssignmentService;
         this.virtualGroupService = virtualGroupService;
     }
 
@@ -63,7 +63,7 @@ public class EnvironmentUMSResourceDeleteHandler extends EventSenderAwareHandler
                 environmentCrn = resourceCrn.get();
             }
             virtualGroupService.cleanupVirtualGroups(Crn.fromString(environmentCrn).getAccountId(), environmentCrn);
-            umsClient.notifyResourceDeleted(environmentCrn, MDCUtils.getRequestId());
+            ownerAssignmentService.notifyResourceDeleted(environmentCrn, MDCUtils.getRequestId());
         } catch (Exception e) {
             LOGGER.warn("UMS delete event failed (this event is not critical)", e);
         }

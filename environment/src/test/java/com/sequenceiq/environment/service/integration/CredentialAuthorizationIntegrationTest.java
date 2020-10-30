@@ -105,7 +105,7 @@ public class CredentialAuthorizationIntegrationTest {
             List<AuthorizationProto.RightCheck> rightChecks = i.getArgument(2);
             return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
         });
-        lenient().when(grpcUmsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(true);
+        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
         when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
         mockPermissions();
     }
@@ -123,8 +123,8 @@ public class CredentialAuthorizationIntegrationTest {
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
-        when(grpcUmsClient.checkRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
-        when(grpcUmsClient.checkRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
+        when(grpcUmsClient.checkAccountRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
+        when(grpcUmsClient.checkAccountRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
 
         assertNotNull(firstUserClient.credentialV1Endpoint().post(getAwsCredentialRequest(FIRST_CRED_NAME)));
         assertThrows(ForbiddenException.class, () ->

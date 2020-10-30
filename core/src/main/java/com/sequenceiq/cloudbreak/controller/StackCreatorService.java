@@ -30,6 +30,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -40,7 +41,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -142,7 +142,7 @@ public class StackCreatorService {
     private StackViewService stackViewService;
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private OwnerAssignmentService ownerAssignmentService;
 
     @Inject
     private CredentialConverter credentialConverter;
@@ -290,7 +290,7 @@ public class StackCreatorService {
 
     private void assignOwnerRoleOnDataHub(User user, StackV4Request stackRequest, Stack newStack) {
         if (StackType.WORKLOAD.equals(stackRequest.getType())) {
-            grpcUmsClient.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), newStack.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(user.getUserCrn(), newStack.getResourceCrn(), ThreadBasedUserCrnProvider.getAccountId());
         }
     }
 

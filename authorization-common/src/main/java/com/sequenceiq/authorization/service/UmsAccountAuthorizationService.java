@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -28,21 +29,27 @@ public class UmsAccountAuthorizationService {
     @Inject
     private UmsRightProvider umsRightProvider;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void checkRightOfUser(String userCrn, AuthorizationResourceAction action) {
-        String unauthorizedMessage = String.format("You have no right to perform %s in account %s.", umsRightProvider.getRight(action),
+        String unauthorizedMessage = String.format("You have no right to perform %s in account %s", umsRightProvider.getRight(action),
                 Crn.fromString(userCrn).getAccountId());
         checkRightOfUser(userCrn, action, unauthorizedMessage);
     }
 
     private void checkRightOfUser(String userCrn, AuthorizationResourceAction action, String unauthorizedMessage) {
-        if (!hasRightOfUser(userCrn, action)) {
-            LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
+        if (entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+            if (!umsClient.checkAccountRight(userCrn, userCrn, action.getRight(), getRequestId())) {
+                LOGGER.error(unauthorizedMessage);
+                throw new AccessDeniedException(unauthorizedMessage);
+            }
+        } else {
+            if (!umsClient.checkAccountRightLegacy(userCrn, userCrn, action.getRight(), getRequestId())) {
+                LOGGER.error(unauthorizedMessage);
+                throw new AccessDeniedException(unauthorizedMessage);
+            }
         }
-    }
-
-    private boolean hasRightOfUser(String userCrn, AuthorizationResourceAction action) {
-        return umsClient.checkRight(userCrn, userCrn, umsRightProvider.getRight(action), getRequestId());
     }
 
     // Checks that the calling actor is either performing an action against themselves or have the right
@@ -57,11 +64,7 @@ public class UmsAccountAuthorizationService {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
-        if (!umsClient.checkRight(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, actorCrn.toString(), umsRightProvider.getRight(action), getRequestId())) {
-            String unauthorizedMessage = String.format("You have no right to perform %s on user %s.", umsRightProvider.getRight(action), targetUserCrnStr);
-            LOGGER.error(unauthorizedMessage);
-            throw new AccessDeniedException(unauthorizedMessage);
-        }
+        checkRightOfUser(actorCrnStr, action);
     }
 
     protected Optional<String> getRequestId() {
