@@ -1,12 +1,13 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
+{# DEPRECATED - use vm-logs.json to generate input.conf #}
 {% if providerPrefix != "databus" or fluent.dbusClusterLogsCollection %}
 <worker {{ workerIndex }}>
 <source>
   @type tail
   format none
   path /var/log/messages
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-messages.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-messages.log.pos
   tag {{providerPrefix}}.syslog
   read_from_head true
 </source>
@@ -14,7 +15,7 @@
   @type tail
   format none
   path /var/log/cloud-init.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloud-init.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloud-init.log.pos
   tag {{providerPrefix}}.cloud-init
   read_from_head true
 </source>
@@ -23,7 +24,7 @@
   @type tail
   format none
   path /var/log/salt/master
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_master.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_master.log.pos
   tag {{providerPrefix}}.salt_master
   read_from_head true
 </source>
@@ -31,7 +32,7 @@
   @type tail
   format none
   path /var/log/salt/minion
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_minion.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_minion.log.pos
   tag {{providerPrefix}}.salt_minion
   read_from_head true
 </source>
@@ -39,7 +40,7 @@
   @type tail
   format none
   path /var/log/salt/api
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_api.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_api.log.pos
   tag {{providerPrefix}}.salt_api
   read_from_head true
 </source>
@@ -48,7 +49,7 @@
   @type tail
   format none
   path /var/log/saltboot.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-saltboot.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-saltboot.log.pos
   tag {{providerPrefix}}.saltboot
   read_from_head true
 </source>
@@ -56,7 +57,7 @@
   @type tail
   format none
   path /var/log/waagent.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-waagent.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-waagent.log.pos
   tag {{providerPrefix}}.waagent
   read_from_head true
 </source>
@@ -64,7 +65,7 @@
   @type tail
   format none
   path {{fluent.serverLogFolderPrefix}}/cloudera-scm-server/cloudera-scm-server.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloudera-scm-server.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloudera-scm-server.log.pos
   tag {{providerPrefix}}.cloudera-scm-server-log
   read_from_head true
 </source>
@@ -72,7 +73,7 @@
   @type tail
   format none
   path {{fluent.serverLogFolderPrefix}}/cloudera-scm-server/cloudera-scm-server.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloudera-scm-server-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloudera-scm-server-out.log.pos
   tag {{providerPrefix}}.cloudera-scm-server-out
   read_from_head true
 </source>
@@ -80,7 +81,7 @@
   @type tail
   format none
   path {{fluent.agentLogFolderPrefix}}/cloudera-scm-agent/cloudera-scm-agent.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloudera-scm-agent.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloudera-scm-agent.log.pos
   tag {{providerPrefix}}.cloudera-scm-agent-log
   read_from_head true
 </source>
@@ -88,7 +89,7 @@
   @type tail
   format none
   path {{fluent.agentLogFolderPrefix}}/cloudera-scm-agent/cloudera-scm-agent*.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloudera-scm-agent-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloudera-scm-agent-out.log.pos
   tag {{providerPrefix}}.cloudera-scm-agent-out
   read_from_head true
 </source>
@@ -96,7 +97,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-ALERTPUBLISHER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-alertpublisher-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-alertpublisher-out.log.pos
   tag {{providerPrefix}}.MGMT-ALERTPUBLISHER
   read_from_head true
 </source>
@@ -104,7 +105,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-EVENTSERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-eventserver-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-eventserver-out.log.pos
   tag {{providerPrefix}}.MGMT-EVENTSERVER
   read_from_head true
 </source>
@@ -112,7 +113,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-HOSTMONITOR*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-hostmonitor-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-hostmonitor-out.log.pos
   tag {{providerPrefix}}.MGMT-HOSTMONITOR
   read_from_head true
 </source>
@@ -120,7 +121,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-NAVIGATOR*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-navigator-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-navigator-out.log.pos
   tag {{providerPrefix}}.MGMT-NAVIGATOR
   read_from_head true
 </source>
@@ -128,7 +129,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-NAVIGATORMETASERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-navigatormetaserver-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-navigatormetaserver-out.log.pos
   tag {{providerPrefix}}.MGMT-NAVIGATORMETASERVER
   read_from_head true
 </source>
@@ -136,7 +137,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-REPORTSMANAGER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-reportsmanager-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-reportsmanager-out.log.pos
   tag {{providerPrefix}}.MGMT-REPORTSMANAGER
   read_from_head true
 </source>
@@ -144,7 +145,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-SERVICEMONITOR*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-servicemonitor-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-servicemonitor-out.log.pos
   tag {{providerPrefix}}.MGMT-SERVICEMONITOR
   read_from_head true
 </source>
@@ -152,7 +153,7 @@
   @type tail
   format none
   path /var/log/*/*mgmt-cmf-MGMT-TELEMETRYPUBLISHER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-mgmt-telemetrypublisher-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-mgmt-telemetrypublisher-out.log.pos
   tag {{providerPrefix}}.MGMT-TELEMETRYPUBLISHER
   read_from_head true
 </source>
@@ -160,7 +161,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-yarn*-NODEMANAGER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-yarn-nodemanager-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-yarn-nodemanager-out.log.pos
   tag {{providerPrefix}}.YARN-NODEMANAGER
   read_from_head true
 </source>
@@ -168,7 +169,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-yarn*-JOBHISTORY*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-yarn-jobhistory-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-yarn-jobhistory-out.log.pos
   tag {{providerPrefix}}.YARN-JOBHISTORY
   read_from_head true
 </source>
@@ -176,7 +177,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-yarn*-RESOURCEMANAGER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-yarn-resourcemanager-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-yarn-resourcemanager-out.log.pos
   tag {{providerPrefix}}.YARN-RESOURCEMANAGER
   read_from_head true
 </source>
@@ -184,7 +185,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-hive*-HIVEMETASTORE*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-hive-hms-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-hive-hms-out.log.pos
   tag {{providerPrefix}}.HIVE-HIVEMETASTORE
   read_from_head true
 </source>
@@ -192,7 +193,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-hive*-HIVESERVER2*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-hive-hs2-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-hive-hs2-out.log.pos
   tag {{providerPrefix}}.HIVE-HIVESERVER2
   read_from_head true
 </source>
@@ -200,7 +201,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-hdfs*-DATANODE*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-hdfs-datanode-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-hdfs-datanode-out.log.pos
   tag {{providerPrefix}}.HDFS-DATANODE
   read_from_head true
 </source>
@@ -208,7 +209,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-hdfs*-NAMENODE*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-hdfs-namenode-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-hdfs-namenode-out.log.pos
   tag {{providerPrefix}}.HDFS-NAMENODE
   read_from_head true
 </source>
@@ -216,7 +217,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-hdfs*-SECONDARYNAMENODE*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-hdfs-snn-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-hdfs-snn-out.log.pos
   tag {{providerPrefix}}.HDFS-SECONDARYNAMENODE
   read_from_head true
 </source>
@@ -224,7 +225,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/knox/gateway/gateway.log*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-gateway.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-knox-gateway.log.pos
   tag {{providerPrefix}}.KNOX-GATEWAY
   read_from_head true
 </source>
@@ -232,7 +233,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/knox/gateway/gateway-audit.log*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-gateway-audit.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-knox-gateway-audit.log.pos
   tag {{providerPrefix}}.KNOX-GATEWAY_AUDIT
   read_from_head true
 </source>
@@ -240,7 +241,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/knox/idbroker/gateway.log*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-idbroker-gateway.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-knox-idbroker-gateway.log.pos
   tag {{providerPrefix}}.KNOX-IDBROKER_GATEWAY
   read_from_head true
 </source>
@@ -248,7 +249,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/knox/idbroker/gateway-audit.log*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-knox-idbroker-gateway-audit.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-knox-idbroker-gateway-audit.log.pos
   tag {{providerPrefix}}.KNOX-IDBROKER_GATEWAY_AUDIT
   read_from_head true
 </source>
@@ -256,7 +257,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-solr*-SOLR_SERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-solr-server-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-solr-server-out.log.pos
   tag {{providerPrefix}}.SOLR-SOLR_SERVER
   read_from_head true
 </source>
@@ -264,7 +265,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/atlas/application.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-atlas-application.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-atlas-application.log.pos
   tag {{providerPrefix}}.ATLAS-ATLAS_SERVER
   read_from_head true
 </source>
@@ -272,7 +273,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/admin/ranger-admin-*-ranger.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ranger-admin.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ranger-admin.log.pos
   tag {{providerPrefix}}.RANGER-RANGER_ADMIN
   read_from_head true
 </source>
@@ -280,7 +281,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/tagsync/tagsync.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ranger-tagsync.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ranger-tagsync.log.pos
   tag {{providerPrefix}}.RANGER-RANGER_TAGSYNC
   read_from_head true
 </source>
@@ -288,7 +289,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/usersync/usersync-*-ranger.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ranger-usersync.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ranger-usersync.log.pos
   tag {{providerPrefix}}.RANGER-RANGER_USERSYNC
   read_from_head true
 </source>
@@ -296,7 +297,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-oozie*-OOZIE_SERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-oozie-server-out.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-oozie-server-out.log.pos
   tag {{providerPrefix}}.OOZIE-OOZIE_SERVER
   read_from_head true
 </source>
@@ -304,7 +305,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/*cmf*-zookeeper*-SERVER*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cmf-zookeeper-server.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cmf-zookeeper-server.log.pos
   tag {{providerPrefix}}.ZOOKEEPER-SERVER
   read_from_head true
 </source>
@@ -312,7 +313,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/spark-history-server*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-spark-history-server.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-spark-history-server.log.pos
   tag {{providerPrefix}}.SPARK-HISTORY_SERVER
   read_from_head true
 </source>
@@ -320,7 +321,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/spark2-history-server*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-spark2-history-server.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-spark2-history-server.log.pos
   tag {{providerPrefix}}.SPARK2-HISTORY_SERVER
   read_from_head true
 </source>
@@ -328,7 +329,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/zeppelin/zeppelin-zeppelin*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-zeppelin-server.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-zeppelin-server.log.pos
   tag {{providerPrefix}}.ZEPPELIN_SERVER
   read_from_head true
 </source>
@@ -336,7 +337,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/impalad.*impala.log.INFO.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-impalad-info.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-impalad-info.log.pos
   tag {{providerPrefix}}.IMPALA-impalad_INFO
   read_from_head true
 </source>
@@ -344,7 +345,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/impalad.*impala.log.WARNING.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-impalad-warning.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-impalad-warning.log.pos
   tag {{providerPrefix}}.IMPALA-impalad_WARNING
   read_from_head true
 </source>
@@ -352,7 +353,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/impalad.*impala.log.ERROR.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-impalad-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-impalad-error.log.pos
   tag {{providerPrefix}}.IMPALA-impalad_ERROR
   read_from_head true
 </source>
@@ -360,7 +361,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/catalogd.*impala.log.INFO.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-catalogd-info.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-catalogd-info.log.pos
   tag {{providerPrefix}}.IMPALA-catalogd_INFO
   read_from_head true
 </source>
@@ -368,7 +369,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/catalogd.*impala.log.WARNING.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-catalogd-warning.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-catalogd-warning.log.pos
   tag {{providerPrefix}}.IMPALA-catalogd_WARNING
   read_from_head true
 </source>
@@ -376,7 +377,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/catalogd.*impala.log.ERROR.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-catalogd-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-catalogd-error.log.pos
   tag {{providerPrefix}}.IMPALA-catalogd_ERROR
   read_from_head true
 </source>
@@ -384,7 +385,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/statestored.*impala.log.INFO.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-statestored-info.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-statestored-info.log.pos
   tag {{providerPrefix}}.IMPALA-statestored_INFO
   read_from_head true
 </source>
@@ -392,7 +393,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/statestored.*impala.log.WARNING.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-statestored-warning.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-statestored-warning.log.pos
   tag {{providerPrefix}}.IMPALA-statestored_WARNING
   read_from_head true
 </source>
@@ -400,7 +401,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/statestored.*impala.log.ERROR.*
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-statestored-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-statestored-error.log.pos
   tag {{providerPrefix}}.IMPALA-statestored_ERROR
   read_from_head true
 </source>
@@ -408,7 +409,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-streams-messaging-manager.log.pos
   exclude_path ["{{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.log"]
   tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-server
   read_from_head true
@@ -417,7 +418,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager-ui.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-streams-messaging-manager-ui.log.pos
   tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-ui
   read_from_head true
 </source>
@@ -425,7 +426,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager*.err
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager.err.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-streams-messaging-manager.err.pos
   exclude_path ["{{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.err"]
   tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-server_ERROR
   read_from_head true
@@ -434,7 +435,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/*/streams-messaging-manager-ui*.err
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-streams-messaging-manager-ui.err.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-streams-messaging-manager-ui.err.pos
   tag {{providerPrefix}}.STREAMS_MESSAGING_MANAGER-ui_ERROR
   read_from_head true
 </source>
@@ -442,7 +443,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/schemaregistry/registry*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-schemaregistry.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-schemaregistry.log.pos
   tag {{providerPrefix}}.SCHEMAREGISTRY_registry
   read_from_head true
 </source>
@@ -450,7 +451,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/kafka/kafka-broker*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-kafka-broker.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-kafka-broker.log.pos
   tag {{providerPrefix}}.KAFKA_kafka-broker
   read_from_head true
 </source>
@@ -458,7 +459,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/kafka/ranger_kafka*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ranger-kafka.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ranger-kafka.log.pos
   tag {{providerPrefix}}.KAFKA_ranger
   read_from_head true
 </source>
@@ -466,7 +467,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-HBASETHRIFTSERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-thriftserver.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hbase-thriftserver.log.pos
   tag {{providerPrefix}}.HBASE_thriftserver
   read_from_head true
 </source>
@@ -474,7 +475,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-MASTER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-master.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hbase-master.log.pos
   tag {{providerPrefix}}.HBASE_master
   read_from_head true
 </source>
@@ -482,7 +483,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hbase/*hbase-REGIONSERVER*.log.out
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hbase-regionserver.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hbase-regionserver.log.pos
   tag {{providerPrefix}}.HBASE_regionserver
   read_from_head true
 </source>
@@ -490,7 +491,7 @@
   @type tail
   format none
   path /var/run/cloudera-scm-agent/process/*/logs/stderr.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-scm-agent-process-stderr.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-scm-agent-process-stderr.log.pos
   tag {{providerPrefix}}_CM_COMMAND.ERROR.*
   read_from_head true
 </source>
@@ -498,7 +499,7 @@
   @type tail
   format none
   path /var/run/cloudera-scm-agent/process/*/logs/stdout.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-scm-agent-process-stdout.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-scm-agent-process-stdout.log.pos
   tag {{providerPrefix}}_CM_COMMAND.OUT.*
   read_from_head true
 </source>
@@ -506,7 +507,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hue/runcpserver.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hue-runcpserver.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hue-runcpserver.log.pos
   tag {{providerPrefix}}.HUE-runcpserver
   read_from_head true
 </source>
@@ -514,7 +515,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hue/error.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hue-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hue-error.log.pos
   tag {{providerPrefix}}.HUE-error
   read_from_head true
 </source>
@@ -522,7 +523,7 @@
   @type tail
   format none
   path {{fluent.serviceLogFolderPrefix}}/hue-httpd/error_log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-hue-httpd-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-hue-httpd-error.log.pos
   tag {{providerPrefix}}.HUE-HTTPD-error_log
   read_from_head true
 </source>
@@ -530,7 +531,7 @@
   @type tail
   format none
   path /var/log/autossh-*.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-autossh.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-autossh.log.pos
   tag {{providerPrefix}}.AUTOSSH
   read_from_head true
 </source>
@@ -538,7 +539,7 @@
   @type tail
   format none
   path /var/log/nginx/access.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-access.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-nginx-access.log.pos
   tag {{providerPrefix}}.nginx_access
   read_from_head true
 </source>
@@ -546,7 +547,7 @@
   @type tail
   format none
   path /var/log/nginx/error.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-nginx-error.log.pos
   tag {{providerPrefix}}.nginx_error
   read_from_head true
 </source>
@@ -554,7 +555,7 @@
   @type tail
   format none
   path /var/log/find_device_and_format.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-find_device_and_format.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-find_device_and_format.log.pos
   tag {{providerPrefix}}.find_device_and_format
   read_from_head true
 </source>
@@ -562,7 +563,7 @@
   @type tail
   format none
   path /var/log/get_uuid_list.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-get_uuid_list.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-get_uuid_list.log.pos
   tag {{providerPrefix}}.get_uuid_list
   read_from_head true
 </source>
@@ -570,7 +571,7 @@
   @type tail
   format none
   path /var/log/mount-disks.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-mount-disks.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-mount-disks.log.pos
   tag {{providerPrefix}}.mount-disks
   read_from_head true
 </source>

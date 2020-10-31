@@ -108,15 +108,7 @@
   },
   {
     "path": "${serviceLogFolderPrefix}/*/*cmf*-hive*-HIVESERVER2*.log.out",
-    "label": "HIVE_HIVEMETASTORE"
-  },
-  {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hive*-HIVEMETASTORE*.log.out",
     "label": "HIVE_HIVESERVER2"
-  },
-  {
-    "path": "${serviceLogFolderPrefix}/*/*cmf*-hive*-HIVEMETASTORE*.log.out",
-    "label": "HIVE_HIVEMETASTORE"
   },
   {
     "path": "${serviceLogFolderPrefix}/*/*cmf*-hdfs*-DATANODE*.log.out",
@@ -212,15 +204,15 @@
   },
   {
     "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.INFO.*",
-    "label": ".IMPALA_statestored_INFO"
+    "label": "IMPALA_statestored_INFO"
   },
   {
     "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.WARNING.*",
-    "label": ".IMPALA_statestored_WARNING"
+    "label": "IMPALA_statestored_WARNING"
   },
   {
     "path": "${serviceLogFolderPrefix}/*/statestored.*impala.log.ERROR.*",
-    "label": ".IMPALA_statestored_ERROR"
+    "label": "IMPALA_statestored_ERROR"
   },
   {
     "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager*.log",
@@ -259,10 +251,6 @@
   {
     "path": "${serviceLogFolderPrefix}/hbase/*hbase-MASTER*.log.out",
     "label": "HBASE_master"
-  },
-  {
-    "path": "${serviceLogFolderPrefix}/*/streams-messaging-manager-ui*.log",
-    "label": "STREAMS_MESSAGING_MANAGER_ui"
   },
   {
     "path": "${serviceLogFolderPrefix}/hbase/*hbase-REGIONSERVER*.log.out",
