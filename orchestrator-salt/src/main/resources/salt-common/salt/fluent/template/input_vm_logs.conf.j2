@@ -1,0 +1,19 @@
+{%- from 'fluent/settings.sls' import fluent with context %}
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+# CONFIGURED BY SALT - do not edit
+{% if providerPrefix != "databus" or fluent.dbusClusterLogsCollection %}
+<worker {{ workerIndex }}>{% for logfile in telemetry.logs %}{% if not ("type" in logfile and logfile["type"] == "salt" and not fluent.dbusIncludeSaltLogs) %}
+   <source>
+     @type tail
+     format none
+     path {{ logfile["path"] }}
+     pos_file /var/log/{{ fluent.binary }}/pos/{{ providerPrefix }}-{{ logfile["label"] }}.log.pos{% if "type" in logfile and logfile["type"] == "cm_command"%}
+     tag {{providerPrefix}}_{{ logfile["label"] }}.*{% else %}
+     tag {{providerPrefix}}.{{ logfile["label"] }}{% endif %}
+     read_from_head true{% if "excludes" in logfile and logfile["excludes"] %}
+     exclude_path [{% for exclude_path in logfile["excludes"] %}{% if loop.index == loop.length %}"{{ exclude_path }}"{% else %}"{{ exclude_path }}",{% endif %}{% endfor %}]{% endif %}
+   </source>{% endif %}{% endfor %}
+</worker>
+{% else %}
+# DATABUS inputs are disabled
+{% endif %}

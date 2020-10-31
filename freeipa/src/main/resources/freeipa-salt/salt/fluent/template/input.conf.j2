@@ -1,12 +1,13 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 # CONFIGURED BY SALT - do not edit
+{# DEPRECATED - use vm-logs.json to generate input.conf #}
 {% if providerPrefix != "databus" or fluent.dbusClusterLogsCollection %}
 <worker {{ workerIndex }}>
 <source>
   @type tail
   format none
   path /var/log/messages
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-messages.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-messages.log.pos
   tag {{providerPrefix}}.syslog
   read_from_head true
 </source>
@@ -14,7 +15,7 @@
   @type tail
   format none
   path /var/log/cloud-init.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-cloud-init.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-cloud-init.log.pos
   tag {{providerPrefix}}.cloud-init
   read_from_head true
 </source>
@@ -23,7 +24,7 @@
   @type tail
   format none
   path /var/log/salt/master
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_master.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_master.log.pos
   tag {{providerPrefix}}.salt_master
   read_from_head true
 </source>
@@ -31,7 +32,7 @@
   @type tail
   format none
   path /var/log/salt/minion
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_minion.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_minion.log.pos
   tag {{providerPrefix}}.salt_minion
   read_from_head true
 </source>
@@ -39,7 +40,7 @@
   @type tail
   format none
   path /var/log/salt/api
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-salt_api.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-salt_api.log.pos
   tag {{providerPrefix}}.salt_api
   read_from_head true
 </source>
@@ -48,7 +49,7 @@
   @type tail
   format none
   path /var/log/saltboot.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-saltboot.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-saltboot.log.pos
   tag {{providerPrefix}}.saltboot
   read_from_head true
 </source>
@@ -56,7 +57,7 @@
   @type tail
   format none
   path /var/log/httpd/error_log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-httpd_error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-httpd_error.log.pos
   tag {{providerPrefix}}.httpd_error_log
   read_from_head true
 </source>
@@ -64,7 +65,7 @@
   @type tail
   format none
   path /var/log/krb5kdc.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-krb5kdc.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-krb5kdc.log.pos
   tag {{providerPrefix}}.krb5kdc
   read_from_head true
 </source>
@@ -72,7 +73,7 @@
   @type tail
   format none
   path /var/log/dirsrv/slapd-**/access
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-slapd_access.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-slapd_access.log.pos
   tag {{providerPrefix}}.slapd_access
   read_from_head true
 </source>
@@ -80,7 +81,7 @@
   @type tail
   format none
   path /var/log/dirsrv/slapd-**/errors
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-slapd_errors.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-slapd_errors.log.pos
   tag {{providerPrefix}}.slapd_errors
   read_from_head true
 </source>
@@ -88,7 +89,7 @@
   @type tail
   format none
   path /var/log/pki/pki-tomcat/ca/transactions
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-pki_transactions.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-pki_transactions.log.pos
   tag {{providerPrefix}}.pki_transactions
   read_from_head true
 </source>
@@ -96,7 +97,7 @@
   @type tail
   format none
   path /var/log/nginx/access.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-access.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-nginx-access.log.pos
   tag {{providerPrefix}}.nginx_access
   read_from_head true
 </source>
@@ -104,7 +105,7 @@
   @type tail
   format none
   path /var/log/nginx/error.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-nginx-error.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-nginx-error.log.pos
   tag {{providerPrefix}}.nginx_error
   read_from_head true
 </source>
@@ -112,7 +113,7 @@
   @type tail
   format none
   path /var/log/ipabackup.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipabackup.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipabackup.log.pos
   tag {{providerPrefix}}.ipa_backup
   read_from_head true
 </source>
@@ -120,7 +121,7 @@
   @type tail
   format none
   path /var/log/ipaclient-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaclient-install.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipaclient-install.log.pos
   tag {{providerPrefix}}.ipa_client_install
   read_from_head true
 </source>
@@ -128,7 +129,7 @@
   @type tail
   format none
   path /var/log/ipaclient-uninstall.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaclient-uninstall.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipaclient-uninstall.log.pos
   tag {{providerPrefix}}.ipa_client_uninstall
   read_from_head true
 </source>
@@ -136,7 +137,7 @@
   @type tail
   format none
   path /var/log/ipaserver-uninstall.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaserver-uninstall.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipaserver-uninstall.log.pos
   tag {{providerPrefix}}.ipa_server_uninstall
   read_from_head true
 </source>
@@ -144,7 +145,7 @@
   @type tail
   format none
   path /var/log/ipaserver-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipaserver-install.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipaserver-install.log.pos
   tag {{providerPrefix}}.ipa_server_install
   read_from_head true
 </source>
@@ -152,7 +153,7 @@
   @type tail
   format none
   path /var/log/ipareplica-install.log
-  pos_file /var/log/td-agent/pos/{{providerPrefix}}-ipareplica-install.log.pos
+  pos_file /var/log/{{ fluent.binary }}/pos/{{providerPrefix}}-ipareplica-install.log.pos
   tag {{providerPrefix}}.ipa_replica_install
   read_from_head true
 </source>

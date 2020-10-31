@@ -1,4 +1,5 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
+{%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set os = salt['grains.get']('os') %}
 {% set dbus_lock_exists = salt['file.file_exists' ]('/etc/cdp-logging-agent/databus_bundle.lock') %}
 {% set restart_sleep_time = 1200 %}
@@ -92,8 +93,9 @@ copy_cdp_logging_agent_conf:
 
 {% if fluent.cloudStorageLoggingEnabled or fluent.cloudLoggingServiceEnabled %}
 /etc/cdp-logging-agent/input.conf:
-  file.managed:
-    - source: salt://fluent/template/input.conf.j2
+  file.managed:{% if telemetry.logs %}
+    - source: salt://fluent/template/input_vm_logs.conf.j2{% else %}
+    - source: salt://fluent/template/input.conf.j2{% endif %}
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"
@@ -120,8 +122,9 @@ copy_cdp_logging_agent_conf:
     - mode: 640
 
 /etc/cdp-logging-agent/input_databus.conf:
-  file.managed:
-    - source: salt://fluent/template/input.conf.j2
+  file.managed:{% if telemetry.logs %}
+    - source: salt://fluent/template/input_vm_logs.conf.j2{% else %}
+    - source: salt://fluent/template/input.conf.j2{% endif %}
     - template: jinja
     - user: "{{ fluent.user }}"
     - group: "{{ fluent.group }}"

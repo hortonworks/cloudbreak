@@ -57,5 +57,25 @@
   {
     "path": "/var/log/ipabackup.log",
     "label": "ipa_backup"
+  },
+  {
+    "path": "/var/log/ipaclient-install.log",
+    "label": "ipa_client_install"
+  },
+  {
+    "path": "/var/log/ipaclient-uninstall.log",
+    "label": "ipa_client_uninstall"
+  },
+  {
+    "path": "/var/log/ipaserver-install.log",
+    "label": "ipa_server_install"
+  },
+  {
+    "path": "/var/log/ipaserver-uninstall.log",
+    "label": "ipa_server_uninstall"
+  },
+  {
+    "path": "/var/log/ipareplica-install.log",
+    "label": "ipa_replica_install"
   }
 ]
