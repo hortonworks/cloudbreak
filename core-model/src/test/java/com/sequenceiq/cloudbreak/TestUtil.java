@@ -853,16 +853,7 @@ public class TestUtil {
     }
 
     public static RdsDetails rdsDetails() {
-        RdsDetails details = new RdsDetails();
-        details.setTenantName("someTenant");
-        details.setUserId("someUserId");
-        details.setUserName("someUsername");
-        details.setWorkspaceId(123L);
-        details.setDescription(DUMMY_DESCRIPTION);
-        details.setId(111L);
-        details.setName("ldapname");
-
-        return details;
+        return new RdsDetails();
     }
 
 }
