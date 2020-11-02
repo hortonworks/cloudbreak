@@ -10,6 +10,6 @@ ENV VERSION ${VERSION}
 WORKDIR /
 
 # install the cloudbreak app
-ADD ${REPO_URL}/com/sequenceiq/cloudbreak/$VERSION/mock-infrastructure-$VERSION.jar /mock-infrastructure.jar
+ADD ${REPO_URL}/com/sequenceiq/mock-infrastructure/$VERSION/mock-infrastructure-$VERSION.jar /mock-infrastructure.jar
 
 CMD (java -jar /mock-infrastructure.jar) & JAVAPID=$!; trap "kill $JAVAPID; wait $JAVAPID" INT TERM; wait $JAVAPID
