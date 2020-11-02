@@ -122,7 +122,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
-        instance.setHostname(getHostname(cloudStack, buildableResource));
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
@@ -211,15 +210,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             publicKey = groupPublicKey;
         }
         return publicKey;
-    }
-
-    private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
-        String hostname = null;
-        if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
-            hostname = cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
-            LOGGER.debug("Setting FreeIPA hostname to {}", hostname);
-        }
-        return hostname;
     }
 
     private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {
