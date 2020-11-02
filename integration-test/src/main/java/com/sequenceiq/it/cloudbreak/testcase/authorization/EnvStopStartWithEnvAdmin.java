@@ -88,12 +88,14 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource " +
+                                "with resource identifier: 'crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have no right to perform any of these actions: environments/describeEnvironment " +
-                                "on crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
+                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource " +
+                                "with resource identifier: 'crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
                 .validate();
         testContext
                 .given(EnvironmentTestDto.class)
