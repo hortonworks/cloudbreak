@@ -4,15 +4,20 @@ package com.sequenceiq.datalake.flow.dr.restore;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_COULD_NOT_START_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_RESTORE_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_FULL_RESTORE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_DATABASE_RESTORE_COULD_NOT_START_STATE;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_DATABASE_RESTORE_FAILED_STATE;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_DATABASE_RESTORE_FINISHED_STATE;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_RESTORE_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_DATABASE_RESTORE_START_STATE;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.DATALAKE_RESTORE_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreState.INIT_STATE;
 
@@ -42,18 +47,28 @@ public class DatalakeDatabaseRestoreFlowConfig extends AbstractFlowConfiguration
                     .failureEvent(DATALAKE_DATABASE_RESTORE_COULD_NOT_START_EVENT)
 
                     .from(DATALAKE_DATABASE_RESTORE_IN_PROGRESS_STATE)
-                    .to(DATALAKE_DATABASE_RESTORE_FINISHED_STATE)
-                    .event(DATALAKE_DATABASE_RESTORE_SUCCESS_EVENT)
-                    .failureState(DATALAKE_DATABASE_RESTORE_FAILED_STATE)
+                    .to(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .event(DATALAKE_FULL_RESTORE_IN_PROGRESS_EVENT)
+                    .failureState(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
                     .failureEvent(DATALAKE_DATABASE_RESTORE_FAILED_EVENT)
 
-                    .from(DATALAKE_DATABASE_RESTORE_FINISHED_STATE)
+                    .from(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .to(DATALAKE_RESTORE_FINISHED_STATE)
+                    .event(DATALAKE_RESTORE_SUCCESS_EVENT)
+                    .failureState(DATALAKE_RESTORE_FAILED_STATE)
+                    .failureEvent(DATALAKE_RESTORE_FAILED_EVENT)
+
+                    .from(DATALAKE_RESTORE_FINISHED_STATE)
                     .to(FINAL_STATE)
                     .event(DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_DATABASE_RESTORE_FAILED_STATE)
                     .to(FINAL_STATE)
                     .event(DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_RESTORE_FAILED_STATE)
+                    .to(FINAL_STATE)
+                    .event(DATALAKE_RESTORE_FAILURE_HANDLED_EVENT).defaultFailureEvent()
 
                     .build();
 

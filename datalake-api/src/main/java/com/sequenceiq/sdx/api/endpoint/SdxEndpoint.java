@@ -194,7 +194,8 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "restore the database backing datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatabase")
     SdxDatabaseRestoreResponse restoreDatabaseByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("backupLocation") String backupLocation);
+            @QueryParam("backupId") String backupId, @QueryParam("restoreTd") String restoreId,
+            @QueryParam("backupLocation") String backupLocation);
 
     @GET
     @Path("{name}/backupDatabaseStatus")
