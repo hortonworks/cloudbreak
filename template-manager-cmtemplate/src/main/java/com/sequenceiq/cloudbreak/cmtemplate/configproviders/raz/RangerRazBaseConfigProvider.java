@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProvider {
 
@@ -29,8 +28,9 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
         if (isConfigurationNeeded(cmTemplateProcessor, source)) {
             ApiClusterTemplateService coreSettings = createTemplate();
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
+
             return hostgroupViews.stream()
-                    .filter(hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType()))
+                    .filter(hg -> hg.getName().toLowerCase().equals("master"))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();
