@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.DISCOVERY_NAME;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
@@ -187,6 +190,7 @@ public class GcpInstanceResourceBuilderTest {
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertTrue(instanceArg.getValue().getScheduling().getPreemptible());
+        assertNull(instanceArg.getValue().getHostname());
     }
 
     @Test
@@ -208,6 +212,7 @@ public class GcpInstanceResourceBuilderTest {
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertFalse(instanceArg.getValue().getScheduling().getPreemptible());
+        assertNull(instanceArg.getValue().getHostname());
     }
 
     @Test
@@ -229,12 +234,13 @@ public class GcpInstanceResourceBuilderTest {
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertFalse(instanceArg.getValue().getScheduling().getPreemptible());
+        assertNull(instanceArg.getValue().getHostname());
     }
 
     @Test
     public void extraxtServiceAccountWhenServiceEmailEmpty() throws Exception {
         // GIVEN
-        Group group = newGroupWithParams(ImmutableMap.of());
+        Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
         List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
         context.addComputeResources(0L, buildableResources);
 
@@ -250,6 +256,33 @@ public class GcpInstanceResourceBuilderTest {
         verify(compute).instances();
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertNull(instanceArg.getValue().getServiceAccounts());
+        assertNull(instanceArg.getValue().getHostname());
+    }
+
+    @Test
+    public void freeipaHostnameSet() throws Exception {
+        // GIVEN
+        String ipaserver = "ipaserver";
+        Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, ipaserver));
+        List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+        cloudStack = new CloudStack(Collections.singletonList(group), new Network(null), image,
+                ImmutableMap.of(CLOUD_STACK_TYPE_PARAMETER, FREEIPA_STACK_TYPE), emptyMap(), null,
+                null, null, null, null);
+
+        // WHEN
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+        when(insert.execute()).thenReturn(operation);
+
+        builder.build(context, privateId, authenticatedContext, group, buildableResources, cloudStack);
+
+        // THEN
+        verify(compute).instances();
+        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
+        assertNull(instanceArg.getValue().getServiceAccounts());
+        assertEquals(ipaserver, instanceArg.getValue().getHostname());
     }
 
     @Test
@@ -303,7 +336,7 @@ public class GcpInstanceResourceBuilderTest {
     public CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25");
-        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
+        return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, params);
     }
 
     @Test

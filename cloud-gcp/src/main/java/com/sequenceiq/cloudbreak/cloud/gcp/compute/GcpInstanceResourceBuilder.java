@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
@@ -122,7 +124,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
-        instance.setHostname(getHostname(cloudStack, buildableResource));
+        // For FreeIPA hosts set the hostname during creation to avoid Google Network Manager overriding it with internal hostnames
+        if (cloudStack.getParameters() != null
+                && cloudStack.getParameters().getOrDefault(CLOUD_STACK_TYPE_PARAMETER, "").equals(FREEIPA_STACK_TYPE)) {
+            String hostname = getHostname(group, privateId);
+            if (hostname != null) {
+                instance.setHostname(hostname);
+            }
+        }
         instance.setCanIpForward(Boolean.TRUE);
         instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack));
         instance.setDisks(listOfDisks);
@@ -213,10 +222,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return publicKey;
     }
 
-    private String getHostname(CloudStack cloudStack, List<CloudResource> buildableResource) {
+    private String getHostname(Group group, Long privateId) {
         String hostname = null;
-        if (!cloudStack.getGroups().isEmpty() && !cloudStack.getGroups().get(0).getInstances().isEmpty()) {
-            hostname = cloudStack.getGroups().get(0).getInstances().get(0).getStringParameter(CloudInstance.DISCOVERY_NAME);
+        CloudInstance cloudInstance = group.getInstances().stream()
+                .filter(i -> i.getTemplate().getPrivateId().equals(privateId))
+                .findFirst()
+                .orElse(null);
+        if (cloudInstance != null) {
+            hostname = cloudInstance.getStringParameter(CloudInstance.DISCOVERY_NAME);
             LOGGER.debug("Setting FreeIPA hostname to {}", hostname);
         }
         return hostname;
