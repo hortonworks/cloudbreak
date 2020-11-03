@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -29,6 +30,9 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
+    private DatalakeAuditGrpcServiceAssertion datalakeAuditGrpcServiceAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -69,6 +73,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
     }
 }

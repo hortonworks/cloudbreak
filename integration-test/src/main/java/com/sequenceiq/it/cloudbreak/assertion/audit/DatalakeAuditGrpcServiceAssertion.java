@@ -23,6 +23,14 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
         return testDto;
     }
 
+    public SdxTestDto upgradeClusterByNameInternal(TestContext testContext, SdxTestDto testDto, SdxClient client) {
+        List<AuditProto.CdpAuditEvent> cdpAuditEvents = getAuditClient().listEvents(ListAuditEvent.builder()
+                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
+                .eventSource(getService()).build());
+        validateEventList(cdpAuditEvents, testDto, "UpgradeDatalakeCluster");
+        return testDto;
+    }
+
     @Override
     protected String getStopEventName() {
         return "StopDatalakeCluster";
