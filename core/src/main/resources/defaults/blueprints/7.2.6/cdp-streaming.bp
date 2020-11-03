@@ -1,5 +1,5 @@
 {
-  "description": "7.2.6 - Streams Messaging Heavy Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
+  "description": "7.2.6 - Streams Messaging Heavy Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager",
   "blueprint": {
     "cdhVersion": "7.2.6",
     "displayName": "streams-messaging",
@@ -68,6 +68,22 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName" : "streams_replication_manager",
+        "serviceType" : "STREAMS_REPLICATION_MANAGER",
+        "roleConfigGroups" : [
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_SERVICE",
+            "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_DRIVER",
+            "base" : true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -103,6 +119,14 @@
         "roleConfigGroupsRefNames": [
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE"
+        ]
+      },
+      {
+        "refName": "srm",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE"
         ]
       }
     ]

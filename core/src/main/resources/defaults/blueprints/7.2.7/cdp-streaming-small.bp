@@ -1,5 +1,5 @@
 {
-  "description": "7.2.7 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
+  "description": "7.2.7 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager",
   "blueprint": {
     "cdhVersion": "7.2.7",
     "displayName": "streams-messaging",

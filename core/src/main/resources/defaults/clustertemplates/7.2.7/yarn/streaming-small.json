@@ -5,10 +5,7 @@
   "cloudPlatform": "YARN",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.7 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
-    },
-    "externalDatabase": {
-      "availabilityType": "NON_HA"
+      "blueprintName": "7.2.7 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager"
     },
     "instanceGroups": [
       {

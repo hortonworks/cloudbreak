@@ -1,5 +1,5 @@
 {
-  "description": "7.2.6 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager",
+  "description": "7.2.6 - Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager",
   "blueprint": {
     "cdhVersion": "7.2.6",
     "displayName": "streams-messaging",
@@ -68,6 +68,22 @@
             "base": true
           }
         ]
+      },
+      {
+        "refName" : "streams_replication_manager",
+        "serviceType" : "STREAMS_REPLICATION_MANAGER",
+        "roleConfigGroups" : [
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_SERVICE",
+            "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_DRIVER",
+            "base" : true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -76,6 +92,7 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "core_settings-STORAGEOPERATIONS-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
@@ -85,9 +102,10 @@
         "refName": "broker",
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
           "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "zookeeper-SERVER-BASE"
+          "kafka-KAFKA_BROKER-BASE"
         ]
       }
     ]
