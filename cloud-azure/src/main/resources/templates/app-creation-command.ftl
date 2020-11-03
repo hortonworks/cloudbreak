@@ -1,4 +1,4 @@
 az ad sp create-for-rbac \
-    --name http://cloudbreak-app \
+    --name http://{app-name} \
     --role Contributor \
     --scopes /subscriptions/{subscriptionId}
