@@ -10,7 +10,6 @@ import java.sql.SQLException;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.hibernate.envers.AuditReader;
@@ -113,11 +112,6 @@ public class DatabaseConfig {
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
         jpaTransactionManager.afterPropertiesSet();
         return jpaTransactionManager;
-    }
-
-    @Bean
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.createEntityManager();
     }
 
     @Bean
