@@ -45,6 +45,8 @@ public class StackDetails implements Serializable {
 
     private String ambariVersion;
 
+    private ImageDetails image;
+
     private String clusterType;
 
     private String clusterVersion;
@@ -125,14 +127,6 @@ public class StackDetails implements Serializable {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public String getPlatformVariant() {
-        return platformVariant;
-    }
-
-    public void setPlatformVariant(String platformVariant) {
-        this.platformVariant = platformVariant;
-    }
-
     public String getStatus() {
         return status;
     }
@@ -157,28 +151,12 @@ public class StackDetails implements Serializable {
         this.statusReason = statusReason;
     }
 
-    public String getCloudbreakVersion() {
-        return cloudbreakVersion;
+    public ImageDetails getImage() {
+        return image;
     }
 
-    public void setCloudbreakVersion(String cloudbreakVersion) {
-        this.cloudbreakVersion = cloudbreakVersion;
-    }
-
-    public String getImageIdentifier() {
-        return imageIdentifier;
-    }
-
-    public void setImageIdentifier(String imageIdentifier) {
-        this.imageIdentifier = imageIdentifier;
-    }
-
-    public String getAmbariVersion() {
-        return ambariVersion;
-    }
-
-    public void setAmbariVersion(String ambariVersion) {
-        this.ambariVersion = ambariVersion;
+    public void setImage(ImageDetails image) {
+        this.image = image;
     }
 
     public String getClusterType() {
@@ -197,44 +175,12 @@ public class StackDetails implements Serializable {
         this.clusterVersion = clusterVersion;
     }
 
-    public Boolean getPrewarmedImage() {
-        return prewarmedImage;
-    }
-
-    public void setPrewarmedImage(Boolean prewarmedImage) {
-        this.prewarmedImage = prewarmedImage;
-    }
-
-    public Boolean getExistingNetwork() {
-        return existingNetwork;
-    }
-
-    public void setExistingNetwork(Boolean existingNetwork) {
-        this.existingNetwork = existingNetwork;
-    }
-
-    public Boolean getExistingSubnet() {
-        return existingSubnet;
-    }
-
-    public void setExistingSubnet(Boolean existingSubnet) {
-        this.existingSubnet = existingSubnet;
-    }
-
     public List<InstanceGroupDetails> getInstanceGroups() {
         return instanceGroups;
     }
 
     public void setInstanceGroups(List<InstanceGroupDetails> instanceGroups) {
         this.instanceGroups = instanceGroups;
-    }
-
-    public Long getDatalakeId() {
-        return datalakeId;
-    }
-
-    public void setDatalakeId(Long datalakeId) {
-        this.datalakeId = datalakeId;
     }
 
     public Long getDatalakeResourceId() {

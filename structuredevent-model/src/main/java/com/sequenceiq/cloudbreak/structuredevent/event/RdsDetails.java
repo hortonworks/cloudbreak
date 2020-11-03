@@ -9,18 +9,38 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RdsDetails implements Serializable {
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private Long id;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private String name;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private String description;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private String connectionURL;
 
     private String sslMode;
 
     private String databaseEngine;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as useless information
+     */
+    @Deprecated
     private String connectionDriver;
 
     private Long creationDate;
@@ -31,65 +51,37 @@ public class RdsDetails implements Serializable {
 
     private String type;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as useless information
+     */
+    @Deprecated
     private String connectorJarUrl;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private Long workspaceId;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private String userId;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as sensitive information
+     */
+    @Deprecated
     private String userName;
 
+    /**
+     * @deprecated this is value is not set anymore, since this is considered as duplicated data
+     */
+    @Deprecated
     private String tenantName;
 
     private Boolean externalDatabase;
-
-    public String getTenantName() {
-        return tenantName;
-    }
-
-    public void setTenantName(String tenantName) {
-        this.tenantName = tenantName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getConnectionURL() {
-        return connectionURL;
-    }
-
-    public void setConnectionURL(String connectionURL) {
-        this.connectionURL = connectionURL;
-    }
-
-    public String getSslMode() {
-        return sslMode;
-    }
-
-    public void setSslMode(String sslMode) {
-        this.sslMode = sslMode;
-    }
 
     public String getDatabaseEngine() {
         return databaseEngine;
@@ -97,14 +89,6 @@ public class RdsDetails implements Serializable {
 
     public void setDatabaseEngine(String databaseEngine) {
         this.databaseEngine = databaseEngine;
-    }
-
-    public String getConnectionDriver() {
-        return connectionDriver;
-    }
-
-    public void setConnectionDriver(String connectionDriver) {
-        this.connectionDriver = connectionDriver;
     }
 
     public Long getCreationDate() {
@@ -139,6 +123,62 @@ public class RdsDetails implements Serializable {
         this.type = type;
     }
 
+    public Boolean getExternal() {
+        return externalDatabase;
+    }
+
+    public void setExternal(Boolean external) {
+        externalDatabase = external;
+    }
+
+    public String getSslMode() {
+        return sslMode;
+    }
+
+    public void setSslMode(String sslMode) {
+        this.sslMode = sslMode;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getConnectionURL() {
+        return connectionURL;
+    }
+
+    public void setConnectionURL(String connectionURL) {
+        this.connectionURL = connectionURL;
+    }
+
+    public String getConnectionDriver() {
+        return connectionDriver;
+    }
+
+    public void setConnectionDriver(String connectionDriver) {
+        this.connectionDriver = connectionDriver;
+    }
+
     public String getConnectorJarUrl() {
         return connectorJarUrl;
     }
@@ -171,12 +211,11 @@ public class RdsDetails implements Serializable {
         this.userName = userName;
     }
 
-    public Boolean getExternal() {
-        return externalDatabase;
+    public String getTenantName() {
+        return tenantName;
     }
 
-    public void setExternal(Boolean external) {
-        externalDatabase = external;
+    public void setTenantName(String tenantName) {
+        this.tenantName = tenantName;
     }
-
 }
