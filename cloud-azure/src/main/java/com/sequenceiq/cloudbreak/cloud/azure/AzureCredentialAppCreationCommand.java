@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -41,6 +42,9 @@ public class AzureCredentialAppCreationCommand {
     @Value("${cb.arm.app.creation.template.command.path:}")
     private String appCreationCommandTemplatePath;
 
+    @Value("${cb.arm.app.creation.template.command.audit.path:}")
+    private String appAuditCreationCommandTemplatePath;
+
     @Value("${cb.arm.app.creation.template.json.path:}")
     private String appCreationJSONTemplatePath;
 
@@ -53,17 +57,26 @@ public class AzureCredentialAppCreationCommand {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String generate(String deploymentAddress) {
+    public String generateEnvironmentCredentialCommand(String deploymentAddress) {
+        return getCommandString(deploymentAddress, appCreationCommandTemplatePath);
+    }
+
+    public String generateAuditCredentialCommand(String deploymentAddress) {
+        return getCommandString(deploymentAddress, appAuditCreationCommandTemplatePath);
+    }
+
+    @NotNull
+    public String getCommandString(String deploymentAddress, String appAuditCreationCommandTemplatePath) {
         try {
             if (StringUtils.isEmpty(deploymentAddress)) {
                 deploymentAddress = DEFAULT_DEPLOYMENT_ADDRESS;
             }
             Map<String, Object> model = buildModel(deploymentAddress, getAppIdentifierURI(deploymentAddress), getReplyURL(deploymentAddress));
 
-            Template template = freemarkerConfiguration.getTemplate(appCreationCommandTemplatePath, ENCODING);
+            Template template = freemarkerConfiguration.getTemplate(appAuditCreationCommandTemplatePath, ENCODING);
             return processTemplateIntoString(template, model);
         } catch (IOException | TemplateException e) {
-            String message = String.format(GENERATE_EXCEPTION_MESSAGE_FORMAT, appCreationCommandTemplatePath);
+            String message = String.format(GENERATE_EXCEPTION_MESSAGE_FORMAT, appAuditCreationCommandTemplatePath);
             throw new CloudConnectorException(message, e);
         }
     }
