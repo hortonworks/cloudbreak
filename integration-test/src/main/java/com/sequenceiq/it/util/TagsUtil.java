@@ -125,7 +125,7 @@ public class TagsUtil {
     }
 
     private void validateTestNameTag(TaggedResponse response, TestContext testContext) {
-        if (response.getTagValue(TEST_NAME_TAG).equals(testContext.getTestMethodName().get())) {
+        if (response.getTagValue(TEST_NAME_TAG).toLowerCase().equals(testContext.getTestMethodName().get().toLowerCase())) {
             Log.log(LOGGER, format(" Test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG),
                     testContext.getTestMethodName().get()));
         } else {

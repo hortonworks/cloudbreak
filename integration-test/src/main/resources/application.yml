@@ -150,8 +150,9 @@ integrationtest:
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
-    vpcId:
-    subnetId:
+    sharedProjectId:
+    networkId:
+    subnetIds:
     credential:
       type: json
       json:
@@ -163,6 +164,9 @@ integrationtest:
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-standard
+    securityAccess:
+      knoxSecurityGroup:
+      defaultSecurityGroup:
 
   # openstack parameters
   openstack:

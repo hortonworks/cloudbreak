@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
+import java.util.Set;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -13,9 +15,47 @@ public class GcpProperties {
 
     private String location;
 
+    private String sharedProjectId;
+
+    private String networkId;
+
+    private Set<String> subnetIds;
+
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
+
+    private final SecurityAccess securityAccess = new SecurityAccess();
+
+    private final Baseimage baseimage = new Baseimage();
+
+    public String getSharedProjectId() {
+        return sharedProjectId;
+    }
+
+    public void setSharedProjectId(String sharedProjectId) {
+        this.sharedProjectId = sharedProjectId;
+    }
+
+    public String getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
+    }
+
+    public Set<String> getSubnetIds() {
+        return subnetIds;
+    }
+
+    public Baseimage getBaseimage() {
+        return baseimage;
+    }
+
+    public void setSubnetIds(Set<String> subnets) {
+        this.subnetIds = subnets;
+    }
 
     public String getAvailabilityZone() {
         return availabilityZone;
@@ -49,7 +89,48 @@ public class GcpProperties {
         return instance;
     }
 
+    public SecurityAccess getSecurityAccess() {
+        return securityAccess;
+    }
+
+    public static class Baseimage {
+        private String imageId;
+
+        public String getImageId() {
+            return imageId;
+        }
+
+        public void setImageId(String imageId) {
+            this.imageId = imageId;
+        }
+    }
+
+    public static class SecurityAccess {
+
+        private String defaultSecurityGroup;
+
+        private String knoxSecurityGroup;
+
+        public String getDefaultSecurityGroup() {
+            return defaultSecurityGroup;
+        }
+
+        public void setDefaultSecurityGroup(String defaultSecurityGroup) {
+            this.defaultSecurityGroup = defaultSecurityGroup;
+        }
+
+        public String getKnoxSecurityGroup() {
+            return knoxSecurityGroup;
+        }
+
+        public void setKnoxSecurityGroup(String knoxSecurityGroup) {
+            this.knoxSecurityGroup = knoxSecurityGroup;
+        }
+
+    }
+
     public static class Credential {
+
         private String type;
 
         private String json;
@@ -99,9 +180,11 @@ public class GcpProperties {
         public void setProjectId(String projectId) {
             this.projectId = projectId;
         }
+
     }
 
     public static class Instance {
+
         private String type;
 
         private Integer volumeSize;
@@ -141,5 +224,6 @@ public class GcpProperties {
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
         }
+
     }
 }
