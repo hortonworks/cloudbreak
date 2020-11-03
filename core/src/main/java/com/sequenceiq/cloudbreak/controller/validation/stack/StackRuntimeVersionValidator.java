@@ -38,7 +38,7 @@ public class StackRuntimeVersionValidator {
     public void validate(StackV4Request stackRequest, Image image) {
         if (isDifferentDataHubAndDataLakeVersionAllowed()) {
             LOGGER.debug("The Data Hub version validation has been turned off with entitlement.");
-        } else if(StackType.WORKLOAD.equals(stackRequest.getType())) {
+        } else if (StackType.WORKLOAD.equals(stackRequest.getType())) {
             LOGGER.debug("Validating Data Hub version.");
             findStackVersion(stackRequest, image).ifPresent(stackRuntimeVersion -> {
                 List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(stackRequest.getEnvironmentCrn());

@@ -85,7 +85,8 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
             environmentService.setAdminGroupName(environment, environment.getAdminGroupName());
         }
         if (environment.getNetwork() != null && RegistrationType.EXISTING.equals(environment.getNetwork().getRegistrationType())) {
-            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+            EnvironmentNetworkConverter environmentNetworkConverter =
+                    environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
             if (environmentNetworkConverter != null) {
                 Network network = environmentNetworkConverter.convertToNetwork(environment.getNetwork());
                 NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(
