@@ -9,7 +9,6 @@ import java.sql.SQLException;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -114,11 +113,6 @@ public class DatabaseConfig {
     }
 
     @Bean
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.createEntityManager();
-    }
-
-    @Bean
     @DependsOn("databaseUpMigration")
     public EntityManagerFactory entityManagerFactory() throws SQLException {
         LocalContainerEntityManagerFactoryBean entityManagerFactory = new LocalContainerEntityManagerFactoryBean();
@@ -140,4 +134,5 @@ public class DatabaseConfig {
         hibernateJpaVendorAdapter.setDatabase(Database.POSTGRESQL);
         return hibernateJpaVendorAdapter;
     }
+
 }
