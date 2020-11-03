@@ -217,7 +217,7 @@ public class IntegrationTestApp implements CommandLineRunner {
                     if (file.delete()) {
                         LOG.info("Old resource file: {} (creation time: {}) have been found and deleted at: {}.", file.getName(), creationTime, folderPath);
                     } else {
-                        LOG.info("Old resource file: {} (creation time: {}) have NOT been deleted at: {}.", file.getName(), creationTime, folderPath);
+                        LOG.info("Old resource file: {} (creation time: {}) have NOT been deleted at: {}. ", file.getName(), creationTime, folderPath);
                     }
                 } catch (IOException e) {
                     LOG.info("{} resource file get creation time throws exception: {}", file.getName(), e.getMessage(), e);
