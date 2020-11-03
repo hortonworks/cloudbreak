@@ -567,6 +567,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
+        mockCrnService.ensureProperAccountIdUsage(request.getAccountId());
         LOGGER.info("Get account: {}", request.getAccountId());
         Account.Builder builder = Account.newBuilder();
         if (enableBaseImages) {
