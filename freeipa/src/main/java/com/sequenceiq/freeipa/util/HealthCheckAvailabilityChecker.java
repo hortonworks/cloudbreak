@@ -23,7 +23,7 @@ public class HealthCheckAvailabilityChecker extends AvailabilityChecker {
     private EntitlementService entitlementService;
 
     public boolean isCdpFreeIpaHeathAgentAvailable(Stack stack) {
-        String accountId = crnService.getCurrentAccountId();
+        String accountId = stack.getAccountId();
         return isAvailable(stack, CDP_FREEIPA_HEALTH_AGENT_AFTER_VERSION) &&
                 entitlementService.freeIpaHealthCheckEnabled(INTERNAL_ACTOR_CRN, accountId);
     }
