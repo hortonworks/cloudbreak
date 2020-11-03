@@ -7,3 +7,4 @@ docker_images:
   cloudbreak-redbeams: hortonworks/cloudbreak-redbeams
   periscope-mock: hortonworks/periscope-mock
   cloudbreak-mock-thunderhead: hortonworks/cloudbreak-mock-thunderhead
+  cloudbreak-mock-infrastructure: hortonworks/cloudbreak-mock-infrastructure
