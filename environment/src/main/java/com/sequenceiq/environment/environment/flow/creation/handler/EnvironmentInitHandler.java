@@ -14,6 +14,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
@@ -21,6 +24,9 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.network.EnvironmentNetworkService;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -38,12 +44,22 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final VirtualGroupService virtualGroupService;
 
-    protected EnvironmentInitHandler(EventSender eventSender, EnvironmentService environmentService,
-            EventBus eventBus, VirtualGroupService virtualGroupService) {
+    private final EnvironmentNetworkService environmentNetworkService;
+
+    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
+
+    protected EnvironmentInitHandler(
+            EventSender eventSender,
+            EnvironmentService environmentService,
+            EnvironmentNetworkService environmentNetworkService,
+            EventBus eventBus, VirtualGroupService virtualGroupService,
+            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
         super(eventSender);
         this.environmentService = environmentService;
         this.eventBus = eventBus;
         this.virtualGroupService = virtualGroupService;
+        this.environmentNetworkService = environmentNetworkService;
+        this.environmentNetworkConverterMap = environmentNetworkConverterMap;
     }
 
     @Override
@@ -67,6 +83,18 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
         if (!createVirtualGroups(environment, environmentCrnForVirtualGroups)) {
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
             environmentService.setAdminGroupName(environment, environment.getAdminGroupName());
+        }
+        if (environment.getNetwork() != null && RegistrationType.EXISTING.equals(environment.getNetwork().getRegistrationType())) {
+            EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+            if (environmentNetworkConverter != null) {
+                Network network = environmentNetworkConverter.convertToNetwork(environment.getNetwork());
+                NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(
+                        network,
+                        environment.getCloudPlatform(),
+                        environment.getCredential());
+                environment.getNetwork().setNetworkCidr(networkCidr.getCidr());
+                environment.getNetwork().setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
+            }
         }
         environmentService.assignEnvironmentAdminRole(environment.getCreator(), environmentCrnForVirtualGroups);
         setLocationAndRegions(environment);
