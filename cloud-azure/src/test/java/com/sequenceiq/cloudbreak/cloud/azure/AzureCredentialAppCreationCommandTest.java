@@ -88,7 +88,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -104,7 +104,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -119,7 +119,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -134,7 +134,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -149,7 +149,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -160,7 +160,7 @@ public class AzureCredentialAppCreationCommandTest {
     public void testWhenNoExceptionComesFromExecutionThenEverythingShouldGoFineForAppCreationCommandTemplate() throws IOException, TemplateException {
         doNothing().when(template).process(any(), any(StringWriter.class));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -172,7 +172,7 @@ public class AzureCredentialAppCreationCommandTest {
             throws IOException, TemplateException {
         doNothing().when(template).process(any(), any(StringWriter.class));
 
-        underTest.generate("");
+        underTest.generateEnvironmentCredentialCommand("");
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());

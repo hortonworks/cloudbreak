@@ -58,32 +58,6 @@ public class NetworkServiceTest {
             networkCreationValidator);
 
     @Test
-    public void testSaveNetworkIfExistingNetwork() {
-        NetworkDto networkDto = mock(NetworkDto.class);
-        EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
-        Network network = mock(Network.class);
-        Credential credential = mock(Credential.class);
-
-        String cidr = "10.0.0.0/16";
-        BaseNetwork baseNetwork = new AwsNetwork();
-        baseNetwork.setRegistrationType(RegistrationType.EXISTING);
-        Environment environment = new Environment();
-        environment.setCloudPlatform("AWS");
-        environment.setCredential(credential);
-
-        when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(environmentNetworkConverter);
-        when(environmentNetworkConverter.convert(environment, networkDto, Collections.emptyMap())).thenReturn(baseNetwork);
-        when(environmentNetworkConverter.convertToNetwork(baseNetwork)).thenReturn(network);
-        when(environmentNetworkService.getNetworkCidr(eq(network), anyString(), eq(credential))).thenReturn(new NetworkCidr(cidr));
-        when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
-
-        BaseNetwork result = underTest.saveNetwork(environment, networkDto, "accountId", Collections.emptyMap());
-
-        Assertions.assertEquals(cidr, result.getNetworkCidr());
-        verify(environmentNetworkService, times(1)).getNetworkCidr(eq(network), anyString(), eq(credential));
-    }
-
-    @Test
     public void testSaveNetworkIfNewNetwork() {
         NetworkDto networkDto = mock(NetworkDto.class);
         EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
