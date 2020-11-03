@@ -1,5 +1,6 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
+import static com.sequenceiq.cloudbreak.auth.InternalCrnBuilder.INTERNAL_ACCOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -33,6 +35,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Workl
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
+import io.grpc.StatusRuntimeException;
 import io.grpc.internal.testing.StreamRecorder;
 
 @ExtendWith(ExpectedExceptionSupport.class)
@@ -47,6 +50,9 @@ public class MockUserManagementServiceTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Spy
+    private MockCrnService mockCrnService;
 
     @InjectMocks
     private MockUserManagementService underTest;
@@ -271,6 +277,18 @@ public class MockUserManagementServiceTest {
         Account account = res.getAccount();
         assertThat(account.getAccountId()).isEqualTo(ACCOUNT_ID);
         assertThat(account.getExternalAccountId()).isEqualTo("external-" + ACCOUNT_ID);
+    }
+
+    @Test
+    void testGetAccountWithAltusAccountId() {
+        GetAccountRequest req = GetAccountRequest.newBuilder()
+                .setAccountId(INTERNAL_ACCOUNT)
+                .build();
+
+        expectedException.expect(StatusRuntimeException.class);
+        expectedException.expectMessage("INVALID_ARGUMENT");
+
+        underTest.getAccount(req, null);
     }
 
     @Test
