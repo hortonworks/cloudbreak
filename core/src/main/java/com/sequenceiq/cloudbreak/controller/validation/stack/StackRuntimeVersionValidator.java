@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -37,7 +38,7 @@ public class StackRuntimeVersionValidator {
     public void validate(StackV4Request stackRequest, Image image) {
         if (isDifferentDataHubAndDataLakeVersionAllowed()) {
             LOGGER.debug("The Data Hub version validation has been turned off with entitlement.");
-        } else {
+        } else if(StackType.WORKLOAD.equals(stackRequest.getType())) {
             LOGGER.debug("Validating Data Hub version.");
             findStackVersion(stackRequest, image).ifPresent(stackRuntimeVersion -> {
                 List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(stackRequest.getEnvironmentCrn());
