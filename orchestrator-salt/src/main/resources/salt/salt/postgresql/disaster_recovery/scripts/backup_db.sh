@@ -4,7 +4,6 @@
 # After PostgreSQL contents are dumped, the SQL file is uploaded using the hdfs cli.
 # For AWS or Azure, the url should start with `s3a://` or `abfs://`, respectively.
 
-set -o errexit
 set -o nounset
 set -o pipefail
 set -o xtrace
@@ -53,14 +52,30 @@ errorExit() {
   exit 1
 }
 
-kinit_as_hdfs() {
-  # Use a new Kerberos credential cache, to keep from clobbering the default.
-  export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
-  HDFS_KEYTAB=/run/cloudera-scm-agent/process/$(ls -t /run/cloudera-scm-agent/process/ | grep hdfs-NAMENODE$ | head -n 1)/hdfs.keytab
-  doLog "kinit as hdfs using Keytab: $HDFS_KEYTAB"
-  kinit -kt "$HDFS_KEYTAB" "hdfs/$(hostname -f)"
+kinit_as() {
+  doLog "attempting kinit as $1 using Keytab: $2"
+  kinit -kt "$2" "$1/$(hostname -f)"
   if [[ $? -ne 0 ]]; then
-    errorExit "Couldn't kinit as hdfs"
+    doLog "Couldn't kinit as $1"
+    return 1
+  fi
+}
+
+run_kinit() {
+  export KRB5CCNAME=/tmp/krb5cc_cloudbreak_$EUID
+
+  HDFS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hdfs*" | head -n 1)
+  HBASE_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -a \( -path "*hbase-REGIONSERVER*" -o -path "*hbase-MASTER*" \) -a -type f | head -n 1)
+  SOLR_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*solr-SOLR_SERVER*" | head -n 1)
+
+  if kinit_as hdfs "$HDFS_KEYTAB"; then
+    doLog "Successful kinit using hdfs principal"
+  elif kinit_as hbase "$HBASE_KEYTAB"; then
+    doLog "Successful kinit using hbase principal"
+  elif kinit_as solr "$SOLR_KEYTAB"; then
+    doLog "Successful kinit using solr principal"
+  else
+    errorExit "Couldn't get kerberos ticket to access cloud storage."
   fi
 }
 
@@ -77,7 +92,7 @@ replace_ranger_group_before_export() {
 
 move_backup_to_cloud () {
   LOCAL_BACKUP="$1"
-  kinit_as_hdfs
+  run_kinit
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
 
   hdfs dfs -mkdir -p "$BACKUP_LOCATION"
