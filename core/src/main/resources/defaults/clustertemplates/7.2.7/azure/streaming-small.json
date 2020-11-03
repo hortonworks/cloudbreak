@@ -5,7 +5,7 @@
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.7 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager"
+      "blueprintName": "7.2.7 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager"
     },
     "externalDatabase": {
       "availabilityType": "NON_HA"
