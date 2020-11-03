@@ -59,6 +59,8 @@ public class DatalakeRestResourceAuditEventConverter implements RestResourceAudi
             return AuditEventName.MANUAL_REPAIR_DATALAKE_CLUSTER;
         } else if ("rotate_autotls_certificates".equals(resourceEvent)) {
             return AuditEventName.ROTATE_DATALAKE_CLUSTER_CERTIFICATES;
+        } else if ("cluster_upgrade".equals(resourceEvent)) {
+            return AuditEventName.UPGRADE_DATALAKE_CLUSTER;
         }
         return null;
     }
