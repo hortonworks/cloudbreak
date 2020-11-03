@@ -11,7 +11,6 @@ import java.sql.Statement;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
@@ -118,11 +117,6 @@ public class DatabaseConfig {
         jpaTransactionManager.setEntityManagerFactory(entityManagerFactory());
         jpaTransactionManager.afterPropertiesSet();
         return jpaTransactionManager;
-    }
-
-    @Bean
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.createEntityManager();
     }
 
     @Bean
