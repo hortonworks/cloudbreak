@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.eventbus;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.repository.StackReferenceRepository;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 
 @Component
@@ -29,10 +29,10 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     private ConversionService conversionService;
 
     @Inject
-    private ResourceService resourceService;
+    private StackReferenceRepository stackReferenceRepository;
 
     @Inject
-    private EntityManager entityManager;
+    private ResourceService resourceService;
 
     @Override
     public ResourceNotification persist(ResourceNotification notification) {
@@ -76,7 +76,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     }
 
     private Stack findStackById(Long stackId) {
-        return entityManager.getReference(Stack.class, stackId);
+        return stackReferenceRepository.getOne(stackId);
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
