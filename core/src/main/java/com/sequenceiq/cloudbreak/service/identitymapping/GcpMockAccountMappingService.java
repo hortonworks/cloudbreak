@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 @Component
 public class GcpMockAccountMappingService {
 
-    private static final String FIXED_SERVICE_ACCOUNT_ROLE = " mock-idbroker-admin-role@${projectId}.iam.gserviceaccount.com";
+    private static final String FIXED_SERVICE_ACCOUNT_ROLE = "mock-idbroker-admin-role@${projectId}.iam.gserviceaccount.com";
 
     private static final Map<String, String> MOCK_IDBROKER_USER_MAPPINGS = AccountMappingSubject.ALL_SPECIAL_USERS
             .stream()
