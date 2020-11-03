@@ -25,6 +25,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCh
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -179,6 +180,11 @@ public class EnvironmentTestDto
     public EnvironmentTestDto withSecurityAccess() {
         EnvironmentSecurityAccessTestDto securityAccessTestDto = getTestContext().get(EnvironmentSecurityAccessTestDto.class);
         getRequest().setSecurityAccess(securityAccessTestDto.getRequest());
+        return this;
+    }
+
+    public EnvironmentTestDto withSecurityAccess(SecurityAccessRequest securityAccessRequest) {
+        getRequest().setSecurityAccess(securityAccessRequest);
         return this;
     }
 

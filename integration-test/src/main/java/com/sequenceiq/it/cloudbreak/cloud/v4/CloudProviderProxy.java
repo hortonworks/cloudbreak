@@ -266,7 +266,7 @@ public class CloudProviderProxy implements CloudProvider {
 
     @Override
     public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto) {
-        return environmentSecurityAccessTestDto;
+        return getDelegate(environmentSecurityAccessTestDto).environmentSecurityAccess(environmentSecurityAccessTestDto);
     }
 
     @Override
