@@ -72,7 +72,8 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         });
         if (encryption != null) {
             putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
-            putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryption.getType() != EncryptionType.NONE);
+            putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryption != null &&
+                    encryption.getType() != EncryptionType.NONE);
         }
 
         putIfValueNotNull(map, AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, Optional.ofNullable(placementGroup)
@@ -92,7 +93,7 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public Map<String, Object> asSecretMap() {
         Map<String, Object> secretMap = super.asSecretMap();
         if (encryption != null) {
-            secretMap.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryption.getKey());
+            putIfValueNotNull(secretMap, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryption.getKey());
         }
         return secretMap;
     }

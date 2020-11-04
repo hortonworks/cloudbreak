@@ -8,6 +8,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Maps;
 
 @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +24,7 @@ public class StackTags {
             @JsonProperty("applicationTags") Map<String, String> applicationTags,
             @JsonProperty("defaultTags") Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
-        this.applicationTags = applicationTags;
+        this.applicationTags = applicationTags != null ? applicationTags : Maps.newHashMap();
         this.userDefinedTags = userDefinedTags;
     }
 

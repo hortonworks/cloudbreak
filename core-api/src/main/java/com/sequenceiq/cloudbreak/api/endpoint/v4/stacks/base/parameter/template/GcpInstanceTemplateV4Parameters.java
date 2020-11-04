@@ -65,7 +65,7 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     public Map<String, Object> asSecretMap() {
         Map<String, Object> secretMap = super.asSecretMap();
         if (encryption != null) {
-            secretMap.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryption.getKey());
+            putIfValueNotNull(secretMap, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryption.getKey());
         }
         return secretMap;
     }
