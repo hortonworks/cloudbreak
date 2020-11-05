@@ -28,9 +28,12 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private final DateFormat formatter;
 
-    public RestLoggerFilter() {
-        formatter = new SimpleDateFormat("HH:mm:ss.SSS");
-        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+    private final boolean restLoggerEnabled;
+
+    public RestLoggerFilter(boolean restLoggerEnabled) {
+        this.restLoggerEnabled = restLoggerEnabled;
+        this.formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        this.formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
     @Override
@@ -41,22 +44,24 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(wrappedRequest, wrappedResponse);
 
-        Date end = new Date(System.currentTimeMillis());
-        String log = new StringBuilder()
-                .append(appendLine(RestLoggerField.START_TIME, formatter.format(start)))
-                .append(appendLine(RestLoggerField.END_TIME, formatter.format(end)))
-                .append(appendLine(RestLoggerField.DURATION, Math.abs(end.getTime() - start.getTime()) + " ms"))
-                .append(appendLine(RestLoggerField.HTTP_METHOD, request.getMethod()))
-                .append(appendLine(RestLoggerField.PATH, request.getRequestURI()))
-                .append(appendLine(RestLoggerField.QUERY_STRING, request.getQueryString()))
-                .append(appendLine(RestLoggerField.CLIENT_IP, request.getRemoteAddr()))
-                .append(appendLine(RestLoggerField.REQUEST,
-                        logContent(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding())))
-                .append(appendLine(RestLoggerField.RESPONSE_STATUS, String.valueOf(response.getStatus())))
-                .append(appendLine(RestLoggerField.RESPONSE,
-                        logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding())))
-                .toString();
-        logger.debug(log);
+        if (restLoggerEnabled) {
+            Date end = new Date(System.currentTimeMillis());
+            String log = new StringBuilder()
+                    .append(appendLine(RestLoggerField.START_TIME, formatter.format(start)))
+                    .append(appendLine(RestLoggerField.END_TIME, formatter.format(end)))
+                    .append(appendLine(RestLoggerField.DURATION, Math.abs(end.getTime() - start.getTime()) + " ms"))
+                    .append(appendLine(RestLoggerField.HTTP_METHOD, request.getMethod()))
+                    .append(appendLine(RestLoggerField.PATH, request.getRequestURI()))
+                    .append(appendLine(RestLoggerField.QUERY_STRING, request.getQueryString()))
+                    .append(appendLine(RestLoggerField.CLIENT_IP, request.getRemoteAddr()))
+                    .append(appendLine(RestLoggerField.REQUEST,
+                            logContent(wrappedRequest.getContentAsByteArray(), request.getCharacterEncoding())))
+                    .append(appendLine(RestLoggerField.RESPONSE_STATUS, String.valueOf(response.getStatus())))
+                    .append(appendLine(RestLoggerField.RESPONSE,
+                            logContent(wrappedResponse.getContentAsByteArray(), request.getCharacterEncoding())))
+                    .toString();
+            logger.debug(log);
+        }
         wrappedResponse.copyBodyToResponse();
     }
 

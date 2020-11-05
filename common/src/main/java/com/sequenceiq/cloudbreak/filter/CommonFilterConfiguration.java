@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.filter;
 
 import javax.servlet.DispatcherType;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,6 +21,9 @@ public class CommonFilterConfiguration {
     private static final int CRN_FILTER_ORDER = 0;
 
     private static final int REQUEST_RESPONSE_LOGGER_FILTER_ORDER = 5;
+
+    @Value("${rest.logger.enabled:true}")
+    private boolean restLoggerEnabled;
 
     @Bean
     public FilterRegistrationBean<CrnFilter> crnFilterRegistrationBean() {
@@ -42,7 +46,7 @@ public class CommonFilterConfiguration {
     @Bean
     public FilterRegistrationBean<RestLoggerFilter> restLoggerFilterFilterRegistrationBean() {
         FilterRegistrationBean<RestLoggerFilter> registrationBean = new FilterRegistrationBean<>();
-        RestLoggerFilter filter = new RestLoggerFilter();
+        RestLoggerFilter filter = new RestLoggerFilter(restLoggerEnabled);
         registrationBean.setFilter(filter);
         registrationBean.setOrder(REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
         return registrationBean;
