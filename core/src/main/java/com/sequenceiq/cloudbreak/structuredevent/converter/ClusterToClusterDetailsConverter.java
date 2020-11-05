@@ -24,6 +24,9 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setDescription(source.getDescription());
         clusterDetails.setStatus(source.getStatus().toString());
         clusterDetails.setStatusReason(source.getStatusReason());
+        clusterDetails.setCreationStarted(source.getCreationStarted());
+        clusterDetails.setCreationFinished(source.getCreationFinished());
+        clusterDetails.setUpSince(source.getUpSince());
         convertGatewayProperties(clusterDetails, source.getGateway());
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         addDatabaseInfo(clusterDetails, source);
