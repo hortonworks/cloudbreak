@@ -51,6 +51,12 @@ public class ClusterDetails implements Serializable {
 
     private Boolean defaultFileSystem;
 
+    private Long creationStarted;
+
+    private Long creationFinished;
+
+    private Long upSince;
+
     public Long getId() {
         return id;
     }
@@ -187,4 +193,27 @@ public class ClusterDetails implements Serializable {
         this.fileSystemType = fileSystemType;
     }
 
+    public Long getCreationStarted() {
+        return creationStarted;
+    }
+
+    public void setCreationStarted(Long creationStarted) {
+        this.creationStarted = creationStarted;
+    }
+
+    public Long getCreationFinished() {
+        return creationFinished;
+    }
+
+    public void setCreationFinished(Long creationFinished) {
+        this.creationFinished = creationFinished;
+    }
+
+    public Long getUpSince() {
+        return upSince;
+    }
+
+    public void setUpSince(Long upSince) {
+        this.upSince = upSince;
+    }
 }
