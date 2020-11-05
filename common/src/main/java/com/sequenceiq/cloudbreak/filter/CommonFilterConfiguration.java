@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.auth.CrnFilter;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
+import com.sequenceiq.cloudbreak.logger.RestLoggerFilter;
 
 import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
@@ -17,6 +18,8 @@ import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 public class CommonFilterConfiguration {
 
     private static final int CRN_FILTER_ORDER = 0;
+
+    private static final int REQUEST_RESPONSE_LOGGER_FILTER_ORDER = 5;
 
     @Bean
     public FilterRegistrationBean<CrnFilter> crnFilterRegistrationBean() {
@@ -33,6 +36,15 @@ public class CommonFilterConfiguration {
         MDCContextFilter filter = new MDCContextFilter();
         registrationBean.setFilter(filter);
         registrationBean.setOrder(Integer.MAX_VALUE);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<RestLoggerFilter> restLoggerFilterFilterRegistrationBean() {
+        FilterRegistrationBean<RestLoggerFilter> registrationBean = new FilterRegistrationBean<>();
+        RestLoggerFilter filter = new RestLoggerFilter();
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
         return registrationBean;
     }
 
