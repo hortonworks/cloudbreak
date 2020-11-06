@@ -29,7 +29,13 @@ collector:
       skipLabelFromPath: true
       skipAnonymization: true
       useFullPath: false
-      folderPrefix: doctor
+      folderPrefix: doctor{% if destination in ["CLOUD_STORAGE", "LOCAL"] %}
+    - path: /tmp/cdp_report.html
+      label: report
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report{% endif %}
 {% if filecollector.additionalLogs %}{% for extra_log in filecollector.additionalLogs %}
     - path: "{{ extra_log["path"] }}"
       folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
