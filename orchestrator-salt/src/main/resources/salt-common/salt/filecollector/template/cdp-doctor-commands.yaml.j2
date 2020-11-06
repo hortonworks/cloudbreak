@@ -2,6 +2,7 @@
 commands:
     - command: ps aux
       output: /tmp/doctor_ps_aux.txt
+      report: false
     - command: netstat -tlpn
       output: /tmp/doctor_netstat.txt
     - command: nslookup $(hostname -i)
@@ -11,10 +12,13 @@ commands:
     - command: cdp-doctor network status
       output: /tmp/doctor_network.txt
     - command: cdp-doctor service status
-      output: /tmp/doctor_services.txt
-{% if filecollector.clusterType != "FREEIPA" %}
+      output: /tmp/doctor_services.txt{% if filecollector.clusterType != "FREEIPA" %}
     - command: cdp-doctor recipe results
       output: /tmp/doctor_recipes.txt
     - command: cdp-doctor scm list-commands
-      output: /tmp/doctor_scm_agent_commands.txt
-{% endif %}
+      output: /tmp/doctor_scm_agent_commands.txt{% endif %}{% if filecollector.clusterType == "DATAHUB" and filecollector.cdpTelemetryVersion > 0 %}
+    - command: cdp-doctor metering status
+      output: /tmp/doctor_metering.txt{% endif %}
+report:
+    location: /tmp/cdp_report.html
+    title: CDP commands report

@@ -71,7 +71,8 @@ public class DiagnosticsTriggerService {
                 && StringUtils.isNotBlank(stack.getCluster().getBlueprint().getStackVersion())) {
             clusterVersion = stack.getCluster().getBlueprint().getStackVersion();
         }
-        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry, stack.getType().name(), clusterVersion,
+        DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry,
+                StringUtils.upperCase(stack.getType().getResourceType()), clusterVersion,
                 Crn.fromString(stack.getResourceCrn()).getAccountId(), stack.getRegion());
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
