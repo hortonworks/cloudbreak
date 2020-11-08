@@ -289,7 +289,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
             CDPTagMergeRequest request = CDPTagMergeRequest.Builder
                     .builder()
                     .withPlatform(source.getCloudPlatform().name())
-                    .withRequestTags(tags.getUserDefined())
+                    .withRequestTags(tags.getUserDefined() != null ? tags.getUserDefined() : Maps.newHashMap())
                     .withEnvironmentTags(userDefined)
                     .build();
             return new Json(new StackTags(costTagging.mergeTags(request), tags.getApplication(), new HashMap<>()));
