@@ -159,6 +159,40 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
     @Test
     public void convertWithGcpEncryption() {
+        InstanceTemplateV4Request source = getSampleGcpRequest();
+
+        Template result = underTest.convert(source);
+
+        assertGcpEncryptionConvertResult(source, result);
+        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
+    }
+
+    @Test
+    public void convertWithGcpEncryptionWithNullKey() {
+        InstanceTemplateV4Request source = getSampleGcpRequest();
+        source.getGcp().getEncryption().setKey(null);
+
+        Template result = underTest.convert(source);
+
+        assertGcpEncryptionConvertResult(source, result);
+        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
+    }
+
+    private void assertGcpEncryptionConvertResult(InstanceTemplateV4Request source, Template result) {
+        assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
+        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
+        assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
+
+        assertThat(result.getAttributes()).isNotNull();
+        Map<String, Object> map = result.getAttributes().getMap();
+        assertThat(map.get("keyEncryptionMethod")).isEqualTo("RAW");
+        assertThat(map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
+
+        assertThat(result.getSecretAttributes()).isNotNull();
+    }
+
+    private InstanceTemplateV4Request getSampleGcpRequest() {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setCloudPlatform(CloudPlatform.GCP);
         source.setRootVolume(getRootVolume(100));
@@ -175,43 +209,31 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
 
         when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
-
-        Template result = underTest.convert(source);
-
-        assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
-        assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
-        assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
-
-        assertThat(result.getAttributes()).isNotNull();
-        Map<String, Object> map = result.getAttributes().getMap();
-        assertThat(map.get("keyEncryptionMethod")).isEqualTo("RAW");
-        assertThat(map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
-
-        assertThat(result.getSecretAttributes()).isNotNull();
-        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
+        return source;
     }
 
     @Test
     public void convertWithAwsEncryption() {
-        InstanceTemplateV4Request source = new InstanceTemplateV4Request();
-        source.setCloudPlatform(CloudPlatform.AWS);
-        source.setRootVolume(getRootVolume(100));
-        source.setInstanceType("m5.2xlarge");
-        AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
-        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
-        encryption.setType(EncryptionType.CUSTOM);
-        encryption.setKey("myKey");
-        parameters.setEncryption(encryption);
-        source.setAws(parameters);
-
-        ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
-        ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
-
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        InstanceTemplateV4Request source = getSampleAwsRequest();
 
         Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
+        assertAwsEncryptionConvertResult(source, result);
+        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
+    }
+
+    @Test
+    public void convertWithAwsEncryptionWithNullKey() {
+        InstanceTemplateV4Request source = getSampleAwsRequest();
+        source.getAws().getEncryption().setKey(null);
+
+        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+
+        assertAwsEncryptionConvertResult(source, result);
+        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isNull();
+    }
+
+    private void assertAwsEncryptionConvertResult(InstanceTemplateV4Request source, Template result) {
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
         assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
@@ -223,26 +245,11 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         assertThat(map.get(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(false);
 
         assertThat(result.getSecretAttributes()).isNotNull();
-        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
     }
 
     @Test
     public void convertWithAwsEncryptionFast() {
-        InstanceTemplateV4Request source = new InstanceTemplateV4Request();
-        source.setCloudPlatform(CloudPlatform.AWS);
-        source.setRootVolume(getRootVolume(100));
-        source.setInstanceType("m5.2xlarge");
-        AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
-        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
-        encryption.setType(EncryptionType.CUSTOM);
-        encryption.setKey("myKey");
-        parameters.setEncryption(encryption);
-        source.setAws(parameters);
-
-        ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
-        ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
-
-        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        InstanceTemplateV4Request source = getSampleAwsRequest();
 
         when(entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
 
@@ -260,6 +267,25 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
         assertThat(result.getSecretAttributes()).isNotNull();
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
+    }
+
+    private InstanceTemplateV4Request getSampleAwsRequest() {
+        InstanceTemplateV4Request source = new InstanceTemplateV4Request();
+        source.setCloudPlatform(CloudPlatform.AWS);
+        source.setRootVolume(getRootVolume(100));
+        source.setInstanceType("m5.2xlarge");
+        AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
+        AwsEncryptionV4Parameters encryption = new AwsEncryptionV4Parameters();
+        encryption.setType(EncryptionType.CUSTOM);
+        encryption.setKey("myKey");
+        parameters.setEncryption(encryption);
+        source.setAws(parameters);
+
+        ProviderParameterCalculator providerParameterCalculator = new ProviderParameterCalculator();
+        ReflectionTestUtils.setField(underTest, "providerParameterCalculator", providerParameterCalculator);
+
+        when(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE)).thenReturn("name");
+        return source;
     }
 
     private RootVolumeV4Request getRootVolume(Integer size) {
