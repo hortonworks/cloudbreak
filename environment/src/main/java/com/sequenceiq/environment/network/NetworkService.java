@@ -62,12 +62,6 @@ public class NetworkService {
                 baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
                 baseNetwork.setResourceCrn(createCRN(accountId));
                 baseNetwork.setAccountId(accountId);
-                if (baseNetwork.getRegistrationType() == RegistrationType.EXISTING) {
-                    Network network = environmentNetworkConverter.convertToNetwork(baseNetwork);
-                    NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());
-                    baseNetwork.setNetworkCidr(networkCidr.getCidr());
-                    baseNetwork.setNetworkCidrs(StringUtils.join(networkCidr.getCidrs(), ","));
-                }
                 baseNetwork = save(baseNetwork);
             }
         }
