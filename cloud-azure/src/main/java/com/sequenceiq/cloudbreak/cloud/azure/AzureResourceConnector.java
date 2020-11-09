@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -37,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -116,14 +115,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
                     resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
             azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
         } catch (CloudException e) {
-            LOGGER.info("Provisioning error, cloud exception happened: ", e);
-            if (e.body() != null && e.body().details() != null) {
-                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
-                        e.body().code(), e.body().message(), details));
-            } else {
-                throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
-            }
+            throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
@@ -156,7 +148,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             LOGGER.debug("Template resources retrieved: {}", templateResources);
             allResourcesToPersist.addAll(templateResources);
             instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
-            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, instances, resourceGroupName);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(instances, resourceGroupName, azureClient);
             LOGGER.debug("OS disk resources retrieved: {}", osDiskResources);
             allResourcesToPersist.addAll(osDiskResources);
         } finally {
@@ -227,6 +220,10 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         ResourceGroupUsage resourceGroupUsage = azureResourceGroupMetadataProvider.getResourceGroupUsage(stack);
 
         if (resourceGroupUsage != ResourceGroupUsage.MULTIPLE) {
+
+            String deploymentName = azureUtils.getStackName(ac.getCloudContext());
+            List<CloudResource> transientResources = azureTerminationHelperService.handleTransientDeployment(client, resourceGroupName, deploymentName);
+            NullUtil.doIfNotNull(transientResources, resources::addAll);
             azureTerminationHelperService.terminate(ac, stack, resources);
             return check(ac, Collections.emptyList());
         } else {
@@ -251,6 +248,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) {
+
+        azureDatabaseResourceService.handleTransientDeployment(authenticatedContext, resources);
         return azureDatabaseResourceService.terminateDatabaseServer(authenticatedContext, stack, resources, force, persistenceNotifier);
     }
 

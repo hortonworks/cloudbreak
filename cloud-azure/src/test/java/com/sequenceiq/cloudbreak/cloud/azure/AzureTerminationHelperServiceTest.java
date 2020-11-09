@@ -47,7 +47,7 @@ class AzureTerminationHelperServiceTest {
 
     private static final String NSG_ID = "securityGroupId";
 
-    private static final String MANAGED_DISK_ID = "managedDiskId";
+    private static final String MANAGED_DISK_NAME = "managedDiskName";
 
     private static final List<String> AVAILABILITY_SET_NAME_LIST = List.of(AVAILABILITY_SET_NAME);
 
@@ -55,7 +55,7 @@ class AzureTerminationHelperServiceTest {
 
     private static final List<String> NETWORK_INTERFACE_NAME_LIST = List.of(NETWORK_INTERFACE_NAME);
 
-    private static final List<String> MANAGED_DISK_ID_LIST = List.of(MANAGED_DISK_ID);
+    private static final List<String> MANAGED_DISK_NAME_LIST = List.of(MANAGED_DISK_NAME);
 
     private static final List<String> NSG_ID_LIST = List.of(NSG_ID);
 
@@ -112,7 +112,7 @@ class AzureTerminationHelperServiceTest {
         verify(azureUtils).waitForDetachNetworkInterfaces(eq(ac), any(), eq(RESOURCE_GROUP_NAME), eq(NETWORK_INTERFACE_NAME_LIST));
         verify(azureUtils).deleteNetworkInterfaces(any(), eq(RESOURCE_GROUP_NAME), eq(NETWORK_INTERFACE_NAME_LIST));
         verify(azureUtils).deletePublicIps(any(), eq(RESOURCE_GROUP_NAME), eq(PUBLIC_ADDRESS_NAME_LIST));
-        verify(azureUtils).deleteManagedDisks(any(), eq(MANAGED_DISK_ID_LIST));
+        verify(azureUtils).deleteManagedDisks(any(), eq(RESOURCE_GROUP_NAME), eq(MANAGED_DISK_NAME_LIST));
         verify(azureComputeResourceService).deleteComputeResources(any(), any(), eq(volumeSets), any());
         verify(azureUtils, never()).deleteAvailabilitySets(any(), eq(RESOURCE_GROUP_NAME), anyCollection());
         verify(azureUtils, never()).deleteSecurityGroups(any(), eq(NSG_ID_LIST));
@@ -129,7 +129,7 @@ class AzureTerminationHelperServiceTest {
         verify(azureUtils).waitForDetachNetworkInterfaces(eq(ac), any(), eq(RESOURCE_GROUP_NAME), eq(NETWORK_INTERFACE_NAME_LIST));
         verify(azureUtils).deleteNetworkInterfaces(any(), eq(RESOURCE_GROUP_NAME), eq(NETWORK_INTERFACE_NAME_LIST));
         verify(azureUtils).deletePublicIps(any(), eq(RESOURCE_GROUP_NAME), eq(PUBLIC_ADDRESS_NAME_LIST));
-        verify(azureUtils).deleteManagedDisks(any(), eq(MANAGED_DISK_ID_LIST));
+        verify(azureUtils).deleteManagedDisks(any(), eq(RESOURCE_GROUP_NAME), eq(MANAGED_DISK_NAME_LIST));
         verify(azureUtils).deleteAvailabilitySets(any(), any(), eq(AVAILABILITY_SET_NAME_LIST));
 
         verify(azureComputeResourceService).deleteComputeResources(any(), any(), eq(volumeSets), any());
@@ -142,7 +142,7 @@ class AzureTerminationHelperServiceTest {
                 createCloudResource(ResourceType.AZURE_INSTANCE, INSTANCE_NAME),
                 createCloudResource(ResourceType.AZURE_NETWORK_INTERFACE, NETWORK_INTERFACE_NAME),
                 createCloudResource(ResourceType.AZURE_PUBLIC_IP, PUBLIC_ADDRESS_NAME),
-                createCloudResource(ResourceType.AZURE_DISK, "aDisk", MANAGED_DISK_ID),
+                createCloudResource(ResourceType.AZURE_DISK, MANAGED_DISK_NAME),
                 createCloudResource(ResourceType.AZURE_AVAILABILITY_SET, AVAILABILITY_SET_NAME),
                 createCloudResource(ResourceType.AZURE_SUBNET, SUBNET_NAME),
                 createCloudResource(ResourceType.AZURE_VOLUMESET, VOLUMESET_NAME),

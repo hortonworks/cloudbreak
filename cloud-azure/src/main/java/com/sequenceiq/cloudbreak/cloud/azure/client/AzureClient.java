@@ -174,14 +174,14 @@ public class AzureClient {
     }
 
     public ResourceStatus getTemplateDeploymentStatus(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
+        return handleAuthException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
                 .map(Deployment::provisioningState)
                 .map(AzureStatusMapper::mapResourceStatus)
                 .orElse(ResourceStatus.DELETED);
     }
 
     public CommonStatus getTemplateDeploymentCommonStatus(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> Optional.ofNullable(azure.deployments().getByResourceGroup(resourceGroupName, deploymentName)))
+        return handleAuthException(() -> Optional.ofNullable(getTemplateDeployment(resourceGroupName, deploymentName)))
                 .map(Deployment::provisioningState)
                 .map(AzureStatusMapper::mapCommonStatus)
                 .orElse(CommonStatus.DETACHED);
@@ -196,11 +196,11 @@ public class AzureClient {
     }
 
     public DeploymentOperations getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
-        return handleAuthException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName).deploymentOperations());
+        return handleAuthException(() -> getTemplateDeployment(resourceGroupName, deploymentName).deploymentOperations());
     }
 
-    public void cancelTemplateDeployments(String resourceGroupName, String deploymentName) {
-        handleAuthException(() -> azure.deployments().getByResourceGroup(resourceGroupName, deploymentName).cancel());
+    public void cancelTemplateDeployment(String resourceGroupName, String deploymentName) {
+        handleAuthException(() -> getTemplateDeployment(resourceGroupName, deploymentName).cancel());
     }
 
     public StorageAccounts getStorageAccounts() {
@@ -323,9 +323,13 @@ public class AzureClient {
         return azure.disks().getByResourceGroup(resourceGroupName, diskName);
     }
 
-    public Observable<String> deleteManagedDiskAsync(Collection<String> ids) {
+    public Observable<String> deleteManagedDisksAsync(Collection<String> ids) {
         LOGGER.debug("delete managed disk: id={}", ids);
         return handleAuthException(() -> azure.disks().deleteByIdsAsync(ids));
+    }
+
+    public Completable deleteManagedDiskAsync(String resourceGroup, String name) {
+        return handleAuthException(() -> azure.disks().deleteByResourceGroupAsync(resourceGroup, name));
     }
 
     public DiskSkuTypes convertAzureDiskTypeToDiskSkuTypes(AzureDiskType diskType) {

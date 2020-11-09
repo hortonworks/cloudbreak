@@ -194,7 +194,7 @@ class EnvironmentNetworkServiceTest {
         assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
-        assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
+        assertEquals(environmentDto.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName(), argumentCaptor.getValue().getResourceGroup());
     }
 
     @ParameterizedTest
@@ -216,7 +216,7 @@ class EnvironmentNetworkServiceTest {
         assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
-        assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
+        assertEquals(environmentDto.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName(), argumentCaptor.getValue().getResourceGroup());
         assertTrue(argumentCaptor.getValue().isSingleResourceGroup());
     }
 

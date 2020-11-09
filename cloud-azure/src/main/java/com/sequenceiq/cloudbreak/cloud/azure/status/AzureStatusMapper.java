@@ -30,6 +30,7 @@ public class AzureStatusMapper {
                 mappedStatus =  ResourceStatus.CREATED;
                 break;
             case "Accepted":
+            case "Running":
             default:
                 mappedStatus =  ResourceStatus.IN_PROGRESS;
                 break;

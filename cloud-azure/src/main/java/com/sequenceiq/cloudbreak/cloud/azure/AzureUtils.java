@@ -272,7 +272,7 @@ public class AzureUtils {
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vm.getInstanceId())
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure instance delete: {}", vm, throwable);
+                        LOGGER.error("Error happened on azure instance delete: {}", vm, throwable);
                         statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
                     })
                     .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED)))
@@ -280,6 +280,27 @@ public class AzureUtils {
         }
         Completable.merge(deleteCompletables).await();
         return statuses;
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteCloudResourceInstances(AuthenticatedContext ac, String resourceGroupName, List<String> instanceIdList) {
+        LOGGER.info("Delete VM-s by name: {}", instanceIdList);
+        List<String> failedToDeleteVms = new ArrayList<>();
+        List<Completable> deleteCompletables = new ArrayList<>();
+        for (String name : instanceIdList) {
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, name)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened on azure instance delete: {}", name, throwable);
+                        failedToDeleteVms.add(name);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.mergeDelayError(deleteCompletables).await();
+        if (!failedToDeleteVms.isEmpty()) {
+            LOGGER.error("Can't delete every vm: {}", failedToDeleteVms);
+            throw new CloudbreakServiceException("Can't delete every vm: " + failedToDeleteVms);
+        }
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
@@ -499,7 +520,7 @@ public class AzureUtils {
         if (CollectionUtils.isNotEmpty(managedDiskIds)) {
             LOGGER.info("Delete managed disks with id-s: {}", managedDiskIds);
 
-            Observable<String> deletionObservable = azureClient.deleteManagedDiskAsync(managedDiskIds)
+            Observable<String> deletionObservable = azureClient.deleteManagedDisksAsync(managedDiskIds)
                     .doOnError(throwable -> {
                         LOGGER.error("Error happened during the deletion of the managed disks ", throwable);
                         throw new CloudbreakServiceException("Can't delete all managed disks: ", throwable);
@@ -508,6 +529,26 @@ public class AzureUtils {
                     .subscribeOn(Schedulers.io());
             deletionObservable.subscribe(disk -> LOGGER.debug("Deleting {}", disk));
             deletionObservable.toCompletable().await();
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteManagedDisks(AzureClient azureClient, String resourceGroupName, Collection<String> managedDiskNames) {
+        LOGGER.info("Deleting managed disks: {}", managedDiskNames);
+        List<Completable> deleteCompletables = new ArrayList<>();
+        List<String> failedToDeleteManagedDisks = new ArrayList<>();
+        for (String resourceId : managedDiskNames) {
+            deleteCompletables.add(azureClient.deleteManagedDiskAsync(resourceGroupName, resourceId)
+                    .doOnError(throwable -> {
+                        LOGGER.error("Error happened on azure during managed disk deletion: {}", resourceId, throwable);
+                        failedToDeleteManagedDisks.add(resourceId);
+                    })
+                    .subscribeOn(Schedulers.io()));
+        }
+        Completable.mergeDelayError(deleteCompletables).await();
+        if (!failedToDeleteManagedDisks.isEmpty()) {
+            LOGGER.error("Can't delete every managed disk: {}", failedToDeleteManagedDisks);
+            throw new CloudbreakServiceException("Can't delete every managed disk: " + failedToDeleteManagedDisks);
         }
     }
 

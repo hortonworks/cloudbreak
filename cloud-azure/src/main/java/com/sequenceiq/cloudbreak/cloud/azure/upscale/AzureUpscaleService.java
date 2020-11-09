@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -79,7 +78,7 @@ public class AzureUpscaleService {
             List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
             List<CloudResource> newInstances =
                     azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName);
-            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(ac, newInstances, resourceGroupName);
+            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client);
 
             azureCloudResourceService.saveCloudResources(resourceNotifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
 
@@ -90,14 +89,7 @@ public class AzureUpscaleService {
 
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (CloudException e) {
-            LOGGER.info("Upscale error, cloud exception happened: ", e);
-            if (e.body() != null && e.body().details() != null) {
-                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Stack upscale failed, status code %s, error message: %s, details: %s",
-                        e.body().code(), e.body().message(), details));
-            } else {
-                throw new CloudConnectorException(String.format("Stack upscale failed: '%s', please go to Azure Portal for detailed message", e));
-            }
+            throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
         }

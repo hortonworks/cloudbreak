@@ -108,19 +108,26 @@ public class EnvironmentNetworkService {
                 .withEnvId(environment.getId())
                 .withAccountId(environment.getAccountId())
                 .withUserId(environment.getCreator())
-                .withRegion(environment.getLocation().getName());
-        getResourceGroupName(environment.getNetwork()).ifPresent(builder::withResourceGroup);
-        getNetworkId(environment.getNetwork()).ifPresent(builder::withNetworkId);
+                .withRegion(environment.getLocation().getName())
+                .withNetworkId(getNetworkId(environment.getNetwork(), environment.getName()));
+        getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);
         return builder.build();
     }
 
-    private Optional<String> getResourceGroupName(NetworkDto networkDto) {
-        return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getResourceGroupName);
+    private Optional<String> getResourceGroupName(EnvironmentDto environmentDto) {
+        return Optional.of(environmentDto)
+                .map(EnvironmentDto::getParameters)
+                .map(ParametersDto::getAzureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto)
+                .map(AzureResourceGroupDto::getName);
     }
 
-    private Optional<String> getNetworkId(NetworkDto networkDto) {
-        return Optional.of(networkDto).map(NetworkDto::getAzure).map(AzureParams::getNetworkId);
+    private String getNetworkId(NetworkDto networkDto, String envName) {
+        return Optional.of(networkDto)
+                .map(NetworkDto::getAzure)
+                .map(AzureParams::getNetworkId)
+                .orElse(envName);
     }
 
     private boolean isSingleResourceGroup(EnvironmentDto environmentDto) {
