@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -80,6 +81,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .resourceName(stack.getName())
                 .resourceType("STACK")
                 .environmentCrn(stack.getEnvironmentCrn())
+                .requestId(UUID.randomUUID().toString())
                 .buildMdc();
     }
 

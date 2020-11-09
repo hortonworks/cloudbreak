@@ -38,6 +38,8 @@ public class AzureCredentialAppCreationCommandTest {
 
     private static final String APP_CREATION_COMMAND_TEMPLATE_PATH = "somePathForCommandTemplate";
 
+    private static final String APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH = "someAuditPathForCommandTemplate";
+
     private static final String MALFORMED_TEMPLATE_NAMED_EXCEPTION_DESCRIPTION = "description";
 
     private static final String APP_CREATION_JSON_TEMPLATE_PATH = "somePathForJsonTemplate";
@@ -72,15 +74,17 @@ public class AzureCredentialAppCreationCommandTest {
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         ReflectionTestUtils.setField(underTest, "appCreationCommandTemplatePath", APP_CREATION_COMMAND_TEMPLATE_PATH);
+        ReflectionTestUtils.setField(underTest, "appAuditCreationCommandTemplatePath", APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH);
         ReflectionTestUtils.setField(underTest, "appCreationJSONTemplatePath", APP_CREATION_JSON_TEMPLATE_PATH);
         ReflectionTestUtils.setField(underTest, "resourceAppId", MANAGEMENT_API_RESOURCE_APP_ID);
         ReflectionTestUtils.setField(underTest, "resourceAccessScopeId", MANAGEMENT_API_RESOURCE_ACCESS_SCOPE_ID);
         when(freemarkerConfiguration.getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING)).thenReturn(template);
+        when(freemarkerConfiguration.getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING)).thenReturn(template);
         when(freemarkerConfiguration.getTemplate(APP_CREATION_JSON_TEMPLATE_PATH, ENCODING)).thenReturn(template);
     }
 
     @Test
-    public void testGenerateWhenFreemarkerConfigGetTemplateThrowsTemplateNotFoundExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+    public void testEnvironmentWhenFreemarkerConfigGetTemplateThrowsTemplateNotFoundExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
             throws IOException, TemplateException {
         doThrow(new TemplateNotFoundException(TEMPLATE_NAME, new Object(), TEMPLATE_NOT_FOUND_EXCEPTION_MESSAGE)).when(freemarkerConfiguration)
                 .getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
@@ -88,7 +92,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -96,7 +100,7 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testGenerateWhenFreemarkerConfigGetTemplateThrowsMalformedTemplateNameExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+    public void testEnvironmentWhenFreemarkerConfigGetTemplateThrowsMalformedTemplateNameExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
             throws IOException, TemplateException {
         doThrow(new MalformedTemplateNameException(TEMPLATE_NAME, MALFORMED_TEMPLATE_NAMED_EXCEPTION_DESCRIPTION)).when(freemarkerConfiguration)
                 .getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
@@ -104,7 +108,7 @@ public class AzureCredentialAppCreationCommandTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -112,14 +116,14 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testGenerateWhenFreemarkerConfigGetTemplateThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+    public void testEnvironmentWhenFreemarkerConfigGetTemplateThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
                     throws IOException, TemplateException {
         doThrow(new IOException()).when(freemarkerConfiguration).getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(0)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -127,14 +131,14 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testGenerateWhenTemplateProcessThrowsTemplateExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+    public void testEnvironmentWhenTemplateProcessThrowsTemplateExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
             throws IOException, TemplateException {
         doThrow(new TemplateException(Environment.getCurrentEnvironment())).when(template).process(any(), any(StringWriter.class));
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -142,14 +146,14 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testGenerateWhenTemplateProcessThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+    public void testEnvironmentWhenTemplateProcessThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
             throws IOException, TemplateException {
         doThrow(new IOException()).when(template).process(any(), any(StringWriter.class));
 
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_CREATION_COMMAND_TEMPLATE_PATH));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -157,10 +161,10 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testWhenNoExceptionComesFromExecutionThenEverythingShouldGoFineForAppCreationCommandTemplate() throws IOException, TemplateException {
+    public void testEnvironmentWhenNoExceptionComesFromExecutionThenEverythingShouldGoFineForAppCreationCommandTemplate() throws IOException, TemplateException {
         doNothing().when(template).process(any(), any(StringWriter.class));
 
-        underTest.generate(DEPLOYMENT_ADDRESS);
+        underTest.generateEnvironmentCredentialCommand(DEPLOYMENT_ADDRESS);
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
@@ -168,15 +172,115 @@ public class AzureCredentialAppCreationCommandTest {
     }
 
     @Test
-    public void testWhenDeploymentAddressIsEmptyThenEverythingShouldGoFineForAppCreationCommandTemplateWithDefaultDeployment()
+    public void testEnvironmentWhenDeploymentAddressIsEmptyThenEverythingShouldGoFineForAppCreationCommandTemplateWithDefaultDeployment()
             throws IOException, TemplateException {
         doNothing().when(template).process(any(), any(StringWriter.class));
 
-        underTest.generate("");
+        underTest.generateEnvironmentCredentialCommand("");
 
         verify(template, times(1)).process(any(), any(StringWriter.class));
         verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
         verify(freemarkerConfiguration, times(1)).getTemplate(APP_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenFreemarkerConfigGetTemplateThrowsTemplateNotFoundExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+            throws IOException, TemplateException {
+        doThrow(new TemplateNotFoundException(TEMPLATE_NAME, new Object(), TEMPLATE_NOT_FOUND_EXCEPTION_MESSAGE)).when(freemarkerConfiguration)
+                .getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(0)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenFreemarkerConfigGetTemplateThrowsMalformedTemplateNameExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+            throws IOException, TemplateException {
+        doThrow(new MalformedTemplateNameException(TEMPLATE_NAME, MALFORMED_TEMPLATE_NAMED_EXCEPTION_DESCRIPTION)).when(freemarkerConfiguration)
+                .getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(0)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenFreemarkerConfigGetTemplateThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+            throws IOException, TemplateException {
+        doThrow(new IOException()).when(freemarkerConfiguration).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(0)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenTemplateProcessThrowsTemplateExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+            throws IOException, TemplateException {
+        doThrow(new TemplateException(Environment.getCurrentEnvironment())).when(template).process(any(), any(StringWriter.class));
+
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(1)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenTemplateProcessThrowsIOExceptionThenCloudConnectorExceptionComesForAppCreationCommandTemplate()
+            throws IOException, TemplateException {
+        doThrow(new IOException()).when(template).process(any(), any(StringWriter.class));
+
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage(format(GENERATE_EXCEPTION_MESSAGE_FORMAT, APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(1)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenNoExceptionComesFromExecutionThenEverythingShouldGoFineForAppCreationCommandTemplate() throws IOException, TemplateException {
+        doNothing().when(template).process(any(), any(StringWriter.class));
+
+        underTest.generateAuditCredentialCommand(DEPLOYMENT_ADDRESS);
+
+        verify(template, times(1)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
+    }
+
+    @Test
+    public void testAuditWhenDeploymentAddressIsEmptyThenEverythingShouldGoFineForAppCreationCommandTemplateWithDefaultDeployment()
+            throws IOException, TemplateException {
+        doNothing().when(template).process(any(), any(StringWriter.class));
+
+        underTest.generateAuditCredentialCommand("");
+
+        verify(template, times(1)).process(any(), any(StringWriter.class));
+        verify(freemarkerConfiguration, times(1)).getTemplate(anyString(), anyString());
+        verify(freemarkerConfiguration, times(1)).getTemplate(APP_AUDIT_CREATION_COMMAND_TEMPLATE_PATH, ENCODING);
     }
 
     @Test

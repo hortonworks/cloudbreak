@@ -74,7 +74,7 @@ public class AzureCredentialConnectorTest {
     public void testGetPrerequisitesReturnsTheExpectedValue() {
         String expectedCommand = "someAppCreationCommandValue";
         String expectedRoleDef = "roleDefJson";
-        when(appCreationCommand.generate(anyString())).thenReturn(expectedCommand);
+        when(appCreationCommand.generateEnvironmentCredentialCommand(anyString())).thenReturn(expectedCommand);
         when(azurePlatformParameters.getRoleDefJson()).thenReturn(expectedRoleDef);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS,
@@ -88,7 +88,7 @@ public class AzureCredentialConnectorTest {
     @Test
     public void testGetPrerequisitesOnlyAzureIsImplemented() {
         String expected = "someAppCreationCommandValue";
-        when(appCreationCommand.generate(anyString())).thenReturn(expected);
+        when(appCreationCommand.generateEnvironmentCredentialCommand(anyString())).thenReturn(expected);
 
         CredentialPrerequisitesResponse result = underTest.getPrerequisites(TEST_CLOUD_CONTEXT, "2", DEPLOYMENT_ADDRESS,
                 CredentialType.ENVIRONMENT);

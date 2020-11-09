@@ -101,17 +101,21 @@ public class AzureCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
-        String creationCommand = appCreationCommand.generate(deploymentAddress);
-        String encodedCommand = Base64.encodeBase64String(creationCommand.getBytes());
+        String credentialCreationCommand = appCreationCommand.generateEnvironmentCredentialCommand(deploymentAddress);
+        String auditCredentialCreationCommand = appCreationCommand.generateAuditCredentialCommand(deploymentAddress);
+        String encodedCommand;
         String roleDefJson;
         switch (type) {
             case ENVIRONMENT:
                 roleDefJson = azurePlatformParameters.getRoleDefJson();
+                encodedCommand = Base64.encodeBase64String(credentialCreationCommand.getBytes());
                 break;
             case AUDIT:
                 roleDefJson = azurePlatformParameters.getAuditRoleDefJson();
+                encodedCommand = Base64.encodeBase64String(auditCredentialCreationCommand.getBytes());
                 break;
             default:
+                encodedCommand = null;
                 roleDefJson = null;
                 break;
         }
