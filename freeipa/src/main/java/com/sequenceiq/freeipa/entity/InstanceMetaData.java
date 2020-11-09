@@ -142,24 +142,8 @@ public class InstanceMetaData {
         this.terminationDate = terminationDate;
     }
 
-    public boolean isCreated() {
-        return InstanceStatus.CREATED.equals(instanceStatus);
-    }
-
     public boolean isAvailable() {
         return instanceStatus.isAvailable();
-    }
-
-    public boolean isFailed() {
-        return InstanceStatus.FAILED.equals(instanceStatus);
-    }
-
-    public boolean isDecommissioned() {
-        return InstanceStatus.DECOMMISSIONED.equals(instanceStatus);
-    }
-
-    public boolean isUnRegistered() {
-        return InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public boolean isTerminated() {
@@ -168,14 +152,6 @@ public class InstanceMetaData {
 
     public boolean isDeletedOnProvider() {
         return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus) || InstanceStatus.DELETED_BY_PROVIDER.equals(instanceStatus);
-    }
-
-    public boolean isRegistered() {
-        return InstanceStatus.REGISTERED.equals(instanceStatus);
-    }
-
-    public boolean isRunning() {
-        return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
     public String getLocalityIndicator() {

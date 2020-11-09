@@ -206,7 +206,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyGoodPayload(HOST1));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.AVAILABLE, response.getStatus());
@@ -223,7 +223,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyErrorPayload(HOST1));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
@@ -240,7 +240,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStack());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
@@ -259,7 +259,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
         Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
         Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getGoodStackTwoInstances());
-        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackWithPing(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST1))).thenReturn(getLegacyGoodPayload(HOST1));
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST2))).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
