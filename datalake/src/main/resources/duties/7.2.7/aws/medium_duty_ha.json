@@ -94,8 +94,7 @@
         "instanceType": "t3.medium",
         "attachedVolumes": [
           {
-            "count": 1,
-            "size": 100,
+            "count": 0,
             "type": "standard"
           }
         ],

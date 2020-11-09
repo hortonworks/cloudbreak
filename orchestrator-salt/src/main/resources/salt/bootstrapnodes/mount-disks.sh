@@ -115,10 +115,10 @@ mount_common() {
 }
 
 create_directories() {
-    cd /hadoopfs/fs1 && mkdir logs logs/ambari-server logs/ambari-agent logs/consul-watch logs/kerberos >> $LOG_FILE 2>&1
+    cd /hadoopfs/fs1 && mkdir logs >> $LOG_FILE 2>&1
 
     fs1_logs_dir=/hadoopfs/fs1/logs
-    [[ -d $fs1_logs_dir  && -d $fs1_logs_dir/ambari-server  && -d $fs1_logs_dir/ambari-agent  && -d $fs1_logs_dir/consul-watch  && -d $fs1_logs_dir/kerberos ]] && return 0
+    [[ -d $fs1_logs_dir ]] && return 0
 
     log $LOG_FILE there was an error creating log directories in /hadoopfs/fs1
     return 1

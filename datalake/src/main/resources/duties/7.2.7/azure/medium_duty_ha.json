@@ -94,8 +94,7 @@
         "instanceType": "Standard_D2s_v3",
         "attachedVolumes": [
           {
-            "count": 1,
-            "size": 100,
+            "count": 0,
             "type": "StandardSSD_LRS"
           }
         ],

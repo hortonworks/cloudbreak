@@ -114,7 +114,7 @@ public class CloudConfigValidationActions {
                         StackType type = stack.getType();
                         templateValidator.validate(
                                 credential,
-                                instanceGroup.getTemplate(),
+                                instanceGroup,
                                 stack,
                                 fromStackType(type == null ? null : type.name()),
                                 user,

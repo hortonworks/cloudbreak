@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -36,6 +37,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
 public class TemplateValidator {
+    public static final String GROUP_NAME_ID_BROKER = "idbroker";
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -52,9 +54,9 @@ public class TemplateValidator {
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
-    public void validate(Credential credential, Template value, Stack stack,
+    public void validate(Credential credential, InstanceGroup instanceGroup, Stack stack,
         CdpResourceType stackType, Optional<User> user, ValidationResult.ValidationResultBuilder validationBuilder) {
-
+        Template value = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential, user),
                 stack.getRegion(),
@@ -85,13 +87,13 @@ public class TemplateValidator {
                 }
             }
 
-            validateVolumeTemplates(value, vmType, platform, validationBuilder);
+            validateVolumeTemplates(value, vmType, platform, validationBuilder, instanceGroup);
             validateMaximumVolumeSize(value, vmType, validationBuilder);
         }
     }
 
     private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
-        ValidationResult.ValidationResultBuilder validationBuilder) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup) {
         for (VolumeTemplate volumeTemplate : value.getVolumeTemplates()) {
             VolumeParameterType volumeParameterType = null;
             Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
@@ -104,7 +106,7 @@ public class TemplateValidator {
                 }
             }
 
-            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder);
+            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder, instanceGroup);
         }
     }
 
@@ -127,10 +129,10 @@ public class TemplateValidator {
     }
 
     private void validateVolume(VolumeTemplate value, VmType vmType, Platform platform,
-        VolumeParameterType volumeParameterType, ValidationResult.ValidationResultBuilder validationBuilder) {
+        VolumeParameterType volumeParameterType, ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup) {
         validateVolumeType(value, platform, validationBuilder);
-        validateVolumeCount(value, vmType, volumeParameterType, validationBuilder);
-        validateVolumeSize(value, vmType, volumeParameterType, validationBuilder);
+        validateVolumeCount(value, vmType, volumeParameterType, validationBuilder, instanceGroup);
+        validateVolumeSize(value, vmType, volumeParameterType, validationBuilder, instanceGroup);
     }
 
     private void validateMaximumVolumeSize(Template value, VmType vmType, ValidationResult.ValidationResultBuilder validationBuilder) {
@@ -157,14 +159,20 @@ public class TemplateValidator {
         }
     }
 
+    private boolean isIDBrokerInstanceGroup(InstanceGroup instanceGroup) {
+        return GROUP_NAME_ID_BROKER.equalsIgnoreCase(instanceGroup.getGroupName());
+    }
+
     private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
+                // IDBroker does not use data volume, so its volume count should be zero
+                // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
                 if (value.getVolumeCount() > config.maximumNumber()) {
                     validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
-                } else if (value.getVolumeCount() < config.minimumNumber()) {
+                } else if (!isIDBrokerInstanceGroup(instanceGroup) && value.getVolumeCount() < config.minimumNumber()) {
                     validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
                 }
             } else {
@@ -174,13 +182,15 @@ public class TemplateValidator {
     }
 
     private void validateVolumeSize(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
-        ValidationResult.ValidationResultBuilder validationBuilder) {
+        ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
+                // IDBroker does not use data volume, so its volume size should be zero
+                // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
                 if (value.getVolumeSize() > config.maximumSize()) {
                     validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
-                } else if (value.getVolumeSize() < config.minimumSize()) {
+                } else if (!isIDBrokerInstanceGroup(instanceGroup) && value.getVolumeSize() < config.minimumSize()) {
                     validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }
             } else {
