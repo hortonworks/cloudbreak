@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -36,6 +38,7 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
         DBStack dbStack = dbStackService.getById(dbStackId);
 
         MDCBuilder.buildMdcContext(dbStack);
+        MDCBuilder.addRequestId(UUID.randomUUID().toString());
 
         if (flowLogService.isOtherFlowRunning(dbStackId)) {
             LOGGER.debug("DBStackStatusCheckerJob cannot run, because flow is running for stack: {}", dbStackId);

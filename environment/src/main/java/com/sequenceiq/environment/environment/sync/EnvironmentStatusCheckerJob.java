@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.sync;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
@@ -102,6 +103,7 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
                 .resourceCrn(environment.getResourceCrn())
                 .resourceName(environment.getName())
                 .resourceType("ENVIRONMENT")
+                .requestId(UUID.randomUUID().toString())
                 .buildMdc();
     }
 
