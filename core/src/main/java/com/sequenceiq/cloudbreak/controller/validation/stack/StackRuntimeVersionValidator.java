@@ -67,7 +67,7 @@ public class StackRuntimeVersionValidator {
     }
 
     private void validateStackVersion(String stackVersion, String sdxRuntimeVersion) {
-        if (!stackVersion.equals(sdxRuntimeVersion)) {
+        if (sdxRuntimeVersion != null && !stackVersion.equals(sdxRuntimeVersion)) {
             String errorMessage = String.format(
                     "Data Hub cluster (%s) creation is not allowed with different runtime version than the Data Lake version (%s).",
                     stackVersion, sdxRuntimeVersion);
