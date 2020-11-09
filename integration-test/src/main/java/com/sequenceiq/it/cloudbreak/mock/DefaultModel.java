@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.it.cloudbreak.mock.model.AmbariMock;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SPIMock;
-import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.util.ServerAddressGenerator;
 
 import spark.Service;
@@ -35,7 +34,7 @@ public class DefaultModel extends MockModel {
 
     private SPIMock spiMock;
 
-    private SaltMock saltMock;
+//    private SaltMock saltMock;
 
     private ClouderaManagerMock clouderaManagerMock;
 
@@ -48,13 +47,13 @@ public class DefaultModel extends MockModel {
 
         ambariMock = new AmbariMock(sparkService, this);
         spiMock = new SPIMock(sparkService, this);
-        saltMock = new SaltMock(sparkService, this);
+//        saltMock = new SaltMock(sparkService, this);
         clouderaManagerMock = new ClouderaManagerMock(sparkService, this, activeProfiles);
 
-        ambariMock.addAmbariMappings();
-        spiMock.addSPIEndpoints();
-        saltMock.addSaltMappings();
-        clouderaManagerMock.addClouderaManagerMappings();
+//        ambariMock.addAmbariMappings();
+//        spiMock.addSPIEndpoints();
+//        saltMock.addSaltMappings();
+//        clouderaManagerMock.addClouderaManagerMappings();
     }
 
     public SPIMock getSpiMock() {

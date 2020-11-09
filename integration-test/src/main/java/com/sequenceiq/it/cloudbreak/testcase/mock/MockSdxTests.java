@@ -160,7 +160,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     public void repairTerminatedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER, IDBROKER),
-                testContext.getModel()::terminateInstance,
+                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/terminate", w -> w),
                 SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE);
     }
 
@@ -173,7 +173,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     public void repairTerminatedMaster(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER),
-                testContext.getModel()::terminateInstance,
+                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/terminate", w -> w),
                 SdxClusterStatusResponse.CLUSTER_AMBIGUOUS);
     }
 
@@ -186,7 +186,7 @@ public class MockSdxTests extends AbstractIntegrationTest {
     public void repairStoppedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER, IDBROKER),
-                testContext.getModel()::stopInstance,
+                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/stop", w -> w),
                 SdxClusterStatusResponse.STOPPED);
     }
 

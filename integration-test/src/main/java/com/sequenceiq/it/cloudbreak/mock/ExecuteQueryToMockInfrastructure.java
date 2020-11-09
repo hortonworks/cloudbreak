@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 import java.util.Map;
 import java.util.function.Function;
 
+import javax.annotation.PostConstruct;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.ws.rs.client.Client;
@@ -14,18 +15,28 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.SslConfigurator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class ExecuteQueryToMockInfrastructure {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExecuteQueryToMockInfrastructure.class);
+
     @Value("${mock.infrastructure.host:localhost}")
-    private String infrastructureMockHost;
+    private String mockInfrastructureHost;
+
+    @PostConstruct
+    void log() {
+        Log.log(LOGGER, "Mock-infrastructure host: %s", mockInfrastructureHost);
+    }
 
     public void call(String path, Function<WebTarget, WebTarget> decorateWebTarget) {
         execute(path, decorateWebTarget, r -> null);
@@ -67,8 +78,12 @@ public class ExecuteQueryToMockInfrastructure {
             throw new TestFailException("Cannot init SSL Context: " + e.getMessage(), e);
         }
         Client client = RestClientUtil.createClient(sslContext, true);
-        WebTarget target = client.target(String.format("https://%s:%d", infrastructureMockHost, 10090));
+        WebTarget target = client.target(getUrl());
         target = decorateWebTarget.apply(target.path(path));
         return target;
+    }
+
+    public String getUrl() {
+        return String.format("https://%s:%d", mockInfrastructureHost, 10090);
     }
 }

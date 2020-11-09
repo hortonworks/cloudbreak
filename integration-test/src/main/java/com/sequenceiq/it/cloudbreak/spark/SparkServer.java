@@ -1,9 +1,5 @@
 package com.sequenceiq.it.cloudbreak.spark;
 
-import static java.lang.String.format;
-
-import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,27 +24,10 @@ public class SparkServer {
 
     private final java.util.Stack<Call> callStack = new java.util.Stack<>();
 
-    private final Service sparkService;
-
     private final String endpoint;
 
-    private final boolean printRequestBody;
-
-    private boolean secure;
-
-    private int port;
-
-    public SparkServer(int port, File keystoreFile, String endpoint, boolean printRequestBody, boolean secure) {
-        this.port = port;
+    public SparkServer(String endpoint) {
         this.endpoint = endpoint;
-        this.printRequestBody = printRequestBody;
-        sparkService = Service.ignite();
-        sparkService.port(port);
-        sparkService.threadPool(30, 30, 600000);
-        this.secure = secure;
-        if (secure) {
-            sparkService.secure(keystoreFile.getPath(), "secret", null, null);
-        }
     }
 
     public void reset() {
@@ -59,41 +38,21 @@ public class SparkServer {
     }
 
     public void init() {
-        callStack.clear();
-        requestResponseMap.clear();
-        sparkService.init();
-        sparkService.before((req, res) -> res.type("application/json"));
-        sparkService.after(
-                (request, response) -> {
-                    if (printRequestBody) {
-                        LOGGER.info(format("%s request from %s --> %s", request.requestMethod(), request.url(), request.body()));
-                        LOGGER.info(format("response from [%s] ::: [%d] --> %s", request.url(), response.status(), response.body()));
-                    }
-                    requestResponseMap.put(Call.fromRequest(request), response);
-                });
-        sparkService.after(
-                (request, response) -> callStack.push(Call.fromRequest(request))
-        );
-        sparkService.get(VALIDATIONCALL, (request, response) -> "OK");
-    }
-
-    public Map<Call, Response> getRequestResponseMap() {
-        return Collections.unmodifiableMap(requestResponseMap);
     }
 
     public String getEndpoint() {
-        return (secure ? "https://"  : "http://") + endpoint + ":" + port;
+        return "https://%s:10090";
     }
 
     public Service getSparkService() {
-        return sparkService;
+        throw new UnsupportedOperationException("Please don't use this. WE handle all request in a separated service");
     }
 
     public void awaitInitialization() {
-        LOGGER.info("Spark service initialization in progress on port: {}.", port);
-        sparkService.awaitInitialization();
-        waitEndpointToBeReady(VALIDATIONCALL, null);
-        LOGGER.info("Spark service initialization finished on port {}.", port);
+//        LOGGER.info("Spark service initialization in progress on port: {}.", port);
+//        sparkService.awaitInitialization();
+//        waitEndpointToBeReady(VALIDATIONCALL, null);
+//        LOGGER.info("Spark service initialization finished on port {}.", port);
     }
 
     public void waitEndpointToBeReady(String path, String expectedResponseBody) {
@@ -135,11 +94,11 @@ public class SparkServer {
     }
 
     public void awaitStop() {
-        sparkService.awaitStop();
+//        sparkService.awaitStop();
     }
 
     public void stop() {
-        sparkService.stop();
+//        sparkService.stop();
     }
 
     public int getPort() {
@@ -147,7 +106,8 @@ public class SparkServer {
     }
 
     public boolean isSecure() {
-        return secure;
+//        return secure;
+        return true;
     }
 
     @Override
