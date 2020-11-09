@@ -28,8 +28,7 @@
         },
         "attachedVolumes": [
           {
-            "size": 100,
-            "count": 1,
+            "count": 0,
             "type": "magnetic"
           }
         ]
