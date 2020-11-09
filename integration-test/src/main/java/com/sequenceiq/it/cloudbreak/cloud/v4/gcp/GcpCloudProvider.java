@@ -288,7 +288,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
                         .getCloudbreakClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.AZURE.name()).getBaseImages();
+                                CloudPlatform.GCP.name()).getBaseImages();
 
                 BaseImageV4Response baseImage = images.get(images.size() - 1);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));

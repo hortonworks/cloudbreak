@@ -2,6 +2,6 @@ name: "gcp-e2e-tests"
 tests:
   - name: "gcp_encryption_tests"
     classes:
-      - com.sequenceiq.it.cloudbreak.testcase.e2e.stack.GcpEncryptionTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXImagesTests
         includedMethods:
-          - testGcpClusterWithEncryptedDisks
+          - testDistroXWithBaseImageCanBeCreatedSuccessfully
