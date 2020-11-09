@@ -26,7 +26,6 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.TargetResource;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -56,7 +55,7 @@ public class AzureCloudResourceService {
 
     public List<CloudResource> getDeploymentCloudResources(Deployment templateDeployment) {
         PagedList<DeploymentOperation> operations = templateDeployment.deploymentOperations().list();
-        return operations.stream()
+        List<CloudResource> resourceList = operations.stream()
                 .filter(Predicate.not(Predicate.isEqual(null)))
                 .filter(deploymentOperation -> Objects.nonNull(deploymentOperation.targetResource())
                         && StringUtils.isNotBlank(deploymentOperation.provisioningState()))
@@ -65,6 +64,8 @@ public class AzureCloudResourceService {
                                 convertProvisioningState(deploymentOperation.provisioningState())))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+        LOGGER.debug("Template deployment related cloud resource list: {}", resourceList);
+        return resourceList;
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -230,11 +231,10 @@ public class AzureCloudResourceService {
                 .build();
     }
 
-    public List<CloudResource> getAttachedOsDiskResources(AuthenticatedContext authenticatedContext, List<CloudResource> instanceList,
-            String resourceGroupName) {
+    public List<CloudResource> getAttachedOsDiskResources(List<CloudResource> instanceList,
+            String resourceGroupName, AzureClient client) {
 
         List<CloudResource> osDiskList = new ArrayList<>();
-        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         PagedList<VirtualMachine> virtualMachines = client.getVirtualMachines(resourceGroupName);
         virtualMachines.loadAll();
 
@@ -249,7 +249,7 @@ public class AzureCloudResourceService {
                     () -> LOGGER.warn("No Azure VM metadata found for the VM: " + vm.getInstanceId()));
                 }
         );
-
+        LOGGER.debug("The following OS disks have been found: {}", osDiskList);
         return osDiskList;
     }
 

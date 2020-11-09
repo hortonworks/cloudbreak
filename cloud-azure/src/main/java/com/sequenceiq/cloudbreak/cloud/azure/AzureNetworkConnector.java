@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -28,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -77,6 +76,9 @@ public class AzureNetworkConnector implements NetworkConnector {
     @Inject
     private AzureNetworkLinkService azureNetworkLinkService;
 
+    @Inject
+    private AzureTransientDeploymentService azureTransientDeploymentService;
+
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
         AzureClient azureClient = azureClientService.getClient(networkRequest.getCloudCredential());
@@ -95,14 +97,7 @@ public class AzureNetworkConnector implements NetworkConnector {
             String parametersMapAsString = new Json(Map.of()).getValue();
             templateDeployment = azureClient.createTemplateDeployment(resourceGroup.name(), networkRequest.getStackName(), template, parametersMapAsString);
         } catch (CloudException e) {
-            LOGGER.info("Provisioning error, cloud exception happened: ", e);
-            if (e.body() != null && e.body().details() != null) {
-                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Network provisioning failed, status code %s, error message: %s, details: %s",
-                        e.body().code(), e.body().message(), details));
-            } else {
-                throw new CloudConnectorException(String.format("Network provisioning failed: '%s', please go to Azure Portal for detailed message", e));
-            }
+            throw azureUtils.convertToCloudConnectorException(e, "Network template deployment provisioning");
         } catch (Exception e) {
             LOGGER.warn("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning network %s: %s", networkRequest.getStackName(), e.getMessage()));
@@ -143,8 +138,10 @@ public class AzureNetworkConnector implements NetworkConnector {
         try {
             LOGGER.debug("Deleting network id and deployment, preserving the resource group");
             AzureClient azureClient = azureClientService.getClient(networkDeletionRequest.getCloudCredential());
-            azureClient.deleteNetworkInResourceGroup(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getNetworkId());
-            azureClient.deleteTemplateDeployment(networkDeletionRequest.getResourceGroup(), networkDeletionRequest.getStackName());
+            String resourceGroupName = networkDeletionRequest.getResourceGroup();
+            String stackName = networkDeletionRequest.getStackName();
+            azureTransientDeploymentService.handleTransientDeployment(azureClient, resourceGroupName, stackName);
+            azureClient.deleteNetworkInResourceGroup(resourceGroupName, networkDeletionRequest.getNetworkId());
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Network and template deployment deletion");
         }

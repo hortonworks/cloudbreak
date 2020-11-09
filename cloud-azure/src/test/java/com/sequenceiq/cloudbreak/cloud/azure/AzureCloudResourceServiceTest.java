@@ -203,11 +203,10 @@ public class AzureCloudResourceServiceTest {
         when(osDisk.managedDisk()).thenReturn(managedDiskParameters);
         when(managedDiskParameters.id()).thenReturn("diskId1");
         when(osDisk.name()).thenReturn("diskName1");
-        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
 
         when(azureClient.getVirtualMachines("resourceGroupName")).thenReturn(virtualMachines);
 
-        List<CloudResource> osDiskResources = underTest.getAttachedOsDiskResources(ac, List.of(vm1, vm2, vm3), "resourceGroupName");
+        List<CloudResource> osDiskResources = underTest.getAttachedOsDiskResources(List.of(vm1, vm2, vm3), "resourceGroupName", azureClient);
 
         assertEquals(1, osDiskResources.size());
         CloudResource diskResource = osDiskResources.get(0);

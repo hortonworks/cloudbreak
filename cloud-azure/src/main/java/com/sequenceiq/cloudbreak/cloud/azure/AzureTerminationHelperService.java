@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -50,6 +53,26 @@ public class AzureTerminationHelperService {
     @Inject
     private PersistenceNotifier resourceNotifier;
 
+    @Inject
+    private AzureTransientDeploymentService azureTransientDeploymentService;
+
+    public List<CloudResource> handleTransientDeployment(AzureClient client, String resourceGroupName, String deploymentName) {
+
+        List<CloudResource> deployedResources = azureTransientDeploymentService.handleTransientDeployment(client, resourceGroupName, deploymentName);
+        if (CollectionUtils.isNotEmpty(deployedResources)) {
+            List<CloudResource> osDiskResources = getOsDiskResources(client, resourceGroupName, deployedResources);
+            deployedResources.addAll(osDiskResources);
+        }
+        return deployedResources;
+    }
+
+    private List<CloudResource> getOsDiskResources(AzureClient client, String resourceGroupName, List<CloudResource> deployedResources) {
+        List<CloudResource> transientVms = deployedResources.stream()
+                .filter(cloudResource -> ResourceType.AZURE_INSTANCE == cloudResource.getType())
+                .collect(Collectors.toList());
+        return azureCloudResourceService.getAttachedOsDiskResources(transientVms, resourceGroupName, client);
+    }
+
     public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudInstance> vms,
             List<CloudResource> allResources, List<CloudResource> resourcesToRemove) {
         List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(allResources);
@@ -71,6 +94,7 @@ public class AzureTerminationHelperService {
 
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
 
+        deleteInstancesInProgress(ac, vms, resourcesToRemove, resourceGroupName);
         Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
         List<CloudInstance> cloudInstancesSyncedWithAzure = vms.stream()
                 .filter(cloudInstance -> vmsFromAzure.containsKey(cloudInstance.getInstanceId()))
@@ -88,8 +112,8 @@ public class AzureTerminationHelperService {
         azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
 
-        List<String> managedDiskIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_DISK);
-        azureUtils.deleteManagedDisks(client, managedDiskIds);
+        List<String> managedDiskNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_DISK);
+        azureUtils.deleteManagedDisks(client, resourceGroupName, managedDiskNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_DISK);
 
         deleteVolumeSets(ac, stack, resourcesToRemove, networkResources, resourceGroupName);
@@ -114,6 +138,18 @@ public class AzureTerminationHelperService {
 
         LOGGER.debug("All the necessary resources have been deleted successfully");
         return azureResourceConnector.check(ac, resourcesToRemove);
+    }
+
+    private void deleteInstancesInProgress(AuthenticatedContext ac, List<CloudInstance> vms, List<CloudResource> resourcesToRemove, String resourceGroupName) {
+        List<CloudInstance> instancesInProgress = vms.stream()
+                .filter(cloudInstance -> StringUtils.isEmpty(cloudInstance.getInstanceId()))
+                .collect(Collectors.toList());
+        if (instancesInProgress.size() > 0) {
+            LOGGER.info("The following instances are not yet created: {}", instancesInProgress);
+            List<String> instancesProgress = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_INSTANCE);
+            azureUtils.deleteCloudResourceInstances(ac, resourceGroupName, instancesProgress);
+            vms.removeAll(instancesInProgress);
+        }
     }
 
     private void deleteVolumeSets(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resourcesToRemove,

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
+import static com.sequenceiq.common.api.type.ResourceType.ARM_TEMPLATE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_ENDPOINT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.RDS_HOSTNAME;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.ResourceGroup;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -64,6 +66,9 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureCloudResourceService azureCloudResourceService;
 
+    @Inject
+    private AzureTransientDeploymentService azureTransientDeploymentService;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -83,19 +88,14 @@ public class AzureDatabaseResourceService {
                 client.createResourceGroup(resourceGroupName, region, stack.getTags());
             }
         }
+        createResourceGroupResource(persistenceNotifier, cloudContext, resourceGroupName);
+        createTemplateResource(persistenceNotifier, cloudContext, stackName);
         Deployment deployment;
         try {
             String parametersMapAsString = new Json(Map.of()).getValue();
             client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
         } catch (CloudException e) {
-            if (e.body() != null && e.body().details() != null) {
-                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
-                throw new CloudConnectorException(String.format("Database stack provisioning failed, status code %s, error message: %s, details: %s",
-                        e.body().code(), e.body().message(), details), e);
-            } else {
-                throw new CloudConnectorException(String.format("Database stack provisioning failed: '%s', please go to Azure Portal for details",
-                        e.getMessage()), e);
-            }
+            throw azureUtils.convertToCloudConnectorException(e, "Database stack provisioning");
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Error in provisioning database stack %s: %s", stackName, e.getMessage()), e);
         } finally {
@@ -107,28 +107,35 @@ public class AzureDatabaseResourceService {
         }
 
         String fqdn = (String) ((Map) ((Map) deployment.outputs()).get(DATABASE_SERVER_FQDN)).get("value");
-        List<CloudResource> databaseResources = createCloudResources(resourceGroupName, fqdn);
+        List<CloudResource> databaseResources = createCloudResources(fqdn);
         databaseResources.forEach(dbr -> persistenceNotifier.notifyAllocation(dbr, cloudContext));
         return databaseResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
     }
 
-    private List<CloudResource> createCloudResources(String resourceGroupName, String fqdn) {
+    private void createTemplateResource(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, String stackName) {
+        CloudResource armTemplate = createCloudResource(ARM_TEMPLATE, stackName);
+        persistenceNotifier.notifyAllocation(armTemplate, cloudContext);
+    }
+
+    private void createResourceGroupResource(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, String resourceGroupName) {
+        CloudResource resourceGroup = createCloudResource(AZURE_RESOURCE_GROUP, resourceGroupName);
+        persistenceNotifier.notifyAllocation(resourceGroup, cloudContext);
+    }
+
+    private List<CloudResource> createCloudResources(String fqdn) {
         List<CloudResource> databaseResources = Lists.newArrayList();
-        databaseResources.add(CloudResource.builder()
-                .type(ResourceType.RDS_HOSTNAME)
-                .name(fqdn)
-                .build());
-        databaseResources.add(CloudResource.builder()
-                .type(ResourceType.RDS_PORT)
-                .name(Integer.toString(POSTGRESQL_SERVER_PORT))
-                .build());
-        databaseResources.add(CloudResource.builder()
-                .type(AZURE_RESOURCE_GROUP)
-                .name(resourceGroupName)
-                .build());
+        databaseResources.add(createCloudResource(RDS_HOSTNAME, fqdn));
+        databaseResources.add(createCloudResource(ResourceType.RDS_PORT, Integer.toString(POSTGRESQL_SERVER_PORT)));
         return databaseResources;
+    }
+
+    private CloudResource createCloudResource(ResourceType type, String name) {
+        return CloudResource.builder()
+                .type(type)
+                .name(name)
+                .build();
     }
 
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
@@ -139,6 +146,25 @@ public class AzureDatabaseResourceService {
         return (azureResourceGroupMetadataProvider.getResourceGroupUsage(stack) != ResourceGroupUsage.MULTIPLE)
                 ? deleteResources(resources, cloudContext, force, client, persistenceNotifier)
                 : deleteResourceGroup(resources, cloudContext, force, client, persistenceNotifier, stack);
+    }
+
+    public void handleTransientDeployment(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
+        Optional<String> deploymentNameOpt = getFirstResourceName(resources, ARM_TEMPLATE);
+        Optional<String> resourceGroupNameOpt = getFirstResourceName(resources, AZURE_RESOURCE_GROUP);
+        LOGGER.debug("Database template saved: {}, resource group saved: {}", deploymentNameOpt, resourceGroupNameOpt);
+        if (deploymentNameOpt.isPresent() && resourceGroupNameOpt.isPresent()) {
+            AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+            String resourceGroupName = resourceGroupNameOpt.get();
+            String deploymentName = deploymentNameOpt.get();
+            LOGGER.debug("Checking if database deployment {}.{} status is transient", resourceGroupName, deploymentName);
+            resources.addAll(azureTransientDeploymentService.handleTransientDeployment(client, resourceGroupName, deploymentName));
+        }
+    }
+
+    private Optional<String> getFirstResourceName(List<CloudResource> resources, ResourceType resourceType) {
+        return findResources(resources, List.of(resourceType)).stream()
+                .map(CloudResource::getName)
+                .findFirst();
     }
 
     private List<CloudResourceStatus> deleteResourceGroup(List<CloudResource> resources, CloudContext cloudContext, boolean force,

@@ -40,6 +40,7 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.subnet.selector.AzureSubnetSelectorService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -55,8 +56,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
-import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -125,6 +126,9 @@ public class AzureNetworkConnectorTest {
 
     @Mock
     private AzureNetworkLinkService azureNetworkLinkService;
+
+    @Mock
+    private AzureTransientDeploymentService azureTransientDeploymentService;
 
     @Test
     public void testPlatformShouldReturnAzurePlatform() {
@@ -199,19 +203,31 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldNotDeleteResourceGroupWhenSingleResourceGroup() {
+    public void testDeleteNetworkWithSubnetsShouldCancelDeploymentIfTransientWhenSingleResourceGroup() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, true);
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
 
-        verify(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
         verify(azureClient).deleteNetworkInResourceGroup(RESOURCE_GROUP, NETWORK_ID);
         verify(azureClient, never()).deleteResourceGroup(RESOURCE_GROUP);
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldDeleteNothingWhenExistingNetwork() {
+    public void testDeleteNetworkWithSubnetsShouldNotCancelDeploymentIfNotTransientWhenSingleResourceGroup() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, true);
+        when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(azureClient).deleteNetworkInResourceGroup(RESOURCE_GROUP, NETWORK_ID);
+        verify(azureClient, never()).deleteResourceGroup(RESOURCE_GROUP);
+        verify(azureClient, never()).getTemplateDeployment(RESOURCE_GROUP, STACK);
+
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubnetsShouldDeleteNothingWhenExistingNetwork() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(true, false);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -221,7 +237,7 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldDeleteTheStackAndTheResourceGroupWhenNotExistingNetwork() {
+    public void testDeleteNetworkWithSubnetsShouldDeleteTheStackAndTheResourceGroupWhenNotExistingNetwork() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
@@ -234,7 +250,7 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test(expected = CloudConnectorException.class)
-    public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
+    public void testDeleteNetworkWithSubnetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest(false, false);
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
@@ -246,7 +262,7 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldDoNothingWhenResourceGroupNameIsNullInRequest() {
+    public void testDeleteNetworkWithSubnetsShouldDoNothingWhenResourceGroupNameIsNullInRequest() {
         NetworkDeletionRequest networkDeletionRequest = mock(NetworkDeletionRequest.class);
         when(networkDeletionRequest.getResourceGroup()).thenReturn(null);
 
@@ -259,7 +275,7 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testDeleteNetworkWithSubNetsShouldDoNothingWhenResourceGroupNameRefersToANonExistingResourceGroupInRequest() {
+    public void testDeleteNetworkWithSubnetsShouldDoNothingWhenResourceGroupNameRefersToANonExistingResourceGroupInRequest() {
         NetworkDeletionRequest networkDeletionRequest = mock(NetworkDeletionRequest.class);
         String resourceGroupName = "someNotExistingResourceGroupName";
         when(networkDeletionRequest.getResourceGroup()).thenReturn(resourceGroupName);
