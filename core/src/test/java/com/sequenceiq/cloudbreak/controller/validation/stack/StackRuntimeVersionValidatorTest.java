@@ -123,6 +123,18 @@ public class StackRuntimeVersionValidatorTest {
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
 
+    @Test
+    public void testValidateShouldNotDoAnythingWhenDataLakeVersionIsNotPresent() {
+        StackV4Request request = createStackRequest(DATA_HUB_VERSION);
+        when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(eq(INTERNAL_ACTOR_CRN), any())).thenReturn(false);
+        when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Collections.singletonList(new SdxClusterResponse()));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(request, mock(Image.class)));
+
+        verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(eq(INTERNAL_ACTOR_CRN), any());
+        verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
+    }
+
     private StackV4Request createStackRequest(String dataHubVersion) {
         ClouderaManagerRepositoryV4Request clouderaManagerRepositoryV4Request = new ClouderaManagerRepositoryV4Request();
         clouderaManagerRepositoryV4Request.setVersion(dataHubVersion);
