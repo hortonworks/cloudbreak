@@ -154,6 +154,14 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     protected abstract FlowEdgeConfig<S, E> getEdgeConfig();
 
+    public List<Transition<S, E>> getMyTransitions() {
+        return getTransitions();
+    }
+
+    public FlowEdgeConfig<S, E> getMyEdgeConfig() {
+        return getEdgeConfig();
+    }
+
     public E getFailHandledEvent() {
         return getEdgeConfig().failureHandled;
     }
@@ -230,6 +238,18 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
         private E getFailureEvent() {
             return failureEvent;
+        }
+
+        public String getSourceName() {
+            return source.name();
+        }
+
+        public String getEvent() {
+            return event.name();
+        }
+
+        public String getFailureStateName() {
+            return failureState.name();
         }
 
         public static class Builder<S extends FlowState, E extends FlowEvent> {
@@ -354,6 +374,18 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             this.finalState = finalState;
             this.defaultFailureState = defaultFailureState;
             this.failureHandled = failureHandled;
+        }
+
+        public S getInitState() {
+            return initState;
+        }
+
+        public S getFinalState() {
+            return finalState;
+        }
+
+        public S getDefaultFailureState() {
+            return defaultFailureState;
         }
     }
 }
