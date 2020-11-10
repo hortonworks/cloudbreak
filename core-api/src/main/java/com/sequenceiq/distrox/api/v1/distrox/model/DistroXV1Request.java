@@ -147,7 +147,9 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     @JsonIgnore
     public Set<String> getAllRecipes() {
         Set<String> recipes = Sets.newHashSet();
-        instanceGroups.stream().forEach(instanceGroup -> recipes.addAll(instanceGroup.getRecipeNames()));
+        instanceGroups.stream()
+                .filter(instanceGroup -> instanceGroup.getRecipeNames() != null)
+                .forEach(instanceGroup -> recipes.addAll(instanceGroup.getRecipeNames()));
         return recipes;
     }
 }
