@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.sync;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -14,6 +15,7 @@ import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -51,6 +53,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private AutoSyncConfig autoSyncConfig;
+
+    @Value("${freeipa.autosync.update.status:true}")
+    private boolean updateStatus;
 
     @Override
     protected void executeInternal(JobExecutionContext context) {
@@ -104,6 +109,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
                         if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
+                            for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry: syncResult.getInstanceStatusMap().entrySet()) {
+                                updateInstanceStatus(entry.getKey(), entry.getValue());
+                            }
                             updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
                         } else {
                             List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
@@ -120,6 +128,22 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             }, LOGGER, ":::Auto sync::: freeipa stack sync in {}ms");
         } catch (Exception e) {
             LOGGER.info(":::Auto sync::: Error occurred during freeipa sync: {}", e.getMessage(), e);
+        }
+    }
+
+    private void updateInstanceStatus(InstanceMetaData instanceMetaData, DetailedStackStatus detailedStackStatus) {
+        switch (detailedStackStatus) {
+            case AVAILABLE:
+                setStatusIfNotTheSame(instanceMetaData, InstanceStatus.CREATED);
+                break;
+            case UNHEALTHY:
+                setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNHEALTHY);
+                break;
+            case UNREACHABLE:
+                setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNREACHABLE);
+                break;
+            default:
+                LOGGER.info(":::Auto sync::: the '{}' status is not converted", detailedStackStatus);
         }
     }
 
@@ -159,6 +183,18 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private Predicate<ProviderSyncResult> hasStatus(InstanceStatus... statuses) {
         return providerSyncResult -> Set.of(statuses).contains(providerSyncResult.getStatus());
+    }
+
+    private void setStatusIfNotTheSame(InstanceMetaData instanceMetaData, InstanceStatus newStatus) {
+        if (instanceMetaData.getInstanceStatus() != newStatus) {
+            if (updateStatus) {
+                instanceMetaData.setInstanceStatus(newStatus);
+                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
+            } else {
+                LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
+                        instanceMetaData.getInstanceStatus(), newStatus);
+            }
+        }
     }
 
 }
