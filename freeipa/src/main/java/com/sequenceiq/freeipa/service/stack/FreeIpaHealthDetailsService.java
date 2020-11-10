@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -50,6 +51,8 @@ public class FreeIpaHealthDetailsService {
 
     private static final Pattern NEW_NODE_PATTERN = Pattern.compile("Check connection from master to remote replica '(.[^\']*)");
 
+    private static final Set<InstanceStatus> CACHEABLE_INSTANCE_STATUS = Set.of(InstanceStatus.STOPPED, InstanceStatus.FAILED);
+
     @Inject
     private StackService stackService;
 
@@ -69,7 +72,7 @@ public class FreeIpaHealthDetailsService {
         HealthDetailsFreeIpaResponse response = new HealthDetailsFreeIpaResponse();
 
         for (InstanceMetaData instance: instances) {
-            if (instance.isAvailable()) {
+            if (shouldRunHealthCheck(instance)) {
                 try {
                     if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
                         RPCResponse<CheckResult> rpcResponse = freeIpaHealthCheck(stack, instance);
@@ -91,6 +94,12 @@ public class FreeIpaHealthDetailsService {
             }
         }
         return updateResponse(stack, response);
+    }
+
+    private boolean shouldRunHealthCheck(InstanceMetaData instance) {
+        return !(instance.isTerminated() ||
+                instance.isDeletedOnProvider() ||
+                CACHEABLE_INSTANCE_STATUS.contains(instance.getInstanceStatus()));
     }
 
     private void addUnreachableResponse(InstanceMetaData instance, HealthDetailsFreeIpaResponse response, String issue) {
@@ -149,7 +158,7 @@ public class FreeIpaHealthDetailsService {
     }
 
     private RPCResponse<Boolean> legacyFreeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackWithPing(stack, instance.getDiscoveryFQDN());
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(stack, instance.getDiscoveryFQDN());
         return freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), instance.getDiscoveryFQDN());
     }
 

@@ -119,7 +119,7 @@ public class FreeIpaClientFactory {
                         throw new RetryableFreeIpaClientException("Unable to connect to FreeIPA using cluster proxy", e);
                     }
                 } else {
-                    List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack).stream()
+                    List<InstanceMetaData> instanceMetaDatas = getPriorityOrderedFreeIpaInstances(stack, forceCheckUnreachable).stream()
                             .filter(instanceMetaData -> freeIpaFqdn.isEmpty() || freeIpaFqdn.get().equals(instanceMetaData.getDiscoveryFQDN()))
                             .collect(Collectors.toList());
                     for (Iterator<InstanceMetaData> instanceIterator = instanceMetaDatas.iterator();
@@ -167,9 +167,9 @@ public class FreeIpaClientFactory {
         return !lastInstance;
     }
 
-    private List<InstanceMetaData> getPriorityOrderedFreeIpaInstances(Stack stack) {
+    private List<InstanceMetaData> getPriorityOrderedFreeIpaInstances(Stack stack, boolean forceCheckUnreachable) {
         return stack.getNotDeletedInstanceMetaDataList().stream()
-                .filter(InstanceMetaData::isAvailable)
+                .filter(im -> forceCheckUnreachable || im.isAvailable())
                 .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator())
                 .collect(Collectors.toList());
     }
@@ -179,13 +179,8 @@ public class FreeIpaClientFactory {
         return getFreeIpaClient(stack, false, false, Optional.empty());
     }
 
-    public FreeIpaClient getFreeIpaClientForStack(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
-        LOGGER.debug("Creating FreeIpaClient for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
-        return getFreeIpaClient(stack, false, false, Optional.of(freeIpaFqdn));
-    }
-
-    public FreeIpaClient getFreeIpaClientForStackWithPing(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
-        LOGGER.debug("Ping the login endpoint and creating FreeIpaClient for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
+    public FreeIpaClient getFreeIpaClientForStackForLegacyHealthCheck(Stack stack, String freeIpaFqdn) throws FreeIpaClientException {
+        LOGGER.debug("Creating FreeIpaClient for legacy health checks for stack {} for {}", stack.getResourceCrn(), freeIpaFqdn);
         return getFreeIpaClient(stack, true, true, Optional.of(freeIpaFqdn));
     }
 
