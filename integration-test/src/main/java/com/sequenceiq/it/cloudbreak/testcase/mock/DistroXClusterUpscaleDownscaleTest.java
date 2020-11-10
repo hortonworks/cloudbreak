@@ -59,6 +59,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     public void testScaleDownAndUp(MockedTestContext testContext, ITestContext testNgContext) {
         DistroXStartStopTestParameters params = new DistroXStartStopTestParameters(testNgContext.getCurrentXmlTest().getAllParameters());
         String stack = resourcePropertyProvider().getName();
+        createDatalake(testContext);
         DistroXTestDto currentContext = testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)

@@ -45,4 +45,8 @@ public class StackViewService {
         return stackViewRepository.findResourceCrnsByTenant(tenantName);
     }
 
+    public Optional<StackView> findDatalakeViewByEnvironmentCrn(String environmentCrn) {
+        return stackViewRepository.findDatalakeViewByEnvironmentCrn(environmentCrn);
+    }
+
 }

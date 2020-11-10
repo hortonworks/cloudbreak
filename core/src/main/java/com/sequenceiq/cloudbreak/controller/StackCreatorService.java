@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -174,7 +173,8 @@ public class StackCreatorService {
                 "Stack request converted to stack took {} ms for stack {}", stackName);
         stackStub.setWorkspace(workspace);
         stackStub.setCreator(user);
-        stackStub.setType(determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest));
+        StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
+        stackStub.setType(stackType);
         String platformString = stackStub.getCloudPlatform().toLowerCase();
 
         MDCBuilder.buildMdcContext(stackStub);
@@ -229,7 +229,7 @@ public class StackCreatorService {
                 StatedImage imgFromCatalog = measure(() -> getImageCatalog(imgFromCatalogFuture),
                         LOGGER,
                         "Select the correct image took {} ms");
-                validateStackVersion(stackRequest, imgFromCatalog.getImage());
+                stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 Stack newStack = measure(() -> stackService.create(
                             stack, platformString, imgFromCatalog, user, workspace, Optional.ofNullable(stackRequest.getResourceCrn())),
                             LOGGER,
@@ -276,10 +276,6 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
-    }
-
-    private void validateStackVersion(StackV4Request stackRequest, Image image) {
-        stackRuntimeVersionValidator.validate(stackRequest, image);
     }
 
     StackType determineStackTypeBasedOnTheUsedApi(Stack stack, boolean distroxRequest) {
