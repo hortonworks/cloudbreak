@@ -9,6 +9,7 @@ import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -64,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -82,6 +84,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String GCP_DISK_MODE = "READ_WRITE";
 
     private static final String PREEMPTIBLE = "preemptible";
+
+    private static final String GCP_CLOUD_STORAGE_RW_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
 
     private static final int MAX_TAG_LENGTH = 63;
 
@@ -124,6 +128,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
+        Optional<CloudFileSystemView> cloudFileSystemView = group.getIdentity();
+        if (cloudFileSystemView.isPresent()) {
+            CloudGcsView gcsView = (CloudGcsView) cloudFileSystemView.get();
+            ServiceAccount serviceAccount = new ServiceAccount();
+            serviceAccount.setEmail(gcsView.getServiceAccountEmail());
+            serviceAccount.setScopes(Arrays.asList(GCP_CLOUD_STORAGE_RW_SCOPE));
+            instance.setServiceAccounts(Arrays.asList(serviceAccount));
+        }
         // For FreeIPA hosts set the hostname during creation to avoid Google Network Manager overriding it with internal hostnames
         if (cloudStack.getParameters() != null
                 && cloudStack.getParameters().getOrDefault(CLOUD_STACK_TYPE_PARAMETER, "").equals(FREEIPA_STACK_TYPE)) {
