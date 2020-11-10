@@ -82,6 +82,7 @@ public class TelemetryApiConverter {
             loggingRequest.setStorageLocation(logging.getStorageLocation());
             loggingRequest.setS3(convertS3(logging.getS3()));
             loggingRequest.setAdlsGen2(convertAdlsV2(logging.getAdlsGen2()));
+            loggingRequest.setGcs(convertGcs(logging.getGcs()));
             loggingRequest.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingRequest;
