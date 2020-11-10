@@ -71,7 +71,7 @@ import com.sequenceiq.environment.service.integration.testconfiguration.TestConf
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         classes = TestConfigurationForServiceIntegration.class,
-        properties = "spring.main.allow-bean-definition-overriding=true")
+        properties = {"spring.main.allow-bean-definition-overriding=true", "info.app.version=test"})
 @ActiveProfiles("test")
 public class EnvironmentServiceIntegrationTest {
 

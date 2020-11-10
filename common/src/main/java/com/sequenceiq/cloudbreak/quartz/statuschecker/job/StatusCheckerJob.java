@@ -1,12 +1,18 @@
 package com.sequenceiq.cloudbreak.quartz.statuschecker.job;
 
-import org.springframework.scheduling.quartz.QuartzJobBean;
+import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
 
-public abstract class StatusCheckerJob extends QuartzJobBean {
+import io.opentracing.Tracer;
+
+public abstract class StatusCheckerJob extends TracedQuartzJob {
 
     private String localId;
 
     private String remoteResourceCrn;
+
+    public StatusCheckerJob(Tracer tracer, String jobName) {
+        super(tracer, jobName);
+    }
 
     public String getLocalId() {
         return localId;

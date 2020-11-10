@@ -26,6 +26,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaUMSCleanupJobTest {
 
@@ -44,9 +46,12 @@ public class FreeIpaUMSCleanupJobTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
+    @Mock
+    private Tracer tracer;
+
     @BeforeEach
     public void setUp() {
-        underTest = new FreeIpaUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService);
+        underTest = new FreeIpaUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService, tracer);
     }
 
     @Test
@@ -59,7 +64,7 @@ public class FreeIpaUMSCleanupJobTest {
         given(altusMachineUserService.getAllInternalMachineUsers("acc3")).willReturn(getMachineUsers("acc3"));
         given(umsCleanupConfig.getMaxAgeDays()).willReturn(100);
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(4)).cleanupMachineUser(anyString(), anyString());
     }
@@ -69,7 +74,7 @@ public class FreeIpaUMSCleanupJobTest {
         // GIVEN
         given(stackService.findAllRunning()).willReturn(new ArrayList<>());
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(0)).cleanupMachineUser(anyString(), anyString());
     }
@@ -81,7 +86,7 @@ public class FreeIpaUMSCleanupJobTest {
         fluentMachineUserMocks();
         given(altusMachineUserService.getAllInternalMachineUsers(anyString())).willReturn(new ArrayList<>());
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(0)).cleanupMachineUser(anyString(), anyString());
     }

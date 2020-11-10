@@ -34,6 +34,8 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = EnvironmentStatusTest.TestAppContext.class)
 class EnvironmentStatusTest {
@@ -54,6 +56,9 @@ class EnvironmentStatusTest {
 
     @MockBean
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    @MockBean
+    private Tracer tracer;
 
     @Mock
     private JobExecutionContext jobExecutionContext;
@@ -83,7 +88,7 @@ class EnvironmentStatusTest {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.AVAILABLE);
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(eq(environment), any(), any());
     }
@@ -98,7 +103,7 @@ class EnvironmentStatusTest {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.DELETED_ON_PROVIDER_SIDE);
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 environment,

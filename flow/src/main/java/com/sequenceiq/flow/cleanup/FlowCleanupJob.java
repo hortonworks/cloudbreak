@@ -6,15 +6,17 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
+import io.opentracing.Tracer;
+
 @Component
-public class FlowCleanupJob extends QuartzJobBean {
+public class FlowCleanupJob extends TracedQuartzJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowCleanupJob.class);
 
@@ -27,8 +29,17 @@ public class FlowCleanupJob extends QuartzJobBean {
     @Inject
     private FlowChainLogService flowChainLogService;
 
+    public FlowCleanupJob(Tracer tracer) {
+        super(tracer, "Flow Cleanup Job");
+    }
+
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected Object getMdcContextObject() {
+        return null;
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         try {
             purgeFinalisedFlowLogs();
         } catch (TransactionService.TransactionExecutionException e) {

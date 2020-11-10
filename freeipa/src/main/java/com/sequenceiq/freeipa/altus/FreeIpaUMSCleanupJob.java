@@ -21,6 +21,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
+import io.opentracing.Tracer;
+
 @Component
 public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
 
@@ -32,15 +34,21 @@ public class FreeIpaUMSCleanupJob extends UMSCleanupJob {
 
     private final StackService stackService;
 
-    public FreeIpaUMSCleanupJob(UMSCleanupConfig umsCleanupConfig,
-            AltusMachineUserService altusMachineUserService, StackService stackService) {
+    public FreeIpaUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
+            StackService stackService, Tracer tracer) {
+        super(tracer, "FreeIpa UMS Cleanup Job");
         this.umsCleanupConfig = umsCleanupConfig;
         this.altusMachineUserService = altusMachineUserService;
         this.stackService = stackService;
     }
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected Object getMdcContextObject() {
+        return null;
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         LOGGER.debug("Cleaning up unused UMS resources (machine users) has started.");
         Map<String, Set<String>> expectedMachineUsers = stackService
                 .findAllRunning()

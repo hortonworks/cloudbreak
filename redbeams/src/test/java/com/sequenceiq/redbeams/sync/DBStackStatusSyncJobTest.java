@@ -1,8 +1,9 @@
 package com.sequenceiq.redbeams.sync;
 
-import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.redbeams.service.stack.DBStackService;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,9 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
+
+import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackStatusSyncJobTest {
@@ -39,6 +42,9 @@ public class DBStackStatusSyncJobTest {
     @Mock
     private DBStack dbStack;
 
+    @Mock
+    private Tracer tracer;
+
     @InjectMocks
     private DBStackStatusSyncJob victim;
 
@@ -54,7 +60,7 @@ public class DBStackStatusSyncJobTest {
     public void shouldNotCallSyncWhenOtherFlowIsRunning() throws JobExecutionException {
         when(flowLogService.isOtherFlowRunning(DB_STACK_ID)).thenReturn(true);
 
-        victim.executeInternal(jobExecutionContext);
+        victim.executeTracedJob(jobExecutionContext);
 
         verifyZeroInteractions(dbStackStatusSyncService);
     }
@@ -63,7 +69,7 @@ public class DBStackStatusSyncJobTest {
     public void shouldCallSync() throws JobExecutionException {
         when(flowLogService.isOtherFlowRunning(DB_STACK_ID)).thenReturn(false);
 
-        victim.executeInternal(jobExecutionContext);
+        victim.executeTracedJob(jobExecutionContext);
 
         verify(dbStackStatusSyncService).sync(dbStack);
     }

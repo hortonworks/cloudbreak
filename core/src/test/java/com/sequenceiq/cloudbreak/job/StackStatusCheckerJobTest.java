@@ -23,6 +23,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -54,6 +56,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
+
+import io.opentracing.Tracer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackStatusCheckerJobTest {
@@ -111,6 +115,9 @@ public class StackStatusCheckerJobTest {
 
     @Before
     public void init() {
+        Tracer tracer = Mockito.mock(Tracer.class);
+        underTest = new StackStatusCheckerJob(tracer);
+        MockitoAnnotations.initMocks(this);
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn("remote:crn");
@@ -136,7 +143,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testNotRunningIfFlowInProgress() throws JobExecutionException {
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.TRUE);
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
     }
@@ -144,7 +151,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testNotRunningIfStackFailedOrBeingDeleted() throws JobExecutionException {
         setStackStatus(DetailedStackStatus.DELETE_COMPLETED);
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterApiConnectors, times(0)).getConnector(stack);
     }
@@ -152,7 +159,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncIfCMNotAccessible() throws JobExecutionException {
         setupForCMNotAccessible();
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
@@ -160,7 +167,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMNotRunning() throws JobExecutionException {
         setupForCM();
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), anySet(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
@@ -172,7 +179,7 @@ public class StackStatusCheckerJobTest {
         when(clusterStatusResult.getClusterStatus()).thenReturn(ClusterStatus.CLUSTERMANAGER_RUNNING);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), anySet(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());

@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -51,6 +50,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.flow.core.FlowLogService;
+
+import io.opentracing.Tracer;
 
 @DisallowConcurrentExecution
 @Component
@@ -87,8 +88,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    public StackStatusCheckerJob(Tracer tracer) {
+        super(tracer, "Stack Status Checker Job");
+    }
+
     @Override
-    protected void executeInternal(JobExecutionContext context) {
+    protected Object getMdcContextObject() {
+        return stackService.getById(getStackId());
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         if (flowLogService.isOtherFlowRunning(getStackId())) {
             LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for stack: {}", getStackId());
             return;
@@ -96,7 +106,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         try {
             measure(() -> {
                 Stack stack = stackService.get(getStackId());
-                buildMdcContext(stack);
                 if (unshedulableStates().contains(stack.getStatus())) {
                     LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stack.getStatus());
                     jobService.unschedule(getLocalId());
@@ -110,8 +119,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
-        } finally {
-            MDCBuilder.cleanupMdc();
         }
     }
 
@@ -191,11 +198,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             LOGGER.warn("Error during sync", e);
             syncInstances(stack, runningInstances);
         }
-    }
-
-    private void buildMdcContext(Stack stack) {
-        MDCBuilder.buildMdcContext(stack);
-        MDCBuilder.addRequestId(UUID.randomUUID().toString());
     }
 
     private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances, Collection<InstanceMetaData> failedInstances,

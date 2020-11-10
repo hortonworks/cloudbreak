@@ -41,6 +41,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StackStatusTest.TestAppContext.class)
 class StackStatusTest {
@@ -73,6 +75,9 @@ class StackStatusTest {
 
     @MockBean
     private StackUpdater stackUpdater;
+
+    @MockBean
+    private Tracer tracer;
 
     @Mock
     private FreeIpaClient freeIpaClient;
@@ -143,7 +148,7 @@ class StackStatusTest {
         stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater, never()).updateStackStatus(eq(stack), any(), any());
     }
@@ -161,7 +166,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER)
         ));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
     }
@@ -179,7 +184,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
     }
@@ -198,7 +203,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
     }
@@ -217,7 +222,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
     }
@@ -237,7 +242,7 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_3, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
     }

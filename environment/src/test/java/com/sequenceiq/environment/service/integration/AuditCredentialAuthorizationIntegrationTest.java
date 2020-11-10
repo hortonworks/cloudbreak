@@ -42,7 +42,7 @@ import com.sequenceiq.environment.credential.service.RequestProvider;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = TestConfigurationForServiceIntegration.class)
+        classes = TestConfigurationForServiceIntegration.class, properties = "info.app.version=test")
 @ActiveProfiles("test")
 public class AuditCredentialAuthorizationIntegrationTest {
 

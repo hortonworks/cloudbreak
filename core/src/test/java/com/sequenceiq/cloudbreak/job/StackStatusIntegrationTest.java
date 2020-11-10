@@ -80,6 +80,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = StackStatusIntegrationTest.TestAppContext.class)
 class StackStatusIntegrationTest {
@@ -113,6 +115,9 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private ReactorFlowManager flowManager;
+
+    @MockBean
+    private Tracer tracer;
 
     @Mock
     private ClusterStatusService clusterStatusService;
@@ -195,7 +200,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
@@ -224,7 +229,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
@@ -255,7 +260,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
         when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
@@ -287,7 +292,7 @@ class StackStatusIntegrationTest {
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
         when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());

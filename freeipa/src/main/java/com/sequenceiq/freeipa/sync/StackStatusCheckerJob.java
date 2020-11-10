@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -13,14 +12,13 @@ import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -29,6 +27,8 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+
+import io.opentracing.Tracer;
 
 @DisallowConcurrentExecution
 @Component
@@ -57,12 +57,20 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
+    public StackStatusCheckerJob(Tracer tracer) {
+        super(tracer, "Stack Status Checker Job");
+    }
+
     @Override
-    protected void executeInternal(JobExecutionContext context) {
+    protected Object getMdcContextObject() {
+        return stackService.getStackById(getStackId());
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         Long stackId = getStackId();
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         try {
-            prepareMdcContextWithStack(stack);
             if (flowLogService.isOtherFlowRunning(stackId)) {
                 LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
             } else {
@@ -71,23 +79,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             }
         } catch (InterruptSyncingException e) {
             LOGGER.info("Syncing was interrupted", e);
-        } finally {
-            MDCBuilder.cleanupMdc();
         }
     }
 
     private Long getStackId() {
         return Long.valueOf(getLocalId());
-    }
-
-    private void prepareMdcContextWithStack(Stack stack) {
-        MdcContext.builder()
-                .resourceCrn(stack.getResourceCrn())
-                .resourceName(stack.getName())
-                .resourceType("STACK")
-                .environmentCrn(stack.getEnvironmentCrn())
-                .requestId(UUID.randomUUID().toString())
-                .buildMdc();
     }
 
     public void syncAStack(Stack stack) {
@@ -109,7 +105,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
                         if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
-                            for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry: syncResult.getInstanceStatusMap().entrySet()) {
+                            for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
                                 updateInstanceStatus(entry.getKey(), entry.getValue());
                             }
                             updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
