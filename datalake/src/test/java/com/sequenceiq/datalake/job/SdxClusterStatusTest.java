@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -34,6 +35,8 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+
+import io.opentracing.Tracer;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SdxClusterStatusTest.TestAppContext.class)
@@ -54,6 +57,9 @@ class SdxClusterStatusTest {
 
     @MockBean
     private SdxStatusService sdxStatusService;
+
+    @MockBean
+    private Tracer tracer;
 
     @Mock
     private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
@@ -89,11 +95,11 @@ class SdxClusterStatusTest {
     }
 
     @Test
-    void available() {
+    void available() throws JobExecutionException {
         setUpSdxStatus(DatalakeStatusEnum.RUNNING);
         stack.setStatus(Status.AVAILABLE);
 
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
 
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(), any(), anyString(), eq(sdxCluster));
     }

@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.job;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -23,6 +22,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+
+import io.opentracing.Tracer;
 
 @DisallowConcurrentExecution
 @Component
@@ -42,8 +43,17 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private StatusCheckerJobService jobService;
 
+    public SdxClusterStatusCheckerJob(Tracer tracer) {
+        super(tracer, "SDX Cluster Status Checker");
+    }
+
     @Override
-    protected void executeInternal(JobExecutionContext context) {
+    protected SdxCluster getMdcContextObject() {
+        return sdxClusterRepository.findById(Long.valueOf(getLocalId())).orElse(null);
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         LOGGER.debug("Sdx StatusChecker Job is running for datalake: '{}'", getLocalId());
         if (unschedulable()) {
             jobService.unschedule(getLocalId());
@@ -51,13 +61,11 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             return;
         }
         handleSdxStatusChange();
-        MDCBuilder.cleanupMdc();
     }
 
     private void handleSdxStatusChange() {
         Optional<SdxCluster> cluster = sdxClusterRepository.findById(Long.valueOf(getLocalId()));
         cluster.ifPresent(sdx -> {
-            buildMdcContext(sdx);
             StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
             updateCertExpirationStateIfDifferent(sdx, stack);
             SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdx);
@@ -96,11 +104,6 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
 
     private boolean unschedulable() {
         return getRemoteResourceCrn() == null;
-    }
-
-    private void buildMdcContext(SdxCluster sdx) {
-        MDCBuilder.buildMdcContext(sdx);
-        MDCBuilder.addRequestId(UUID.randomUUID().toString());
     }
 
     private void handleAmbiguousSdx(StackStatusV4Response stack, SdxCluster sdx) {

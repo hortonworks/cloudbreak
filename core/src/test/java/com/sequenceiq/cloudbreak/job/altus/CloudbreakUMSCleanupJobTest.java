@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
+import io.opentracing.Tracer;
+
 @ExtendWith(MockitoExtension.class)
 public class CloudbreakUMSCleanupJobTest {
 
@@ -45,9 +47,12 @@ public class CloudbreakUMSCleanupJobTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
+    @Mock
+    private Tracer tracer;
+
     @BeforeEach
     public void setUp() {
-        underTest = new CloudbreakUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService);
+        underTest = new CloudbreakUMSCleanupJob(umsCleanupConfig, altusMachineUserService, stackService, tracer);
     }
 
     @Test
@@ -60,7 +65,7 @@ public class CloudbreakUMSCleanupJobTest {
         given(altusMachineUserService.getAllInternalMachineUsers("acc3")).willReturn(getMachineUsers("acc3"));
         given(umsCleanupConfig.getMaxAgeDays()).willReturn(100);
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(6)).getFluentDatabusMachineUserName(anyString(), anyString());
         verify(altusMachineUserService, times(5)).cleanupMachineUser(anyString(), anyString());
@@ -71,7 +76,7 @@ public class CloudbreakUMSCleanupJobTest {
         // GIVEN
         given(stackService.getAllAlive()).willReturn(new ArrayList<>());
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(0)).getFluentDatabusMachineUserName(anyString(), anyString());
         verify(altusMachineUserService, times(0)).cleanupMachineUser(anyString(), anyString());
@@ -84,7 +89,7 @@ public class CloudbreakUMSCleanupJobTest {
         fluentMachineUserMocks();
         given(altusMachineUserService.getAllInternalMachineUsers(anyString())).willReturn(new ArrayList<>());
         // WHEN
-        underTest.executeInternal(jobExecutionContext);
+        underTest.executeTracedJob(jobExecutionContext);
         // THEN
         verify(altusMachineUserService, times(6)).getFluentDatabusMachineUserName(anyString(), anyString());
         verify(altusMachineUserService, times(0)).cleanupMachineUser(anyString(), anyString());

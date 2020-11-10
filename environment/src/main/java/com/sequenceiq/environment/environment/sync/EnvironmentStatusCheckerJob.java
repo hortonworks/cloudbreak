@@ -1,10 +1,10 @@
 package com.sequenceiq.environment.environment.sync;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.flow.core.FlowLogService;
+
+import io.opentracing.Tracer;
 
 @DisallowConcurrentExecution
 @Component
@@ -41,7 +41,8 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
 
     public EnvironmentStatusCheckerJob(EnvironmentService environmentService, FlowLogService flowLogService,
             EnvironmentSyncService environmentSyncService, EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig) {
+            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig, Tracer tracer) {
+        super(tracer, "Environment Status Checker Job");
         this.environmentService = environmentService;
         this.flowLogService = flowLogService;
         this.environmentSyncService = environmentSyncService;
@@ -51,18 +52,21 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeInternal(JobExecutionContext context) {
+    protected Object getMdcContextObject() {
+        return environmentService.findEnvironmentById(getEnvId()).orElse(null);
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         Long envId = getEnvId();
         Optional<Environment> environmentOpt = environmentService.findEnvironmentById(envId);
         if (environmentOpt.isPresent()) {
             Environment environment = environmentOpt.get();
-            prepareMdcContext(environment);
             if (flowLogService.isOtherFlowRunning(envId)) {
                 LOGGER.info("EnvironmentStatusCheckerJob cannot run, because flow is running for environment: {}", environment.getName());
             } else {
                 syncAnEnv(environment);
             }
-            MDCBuilder.cleanupMdc();
         } else {
             environmentJobService.unschedule(envId);
             LOGGER.warn("EnvironmentStatusCheckerJob cannot run, because environment is not found with id: {}. This env is unscheduled now", envId);
@@ -96,15 +100,6 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
         } else {
             LOGGER.info("The environment status would be had to update from {} to {}", environment.getStatus(), status);
         }
-    }
-
-    private void prepareMdcContext(Environment environment) {
-        MdcContext.builder()
-                .resourceCrn(environment.getResourceCrn())
-                .resourceName(environment.getName())
-                .resourceType("ENVIRONMENT")
-                .requestId(UUID.randomUUID().toString())
-                .buildMdc();
     }
 
     private Long getEnvId() {

@@ -51,8 +51,8 @@ import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.service.RequestProvider;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
-        classes = TestConfigurationForServiceIntegration.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TestConfigurationForServiceIntegration.class,
+        properties = "info.app.version=test")
 @ActiveProfiles("test")
 public class CredentialAuthorizationIntegrationTest {
 
@@ -68,7 +68,7 @@ public class CredentialAuthorizationIntegrationTest {
 
     private static final String SECOND_USER_ID = "2";
 
-    private static final String FIRST_USER_CRN  = getUserCrn(FIRST_USER_ID, ACCOUNT_ID);
+    private static final String FIRST_USER_CRN = getUserCrn(FIRST_USER_ID, ACCOUNT_ID);
 
     private static final String SECOND_USER_CRN = getUserCrn(SECOND_USER_ID, ACCOUNT_ID);
 

@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.quartz.cleanup.job.UMSCleanupJob;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
+import io.opentracing.Tracer;
+
 @Component
 public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
 
@@ -35,15 +37,21 @@ public class CloudbreakUMSCleanupJob extends UMSCleanupJob {
 
     private final StackService stackService;
 
-    public CloudbreakUMSCleanupJob(UMSCleanupConfig umsCleanupConfig,
-            AltusMachineUserService altusMachineUserService, StackService stackService) {
+    public CloudbreakUMSCleanupJob(UMSCleanupConfig umsCleanupConfig, AltusMachineUserService altusMachineUserService,
+            StackService stackService, Tracer tracer) {
+        super(tracer, "UMS Cleanup");
         this.umsCleanupConfig = umsCleanupConfig;
         this.altusMachineUserService = altusMachineUserService;
         this.stackService = stackService;
     }
 
     @Override
-    protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
+    protected Object getMdcContextObject() {
+        return null;
+    }
+
+    @Override
+    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
         LOGGER.debug("Cleaning up unused UMS resources (machine users) has started.");
         List<Crn> allStackCrns = getAllStackCrns();
         String datalakeName = Crn.Service.DATALAKE.getName();
