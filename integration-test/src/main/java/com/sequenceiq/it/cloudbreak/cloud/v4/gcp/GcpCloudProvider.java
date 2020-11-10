@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import static java.lang.String.format;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -12,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -26,7 +23,6 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcp
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
-import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -48,7 +44,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -57,7 +52,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     private static final String JSON_CREDENTIAL_TYPE = "json";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpCloudProvider.class);
 
     @Inject
     private GcpProperties gcpProperties;
@@ -283,25 +278,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
-            try {
-                List<BaseImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
-                        .imageCatalogV4Endpoint()
-                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.GCP.name()).getBaseImages();
-
-                BaseImageV4Response baseImage = images.get(images.size() - 1);
-                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
-                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
-                Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
-                        baseImage.getUuid(), baseImage.getDescription()));
-                gcpProperties.getBaseimage().setImageId(baseImage.getUuid());
-
-                return baseImage.getUuid();
-            } catch (Exception e) {
-                LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
-                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
-            }
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name());
+            gcpProperties.getBaseimage().setImageId(imageId);
+            return imageId;
         } else {
             Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));

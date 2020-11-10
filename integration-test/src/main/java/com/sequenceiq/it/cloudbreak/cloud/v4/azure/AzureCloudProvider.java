@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 import static com.sequenceiq.it.cloudbreak.ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE;
 import static java.lang.String.format;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -350,25 +348,9 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
-            try {
-                List<BaseImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
-                        .imageCatalogV4Endpoint()
-                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.AZURE.name()).getBaseImages();
-
-                BaseImageV4Response baseImage = images.get(images.size() - 1);
-                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
-                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
-                Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
-                        baseImage.getUuid(), baseImage.getDescription()));
-                azureProperties.getBaseimage().setImageId(baseImage.getUuid());
-
-                return baseImage.getUuid();
-            } catch (Exception e) {
-                LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
-                throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
-            }
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AZURE.name());
+            azureProperties.getBaseimage().setImageId(imageId);
+            return imageId;
         } else {
             Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
             Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));

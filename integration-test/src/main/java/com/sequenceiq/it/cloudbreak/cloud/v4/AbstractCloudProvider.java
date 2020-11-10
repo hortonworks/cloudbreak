@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
 
@@ -9,8 +11,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.TestParameter;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
@@ -26,10 +30,11 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxRepairTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 public abstract class AbstractCloudProvider implements CloudProvider {
-
     private static final String DEFAULT_SUBNET_CIDR = "10.0.0.0/16";
 
     private static final String DEFAULT_ACCESS_CIDR = "0.0.0.0/0";
@@ -207,4 +212,28 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
+
+    public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform) {
+        try {
+            List<BaseImageV4Response> images = cloudbreakClient
+                    .getCloudbreakClient()
+                    .imageCatalogV4Endpoint()
+                    .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                            platform).getBaseImages();
+
+            if (images.size() == 0) {
+                throw new IllegalStateException("Images are empty, there is not any base image on provider " + platform);
+            }
+            BaseImageV4Response baseImage = images.get(images.size() - 1);
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+            Log.log(LOGGER, format(" Selected Base Image Date: %s | ID: %s | Description: %s ", baseImage.getDate(),
+                    baseImage.getUuid(), baseImage.getDescription()));
+
+            return baseImage.getUuid();
+        } catch (Exception e) {
+            LOGGER.error("Cannot fetch base images of {} image catalog, because of {}", imageCatalogTestDto.getRequest().getName(), e);
+            throw new TestFailException(" Cannot fetch base images of " + imageCatalogTestDto.getRequest().getName() + " image catalog", e);
+        }
+    }
 }
