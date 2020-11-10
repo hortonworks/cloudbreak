@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudGcsView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -283,6 +284,10 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
                     adlsGen2View.setSecure(adlsGen2Params.isSecure());
                     adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
                     return Optional.of(adlsGen2View);
+                } else if (logging.getGcs() != null) {
+                    CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
+                    cloudGcsView.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
+                    return Optional.of(cloudGcsView);
                 } else if (logging.getCloudwatch() != null) {
                     CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
                     s3View.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
