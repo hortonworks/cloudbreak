@@ -624,7 +624,6 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     private Optional<String> getCdpVersion(StackV4Response stack) {
-        Optional<String> result = Optional.empty();
         String stackName = stack.getName();
         ClusterV4Response cluster = stack.getCluster();
         if (cluster != null) {
@@ -635,21 +634,20 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 if (products != null && !products.isEmpty()) {
                     Optional<ClouderaManagerProductV4Response> cdpOpt = products.stream().filter(p -> "CDH".equals(p.getName())).findFirst();
                     if (cdpOpt.isPresent()) {
-                        result = getRuntimeVersionFromCdpVersion(cdpOpt.get().getVersion());
+                        return getRuntimeVersionFromCdpVersion(cdpOpt.get().getVersion());
                     }
                 }
             }
         }
-        return result;
+        return Optional.empty();
     }
 
     private Optional<String> getRuntimeVersionFromCdpVersion(String cdpVersion) {
-        Optional<String> result = Optional.empty();
         if (isNotEmpty(cdpVersion)) {
             LOGGER.info("Extract runtime version from CDP version: {}", cdpVersion);
-            result = Optional.of(StringUtils.substringBefore(cdpVersion, "-"));
+            return Optional.of(StringUtils.substringBefore(cdpVersion, "-"));
         }
-        return result;
+        return Optional.empty();
     }
 
     private FlowIdentifier deleteSdxCluster(SdxCluster sdxCluster, boolean forced) {

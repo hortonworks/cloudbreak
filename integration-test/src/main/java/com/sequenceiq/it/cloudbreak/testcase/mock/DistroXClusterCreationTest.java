@@ -93,6 +93,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
         createCmBlueprint(testContext);
+        createDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -149,8 +150,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
-                .when(distroXClient.postStackForBlueprint())
-                .then(DistroXClusterCreationTest::distroxClusterGeneratedBlueprintCheck)
                 .when(distroXClient.create(), key("error"))
                 .expect(BadRequestException.class, key("error").withExpectedMessage("Environment state is ENV_STOPPED instead of AVAILABLE"))
                 .validate();

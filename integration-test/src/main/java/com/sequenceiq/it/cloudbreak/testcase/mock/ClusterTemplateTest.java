@@ -96,6 +96,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
         String template = resourcePropertyProvider().getName();
         String distroxTemplate = resourcePropertyProvider().getName();
 
+        createDatalake(testContext);
+
         testContext
                 .given("clusterWithUnPw", ClusterTestDto.class)
                 .withUserName("someusername")
