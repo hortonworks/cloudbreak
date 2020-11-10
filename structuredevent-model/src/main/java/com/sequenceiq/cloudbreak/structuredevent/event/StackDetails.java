@@ -29,6 +29,10 @@ public class StackDetails implements Serializable {
 
     private String cloudPlatform;
 
+    /**
+     * @deprecated this is value is not set anymore
+     */
+    @Deprecated
     private String platformVariant;
 
     private String status;
@@ -39,10 +43,22 @@ public class StackDetails implements Serializable {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String statusReason;
 
+    /**
+     * @deprecated this is value is not set anymore, since it is a duplicated information
+     */
+    @Deprecated
     private String cloudbreakVersion;
 
+    /**
+     * @deprecated this is value is not set anymore, since it is a duplicated information
+     */
+    @Deprecated
     private String imageIdentifier;
 
+    /**
+     * @deprecated this is value is not set anymore
+     */
+    @Deprecated
     private String ambariVersion;
 
     private ImageDetails image;
@@ -51,14 +67,30 @@ public class StackDetails implements Serializable {
 
     private String clusterVersion;
 
+    /**
+     * @deprecated this is value is not set anymore, use imageDetails
+     */
+    @Deprecated
     private Boolean prewarmedImage;
 
+    /**
+     * @deprecated this is value is not set anymore, it is always considered as existing network from CB perspective
+     */
+    @Deprecated
     private Boolean existingNetwork;
 
+    /**
+     * @deprecated this is value is not set anymore, it is always considered as existing network from CB perspective
+     */
+    @Deprecated
     private Boolean existingSubnet;
 
     private List<InstanceGroupDetails> instanceGroups;
 
+    /**
+     * @deprecated this is value is not set anymore, this might be sensitive, we shall use CRN
+     */
+    @Deprecated
     private Long datalakeId;
 
     private Long datalakeResourceId;
@@ -127,6 +159,14 @@ public class StackDetails implements Serializable {
         this.cloudPlatform = cloudPlatform;
     }
 
+    public String getPlatformVariant() {
+        return platformVariant;
+    }
+
+    public void setPlatformVariant(String platformVariant) {
+        this.platformVariant = platformVariant;
+    }
+
     public String getStatus() {
         return status;
     }
@@ -151,12 +191,28 @@ public class StackDetails implements Serializable {
         this.statusReason = statusReason;
     }
 
-    public ImageDetails getImage() {
-        return image;
+    public String getCloudbreakVersion() {
+        return cloudbreakVersion;
     }
 
-    public void setImage(ImageDetails image) {
-        this.image = image;
+    public void setCloudbreakVersion(String cloudbreakVersion) {
+        this.cloudbreakVersion = cloudbreakVersion;
+    }
+
+    public String getImageIdentifier() {
+        return imageIdentifier;
+    }
+
+    public void setImageIdentifier(String imageIdentifier) {
+        this.imageIdentifier = imageIdentifier;
+    }
+
+    public String getAmbariVersion() {
+        return ambariVersion;
+    }
+
+    public void setAmbariVersion(String ambariVersion) {
+        this.ambariVersion = ambariVersion;
     }
 
     public String getClusterType() {
@@ -175,6 +231,30 @@ public class StackDetails implements Serializable {
         this.clusterVersion = clusterVersion;
     }
 
+    public Boolean getPrewarmedImage() {
+        return prewarmedImage;
+    }
+
+    public void setPrewarmedImage(Boolean prewarmedImage) {
+        this.prewarmedImage = prewarmedImage;
+    }
+
+    public Boolean getExistingNetwork() {
+        return existingNetwork;
+    }
+
+    public void setExistingNetwork(Boolean existingNetwork) {
+        this.existingNetwork = existingNetwork;
+    }
+
+    public Boolean getExistingSubnet() {
+        return existingSubnet;
+    }
+
+    public void setExistingSubnet(Boolean existingSubnet) {
+        this.existingSubnet = existingSubnet;
+    }
+
     public List<InstanceGroupDetails> getInstanceGroups() {
         return instanceGroups;
     }
@@ -183,11 +263,27 @@ public class StackDetails implements Serializable {
         this.instanceGroups = instanceGroups;
     }
 
+    public Long getDatalakeId() {
+        return datalakeId;
+    }
+
+    public void setDatalakeId(Long datalakeId) {
+        this.datalakeId = datalakeId;
+    }
+
     public Long getDatalakeResourceId() {
         return datalakeResourceId;
     }
 
     public void setDatalakeResourceId(Long datalakeResourceId) {
         this.datalakeResourceId = datalakeResourceId;
+    }
+
+    public ImageDetails getImage() {
+        return image;
+    }
+
+    public void setImage(ImageDetails image) {
+        this.image = image;
     }
 }
