@@ -54,6 +54,14 @@ public class LoggingUsageReporter implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpTelemetryEvent(UsageProto.CDPTelemetryEvent details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpTelemetryEvent(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

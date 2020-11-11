@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -53,6 +54,9 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Inject
     private StackService stackService;
 
+    @Inject
+    private UsageLoggingUtil usageLoggingUtil;
+
     @Override
     public void create(StructuredEvent structuredEvent) {
         StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
@@ -69,6 +73,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
         resource.setWorkspace(workspace);
         LOGGER.info("Stored StructuredEvent type: {}, payload: {}", resource.getEventType().name(), resource.getStructuredEventJson().getValue());
+        usageLoggingUtil.logTelemetryEvent(resource);
         return repository().save(resource);
     }
 

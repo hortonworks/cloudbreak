@@ -51,4 +51,11 @@ public interface UsageReporter {
      */
     void cdpDatalakeClusterStatusChanged(
             UsageProto.CDPDatalakeClusterStatusChanged details);
+
+    /**
+     * Reports that a CDP telemetry event has happened.
+     * @param details the event details
+     */
+    void cdpTelemetryEvent(
+            UsageProto.CDPTelemetryEvent details);
 }

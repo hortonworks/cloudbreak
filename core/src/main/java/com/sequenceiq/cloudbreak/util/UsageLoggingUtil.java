@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.util;
 
+import javax.annotation.Nullable;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.usage.LoggingUsageReporter;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.cloudbreak.workspace.model.User;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.Nullable;
 
 /**
  * Utility class for logging usage events.
@@ -102,6 +104,19 @@ public class UsageLoggingUtil {
                     .build();
             usageReporter.cdpDatalakeClusterStatusChanged(proto);
         }
+    }
+
+    /**
+     * Log structured events.
+     * @param resource StructuredEventEntity contains information about the structured event that will be logged.
+     */
+    public void logTelemetryEvent(StructuredEventEntity resource) {
+        UsageProto.CDPTelemetryEvent proto = UsageProto.CDPTelemetryEvent.newBuilder()
+                .setEventType(resource.getEventType().name())
+                .setEventSource(resource.getResourceType())
+                .setEventDetails(resource.getStructuredEventJson().getValue())
+                .build();
+        usageReporter.cdpTelemetryEvent(proto);
     }
 
     private void buildDatalakeRequestedProto(
