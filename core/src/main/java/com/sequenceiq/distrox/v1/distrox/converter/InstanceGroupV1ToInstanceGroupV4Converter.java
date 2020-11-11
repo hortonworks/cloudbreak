@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.SecurityRuleUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -44,6 +45,9 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
 
     private InstanceGroupV4Request convert(InstanceGroupV1Request source, DetailedEnvironmentResponse environment) {
         InstanceGroupV4Request response = new InstanceGroupV4Request();
+        if (InstanceGroupType.GATEWAY == source.getType() && source.getNodeCount() != 1) {
+            throw new BadRequestException("Instance group with GATEWAY type must contain 1 node!");
+        }
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
         response.setCloudPlatform(source.getCloudPlatform());
@@ -101,7 +105,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
     private List<String> getPorts(InstanceGroupType type) {
         List<String> ret = new ArrayList<>();
         ret.add("22");
-        if (type == InstanceGroupType.GATEWAY) {
+        if (InstanceGroupType.GATEWAY == type) {
             ret.add("443");
         }
         return ret;
@@ -111,7 +115,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         String securityGroupIdForKnox = securityAccess.getSecurityGroupIdForKnox();
         String defaultSecurityGroupId = securityAccess.getDefaultSecurityGroupId();
         String cidrs = securityAccess.getCidr();
-        if (type == InstanceGroupType.GATEWAY) {
+        if (InstanceGroupType.GATEWAY == type) {
             setSecurityAccess(securityGroup, securityGroupIdForKnox, cidrs);
         } else {
             setSecurityAccess(securityGroup, defaultSecurityGroupId, cidrs);
