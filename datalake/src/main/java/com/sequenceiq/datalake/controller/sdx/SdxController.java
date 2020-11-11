@@ -265,9 +265,10 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
-    public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
+    public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
+                                                            String restoreId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, backupId, backupLocation);
+        return sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
     }
 
     @Override

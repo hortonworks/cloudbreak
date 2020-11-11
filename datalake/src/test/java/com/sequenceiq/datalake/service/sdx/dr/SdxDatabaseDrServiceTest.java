@@ -38,6 +38,8 @@ public class SdxDatabaseDrServiceTest {
 
     private static final String BACKUPID = UUID.randomUUID().toString();
 
+    private static final String RESTOREID = UUID.randomUUID().toString();
+
     private static final String BACKUPLOCATION = "location/of/backup";
 
     private static final String DBHOST = "loclhost";
@@ -91,11 +93,12 @@ public class SdxDatabaseDrServiceTest {
     @Test
     public void triggerDatabaseRestoreSuccess() {
         when(sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(Mockito.any(DatalakeDatabaseRestoreStartEvent.class))).thenReturn(flowIdentifier);
-        SdxDatabaseRestoreResponse restoreResponse = sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, BACKUPID, BACKUPLOCATION);
+        SdxDatabaseRestoreResponse restoreResponse = sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, BACKUPID, RESTOREID, BACKUPLOCATION);
         Assert.assertEquals(flowIdentifier, restoreResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseRestoreFlow(eventArgumentCaptor.capture());
         Assert.assertEquals(BACKUPID, eventArgumentCaptor.getValue().getBackupId());
+        Assert.assertEquals(RESTOREID, eventArgumentCaptor.getValue().getRestoreId());
         Assert.assertEquals(BACKUPLOCATION, eventArgumentCaptor.getValue().getBackupLocation());
         Assert.assertEquals(userCrn, eventArgumentCaptor.getValue().getUserId());
         Assert.assertEquals(sdxCluster.getId(), eventArgumentCaptor.getValue().getResourceId());
