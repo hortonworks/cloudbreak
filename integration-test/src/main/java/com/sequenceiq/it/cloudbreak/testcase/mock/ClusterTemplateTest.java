@@ -36,9 +36,8 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class ClusterTemplateTest extends AbstractIntegrationTest {
+public class ClusterTemplateTest extends AbstractMockTest {
 
     private static final String IMAGE_CATALOG_ID = "f6e778fc-7f17-4535-9021-515351df3691";
 

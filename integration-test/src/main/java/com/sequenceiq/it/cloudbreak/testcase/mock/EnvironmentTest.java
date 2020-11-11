@@ -25,9 +25,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class EnvironmentTest extends AbstractIntegrationTest {
+public class EnvironmentTest extends AbstractMockTest {
 
     private static final Set<String> INVALID_REGION = new HashSet<>(Collections.singletonList("MockRegion"));
 

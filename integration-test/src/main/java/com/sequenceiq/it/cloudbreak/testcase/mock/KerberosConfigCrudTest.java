@@ -10,9 +10,8 @@ import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class KerberosConfigCrudTest extends AbstractIntegrationTest {
+public class KerberosConfigCrudTest extends AbstractMockTest {
 
     @Inject
     private KerberosTestClient kerberosTestClient;

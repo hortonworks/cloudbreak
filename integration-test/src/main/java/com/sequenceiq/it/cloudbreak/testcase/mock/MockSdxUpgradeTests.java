@@ -27,11 +27,10 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class MockSdxUpgradeTests extends AbstractIntegrationTest {
+public class MockSdxUpgradeTests extends AbstractMockTest {
 
     @Inject
     private RedbeamsDatabaseServerTestClient redbeamsDatabaseServerTestClient;

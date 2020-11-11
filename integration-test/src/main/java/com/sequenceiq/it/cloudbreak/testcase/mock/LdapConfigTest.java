@@ -16,9 +16,8 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class LdapConfigTest extends AbstractIntegrationTest {
+public class LdapConfigTest extends AbstractMockTest {
 
     private static final String INVALID_LDAP_NAME = "a-@#$%%|:&*;";
 

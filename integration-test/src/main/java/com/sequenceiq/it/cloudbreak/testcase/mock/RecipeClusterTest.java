@@ -40,11 +40,10 @@ import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
-public class RecipeClusterTest extends AbstractIntegrationTest {
+public class RecipeClusterTest extends AbstractMockTest {
 
     private static final int NODE_COUNT = 3;
 

@@ -11,9 +11,8 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class ShowStackCliRequestTest extends AbstractIntegrationTest {
+public class ShowStackCliRequestTest extends AbstractMockTest {
 
     @Inject
     private StackTestClient stackTestClient;

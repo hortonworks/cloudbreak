@@ -16,10 +16,9 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
-public class RedbeamsDatabaseServerTest extends AbstractIntegrationTest {
+public class RedbeamsDatabaseServerTest extends AbstractMockTest {
 
     @Inject
     private RedbeamsDatabaseServerTestClient redbeamsDatabaseServerTest;

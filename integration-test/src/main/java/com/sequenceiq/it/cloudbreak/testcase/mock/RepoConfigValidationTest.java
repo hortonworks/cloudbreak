@@ -13,9 +13,8 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class RepoConfigValidationTest extends AbstractIntegrationTest {
+public class RepoConfigValidationTest extends AbstractMockTest {
 
     private static final String DATA_PROVIDER_FOR_REPO_CONFIG_TEST = "contextAndTestData";
 

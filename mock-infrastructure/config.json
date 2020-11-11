@@ -1,0 +1,9 @@
+{
+  "sourceFolder": "src/generated",
+  "modelPackage" : "com.sequenceiq.mock.swagger.model",
+  "apiPackage" : "com.sequenceiq.mock.swagger.CM_VERSION.api",
+  "interfaceOnly": true,
+  "useTags": true,
+  "dateLibrary": "java8-instant",
+  "xdefaultInterfaces": false
+}

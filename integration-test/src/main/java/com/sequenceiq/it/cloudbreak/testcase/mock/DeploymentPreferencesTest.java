@@ -11,9 +11,8 @@ import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class DeploymentPreferencesTest extends AbstractIntegrationTest {
+public class DeploymentPreferencesTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;

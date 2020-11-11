@@ -99,8 +99,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
+        renewTestAndSetup(data, testResult);
         setupTest(testResult);
         setupTest((TestContext) data[0]);
+    }
+
+    protected void renewTestAndSetup(Object[] data, ITestResult testResult) {
+
     }
 
     protected void setupTest(ITestResult testResult) {

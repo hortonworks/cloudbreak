@@ -26,9 +26,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class EnvironmentChildTest extends AbstractIntegrationTest {
+public class EnvironmentChildTest extends AbstractMockTest {
 
     private static final String PARENT_ENVIRONMENT = "parent";
 

@@ -15,9 +15,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class FreeIpaCreationTest extends AbstractIntegrationTest {
+public class FreeIpaCreationTest extends AbstractMockTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;

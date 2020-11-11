@@ -12,10 +12,9 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.spark.StatefulRoute;
 
-public class RecoveryItTest extends AbstractIntegrationTest {
+public class RecoveryItTest extends AbstractMockTest {
 
     private static final String HOSTS = "/api/v1/hosts";
 

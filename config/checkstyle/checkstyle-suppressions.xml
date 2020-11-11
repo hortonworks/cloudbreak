@@ -40,6 +40,7 @@
     <suppress files="com[\\/]sequenceiq[\\/]environment[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]flow[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]it[\\/]" checks="ExecutableStatementCount"/>
+    <suppress files="com[\\/]sequenceiq[\\/]mock[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="client[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="api[\\/]" checks="ExecutableStatementCount"/>
 

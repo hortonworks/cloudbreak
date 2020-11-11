@@ -1,8 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
-
-public class BlueprintTestBase extends AbstractIntegrationTest {
+public class BlueprintTestBase extends AbstractMockTest {
 
     private static final String VALID_CM_BP = "{\"cdhVersion\":\"7.0.1\",\"displayName\":\"datamart\",\"services\":[{\"refName\":\"hdfs\",\"serviceType\":" +
             "\"HDFS\",\"roleConfigGroups\":[{\"refName\":\"hdfs-NAMENODE-BASE\",\"roleType\":\"NAMENODE\",\"base\":true},{\"refName\":\"" +

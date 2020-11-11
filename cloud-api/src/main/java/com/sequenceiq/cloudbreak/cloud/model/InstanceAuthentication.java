@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class InstanceAuthentication extends DynamicModel {
@@ -10,7 +12,10 @@ public class InstanceAuthentication extends DynamicModel {
 
     private final String loginUserName;
 
-    public InstanceAuthentication(String publicKey, String publicKeyId, String loginUserName) {
+    @JsonCreator
+    public InstanceAuthentication(@JsonProperty("publicKey") String publicKey,
+            @JsonProperty("publicKeyId") String publicKeyId,
+            @JsonProperty("loginUserName") String loginUserName) {
         this.publicKey = publicKey;
         this.publicKeyId = publicKeyId;
         this.loginUserName = loginUserName;

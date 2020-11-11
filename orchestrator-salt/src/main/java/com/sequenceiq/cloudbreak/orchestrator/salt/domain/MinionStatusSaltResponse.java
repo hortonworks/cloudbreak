@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class MinionStatusSaltResponse {
@@ -10,12 +11,14 @@ public class MinionStatusSaltResponse {
     @JsonProperty("return")
     private List<MinionStatus> result;
 
+    @JsonIgnore
     public List<String> upMinions() {
         return result.stream()
                 .flatMap(minionStatus -> minionStatus.getUp().stream())
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     public List<String> downMinions() {
         return result.stream()
                 .flatMap(minionStatus -> minionStatus.getDown().stream())

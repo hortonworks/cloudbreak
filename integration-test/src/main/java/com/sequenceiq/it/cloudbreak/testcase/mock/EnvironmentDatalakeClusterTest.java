@@ -23,9 +23,8 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
+public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
 
     private static final Set<String> VALID_REGION = new HashSet<>(Collections.singletonList("Europe"));
 
@@ -73,7 +72,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractIntegrationTest {
 
                 .when(stackTestClient.createV4())
                 .when(stackTestClient.deleteV4(), RunningParameter.withoutLogError())
-                .await(AbstractIntegrationTest.STACK_DELETED)
+                .await(AbstractMockTest.STACK_DELETED)
 
                 .given(EnvironmentTestDto.class)
                 .withName(testContext.get(EnvironmentTestDto.class).getName())

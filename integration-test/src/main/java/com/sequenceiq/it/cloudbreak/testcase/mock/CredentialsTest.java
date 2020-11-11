@@ -10,10 +10,9 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
-public class CredentialsTest extends AbstractIntegrationTest {
+public class CredentialsTest extends AbstractMockTest {
 
     @Inject
     private CredentialTestClient credentialTestClient;

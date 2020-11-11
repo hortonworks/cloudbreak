@@ -26,10 +26,9 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-public class EnvironmentStartStopTest extends AbstractIntegrationTest {
+public class EnvironmentStartStopTest extends AbstractMockTest {
 
     private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
@@ -71,6 +70,7 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         setUpFreeIpaRouteStubbing(testContext);
         setUpFreeIpaHealthCheckRouteStubbing(testContext);
+        getFreeIpaHealthCheckHandler().setHealthy();
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)

@@ -13,9 +13,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class StackMatrixTest extends AbstractIntegrationTest {
+public class StackMatrixTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;
