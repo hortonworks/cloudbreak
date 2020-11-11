@@ -170,6 +170,7 @@ cb:
       services: postgresqlServer
     app.creation.template:
       command.path: templates/app-creation-command.ftl
+      command.audit.path: templates/app-audit-creation-command.ftl
       json.path: templates/app-creation.json
       resource:
         app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
