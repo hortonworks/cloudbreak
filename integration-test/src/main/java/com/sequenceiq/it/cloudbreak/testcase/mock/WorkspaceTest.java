@@ -24,9 +24,8 @@ import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class WorkspaceTest extends AbstractIntegrationTest {
+public class WorkspaceTest extends AbstractMockTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WorkspaceTest.class);
 

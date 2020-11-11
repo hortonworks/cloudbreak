@@ -13,9 +13,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class VersionCheckTest extends AbstractIntegrationTest {
+public class VersionCheckTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;

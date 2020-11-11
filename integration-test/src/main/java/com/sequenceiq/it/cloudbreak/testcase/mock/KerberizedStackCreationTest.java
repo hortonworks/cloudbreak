@@ -23,10 +23,9 @@ import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 
-public class KerberizedStackCreationTest extends AbstractIntegrationTest {
+public class KerberizedStackCreationTest extends AbstractMockTest {
 
     @Inject
     private KerberosTestClient kerberosTestClient;

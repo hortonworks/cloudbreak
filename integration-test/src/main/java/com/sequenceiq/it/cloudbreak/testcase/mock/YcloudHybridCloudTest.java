@@ -48,11 +48,10 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
-public class YcloudHybridCloudTest extends AbstractIntegrationTest {
+public class YcloudHybridCloudTest extends AbstractMockTest {
 
     private static final String CHILD_ENVIRONMENT = "childEnvironment";
 

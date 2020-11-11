@@ -18,11 +18,10 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 // import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
 
-public class DatabaseTest extends AbstractIntegrationTest {
+public class DatabaseTest extends AbstractMockTest {
 
     private static final String DB_TYPE_PROVIDER = "databaseTypeTestProvider";
 

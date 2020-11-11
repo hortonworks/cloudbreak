@@ -5,10 +5,10 @@ import java.io.IOException;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.it.util.ResourceUtil;
 
-public abstract class AbstractClouderaManagerTest extends AbstractIntegrationTest {
+public abstract class AbstractClouderaManagerTest extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {

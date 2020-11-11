@@ -32,9 +32,8 @@ import com.sequenceiq.it.cloudbreak.mock.ambari.AmbariGetHostComponentsReponse;
 import com.sequenceiq.it.cloudbreak.mock.ambari.AmbariGetServiceComponentInfoResponse;
 import com.sequenceiq.it.cloudbreak.mock.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class RepairTest extends AbstractIntegrationTest {
+public class RepairTest extends AbstractMockTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(RepairTest.class);
 
     private static final int HTTP_CREATED = 201;

@@ -22,9 +22,8 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class LdapClusterTest extends AbstractIntegrationTest {
+public class LdapClusterTest extends AbstractMockTest {
 
     @Inject
     private LdapTestClient ldapTestClient;

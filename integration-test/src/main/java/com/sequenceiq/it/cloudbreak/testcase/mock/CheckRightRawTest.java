@@ -11,9 +11,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.RawCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class CheckRightRawTest extends AbstractIntegrationTest {
+public class CheckRightRawTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;

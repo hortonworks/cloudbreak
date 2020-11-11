@@ -11,9 +11,8 @@ import com.sequenceiq.it.cloudbreak.action.stack.StackTestAction;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class ClusterCreationTest extends AbstractIntegrationTest {
+public class ClusterCreationTest extends AbstractMockTest {
 
     @BeforeMethod
     public void beforeMethod(Object[] data) {

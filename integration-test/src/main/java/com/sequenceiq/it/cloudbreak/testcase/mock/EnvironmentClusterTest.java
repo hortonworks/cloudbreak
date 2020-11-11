@@ -22,9 +22,8 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class EnvironmentClusterTest extends AbstractIntegrationTest {
+public class EnvironmentClusterTest extends AbstractMockTest {
 
     private static final String NEW_CREDENTIAL_KEY = "newCred";
 

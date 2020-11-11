@@ -42,10 +42,9 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 
-public class SharedServiceTest extends AbstractIntegrationTest {
+public class SharedServiceTest extends AbstractMockTest {
 
     private static final String SHARED_SERVICE_TAG = "shared_services_ready";
 

@@ -20,9 +20,8 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class RecipeTest extends AbstractIntegrationTest {
+public class RecipeTest extends AbstractMockTest {
 
     @Inject
     private RecipeTestClient recipeTestClient;

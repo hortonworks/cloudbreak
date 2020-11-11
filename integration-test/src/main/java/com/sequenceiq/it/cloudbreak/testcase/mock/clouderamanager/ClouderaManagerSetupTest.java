@@ -11,9 +11,9 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 
-public class ClouderaManagerSetupTest extends AbstractIntegrationTest {
+public class ClouderaManagerSetupTest extends AbstractMockTest {
 
     @Inject
     private StackTestClient stackTestClient;

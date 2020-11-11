@@ -34,11 +34,10 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
 import spark.Route;
 
-public class KerberosConfigTest extends AbstractIntegrationTest {
+public class KerberosConfigTest extends AbstractMockTest {
 
     private static final String LDAP_SYNC_PATH = "/api/v1/ldap_sync_events";
 

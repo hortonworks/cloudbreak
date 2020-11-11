@@ -11,10 +11,9 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.ShowBlueprintUtil;
 
-public class ShowBlueprintTest extends AbstractIntegrationTest {
+public class ShowBlueprintTest extends AbstractMockTest {
 
     @Inject
     private StackTestClient stackTestClient;

@@ -14,9 +14,8 @@ import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class ProxyConfigTest extends AbstractIntegrationTest {
+public class ProxyConfigTest extends AbstractMockTest {
 
     private static final String INVALID_PROXY_NAME = "a-@#$%|:&*;";
 

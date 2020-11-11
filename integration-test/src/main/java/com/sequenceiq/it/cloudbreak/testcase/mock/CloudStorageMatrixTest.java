@@ -12,9 +12,8 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class CloudStorageMatrixTest extends AbstractIntegrationTest {
+public class CloudStorageMatrixTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;

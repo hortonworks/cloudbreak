@@ -9,9 +9,8 @@ import com.sequenceiq.it.cloudbreak.client.NotificationTestingTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.NotificationTestingTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class NotificationTestingTest extends AbstractIntegrationTest {
+public class NotificationTestingTest extends AbstractMockTest {
 
     @Inject
     private NotificationTestingTestClient notificationTestingTestClient;

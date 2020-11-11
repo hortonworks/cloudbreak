@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CloudVmInstanceStatus {
 
     private final CloudInstance cloudInstance;
@@ -10,7 +13,10 @@ public class CloudVmInstanceStatus {
 
     private final String statusReason;
 
-    public CloudVmInstanceStatus(CloudInstance cloudInstance, InstanceStatus status, String statusReason) {
+    @JsonCreator
+    public CloudVmInstanceStatus(@JsonProperty("cloudInstance") CloudInstance cloudInstance,
+            @JsonProperty("status") InstanceStatus status,
+            @JsonProperty("statusReason") String statusReason) {
         this.cloudInstance = cloudInstance;
         this.status = status;
         this.statusReason = statusReason;

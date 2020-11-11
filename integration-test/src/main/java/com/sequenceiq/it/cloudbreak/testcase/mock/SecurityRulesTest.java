@@ -13,9 +13,8 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class SecurityRulesTest extends AbstractIntegrationTest {
+public class SecurityRulesTest extends AbstractMockTest {
 
     private static final String DATA_PROVIDER_FOR_SECURITY_RULES_TEST = "contextAndBoolean";
 

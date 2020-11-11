@@ -20,9 +20,8 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class TerminationTest extends AbstractIntegrationTest {
+public class TerminationTest extends AbstractMockTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TerminationTest.class);
 
