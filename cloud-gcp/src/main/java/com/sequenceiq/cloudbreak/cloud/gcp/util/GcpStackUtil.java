@@ -34,6 +34,7 @@ import com.google.api.services.compute.Compute.ZoneOperations;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
+import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.OperationError;
 import com.google.api.services.storage.Storage;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.FileSystemType;
 
 public final class GcpStackUtil {
 
@@ -99,9 +101,23 @@ public final class GcpStackUtil {
 
     private static final int MIN_PATH_PARTS = 3;
 
-    private static final int FIRST = 1;
+    private static final int FIRST = 0;
 
     private GcpStackUtil() {
+    }
+
+    public static Iam buildIam(CloudCredential gcpCredential) {
+        try {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
+            return new Iam.Builder(
+                    httpTransport, JSON_FACTORY, null).setApplicationName(gcpCredential.getName())
+                    .setHttpRequestInitializer(credential)
+                    .build();
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred while building Google Compute access.", e);
+            throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
+        }
     }
 
     public static Compute buildCompute(CloudCredential gcpCredential) {
@@ -315,7 +331,7 @@ public final class GcpStackUtil {
     }
 
     public static String getBucketName(String objectStorageLocation) {
-        String[] parts = createParts(objectStorageLocation);
+        String[] parts = createParts(objectStorageLocation.replaceAll(FileSystemType.GCS.getProtocol() + "://", ""));
         if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
             return parts[FIRST];
         } else {
