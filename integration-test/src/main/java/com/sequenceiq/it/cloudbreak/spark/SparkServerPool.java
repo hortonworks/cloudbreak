@@ -8,7 +8,6 @@ import java.io.OutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.PreDestroy;
 
@@ -23,25 +22,14 @@ public class SparkServerPool {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SparkServerPool.class);
 
-    private static final AtomicInteger NEXT_PORT = new AtomicInteger(9400);
-
     private final BlockingQueue<SparkServer> secureServers;
-
-    private final BlockingQueue<SparkServer> insecureServers;
 
     private final String endpoint;
 
-    private final boolean printRequestBody;
-
     public SparkServerPool(int initialSparkPoolSize, boolean printRequestBody, String endpoint) {
-        this.printRequestBody = printRequestBody;
         this.endpoint = endpoint;
         secureServers = new LinkedBlockingQueue<>(initialSparkPoolSize);
-        insecureServers = new LinkedBlockingQueue<>(initialSparkPoolSize);
-        for (int i = 0; i < initialSparkPoolSize; i++) {
-            initializeSpark(secureServers, true);
-            initializeSpark(insecureServers, false);
-        }
+        initializeSpark(secureServers);
     }
 
     private File getKeyStore() {
@@ -70,24 +58,15 @@ public class SparkServerPool {
         LOGGER.info("Secure spark server put back. Pool size: {}", secureServers.size());
     }
 
-    public SparkServer popInsecure() {
-        return popServer(insecureServers);
-    }
-
-    public void putInsecure(SparkServer sparkServer) {
-        putBack(sparkServer, insecureServers);
-        LOGGER.info("Insecure spark server put back. Pool size: {}", secureServers.size());
-    }
-
     private SparkServer popServer(BlockingQueue<SparkServer> servers) {
         long start = System.currentTimeMillis();
-        LOGGER.info("Spark server popping. Queue size: {}", servers.size());
+//        LOGGER.info("Spark server popping. Queue size: {}", servers.size());
         SparkServer sparkServer;
         try {
-            sparkServer = servers.poll(10, TimeUnit.MINUTES);
-            if (sparkServer == null) {
-                throw new TestFailException("Can't take spark server from pool in time");
-            }
+            sparkServer = servers.poll(1, TimeUnit.SECONDS);
+//            if (sparkServer == null) {
+//                throw new TestFailException("Can't take spark server from pool in time");
+//            }
         } catch (InterruptedException e) {
             LOGGER.error("Can't pop spark server", e);
             throw new TestFailException("Can't take spark server from pool", e);
@@ -101,9 +80,9 @@ public class SparkServerPool {
         return sparkServer;
     }
 
-    private void initializeSpark(BlockingQueue<SparkServer> servers, boolean secure) {
+    private void initializeSpark(BlockingQueue<SparkServer> servers) {
         LOGGER.info("Initialize spark server. queue size: {}", servers.size());
-        SparkServer server = new SparkServer(NEXT_PORT.incrementAndGet(), getKeyStore(), endpoint, printRequestBody, secure);
+        SparkServer server = new SparkServer(endpoint);
         servers.add(server);
     }
 
