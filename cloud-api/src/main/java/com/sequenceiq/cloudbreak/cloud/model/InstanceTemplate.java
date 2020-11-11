@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -60,15 +58,8 @@ public class InstanceTemplate extends DynamicModel {
 
     private final String imageId;
 
-    @JsonCreator
-    public InstanceTemplate(@JsonProperty("flavor") String flavor,
-            @JsonProperty("groupName") String groupName,
-            @JsonProperty("privateId") Long privateId,
-            @JsonProperty("volumes") Collection<Volume> volumes,
-            @JsonProperty("status") InstanceStatus status,
-            @JsonProperty("parameters") Map<String, Object> parameters,
-            @JsonProperty("templateId") Long templateId,
-            @JsonProperty("imageId") String imageId) {
+    public InstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status, Map<String, Object> parameters,
+            Long templateId, String imageId) {
         super(parameters);
         this.flavor = flavor;
         this.templateId = templateId;

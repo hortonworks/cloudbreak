@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.REGISTER_PUBIC_KEY
 import static com.sequenceiq.it.cloudbreak.mock.model.SPIMock.UNREGISTER_PUBIC_KEY;
 
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
-import com.sequenceiq.it.cloudbreak.dto.mock.answer.BooleanRequestAnswer;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.StringRequestAnswer;
 
 public final class SpiEndpoints {
@@ -24,8 +23,8 @@ public final class SpiEndpoints {
         StringRequestAnswer<String> post();
     }
 
-    @SparkUri(url = MOCK_ROOT + "/get_public_key/{publicKeyId}")
+    @SparkUri(url = MOCK_ROOT + "/get_public_key/:publicKeyId")
     public interface GetPublicKey {
-        BooleanRequestAnswer<Boolean> get();
+        StringRequestAnswer<String> get();
     }
 }

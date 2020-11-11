@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -19,7 +18,6 @@ public class MinionFingersOnMasterResponse {
     @JsonProperty("return")
     private List<Map<String, JsonNode>> result;
 
-    @JsonIgnore
     public Map<String, String> getUnacceptedMinions() {
         Optional<JsonNode> minionsWithFingerprint = mapToMinionsWithFingerprint();
         if (minionsWithFingerprint.isPresent()) {

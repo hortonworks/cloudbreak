@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class RunnerInfo {
 
     private String stateId;
@@ -49,7 +47,6 @@ public class RunnerInfo {
         return String.valueOf(changes.get("stdout"));
     }
 
-    @JsonIgnore
     public Map<String, String> getErrorResultSummary() {
         String stdout = getStdout();
         String stderr = getStderr();

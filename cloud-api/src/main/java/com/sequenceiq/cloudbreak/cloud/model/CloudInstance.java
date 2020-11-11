@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class CloudInstance extends DynamicModel {
@@ -27,11 +25,7 @@ public class CloudInstance extends DynamicModel {
         this.authentication = authentication;
     }
 
-    @JsonCreator
-    public CloudInstance(@JsonProperty("instanceId") String instanceId,
-            @JsonProperty("template") InstanceTemplate template,
-            @JsonProperty("authentication") InstanceAuthentication authentication,
-            @JsonProperty("params") Map<String, Object> params) {
+    public CloudInstance(String instanceId, InstanceTemplate template, InstanceAuthentication authentication, Map<String, Object> params) {
         super(params);
         this.instanceId = instanceId;
         this.template = template;

@@ -1,17 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CloudVmMetaDataStatus {
 
     private final CloudVmInstanceStatus cloudVmInstanceStatus;
 
     private final CloudInstanceMetaData metaData;
 
-    @JsonCreator
-    public CloudVmMetaDataStatus(@JsonProperty("cloudVmInstanceStatus") CloudVmInstanceStatus cloudVmInstanceStatus,
-            @JsonProperty("metaData") CloudInstanceMetaData metaData) {
+    public CloudVmMetaDataStatus(CloudVmInstanceStatus cloudVmInstanceStatus, CloudInstanceMetaData metaData) {
         this.cloudVmInstanceStatus = cloudVmInstanceStatus;
         this.metaData = metaData;
     }

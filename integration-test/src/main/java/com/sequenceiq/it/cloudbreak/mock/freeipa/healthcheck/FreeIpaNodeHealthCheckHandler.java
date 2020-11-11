@@ -1,12 +1,9 @@
 package com.sequenceiq.it.cloudbreak.mock.freeipa.healthcheck;
 
-import javax.inject.Inject;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 
 import spark.Request;
@@ -15,27 +12,28 @@ import spark.Response;
 @Component
 public class FreeIpaNodeHealthCheckHandler extends ITResponse {
 
-    private CheckResult result = new CheckResult();
+    private CheckResult result;
 
-    private HttpStatus status = HttpStatus.OK;
+    private HttpStatus status;
 
-    @Inject
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+    public FreeIpaNodeHealthCheckHandler() {
+        setHealthy();
+    }
 
     public void setHealthy() {
-        setStatusOfFreeipa(HttpStatus.OK);
+        status = HttpStatus.OK;
+        result = new CheckResult();
+        result.setHost("host");
+        result.setStatus("healthy");
     }
 
     public void setUnreachable() {
-        setStatusOfFreeipa(HttpStatus.SERVICE_UNAVAILABLE);
-    }
-
-    private void setStatusOfFreeipa(HttpStatus status) {
-        executeQueryToMockInfrastructure.call("/ipa/status/configure", w -> w.queryParam("status", status.name()));
+        status = HttpStatus.SERVICE_UNAVAILABLE;
+        result = null;
     }
 
     @Override
-    public Object handle(Request request, Response response) {
+    public Object handle(Request request, Response response) throws Exception {
         response.status(status.value());
         if (result == null) {
             return "";
