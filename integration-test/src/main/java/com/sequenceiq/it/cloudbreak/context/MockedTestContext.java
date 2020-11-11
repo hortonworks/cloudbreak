@@ -29,8 +29,8 @@ public class MockedTestContext extends TestContext implements MockTestContext {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockedTestContext.class);
 
-    @Value("${mock.infrastructure.host:localhost}")
-    private String mockInfrastructureHost;
+    @Value("${mock.server.address:localhost}")
+    private String mockServerAddress;
 
     @Inject
     private SparkServerPool sparkServerPool;
@@ -59,7 +59,7 @@ public class MockedTestContext extends TestContext implements MockTestContext {
         if (model == null) {
             LOGGER.info("Model is null, initialize it");
             model = new DefaultModel();
-            model.startModel(null, mockInfrastructureHost, ThreadLocalProfiles.getActiveProfiles());
+            model.startModel(getSparkServer().getSparkService(), mockServerAddress, ThreadLocalProfiles.getActiveProfiles());
         }
     }
 
@@ -67,17 +67,14 @@ public class MockedTestContext extends TestContext implements MockTestContext {
     public SparkServer getSparkServer() {
         initSparkServerIfNecessary();
         initImageCatalogIfNecessary(commonClusterManagerProperties().getRuntimeVersion());
-        // only for ports, will be removed
-        return new SparkServer(mockInfrastructureHost);
+        return sparkServer;
     }
 
     private void initSparkServerIfNecessary() {
         if (sparkServer == null) {
             LOGGER.info("Creating spark server for Test Context: {}", this);
-//            sparkServer = sparkServerPool.popSecure();
-//            if (sparkServer != null) {
-//                LOGGER.info("MockedTestContext got spark server: {}", sparkServer.getEndpoint());
-//            }
+            sparkServer = sparkServerPool.popSecure();
+            LOGGER.info("MockedTestContext got spark server: {}", sparkServer.getEndpoint());
         }
     }
 
@@ -128,9 +125,7 @@ public class MockedTestContext extends TestContext implements MockTestContext {
 
     @PreDestroy
     public void preDestroy() {
-        if (sparkServer != null) {
-            LOGGER.info("MockedTestContext destroyed. {}", sparkServer.getEndpoint());
-        }
+        LOGGER.info("MockedTestContext destroyed. {}", sparkServer.getEndpoint());
         cleanupTestContext();
     }
 }

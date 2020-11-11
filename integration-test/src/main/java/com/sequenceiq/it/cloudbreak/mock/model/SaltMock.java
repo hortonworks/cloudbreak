@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -53,8 +55,8 @@ public class SaltMock extends AbstractModelMock {
     }
 
     public void addSaltMappings() {
-//        Map<String, CloudVmMetaDataStatus> instanceMap = getDefaultModel().getInstanceMap();
-        /*ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, CloudVmMetaDataStatus> instanceMap = getDefaultModel().getInstanceMap();
+        ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         Service sparkService = getSparkService();
         getSaltBootHealth(sparkService);
@@ -64,7 +66,7 @@ public class SaltMock extends AbstractModelMock {
         postSaltBootHostnameDistribute2(sparkService);
         postSaltBootFileDistribute(sparkService);
         postSaltBootPillarDistribute(sparkService);
-        getWsV1ClusterApps(sparkService);*/
+        getWsV1ClusterApps(sparkService);
     }
 
     private void postSaltBootPillarDistribute(Service sparkService) {

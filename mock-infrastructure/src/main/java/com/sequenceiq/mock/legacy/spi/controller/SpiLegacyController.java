@@ -45,7 +45,8 @@ public class SpiLegacyController {
 
     @GetMapping("/{instanceId}/start")
     public CloudVmInstanceStatus startInstance(@PathVariable String instanceId) {
-        return defaultModelService.startInstance(instanceId);
+        CloudInstance instance = new CloudInstance(instanceId, null, null);
+        return new CloudVmInstanceStatus(instance, InstanceStatus.STARTED);
     }
 
     @PostMapping("/start_instances")
@@ -55,12 +56,8 @@ public class SpiLegacyController {
 
     @GetMapping("/{instanceId}/stop")
     public CloudVmInstanceStatus stopInstance(@PathVariable String instanceId) {
-        return defaultModelService.stopInstance(instanceId);
-    }
-
-    @GetMapping("/{instanceId}/terminate")
-    public void terminateInstance(@PathVariable String instanceId) {
-        defaultModelService.terminateInstance(instanceId);
+        CloudInstance instance = new CloudInstance(instanceId, null, null);
+        return new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);
     }
 
     @PostMapping("/stop_instances")

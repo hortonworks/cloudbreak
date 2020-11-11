@@ -51,14 +51,14 @@ public class SPIMock extends AbstractModelMock {
     }
 
     public void addSPIEndpoints() {
-        /*Map<String, CloudVmMetaDataStatus> instanceMap = getDefaultModel().getInstanceMap();
+        Map<String, CloudVmMetaDataStatus> instanceMap = getDefaultModel().getInstanceMap();
         postMockProviderMetadataStatus(instanceMap);
         postMockProviderInstanceStatus(instanceMap);
         postMockProviderTerminateInstance();
         getMockProviderStopStatus();
         getMockProviderStartStatus();
         postMockProviderStartInstance(getDefaultModel());
-        postMockProviderStopInstance(getDefaultModel());*/
+        postMockProviderStopInstance(getDefaultModel());
     }
 
     public DynamicRouteStack getDynamicRouteStack() {

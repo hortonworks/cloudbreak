@@ -110,7 +110,7 @@ abstract class AbstractRequestHandler<T> {
     }
 
     public String getFullUrl() {
-        return executeQuery.getUrl();
+        return getMock().getSparkServer().getEndpoint() + getPath();
     }
 
     protected void pathVariableInternal(String name, String value) {

@@ -9,9 +9,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
@@ -33,8 +30,6 @@ public class DefaultModelService {
 
     public static final int NUMBER_OF_SERVERS = 1000;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultModelService.class);
-
     private static final int SSH_PORT = 2020;
 
     private Map<String, CloudVmMetaDataStatus> instanceMap = new HashMap<>();
@@ -47,12 +42,8 @@ public class DefaultModelService {
 
     private final Map<String, Multimap<String, String>> grains = new HashMap<>();
 
-    @Value("${mock.infrastructure.host:localhost}")
-    private String mockInfrastructureHost;
-
     @PostConstruct
     public void init() {
-        LOGGER.info("Mock-infrastructure host: {} ", mockInfrastructureHost);
         initInstanceMap(NUMBER_OF_SERVERS);
     }
 
@@ -101,10 +92,14 @@ public class DefaultModelService {
             InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
             CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
-            CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, mockInfrastructureHost, SSH_PORT, "MOCK");
+            CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, getMockServerAddress(), SSH_PORT, "MOCK");
             CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
             instanceMap.put(instanceId, cloudVmMetaDataStatus);
         });
+    }
+
+    private String getMockServerAddress() {
+        return "localhost";
     }
 
     public void terminateInstance(String instanceId) {
@@ -119,22 +114,12 @@ public class DefaultModelService {
         instanceMap.put(instanceId, cloudVmMetaDataStatus);
     }
 
-    public CloudVmInstanceStatus stopInstance(String instanceId) {
+    public void stopInstance(String instanceId) {
         CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
         CloudVmInstanceStatus currentInstance = vmMetaDataStatus.getCloudVmInstanceStatus();
         CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STOPPED);
         CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, vmMetaDataStatus.getMetaData());
         instanceMap.put(instanceId, newVmMetaData);
-        return currentInstance;
-    }
-
-    public CloudVmInstanceStatus startInstance(String instanceId) {
-        CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
-        CloudVmInstanceStatus currentInstance = vmMetaDataStatus.getCloudVmInstanceStatus();
-        CloudVmInstanceStatus newInstanceStatus = new CloudVmInstanceStatus(currentInstance.getCloudInstance(), InstanceStatus.STARTED);
-        CloudVmMetaDataStatus newVmMetaData = new CloudVmMetaDataStatus(newInstanceStatus, vmMetaDataStatus.getMetaData());
-        instanceMap.put(instanceId, newVmMetaData);
-        return currentInstance;
     }
 
     public void stopAllInstances() {

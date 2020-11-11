@@ -40,8 +40,8 @@ public class IntegrationTestConfiguration {
     @Value("${mock.server.request.response.print:false}")
     private boolean printRequestBody;
 
-    @Value("${mock.infrastructure.host:localhost}")
-    private String mockInfrastructureHost;
+    @Value("${mock.server.address:localhost}")
+    private String mockServerAddress;
 
     private SparkServerPool sparkServerPool;
 
@@ -65,7 +65,7 @@ public class IntegrationTestConfiguration {
     @Bean
     public SparkServerPool sparkServerPool() {
         if (sparkServerPool == null) {
-            sparkServerPool = new SparkServerPool(sparkPoolSize, printRequestBody, mockInfrastructureHost);
+            sparkServerPool = new SparkServerPool(sparkPoolSize, printRequestBody, mockServerAddress);
         }
         return sparkServerPool;
     }

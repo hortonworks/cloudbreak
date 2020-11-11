@@ -1,10 +1,52 @@
 package com.sequenceiq.it.cloudbreak.mock.model;
 
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+import com.cloudera.api.swagger.client.ApiClient;
+import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
+import com.cloudera.api.swagger.model.ApiAuthRoleRef;
+import com.cloudera.api.swagger.model.ApiCluster;
+import com.cloudera.api.swagger.model.ApiClusterTemplate;
+import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiEcho;
+import com.cloudera.api.swagger.model.ApiHealthCheck;
+import com.cloudera.api.swagger.model.ApiHealthSummary;
+import com.cloudera.api.swagger.model.ApiHost;
+import com.cloudera.api.swagger.model.ApiHostList;
+import com.cloudera.api.swagger.model.ApiHostTemplate;
+import com.cloudera.api.swagger.model.ApiHostTemplateList;
+import com.cloudera.api.swagger.model.ApiParcel;
+import com.cloudera.api.swagger.model.ApiParcelList;
+import com.cloudera.api.swagger.model.ApiProductVersion;
+import com.cloudera.api.swagger.model.ApiRemoteDataContext;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupRef;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleTypeList;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
+import com.cloudera.api.swagger.model.ApiServiceRef;
+import com.cloudera.api.swagger.model.ApiServiceState;
+import com.cloudera.api.swagger.model.ApiUser2;
+import com.cloudera.api.swagger.model.ApiUser2List;
+import com.cloudera.api.swagger.model.ApiVersionInfo;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.mock.AbstractModelMock;
 import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
+import com.sequenceiq.it.cloudbreak.mock.ProfileAwareRoute;
 import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
+import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Service;
 
@@ -131,7 +173,7 @@ public class ClouderaManagerMock extends AbstractModelMock {
     }
 
     public void addClouderaManagerMappings() {
-        /*getEcho();
+        getEcho();
         getUsers();
         putUser();
         postUser();
@@ -189,9 +231,9 @@ public class ClouderaManagerMock extends AbstractModelMock {
         dynamicRouteStack.post(CONFIGURE_KERBEROS, new ProfileAwareRoute(
                 (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Configure Kerberos"), activeProfiles));
         dynamicRouteStack.post(GENERATE_CREDENTIALS, new ProfileAwareRoute(
-                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Generate Credentials"), activeProfiles));*/
+                (request, response) -> new ApiCommand().id(BigDecimal.ONE).active(Boolean.TRUE).name("Generate Credentials"), activeProfiles));
     }
-/*
+
     private void readAuthRoles() {
         dynamicRouteStack.get(READ_AUTH_ROLES,
                 new ProfileAwareRoute((request, response) -> new ApiAuthRoleMetadataList(), activeProfiles));
@@ -493,5 +535,5 @@ public class ClouderaManagerMock extends AbstractModelMock {
             return ApiHealthSummary.GOOD;
         }
         return ApiHealthSummary.BAD;
-    }*/
+    }
 }
