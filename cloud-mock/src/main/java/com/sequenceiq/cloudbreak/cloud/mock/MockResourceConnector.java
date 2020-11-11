@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static java.util.Collections.emptyList;
 
-import java.security.KeyManagementException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -13,14 +12,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -54,13 +53,13 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockResourceConnector.class);
 
     @Inject
+    private MockCredentialViewFactory mockCredentialViewFactory;
+
+    @Inject
     private PersistenceNotifier resourceNotifier;
 
     @Inject
     private CloudResourceHelper cloudResourceHelper;
-
-    @Inject
-    private MockUrlFactory mockUrlFactory;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
@@ -93,7 +92,9 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     private Iterator<String> getInstanceIdIterator(AuthenticatedContext authenticatedContext) {
         try {
-            CloudVmInstanceStatus[] cloudVmInstanceStatusArray = mockUrlFactory.get("/spi/cloud_instance_statuses").post(null, CloudVmInstanceStatus[].class);
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            CloudVmInstanceStatus[] cloudVmInstanceStatusArray = Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/cloud_instance_statuses")
+                    .asObject(CloudVmInstanceStatus[].class).getBody();
             List<String> instanceIds = Arrays.stream(cloudVmInstanceStatusArray)
                     .filter(instanceStatus -> InstanceStatus.STARTED == instanceStatus.getStatus())
                     .map(CloudVmInstanceStatus::getCloudInstance)
@@ -101,7 +102,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
                     .sorted(new MockInstanceIdComparator())
                     .collect(Collectors.toList());
             return instanceIds.iterator();
-        } catch (KeyManagementException e) {
+        } catch (UnirestException e) {
             LOGGER.error("Couldn't fetch CloudInstances", e);
             throw new RuntimeException("Couldn't fetch CloudInstances", e);
         }
@@ -207,8 +208,9 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms, Object resourcesToRemove) {
         try {
-            mockUrlFactory.get("/spi/terminate_instances").post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), String.class);
-        } catch (KeyManagementException e) {
+            MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
+            Unirest.post(mockCredentialView.getMockEndpoint() + "/spi/terminate_instances").body(vms).asString();
+        } catch (UnirestException e) {
             throw new RuntimeException("rest error", e);
         }
         return emptyList();

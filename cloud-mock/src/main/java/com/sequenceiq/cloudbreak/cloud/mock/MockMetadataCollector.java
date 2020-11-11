@@ -4,13 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -26,20 +26,19 @@ public class MockMetadataCollector implements MetadataCollector {
     @Inject
     private MockCredentialViewFactory mockCredentialViewFactory;
 
-    @Inject
-    private MockUrlFactory mockUrlFactory;
-
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
         MockCredentialView mockCredentialView = mockCredentialViewFactory.createCredetialView(authenticatedContext.getCloudCredential());
         LOGGER.info("Collect metadata from mock spi, server address: " + mockCredentialView.getMockEndpoint());
+        String url = mockCredentialView.getMockEndpoint() + "/spi/cloud_metadata_statuses";
         try {
-            CloudVmMetaDataStatus[] response = mockUrlFactory
-                    .get("/spi/cloud_metadata_statuses")
-                    .post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), CloudVmMetaDataStatus[].class);
+            CloudVmMetaDataStatus[] response = Unirest.post(url)
+                    .body(vms)
+                    .asObject(CloudVmMetaDataStatus[].class).getBody();
             return Arrays.asList(response);
-        } catch (Exception e) {
+        } catch (UnirestException e) {
+            LOGGER.error("Url invocation failed: " + url, e);
             throw new CloudbreakServiceException("can't convert to object", e);
         }
     }

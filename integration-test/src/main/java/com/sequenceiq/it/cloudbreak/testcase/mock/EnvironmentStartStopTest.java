@@ -71,7 +71,6 @@ public class EnvironmentStartStopTest extends AbstractIntegrationTest {
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         setUpFreeIpaRouteStubbing(testContext);
         setUpFreeIpaHealthCheckRouteStubbing(testContext);
-        getFreeIpaHealthCheckHandler().setHealthy();
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)

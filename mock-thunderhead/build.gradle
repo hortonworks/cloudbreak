@@ -68,7 +68,6 @@ dependencies {
   compile (project(':audit-connector')) {
     transitive = false;
   }
-  compile project (':cloud-api')
 }
 
 dependencies {

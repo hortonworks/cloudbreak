@@ -48,16 +48,15 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
                 .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
                 .thenReturn((s, model, uriParameters) -> "")
                 .whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> true)
+                .thenReturn((s, model, uriParameters) -> "true")
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
-//                .given(HttpMock.class).whenRequested(SpiEndpoints.UnregisterPublicKey.class).post().clearCalls()
-//                .whenRequested(SpiEndpoints.UnregisterPublicKey.class).post()
-//                .thenReturn((s, model, uriParameters) -> false)
+                .given(HttpMock.class).whenRequested(SpiEndpoints.UnregisterPublicKey.class).post().clearCalls()
+                .whenRequested(SpiEndpoints.UnregisterPublicKey.class).post()
+                .thenReturn((s, model, uriParameters) -> "")
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId("existing-public-key")
                 .withPublicKey(null)
@@ -89,8 +88,7 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
         testContext
                 .given(HttpMock.class)
                 .whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> true)
+                .thenReturn((s, model, uriParameters) -> "true")
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId("existing-public-key")
                 .withPublicKey(null)
@@ -99,9 +97,9 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
-//                .given(HttpMock.class)
-//                .whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
-//                .thenReturn((s, model, uriParameters) -> "")
+                .given(HttpMock.class)
+                .whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
+                .thenReturn((s, model, uriParameters) -> "")
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(null)
@@ -132,8 +130,9 @@ public class EnvironmentEditTest extends AbstractIntegrationTest {
     public void authenticationEditValidationErrors(MockedTestContext testContext) {
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> false)
+                .thenReturn((s, model, uriParameters) -> {
+                    return "false";
+                })
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())

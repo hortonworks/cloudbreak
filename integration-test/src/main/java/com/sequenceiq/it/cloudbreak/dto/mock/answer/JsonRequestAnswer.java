@@ -10,15 +10,14 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 import spark.Request;
 
-public class JsonRequestAnswer<S> extends AbstractRequestWithBodyHandler<S, JsonNode, JsonRequestAnswer<S>> {
+public class JsonRequestAnswer<S> extends AbstractRequestWithBodyHandler<S, JsonNode> {
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonRequestAnswer.class);
 
-    public JsonRequestAnswer(Method method, String path, Class<String> requestType, HttpMock mock, ExecuteQueryToMockInfrastructure executeQuery) {
-        super(method, path, JsonNode.class, mock, executeQuery);
+    public JsonRequestAnswer(Method method, String path, Class<String> requestType, HttpMock mock) {
+        super(method, path, JsonNode.class, mock);
     }
 
     @Override

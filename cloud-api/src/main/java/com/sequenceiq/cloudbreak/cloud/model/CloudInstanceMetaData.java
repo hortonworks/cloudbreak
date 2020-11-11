@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class CloudInstanceMetaData {
 
     public static final CloudInstanceMetaData EMPTY_METADATA = new CloudInstanceMetaData(null, null);
@@ -35,12 +32,7 @@ public class CloudInstanceMetaData {
         this(privateIp, publicIp, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
     }
 
-    @JsonCreator
-    public CloudInstanceMetaData(@JsonProperty("privateIp") String privateIp,
-            @JsonProperty("publicIp") String publicIp,
-            @JsonProperty("sshPort") int sshPort,
-            @JsonProperty("localityIndicator") String localityIndicator,
-            @JsonProperty("lifeCycle") CloudInstanceLifeCycle lifeCycle) {
+    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator, CloudInstanceLifeCycle lifeCycle) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
         this.localityIndicator = localityIndicator;
