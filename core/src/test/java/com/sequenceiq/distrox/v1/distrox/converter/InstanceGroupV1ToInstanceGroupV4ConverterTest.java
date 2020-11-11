@@ -1,12 +1,14 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.se
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -62,6 +65,22 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     void setUp() {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTENCE_TEMPLATE_V4_REQUEST);
+    }
+
+    @Test
+    void gatewayIGMustContain1Node() {
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(InstanceGroupType.GATEWAY);
+
+        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(2));
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.convertTo(instanceGroups, null));
+        assertEquals("Instance group with GATEWAY type must contain 1 node!", exception.getMessage());
+
+        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(0));
+        exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.convertTo(instanceGroups, null));
+        assertEquals("Instance group with GATEWAY type must contain 1 node!", exception.getMessage());
+
+        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(1));
+        underTest.convertTo(instanceGroups, null);
     }
 
     @Test
@@ -146,7 +165,11 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
         instanceGroup.setAws(AWS_INSTANCE_GROUP_V1_PARAMETERS);
         instanceGroup.setName(INSTANE_GROUP_NAME);
-        instanceGroup.setNodeCount(NODE_COUNT_1);
+        if (InstanceGroupType.GATEWAY.equals(instanceGroupType)) {
+            instanceGroup.setNodeCount(1);
+        } else {
+            instanceGroup.setNodeCount(NODE_COUNT_1);
+        }
         instanceGroup.setRecipeNames(RECIPE_NAMES);
         instanceGroup.setRecoveryMode(RecoveryMode.AUTO);
         instanceGroup.setTemplate(new InstanceTemplateV1Request());
