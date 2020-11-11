@@ -1318,6 +1318,10 @@ public abstract class TestContext implements ApplicationContextAware {
         return cloudProvider;
     }
 
+    public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {
+        return executeQueryToMockInfrastructure;
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{clients: " + clients + ", entities: " + resources + "}";

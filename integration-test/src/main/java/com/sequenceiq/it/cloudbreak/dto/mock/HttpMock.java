@@ -48,8 +48,8 @@ public class HttpMock implements CloudbreakTestDto {
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
 
-    @Value("${mock.infrastructure.host:localhost}")
-    private String mockInfrastructureHost;
+    @Value("${mock.server.address:localhost}")
+    private String mockServerAddress;
 
     @Inject
     private SparkServerPool sparkServerPool;
@@ -119,11 +119,10 @@ public class HttpMock implements CloudbreakTestDto {
         } else {
             LOGGER.info("Creating HttpMock server");
             sparkServer = sparkServerPool.popSecure();
-            if (sparkServer != null) {
-                LOGGER.info("HttpMock got spark server: {}", sparkServer);
-            }
+            LOGGER.info("HttpMock got spark server: {}", sparkServer);
             model = new DefaultModel();
-            model.setMockServerAddress(mockInfrastructureHost);
+            model.setMockServerAddress(mockServerAddress);
+            dynamicRouteStack = new DynamicRouteStack(sparkServer.getSparkService(), model);
         }
         return this;
     }

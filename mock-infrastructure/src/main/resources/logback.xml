@@ -10,7 +10,7 @@
         </encoder>
     </appender>
 
-    <appender name="MOCK_INFRASTRUCTURE_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="CB_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>mock-infrastructure-log/mock-infrastructure.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
@@ -29,12 +29,12 @@
     </appender>
 
     <root level="${CB_ROOT_LOG_LEVEL:-INFO}">
-        <appender-ref ref="MOCK_INFRASTRUCTURE_FILE_BASED"/>
+        <appender-ref ref="CB_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </root>
 
     <logger name="com.sequenceiq" level="${CB_LOG_LEVEL:-DEBUG}" additivity="false">
-        <appender-ref ref="MOCK_INFRASTRUCTURE_FILE_BASED"/>
+        <appender-ref ref="CB_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
 
