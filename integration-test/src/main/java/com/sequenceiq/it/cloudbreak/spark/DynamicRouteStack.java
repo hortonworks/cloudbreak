@@ -107,51 +107,19 @@ public class DynamicRouteStack {
     }
 
     private void addRouteIfNotPresent(HttpMethod method, String url, boolean hasSparkRoute, Route route) {
-        if (!hasSparkRoute) {
-            switch (method) {
-                case GET:
-                    service.get(url, route);
-                    break;
-                case PUT:
-                    service.put(url, route);
-                    break;
-                case POST:
-                    service.post(url, route);
-                    break;
-                case DELETE:
-                    service.delete(url, route);
-                    break;
-                case HEAD:
-                    service.head(url, route);
-                    break;
-                default:
-                    throw new IllegalArgumentException("http method is not implemented");
-            }
-        }
+
     }
 
     private void addPostIfNotPresent(String url, boolean hasSparkRoute, Route route) {
-        if (!hasSparkRoute) {
-            service.post(url, route);
-        }
     }
 
     private void addPutIfNotPresent(String url, boolean hasSparkRoute, Route route) {
-        if (!hasSparkRoute) {
-            service.put(url, route);
-        }
     }
 
     private void addGetIfNotPresent(String url, boolean hasSparkRoute, Route route) {
-        if (!hasSparkRoute) {
-            service.get(url, route);
-        }
     }
 
     private void addDeleteIfNotPresent(String url, boolean hasSparkRoute, Route route) {
-        if (!hasSparkRoute) {
-            service.delete(url, route);
-        }
     }
 
     private Route overrideResponseByUrlWithSimple(RouteKey key, Route responseHandler) {

@@ -57,7 +57,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
 
     @Value("${mock.infrastructure.host:localhost}")
-    private String infrastructureMockHost;
+    private String mockInfrastructureHost;
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
@@ -68,12 +68,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
         MockParameters credentialParameters = new MockParameters();
-        if (credentialEntity.getTestContext() instanceof MockedTestContext) {
-            credentialParameters.setMockEndpoint("https://" + infrastructureMockHost);
-        } else {
-            credentialParameters.setMockEndpoint(
-                    credentialEntity.getTestContext().get(HttpMock.class).getSparkServer().getEndpoint());
-        }
+        credentialParameters.setMockEndpoint("https://" + mockInfrastructureHost);
         return credentialEntity.withName(resourcePropertyProvider.getName(getCloudPlatform()))
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
