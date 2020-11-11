@@ -7,14 +7,13 @@ import java.util.Map;
 import com.sequenceiq.it.cloudbreak.dto.mock.GenericResponse;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public class AnswerWithoutRequest<S> extends AbstractRequestHandler {
 
     private Map<String, String> headers = new HashMap<>();
 
-    public AnswerWithoutRequest(Method method, String path, Class requestType, HttpMock mock, ExecuteQueryToMockInfrastructure executeQuery) {
-        super(method, path, String.class, mock, executeQuery);
+    public AnswerWithoutRequest(Method method, String path, Class requestType, HttpMock mock) {
+        super(method, path, String.class, mock);
     }
 
     public HttpMock thenReturn(GenericResponse<S> genericResponse) {

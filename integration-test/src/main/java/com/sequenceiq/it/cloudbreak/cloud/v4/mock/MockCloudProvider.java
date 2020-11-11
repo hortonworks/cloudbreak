@@ -5,7 +5,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
@@ -56,9 +55,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
 
-    @Value("${mock.infrastructure.host:localhost}")
-    private String mockInfrastructureHost;
-
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
 
@@ -68,7 +64,13 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
         MockParameters credentialParameters = new MockParameters();
-        credentialParameters.setMockEndpoint("https://" + mockInfrastructureHost);
+        if (credentialEntity.getTestContext() instanceof MockedTestContext) {
+            MockedTestContext mockedTestContext = (MockedTestContext) credentialEntity.getTestContext();
+            credentialParameters.setMockEndpoint(mockedTestContext.getSparkServer().getEndpoint());
+        } else {
+            credentialParameters.setMockEndpoint(
+                    credentialEntity.getTestContext().get(HttpMock.class).getSparkServer().getEndpoint());
+        }
         return credentialEntity.withName(resourcePropertyProvider.getName(getCloudPlatform()))
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
@@ -82,7 +84,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
-        return distrox.withGatewayPort(10090);
+        return distrox.withGatewayPort(getSparkServerPort(distrox.getTestContext()));
     }
 
     @Override
@@ -295,12 +297,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public Integer gatewayPort(StackTestDtoBase stackEntity) {
-        return 10090;
+        return getSparkServerPort(stackEntity.getTestContext());
     }
 
     @Override
     public Integer gatewayPort(FreeIpaTestDto stackEntity) {
-        return 10090;
+        return getSparkServerPort(stackEntity.getTestContext());
     }
 
     @Override

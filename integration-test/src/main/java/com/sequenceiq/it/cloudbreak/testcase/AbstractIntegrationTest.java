@@ -44,7 +44,6 @@ import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ITResponse;
 import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
@@ -99,13 +98,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
 
-    @Inject
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
-
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
-        Log.log(LOGGER, "New test inited: %s", testResult.getMethod().getMethodName());
-        executeQueryToMockInfrastructure.call("/tests/new", w -> w);
         setupTest(testResult);
         setupTest((TestContext) data[0]);
     }
@@ -398,9 +392,5 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     public FreeIpaNodeHealthCheckHandler getFreeIpaHealthCheckHandler() {
         return freeIpaNodeHealthCheckHandler;
-    }
-
-    public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {
-        return executeQueryToMockInfrastructure;
     }
 }
