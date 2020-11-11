@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -218,6 +219,9 @@ public class CloudStorageConverter {
         } else if (cloudIdentity.getAdlsGen2Identity() != null) {
             AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = adlsGen2IdentityToParameters(cloudIdentity.getAdlsGen2Identity());
             storageIdentityBase.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
+        } else if (cloudIdentity.getGcsIdentity() != null) {
+            GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = gcsIdentityToParameters(cloudIdentity.getGcsIdentity());
+            storageIdentityBase.setGcs(gcsCloudStorageV1Parameters);
         }
         return storageIdentityBase;
     }
@@ -234,6 +238,9 @@ public class CloudStorageConverter {
         } else if (cloudIdentity.getAdlsGen2Identity() != null) {
             AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = adlsGen2IdentityToParameters(cloudIdentity.getAdlsGen2Identity());
             storageIdentityRequest.setAdlsGen2(adlsGen2CloudStorageV1Parameters);
+        } else if (cloudIdentity.getGcsIdentity() != null) {
+            GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = gcsIdentityToParameters(cloudIdentity.getGcsIdentity());
+            storageIdentityRequest.setGcs(gcsCloudStorageV1Parameters);
         }
         return storageIdentityRequest;
     }
@@ -263,6 +270,12 @@ public class CloudStorageConverter {
         AdlsGen2CloudStorageV1Parameters adlsGen2CloudStorageV1Parameters = new AdlsGen2CloudStorageV1Parameters();
         adlsGen2CloudStorageV1Parameters.setManagedIdentity(adlsGen2Identity.getManagedIdentity());
         return adlsGen2CloudStorageV1Parameters;
+    }
+
+    private GcsCloudStorageV1Parameters gcsIdentityToParameters(GcsIdentity gcsIdentity) {
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(gcsIdentity.getServiceAccountEmail());
+        return gcsCloudStorageV1Parameters;
     }
 
     private S3Identity s3ParametersToIdentity(S3CloudStorageV1Parameters s3CloudStorageV1Parameters) {
