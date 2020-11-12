@@ -17,4 +17,9 @@ public class GcpDatabaseNetworkView {
     public String getAvailabilityZone() {
         return network.getStringParameter("availabilityZone");
     }
+
+    public String getSharedProjectId() {
+        return network.getStringParameter("sharedProjectId");
+    }
+
 }
