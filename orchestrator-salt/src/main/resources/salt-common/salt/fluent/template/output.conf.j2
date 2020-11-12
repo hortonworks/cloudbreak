@@ -147,8 +147,8 @@
   </store>
 </match>
 </worker>
-{% elif fluent.providerPrefix == "gcs" and fluent.version > 1 %}
-<worker {{ cloudStorageWorkerIndex }}>
+{% elif fluent.providerPrefix == "gcs" and fluent.fluentVersion > 1 %}
+<worker {{fluent.cloudStorageWorkerIndex }}>
   <match {{fluent.providerPrefix}}.*>
      @type gcs
      project {{ fluent.gcsProjectId }}
@@ -203,7 +203,7 @@
   </match>
 </worker>
 {% elif fluent.providerPrefix == "cloudwatch" %}
-<worker {{ cloudStorageWorkerIndex }}>
+<worker {{fluent.cloudStorageWorkerIndex }}>
 <match **{{fluent.providerPrefix}}**>
   @type cloudwatch_logs
   log_group_name {{fluent.logFolderName}}
@@ -230,7 +230,7 @@
 </match>
 </worker>
 {% else %}
-<worker {{ cloudStorageWorkerIndex }}>
+<worker {{fluent.cloudStorageWorkerIndex }}>
 <match {{fluent.providerPrefix}}.*>
   @type stdout
 </match>
