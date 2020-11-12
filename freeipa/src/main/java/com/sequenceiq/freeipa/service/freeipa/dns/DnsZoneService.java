@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -78,7 +79,15 @@ public class DnsZoneService {
         FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
         String reverseDnsZone = reverseDnsZoneCalculator.reverseDnsZoneForCidr(subnet);
         LOGGER.info("Delete DNS reverse zone [{}], for subnet [{}]", reverseDnsZone, subnet);
-        freeIpaClient.deleteDnsZone(reverseDnsZone);
+        try {
+            freeIpaClient.deleteDnsZone(reverseDnsZone);
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                LOGGER.info("DNS zone was not present on FreeIPA: {}", reverseDnsZone);
+            } else {
+                throw e;
+            }
+        }
     }
 
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
