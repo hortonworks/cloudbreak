@@ -64,8 +64,8 @@ import reactor.Environment;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class)})
 @Configuration
-@ComponentScans({@ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
-        @ComponentScan("com.sequenceiq.cloudbreak.auth")})
+@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
+        @ComponentScan("com.sequenceiq.cloudbreak.auth"), @ComponentScan("com.sequenceiq.cloudbreak.client")})
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 

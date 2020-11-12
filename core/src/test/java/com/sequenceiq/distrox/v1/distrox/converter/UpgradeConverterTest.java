@@ -1,0 +1,73 @@
+package com.sequenceiq.distrox.v1.distrox.converter;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeReplaceVms;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Response;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
+
+class UpgradeConverterTest {
+
+    private final UpgradeConverter underTest = new UpgradeConverter();
+
+    @ParameterizedTest
+    @EnumSource(UpgradeShowAvailableImages.class)
+    public void testFromUpgradeShowAvailableImagesToDistroxUpgradeShowAvailableImages(UpgradeShowAvailableImages upgradeShowAvailableImagesEnum) {
+        DistroxUpgradeShowAvailableImages.valueOf(upgradeShowAvailableImagesEnum.name());
+    }
+
+    @ParameterizedTest
+    @EnumSource(DistroxUpgradeShowAvailableImages.class)
+    public void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroxUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
+        UpgradeShowAvailableImages.valueOf(distroxUpgradeShowAvailableImages.name());
+    }
+
+    @Test
+    public void testConvertRequest() {
+        DistroxUpgradeV1Request source = new DistroxUpgradeV1Request();
+        source.setDryRun(Boolean.TRUE);
+        source.setImageId("asdf");
+        source.setShowAvailableImages(DistroxUpgradeShowAvailableImages.LATEST_ONLY);
+        source.setLockComponents(Boolean.TRUE);
+        source.setReplaceVms(DistroxUpgradeReplaceVms.DISABLED);
+        source.setRuntime("runtime");
+
+        UpgradeV4Request result = underTest.convert(source);
+
+        assertEquals(source.getDryRun(), result.getDryRun());
+        assertEquals(source.getImageId(), result.getImageId());
+        assertEquals(source.getShowAvailableImages().name(), result.getShowAvailableImages().name());
+        assertEquals(source.getLockComponents(), result.getLockComponents());
+        assertEquals(Boolean.FALSE, result.getReplaceVms());
+        assertEquals(source.getRuntime(), result.getRuntime());
+    }
+
+    @Test
+    public void testConvertResult() {
+        UpgradeV4Response source = new UpgradeV4Response();
+        source.setUpgradeCandidates(List.of());
+        source.setCurrent(new ImageInfoV4Response());
+        source.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, "asdg"));
+        source.setReason("fdas");
+
+        DistroxUpgradeV1Response result = underTest.convert(source);
+
+        assertEquals(source.getCurrent(), result.getCurrent());
+        assertEquals(source.getFlowIdentifier(), result.getFlowIdentifier());
+        assertEquals(source.getReason(), result.getReason());
+        assertEquals(source.getUpgradeCandidates(), result.getUpgradeCandidates());
+    }
+}

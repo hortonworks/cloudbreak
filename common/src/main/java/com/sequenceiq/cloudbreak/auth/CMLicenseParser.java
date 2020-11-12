@@ -9,17 +9,16 @@ import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
-public class CMLicenseUtil {
+@Component
+public class CMLicenseParser {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CMLicenseUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CMLicenseParser.class);
 
-    private CMLicenseUtil() {
-    }
-
-    public static Optional<JsonCMLicense> parseLicense(String license) {
+    public Optional<JsonCMLicense> parseLicense(String license) {
         Optional<JsonCMLicense> result = Optional.empty();
         if (isNotEmpty(license)) {
             try {

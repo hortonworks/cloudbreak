@@ -65,6 +65,10 @@ public class NameOrCrn {
         return isNotEmpty(crn);
     }
 
+    public String getNameOrCrn() {
+        return hasName() ? name : crn;
+    }
+
     @Override
     public String toString() {
         StringBuilder toString = new StringBuilder();
