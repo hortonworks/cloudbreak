@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.sdx;
 
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -45,6 +46,11 @@ public class SdxCloudStorageTestDto extends AbstractSdxTestDto<SdxCloudStorageRe
 
     public SdxCloudStorageTestDto withBaseLocation(String baseLocation) {
         getRequest().setBaseLocation(baseLocation);
+        return this;
+    }
+
+    public SdxCloudStorageTestDto withGcs(GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters) {
+        getRequest().setGcs(gcsCloudStorageV1Parameters);
         return this;
     }
 }

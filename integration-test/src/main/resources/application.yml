@@ -152,6 +152,9 @@ integrationtest:
     location: europe-west2
     sharedProjectId:
     networkId:
+    network:
+      noPublicIp:
+      noFirewallRules:
     subnetIds:
     credential:
       type: json
@@ -167,6 +170,10 @@ integrationtest:
     securityAccess:
       knoxSecurityGroup:
       defaultSecurityGroup:
+    cloudstorage:
+      baseLocation:
+      gcs:
+        serviceAccount:
 
   # openstack parameters
   openstack:
