@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -85,6 +86,9 @@ public class StackOperationService {
     @Inject
     private EnvironmentService environmentService;
 
+    @Inject
+    private DataLakeStatusCheckerService dataLakeStatusCheckerService;
+
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack, workspaceId, user);
         return flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
@@ -119,7 +123,7 @@ public class StackOperationService {
             case STOPPED:
                 return stop(stack, cluster, updateCluster, user);
             case STARTED:
-                return start(stack, cluster, updateCluster, user);
+                return start(stack, cluster, updateCluster);
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
@@ -226,9 +230,10 @@ public class StackOperationService {
     }
 
     @VisibleForTesting
-    FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+    FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster) {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
+        dataLakeStatusCheckerService.validateRunningState(stack);
         if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (isStackStartable(stack) || isClusterStartable(cluster)) {

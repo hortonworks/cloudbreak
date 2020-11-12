@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
+import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -78,13 +79,16 @@ public class StackOperationServiceTest {
     @Mock
     private TransactionService transactionService;
 
+    @Mock
+    private DataLakeStatusCheckerService statusCheckerService;
+
     @Test
     public void testStartWhenStackAvailable() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
         stack.setId(1L);
 
-        underTest.start(stack, null, false, new User());
+        underTest.start(stack, null, false);
 
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
     }
@@ -95,7 +99,7 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
         stack.setId(1L);
 
-        underTest.start(stack, null, false, new User());
+        underTest.start(stack, null, false);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
         verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
@@ -107,7 +111,7 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.START_FAILED));
         stack.setId(1L);
 
-        underTest.start(stack, null, false, new User());
+        underTest.start(stack, null, false);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
         verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
@@ -121,7 +125,7 @@ public class StackOperationServiceTest {
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("");
-        underTest.start(stack, null, false, new User());
+        underTest.start(stack, null, false);
 
         verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
     }
@@ -134,7 +138,7 @@ public class StackOperationServiceTest {
         Cluster cluster = new Cluster();
         cluster.setStatus(Status.STOPPED);
         stack.setCluster(cluster);
-        underTest.start(stack, cluster, false, new User());
+        underTest.start(stack, cluster, false);
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
         verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
     }
@@ -184,7 +188,7 @@ public class StackOperationServiceTest {
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         cluster.setStatus(Status.STOPPED);
-        underTest.start(stack, cluster, false, new User());
+        underTest.start(stack, cluster, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.startable());
     }
 
