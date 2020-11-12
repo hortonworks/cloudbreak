@@ -68,7 +68,11 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .when(recipeTestClient.deleteV4())
                 .when(recipeTestClient.listV4())
                 .then((context, dto, client) -> {
-                    Assertions.assertThat(dto.getSimpleResponses().getResponses()).isEmpty();
+                    Assertions.assertThat(
+                            dto.getSimpleResponses().getResponses()
+                                    .stream()
+                                    .filter(response -> response.getName()
+                                            .equals(dto.getName())).findFirst().isPresent()).isFalse();
                     return dto;
                 })
                 .validate();
