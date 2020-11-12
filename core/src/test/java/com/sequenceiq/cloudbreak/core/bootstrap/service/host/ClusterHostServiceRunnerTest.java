@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -136,6 +138,9 @@ public class ClusterHostServiceRunnerTest {
     @Mock
     private EnvironmentConfigProvider environmentConfigProvider;
 
+    @Mock
+    private CMLicenseParser cmLicenseParser;
+
     @InjectMocks
     private ClusterHostServiceRunner underTest;
 
@@ -159,6 +164,7 @@ public class ClusterHostServiceRunnerTest {
     @Test
     public void testDecoratePillarWithClouderaManagerRepo() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license.txt");
+        when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
@@ -178,6 +184,7 @@ public class ClusterHostServiceRunnerTest {
     @Test
     public void testDecoratePillarWithClouderaManagerRepoWithNoJsonLicense() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license-nojson.txt");
+        when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");
@@ -197,6 +204,7 @@ public class ClusterHostServiceRunnerTest {
     @Test
     public void testDecoratePillarWithClouderaManagerRepoWithEmptyLicense() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license-empty.txt");
+        when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("7.2.0");
         clouderaManagerRepo.setBaseUrl("https://archive.cloudera.com/cm/7.2.0/");

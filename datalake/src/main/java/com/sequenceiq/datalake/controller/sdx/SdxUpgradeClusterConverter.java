@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -30,6 +32,7 @@ public class SdxUpgradeClusterConverter {
         if (Objects.nonNull(sdxUpgradeRequest.getShowAvailableImages())) {
             upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(sdxUpgradeRequest.getShowAvailableImages().name()));
         }
+        upgradeV4Request.setReplaceVms(Optional.ofNullable(sdxUpgradeRequest.getReplaceVms()).orElse(SdxUpgradeReplaceVms.ENABLED).getBooleanValue());
         return upgradeV4Request;
     }
 }

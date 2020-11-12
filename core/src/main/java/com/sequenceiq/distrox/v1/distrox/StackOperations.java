@@ -237,22 +237,21 @@ public class StackOperations implements ResourceBasedCrnProvider {
     }
 
     public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
-        if (nameOrCrn.hasName()) {
-            String stackName = nameOrCrn.getName();
-            boolean osUpgrade = upgradeService.isOsUpgrade(request);
-            UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(workspaceId, stackName,
-                    osUpgrade);
-            if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-                clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
-            }
-            Stack stack = getStackByName(stackName);
-            MDCBuilder.buildMdcContext(stack);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
+        boolean osUpgrade = upgradeService.isOsUpgrade(request);
+        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, request.getReplaceVms());
+        if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
+        }
+        validateDatalakeHasNoRunningDatahub(workspaceId, stack, upgradeResponse);
+        return upgradeResponse;
+    }
+
+    private void validateDatalakeHasNoRunningDatahub(Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
+        if (StackType.DATALAKE == stack.getType()) {
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
-            clusterUpgradeAvailabilityService.checkForNotAttachedClusters(stackViewV4Responses, upgradeResponse);
-            return upgradeResponse;
-        } else {
-            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
-            throw new BadRequestException("Please provide a stack name for upgrade");
+            clusterUpgradeAvailabilityService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
         }
     }
 

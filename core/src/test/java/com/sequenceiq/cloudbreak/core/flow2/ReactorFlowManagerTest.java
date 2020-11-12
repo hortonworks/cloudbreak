@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -89,6 +90,7 @@ public class ReactorFlowManagerTest {
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
+        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageid");
 
         underTest.triggerProvisioning(STACK_ID);
         underTest.triggerClusterInstall(STACK_ID);
@@ -118,10 +120,11 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false);
         underTest.triggerEphemeralUpdate(STACK_ID);
-        underTest.triggerStackImageUpdate(STACK_ID, "asdf", null, null);
+        underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, "asdf");
+        underTest.triggerDistroxUpgrade(STACK_ID, imageChangeDto, false);
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
@@ -197,7 +200,7 @@ public class ReactorFlowManagerTest {
         String imageID = "imageID";
         String imageCatalogName = "imageCatalogName";
         String imageCatalogUrl = "imageCatalogUrl";
-        underTest.triggerStackImageUpdate(stackId, imageID, imageCatalogName, imageCatalogUrl);
+        underTest.triggerStackImageUpdate(new ImageChangeDto(stackId, imageID, imageCatalogName, imageCatalogUrl));
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
         verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT), captor.capture());
         StackImageUpdateTriggerEvent event = (StackImageUpdateTriggerEvent) captor.getValue();

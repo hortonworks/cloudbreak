@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
@@ -124,6 +125,10 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
             ret = componentVersions.compareTo(o.componentVersions);
         }
         return ret;
+    }
+
+    public static Comparator<ImageInfoV4Response> creationBasedComparator() {
+        return Comparator.comparingLong(ImageInfoV4Response::getCreated);
     }
 
     @Override

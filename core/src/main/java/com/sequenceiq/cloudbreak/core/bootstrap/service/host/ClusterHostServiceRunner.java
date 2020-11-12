@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.auth.CMLicenseUtil;
+import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -201,6 +201,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
+
+    @Inject
+    private CMLicenseParser cmLicenseParser;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
@@ -467,7 +470,7 @@ public class ClusterHostServiceRunner {
     private Map<String, Object> createCMRepoPillar(ClouderaManagerRepo clouderaManagerRepo, Optional<String> licenseOpt) {
         Map<String, Object> pillarValues = new HashMap<>();
         pillarValues.put("repo", clouderaManagerRepo);
-        licenseOpt.flatMap(CMLicenseUtil::parseLicense).ifPresent(jsonLicense -> {
+        licenseOpt.flatMap(cmLicenseParser::parseLicense).ifPresent(jsonLicense -> {
             String username = jsonLicense.getPaywallUsername();
             String password = jsonLicense.getPaywallPassword();
             if (isNotEmpty(username) && isNotEmpty(password)) {

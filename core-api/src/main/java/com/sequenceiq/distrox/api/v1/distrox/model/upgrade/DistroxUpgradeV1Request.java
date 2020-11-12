@@ -1,36 +1,23 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade;
+package com.sequenceiq.distrox.api.v1.distrox.model.upgrade;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
-import com.sequenceiq.cloudbreak.validation.ValidUpgradeRequest;
-import com.sequenceiq.common.model.UpgradeShowAvailableImages;
-
-import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel
-@JsonIgnoreProperties(ignoreUnknown = true)
 @ValidUpgradeRequest
-public class UpgradeV4Request {
+public class DistroxUpgradeV1Request {
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.IMAGE_ID)
     private String imageId;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.RUNTIME)
     private String runtime;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.LOCK_COMPONENTS)
     private Boolean lockComponents;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
 
-    private Boolean replaceVms = Boolean.TRUE;
+    private DistroxUpgradeShowAvailableImages showAvailableImages;
 
-    @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
-    private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
+    private DistroxUpgradeReplaceVms replaceVms;
 
     public String getImageId() {
         return imageId;
@@ -68,22 +55,23 @@ public class UpgradeV4Request {
         this.dryRun = dryRun;
     }
 
-    public UpgradeShowAvailableImages getShowAvailableImages() {
+    public DistroxUpgradeShowAvailableImages getShowAvailableImages() {
         return showAvailableImages;
     }
 
-    public void setShowAvailableImages(UpgradeShowAvailableImages showAvailableImages) {
+    public void setShowAvailableImages(DistroxUpgradeShowAvailableImages showAvailableImages) {
         this.showAvailableImages = showAvailableImages;
     }
 
-    public Boolean getReplaceVms() {
+    public DistroxUpgradeReplaceVms getReplaceVms() {
         return replaceVms;
     }
 
-    public void setReplaceVms(Boolean replaceVms) {
+    public void setReplaceVms(DistroxUpgradeReplaceVms replaceVms) {
         this.replaceVms = replaceVms;
     }
 
+    @ApiModelProperty(hidden = true)
     public boolean isEmpty() {
         return isUnspecifiedUpgradeType() &&
                 !Boolean.TRUE.equals(dryRun) &&
@@ -104,7 +92,7 @@ public class UpgradeV4Request {
 
     @ApiModelProperty(hidden = true)
     public boolean isShowAvailableImagesSet() {
-        return Objects.nonNull(showAvailableImages) && UpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
+        return Objects.nonNull(showAvailableImages) && DistroxUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }
 
     private boolean isUnspecifiedUpgradeType() {
@@ -115,12 +103,12 @@ public class UpgradeV4Request {
 
     @Override
     public String toString() {
-        return "UpgradeV4Request{" +
+        return "DistroxUpgradeRequest{" +
                 "imageId='" + imageId + '\'' +
                 ", runtime='" + runtime + '\'' +
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
-                ", showAvailableImages=" + showAvailableImages +
+                ", replaceVms=" + replaceVms +
                 '}';
     }
 }

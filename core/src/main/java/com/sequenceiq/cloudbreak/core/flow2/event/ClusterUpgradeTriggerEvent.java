@@ -5,16 +5,16 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.rx.Promise;
 
-public class DatalakeClusterUpgradeTriggerEvent extends StackEvent {
+public class ClusterUpgradeTriggerEvent extends StackEvent {
 
     private final String imageId;
 
-    public DatalakeClusterUpgradeTriggerEvent(String selector, Long stackId, String imageId) {
+    public ClusterUpgradeTriggerEvent(String selector, Long stackId, String imageId) {
         super(selector, stackId);
         this.imageId = imageId;
     }
 
-    public DatalakeClusterUpgradeTriggerEvent(String event, Long resourceId, Promise<AcceptResult> accepted, String imageId) {
+    public ClusterUpgradeTriggerEvent(String event, Long resourceId, Promise<AcceptResult> accepted, String imageId) {
         super(event, resourceId, accepted);
         this.imageId = imageId;
     }

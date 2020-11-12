@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -282,14 +283,17 @@ public class StackCommonService {
     }
 
     public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, organziationId);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        ImageChangeDto imageChangeDto = createImageChangeDto(nameOrCrn, organziationId, stackImageChangeRequest);
+        return stackOperationService.updateImage(imageChangeDto);
+    }
+
+    public ImageChangeDto createImageChangeDto(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, organziationId);
         if (StringUtils.isNotBlank(stackImageChangeRequest.getImageCatalogName())) {
             ImageCatalog imageCatalog = imageCatalogService.get(organziationId, stackImageChangeRequest.getImageCatalogName());
-            return stackOperationService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(),
-                    imageCatalog.getName(), imageCatalog.getImageCatalogUrl(), user);
+            return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId(), imageCatalog.getName(), imageCatalog.getImageCatalogUrl());
         } else {
-            return stackOperationService.updateImage(stack.getId(), organziationId, stackImageChangeRequest.getImageId(), null, null, user);
+            return new ImageChangeDto(stackId, stackImageChangeRequest.getImageId());
         }
     }
 
