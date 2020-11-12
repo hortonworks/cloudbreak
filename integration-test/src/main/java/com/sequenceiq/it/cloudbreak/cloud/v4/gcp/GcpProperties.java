@@ -29,6 +29,10 @@ public class GcpProperties {
 
     private final Baseimage baseimage = new Baseimage();
 
+    private final CloudStorage cloudStorage = new CloudStorage();
+
+    private final Network network = new Network();
+
     public String getSharedProjectId() {
         return sharedProjectId;
     }
@@ -93,6 +97,14 @@ public class GcpProperties {
         return securityAccess;
     }
 
+    public CloudStorage getCloudStorage() {
+        return cloudStorage;
+    }
+
+    public Network getNetwork() {
+        return network;
+    }
+
     public static class Baseimage {
         private String imageId;
 
@@ -127,6 +139,28 @@ public class GcpProperties {
             this.knoxSecurityGroup = knoxSecurityGroup;
         }
 
+    }
+
+    public static class Network {
+        private Boolean noPublicIp;
+
+        private Boolean noFirewallRules;
+
+        public Boolean getNoPublicIp() {
+            return noPublicIp;
+        }
+
+        public void setNoPublicIp(Boolean noPublicIp) {
+            this.noPublicIp = noPublicIp;
+        }
+
+        public Boolean getNoFirewallRules() {
+            return noFirewallRules;
+        }
+
+        public void setNoFirewallRules(Boolean noFirewallRules) {
+            this.noFirewallRules = noFirewallRules;
+        }
     }
 
     public static class Credential {
@@ -225,5 +259,35 @@ public class GcpProperties {
             this.volumeType = volumeType;
         }
 
+    }
+
+    public static class CloudStorage {
+        private final Gcs gcs = new Gcs();
+
+        private String baseLocation;
+
+        public Gcs getGcs() {
+            return gcs;
+        }
+
+        public String getBaseLocation() {
+            return baseLocation;
+        }
+
+        public void setBaseLocation(String baseLocation) {
+            this.baseLocation = baseLocation;
+        }
+
+        public static class Gcs {
+            private String serviceAccount;
+
+            public String getServiceAccount() {
+                return serviceAccount;
+            }
+
+            public void setServiceAccount(String serviceAccount) {
+                this.serviceAccount = serviceAccount;
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import static java.lang.String.format;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -46,16 +48,22 @@ import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.gcp.GcpCloudFunctionality;
 
 @Component
 public class GcpCloudProvider extends AbstractCloudProvider {
 
     private static final String JSON_CREDENTIAL_TYPE = "json";
 
+    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCloudProvider.class);
 
     @Inject
     private GcpProperties gcpProperties;
+
+    @Inject
+    private GcpCloudFunctionality gcpCloudFunctionality;
 
     @Override
     public String region() {
@@ -133,8 +141,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         GcpNetworkV4Parameters gcpNetworkV4Parameters = new GcpNetworkV4Parameters();
-        gcpNetworkV4Parameters.setNoFirewallRules(false);
-        gcpNetworkV4Parameters.setNoPublicIp(false);
+        gcpNetworkV4Parameters.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
+        gcpNetworkV4Parameters.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
         gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getSharedProjectId());
         return network.withGcp(gcpNetworkV4Parameters)
                 .withSubnetCIDR(getSubnetCIDR());
@@ -155,6 +163,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         EnvironmentNetworkGcpParams params = new EnvironmentNetworkGcpParams();
         params.setSharedProjectId(gcpProperties.getSharedProjectId());
         params.setNetworkId(gcpProperties.getNetworkId());
+        params.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
+        params.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
         return params;
     }
 
@@ -187,7 +197,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CloudFunctionality getCloudFunctionality() {
-        return notImplementedException();
+        return gcpCloudFunctionality;
     }
 
     @Override
@@ -247,7 +257,16 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
-        return cloudStorage;
+        return cloudStorage
+                .withFileSystemType(getFileSystemType())
+                .withBaseLocation(getBaseLocation())
+                .withGcs(getGcs());
+    }
+
+    private GcsCloudStorageV1Parameters getGcs() {
+        GcsCloudStorageV1Parameters alma = new GcsCloudStorageV1Parameters();
+        alma.setServiceAccountEmail(gcpProperties.getCloudStorage().getGcs().getServiceAccount());
+        return alma;
     }
 
     @Override
@@ -258,7 +277,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return null;
+        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     public String getInstanceProfile() {

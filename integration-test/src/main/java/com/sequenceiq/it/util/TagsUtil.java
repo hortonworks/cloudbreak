@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.testng.asserts.SoftAssert;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -111,9 +112,14 @@ public class TagsUtil {
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
         Crn actingUserCrn = testContext.getActingUserCrn();
-        Crn clouderaCreatorResourceName = Crn.fromString(response.getTagValue(tag));
 
-        if (clouderaCreatorResourceName.equals(actingUserCrn)) {
+        String tagValue = response.getTagValue(tag);
+        if (StringUtils.isEmpty(tagValue)) {
+            tagValue = response.getTagValue(tag.toLowerCase());
+        }
+        Crn clouderaCreatorResourceName = Crn.fromString(tagValue);
+
+        if (clouderaCreatorResourceName != null && clouderaCreatorResourceName.equals(actingUserCrn)) {
             Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, clouderaCreatorResourceName,
                     actingUserCrn));
         } else {
