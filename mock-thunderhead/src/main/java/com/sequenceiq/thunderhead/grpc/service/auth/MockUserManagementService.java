@@ -229,6 +229,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
 
+    private static final String CDP_SHOW_CLI = "CDP_SHOW_CLI";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -634,6 +636,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
                                 .addEntitlements(createEntitlement(DATAHUB_FLOW_SCALING))
+                                .addEntitlements(createEntitlement(CDP_SHOW_CLI))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .setPasswordPolicy(workloadPasswordPolicy)
