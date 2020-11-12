@@ -73,7 +73,8 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
-                .then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
+                // This assertion is disabled until the Audit Service is not configured.
+                //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .validate();
     }
 }
