@@ -23,6 +23,7 @@ import com.google.api.services.sqladmin.model.IpConfiguration;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.google.api.services.sqladmin.model.User;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
@@ -141,10 +142,18 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     private DatabaseInstance getDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
-        Subnetwork subnetworkForRedbeams = compute
-                .subnetworks()
-                .get(projectId, databaseServerView.getLocation(), databaseNetworkView.getSubnetId())
-                .execute();
+        Subnetwork subnetworkForRedbeams;
+        if (Strings.isNullOrEmpty(databaseNetworkView.getSharedProjectId())) {
+            subnetworkForRedbeams = compute
+                    .subnetworks()
+                    .get(projectId, databaseServerView.getLocation(), databaseNetworkView.getSubnetId())
+                    .execute();
+        } else {
+            subnetworkForRedbeams = compute
+                    .subnetworks()
+                    .get(databaseNetworkView.getSharedProjectId(), databaseServerView.getLocation(), databaseNetworkView.getSubnetId())
+                    .execute();
+        }
         DatabaseInstance databaseInstance = new DatabaseInstance();
         databaseInstance.setCurrentDiskSize(databaseServerView.getAllocatedStorageInMb());
         databaseInstance.setName(deploymentName);
@@ -169,7 +178,9 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                 .setDataDiskSizeGb(databaseServerView.getAllocatedStorageInGb())
                 .setDataDiskType("PD_SSD")
                 .setIpConfiguration(new IpConfiguration()
-                        .setPrivateNetwork(subnetworkForRedbeams.getNetwork()))
+                        .setPrivateNetwork(subnetworkForRedbeams.getNetwork())
+                        .setIpv4Enabled(false)
+                )
                 .setUserLabels(stack.getTags())
                 .setBackupConfiguration(
                         new BackupConfiguration()

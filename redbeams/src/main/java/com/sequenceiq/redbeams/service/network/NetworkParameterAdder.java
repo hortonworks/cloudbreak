@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.common.model.PrivateEndpointType;
@@ -25,6 +26,9 @@ public class NetworkParameterAdder {
 
     @VisibleForTesting
     static final String VPC_CIDR = "vpcCidr";
+
+    @VisibleForTesting
+    static final String SHARED_PROJECT_ID = "sharedProjectId";
 
     @VisibleForTesting
     static final String VPC_CIDRS = "vpcCidrs";
@@ -89,7 +93,9 @@ public class NetworkParameterAdder {
                 }
                 break;
             case GCP:
-                // oddly, nothing to pass on yet
+                if (!Strings.isNullOrEmpty(environmentResponse.getNetwork().getGcp().getSharedProjectId())) {
+                    parameters.put(SHARED_PROJECT_ID, environmentResponse.getNetwork().getGcp().getSharedProjectId());
+                }
                 break;
             case MOCK:
                 parameters.put(VPC_ID, environmentResponse.getNetwork().getMock().getVpcId());
