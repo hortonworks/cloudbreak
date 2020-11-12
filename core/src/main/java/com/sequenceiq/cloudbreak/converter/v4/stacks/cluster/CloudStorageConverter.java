@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +37,7 @@ import com.sequenceiq.common.api.cloudstorage.S3Guard;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.model.CloudStorageCdpService;
@@ -172,7 +172,7 @@ public class CloudStorageConverter {
             throw new BadRequestException(type + " FileSystemType is not supported.");
         }
         if (cloudFileSystemViews.size() > 1) {
-            if (type != FileSystemType.S3 && type != FileSystemType.ADLS_GEN_2) {
+            if (type != FileSystemType.S3 && type != FileSystemType.ADLS_GEN_2 && type != FileSystemType.GCS) {
                 throw new BadRequestException("Multiple identities for " + type + " is not supported yet.");
             }
         }
