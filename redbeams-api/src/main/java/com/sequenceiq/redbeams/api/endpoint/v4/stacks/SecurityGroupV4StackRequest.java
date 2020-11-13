@@ -25,4 +25,11 @@ public class SecurityGroupV4StackRequest {
     public void setSecurityGroupIds(Set<String> securityGroupIds) {
         this.securityGroupIds = securityGroupIds;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityGroupV4StackRequest{" +
+                "securityGroupIds=" + securityGroupIds +
+                '}';
+    }
 }

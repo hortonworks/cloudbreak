@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -59,6 +60,7 @@ public class RedbeamsTerminationService {
         }
 
         DBStack dbStack = dbStackService.getByCrn(crn);
+        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
         }

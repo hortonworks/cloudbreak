@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.RedbeamsFlowManager;
@@ -28,6 +29,7 @@ public class RedbeamsStopService {
 
     public void stopDatabaseServer(String crn) {
         DBStack dbStack = dbStackService.getByCrn(crn);
+        MDCBuilder.addEnvironmentCrn(dbStack.getEnvironmentId());
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Stop called for: {}", dbStack);

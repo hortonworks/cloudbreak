@@ -52,6 +52,10 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.ENV_CRN.toString(), env);
     }
 
+    public static void addEnvironmentCrn(String env) {
+        MDC.put(LoggerContextKey.ENVIRONMENT_CRN.toString(), env);
+    }
+
     public static void addResourceCrn(String crn) {
         MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), crn);
     }

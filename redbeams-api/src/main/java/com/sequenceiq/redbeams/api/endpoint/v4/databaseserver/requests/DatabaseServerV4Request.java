@@ -48,4 +48,12 @@ public class DatabaseServerV4Request extends DatabaseServerV4Base {
     // public void setOracle(OracleParameters oracle) {
     //     this.oracle = oracle;
     // }
+
+    @Override
+    public String toString() {
+        return "DatabaseServerV4Request{" +
+                "connectionUserName='" + connectionUserName + '\'' +
+                ", connectionPassword='" + connectionPassword + '\'' +
+                '}';
+    }
 }

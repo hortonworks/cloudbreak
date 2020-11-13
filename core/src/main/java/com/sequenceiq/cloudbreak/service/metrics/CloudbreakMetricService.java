@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.metrics;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
@@ -13,6 +15,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 
 @Service("MetricService")
 public class CloudbreakMetricService extends AbstractMetricService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakMetricService.class);
 
     private static final String METRIC_PREFIX = "cloudbreak";
 
@@ -77,6 +81,7 @@ public class CloudbreakMetricService extends AbstractMetricService {
                 MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
 
         long millispassed = System.currentTimeMillis() - startMillis;
+        LOGGER.debug("Image copy duration report: {} ms", millispassed);
         recordTimer(millispassed, MetricType.STACK_IMAGE_COPY, tags);
     }
 }

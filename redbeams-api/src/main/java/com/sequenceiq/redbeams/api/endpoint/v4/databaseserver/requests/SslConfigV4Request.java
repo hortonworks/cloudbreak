@@ -23,4 +23,10 @@ public class SslConfigV4Request {
         this.sslMode = sslMode;
     }
 
+    @Override
+    public String toString() {
+        return "SslConfigV4Request{" +
+                "sslMode=" + sslMode +
+                '}';
+    }
 }
