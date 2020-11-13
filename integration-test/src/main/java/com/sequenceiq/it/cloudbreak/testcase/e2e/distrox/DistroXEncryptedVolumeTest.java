@@ -45,7 +45,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running cloudbreak",
+            given = "there is a running cloudbreak change",
             when = "a valid DistroX create request is sent with encrypted discs",
             then = "DistroX cluster is created")
     public void testCreateDistroXWithEncryptedVolume(TestContext testContext) {
