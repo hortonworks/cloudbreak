@@ -20,7 +20,6 @@ import com.cloudera.api.swagger.model.ApiParcelState;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.config.InTestCdhParcelProvider;
 
 @Component
@@ -85,10 +84,10 @@ public class ParcelMockActivatorUtil {
         validateTestContext(testContext);
         checkClusterName(clusterName);
         if (activatedParcel != null) {
-            String path = getPathForGetParcels(clusterName);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
-                    .get(path, (request, response, model) -> getApiParcelListFromSingleParcel(activatedParcel));
+//            String path = getPathForGetParcels(clusterName);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
+//                    .get(path, (request, response, model) -> getApiParcelListFromSingleParcel(activatedParcel));
         } else {
             throw new TestFailException("If you would like to mock the activated parcel you should specify it!");
         }
@@ -109,10 +108,10 @@ public class ParcelMockActivatorUtil {
         validateTestContext(testContext);
         checkClusterName(clusterName);
         if (activatedParcels != null && activatedParcels.length > 0) {
-            String path = getPathForGetParcels(clusterName);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
-                    .get(path, (request, response, model) -> getApiParcelListFromArray(activatedParcels));
+//            String path = getPathForGetParcels(clusterName);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
+//                    .get(path, (request, response, model) -> getApiParcelListFromArray(activatedParcels));
         } else {
             throw new TestFailException("If you would like to mock the activated parcels you should specify at least one!");
         }
@@ -133,10 +132,10 @@ public class ParcelMockActivatorUtil {
         validateTestContext(testContext);
         checkClusterName(clusterName);
         if (CollectionUtils.isNotEmpty(activatedParcels)) {
-            String path = getPathForGetParcels(clusterName);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
-            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
-                    .get(path, (request, response, model) -> getApiParcelListFromCollection(activatedParcels));
+//            String path = getPathForGetParcels(clusterName);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack().clearGet(path);
+//            testContext.getModel().getClouderaManagerMock().getDynamicRouteStack()
+//                    .get(path, (request, response, model) -> getApiParcelListFromCollection(activatedParcels));
         } else {
             throw new TestFailException("If you would like to mock the activated parcels you should specify at least one!");
         }
@@ -174,9 +173,5 @@ public class ParcelMockActivatorUtil {
             list.addItemsItem(parcel);
         }
         return list;
-    }
-
-    private String getPathForGetParcels(String clusterName) {
-        return ClouderaManagerMock.API_V31 + "/clusters/" + clusterName + "/parcels";
     }
 }

@@ -45,10 +45,10 @@ public class EnvironmentEditTest extends AbstractMockTest {
     public void authenticationEditWhenSetExistingKeyAndDeleteManagedSuccessfully(MockedTestContext testContext) {
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
-                .thenReturn((s, model, uriParameters) -> "")
+                .thenReturn((s, uriParameters) -> "")
                 .whenRequested(SpiEndpoints.GetPublicKey.class).get()
                 .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> true)
+                .thenReturn((s, uriParameters) -> true)
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
@@ -89,7 +89,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(HttpMock.class)
                 .whenRequested(SpiEndpoints.GetPublicKey.class).get()
                 .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> true)
+                .thenReturn((s, uriParameters) -> true)
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId("existing-public-key")
                 .withPublicKey(null)
@@ -100,7 +100,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
 
 //                .given(HttpMock.class)
 //                .whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
-//                .thenReturn((s, model, uriParameters) -> "")
+//                .thenReturn((s, uriParameters) -> "")
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(null)
@@ -132,7 +132,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.GetPublicKey.class).get()
                 .pathVariable("publicKeyId", "id")
-                .thenReturn((s, model, uriParameters) -> false)
+                .thenReturn((s, uriParameters) -> false)
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())

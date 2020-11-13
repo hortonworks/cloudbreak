@@ -11,17 +11,14 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
-import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
+import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 
-public class EnvironmentLegacyAuthzGetTest extends AbstractIntegrationTest {
+public class EnvironmentLegacyAuthzGetTest extends AbstractMockTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -31,9 +28,6 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -47,7 +41,6 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractIntegrationTest {
             when = "valid create environment request is sent",
             then = "environment should be created but unauthorized users should not be able to access it")
     public void testCreateEnvironment(TestContext testContext) {
-        MockedTestContext mockedTestContext = AuthorizationTestUtil.mockCmForFreeipa(testContext, freeIpaRouteHandler);
         useRealUmsUser(testContext, AuthUserKeys.LEGACY_NON_POWER);
         testContext
                 .given(CredentialTestDto.class)
@@ -58,7 +51,7 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
                 .given(FreeIpaTestDto.class)
-                .withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_POWER)))
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.describe())

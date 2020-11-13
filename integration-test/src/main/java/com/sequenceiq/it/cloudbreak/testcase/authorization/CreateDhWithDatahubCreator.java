@@ -32,7 +32,6 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
@@ -48,9 +47,6 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
     @Inject
     private DistroXTestClient distroXClient;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Inject
     private UtilTestClient utilTestClient;
@@ -76,7 +72,6 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
             when = "valid create environment request is sent and then datahub is created",
             then = "environment should be created but unauthorized users should not be able to access it")
     public void testCreateEnvironmentWithDh(TestContext testContext) {
-        AuthorizationTestUtil.mockCmForFreeipa(testContext, freeIpaRouteHandler);
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         testContext
                 .given(CredentialTestDto.class)

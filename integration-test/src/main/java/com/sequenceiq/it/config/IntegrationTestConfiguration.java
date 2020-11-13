@@ -23,7 +23,6 @@ import org.springframework.util.StringUtils;
 import org.testng.TestNG;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
 
 @Configuration
 @ComponentScan("com.sequenceiq.it")
@@ -34,16 +33,8 @@ public class IntegrationTestConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationTestConfiguration.class);
 
-    @Value("${integrationtest.spark.sparkPoolSize:10}")
-    private int sparkPoolSize;
-
-    @Value("${mock.server.request.response.print:false}")
-    private boolean printRequestBody;
-
     @Value("${mock.infrastructure.host:localhost}")
     private String mockInfrastructureHost;
-
-    private SparkServerPool sparkServerPool;
 
     @Bean
     public static PropertyResourceConfigurer propertySourcesPlaceholderConfigurer() {
@@ -60,14 +51,6 @@ public class IntegrationTestConfiguration {
         int seed = (int) System.currentTimeMillis();
         LOGGER.info("Created random name generator with Seed: {}", seed);
         return new RandomNameGenerator(seed);
-    }
-
-    @Bean
-    public SparkServerPool sparkServerPool() {
-        if (sparkServerPool == null) {
-            sparkServerPool = new SparkServerPool(sparkPoolSize, printRequestBody, mockInfrastructureHost);
-        }
-        return sparkServerPool;
     }
 
     @Bean

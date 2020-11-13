@@ -1,9 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static javax.ws.rs.core.MediaType.TEXT_PLAIN;
-import static javax.ws.rs.core.Response.Status.OK;
-
-import java.math.BigDecimal;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -13,8 +9,6 @@ import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
@@ -31,15 +25,8 @@ import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
-import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-
-import spark.Route;
 
 public class KerberosConfigTest extends AbstractMockTest {
-
-    private static final String LDAP_SYNC_PATH = "/api/v1/ldap_sync_events";
 
     private static final String SALT_HIGHSTATE = "state.highstate";
 
@@ -52,12 +39,6 @@ public class KerberosConfigTest extends AbstractMockTest {
     @Test(dataProvider = "dataProviderForTest")
     public void testClusterCreationWithValidKerberos(MockedTestContext testContext, String blueprintName, KerberosTestData testData,
             @Description TestCaseDescription testCaseDescription) {
-        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.put(ClouderaManagerMock.API_V31 + "/cm/config", (request, response) -> new ApiConfigList());
-        dynamicRouteStack
-                .post(ClouderaManagerMock.API_V31
-                        + "/cm/commands/importAdminCredentials", (request, response) -> new ApiCommand().id(new BigDecimal(1)));
-
         CreateKerberosConfigRequest request = testData.getRequest();
         request.setName(extendNameWithGeneratedPart(request.getName()));
         testContext
@@ -79,7 +60,6 @@ public class KerberosConfigTest extends AbstractMockTest {
             when = "calling cluster creation",
             then = "the cluster should not been kerberized")
     public void testClusterCreationAttemptWithKerberosConfigWithoutName(MockedTestContext testContext) {
-        mockAmbariBlueprintPassLdapSync(testContext);
         testContext
                 .given("master", InstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.MASTER)
@@ -125,18 +105,6 @@ public class KerberosConfigTest extends AbstractMockTest {
         };
     }
 
-    private void mockAmbariBlueprintPassLdapSync(MockedTestContext testContext) {
-        Route customResponse2 = (request, response) -> {
-            if (LDAP_SYNC_PATH.equals(request.url())) {
-                response.type(TEXT_PLAIN);
-                response.status(OK.getStatusCode());
-            }
-            return "";
-        };
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().clearPost(LDAP_SYNC_PATH);
-        testContext.getModel().getAmbariMock().getDynamicRouteStack().post(LDAP_SYNC_PATH, customResponse2);
-    }
-
     private String extendNameWithGeneratedPart(String name) {
         return String.format("%s-%s", name, resourcePropertyProvider().getName());
     }
@@ -148,7 +116,7 @@ public class KerberosConfigTest extends AbstractMockTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
+                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
 
@@ -175,7 +143,7 @@ public class KerberosConfigTest extends AbstractMockTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
+                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
 
@@ -200,7 +168,7 @@ public class KerberosConfigTest extends AbstractMockTest {
             public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
                 List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
                 verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(SALT_HIGHSTATE).exactTimes(2));
+                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
                 return verifications;
             }
 
@@ -226,7 +194,7 @@ public class KerberosConfigTest extends AbstractMockTest {
         public abstract CreateKerberosConfigRequest getRequest();
 
         private static MockVerification clusterTemplatePostToCMContains(String content) {
-            return MockVerification.verify(HttpMethod.POST, ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE).bodyContains(content);
+            return MockVerification.verify(HttpMethod.POST, "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE").bodyContains(content);
         }
 
     }

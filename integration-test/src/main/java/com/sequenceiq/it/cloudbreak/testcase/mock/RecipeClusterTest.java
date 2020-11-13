@@ -38,8 +38,6 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
-import com.sequenceiq.it.cloudbreak.mock.model.SaltMock;
 import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
@@ -100,7 +98,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .replaceInstanceGroups(instanceGroupName)
                 .when(stackTestClient.createV4(), RunningParameter.key(stackName))
                 .await(STACK_AVAILABLE, RunningParameter.key(stackName))
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(executionTime),
+                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(executionTime),
                         RunningParameter.key(stackName))
                 .validate();
     }
@@ -158,33 +156,12 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
+                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).exactTimes(2))
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
+                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
-
-//    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-//    @Description(
-//            given = "a created cluster with post ambari install recipe and ldap attached to the cluster",
-//            when = "creating cluster",
-//            then = "the LDAP sync is hooked for this salt state in the top.sls")
-//    public void testWhenThereIsNoRecipeButLdapHasAttachedThenThePostAmbariRecipeShouldRunWhichResultThreeHighStateCall(MockedTestContext testContext) {
-//        testContext.getModel().getAmbariMock().postSyncLdap();
-//        testContext.getModel().getAmbariMock().putConfigureLdap();
-//        String ldapName = resourcePropertyProvider().getName();
-//        testContext
-//                .given(LdapTestDto.class)
-//                .withName(ldapName)
-//                .when(ldapTestClient.createV4())
-//                .given(ClusterTestDto.class)
-//                .given(StackTestDto.class)
-//                .when(stackTestClient.createV4())
-//                .await(STACK_AVAILABLE)
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).exactTimes(2))
-//                .validate();
-//    }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -196,8 +173,6 @@ public class RecipeClusterTest extends AbstractMockTest {
         String clusterName = resourcePropertyProvider.getName();
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         String recipeName = resourcePropertyProvider().getName();
-        SetupCmScalingMock mock = new SetupCmScalingMock();
-        mock.configure(testContext, 3, 4, 4);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -222,9 +197,9 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
+                .when(StackScalePostAction.valid().withDesiredCount(4))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
+                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
 
@@ -239,8 +214,6 @@ public class RecipeClusterTest extends AbstractMockTest {
         String recipeName = resourcePropertyProvider().getName();
         String clusterName = resourcePropertyProvider.getName();
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
-        SetupCmScalingMock mock = new SetupCmScalingMock();
-        mock.configure(testContext, 3, 4, 4);
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
@@ -265,9 +238,9 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()))
+                .when(StackScalePostAction.valid().withDesiredCount(4))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_RUN).bodyContains(HIGHSTATE).atLeast(2))
+                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
                 .validate();
     }
 

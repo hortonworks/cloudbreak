@@ -2,15 +2,15 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import javax.inject.Inject;
 
-import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
+import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 
 public class ClouderaManagerSetupTest extends AbstractMockTest {
@@ -28,8 +28,10 @@ public class ClouderaManagerSetupTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.GET, ClouderaManagerMock.USERS).exactTimes(1))
-                .then(MockVerification.verify(HttpMethod.PUT, "/api/v31/users/admin").exactTimes(1))
+                .given(HttpMock.class).whenRequested(ClouderaManagerEndpoints.Users.class).get().verify(CheckCount.times(1))
+//                .given(HttpMock.class).whenRequested(ClouderaManagerEndpoints.Users.class).get().verify(CheckCount.times(1))
+//                .then(MockVerification.verify(HttpMethod.GET, ClouderaManagerMock.USERS).exactTimes(1))
+//                .then(MockVerification.verify(HttpMethod.PUT, "/api/v31/users/admin").exactTimes(1))
                 .validate();
     }
 }

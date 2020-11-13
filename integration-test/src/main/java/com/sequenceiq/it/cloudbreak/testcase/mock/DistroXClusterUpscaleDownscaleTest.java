@@ -15,13 +15,11 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
@@ -63,14 +61,13 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         DistroXTestDto currentContext = testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
                 .given(stack, DistroXTestDto.class)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withName(stack)
                 .withImageSettings(DIX_IMG_KEY)
@@ -98,9 +95,5 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
-    }
-
-    private String getImageCatalogName(TestContext testContext) {
-        return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
     }
 }

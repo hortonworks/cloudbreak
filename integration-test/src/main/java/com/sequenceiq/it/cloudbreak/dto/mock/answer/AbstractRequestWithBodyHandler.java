@@ -8,9 +8,6 @@ import java.util.stream.Collectors;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.mock.GenericRequestResponse;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
@@ -25,20 +22,17 @@ abstract class AbstractRequestWithBodyHandler<S, T, R> extends AbstractRequestHa
     }
 
     public HttpMock thenReturn(GenericRequestResponse<S, T> genericResponse) {
-        S handle = genericResponse.handle(null, null, null);
+        S handle = genericResponse.handle(null, null);
         executeQuery().executeConfigure(getPath(), pathVariables(), new MockResponse(handle, getMethod().getHttpMethod().name(), getPath()));
         return getMock();
     }
 
-    abstract T prepareRequestInstance(spark.Request request);
+//    abstract T prepareRequestInstance(spark.Request request);
 
     public HttpMock verifyRequestBodies(Matcher<Iterable<? super T>> matcher) {
-        getMock().then(new Assertion<HttpMock, CloudbreakClient>() {
-            @Override
-            public HttpMock doAssertion(TestContext testContext, HttpMock testDto, CloudbreakClient client) throws Exception {
-                Assert.assertThat(getPath() + " uri " + getMethod().getMethodName() + " method", requestBodies(), matcher);
-                return testDto;
-            }
+        getMock().then((testContext, testDto, client) -> {
+            Assert.assertThat(getPath() + " uri " + getMethod().getMethodName() + " method", requestBodies(), matcher);
+            return testDto;
         });
         return getMock();
     }

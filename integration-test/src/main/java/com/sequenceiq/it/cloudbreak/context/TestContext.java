@@ -67,8 +67,6 @@ import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
-import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
@@ -203,11 +201,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private Tracer tracer;
-
-    @Inject
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
-
-    private DefaultModel model;
 
     private boolean validated;
 
@@ -1279,7 +1272,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     protected void checkShutdown() {
         if (shutdown) {
-            throw new IllegalStateException("Cannot access this MockedTestContext anymore because of it is shutted down.");
+            throw new IllegalStateException("Cannot access this TestContext anymore because of it is shutted down.");
         }
     }
 
@@ -1304,7 +1297,7 @@ public abstract class TestContext implements ApplicationContextAware {
             try {
                 testDto.cleanUp(this, getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(testDto.getCrn()).getAccountId()));
             } catch (Exception e) {
-                LOGGER.error("Cleaning up of {} resource is failing, because of: {}", testDto.getName(), e.getMessage(), e);
+                LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }
         }
         shutdown();

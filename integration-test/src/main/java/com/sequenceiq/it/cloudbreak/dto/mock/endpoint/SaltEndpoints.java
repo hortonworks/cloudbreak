@@ -21,6 +21,11 @@ public final class SaltEndpoints {
         SaltMultipartRequestAnswer<String> post();
     }
 
+    @SparkUri(url = SALT_BOOT_ROOT + "/salt/action/distribute")
+    public interface SaltActionDistribute {
+        SaltMultipartRequestAnswer<String> post();
+    }
+
     // SALT_BOOT_ROOT + "/salt/server/pillar/distribute"
     @SparkUri(url = SALT_BOOT_ROOT + "/salt/server/pillar/distribute")
     public interface SaltPillar {

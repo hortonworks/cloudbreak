@@ -3,8 +3,6 @@ package com.sequenceiq.it.verification;
 import java.util.HashMap;
 import java.util.Map;
 
-import spark.Request;
-
 public class Call {
 
     private String method;
@@ -20,34 +18,6 @@ public class Call {
     private final Map<String, String> headers = new HashMap<>();
 
     private Map<String, String> parameters = new HashMap<>();
-
-    private Request request;
-
-    private Call() {
-    }
-
-    /**
-     * Factory method
-     */
-    public static Call fromRequest(Request request) {
-        Call call = new Call();
-
-        call.request = request;
-        call.method = request.requestMethod();
-        call.uri = request.uri();
-        call.contentType = request.contentType();
-        call.url = request.url();
-
-        for (String s : request.headers()) {
-            call.headers.put(s, request.headers(s));
-        }
-
-        call.parameters = new HashMap<>(request.params());
-
-        call.postBody = request.body();
-
-        return call;
-    }
 
     /**
      * URI of the call
@@ -93,13 +63,6 @@ public class Call {
      */
     public CharSequence getPostBody() {
         return postBody;
-    }
-
-    /**
-     * Returns raw HTTP request
-     */
-    public Request getRequest() {
-        return request;
     }
 
     @Override

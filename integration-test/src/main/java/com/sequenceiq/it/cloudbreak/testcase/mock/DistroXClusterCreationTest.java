@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogEr
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -38,10 +37,8 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -105,7 +102,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -113,7 +110,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
                 .given(DistroXTestDto.class)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -138,7 +134,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         givenAnEnvironmentInStoppedState(testContext)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -146,7 +142,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
                 .given(DistroXTestDto.class)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -164,7 +159,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -172,7 +167,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
                 .given(DistroXTestDto.class)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -213,7 +207,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(getEnvironmentTestClient().describe(), key(storageEnvKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withCloudStorage(testStorage())
                 .withEnvironmentKey(key(storageEnvKey))
@@ -222,7 +215,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -232,7 +225,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withRdsConfigNames()
                 .given(DistroXTestDto.class)
                 .withEnvironmentKey(storageEnvKey)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -267,7 +259,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -275,7 +266,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -285,7 +276,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withRdsConfigNames()
                 .given(DistroXTestDto.class)
                 .withEnvironmentKey(envKey)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -304,7 +294,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
-                .withImageCatalog(getImageCatalogName(testContext))
+                .withImageCatalog()
                 .withImageId(IMAGE_CATALOG_ID)
                 .given(CM_FOR_DISTRO_X, DistroXClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, DistroXClusterTestDto.class)
@@ -312,7 +302,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withValidateBlueprint(false)
                 .withClouderaManager(CM_FOR_DISTRO_X)
                 .given(DistroXTestDto.class)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
@@ -328,15 +317,11 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    private String getImageCatalogName(MockedTestContext testContext) {
-        return testContext.get(ImageCatalogTestDto.class).getRequest().getName();
-    }
-
     @SuppressWarnings("unchecked")
     private static DistroXTestDto distroxClusterTemplateContainsMockHostname(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains(MOCK_HOSTNAME)
                         .exactTimes(2),
                 key(DISTRO_X_STACK)
@@ -347,7 +332,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsCDHAsProduct(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains("\"product\":\"CDH\"")
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
@@ -368,7 +353,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsComputeNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"))
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
@@ -379,7 +364,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsWorkerNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "worker"))
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
@@ -390,7 +375,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsMasterNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "master"))
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
@@ -401,7 +386,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsClusterName(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains(String.format("\"clusterName\":\"%s\"", testContext.get(DistroXTestDto.class).getName()))
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
@@ -412,13 +397,13 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     private static DistroXTestDto distroxClusterTemplateContainsRepositories(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         return testDto.then(
                 MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                         .bodyContains("repositories")
                         .exactTimes(1),
                 key(DISTRO_X_STACK)
         )
                 .then(MockVerification.verify(HttpMethod.POST,
-                        ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE)
+                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
                                 .bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/")
                                 .exactTimes(1),
                         key(DISTRO_X_STACK));

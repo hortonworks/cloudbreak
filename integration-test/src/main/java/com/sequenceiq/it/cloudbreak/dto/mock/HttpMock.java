@@ -21,17 +21,12 @@ import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.RequestData;
-import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.spark.SparkServer;
-import com.sequenceiq.it.cloudbreak.spark.SparkServerPool;
 
 @Prototype
 public class HttpMock implements CloudbreakTestDto {
@@ -52,9 +47,6 @@ public class HttpMock implements CloudbreakTestDto {
     private String mockInfrastructureHost;
 
     @Inject
-    private SparkServerPool sparkServerPool;
-
-    @Inject
     private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
 
     private String name;
@@ -64,12 +56,6 @@ public class HttpMock implements CloudbreakTestDto {
     private TestContext testContext;
 
     private List<RequestData> requestList = new LinkedList<>();
-
-    private DefaultModel model;
-
-    private DynamicRouteStack dynamicRouteStack;
-
-    private SparkServer sparkServer;
 
     protected HttpMock(TestContext testContext) {
         this.testContext = testContext;
@@ -111,20 +97,6 @@ public class HttpMock implements CloudbreakTestDto {
 
     @Override
     public CloudbreakTestDto valid() {
-        if (testContext instanceof MockedTestContext) {
-            MockedTestContext testContext = (MockedTestContext) this.testContext;
-            model = testContext.getModel();
-            dynamicRouteStack = testContext.dynamicRouteStack();
-            sparkServer = testContext.getSparkServer();
-        } else {
-            LOGGER.info("Creating HttpMock server");
-            sparkServer = sparkServerPool.popSecure();
-            if (sparkServer != null) {
-                LOGGER.info("HttpMock got spark server: {}", sparkServer);
-            }
-            model = new DefaultModel();
-            model.setMockServerAddress(mockInfrastructureHost);
-        }
         return this;
     }
 
@@ -164,7 +136,7 @@ public class HttpMock implements CloudbreakTestDto {
 
     public <T> String getUrl(Class<T> endpoint, java.lang.reflect.Method method) {
         SparkUriParameters parameters = new SparkUriAnnotationHandler(endpoint, method).getParameters();
-        return sparkServer.getEndpoint() + parameters.getUri();
+        return "https://" + mockInfrastructureHost + ":10090" + parameters.getUri();
     }
 
     public List<RequestData> getRequestList() {
@@ -201,18 +173,6 @@ public class HttpMock implements CloudbreakTestDto {
 
     public void validate() {
         testContext.handleExceptionsDuringTest(TestErrorLog.FAIL);
-    }
-
-    public DefaultModel getModel() {
-        return model;
-    }
-
-    public DynamicRouteStack getDynamicRouteStack() {
-        return dynamicRouteStack;
-    }
-
-    public SparkServer getSparkServer() {
-        return sparkServer;
     }
 
     @Override

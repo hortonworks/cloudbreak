@@ -24,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -38,9 +37,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -79,7 +75,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
                 .given(stack, StackTestDto.class).withCluster(cluster)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))

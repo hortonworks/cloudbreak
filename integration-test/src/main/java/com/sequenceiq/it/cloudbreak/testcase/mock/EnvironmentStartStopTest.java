@@ -67,18 +67,33 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it and validate the flow events")
-    public void testCreateStopStartEnvironment(MockedTestContext testContext) {
-        setUpFreeIpaRouteStubbing(testContext);
-        setUpFreeIpaHealthCheckRouteStubbing(testContext);
-        getFreeIpaHealthCheckHandler().setHealthy();
+    public void testCreatetEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
-                .withCatalog(testContext
-                        .getImageCatalogMockServerSetup()
+                .withCatalog(getImageCatalogMockServerSetup()
+                        .getFreeIpaImageCatalogUrl())
+                .when(freeIpaTestClient.create())
+                .await(AVAILABLE)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "create an attached SDX and Datahub",
+            then = "should be stopped first and started after it and validate the flow events")
+    public void testCreateStopStartEnvironment(MockedTestContext testContext) {
+        testContext
+                .given(EnvironmentNetworkTestDto.class)
+                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .withCatalog(getImageCatalogMockServerSetup()
                         .getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)

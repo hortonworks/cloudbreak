@@ -7,7 +7,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import javax.inject.Inject;
@@ -71,7 +70,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create(), key(envKey))
                 .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
@@ -136,7 +134,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create(), key(envKey))
                 .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
@@ -215,7 +212,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create(), key(envKey))
                 .await(EnvironmentStatus.AVAILABLE, key(envKey))
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withDefaultSDXSettings(Optional.of(testContext.getSparkServer().getPort()))
                 .withDatabase(sdxDatabaseRequest)
                 .withCustomDomain(customDomain)
                 .withEnvironmentKey(key(envKey))

@@ -28,13 +28,9 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
-import com.sequenceiq.it.cloudbreak.mock.DefaultModel;
-import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.performance.Measure;
 import com.sequenceiq.it.cloudbreak.performance.MeasureAll;
 import com.sequenceiq.it.cloudbreak.performance.PerformanceIndicator;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
-import com.sequenceiq.it.cloudbreak.spark.SparkServer;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
@@ -397,42 +393,6 @@ public class MeasuredTestContext extends MockedTestContext {
 
     protected TestContext getTestContext() {
         return this;
-    }
-
-    @Override
-    public SparkServer getSparkServer() {
-        if (wrappedTestContext instanceof MockedTestContext) {
-            return ((MockedTestContext) wrappedTestContext).getSparkServer();
-        } else {
-            throw new IllegalArgumentException("Not a Mock TestContext");
-        }
-    }
-
-    @Override
-    public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
-        if (wrappedTestContext instanceof MockedTestContext) {
-            return ((MockedTestContext) wrappedTestContext).getImageCatalogMockServerSetup();
-        } else {
-            throw new IllegalArgumentException("Not a Mock TestContext");
-        }
-    }
-
-    @Override
-    public DefaultModel getModel() {
-        if (wrappedTestContext instanceof MockedTestContext) {
-            return ((MockedTestContext) wrappedTestContext).getModel();
-        } else {
-            throw new IllegalArgumentException("Not a Mock TestContext");
-        }
-    }
-
-    @Override
-    public DynamicRouteStack dynamicRouteStack() {
-        if (wrappedTestContext instanceof MockedTestContext) {
-            return ((MockedTestContext) wrappedTestContext).dynamicRouteStack();
-        } else {
-            throw new IllegalArgumentException("Not a Mock TestContext");
-        }
     }
 
     @Override
