@@ -10,7 +10,10 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -176,6 +179,17 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
+        } else {
+            throw notFound("SDX cluster", clusterCrn).get();
+        }
+    }
+
+    public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
+        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+        if (envCrn.isPresent()) {
+            return envCrn.get();
         } else {
             throw notFound("SDX cluster", clusterCrn).get();
         }
@@ -472,7 +486,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
             if (!isRazSupported(sdxClusterRequest.getRuntime(), cloudPlatform)) {
-                String errorMsg =  AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
+                String errorMsg = AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
                         "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
                 validationBuilder.error(errorMsg + sdxClusterRequest.getRuntime());
             }
@@ -721,7 +735,19 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.of(getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn).getEnvCrn());
+        return Optional.of(getEnvCrnByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn));
+    }
+
+    @Override
+    public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
+        Set<String> resourceCrnSet = new LinkedHashSet<>(resourceCrns);
+        List<SdxCluster> clusters = sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNull(getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()),
+                resourceCrnSet);
+        Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
+        clusters.forEach(cluster -> {
+            resourceCrnWithEnvCrn.put(cluster.getCrn(), Optional.ofNullable(cluster.getEnvCrn()));
+        });
+        return resourceCrnWithEnvCrn;
     }
 
     @Override

@@ -2,13 +2,12 @@ package com.sequenceiq.authorization.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -20,16 +19,22 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.authorization.service.list.ListPermissionChecker;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PermissionCheckServiceTest {
@@ -45,13 +50,25 @@ public class PermissionCheckServiceTest {
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @Mock
-    private PermissionChecker permissionChecker;
+    private ListPermissionChecker listPermissionChecker;
+
+    @Mock
+    private InternalUserModifier internalUserModifier;
+
+    @Mock
+    private CrnUserDetailsService crnUserDetailsService;
 
     @Mock
     private ReflectionUtil reflectionUtil;
 
-    @Spy
-    private List<PermissionChecker> permissionCheckers = new ArrayList<PermissionChecker>();
+    @Mock
+    private AccountAuthorizationService accountAuthorizationService;
+
+    @Mock
+    private ResourceAuthorizationService resourceAuthorizationService;
+
+    @InjectMocks
+    private PermissionCheckService underTest;
 
     @Mock
     private ProceedingJoinPoint proceedingJoinPoint;
@@ -59,71 +76,159 @@ public class PermissionCheckServiceTest {
     @Mock
     private MethodSignature methodSignature;
 
-    @InjectMocks
-    private PermissionCheckService underTest;
-
     @Before
-    public void setup() {
-        permissionCheckers.add(permissionChecker);
-        underTest.populatePermissionCheckMap();
+    public void setUp() {
         when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
     }
 
     @Test
-    public void testHasPermissionIfAuthorizationDisabled() throws NoSuchMethodException {
+    public void testDisabledAuthorization() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorization"));
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                listPermissionChecker,
+                resourceAuthorizationService);
     }
 
     @Test
-    public void testHasPermissionIfThereAreTooManyAnnotationOnMethod() throws NoSuchMethodException {
+    public void testDisableAnnotationCancelsOtherAnnotations() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        verify(permissionChecker, times(0)).checkPermissions(any(), anyString(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                listPermissionChecker,
+                resourceAuthorizationService);
     }
 
     @Test
-    public void testHasPermission() throws NoSuchMethodException {
-        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("correctMethod"));
-        when(permissionChecker.supportedAnnotation()).thenReturn(CheckPermissionByAccount.class);
-        doNothing().when(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
-        when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
+    public void testAccountAuthorization() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethod"));
 
-        underTest.populatePermissionCheckMap();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        verify(permissionChecker).checkPermissions(any(), any(), any(), any(), anyLong());
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
+        verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                listPermissionChecker);
     }
 
     @Test
-    public void testInternalOnlyIfNotInternalActor() throws NoSuchMethodException {
+    public void testAccountAndResourceBasedAuthorization() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountAndResourceBasedMethod", String.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                listPermissionChecker);
+    }
+
+    @Test
+    public void testResourceBasedAuthorization() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("resourceBasedMethod", String.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                listPermissionChecker);
+    }
+
+    @Test
+    public void testList() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("listMethod"));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(listPermissionChecker).checkPermissions(any(FilterListBasedOnPermissions.class), eq(USER_CRN),
+                eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verify(commonPermissionCheckingUtils, times(0)).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                resourceAuthorizationService);
+    }
+
+    @Test
+    public void testListAndAccoundBasedAuthorization() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("listAndAcccountBasedMethod"));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
+        verify(listPermissionChecker).checkPermissions(any(FilterListBasedOnPermissions.class), eq(USER_CRN),
+                eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verify(commonPermissionCheckingUtils, times(0)).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                resourceAuthorizationService);
+    }
+
+    @Test
+    public void testInternalOnlyMethodIfNotInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
-        when(permissionChecker.supportedAnnotation()).thenReturn(InternalOnly.class);
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have no access to this resource.");
 
-        underTest.populatePermissionCheckMap();
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
     }
 
     @Test
-    public void testInternalOnlyIfInternalActor() throws NoSuchMethodException {
+    public void testInternalOnlyMethodIfInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
-        when(permissionChecker.supportedAnnotation()).thenReturn(InternalOnly.class);
 
-        underTest.populatePermissionCheckMap();
         ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        verify(commonPermissionCheckingUtils).proceed(any(), any(), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                listPermissionChecker,
+                resourceAuthorizationService);
+    }
+
+    @Test
+    public void testInternalOnlyClassIfNotInternalActor() throws NoSuchMethodException {
+        when(commonPermissionCheckingUtils.isInternalOnly(proceedingJoinPoint)).thenReturn(true);
+        when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
+
+        thrown.expect(AccessDeniedException.class);
+        thrown.expectMessage("You have no access to this resource.");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+    }
+
+    @Test
+    public void testInternalOnlyClassIfInternalActor() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
+
+        ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                listPermissionChecker,
+                resourceAuthorizationService);
     }
 
     private static class ExampleClass {
@@ -134,18 +239,49 @@ public class PermissionCheckServiceTest {
         }
 
         @DisableCheckPermissions
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
         public void tooManyAnnotation() {
 
         }
 
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
-        public void correctMethod() {
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        public void accountBasedMethod() {
 
+        }
+
+        @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
+        public void resourceBasedMethod(@ResourceCrn String crn) {
+
+        }
+
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL)
+        public void accountAndResourceBasedMethod(@ResourceCrn String crn) {
+
+        }
+
+        @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        public List<ResourceCrnAwareApiModel> listMethod() {
+            return List.of();
+        }
+
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        public List<ResourceCrnAwareApiModel> listAndAcccountBasedMethod() {
+            return List.of();
         }
 
         @InternalOnly
         public void internalOnlyMethod() {
+
+        }
+    }
+
+    @InternalOnly
+    public static class InternalOnlyClassExample {
+
+        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+        public void get() {
 
         }
     }

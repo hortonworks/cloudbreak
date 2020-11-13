@@ -84,14 +84,17 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
-                                "'datalake/describeDetailedDatalake'.*")
+                        RunningParameter.expectedMessage("Doesn't have 'datalake/describeDetailedDatalake' right on any of the " +
+                                "'environment'[(]-s[)] crn:cdp:environments:us-west-1:.*:environment:.* " +
+                                "or on 'datalake'[(]-s[)] crn:cdp:datalake:us-west-1:.*:datalake:.*.")
                                 .withKey("SdxDetailedDescribeInternalAction"))
                 .given(RenewDatalakeCertificateTestDto.class)
                 .withStackCrn(testContext.get(sdxInternal).getCrn())
                 .when(sdxTestClient.renewDatalakeCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: 'datalake/repairDatalake'.*")
+                        RunningParameter.expectedMessage("Doesn't have 'datalake/repairDatalake' right on any of the " +
+                                "'environment'[(]-s[)] crn:cdp:environments:us-west-1:.*:environment:.* " +
+                                "or on 'datalake'[(]-s[)] crn:cdp:datalake:us-west-1:.*:datalake:.*.")
                                 .withKey("RenewDatalakeCertificateAction"))
                 .validate();
     }

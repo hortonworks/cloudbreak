@@ -420,7 +420,7 @@ public class GrpcUmsClient {
             return true;
         }
         if (!isEntitledAndLogResult(actorCrn, ThreadBasedUserCrnProvider.getAccountId(), Entitlement.CB_AUTHZ_POWER_USERS)) {
-            if (isReadRight(right)) {
+            if (RightUtil.isReadRight(right)) {
                 LOGGER.info("In account {} authorization related entitlement disabled, thus skipping permission check!!",
                         ThreadBasedUserCrnProvider.getAccountId());
                 return true;
@@ -881,17 +881,6 @@ public class GrpcUmsClient {
                 .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
                 .setResource(resourceRoleName)
                 .build();
-    }
-
-    protected boolean isReadRight(String action) {
-        if (action == null) {
-            return false;
-        }
-        String[] parts = action.split("/");
-        if (parts.length == 2 && parts[1] != null && parts[1].equals("read")) {
-            return true;
-        }
-        return false;
     }
 
     public Crn getRoleCrn(String roleName) {

@@ -3,13 +3,19 @@ package com.sequenceiq.distrox.v1.distrox;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Before;
@@ -26,10 +32,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -37,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
@@ -160,6 +168,28 @@ public class StackOperationsTest {
         verify(stackApiViewService, times(1)).retrieveStackByCrnAndType(anyString(), any(StackType.class));
         verify(converterUtil, times(1)).convert(any(StackApiView.class), any());
         verify(environmentServiceDecorator, times(1)).prepareEnvironment(any(StackViewV4Response.class));
+    }
+
+    @Test
+    public void testGetWithEnvironmentCrnsByResourceCrns() {
+        StackCrnView stack1 = mock(StackCrnView.class);
+        when(stack1.getResourceCrn()).thenReturn("crn1");
+        when(stack1.getEnvironmentCrn()).thenReturn("envcrn1");
+        StackCrnView stack2 = mock(StackCrnView.class);
+        when(stack2.getResourceCrn()).thenReturn("crn2");
+        when(stack2.getEnvironmentCrn()).thenReturn("envcrn2");
+        StackCrnView stackWithoutEnv = mock(StackCrnView.class);
+        when(stackWithoutEnv.getResourceCrn()).thenReturn("crn3");
+        when(stackService.findAllByCrn(anySet())).thenReturn(List.of(stack1, stack2, stackWithoutEnv));
+
+        Map<String, Optional<String>> result = ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:123:user:456",
+                () -> underTest.getEnvironmentCrnsByResourceCrns(List.of("crn1", "crn2", "crn3")));
+
+        Map<String, Optional<String>> expected = new LinkedHashMap<>();
+        expected.put("crn1", Optional.of("envcrn1"));
+        expected.put("crn2", Optional.of("envcrn2"));
+        expected.put("crn3", Optional.empty());
+        assertEquals(expected, result);
     }
 
     private StackV4Response stackResponse() {

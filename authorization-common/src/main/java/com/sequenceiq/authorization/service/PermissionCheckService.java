@@ -1,14 +1,9 @@
 package com.sequenceiq.authorization.service;
 
 import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,12 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.service.list.ListPermissionChecker;
-import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -31,6 +26,8 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class PermissionCheckService {
@@ -39,9 +36,6 @@ public class PermissionCheckService {
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
-
-    @Inject
-    private List<PermissionChecker<? extends Annotation>> permissionCheckers;
 
     @Inject
     private ListPermissionChecker listPermissionChecker;
@@ -55,18 +49,17 @@ public class PermissionCheckService {
     @Inject
     private ReflectionUtil reflectionUtil;
 
-    private final Map<Class<? extends Annotation>, PermissionChecker<? extends Annotation>> permissionCheckerMap = new HashMap<>();
+    @Inject
+    private AccountAuthorizationService accountAuthorizationService;
 
-    @PostConstruct
-    public void populatePermissionCheckMap() {
-        permissionCheckers.forEach(permissionChecker -> permissionCheckerMap.put(permissionChecker.supportedAnnotation(), permissionChecker));
-    }
+    @Inject
+    private ResourceAuthorizationService resourceAuthorizationService;
 
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         long startTime = System.currentTimeMillis();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         LOGGER.debug("Permission check started at {} (method: {})", startTime,
-                methodSignature.getMethod().getDeclaringClass().getSimpleName() + "#" + methodSignature.getMethod().getName());
+                methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
         Optional<Object> initiatorUserCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, InitiatorUserCrn.class);
         if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())
                 && initiatorUserCrn.isPresent()
@@ -76,60 +69,62 @@ public class PermissionCheckService {
             return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         }
 
-        if (commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint) ||
-                InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+        if (commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint)
+                || hasAnyAnnotation(methodSignature, DisableCheckPermissions.class, CustomPermissionCheck.class)
+                || InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
 
-        checkPrerequisitesOnClass(proceedingJoinPoint, methodSignature);
-
-        return checkPermission(proceedingJoinPoint, methodSignature, startTime);
-    }
-
-    protected Object checkPermission(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        validateNotInternalOnly(proceedingJoinPoint, methodSignature);
 
-        List<? extends Annotation> annotations = AuthorizationAnnotationUtils.getPossibleMethodAnnotations().stream()
-                .map(c -> methodSignature.getMethod().getAnnotation(c))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        if (hasAnnotation(methodSignature, CheckPermissionByAccount.class)) {
+            accountAuthorizationService.authorize(methodSignature.getMethod().getAnnotation(CheckPermissionByAccount.class), userCrn);
+        }
 
-        checkPrerequisitesOnMethod(methodSignature, annotations);
-
-        if (annotations.stream().anyMatch(annotation -> annotation instanceof DisableCheckPermissions)) {
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof CustomPermissionCheck)) {
-            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        } else if (annotations.stream().anyMatch(annotation -> annotation instanceof FilterListBasedOnPermissions)) {
-            FilterListBasedOnPermissions listFilterAnnotation = (FilterListBasedOnPermissions) annotations.stream()
-                    .filter(annotation -> annotation instanceof FilterListBasedOnPermissions).findFirst().get();
+        if (hasAnnotation(methodSignature, FilterListBasedOnPermissions.class)) {
+            FilterListBasedOnPermissions listFilterAnnotation = methodSignature.getMethod().getAnnotation(FilterListBasedOnPermissions.class);
             return listPermissionChecker.checkPermissions(listFilterAnnotation, userCrn, proceedingJoinPoint, methodSignature, startTime);
         }
 
-        annotations.stream().forEach(annotation -> {
-            PermissionChecker<? extends Annotation> permissionChecker = permissionCheckerMap.get(annotation.annotationType());
-            permissionChecker.checkPermissions(annotation, userCrn, proceedingJoinPoint, methodSignature, startTime);
-        });
+        resourceAuthorizationService.authorize(userCrn, proceedingJoinPoint, methodSignature, getRequestId());
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
     }
 
-    private void checkPrerequisitesOnClass(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
-        if (commonPermissionCheckingUtils.isInternalOnly(proceedingJoinPoint) &&
-                !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
-            getAccessDeniedAndLogInternalActorRestriction(methodSignature);
+    private void validateNotInternalOnly(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
+        if (commonPermissionCheckingUtils.isInternalOnly(proceedingJoinPoint)) {
+            throw getAccessDeniedAndLogInternalActorRestriction(methodSignature);
         }
-    }
-
-    private void checkPrerequisitesOnMethod(MethodSignature methodSignature, List<? extends Annotation> annotations) {
-        if (annotations.stream().anyMatch(annotation -> annotation instanceof InternalOnly) &&
-            !InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+        if (hasAnnotation(methodSignature, InternalOnly.class)) {
             throw getAccessDeniedAndLogInternalActorRestriction(methodSignature);
         }
     }
 
     private AccessDeniedException getAccessDeniedAndLogInternalActorRestriction(MethodSignature methodSignature) {
         LOGGER.error("Method {} should be called by internal actor only.",
-                methodSignature.getMethod().getDeclaringClass().getSimpleName()  + "#" + methodSignature.getMethod().getName());
+                methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
         return new AccessDeniedException("You have no access to this resource.");
+    }
+
+    @SafeVarargs
+    private boolean hasAnyAnnotation(MethodSignature methodSignature, Class<? extends Annotation>... annotations) {
+        for (Class<? extends Annotation> annotation : annotations) {
+            if (hasAnnotation(methodSignature, annotation)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasAnnotation(MethodSignature methodSignature, Class<? extends Annotation> annotation) {
+        return methodSignature.getMethod().isAnnotationPresent(annotation);
+    }
+
+    protected Optional<String> getRequestId() {
+        String requestId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString());
+        if (requestId == null) {
+            requestId = UUID.randomUUID().toString();
+        }
+        return Optional.of(requestId);
     }
 }

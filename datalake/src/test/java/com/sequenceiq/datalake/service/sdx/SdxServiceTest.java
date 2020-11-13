@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +57,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -794,6 +797,29 @@ class SdxServiceTest {
         underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
         verify(sdxClusterRepository, times(3)).save(sdxClusterArgumentCaptor.capture());
         Assert.assertEquals("7.0.2", sdxClusterArgumentCaptor.getValue().getRuntime());
+    }
+
+    @Test
+    public void testGetWithEnvironmentCrnsByResourceCrns() {
+        SdxCluster cluster1 = new SdxCluster();
+        cluster1.setCrn("crn1");
+        cluster1.setEnvCrn("envcrn1");
+        SdxCluster cluster2 = new SdxCluster();
+        cluster2.setCrn("crn2");
+        cluster2.setEnvCrn("envcrn2");
+        SdxCluster clusterWithoutEnv = new SdxCluster();
+        clusterWithoutEnv.setCrn("crn3");
+        when(sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNull(anyString(), anySet()))
+                .thenReturn(List.of(cluster1, cluster2, clusterWithoutEnv));
+
+        Map<String, Optional<String>> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getEnvironmentCrnsByResourceCrns(List.of("crn1", "crn2", "crn3")));
+
+        Map<String, Optional<String>> expected = new LinkedHashMap<>();
+        expected.put("crn1", Optional.of("envcrn1"));
+        expected.put("crn2", Optional.of("envcrn2"));
+        expected.put("crn3", Optional.empty());
+        assertEquals(expected, result);
     }
 
     private void setSpot(SdxClusterRequest sdxClusterRequest) {

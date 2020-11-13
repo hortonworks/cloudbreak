@@ -34,6 +34,12 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     Optional<SdxCluster> findByAccountIdAndCrnAndDeletedIsNull(String accountId, String crn);
 
+    @Query("SELECT s.envCrn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn = :crn AND s.deleted is null")
+    Optional<String> findEnvCrnByAccountIdAndCrnAndDeletedIsNull(@Param("accountId") String accountId, @Param("crn") String crn);
+
+    @Query("SELECT s FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:crns) AND s.deleted is null")
+    List<SdxCluster> findAllByAccountIdAndCrnAndDeletedIsNull(@Param("accountId") String accountId, @Param("crns") Set<String> crns);
+
     List<SdxCluster> findByAccountIdAndDeletedIsNull(String accountId);
 
     List<SdxCluster> findByAccountIdAndEnvCrnAndDeletedIsNull(String accountId, String envCrn);

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -197,6 +198,12 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT s FROM Stack s WHERE s.resourceCrn = :crn")
     Optional<Stack> findByResourceCrn(@Param("crn") String crn);
+
+    @Query("SELECT s.environmentCrn FROM Stack s WHERE s.resourceCrn = :crn")
+    Optional<String> findEnvCrnByResourceCrn(@Param("crn") String crn);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.environmentCrn as environmentCrn FROM Stack s WHERE s.resourceCrn IN (:crns)")
+    List<StackCrnView> findAllByResourceCrn(@Param("crns") Set<String> crn);
 
     @Query("SELECT VALUE(s.parameters) FROM Stack s WHERE s.id = :stackId AND KEY(s.parameters) = :ttlKey")
     String findTimeToLiveValueForSTack(@Param("stackId") Long stackId, @Param("ttlKey") String ttl);

@@ -57,10 +57,7 @@ public class DistroxService {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
         ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrn.isEmpty()) {
-            // we are not able to authorize distrox list stop endpoint, this is the reason why we do it in a cycle
-            for (String crn : pollingCrn) {
-                distroXV1Endpoint.putStopByCrn(crn);
-            }
+            distroXV1Endpoint.putStopByCrns(pollingCrn);
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)

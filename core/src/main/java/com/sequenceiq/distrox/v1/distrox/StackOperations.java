@@ -1,7 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,6 +45,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -356,7 +361,18 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.of(stackService.getByCrn(resourceCrn).getEnvironmentCrn());
+        return Optional.of(stackService.getEnvCrnByCrn(resourceCrn));
+    }
+
+    @Override
+    public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
+        Set<String> resourceCrnSet = new LinkedHashSet<>(resourceCrns);
+        List<StackCrnView> stacks = stackService.findAllByCrn(resourceCrnSet);
+        Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
+        stacks.forEach(stack -> {
+            resourceCrnWithEnvCrn.put(stack.getResourceCrn(), Optional.ofNullable(stack.getEnvironmentCrn()));
+        });
+        return resourceCrnWithEnvCrn;
     }
 
     public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, Long workspaceId,

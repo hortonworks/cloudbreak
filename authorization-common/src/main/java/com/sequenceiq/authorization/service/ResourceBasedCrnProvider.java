@@ -1,6 +1,8 @@
 package com.sequenceiq.authorization.service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -23,6 +25,10 @@ public interface ResourceBasedCrnProvider {
 
     default Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
         return Optional.empty();
+    }
+
+    default Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
+        return Map.of();
     }
 
     AuthorizationResourceType getResourceType();
