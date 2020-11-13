@@ -15,8 +15,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import spark.Response;
-
 public class Verification {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Verification.class);
@@ -27,7 +25,7 @@ public class Verification {
 
     private final String httpMethod;
 
-    private Map<Call, Response> requestResponseMap;
+    private List<Call> requestResponseMap;
 
     private Integer atLeast;
 
@@ -37,7 +35,7 @@ public class Verification {
 
     private final Map<String, Integer> bodyContainsList = new HashMap<>();
 
-    public Verification(String path, String httpMethod, Map<Call, Response> requestResponseMap, boolean regex) {
+    public Verification(String path, String httpMethod, List<Call> requestResponseMap, boolean regex) {
         this.path = path;
         this.regex = regex;
         this.httpMethod = httpMethod;
@@ -83,7 +81,7 @@ public class Verification {
         checkExactTimes(times);
     }
 
-    public void verify(Map<Call, Response> requestResponseMap) {
+    public void verify(List<Call> requestResponseMap) {
         this.requestResponseMap = requestResponseMap;
         verify();
     }
@@ -121,7 +119,7 @@ public class Verification {
 
     private int getTimesMatched() {
         int times = 0;
-        for (Call call : requestResponseMap.keySet()) {
+        for (Call call : requestResponseMap) {
             boolean pathMatched = isPathMatched(call);
             if (call.getMethod().equals(httpMethod) && pathMatched) {
                 int bodyContainsNumber = 0;
@@ -153,7 +151,7 @@ public class Verification {
 
     private void logRequests() {
         LOGGER.info("Request received: ");
-        requestResponseMap.keySet().forEach(call -> LOGGER.info("Request: " + call));
+        requestResponseMap.forEach(call -> LOGGER.info("Request: " + call));
     }
 
 }

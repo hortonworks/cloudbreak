@@ -32,7 +32,6 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
         createDefaultEnvironmentWithNetwork(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-        setUpFreeIpaRouteStubbing((MockedTestContext) testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -43,7 +42,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     public void testAttachChildEnvironment(MockedTestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
@@ -66,7 +65,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
         String key = resourcePropertyProvider().getName();
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
@@ -91,7 +90,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     public void testParentFreeIpaDeleteSuccess(MockedTestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)

@@ -6,16 +6,44 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 
-public class AbstractMockTest extends AbstractIntegrationTest {
+public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMockTest.class);
 
     @Inject
     private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+
+    @Inject
+    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
+    protected void setupTest(TestContext testContext) {
+        createDefaultUser(testContext);
+        createDefaultCredential(testContext);
+        createDefaultEnvironmentWithNetwork(testContext);
+        createDefaultFreeIpa(testContext);
+        createDefaultImageCatalog(testContext);
+        initializeDefaultBlueprints(testContext);
+    }
+
+    protected void createDefaultFreeIpa(TestContext testContext) {
+        testContext
+                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup()
+                .getFreeIpaImageCatalogUrl())
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .validate();
+    }
 
     @Override
     protected void renewTestAndSetup(Object[] data, ITestResult testResult) {
@@ -25,5 +53,9 @@ public class AbstractMockTest extends AbstractIntegrationTest {
 
     public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {
         return executeQueryToMockInfrastructure;
+    }
+
+    public ImageCatalogMockServerSetup getImageCatalogMockServerSetup() {
+        return imageCatalogMockServerSetup;
     }
 }

@@ -3,7 +3,6 @@
     "blueprintName": "7.2.7 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas",
     "validateBlueprint": false
   },
-  "gatewayPort": 9401,
   "network": {
     "mock": {
       "vpcId": "mock-me-once-more",

@@ -8,9 +8,6 @@ import javax.inject.Inject;
 import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
-import com.cloudera.api.swagger.model.ApiAuthRoleMetadata;
-import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
-import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
@@ -20,8 +17,6 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 
 public class LdapClusterTest extends AbstractMockTest {
 
@@ -37,11 +32,6 @@ public class LdapClusterTest extends AbstractMockTest {
             when = "calling create cluster",
             then = "the ldap should be configured on the cluster")
     public void testCreateClusterWithLdap(MockedTestContext testContext) {
-        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.get(ClouderaManagerMock.READ_AUTH_ROLES,
-                (request, response) -> new ApiAuthRoleMetadataList().items(List.of(new ApiAuthRoleMetadata().role("ROLE_ADMIN"))));
-        dynamicRouteStack.post(ClouderaManagerMock.API_V31 + "/externalUserMappings",
-                (request, response) -> new ApiExternalUserMappingList());
 
         testContext
                 .given(ClusterTestDto.class)
@@ -80,7 +70,7 @@ public class LdapClusterTest extends AbstractMockTest {
 
     private static List<Assertion<StackTestDto, CloudbreakClient>> externalUserMappingsCall(int times) {
         List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-        verifications.add(MockVerification.verify(HttpMethod.POST, ClouderaManagerMock.API_V31 + "/externalUserMappings").exactTimes(times));
+        verifications.add(MockVerification.verify(HttpMethod.POST, "ClouderaManagerMock.API_V31" + "/externalUserMappings").exactTimes(times));
         return verifications;
     }
 }

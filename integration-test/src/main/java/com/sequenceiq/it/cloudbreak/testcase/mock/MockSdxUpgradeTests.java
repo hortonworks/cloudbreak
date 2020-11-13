@@ -77,7 +77,6 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(stack, StackTestDto.class)
                 .withCluster(cluster)
                 .withImageSettings(imageSettings)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -136,7 +135,6 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(stack, StackTestDto.class)
                 .withCluster(cluster)
                 .withImageSettings(imageSettings)
-                .withGatewayPort(testContext.getSparkServer().getPort())
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -150,7 +148,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
         return testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(name)
-                .withUrl(testContext.getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getUpgradeImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(name));
     }
 }

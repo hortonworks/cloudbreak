@@ -8,30 +8,15 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CheckRightTestDto;
-import com.sequenceiq.it.cloudbreak.mock.ITResponse;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 
 public class AuthorizationTestUtil {
 
     private AuthorizationTestUtil() {
 
-    }
-
-    public static MockedTestContext mockCmForFreeipa(TestContext testContext, FreeIpaRouteHandler freeIpaRouteHandler) {
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-        DynamicRouteStack dynamicRouteStack = mockedTestContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
-        return mockedTestContext;
     }
 
     public static void testCheckRightUtil(TestContext testContext, String testUmsUser, Assertion<CheckRightTestDto, CloudbreakClient> assertion,

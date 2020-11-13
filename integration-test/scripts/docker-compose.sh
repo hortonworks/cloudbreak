@@ -93,7 +93,6 @@ if [[ "$CIRCLECI" ]]; then
         export INTEGRATIONTEST_CLOUDPROVIDER="AWS"
     else
         export INTEGRATIONTEST_PARALLEL=methods
-        export INTEGRATIONTEST_SPARK_SPARKPOOLSIZE=12
         export INTEGRATIONTEST_CLOUDPROVIDER="MOCK"
     fi
 

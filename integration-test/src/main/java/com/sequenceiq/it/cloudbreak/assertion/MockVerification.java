@@ -17,8 +17,6 @@ import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.verification.Call;
 
-import spark.Response;
-
 public class MockVerification<T> implements Assertion<T, MicroserviceClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockVerification.class);
@@ -217,9 +215,9 @@ public class MockVerification<T> implements Assertion<T, MicroserviceClient> {
         return sb.toString();
     }
 
-    private void logRequests(Map<Call, Response> requestResponseMap) {
+    private void logRequests(List<Call> requestResponseMap) {
         LOGGER.info("Request received: ");
-        requestResponseMap.keySet().forEach(call -> LOGGER.info("Request: " + call));
+        requestResponseMap.forEach(call -> LOGGER.info("Request: " + call));
     }
 
     private void logVerify() {

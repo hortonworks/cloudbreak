@@ -41,12 +41,11 @@ public class ImageCatalogPrewarmedTest extends AbstractMockTest {
 
         String imgCatalogName = resourcePropertyProvider().getName();
         String stackName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup()
+                .withUrl(getImageCatalogMockServerSetup()
                         .getPreWarmedImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 // .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))

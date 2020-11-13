@@ -8,12 +8,12 @@ import javax.ws.rs.NotFoundException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogGetImagesByNameAction;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -55,12 +55,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting image catalog response so the creation success")
     public void testImageCatalogCreationWhenURLIsValidAndExists(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(imgCatalogName))
                 .validate();
@@ -181,12 +180,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting an image catalog response so the request was valid")
     public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .select(imgCatalog -> imgCatalog.getResponse().getId(), key(imgCatalogName))
                 .when(imageCatalogTestClient.deleteV4(), key(imgCatalogName))
@@ -210,12 +208,11 @@ public class ImageCatalogTest extends AbstractMockTest {
     public void testImageCatalogDeletion(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
         String catalogKey = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(catalogKey))
                 .when(imageCatalogTestClient.deleteV4(), key(catalogKey))
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
@@ -231,12 +228,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "the response contains MOCK images")
     public void testGetImageCatalogWhenCatalogContainsTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -256,12 +252,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "the response does not contains AWS images")
     public void testGetImageCatalogWhenCatalogDoesNotContainTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(new ImageCatalogGetImagesByNameAction(CloudPlatform.AWS), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -281,12 +276,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting a NotFoundException")
     public void testGetImageCatalogWhenTheSpecifiedCatalogDoesNotExistWithName(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
                 .expect(NotFoundException.class, key(imgCatalogName))
                 .validate();
@@ -299,12 +293,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting a list with AWS specific images")
     public void testGetImageCatalogWhenDefaultCatalogContainsTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.getImagesFromDefaultCatalog(CloudPlatform.AWS), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -324,12 +317,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting a list with AWS specific images")
     public void testGetImageCatalogWhenDefaultCatalogDoesNotContainTheRequestedProvider(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .when(imageCatalogTestClient.getImagesFromDefaultCatalog(), key(imgCatalogName))
                 .then((testContext1, entity, cloudbreakClient) -> {
@@ -349,12 +341,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "getting back the catalog request")
     public void testGetImageCatalogsRequestFromExistingImageCatalog(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .select(ImageCatalogTestDto::getRequest, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {
@@ -382,12 +373,11 @@ public class ImageCatalogTest extends AbstractMockTest {
             then = "the image catalog list should contains the new url")
     public void testUpdateImageCatalog(MockedTestContext testContext) {
         String imgCatalogName = resourcePropertyProvider().getName();
-        MockedTestContext mockedTestContext = (MockedTestContext) testContext;
 
         testContext
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(mockedTestContext.getImageCatalogMockServerSetup().getImageCatalogUrl())
+                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 .select(ImageCatalogTestDto::getResponse, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {

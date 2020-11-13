@@ -12,17 +12,11 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.mock.ITResponse;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.spark.DynamicRouteStack;
 
 public class FreeIpaCreationTest extends AbstractMockTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -38,14 +32,8 @@ public class FreeIpaCreationTest extends AbstractMockTest {
             when = "calling a freeipa creation",
             then = "freeipa should be available with kerberos and ldap config")
     public void testCreateFreeIpa(MockedTestContext testContext) {
-        DynamicRouteStack dynamicRouteStack = testContext.getModel().getClouderaManagerMock().getDynamicRouteStack();
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/login_password", (request, response) -> {
-            response.cookie("ipa_session", "dummysession");
-            return "";
-        });
-        dynamicRouteStack.post(ITResponse.FREEIPA_ROOT + "/session/json", freeIpaRouteHandler);
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(testContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .then(FreeIpaKerberosTestAssertion.validate())

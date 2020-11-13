@@ -23,18 +23,16 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
-import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
+import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
-public class EnvironmentCreateTest extends AbstractIntegrationTest {
+public class EnvironmentCreateTest extends AbstractMockTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -44,9 +42,6 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Inject
     private UtilTestClient utilTestClient;
@@ -65,7 +60,6 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
             when = "valid create environment request is sent",
             then = "environment should be created but unauthorized users should not be able to access it")
     public void testCreateEnvironment(TestContext testContext) {
-        MockedTestContext mockedTestContext = AuthorizationTestUtil.mockCmForFreeipa(testContext, freeIpaRouteHandler);
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         testContext
                 .given(CredentialTestDto.class)
@@ -86,7 +80,7 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                         RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
                                 "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: 'crn:cdp:environments:.*")
                                 .withKey("EnvironmentGetAction"));
-        testFreeipaCreation(testContext, mockedTestContext);
+        testFreeipaCreation(testContext);
         testContext
                 //after assignment describe should work for the environment
                 .given(UmsTestDto.class)
@@ -129,12 +123,12 @@ public class EnvironmentCreateTest extends AbstractIntegrationTest {
                 resourceRightsToCheckForDhOnEnv, utilTestClient);
     }
 
-    private void testFreeipaCreation(TestContext testContext, MockedTestContext mockedTestContext) {
+    private void testFreeipaCreation(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         testContext
                 //testing authorized freeipa calls for the environment
                 .given(FreeIpaTestDto.class)
-                .withCatalog(mockedTestContext.getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.describe())

@@ -28,6 +28,8 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.DistroXTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -38,11 +40,11 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestD
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ImageCatalogEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component
@@ -65,10 +67,12 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Inject
     private MockProperties mockProperties;
 
+    @Inject
+    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+
     @Override
     public CredentialTestDto credential(CredentialTestDto credentialEntity) {
         MockParameters credentialParameters = new MockParameters();
-        credentialParameters.setMockEndpoint("https://" + mockInfrastructureHost);
         return credentialEntity.withName(resourcePropertyProvider.getName(getCloudPlatform()))
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription())
                 .withMockParameters(credentialParameters)
@@ -171,8 +175,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public ImageCatalogTestDto imageCatalog(ImageCatalogTestDto imageCatalog) {
         if (imageCatalog.getTestContext() instanceof MockedTestContext) {
-            MockedTestContext mockedTestContext = (MockedTestContext) imageCatalog.getTestContext();
-            imageCatalog.withUrl(mockedTestContext.getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrl());
+            imageCatalog.withUrl(imageCatalogMockServerSetup.getPreWarmedImageCatalogUrl());
         } else {
             imageCatalog.withUrl(
                     httpMock -> httpMock.whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().getFullUrl());
@@ -280,6 +283,16 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return stackAuthenticationEntity;
     }
 
+    @Override
+    public Integer gatewayPort(ClusterTemplateTestDto template) {
+        return 10090;
+    }
+
+    @Override
+    public Integer gatewayPort(DistroXTemplateTestDto template) {
+        return 10090;
+    }
+
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
         return environmentNetwork
                 .withSubnetIDs(getSubnetIDs())
@@ -338,16 +351,5 @@ public class MockCloudProvider extends AbstractCloudProvider {
         params.setInternetGatewayId(getInternetGatewayId());
         params.setVpcId(getVpcId());
         return params;
-    }
-
-    private Integer getSparkServerPort(TestContext testContext) {
-        if (testContext instanceof MockedTestContext) {
-            MockedTestContext mockedTestContext = (MockedTestContext) testContext;
-            return mockedTestContext.getSparkServer().getPort();
-        } else if (testContext.get(HttpMock.class) != null) {
-            return testContext.get(HttpMock.class).getSparkServer().getPort();
-        } else {
-            throw new IllegalArgumentException("There should have HttpMock entity.");
-        }
     }
 }

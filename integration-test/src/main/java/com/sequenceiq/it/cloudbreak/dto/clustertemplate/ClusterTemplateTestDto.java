@@ -13,7 +13,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
@@ -39,7 +38,8 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public ClusterTemplateTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withDistroXTemplate(getTestContext().init(DistroXTemplateTestDto.class, getCloudPlatform()).getRequest());
+                .withDistroXTemplate(getTestContext().init(DistroXTemplateTestDto.class, getCloudPlatform()).getRequest())
+                .withGatewayPort(getCloudProvider().gatewayPort(this));
     }
 
     public ClusterTemplateTestDto withDistroXTemplate() {
@@ -85,8 +85,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
         return this;
     }
 
-    public ClusterTemplateTestDto withMockedGatewayPort() {
-        Integer gatewayPort = ((MockedTestContext) getTestContext()).getSparkServer().getPort();
+    public ClusterTemplateTestDto withGatewayPort(Integer gatewayPort) {
         getRequest().getDistroXTemplate().setGatewayPort(gatewayPort);
         return this;
     }

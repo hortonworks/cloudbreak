@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.dto.mock.GenericResponse;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 
 public class AnswerWithoutRequest<S> extends AbstractRequestHandler {
 
@@ -18,14 +19,8 @@ public class AnswerWithoutRequest<S> extends AbstractRequestHandler {
     }
 
     public HttpMock thenReturn(GenericResponse<S> genericResponse) {
-        getMock().getDynamicRouteStack().route(getMethod().getHttpMethod(), getPath(), (request, response, model) -> {
-            Map<String, String> uriParameters = request.params();
-            save(request.body(), uriParameters);
-
-            headers.forEach((header, value) -> response.header(header, value));
-            return genericResponse.handle(model, uriParameters);
-        });
-
+        S handle = genericResponse.handle(null);
+        executeQuery().executeConfigure(getPath(), pathVariables(), new MockResponse(handle, getMethod().getHttpMethod().name(), getPath()));
         return getMock();
     }
 

@@ -19,6 +19,8 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.DistroXTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
@@ -136,6 +138,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public SdxClusterShape getInternalClusterShape() {
         return commonClusterManagerProperties.getInternalClusterShape();
+    }
+
+    @Override
+    public Integer gatewayPort(ClusterTemplateTestDto template) {
+        return null;
+    }
+
+    @Override
+    public Integer gatewayPort(DistroXTemplateTestDto template) {
+        return null;
     }
 
     @Override

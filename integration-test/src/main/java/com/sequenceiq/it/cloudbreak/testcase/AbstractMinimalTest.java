@@ -43,7 +43,6 @@ import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescript
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
 import com.sequenceiq.it.cloudbreak.mock.ThreadLocalProfiles;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.FreeIpaRouteHandler;
 import com.sequenceiq.it.config.AuditBeanConfig;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.it.util.LongStringGeneratorUtil;
@@ -75,9 +74,6 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @Inject
     private LongStringGeneratorUtil longStringGeneratorUtil;
-
-    @Inject
-    private FreeIpaRouteHandler freeIpaRouteHandler;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
@@ -161,9 +157,8 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @DataProvider(name = TEST_CONTEXT_WITH_MOCK)
     public Object[][] testContextWithMock() {
-        MockedTestContext mockedTestContext = getBean(MockedTestContext.class);
-        mockedTestContext.initModelAndImageCatalogIfNecessary();
-        MeasuredTestContext tc = createMeasuredTestContext(mockedTestContext);
+        MockedTestContext testContext = getBean(MockedTestContext.class);
+        MeasuredTestContext tc = createMeasuredTestContext(testContext);
         return new Object[][]{{tc}};
     }
 

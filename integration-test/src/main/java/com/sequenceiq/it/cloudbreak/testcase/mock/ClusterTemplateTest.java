@@ -109,7 +109,6 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .withImageCatalog()
                 .given(distroxTemplate, DistroXTemplateTestDto.class)
                 .withImage()
-                .withMockedGatewayPort()
                 .withDefaultThreeInstanceGroups()
                 .withCluster("clusterWithUnPw")
                 .given(template, ClusterTemplateTestDto.class)

@@ -8,13 +8,11 @@ import java.util.stream.Collectors;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
 
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.dto.mock.Verification;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
+import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 
 abstract class AbstractRequestHandler<T> {
     private final Method method;
@@ -54,7 +52,8 @@ abstract class AbstractRequestHandler<T> {
     }
 
     public HttpMock clearDefinedResponses() {
-        mock.getDynamicRouteStack().clear(method.getHttpMethod(), path);
+//        mock.getDynamicRouteStack().clear(method.getHttpMethod(), path);
+        executeQuery.executeConfigure("/tests/clear", pathVariables, new MockResponse(null, "GET", path));
         return mock;
     }
 
@@ -64,23 +63,17 @@ abstract class AbstractRequestHandler<T> {
     }
 
     public HttpMock verifyRequestsParameters(Matcher<? super List<Map<String, String>>> matcher) {
-        mock.then(new Assertion<HttpMock, CloudbreakClient>() {
-            @Override
-            public HttpMock doAssertion(TestContext testContext, HttpMock testDto, CloudbreakClient client) throws Exception {
-                Assert.assertThat(path + " uri " + method + " method", requestParameters(), matcher);
-                return testDto;
-            }
+        mock.then((testContext, testDto, client) -> {
+            Assert.assertThat(path + " uri " + method + " method", requestParameters(), matcher);
+            return testDto;
         });
         return mock;
     }
 
     public HttpMock verify(Verification verification) {
-        getMock().then(new Assertion<HttpMock, CloudbreakClient>() {
-            @Override
-            public HttpMock doAssertion(TestContext testContext, HttpMock testDto, CloudbreakClient client) throws Exception {
-                verification.handle(path, method, client, getMock().getModel(), requests());
-                return testDto;
-            }
+        getMock().then((testContext, testDto, client) -> {
+            verification.handle(path, method, client, requests());
+            return testDto;
         });
         return getMock();
     }

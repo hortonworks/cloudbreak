@@ -100,7 +100,6 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     }
 
     protected TestContext prepareTestContext(MockedTestContext testContext, String tenant, String user) {
-        testContext.initModelAndImageCatalogIfNecessary();
         createUser(testContext, tenant, user);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);

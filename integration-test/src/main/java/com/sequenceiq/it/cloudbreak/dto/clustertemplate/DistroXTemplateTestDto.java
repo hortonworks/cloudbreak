@@ -18,7 +18,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.Instan
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.RootVolumeV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
@@ -44,7 +43,8 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
-                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());
+                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest())
+                .withGatewayPort(getCloudProvider().gatewayPort(this));
     }
 
     private DistroXTemplateTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {
@@ -117,8 +117,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         return this;
     }
 
-    public DistroXTemplateTestDto withMockedGatewayPort() {
-        Integer gatewayPort = ((MockedTestContext) getTestContext()).getSparkServer().getPort();
+    public DistroXTemplateTestDto withGatewayPort(Integer gatewayPort) {
         getRequest().setGatewayPort(gatewayPort);
         return this;
     }

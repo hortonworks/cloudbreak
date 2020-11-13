@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.mock.model.ClouderaManagerMock.PROFILE_RETURN_HTTP_500;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -25,12 +24,13 @@ import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.mock.SetupCmScalingMock;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
+
+    public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMDownscaleWithHttp500ResponsesTest.class);
 
@@ -67,8 +67,8 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider().getName();
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
-        SetupCmScalingMock mock = new SetupCmScalingMock();
-        mock.configure(testContext, 3, 15, 6);
+//        SetupCmScalingMock mock = new SetupCmScalingMock();
+//        mock.configure(testContext, 3, 15, 6);
         testContext
                 .given("cmpkey", ClouderaManagerProductTestDto.class)
                 .withParcel("someParcel")
@@ -84,10 +84,10 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
                 .when(stackTestClient.createV4(), key(clusterName))
                 .awaitForFlow(key(clusterName))
                 .await(STACK_AVAILABLE, key(clusterName))
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredWorkerCount()), key(clusterName))
+                .when(StackScalePostAction.valid().withDesiredCount(15), key(clusterName))
                 .awaitForFlow(key(clusterName))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
-                .when(StackScalePostAction.valid().withDesiredCount(mock.getDesiredBackscaledWorkerCount()), key(clusterName))
+                .when(StackScalePostAction.valid().withDesiredCount(6), key(clusterName))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
                 .validate();
     }
