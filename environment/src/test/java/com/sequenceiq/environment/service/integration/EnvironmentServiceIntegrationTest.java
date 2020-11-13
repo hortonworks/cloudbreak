@@ -3,6 +3,7 @@ package com.sequenceiq.environment.service.integration;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.getProxyConfig;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.getProxyRequest;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,6 +12,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -30,6 +32,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 
+import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.authorization.service.UmsResourceAuthorizationService;
@@ -157,6 +160,11 @@ public class EnvironmentServiceIntegrationTest {
 
         when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+        lenient().when(grpcUmsClient.hasRights(anyString(), anyString(), anyList(), any())).then(i -> {
+            List<RightCheck> rightChecks = i.getArgument(2);
+            return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
+        });
+        lenient().when(grpcUmsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(true);
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
         when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);

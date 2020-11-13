@@ -53,10 +53,7 @@ public class DatahubService {
 
     public void putStartByCrns(String environmentCrn, List<String> crns) {
         try {
-            // we are not able to authorize distrox list start endpoint, this is the reason why we do it in a cycle
-            for (String crn : crns) {
-                distroXV1Endpoint.putStartByCrn(crn);
-            }
+            distroXV1Endpoint.putStartByCrns(crns);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed start Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
@@ -66,10 +63,7 @@ public class DatahubService {
 
     public void putStopByCrns(String environmentCrn, List<String> crns) {
         try {
-            // we are not able to authorize distrox list stop endpoint, this is the reason why we do it in a cycle
-            for (String crn : crns) {
-                distroXV1Endpoint.putStopByCrn(crn);
-            }
+            distroXV1Endpoint.putStopByCrns(crns);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed stop Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
@@ -79,10 +73,7 @@ public class DatahubService {
 
     public void deleteMultiple(String environmentCrn, DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         try {
-            // we are not able to authorize distrox list delete endpoint, this is the reason why we do it in a cycle
-            for (String crn : multiDeleteRequest.getCrns()) {
-                distroXV1Endpoint.deleteByCrn(crn, forced);
-            }
+            distroXV1Endpoint.deleteMultiple(multiDeleteRequest, forced);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed delete multiple Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);

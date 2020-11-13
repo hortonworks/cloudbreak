@@ -83,14 +83,12 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 // testing unauthorized calls for environment
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
-                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource " +
-                                "with resource identifier: 'crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
+                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].").withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("You have insufficient rights to perform the following action[(]s[)]: " +
-                                "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource " +
-                                "with resource identifier: 'crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
+                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
+                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].").withKey("EnvironmentGetAction"))
                 .validate();
         createDatalake(testContext);
         testContext

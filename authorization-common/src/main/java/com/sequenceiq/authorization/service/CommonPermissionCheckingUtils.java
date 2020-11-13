@@ -2,18 +2,15 @@ package com.sequenceiq.authorization.service;
 
 import static java.util.stream.Collectors.toMap;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Parameter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -24,7 +21,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -53,21 +49,10 @@ public class CommonPermissionCheckingUtils {
     private EntitlementService entitlementService;
 
     @Inject
-    private Optional<List<DefaultResourceChecker>> defaultResourceCheckers;
-
-    private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new ConcurrentHashMap<>();
+    private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
     @Inject
-    private Optional<List<ResourceBasedCrnProvider>> resourceBasedCrnProviders;
-
-    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap = new ConcurrentHashMap<>();
-
-    @PostConstruct
-    public void init() {
-        defaultResourceCheckers.ifPresent(checkers -> checkers.forEach(checker -> defaultResourceCheckerMap.put(checker.getResourceType(), checker)));
-        resourceBasedCrnProviders.ifPresent(crnProviders -> crnProviders.forEach(crnProvider ->
-                resourceBasedCrnProviderMap.put(crnProvider.getResourceType(), crnProvider)));
-    }
+    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
 
     public boolean legacyAuthorizationNeeded() {
         return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId());
@@ -80,23 +65,6 @@ public class CommonPermissionCheckingUtils {
 
     public void checkPermissionForUser(AuthorizationResourceAction action, String userCrn) {
         umsAccountAuthorizationService.checkRightOfUser(userCrn, action);
-    }
-
-    public void checkPermissionForUserOnResource(Map<String, AuthorizationResourceAction> resourcesWithActions, String userCrn) {
-        Set<String> removableDefaultResourceCrns = Sets.newHashSet();
-        for (Map.Entry<String, AuthorizationResourceAction> resourceAndAction : resourcesWithActions.entrySet()) {
-            String resourceCrn = resourceAndAction.getKey();
-            AuthorizationResourceAction action = resourceAndAction.getValue();
-            DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(umsRightProvider.getResourceType(action));
-            if (defaultResourceChecker != null && defaultResourceChecker.isDefault(resourceCrn)) {
-                throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
-                removableDefaultResourceCrns.add(resourceCrn);
-            }
-        }
-        removableDefaultResourceCrns.stream().forEach(resourceCrn -> resourcesWithActions.remove(resourceCrn));
-        if (!resourcesWithActions.isEmpty()) {
-            umsResourceAuthorizationService.checkIfUserHasAtLeastOneRight(userCrn, resourcesWithActions);
-        }
     }
 
     public void checkPermissionForUserOnResource(AuthorizationResourceAction action, String userCrn, String resourceCrn) {
@@ -167,7 +135,8 @@ public class CommonPermissionCheckingUtils {
         return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(InternalOnly.class);
     }
 
-    public <T> T getParameter(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class annotation, Class<T> target) {
+    public <T> T getParameter(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<? extends Annotation> annotation,
+            Class<T> target) {
         List<Parameter> parameters = Lists.newArrayList(methodSignature.getMethod().getParameters());
         List<Parameter> matchingParameters = parameters.stream()
                 .filter(parameter -> parameter.isAnnotationPresent(annotation))
@@ -184,7 +153,7 @@ public class CommonPermissionCheckingUtils {
         return (T) result;
     }
 
-    private void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns,
+    public void throwAccessDeniedIfActionNotAllowed(AuthorizationResourceAction action, Collection<String> resourceCrns,
             DefaultResourceChecker defaultResourceChecker) {
         if (!defaultResourceChecker.isAllowedAction(action)) {
             String right = umsRightProvider.getRight(action);

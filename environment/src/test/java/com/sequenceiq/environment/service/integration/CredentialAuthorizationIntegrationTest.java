@@ -3,6 +3,7 @@ package com.sequenceiq.environment.service.integration;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DELETE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_CREDENTIAL;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -12,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -99,6 +101,11 @@ public class CredentialAuthorizationIntegrationTest {
         firstUserClient = getClient(FIRST_USER_CRN);
         secondUserClient = getClient(SECOND_USER_CRN);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+        lenient().when(grpcUmsClient.hasRights(anyString(), anyString(), anyList(), any())).then(i -> {
+            List<AuthorizationProto.RightCheck> rightChecks = i.getArgument(2);
+            return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
+        });
+        lenient().when(grpcUmsClient.checkRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(true);
         when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
         mockPermissions();
     }

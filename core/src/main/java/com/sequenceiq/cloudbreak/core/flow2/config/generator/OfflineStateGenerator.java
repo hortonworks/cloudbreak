@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -422,6 +423,16 @@ public class OfflineStateGenerator {
         @Override
         public Optional<Stack> findByResourceCrn(String crn) {
             return Optional.empty();
+        }
+
+        @Override
+        public Optional<String> findEnvCrnByResourceCrn(String crn) {
+            return Optional.empty();
+        }
+
+        @Override
+        public List<StackCrnView> findAllByResourceCrn(Set<String> crn) {
+            return null;
         }
 
         @Override

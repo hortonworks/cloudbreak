@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -41,6 +42,13 @@ public class UmsRightProvider {
             return getNewRight(action);
         }
         return getLegacyRight(action);
+    }
+
+    public Function<AuthorizationResourceAction, String> getRightMapper(boolean authzEntitled) {
+        if (authzEntitled) {
+            return this::getNewRight;
+        }
+        return this::getLegacyRight;
     }
 
     public String getRight(AuthorizationResourceAction action) {

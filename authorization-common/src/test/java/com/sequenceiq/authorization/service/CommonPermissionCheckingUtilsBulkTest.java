@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.util.Map;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @RunWith(Parameterized.class)
 public class CommonPermissionCheckingUtilsBulkTest {
@@ -57,10 +58,16 @@ public class CommonPermissionCheckingUtilsBulkTest {
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
 
     @Mock
-    private List<DefaultResourceChecker> defaultResourceCheckers;
+    private UmsRightProvider umsRightProvider;
 
     @Mock
-    private UmsRightProvider umsRightProvider;
+    private EntitlementService entitlementService;
+
+    @Mock
+    private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
+
+    @Mock
+    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
 
     private AuthorizationResourceAction action;
 

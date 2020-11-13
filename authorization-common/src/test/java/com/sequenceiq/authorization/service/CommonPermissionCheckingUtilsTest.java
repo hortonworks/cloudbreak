@@ -10,16 +10,14 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Assert;
@@ -30,6 +28,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +42,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommonPermissionCheckingUtilsTest {
@@ -65,14 +65,16 @@ public class CommonPermissionCheckingUtilsTest {
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
 
     @Mock
-    private DefaultResourceChecker defaultResourceChecker;
-
-    private Optional<List<DefaultResourceChecker>> defaultResourceCheckers = Optional.of(new ArrayList<>());
+    private UmsRightProvider umsRightProvider;
 
     @Mock
-    private ResourceBasedCrnProvider resourceBasedCrnProvider;
+    private EntitlementService entitlementService;
 
-    private Optional<List<ResourceBasedCrnProvider>> resourceBasedCrnProviders = Optional.of(new ArrayList<>());
+    @Spy
+    private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new EnumMap<>(AuthorizationResourceType.class);
+
+    @Spy
+    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap = new EnumMap<>(AuthorizationResourceType.class);
 
     @InjectMocks
     private CommonPermissionCheckingUtils underTest;
@@ -84,13 +86,15 @@ public class CommonPermissionCheckingUtilsTest {
     private MethodSignature methodSignature;
 
     @Mock
-    private UmsRightProvider umsRightProvider;
+    private DefaultResourceChecker defaultResourceChecker;
+
+    @Mock
+    private ResourceBasedCrnProvider resourceBasedCrnProvider;
 
     @Before
     public void setUp() throws IllegalAccessException {
-        defaultResourceCheckers.map(checkers -> checkers.add(defaultResourceChecker));
-        FieldUtils.writeField(underTest, "defaultResourceCheckers", defaultResourceCheckers, true);
-        FieldUtils.writeField(underTest, "resourceBasedCrnProviders", resourceBasedCrnProviders, true);
+        defaultResourceCheckerMap.put(AuthorizationResourceType.IMAGE_CATALOG, defaultResourceChecker);
+        resourceBasedCrnProviderMap.put(AuthorizationResourceType.IMAGE_CATALOG, resourceBasedCrnProvider);
         lenient().when(defaultResourceChecker.getResourceType()).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
         lenient().when(defaultResourceChecker.isDefault(RESOURCE_CRN)).thenReturn(false);
         lenient().when(defaultResourceChecker.isDefault(DEFAULT_RESOURCE_CRN)).thenReturn(true);
@@ -102,7 +106,6 @@ public class CommonPermissionCheckingUtilsTest {
         when(umsRightProvider.getResourceType(any())).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
         when(umsRightProvider.getRight(eq(AuthorizationResourceAction.DELETE_IMAGE_CATALOG))).thenReturn("environments/deleteImageCatalog");
         when(methodSignature.getMethod()).thenReturn(getClass().getMethods()[0]);
-        underTest.init();
     }
 
     @Test
@@ -232,7 +235,7 @@ public class CommonPermissionCheckingUtilsTest {
 
         verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
-        verifyZeroInteractions(umsResourceAuthorizationService);
+        verifyNoInteractions(umsResourceAuthorizationService);
     }
 
     @Test
@@ -246,7 +249,7 @@ public class CommonPermissionCheckingUtilsTest {
 
         verify(defaultResourceChecker).isDefault(DEFAULT_RESOURCE_CRN);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
-        verifyZeroInteractions(umsResourceAuthorizationService);
+        verifyNoInteractions(umsResourceAuthorizationService);
     }
 
     @Test
@@ -287,7 +290,7 @@ public class CommonPermissionCheckingUtilsTest {
 
         verify(defaultResourceChecker).getDefaultResourceCrns(resourceCrns);
         verify(defaultResourceChecker).isAllowedAction(AuthorizationResourceAction.DELETE_IMAGE_CATALOG);
-        verifyZeroInteractions(umsResourceAuthorizationService);
+        verifyNoInteractions(umsResourceAuthorizationService);
     }
 
     @Test

@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
@@ -251,6 +252,22 @@ public class StackService implements ResourceIdProvider {
     public Stack getByCrn(String crn) {
         try {
             return transactionService.required(() -> stackRepository.findByResourceCrn(crn).orElseThrow(notFound("Stack", crn)));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public String getEnvCrnByCrn(String crn) {
+        try {
+            return transactionService.required(() -> stackRepository.findEnvCrnByResourceCrn(crn).orElseThrow(notFound("Stack", crn)));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public List<StackCrnView> findAllByCrn(Set<String> crns) {
+        try {
+            return transactionService.required(() -> stackRepository.findAllByResourceCrn(crns));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }

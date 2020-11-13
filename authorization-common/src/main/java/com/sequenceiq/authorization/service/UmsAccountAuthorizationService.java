@@ -4,7 +4,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,17 +32,6 @@ public class UmsAccountAuthorizationService {
         String unauthorizedMessage = String.format("You have no right to perform %s in account %s.", umsRightProvider.getRight(action),
                 Crn.fromString(userCrn).getAccountId());
         checkRightOfUser(userCrn, action, unauthorizedMessage);
-    }
-
-    public Boolean hasRightOfUser(String userCrn, String action) {
-        Optional<AuthorizationResourceAction> actionEnum = umsRightProvider.getByName(action);
-        if (!actionEnum.isPresent()) {
-            throw new BadRequestException("Action cannot be found by request!");
-        }
-        if (!hasRightOfUser(userCrn, actionEnum.get())) {
-            return Boolean.FALSE;
-        }
-        return Boolean.TRUE;
     }
 
     private void checkRightOfUser(String userCrn, AuthorizationResourceAction action, String unauthorizedMessage) {

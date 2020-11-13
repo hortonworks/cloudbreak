@@ -1,24 +1,16 @@
 package com.sequenceiq.authorization.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.UUID;
-
-import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.AdditionalMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -35,10 +27,6 @@ public class UmsAccountAuthorizationServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:" + USER_ID;
 
-    private static final String RESOURCE_CRN = "crn:cdp:datalake:us-west-1:1234:resource:1";
-
-    private static final String RESOURCE_CRN2 = "crn:cdp:datalake:us-west-1:1234:resource:2";
-
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
@@ -54,8 +42,6 @@ public class UmsAccountAuthorizationServiceTest {
     @Before
     public void init() {
         when(umsRightProvider.getRight(any())).thenReturn("datalake/read");
-        when(umsRightProvider.getByName(eq("datalake/read"))).thenReturn(Optional.of(AuthorizationResourceAction.DATALAKE_READ));
-        when(umsRightProvider.getByName(AdditionalMatchers.not(eq("datalake/read")))).thenReturn(Optional.empty());
     }
 
     @Test
@@ -67,27 +53,6 @@ public class UmsAccountAuthorizationServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ));
-    }
-
-    @Test
-    public void testHasRightOfUserWithValidResourceTypeAndAction() {
-        when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
-
-        assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasRightOfUser(USER_CRN, "datalake/read")));
-
-        when(umsClient.checkRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
-
-        assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasRightOfUser(USER_CRN, "datalake/read")));
-    }
-
-    @Test
-    public void testHasRightOfUserWithInvalidAction() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Action cannot be found by request!");
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasRightOfUser(USER_CRN, "invalid"));
-
-        verifyZeroInteractions(umsClient);
     }
 
     @Test

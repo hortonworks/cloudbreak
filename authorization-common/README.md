@@ -1,138 +1,303 @@
-# Authorization
-## General
-Every controller class should be annotated with `@Controller`.
+# authorization-common
 
-Every method of a controller should be annotated with one (or more if necessary) of the mentioned annotations below.
+Authorization framework used in cloudbreak services. The framework provides different ways to authorize resources on API level by annotating `Controller` classes. The authorization happens as an aspect of the API implementation.
 
-## Account level authorization
-- you can annotate your API endpoint with `@CheckPermissionByAccount(action = ResourceAction.WRITE)` and permission check will be done only based on tenant, resource will not be taken into consideration in this case ([DefaultPermissionChecker](src/main/java/com/sequenceiq/authorization/service/DefaultPermissionChecker.java))
+__Table of content__
 
-## Resource based authorization
-Resource based authorization in Cloudbreak services mean that most of the API endpoints are or should be authorized based on a resource.
-Every user who would like to do something regarding a resource should get an ResourceRole in UMS for that resource.
+* [Usage](#usage)
+    + [Authorization annotations on `Controller`](#authorization-annotations-on--controller-)
+    + [Rules for annotation usage](#rules-for-annotation-usage)
+        - [DisableCheckPermissions](#disablecheckpermissions)
+        - [InternalOnly](#internalonly)
+            * [How to make an API internally callable](#how-to-make-an-api-internally-callable)
+        - [CustomPermissionCheck](#custompermissioncheck)
+        - [CheckPermissionByAccount](#checkpermissionbyaccount)
+        - [FilterListBasedOnPermissions](#filterlistbasedonpermissions)
+        - [CheckPermissionByResourceCrn](#checkpermissionbyresourcecrn)
+        - [CheckPermissionByResourceName](#checkpermissionbyresourcename)
+        - [CheckPermissionByResourceCrnList](#checkpermissionbyresourcecrnlist)
+        - [CheckPermissionByResourceNameList](#checkpermissionbyresourcenamelist)
+        - [CheckPermissionByRequestProperty](#checkpermissionbyrequestproperty)
+    + [Example controller](#example-controller)
+* [Introduction of new resources](#introduction-of-new-resources)
+* [How does it work internally](#how-does-it-work-internally)
+    + [Resource based authorization internals](#resource-based-authorization-internals)
+        - [Compatibility with the legacy authorization](#compatibility-with-the-legacy-authorization)
+    + [Example authorization](#example-authorization)
+        - [In the new resource based authorization](#in-the-new-resource-based-authorization)
+        - [In the legacy authorization](#in-the-legacy-authorization)
 
-### How can I add resource based authorization for my new API?
+## Usage
 
-1. Add `@Controller` annotation to the Controller class
-2. Add the related UMS right to the UMS code
-3. Add the related action to the `AuthorizationResourceAction` enum list
-4. For the new enum value, please define
-   - the right (used in UMS)
-   - the resourceType, which should be a value from `AuthorizationResourceType` which controls, what logic should be called during authorization check to find out the CRN of the resource
-5. Fill in the necessary information about the action in [legacyRights.json](src/main/resources/legacyRights.json)
-   - add new entry to the map
-   - key should be the same value used for the desired right as in UMS code
-   - value should be the right (defined in UMS) used in the legacy authorization (where everything were checked on account level with read or write rights)
-6. Annotate your API method in Controller class with desired annotation, detailed explanation below. Putting more annotations on the method is allowed.
-7. If necessary, implement logics needed to find out resource CRNs, detailed explanation below.
+Authorization can be introduced by annotating `Controller` classes and methods. The framework internally creates the necessary authorization method, calls UMS and finally evaluates the response. 
 
-### How can I add resource based authorization for my new API endpoint?
+You can set up the following authorizations:
 
-When you are planning an API endpoint you should specify one of these parameter for that endpoint.
-- resource CRN
-- resource name
-- resource CRN list
-- resource name list
-- request object
+- authorize on __account__ level,
+- authorize on __resource__ level,
+- filter resource lists,
+- allow only internal actors,
+- do custom authorization in the service layer, 
+- not authorize at all (be carefull here).
 
-If it is possible, please use CRN of a resource instead of name, since generally CRN is used in the whole platform to identify a resource and also during authorization it requires additional database query to find out the CRN based on the name, because we need CRN to authorize a call in UMS.
+You can combine the above methods in certain ways.
 
-### Follow these steps to add authorization for the method in controller class
-#### Resource CRN
-- add `@CheckPermissionByResourceCrn(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the resource CRN method parameter with `@ResourceCrn`, the type of the parameter can be a String
-#### Resource name
-- add `@CheckPermissionByResourceName(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the resource name method parameter with `@ResourceName`, the type of the parameter can be a String
-- implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnByResourceName` method
-#### Resource CRN list
-- add `@CheckPermissionByResourceCrnList(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the resource CRN list method parameter with `@ResourceCrnList`, the type of the parameter can be a String
-#### Resource name list
-- add `@CheckPermissionByResourceNameList(action = [a value from AuthorizationResourceAction])` annotation to the method
-- annotate the resource name list method parameter with `@ResourceNameList`, the type of the parameter can be a String
-- implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnListByResourceNameList` method
-#### Request object
-- add `@CheckPermissionByRequestProperty` annotations to the method and you need to fill in parameters of it
-  - `path` is used to identify the target for permission, it can be a resource property (public method, public field, private field with public getter) in the request object. For usage please check JavaDoc of PropertyUtilsBean class.
-  - `type` can be crn, name or crn list, name list
-  - `action` is for defining the permission used for checking property
-  - `skipOnNull` decides whether framework should skip authorization on property if that's null
-- annotate the request object method parameter with `@RequestObject`, the type of the parameter can be any Object
+### Authorization annotations on `Controller`
 
-### Special case: list API endpoints (not used currently)
+```java
+@Controller
+//ClassAnnotation
+public class MyController {
 
-In case of list API methods, we have to query the list of resources first, then filter it based on permissions.
-To do this, you need:
-- annotate controller method with `@FilterListBasedOnPermissions`
-- if necessary, refactor your list method to return with one of these types: `List`, `Set` or `AuthorizationFilterableResponseCollection`
-- element of list should implement `ResourceCrnAwareApiModel` to be able to get resource CRN of the given element
-- within your webservice, implement a `@Service` which is a subclass of [ResourceBasedCrnProvider](src/main/java/com/sequenceiq/authorization/service/ResourceBasedCrnProvider.java) and override `getResourceCrnsInAccount` method
+    //MethodAnnotation
+    public ReturnType method(/* MethodArgAnnotation */) { /*...*/ }
 
-With these, authorization framework can filter result based on permissions. For details, please check: [ListPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ListPermissionChecker.java)
+} 
+```
 
-### How authorization is happening under the hood
+Where the following grammar rules should apply.
 
-We are calling UMS checkRight using these informations:
-- CRN of user (which is present in ThreadLocal)
-- UMS right (which is extracted based of the enum value of the method's annotation)
-- CRN of resource (which is extracted from method parameter, based on method's annotation)
+```ebnf
+ClassAnnotation
+    = @DisableCheckPermissions
+    | @InternalOnly;
 
-#### Resource CRN
+MethodAnnotation 
+    = @DisableCheckPermissions
+    | @InternalOnly
+    | @CustomPermissionCheck
+    | [@CheckPermissionByAccount], [ResourceBasedAuthorization];
 
-[ResourceCrnPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceCrnPermissionChecker.java)
+ResourceBasedAuthorization 
+    = @FilterListBasedOnPermissions
+    | [@CheckPermissionByResourceCrn], [@CheckPermissionByResourceName], [@CheckPermissionByResourceCrnList], [@CheckPermissionByResourceNameList], {@CheckPermissionByRequestProperty};
 
-#### Resource Name
+MethodArgAnnotation
+    = [@ResourceCrn], [@ResourceName], [@ResourceCrnList], [@ResourceNameList], [@RequestObject], [@TenantAwareParam], [@AccountId], [@InitiatorUserCrn];
+```
 
-In this case we are calling the method `getResourceCrnByResourceName` of the current implementation of `ResourceBasedCrnProvider` to get resource CRN by resource name.
+### Rules for annotation usage
 
-[ResourceNamePermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceNamePermissionChecker.java)
+#### DisableCheckPermissions
 
-#### Resource CRN list
+Disables all authorization on class level or on method level.
 
-[ResourceCrnListPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceCrnListPermissionChecker.java)
+**Please note that you have to make sure only methods which don't provide any information about and don't take actions on any resource should be annotated with `@DisabledCheckPermissions`**
 
-#### Resource Name list
+#### InternalOnly
 
-In this case we are calling the method `getResourceCrnListByResourceNameList` of the current implementation of `ResourceBasedCrnProvider` to get resource CRN list by resource name list.
+Makes API endpoints internal only on class level or on method level. No additional authorization will happen, but the API must be interrnally callable (see below the details).
 
-[ResourceNameListPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceNameListPermissionChecker.java)
+##### How to make an API internally callable
 
-#### Request Object
+Lower layers often use the account id, but the internal crn doesn't contain that. There are three possible annotations to help the framework in figuring out the account id, and you must use one of them on one of the API method's argument. 
 
-In this case we are checking properties of the request object and do permission check based on the annotations on the method.
+You should use one of the following annotations to make an API internally callable:
 
-[ResourceObjectPermissionChecker](src/main/java/com/sequenceiq/authorization/service/ResourceObjectPermissionChecker.java)
+- `@TenantAwareParam` - on resource crn parameter,
+- `@AccountId` - on an account id,
+- `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
 
-### I have some default resources and I want to exclude them from the auth authorization process. How can I do that?
+#### CustomPermissionCheck
 
-You need to implement the [DefaultResourceChecker](src/main/java/com/sequenceiq/authorization/service/DefaultResourceChecker.java) interface where you can mark different resources as defaults so that the framework won't go to UMS.
+Disables all authorization on API level, and the developer can provide custom authorization in the service layer.
 
-### Internal calls
+---
 
-Some APIs are used internal only between services, in this case we are using internal actor to call the given API. To restrict a method for internal actors only, you can annotate it `@InternalOnly`.
+For all below rules you should specify the `AuthorizationResourceAction` that the framework will use as the right for the authorization.
 
-#### But what about account id?
+#### CheckPermissionByAccount
 
-We are using account id in service layer heavily, but internal actor CRN doesn't have that information, so there are specific requirements for APIs which can be called with internal actor:
+Checks whether the user has the specified right in the account.
 
-Your method in the Controller class should have at least one parameter:
-- which is some kind of resource CRN -> annotate the parameter with `@TenantAwareParam`, which will extract the account id from CRN parameter and use that in lower layers
-- or it is an account id parameter -> annotate the parameter with `@AccountId` and we'll use that in lower layers. Please note that `@AccountId` is also a validation annotation, thus you need to place it on the API interface method's parameter.
-- or it is an initator user crn parameter -> annotate the initiator user CRN parameter with `@InitiatorUserCrn` and we'll use that in lower layers to find out account id
+#### FilterListBasedOnPermissions
 
-### APIs without authorization
+Filters the resources in the response based on the specified right. The response should be one of the followings:
 
-Some APIs are used to generate service informations, in this case you can call it without authorization. To do so, you can annotate it with `@DisabledCheckPermissions`.
+- `List<T extends ResourceCrnAwareApiModel>`
+- `Set<T extends ResourceCrnAwareApiModel>`
+- `AuthorizationFilterableResponseCollection<T extends ResourceCrnAwareApiModel>`
 
-## Class level annotations for special cases
+#### CheckPermissionByResourceCrn
 
-There are some controller class which used to give service informations (info page, swagger, client version, etc.) and also some APIs used internally only.
+The method's arguments should conatin extactly one `@ResourceCrn` annotated `String` argument (valid Crn).
 
-If every method of a controller class used internally only, you only need to annotate the class with `@InternalOnly` and every method will be restricted for internal actor.
+#### CheckPermissionByResourceName
 
-**Be aware: if your API is internal only, then you have to make sure that every method (which is internal only) can be called with proper parameter and annotated correctly as described in `Internal calls` chapter.**
+The method's arguments should conatin extactly one `@ResourceName` annotated `String` argument.
 
-Same applies for API's methods which can called without authorization, in that case you need to annotate the class only with `@DisabledCheckPermissions`.
+#### CheckPermissionByResourceCrnList
 
-**Please note that you have to make sure that only methods which don't provide any informations about and don't take actions on any resource should be annotated with `@DisabledCheckPermissions`**
+The method's arguments should conatin extactly one `@ResourceCrnList` annotated `Collection<String>` argument (valid Crns).
+
+#### CheckPermissionByResourceNameList
+
+The method's arguments should conatin extactly one `@ResourceNameList` annotated `Collection<String>` argument.
+
+#### CheckPermissionByRequestProperty
+
+This can be used mulitple times on any method. The method's arguments should conatin extactly one `@RequestObject` annotated `T` arbitrary argument.
+
+Where:
+
+- `T` should contain a valid field path defined by `CheckPermissionByRequestProperty.path`,
+- the field can be `null` based on `CheckPermissionByRequestProperty.skipOnNull`,
+- the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`
+
+### Example controller
+
+```java
+@Controller
+public class MyResourceController {
+
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_MY_RESOURCE)
+    public void create() {}
+    
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.GET_RESOURCE)
+    public MyResource getByCrn(@ResourceCrn String crn) {}
+
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.GET_RESOURCE)
+    public MyResource getByName(@ResourceName String name) {}
+
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.GET_RESOURCE)
+    public List<MyResource> list() {}
+
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DELETE_RESOURCE)
+    public void deleteMultipleByCrn(@ResourceCrnList Set<String> crns) {}
+
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_RESOURCE)
+    public void deleteMultipleByName(@ResourceNameList Set<String> names) {}
+
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_MY_RESOURCE)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.GET_RESOURCE)
+    @CheckPermissionByRequestProperty(path = "name", type = AuthorizationVariableType.NAME, action = AuthorizationResourceAction.GET_RESOURCE)
+    @CheckPermissionByRequestProperty(path = "subReq.crn", type = AuthorizationVariableType.CRN, action = AuthorizationResourceAction.GET_OTHER_RESOURCE, skipOnNull = true)
+    public void doSomethingThatRequiresComplicatedAuthorization(@ResourceCrn String crn, @RequestObject MyRequest request) {}
+
+    @InternalOnly
+    public void doSomethingInternalStaffThatNormalUsersShouldNotBeAbleToDo(String crn) {}
+
+    @CustomPermissionCheck
+    public void doSomethingThatIsComplicatedAndWeCanAuthorizeItInTheServiceLayer(String crn) {}
+
+    @DisableCheckPermissions
+    public String notSensitiveAtAll() {}
+}
+```
+
+## Introduction of new resources
+
+You can support authorization on new resources, and you can specify the rights as well.
+
+1. Define new resource types in `AuthorizationResourceType`,
+2. define new rights by extending `AuthorizationResourceAction` enum with new (String right, AuthorizationResourceType type) values (the new right should be defined in UMS previously),
+3. to support legacy authorization add a mapping from the new right to the legacy right in the `legacyRights.json`,
+4. implement `ResourceBasedCrnProvider`'s methods to support different scenarios on API level,
+    - `ResourceBasedCrnProvider.getResourceCrnByResourceName(String)` - if you want to support resoure names,
+    - `ResourceBasedCrnProvider.getResourceCrnListByResourceNameList(Collection<String>)` - if you want to support list of resoure names,
+    - `ResourceBasedCrnProvider.getResourceCrnsInAccount()` - if you want to support `@FilterListBasedOnPermissions`,
+    - `ResourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(String)` - if you want to support environment level authorization as well (has right on resource or on resource's environment),
+    - `ResourceBasedCrnProvider.getEnvironmentCrnsByResourceCrns(Collection<String>)` - if you want to support environment level authorization when the request contains a list of crn-s, names,
+5. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
+
+## How does it work internally
+
+The framework based on the API annotations tries to gather the following information:
+
+- user crn,
+- resource crn (not needed in case of `@CheckPermissionByAccount`),
+- necessary right.
+
+Then it goes to UMS and does an acccount level or resource level authorization. A simplified logic can be seen below:
+
+```
+IF diabled THEN
+    proceed with real API
+
+ELSE IF internalCrn THEN
+    proceed with real API
+
+ELSE
+    IF needAccountLevelAuthorization THEN
+        do account level authorization
+
+    IF hasAnnotation @FilterListBasedOnPermissions THEN
+        proceed with real API then filter the result
+
+    do resource based authorization
+
+    proceed with real API
+```
+
+### Resource based authorization internals
+
+The resource based authorization happens in three steps:
+
+1. the framework collects all the details about how to authorize and what for based on a list of `AuthorizationFactory` implementations those that transforms the API annotations into `AuthorizationRule` implementations,
+2. the framework creates the necessry right checks and sends it to UMS,
+3. based on the response which is a list of boolen values the framework evaluates the original condition and succeeds or throws access denied exception with the failed part of the condition.
+
+Basic implementations of the `AuthorizationRule` interface:
+
+- `HasRight`,
+- `HasRightOnAll`,
+- `HasRightOnAny`,
+- `AllMatch`,
+- `AnyMatch`.
+
+__Note:__ `AuthorizationFactory` implementations can throw access denied exception, this is usefull for default resources.
+
+You can create additional authorization related annotations and implement `AuthorizationFactory` / `AuthorizationRule`-s to support them.
+
+#### Compatibility with the legacy authorization
+
+If a customer not entitled to use the resource based authorization than the framework falls back to the legacy authorization where the following rules apply:
+
+- if the legacy right is a `read` like right (`environments/read`) then we will skip the UMS check and assume he or she has this right,
+- if the legacy right is not a `read` like right (`environments/write`) then we will make an account level UMS right without the resource,
+- no check will happen on the resource's parent environment.
+
+### Example authorization
+
+```java
+@Controller
+public class AController {
+
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.A_ACTION)
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.A_ACTION_ON_RESOURCE)
+    public void aMethod(@ResourceCrn String crn) {
+        // Do something here
+    }
+}
+
+public enum AuthorizationResourceAction {
+    A_ACTION("a/action", A),
+    A_ACTION_ON_RESOURCE("a/action_on_resource", A);
+}
+```
+
+`legacyRights.json` content:
+
+```json
+{
+  "environments/describeEnvironment": "environments/read",
+  "a/action": "a/read",
+  "a/action_on_resource": "a/read",
+}
+```
+
+Let's assume this resource has an environment.
+
+#### In the new resource based authorization
+
+1. Account authorization -> has this user "a/action" right in the acccount? - UMS says yes
+2. Resource authorization -> 
+    - has this user "a/action_on_resource" right on the resource, or it's environment? (`new HasRightOnAny(A_ACTION_ON_RESOURCE, List.of("crn:...:a:...", "crn:...:environment:..."))`)
+    - UMS says `[false, true]`
+    - Evaluation result: authorization succeeds since user has right on the environment.
+
+#### In the legacy authorization
+
+1. Account authorization -> has this user "a/read" right in the acccount? - The framework (without UMS) since it is a `read` right says yes
+2. Resource authorization (acount level actually) -> 
+    - has this user "a/read" right in the account? Since this is `read` right the framework (without UMS) says yes.
