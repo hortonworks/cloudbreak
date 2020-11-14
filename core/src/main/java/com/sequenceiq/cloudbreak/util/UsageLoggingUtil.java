@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.util;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -44,19 +45,22 @@ public class UsageLoggingUtil {
                 // Do not set the cloud platform.
             }
         }
-        if (stack.getDatalakeResourceId() != null) {
-            UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
-                    UsageProto.CDPDatahubClusterRequested.newBuilder();
-            protoBuilder.setClusterId(cluster.getId().toString());
-            protoBuilder.setDatalakeCrn(stack.getDatalakeResourceId().toString());
-            buildDatahubRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
-            usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
-        } else {
+        if (StackType.DATALAKE == stack.getType()) {
             UsageProto.CDPDatalakeClusterRequested.Builder protoBuilder =
                     UsageProto.CDPDatalakeClusterRequested.newBuilder();
             protoBuilder.setDatalakeId(cluster.getId().toString());
             buildDatalakeRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
             usageReporter.cdpDatalakeClusterRequested(timestamp, protoBuilder.build());
+        } else {
+            UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
+                    UsageProto.CDPDatahubClusterRequested.newBuilder();
+            protoBuilder.setClusterId(cluster.getId().toString());
+            if (stack.getDatalakeResourceId() != null) {
+                // TODO: CB-9422 Find crn of datalake for this field. Stack id is used here, but for datalake event cluster id is used.
+                protoBuilder.setDatalakeCrn(stack.getDatalakeResourceId().toString());
+            }
+            buildDatahubRequestedProto(cluster, stack, creator, cloudPlatformEnum, protoBuilder);
+            usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
         }
     }
 
@@ -86,21 +90,20 @@ public class UsageLoggingUtil {
         if (oldStatusEnum == newStatusEnum) {
             return;
         }
-        // Datahub clusters will have datalake resource id set.
-        if (stack.getDatalakeResourceId() != null) {
-            UsageProto.CDPDatahubClusterStatusChanged proto = UsageProto.CDPDatahubClusterStatusChanged.newBuilder()
-                    .setClusterId(cluster.getId().toString())
-                    .setOldStatus(oldStatusEnum)
-                    .setNewStatus(newStatusEnum)
-                    .build();
-            usageReporter.cdpDatahubClusterStatusChanged(proto);
-        } else {
+        if (StackType.DATALAKE == stack.getType()) {
             UsageProto.CDPDatalakeClusterStatusChanged proto = UsageProto.CDPDatalakeClusterStatusChanged.newBuilder()
                     .setDatalakeId(cluster.getId().toString())
                     .setOldStatus(oldStatusEnum)
                     .setNewStatus(newStatusEnum)
                     .build();
             usageReporter.cdpDatalakeClusterStatusChanged(proto);
+        } else {
+            UsageProto.CDPDatahubClusterStatusChanged proto = UsageProto.CDPDatahubClusterStatusChanged.newBuilder()
+                    .setClusterId(cluster.getId().toString())
+                    .setOldStatus(oldStatusEnum)
+                    .setNewStatus(newStatusEnum)
+                    .build();
+            usageReporter.cdpDatahubClusterStatusChanged(proto);
         }
     }
 
