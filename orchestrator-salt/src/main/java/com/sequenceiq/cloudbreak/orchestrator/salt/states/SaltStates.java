@@ -49,6 +49,8 @@ public class SaltStates {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
 
+    private static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function \"state\\.highstate\" is running as PID.*with jid (\\d+)");
+
     private SaltStates() {
     }
 
@@ -97,13 +99,35 @@ public class SaltStates {
         return sc.run(Glob.ALL, "state.show_sls", LOCAL, ApplyFullResponse.class, state);
     }
 
-    public static Multimap<String, Map<String, String>> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
+    public static Multimap<String, Map<String, String>> jidInfo(SaltConnector sc, String jid, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
-            return highStateJidInfo(sc, jid);
+            try {
+                return highStateJidInfo(sc, jid);
+            } catch (SaltExecutionWentWrongException e) {
+                Optional<String> runningJid = extractJidIfPossible(e);
+                if (runningJid.isPresent()) {
+                    return highStateJidInfo(sc, runningJid.get());
+                } else {
+                    throw e;
+                }
+            }
         } else if (StateType.SIMPLE.equals(stateType)) {
             return applyStateJidInfo(sc, jid);
         }
         return ArrayListMultimap.create();
+    }
+
+    private static Optional<String> extractJidIfPossible(SaltExecutionWentWrongException e) {
+        Optional<String> jid = Optional.empty();
+        if (e.getMessage() != null) {
+            Matcher matcher = RUNNING_HIGHSTATE_JID.matcher(e.getMessage());
+            if (matcher.matches()) {
+                String runningHighStateJid = matcher.group(1);
+                LOGGER.info("Highstate is running, but with another jid, check that jid also: {}", runningHighStateJid);
+                jid = Optional.of(runningHighStateJid);
+            }
+        }
+        return jid;
     }
 
     private static Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {

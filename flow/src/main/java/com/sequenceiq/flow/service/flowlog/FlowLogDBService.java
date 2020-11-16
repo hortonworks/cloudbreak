@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -267,7 +268,11 @@ public class FlowLogDBService implements FlowLogService {
 
     public List<FlowLog> getFlowLogsByFlowIdsCreatedDesc(Set<String> flowIds) {
         LOGGER.info("Getting flow logs by these flow ids: {}", Joiner.on(",").join(flowIds));
-        return flowLogRepository.findAllByFlowIdsCreatedDesc(flowIds);
+        if (!flowIds.isEmpty()) {
+            return flowLogRepository.findAllByFlowIdsCreatedDesc(flowIds);
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {
