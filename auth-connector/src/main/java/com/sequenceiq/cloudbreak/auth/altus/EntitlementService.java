@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FAST_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA;
@@ -71,6 +72,10 @@ public class EntitlementService {
 
     public boolean freeIpaHaEnabled(String actorCrn, String accountID) {
         return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA);
+    }
+
+    public boolean enableDistroxInstanceTypesEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
     }
 
     public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
