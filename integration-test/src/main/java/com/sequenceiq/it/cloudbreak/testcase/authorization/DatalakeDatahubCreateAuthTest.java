@@ -85,18 +85,25 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'datalake/describeDetailedDatalake' right on any of the " +
-                                "'environment'[(]-s[)] crn:cdp:environments:us-west-1:.*:environment:.* " +
-                                "or on 'datalake'[(]-s[)] crn:cdp:datalake:us-west-1:.*:datalake:.*.")
+                                "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]" +
+                                " or on " +
+                                datalakePattern(testContext.get(sdxInternal).getName()))
                                 .withKey("SdxDetailedDescribeInternalAction"))
                 .given(RenewDatalakeCertificateTestDto.class)
                 .withStackCrn(testContext.get(sdxInternal).getCrn())
                 .when(sdxTestClient.renewDatalakeCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'datalake/repairDatalake' right on any of the " +
-                                "'environment'[(]-s[)] crn:cdp:environments:us-west-1:.*:environment:.* " +
-                                "or on 'datalake'[(]-s[)] crn:cdp:datalake:us-west-1:.*:datalake:.*.")
+                                "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]" +
+                                " or on " +
+                                datalakePattern(testContext.get(sdxInternal).getName()))
                                 .withKey("RenewDatalakeCertificateAction"))
+
                 .validate();
+    }
+
+    private String datalakePattern(String name) {
+        return String.format("'datalake'[(]-s[)] [\\[]name='%s', crn='crn:cdp:datalake:us-west-1:.*:datalake:.*\\.", name);
     }
 
 }

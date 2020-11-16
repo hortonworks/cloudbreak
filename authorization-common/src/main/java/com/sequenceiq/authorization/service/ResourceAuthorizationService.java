@@ -4,10 +4,13 @@ import static java.util.stream.Collectors.toList;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
@@ -52,6 +55,9 @@ public class ResourceAuthorizationService {
     @Inject
     private List<AuthorizationFactory<? extends Annotation>> authorizationFactories;
 
+    @Inject
+    private ResourceNameFactoryService resourceNameFactoryService;
+
     public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Optional<String> requestId) {
         boolean authzEntitled = isAuthorizationEntitlementRegistered();
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper(authzEntitled);
@@ -67,12 +73,23 @@ public class ResourceAuthorizationService {
                     LOGGER.debug("Resource authorization failed: {}", failedAuthorization.toString(rightMapper));
                 }
                 if (authzEntitled) {
-                    throw new AccessDeniedException(failedAuthorization.getAsFailureMessage(rightMapper));
+                    Map<String, Optional<String>> crnNameMap = resourceNameFactoryService.getNames(collectResourceCrns(failedAuthorization));
+                    throw new AccessDeniedException(failedAuthorization.getAsFailureMessage(rightMapper, getNameOrDefault(crnNameMap)));
                 } else {
                     throw new AccessDeniedException(convertToLegacyFailureMeessage(userCrn, failedAuthorization, rightMapper));
                 }
             }, () -> LOGGER.debug("Resource authorization was successfull."));
         });
+    }
+
+    private Function<String, Optional<String>> getNameOrDefault(Map<String, Optional<String>> nameMap) {
+        return name -> nameMap.getOrDefault(name, Optional.empty());
+    }
+
+    private Collection<String> collectResourceCrns(AuthorizationRule authorizationRule) {
+        Set<String> crns = new HashSet<>();
+        authorizationRule.convert((action, crn) -> crns.add(crn));
+        return crns;
     }
 
     private boolean isAuthorizationEntitlementRegistered() {

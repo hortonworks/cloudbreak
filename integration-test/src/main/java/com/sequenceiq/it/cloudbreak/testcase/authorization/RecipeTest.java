@@ -50,19 +50,23 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                "[(]crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[)].").withKey("RecipeGetAction"))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withKey("RecipeGetAction"))
                 .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                "[(]crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[)].").withKey("RecipeGetAction"))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withKey("RecipeGetAction"))
                 .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                "[(]crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[)].").withKey("RecipeDeleteAction"))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withKey("RecipeDeleteAction"))
                 .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                "[(]crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[)].").withKey("RecipeDeleteAction"))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withKey("RecipeDeleteAction"))
                 .when(recipeTestClient.deleteV4())
                 .when(recipeTestClient.listV4())
                 .then((context, dto, client) -> {
@@ -74,5 +78,9 @@ public class RecipeTest extends AbstractIntegrationTest {
                     return dto;
                 })
                 .validate();
+    }
+
+    private String patternWithName(String name) {
+        return String.format("[\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[]].", name);
     }
 }

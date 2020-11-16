@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -85,4 +86,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
     List<String> findAllEnvironmentCrnsByTenantId(@Param("accountId") String accountId);
+
+    @Query("SELECT s.name as name, s.resourceCrn as crn FROM Stack s" +
+            " WHERE s.accountId = :accountId AND s.terminated = -1 AND s.environmentCrn IN (:environmentCrns)")
+    List<ResourceCrnAndNameView> findNamesByEnvironmentCrnAndAccountId(@Param("environmentCrns") Collection<String> environmentCrns,
+            @Param("accountId") String accountId);
+
+    @Query("SELECT s.name as name, s.resourceCrn as crn FROM Stack s" +
+            " WHERE s.accountId = :accountId AND s.terminated = -1 AND s.resourceCrn IN (:resourceCrns)")
+    List<ResourceCrnAndNameView> findNamesByResourceCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
+            @Param("accountId") String accountId);
 }

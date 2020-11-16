@@ -71,6 +71,9 @@ public class ResourceAuthorizationServiceTest {
     @Mock
     private MethodSignature methodSignature;
 
+    @Mock
+    private ResourceNameFactoryService resourceNameFactoryService;
+
     @Captor
     private ArgumentCaptor<List<RightCheck>> captor;
 
@@ -96,7 +99,7 @@ public class ResourceAuthorizationServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature, Optional.of("requestId")));
         });
 
-        assertEquals("Doesn't have 'environments/editEnvironment' right on 'unknown resource type' (crn='crn').", accessDeniedException.getMessage());
+        assertEquals("Doesn't have 'environments/editEnvironment' right on 'unknown resource type' [crn='crn'].", accessDeniedException.getMessage());
     }
 
     @Test
@@ -124,8 +127,8 @@ public class ResourceAuthorizationServiceTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.authorize(USER_CRN, proceedingJoinPoint, methodSignature, Optional.of("requestId")));
         });
 
-        assertEquals("Not authorized for the following reasons. Doesn't have 'environments/editEnvironment' right on 'unknown resource type' (crn='crn1'). " +
-                "Doesn't have 'environments/describeCredential' right on 'unknown resource type' (crn='crn2').", accessDeniedException.getMessage());
+        assertEquals("Not authorized for the following reasons. Doesn't have 'environments/editEnvironment' right on 'unknown resource type' [crn='crn1']. " +
+                "Doesn't have 'environments/describeCredential' right on 'unknown resource type' [crn='crn2'].", accessDeniedException.getMessage());
 
         verify(grpcUmsClient).hasRights(anyString(), anyString(), captor.capture(), any());
 

@@ -27,7 +27,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
-import com.sequenceiq.authorization.utils.AuthorizationMessageUtils;
+import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
@@ -53,6 +53,8 @@ public class CommonPermissionCheckingUtils {
 
     @Inject
     private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
+
+    private AuthorizationMessageUtilsService authorizationMessageUtilsService;
 
     public boolean legacyAuthorizationNeeded() {
         return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId());
@@ -157,7 +159,7 @@ public class CommonPermissionCheckingUtils {
             DefaultResourceChecker defaultResourceChecker) {
         if (!defaultResourceChecker.isAllowedAction(action)) {
             String right = umsRightProvider.getRight(action);
-            String unauthorizedMessage = AuthorizationMessageUtils.formatTemplate(right, resourceCrns);
+            String unauthorizedMessage = authorizationMessageUtilsService.formatTemplate(right, resourceCrns);
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }

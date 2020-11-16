@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.projection.SdxClusterIdView;
@@ -39,6 +41,10 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     @Query("SELECT s FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:crns) AND s.deleted is null")
     List<SdxCluster> findAllByAccountIdAndCrnAndDeletedIsNull(@Param("accountId") String accountId, @Param("crns") Set<String> crns);
+
+    @Query("SELECT s.clusterName as name, s.crn as crn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn IN (:resourceCrns)")
+    List<ResourceCrnAndNameView> findResourceNamesByCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
+            @Param("accountId") String accountId);
 
     List<SdxCluster> findByAccountIdAndDeletedIsNull(String accountId);
 

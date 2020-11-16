@@ -52,7 +52,7 @@ public abstract class AbstactAuthorizationTest {
                 return Optional.of(authorization);
             }
         });
-        when(authorization.getAsFailureMessage(any())).thenReturn("Failure.");
+        when(authorization.getAsFailureMessage(any(), any())).thenReturn("Failure.");
         return authorization;
     }
 }

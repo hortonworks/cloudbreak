@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -458,6 +460,11 @@ public class OfflineStateGenerator {
         @Override
         public Optional<Long> findIdByCrnAndWorkspaceId(String name, Long workspaceId) {
             return Optional.empty();
+        }
+
+        @Override
+        public List<ResourceCrnAndNameView> findResourceNamesByCrnAndWorkspaceId(Collection<String> resourceCrns, Long workspaceId) {
+            return null;
         }
 
         @Override

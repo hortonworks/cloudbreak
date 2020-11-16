@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
@@ -34,6 +36,13 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.name = :name AND b.workspace.tenant.name = :accountId")
     Optional<String> findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT b.name as name, b.resourceCrn as crn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId AND b.resourceCrn IN (:resourceCrns)")
+    List<ResourceCrnAndNameView> findResourceNamesByCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
+            @Param("accountId") String accountId);
+
+    @Query("SELECT b.name FROM Blueprint b WHERE b.resourceCrn = :resourceCrn AND b.workspace.tenant.name = :accountId")
+    Optional<String> findResourceNameByCrnAndAccountId(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId")
     List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);

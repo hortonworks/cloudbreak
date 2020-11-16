@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceAuthorizationService;
+import com.sequenceiq.authorization.service.ResourceNameFactoryService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
@@ -108,6 +109,9 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
     @MockBean(name = "umsClient")
     private UmsClient umsClient;
+
+    @MockBean(name = "resourceNameFactoryService")
+    private ResourceNameFactoryService resourceNameFactoryService;
 
     @Inject
     private ClusterRepository clusterRepository;
