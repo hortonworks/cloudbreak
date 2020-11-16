@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -43,30 +42,29 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private CmAndStackVersionFilter cmAndStackVersionFilter;
 
-    public ImageFilterResult filter(List<Image> images, Versions versions, Image currentImage, String cloudPlatform, boolean lockComponents,
-            Map<String, String> activatedParcels) {
+    public ImageFilterResult filter(List<Image> images, Versions versions, String cloudPlatform, ImageFilterParams imageFilterParams) {
         ImageFilterResult imagesForCbVersion = getImagesForCbVersion(versions, images);
         List<Image> imageList = imagesForCbVersion.getAvailableImages().getCdhImages();
         if (CollectionUtils.isEmpty(imageList)) {
             return imagesForCbVersion;
         }
         LOGGER.debug("{} image(s) found for the given CB version", imageList.size());
-        return filterImages(imageList, currentImage, cloudPlatform, lockComponents, activatedParcels);
+        return filterImages(imageList, cloudPlatform, imageFilterParams);
     }
 
     private ImageFilterResult getImagesForCbVersion(Versions supportedVersions, List<Image> availableImages) {
         return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
-    private ImageFilterResult filterImages(List<Image> availableImages, Image currentImage, String cloudPlatform,
-            boolean lockComponents, Map<String, String> activatedParcels) {
+    private ImageFilterResult filterImages(List<Image> availableImages, String cloudPlatform, ImageFilterParams imageFilterParams) {
         Mutable<String> reason = new MutableObject<>();
+        Image currentImage = imageFilterParams.getCurrentImage();
         List<Image> images = availableImages.stream()
                 .filter(filterCurrentImage(currentImage, reason))
                 .filter(filterNonCmImages(reason))
                 .filter(filterIgnoredCmVersion(reason))
                 .filter(creationBasedFilter.filterPreviousImages(currentImage, reason))
-                .filter(cmAndStackVersionFilter.filterCmAndStackVersion(currentImage, lockComponents, activatedParcels, reason))
+                .filter(cmAndStackVersionFilter.filterCmAndStackVersion(imageFilterParams, reason))
                 .filter(validateCloudPlatform(cloudPlatform, reason))
                 .filter(validateOsVersion(currentImage, reason))
                 .filter(packageLocationFilter.filterImage(currentImage))

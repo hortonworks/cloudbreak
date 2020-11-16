@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @Component
@@ -143,8 +144,8 @@ public class ClusterUpgradeAvailabilityService {
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            Map<String, String> activatedParcels = getActivatedParcels(stack);
-            ImageFilterResult filteredImages = filterImages(imageCatalog, image, stack.cloudPlatform(), lockComponents, activatedParcels);
+            ImageFilterParams imageFilterParams = new ImageFilterParams(image, lockComponents, getActivatedParcels(stack), stack.isDatalake());
+            ImageFilterResult filteredImages = filterImages(imageCatalog, stack.cloudPlatform(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
@@ -183,10 +184,8 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
     }
 
-    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, Image currentImage, String cloudPlatform,
-            boolean lockComponents, Map<String, String> activatedParcels) {
-        return clusterUpgradeImageFilter.filter(
-                getCdhImages(imageCatalog), imageCatalog.getVersions(), currentImage, cloudPlatform, lockComponents, activatedParcels);
+    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), cloudPlatform, imageFilterParams);
     }
 
     private List<Image> getCdhImages(CloudbreakImageCatalogV3 imageCatalog) {
