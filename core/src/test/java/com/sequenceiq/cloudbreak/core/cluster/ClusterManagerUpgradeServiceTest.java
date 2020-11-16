@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -73,12 +74,27 @@ public class ClusterManagerUpgradeServiceTest {
     public void testUpgradeClusterManager() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
 
-        underTest.upgradeClusterManager(STACK_ID);
+        underTest.upgradeClusterManager(STACK_ID, true);
 
         verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
+        verify(clusterApi).startCluster();
+    }
+
+    @Test
+    public void testUpgradeClusterManagerWithoutStartServices() throws CloudbreakOrchestratorException, CloudbreakException {
+        Cluster cluster = stack.getCluster();
+
+        underTest.upgradeClusterManager(STACK_ID, false);
+
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
+        verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
+        verify(clusterApi).stopCluster(true);
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
+        verify(clusterApi, never()).startCluster();
     }
 }
