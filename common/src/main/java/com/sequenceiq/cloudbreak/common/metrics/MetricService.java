@@ -12,4 +12,6 @@ public interface MetricService {
     void initMicrometerMetricCounter(Metric metric);
 
     void incrementMetricCounter(Metric metric, String... tags);
+
+    <T, U> Map<T, U> gaugeMapSize(Metric metric, Map<T, U> map);
 }

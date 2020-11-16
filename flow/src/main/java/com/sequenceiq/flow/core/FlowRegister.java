@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -22,13 +23,17 @@ public class FlowRegister {
     @Inject
     private MetricService metricService;
 
-    private final Map<String, Pair<Flow, String>> runningFlows = new ConcurrentHashMap<>();
+    private Map<String, Pair<Flow, String>> runningFlows;
+
+    @PostConstruct
+    public void init() {
+        runningFlows = metricService.gaugeMapSize(FlowMetricType.ACTIVE_FLOWS, new ConcurrentHashMap<>());
+    }
 
     public void put(Flow flow, String chainFlowId) {
         LOGGER.info("Put flow {} to running flows", flow.getFlowId());
         runningFlows.put(flow.getFlowId(), new ImmutablePair<>(flow, chainFlowId));
         LOGGER.info("Running flows after put: {}", runningFlows.keySet());
-        metricService.submit(FlowMetricType.ACTIVE_FLOWS, runningFlows.size());
     }
 
     public Flow get(String flowId) {
