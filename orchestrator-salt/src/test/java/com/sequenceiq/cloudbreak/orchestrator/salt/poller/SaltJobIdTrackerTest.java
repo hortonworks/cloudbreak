@@ -193,7 +193,7 @@ public class SaltJobIdTrackerTest {
 
         Multimap<String, Map<String, String>> missingNodesWithReason = ArrayListMultimap.create();
         Multimap<String, String> missingNodesWithResolvedReason = ArrayListMultimap.create();
-        PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
+        PowerMockito.when(SaltStates.jidInfo(any(), any(), any())).thenReturn(missingNodesWithReason);
         when(saltErrorResolver.resolveErrorMessages(missingNodesWithReason)).thenReturn(missingNodesWithResolvedReason);
 
         SaltJobIdTracker underTest = new SaltJobIdTracker(saltConnector, saltJobRunner);
@@ -237,7 +237,7 @@ public class SaltJobIdTrackerTest {
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
-            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any())).thenReturn(missingNodesWithReason);
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any())).thenReturn(missingNodesWithReason);
 
             try {
                 new SaltJobIdTracker(saltConnector, saltJobRunner).call();
@@ -285,7 +285,7 @@ public class SaltJobIdTrackerTest {
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
-            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any())).thenReturn(missingNodesWithReason);
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any())).thenReturn(missingNodesWithReason);
 
             try {
                 new SaltJobIdTracker(saltConnector, saltJobRunner).call();
@@ -353,7 +353,7 @@ public class SaltJobIdTrackerTest {
 
             PowerMockito.mockStatic(SaltStates.class);
             PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
-            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any(Target.class), any()))
+            PowerMockito.when(SaltStates.jidInfo(any(SaltConnector.class), anyString(), any()))
                     .thenThrow(new RuntimeException("Salt execution went wrong: saltErrorDetails"));
 
             try {

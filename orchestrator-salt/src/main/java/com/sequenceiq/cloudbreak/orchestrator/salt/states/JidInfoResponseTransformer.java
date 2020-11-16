@@ -32,7 +32,7 @@ public class JidInfoResponseTransformer {
                 List<String> listValue = (List<String>) stringObjectEntry.getValue();
                 if (!listValue.isEmpty()) {
                     String errorMessage = listValue.stream().reduce((s, s2) -> s + "; " + s2).get();
-                    throw new RuntimeException("Salt execution went wrong: " + errorMessage);
+                    throw new SaltExecutionWentWrongException("Salt execution went wrong: " + errorMessage);
                 }
             } else {
                 throw new UnsupportedOperationException("Not supported Salt response: " + stringObjectEntry.getValue().getClass());

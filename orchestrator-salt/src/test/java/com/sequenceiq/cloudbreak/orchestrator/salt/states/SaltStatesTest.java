@@ -3,11 +3,11 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -133,12 +134,12 @@ public class SaltStatesTest {
         String jobId = "2";
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
-        String response = IOUtils.toString(responseStream);
+        String response = IOUtils.toString(responseStream, Charset.defaultCharset());
         responseStream.close();
         Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
-        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
+        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
@@ -163,6 +164,67 @@ public class SaltStatesTest {
     }
 
     @Test
+    public void highstateIsRunningTest() throws IOException {
+        String runningJid = "20201116101144197633";
+        String jobId = "2";
+
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"))).thenThrow(
+                new SaltExecutionWentWrongException("The function \"state.highstate\" is running as PID 100789 and was started at 2020, " +
+                        "Nov 16 10:11:44.197633 with jid " + runningJid));
+
+        InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
+        String response = IOUtils.toString(responseStream, Charset.defaultCharset());
+        responseStream.close();
+        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq(runningJid))).thenReturn(responseMap);
+
+        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+
+        assertThat(jidInfo.keySet(), hasSize(1));
+        assertThat(jidInfo.entries(), hasSize(4));
+        String hostName = jidInfo.keySet().iterator().next();
+        Collection<Map<String, String>> hostErrors = jidInfo.get(hostName);
+
+        Map<String, String> expectedMap1 = Map.of(
+                "Name", "/opt/ambari-server/ambari-server-init.sh",
+                "Comment", "Source file salt://ambari/scripts/ambari-server-initttt.sh not found");
+        Map<String, String> expectedMap2 = Map.of(
+                "Name", "ambari-server",
+                "Comment", "Service ambari-server is already enabled, and is dead");
+        Map<String, String> expectedMap3 = Map.of(
+                "Comment", "Command \"/opt/ambari-server/install-mpack-1.sh\" run",
+                "Stderr", "+ ARGS= + echo yes + ambari-server install-mpack --");
+        Map<String, String> expectedMap4 = Map.of(
+                "Name", "haveged",
+                "Comment", "Package haveged is already installed.");
+
+        assertThat(hostErrors, containsInAnyOrder(expectedMap1, expectedMap2, expectedMap3, expectedMap4));
+    }
+
+    @Test
+    public void highstateIsRunningAndExceptionIsThrownAtTheEndTest() {
+        String runningJid = "20201116101144197633";
+        String jobId = "2";
+
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"))).thenThrow(
+                new SaltExecutionWentWrongException("The function \"state.highstate\" is running as PID 100789 and was started at 2020, " +
+                        "Nov 16 10:11:44.197633 with jid " + runningJid));
+
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("20201116101144197633"))).thenThrow(
+                new SaltExecutionWentWrongException("other error"));
+
+        try {
+            SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
+        } catch (SaltExecutionWentWrongException e) {
+            assertEquals("other error", e.getMessage());
+        }
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+    }
+
+    @Test
     public void jidInfoSimpleTest() throws Exception {
         String jobId = "2";
 
@@ -172,7 +234,7 @@ public class SaltStatesTest {
 
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
-        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.SIMPLE);
+        Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.SIMPLE);
         verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
