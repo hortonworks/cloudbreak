@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.common.metrics;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 import io.micrometer.core.instrument.Counter;
@@ -13,6 +16,8 @@ import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Timer;
 
 public abstract class AbstractMetricService implements MetricService {
+
+    private final ConcurrentMap<String, AtomicDouble> gaugeMetricMap = new ConcurrentHashMap<>();
 
     /**
      * Set the specified gauge value.
@@ -28,9 +33,10 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void submit(Metric metric, double value, Map<String, String> labels) {
         String metricName = getMetricName(metric);
-
-        Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
-        Metrics.gauge(metricName, tags, value);
+        gaugeMetricMap.computeIfAbsent(metricName, name -> {
+            Iterable<Tag> tags = labels.entrySet().stream().map(label -> Tag.of(label.getKey(), label.getValue().toLowerCase())).collect(Collectors.toList());
+            return Metrics.gauge(name, tags, new AtomicDouble(value));
+        }).set(value);
     }
 
     @Override
