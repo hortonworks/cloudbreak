@@ -19,7 +19,7 @@ public interface ClusterModificationService {
 
     void stopCluster(boolean full) throws CloudbreakException;
 
-    int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException;
+    int startCluster() throws CloudbreakException;
 
     Map<String, String> getComponentsByCategory(String blueprintName, String hostGroupName);
 
