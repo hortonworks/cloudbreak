@@ -168,6 +168,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         acceptFlow(payload, acceptResult);
                         logFlowId(flowId);
                         flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
+                    } else {
+                        LOGGER.debug("Flow is not triggerable: key: {}, payload: {}", key, payload);
                     }
                 } else {
                     handleFlowControlEventAndTerminateOnFail(key, payload, flowParameters, flowChainId, flowId);
