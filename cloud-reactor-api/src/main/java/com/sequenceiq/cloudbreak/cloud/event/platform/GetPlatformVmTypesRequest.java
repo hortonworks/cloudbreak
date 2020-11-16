@@ -17,16 +17,19 @@ public class GetPlatformVmTypesRequest extends CloudPlatformRequest<GetPlatformV
 
     private final CdpResourceType cdpResourceType;
 
+    private final boolean hasEnableDistroxInstanceTypesEntitlement;
+
     private final Map<String, String> filters;
 
     public GetPlatformVmTypesRequest(CloudCredential cloudCredential, ExtendedCloudCredential extendedCloudCredential,
-        String variant, String region, CdpResourceType cdpResourceType, Map<String, String> filters) {
+        String variant, String region, CdpResourceType cdpResourceType, boolean hasEnableDistroxInstanceTypesEntitlement, Map<String, String> filters) {
         super(null, cloudCredential);
         this.extendedCloudCredential = extendedCloudCredential;
         this.variant = variant;
         this.region = region;
         this.filters = filters;
         this.cdpResourceType = cdpResourceType;
+        this.hasEnableDistroxInstanceTypesEntitlement = hasEnableDistroxInstanceTypesEntitlement;
     }
 
     public String getVariant() {
@@ -47,6 +50,10 @@ public class GetPlatformVmTypesRequest extends CloudPlatformRequest<GetPlatformV
 
     public Map<String, String> getFilters() {
         return filters;
+    }
+
+    public boolean hasEnableDistroxInstanceTypesEntitlement() {
+        return hasEnableDistroxInstanceTypesEntitlement;
     }
 
     //BEGIN GENERATED CODE
