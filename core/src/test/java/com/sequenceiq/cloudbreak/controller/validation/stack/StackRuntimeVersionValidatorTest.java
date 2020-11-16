@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -241,8 +242,11 @@ public class StackRuntimeVersionValidatorTest {
 
     private StackV4Request createStackRequest(String dataHubVersion) {
         ClouderaManagerRepositoryV4Request clouderaManagerRepositoryV4Request = new ClouderaManagerRepositoryV4Request();
-        clouderaManagerRepositoryV4Request.setVersion(dataHubVersion);
+        clouderaManagerRepositoryV4Request.setVersion("do-not-use-this-version");
         ClouderaManagerV4Request clouderaManagerV4Request = new ClouderaManagerV4Request();
+        clouderaManagerV4Request.setProducts(List.of(new ClouderaManagerProductV4Request()
+                .withName("CDH")
+                .withVersion(dataHubVersion)));
         clouderaManagerV4Request.setRepository(clouderaManagerRepositoryV4Request);
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setCm(clouderaManagerV4Request);

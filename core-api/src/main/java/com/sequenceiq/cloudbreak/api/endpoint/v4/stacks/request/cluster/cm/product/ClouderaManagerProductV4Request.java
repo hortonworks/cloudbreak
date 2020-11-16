@@ -6,6 +6,7 @@ import javax.validation.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -15,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ClouderaManagerProductV4Request implements JsonEntity {
+public class ClouderaManagerProductV4Request implements JsonEntity, ClouderaManagerProductBase {
 
     @NotEmpty
     @ApiModelProperty(ModelDescriptions.ClouderaManagerProductDescription.NAME)
