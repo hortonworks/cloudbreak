@@ -56,14 +56,24 @@ public class StatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail);
+        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(RANDOM_DELAY));
+        schedule(jobDetail, trigger, resource.getLocalId());
+    }
+
+    public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
+        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds);
+        schedule(jobDetail, trigger, resource.getLocalId());
+    }
+
+    private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
         try {
-            if (scheduler.getJobDetail(JobKey.jobKey(resource.getLocalId(), JOB_GROUP)) != null) {
-                unschedule(resource.getLocalId());
+            if (scheduler.getJobDetail(JobKey.jobKey(localId, JOB_GROUP)) != null) {
+                unschedule(localId);
             }
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", resource.getLocalId()), e);
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
         }
     }
 
@@ -107,12 +117,12 @@ public class StatusCheckerJobService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, int delayInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking datalake status Trigger")
-                .startAt(delayedFirstStart())
+                .startAt(delayedStart(delayInSeconds))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(properties.getIntervalInSeconds())
                         .repeatForever()
@@ -120,7 +130,7 @@ public class StatusCheckerJobService {
                 .build();
     }
 
-    private Date delayedFirstStart() {
-        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(RANDOM.nextInt(RANDOM_DELAY))));
+    private Date delayedStart(int delayInSeconds) {
+        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofSeconds(delayInSeconds)));
     }
 }
