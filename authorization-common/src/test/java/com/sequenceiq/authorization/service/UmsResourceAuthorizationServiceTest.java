@@ -1,7 +1,7 @@
 package com.sequenceiq.authorization.service;
 
-import static com.sequenceiq.authorization.utils.AuthorizationMessageUtils.INSUFFICIENT_RIGHTS;
-import static com.sequenceiq.authorization.utils.AuthorizationMessageUtils.INSUFFICIENT_RIGHTS_TEMPLATE;
+import static com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService.INSUFFICIENT_RIGHTS;
+import static com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService.INSUFFICIENT_RIGHTS_TEMPLATE;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.Assert.assertThrows;
@@ -9,11 +9,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +28,7 @@ import org.springframework.security.access.AccessDeniedException;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -53,8 +57,16 @@ public class UmsResourceAuthorizationServiceTest {
     @InjectMocks
     private UmsResourceAuthorizationService underTest;
 
+    private AuthorizationMessageUtilsService authorizationMessageUtilsService;
+
+    @Mock
+    private ResourceNameFactoryService resourceNameFactoryService;
+
     @BeforeEach
-    public void init() {
+    public void init() throws IllegalAccessException {
+        when(resourceNameFactoryService.getNames(any())).thenReturn(Collections.EMPTY_MAP);
+        this.authorizationMessageUtilsService = spy(new AuthorizationMessageUtilsService(resourceNameFactoryService));
+        FieldUtils.writeField(underTest, "authorizationMessageUtilsService", authorizationMessageUtilsService, true);
         when(umsRightProvider.getRight(any())).thenAnswer(invocation -> {
             AuthorizationResourceAction action = invocation.getArgument(0);
             return action.getRight();
@@ -119,6 +131,6 @@ public class UmsResourceAuthorizationServiceTest {
     }
 
     private String formatTemplate(String right, String resourceCrn) {
-        return String.format(INSUFFICIENT_RIGHTS_TEMPLATE, right, Crn.fromString(resourceCrn).getResourceType().getName(), resourceCrn);
+        return String.format(INSUFFICIENT_RIGHTS_TEMPLATE, right, Crn.fromString(resourceCrn).getResourceType().getName(), "Crn: '" + resourceCrn + "'");
     }
 }

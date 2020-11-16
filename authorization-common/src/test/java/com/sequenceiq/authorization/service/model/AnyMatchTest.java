@@ -39,7 +39,7 @@ public class AnyMatchTest extends AbstactAuthorizationTest {
 
         assertEquals(Optional.of(anyMatch), failedAuthorizations);
         assertEquals("You need to have at least one of the following resource rights. Failure. Failure.",
-                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight));
+                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, Optional::ofNullable));
         assertFalse(iterator.hasNext());
     }
 

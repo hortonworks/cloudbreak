@@ -7,6 +7,8 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +34,7 @@ import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -58,7 +60,7 @@ import com.sequenceiq.environment.credential.verification.CredentialVerification
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
-public class CredentialService extends AbstractCredentialService implements ResourceBasedCrnProvider {
+public class CredentialService extends AbstractCredentialService implements ResourceCrnAndNameProvider {
 
     private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
             + "request!";
@@ -374,5 +376,18 @@ public class CredentialService extends AbstractCredentialService implements Reso
     @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.CREDENTIAL;
+    }
+
+    @Override
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+        Map<String, Optional<String>> result = new HashMap<>();
+        repository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId(), getEnabledPlatforms()).stream()
+                .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        return result;
+    }
+
+    @Override
+    public EnumSet<Crn.ResourceType> getCrnTypes() {
+        return EnumSet.of(Crn.ResourceType.CREDENTIAL);
     }
 }

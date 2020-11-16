@@ -1,5 +1,6 @@
 package com.sequenceiq.authorization.service.model;
 
+import static com.sequenceiq.authorization.utils.AuthorizationMessageUtils.formatIdentifiersForErrorMessage;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.toList;
 
@@ -62,12 +63,13 @@ public class HasRightOnAll implements AuthorizationRule {
     }
 
     @Override
-    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper) {
+    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper, Function<String, Optional<String>> nameMapper) {
         Map<String, List<String>> byResourceType = crns.stream()
                 .collect(groupingBy(this::getResourceType, LinkedHashMap::new, toList()));
         return String.format(FAILURE_MESSAGE_FIX, rightMapper.apply(right)) + byResourceType.entrySet()
                 .stream()
-                .map(entry -> String.format(FAILURE_MESSAGE_REPEATABLE_TEMPLATE, entry.getKey(), String.join(", ", entry.getValue())))
+                .map(entry -> String.format(FAILURE_MESSAGE_REPEATABLE_TEMPLATE, entry.getKey(),
+                        formatIdentifiersForErrorMessage(entry.getValue(), nameMapper)))
                 .collect(Collectors.joining(" and on ")) + '.';
     }
 

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
@@ -34,6 +35,12 @@ public interface DatabaseConfigRepository extends JpaRepository<DatabaseConfig, 
 
     @Query("SELECT c.resourceCrn FROM DatabaseConfig c WHERE c.name = :name")
     Optional<Crn> findResourceCrnByName(@Param("name") String name);
+
+    @Query("SELECT c.name FROM DatabaseConfig c WHERE c.resourceCrn = :resourceCrn")
+    Optional<String> findNameByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT c.name as name, c.resourceCrn as crn FROM DatabaseConfig c WHERE c.resourceCrn IN (:resourceCrns)")
+    List<ResourceCrnAndNameView> findResourceNamesByCrn(@Param("resourceCrns") Collection<String> resourceCrns);
 
     @Query("SELECT c.resourceCrn FROM DatabaseConfig c WHERE c.name IN (:names)")
     List<Crn> findResourceCrnsByNames(@Param("names") Collection<String> names);

@@ -42,10 +42,10 @@ public class AnyMatch implements AuthorizationRule {
     }
 
     @Override
-    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper) {
+    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper, Function<String, Optional<String>> nameMapper) {
         return "You need to have at least one of the following resource rights. " + authorizations
                 .stream()
-                .map(a -> a.getAsFailureMessage(rightMapper))
+                .map(a -> a.getAsFailureMessage(rightMapper, nameMapper))
                 .collect(Collectors.joining(" "));
     }
 

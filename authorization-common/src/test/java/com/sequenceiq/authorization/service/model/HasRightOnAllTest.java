@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 public class HasRightOnAllTest {
 
     private static final AuthorizationResourceAction ACTION = AuthorizationResourceAction.EDIT_CREDENTIAL;
+
+    private Function<String, Optional<String>> nameMapper = Optional::ofNullable;
 
     @Test
     public void testHasRightOnAll() {
@@ -42,8 +45,8 @@ public class HasRightOnAllTest {
         Optional<AuthorizationRule> failedAuthorizations = authorization.evaluateAndGetFailed(iterator);
 
         assertEquals(Optional.of(new HasRight(ACTION, "crn2")), failedAuthorizations);
-        assertEquals("Doesn't have 'environments/editCredential' right on 'unknown resource type' (crn='crn2').",
-                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight));
+        assertEquals("Doesn't have 'environments/editCredential' right on 'unknown resource type' [name='crn2', crn='crn2'].",
+                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, nameMapper));
         assertFalse(iterator.hasNext());
     }
 
@@ -57,8 +60,9 @@ public class HasRightOnAllTest {
         Optional<AuthorizationRule> failedAuthorizations = authorization.evaluateAndGetFailed(iterator);
 
         assertEquals(Optional.of(new HasRightOnAll(ACTION, List.of("crn2", "crn4"))), failedAuthorizations);
-        assertEquals("Doesn't have 'environments/editCredential' right on 'unknown resource type'(-s) crn2, crn4.",
-                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight));
+        assertEquals("Doesn't have 'environments/editCredential' right on 'unknown resource type'(-s) " +
+                        "[name='crn2', crn='crn2'] [name='crn4', crn='crn4'].",
+                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, nameMapper));
         assertFalse(iterator.hasNext());
     }
 

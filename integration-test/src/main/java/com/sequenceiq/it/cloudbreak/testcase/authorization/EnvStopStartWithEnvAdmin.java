@@ -84,11 +84,13 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].").withKey("EnvironmentGetAction"))
+                                environmentPattern(testContext))
+                                .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].").withKey("EnvironmentGetAction"))
+                                environmentPattern(testContext))
+                                .withKey("EnvironmentGetAction"))
                 .validate();
         createDatalake(testContext);
         testContext
@@ -115,6 +117,11 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
+    }
+
+    private String environmentPattern(TestContext testContext) {
+        return String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.",
+                testContext.get(EnvironmentTestDto.class).getName());
     }
 
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {

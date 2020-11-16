@@ -7,12 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 public class AllMatchTest extends AbstactAuthorizationTest {
+
+    private Function<String, Optional<String>> nameMapper = Optional::ofNullable;
 
     @Test
     public void andReturnsTrueWhenAllTrue() {
@@ -40,7 +43,7 @@ public class AllMatchTest extends AbstactAuthorizationTest {
 
         assertEquals(Optional.of(allMatch), failedAuthorizations);
         assertEquals("Not authorized for the following reasons. Failure. Failure.",
-                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight));
+                failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, nameMapper));
         assertFalse(iterator.hasNext());
     }
 

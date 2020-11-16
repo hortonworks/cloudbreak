@@ -85,12 +85,12 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentShortPattern(testContext))
                                 .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentShortPattern(testContext))
                                 .withKey("EnvironmentGetAction"))
                 .validate();
         createDatalake(testContext);
@@ -116,7 +116,7 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                "[(]crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[)].")
+                                datahubRecipePattern(recipe1Name))
                                 .withKey("DistroXCreateAction"))
                 .withRecipe(recipe2Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
@@ -126,12 +126,31 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .when(distroXClient.renewDistroXCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'datahub/repairDatahub' right on any of the " +
-                                "'environment'[(]-s[)] crn:cdp:environments:us-west-1:.*:environment:.* " +
-                                "or on 'cluster'[(]-s[)] crn:cdp:datahub:us-west-1:.*:cluster:.*.")
+                                environmentDhPattern(testContext) +
+                                " or on " +
+                                datahubPattern(testContext))
                                 .withKey("RenewDistroXCertificateAction"))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
+    }
+
+    private String environmentDhPattern(TestContext testContext) {
+        return "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*";
+    }
+
+    private String environmentShortPattern(TestContext testContext) {
+        return String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:environment:.*",
+                testContext.get(EnvironmentTestDto.class).getName());
+    }
+
+    private String datahubPattern(TestContext testContext) {
+        return String.format("'cluster'[(]-s[)] [\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:cluster:.*",
+                testContext.get(DistroXTestDto.class).getName());
+    }
+
+    private String datahubRecipePattern(String recipeName) {
+        return String.format("[\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[]]\\.", recipeName);
     }
 
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {

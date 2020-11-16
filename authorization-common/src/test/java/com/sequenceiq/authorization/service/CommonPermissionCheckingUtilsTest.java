@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -17,7 +18,9 @@ import java.io.FileNotFoundException;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.Assert;
@@ -42,6 +45,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
+import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -91,6 +95,11 @@ public class CommonPermissionCheckingUtilsTest {
     @Mock
     private ResourceBasedCrnProvider resourceBasedCrnProvider;
 
+    private AuthorizationMessageUtilsService authorizationMessageUtilsService;
+
+    @Mock
+    private ResourceNameFactoryService resourceNameFactoryService;
+
     @Before
     public void setUp() throws IllegalAccessException {
         defaultResourceCheckerMap.put(AuthorizationResourceType.IMAGE_CATALOG, defaultResourceChecker);
@@ -106,6 +115,9 @@ public class CommonPermissionCheckingUtilsTest {
         when(umsRightProvider.getResourceType(any())).thenReturn(AuthorizationResourceType.IMAGE_CATALOG);
         when(umsRightProvider.getRight(eq(AuthorizationResourceAction.DELETE_IMAGE_CATALOG))).thenReturn("environments/deleteImageCatalog");
         when(methodSignature.getMethod()).thenReturn(getClass().getMethods()[0]);
+        when(resourceNameFactoryService.getNames(any())).thenReturn(Map.of(RESOURCE_CRN, Optional.empty(), DEFAULT_RESOURCE_CRN, Optional.empty()));
+        this.authorizationMessageUtilsService = spy(new AuthorizationMessageUtilsService(resourceNameFactoryService));
+        FieldUtils.writeField(underTest, "authorizationMessageUtilsService", authorizationMessageUtilsService, true);
     }
 
     @Test
@@ -242,7 +254,7 @@ public class CommonPermissionCheckingUtilsTest {
     public void testCheckPermissionFailForUserOnDefaultResource() {
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have insufficient rights to perform the following action(s): ");
-        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: [Crn: '%s']",
                 AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", DEFAULT_RESOURCE_CRN));
 
         underTest.checkPermissionForUserOnResource(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, DEFAULT_RESOURCE_CRN);
@@ -281,9 +293,9 @@ public class CommonPermissionCheckingUtilsTest {
 
         thrown.expect(AccessDeniedException.class);
         thrown.expectMessage("You have insufficient rights to perform the following action(s): ");
-        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: [Crn: '%s']",
                 AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", DEFAULT_RESOURCE_CRN));
-        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: '%s'",
+        thrown.expectMessage(String.format("'%s' on a(n) '%s' type resource with resource identifier: [Crn: '%s']",
                 AuthorizationResourceAction.DELETE_IMAGE_CATALOG.getRight(), "environment", RESOURCE_CRN));
 
         underTest.checkPermissionForUserOnResources(AuthorizationResourceAction.DELETE_IMAGE_CATALOG, USER_CRN, resourceCrns);

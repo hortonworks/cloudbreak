@@ -51,10 +51,10 @@ public class AllMatch implements AuthorizationRule {
     }
 
     @Override
-    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper) {
+    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper, Function<String, Optional<String>> nameMapper) {
         return "Not authorized for the following reasons. " + authorizations
                 .stream()
-                .map(a -> a.getAsFailureMessage(rightMapper))
+                .map(a -> a.getAsFailureMessage(rightMapper, nameMapper))
                 .collect(Collectors.joining(" "));
     }
 

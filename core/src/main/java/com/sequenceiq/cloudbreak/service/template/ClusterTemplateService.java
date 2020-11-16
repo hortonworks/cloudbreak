@@ -8,8 +8,11 @@ import static java.util.stream.Collectors.toSet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -28,7 +31,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
@@ -37,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -48,7 +52,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -70,7 +73,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 
 @Service
-public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> implements ResourceBasedCrnProvider {
+public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> implements ResourceCrnAndNameProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateService.class);
 
@@ -212,7 +215,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             throw new BadRequestException("The environment cannot be null.");
         }
 
-        if (resource.getStatus().isNonDefault() &&  clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
+        if (resource.getStatus().isNonDefault() && clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
             throw new DuplicateClusterTemplateException(
                     format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
         }
@@ -442,6 +445,19 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     public ClusterTemplateStatusView getStatusViewByResourceCrn(String resourceCrn) {
         return clusterTemplateRepository.findViewByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+        Map<String, Optional<String>> result = new HashMap<>();
+        clusterTemplateRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId()).stream()
+                .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        return result;
+    }
+
+    @Override
+    public EnumSet<Crn.ResourceType> getCrnTypes() {
+        return EnumSet.of(Crn.ResourceType.CLUSTER_DEFINITION);
     }
 
     @Override

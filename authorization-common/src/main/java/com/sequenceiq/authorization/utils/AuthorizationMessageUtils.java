@@ -1,45 +1,29 @@
 package com.sequenceiq.authorization.utils;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import org.apache.commons.lang3.tuple.Pair;
 
 public class AuthorizationMessageUtils {
-
-    public static final String INSUFFICIENT_RIGHTS = "You have insufficient rights to perform the following action(s): ";
-
-    public static final String INSUFFICIENT_RIGHTS_TEMPLATE = "'%s' on a(n) '%s' type resource with resource identifier: '%s'";
 
     private AuthorizationMessageUtils() {
     }
 
-    public static String formatTemplate(String right, String resourceCrn) {
-        return INSUFFICIENT_RIGHTS + formatTemplateMessage(right, resourceCrn);
-    }
-
-    private static String formatTemplateMessage(String right, String resourceCrn) {
-        return String.format(INSUFFICIENT_RIGHTS_TEMPLATE, right, extractResourceName(resourceCrn), resourceCrn);
-    }
-
-    private static String extractResourceName(String resourceCrn) {
-        return Optional.ofNullable(resourceCrn)
-                .map(Crn::fromString)
-                .map(Crn::getResourceType)
-                .map(Crn.ResourceType::getName)
-                .orElse("unknown");
-    }
-
-    public static String formatTemplate(String right, Collection<String> resourceCrns) {
-        return INSUFFICIENT_RIGHTS + resourceCrns.stream().map(crn -> formatTemplateMessage(right, crn)).collect(Collectors.joining(","));
-    }
-
-    public static String formatTemplate(List<AuthorizationProto.RightCheck> rightCheckList) {
-        return INSUFFICIENT_RIGHTS + rightCheckList.stream()
-                .map(rightCheck -> formatTemplateMessage(rightCheck.getRight(), rightCheck.getResource()))
-                .collect(Collectors.joining(","));
+    public static String formatIdentifiersForErrorMessage(List<String> crns, Function<String, Optional<String>> nameMapper) {
+        return crns.stream().map(crn -> Pair.of(crn, nameMapper.apply(crn)))
+                .map(crnAndName -> {
+                            String resourceNameFormatted = crnAndName.getRight()
+                                    .map(name -> String.format("name='%s'", name)).orElse("");
+                            String resourceCrnFormatted = String.format("crn='%s'", crnAndName.getLeft());
+                            return Stream.of(resourceNameFormatted, resourceCrnFormatted)
+                                    .filter(part -> !part.isEmpty())
+                                    .collect(Collectors.joining(", "));
+                        }
+                ).map(nameAndCrnFormatted -> String.format("[%s]", nameAndCrnFormatted))
+                .collect(Collectors.joining(" "));
     }
 }

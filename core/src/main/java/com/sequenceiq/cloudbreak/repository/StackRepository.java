@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import static com.sequenceiq.cloudbreak.repository.snippets.ShowTerminatedClustersSnippets.SHOW_TERMINATED_CLUSTERS_IF_REQUESTED;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Network;
@@ -220,6 +222,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT s.id FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated = null")
     Optional<Long> findIdByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT s.name as name, s.resourceCrn as crn FROM Stack s WHERE s.workspace.id = :workspaceId AND s.resourceCrn IN (:resourceCrns)")
+    List<ResourceCrnAndNameView> findResourceNamesByCrnAndWorkspaceId(@Param("resourceCrns") Collection<String> resourceCrns,
+            @Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s.id as id, "
             + "s.resourceCrn as resourceCrn, "

@@ -22,6 +22,7 @@ public class EnvironmentOpDescription {
     public static final String VERIFY_CREDENTIAL_BY_CRN = "Verifies the credential used by the given environment.";
     public static final String CLI_COMMAND = "produce cli command input for environment creation";
     public static final String GET_CRN_BY_NAME = "Get the crn of an environment by name.";
+    public static final String GET_NAME_BY_CRN = "Get the name of an environment by crn.";
     public static final String UPDATE_CONFIG_BY_CRN = "Update the configuration for all stacks in the Environment by the Environment CRN";
 
     private EnvironmentOpDescription() {

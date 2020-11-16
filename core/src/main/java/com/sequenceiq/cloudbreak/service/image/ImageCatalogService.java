@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +41,7 @@ import org.springframework.util.CollectionUtils;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -56,7 +59,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -69,7 +71,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Component
-public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourceBasedCrnProvider {
+public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourceCrnAndNameProvider {
 
     public static final String UNDEFINED = "";
 
@@ -675,4 +677,35 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return AuthorizationResourceType.IMAGE_CATALOG;
     }
 
+    @Override
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+        Map<String, Optional<String>> result = new HashMap<>();
+        List<String> notDefault = new ArrayList<>();
+        for (String crn : crns) {
+            if (legacyCatalogEnabled) {
+                ImageCatalog legacy = getCloudbreakLegacyDefaultImageCatalog();
+                if (legacy.getResourceCrn().equals(crn)) {
+                    result.put(crn, Optional.ofNullable(legacy.getName()));
+                } else {
+                    notDefault.add(crn);
+                }
+
+            } else {
+                ImageCatalog cdpDefault = getCloudbreakDefaultImageCatalog();
+                if (cdpDefault.getResourceCrn().equals(crn)) {
+                    result.put(crn, Optional.ofNullable(cdpDefault.getName()));
+                } else {
+                    notDefault.add(crn);
+                }
+            }
+        }
+        imageCatalogRepository.findResourceNamesByCrnAndTenantId(notDefault, ThreadBasedUserCrnProvider.getAccountId()).stream()
+                .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        return result;
+    }
+
+    @Override
+    public EnumSet<Crn.ResourceType> getCrnTypes() {
+        return EnumSet.of(Crn.ResourceType.IMAGE_CATALOG);
+    }
 }

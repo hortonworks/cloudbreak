@@ -5,12 +5,14 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 public class HasRight implements AuthorizationRule {
 
-    private static final String FAILURE_MESSAGE_TEMPLATE = "Doesn't have '%s' right on '%s' (crn='%s').";
+    private static final String FAILURE_MESSAGE_TEMPLATE = "Doesn't have '%s' right on '%s' [%s].";
 
     private final AuthorizationResourceAction right;
 
@@ -35,8 +37,15 @@ public class HasRight implements AuthorizationRule {
     }
 
     @Override
-    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper) {
-        return String.format(FAILURE_MESSAGE_TEMPLATE, rightMapper.apply(right), getResourceType(crn), crn);
+    public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper,
+            Function<String, Optional<String>> nameMapper) {
+        String resourceNameFormatted = nameMapper.apply(crn)
+                .map(name -> String.format("name='%s'", name)).orElse("");
+        String resourceCrnFormatted = String.format("crn='%s'", crn);
+        String identifiers = Stream.of(resourceNameFormatted, resourceCrnFormatted)
+                .filter(part -> !part.isEmpty())
+                .collect(Collectors.joining(", "));
+        return String.format(FAILURE_MESSAGE_TEMPLATE, rightMapper.apply(right), getResourceType(crn), identifiers);
     }
 
     @Override

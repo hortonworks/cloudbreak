@@ -14,7 +14,7 @@ public interface AuthorizationRule {
 
     void convert(BiConsumer<AuthorizationResourceAction, String> collector);
 
-    String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper);
+    String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper, Function<String, Optional<String>> nameMapper);
 
     default String getResourceType(String crn) {
         return Optional.ofNullable(crn)

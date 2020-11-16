@@ -73,12 +73,12 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentPattern(testContext))
                                 .withKey("EnvironmentGetAction"))
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentPattern(testContext))
                                 .withKey("EnvironmentGetAction"));
         testFreeipaCreation(testContext);
         testContext
@@ -141,18 +141,27 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentFreeIpaPattern(testContext))
                                 .withKey("FreeIpaDescribeAction"))
                 .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/stopEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentFreeIpaPattern(testContext))
                                 .withKey("FreeIpaStopAction"))
                 .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class,
                         RunningParameter.expectedMessage("Doesn't have 'environments/startEnvironment' right on 'environment' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:environment:.*'[)].")
+                                environmentFreeIpaPattern(testContext))
                                 .withKey("FreeIpaStartAction"));
+    }
+
+    private String environmentPattern(TestContext testContext) {
+        return String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.",
+                testContext.get(EnvironmentTestDto.class).getName());
+    }
+
+    private String environmentFreeIpaPattern(TestContext testContext) {
+        return String.format("[\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.");
     }
 
 }

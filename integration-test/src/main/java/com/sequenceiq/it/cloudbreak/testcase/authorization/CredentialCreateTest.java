@@ -61,7 +61,8 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.get(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .expect(ForbiddenException.class, RunningParameter.key("CredentialGetAction")
                         .withExpectedMessage("Doesn't have 'environments/describeCredential' right on 'credential' " +
-                                "[(]crn='crn:cdp:environments:us-west-1:.*:credential:.*'[)]."))
+                                String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:credential:.*'[]]\\.",
+                                        testContext.get(CredentialTestDto.class).getName())))
                 .validate();
     }
 

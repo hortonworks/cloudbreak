@@ -1,17 +1,22 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
@@ -19,7 +24,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements ResourceBasedCrnProvider {
+public class StackService implements ResourceCrnAndNameProvider {
 
     @Inject
     private StackRepository stackRepository;
@@ -134,5 +139,30 @@ public class StackService implements ResourceBasedCrnProvider {
     @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.ENVIRONMENT;
+    }
+
+    @Override
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+        Map<String, Optional<String>> result = new HashMap<>();
+        Boolean envType = Optional.ofNullable(crns)
+                .map(Collection::stream)
+                .flatMap(Stream::findFirst)
+                .map(Crn::fromString)
+                .map(Crn::getResourceType)
+                .map(type -> type == Crn.ResourceType.ENVIRONMENT)
+                .orElse(Boolean.FALSE);
+        if (envType) {
+            stackRepository.findNamesByEnvironmentCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId())
+                    .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        } else {
+            stackRepository.findNamesByResourceCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId())
+                    .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
+        }
+        return result;
+    }
+
+    @Override
+    public EnumSet<Crn.ResourceType> getCrnTypes() {
+        return EnumSet.of(Crn.ResourceType.FREEIPA, Crn.ResourceType.ENVIRONMENT);
     }
 }
