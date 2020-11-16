@@ -257,14 +257,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
                                                             String restoreId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
@@ -272,14 +272,14 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@ResourceName String name, String operationId) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.getDatabaseBackupStatus(sdxCluster, operationId);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.RESTORE_DATALAKE)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@ResourceName String name, String operationId) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         return sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);    }
