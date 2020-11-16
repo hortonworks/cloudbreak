@@ -98,6 +98,7 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                                 "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource with resource identifier: .*")
                                 .withKey("EnvironmentGetAction"))
                 .validate();
+        createDatalake(testContext);
         String recipe1Name = testContext
                 .given(RecipeTestDto.class).valid()
                 .when(recipeTestClient.createV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
