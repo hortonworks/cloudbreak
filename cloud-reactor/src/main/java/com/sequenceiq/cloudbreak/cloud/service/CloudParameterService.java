@@ -15,6 +15,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
@@ -94,6 +95,9 @@ public class CloudParameterService {
 
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public PlatformVariants getPlatformVariants() {
@@ -299,8 +303,11 @@ public class CloudParameterService {
     public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant,
             CdpResourceType stackType, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
+        boolean hasEnableDistroxInstanceTypesEnabled = entitlementService
+                .enableDistroxInstanceTypesEnabled(cloudCredential.getUserCrn(), cloudCredential.getAccountId());
         GetPlatformVmTypesRequest getPlatformVmTypesRequest =
-                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, filters);
+                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType,
+                        hasEnableDistroxInstanceTypesEnabled, filters);
         eventBus.notify(getPlatformVmTypesRequest.selector(), Event.wrap(getPlatformVmTypesRequest));
         try {
             GetPlatformVmTypesResult res = getPlatformVmTypesRequest.await();
