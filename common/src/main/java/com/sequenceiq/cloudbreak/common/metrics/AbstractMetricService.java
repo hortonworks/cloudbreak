@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import io.micrometer.core.instrument.Tag;
+import io.micrometer.core.instrument.Tags;
 import io.micrometer.core.instrument.Timer;
 
 public abstract class AbstractMetricService implements MetricService {
@@ -46,6 +47,11 @@ public abstract class AbstractMetricService implements MetricService {
     @Override
     public void incrementMetricCounter(Metric metric, String... tags) {
         incrementMetricCounter(getMetricName(metric), tags);
+    }
+
+    @Override
+    public <T, U> Map<T, U> gaugeMapSize(Metric metric, Map<T, U> map) {
+        return Metrics.gaugeMapSize(getMetricName(metric), Tags.empty(), map);
     }
 
     protected void incrementMetricCounter(String metric, String... tags) {
