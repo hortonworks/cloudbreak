@@ -11,33 +11,40 @@
         "cardinality": 2,
         "refName": "master",
         "roleConfigGroupsRefNames": [
-          "hdfs-DATANODE-BASE",
-          "hdfs-JOURNALNODE-BASE",
-          "hdfs-FAILOVERCONTROLLER-BASE",
-          "hdfs-NAMENODE-BASE",
           "hive-HIVEMETASTORE-BASE",
-          "zookeeper-SERVER-BASE",
-          "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE",
-          "solr-SOLR_SERVER-BASE",
           "ranger-RANGER_ADMIN-BASE",
           "hdfs-GATEWAY-BASE",
+          "hive-GATEWAY-BASE",
+          "hbase-GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-FAILOVERCONTROLLER-BASE"
+        ]
+      },
+      {
+        "cardinality": 2,
+        "refName": "gateway",
+        "roleConfigGroupsRefNames": [
+          "atlas-ATLAS_SERVER-BASE",
+          "ranger-RANGER_ADMIN-BASE",
+          "zookeeper-SERVER-BASE",
+          "knox-KNOX_GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hbase-GATEWAY-BASE"
         ]
       },
       {
-        "cardinality": 1,
-        "refName": "gateway",
+        "cardinality": 3,
+        "refName": "core",
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-JOURNALNODE-BASE",
-          "ranger-RANGER_ADMIN-BASE",
-          "ranger-RANGER_USERSYNC-BASE",
-          "ranger-RANGER_TAGSYNC-BASE",
-          "zookeeper-SERVER-BASE",
-          "knox-KNOX_GATEWAY-BASE",
-          "atlas-ATLAS_SERVER-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "solr-SOLR_SERVER-BASE",
           "hbase-REGIONSERVER-BASE",
           "hbase-MASTER-BASE",
           "solr-GATEWAY-BASE",
@@ -45,6 +52,15 @@
           "kafka-GATEWAY-BASE",
           "hive-GATEWAY-BASE",
           "hbase-GATEWAY-BASE"
+        ]
+      },
+      {
+        "cardinality": 1,
+        "refName": "auxiliary",
+        "roleConfigGroupsRefNames": [
+          "ranger-RANGER_USERSYNC-BASE",
+          "ranger-RANGER_TAGSYNC-BASE",
+          "zookeeper-SERVER-BASE"
         ]
       },
       {
@@ -113,7 +129,7 @@
               },
               {
                 "name": "ranger.audit.solr.no.shards",
-                "value": "1"
+                "value": "3"
               },
               {
                 "name": "ranger.audit.solr.max.shards.per.node",
@@ -166,7 +182,7 @@
               },
               {
                 "name": "atlas_solr_shards",
-                "value": "2"
+                "value": "3"
               },
               {
                 "name": "atlas_solr_replication_factor",
@@ -308,21 +324,21 @@
             "roleType": "GATEWAY"
           },
           {
-              "base": true,
-              "refName": "hdfs-FAILOVERCONTROLLER-BASE",
-              "roleType": "FAILOVERCONTROLLER"
-            },
-            {
-              "base": true,
-              "configs": [
-                {
-                  "name": "dfs_journalnode_edits_dir",
-                  "value": "/dfs/jn"
-                }
-              ],
-              "refName": "hdfs-JOURNALNODE-BASE",
-              "roleType": "JOURNALNODE"
-            }
+            "base": true,
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER"
+          },
+          {
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_journalnode_edits_dir",
+                "value": "/dfs/jn"
+              }
+            ],
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE"
+          }
         ],
         "serviceConfigs": [
           {
@@ -361,51 +377,11 @@
           },
           {
             "name": "default.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "offsets.topic.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "transaction.state.log.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "offset.storage.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "config.storage.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "status.storage.replication.factor",
-            "value": "2"
-          },
-          {
-            "name": "transaction.state.log.min.isr",
-            "value": "1"
+            "value": "3"
           },
           {
             "name": "min.insync.replicas",
-            "value": "1"
-          },
-          {
-            "name": "unclean.leader.election.enable",
-            "value": "true"
-          },
-          {
-            "name": "service_config_suppression_offsets.topic.replication.factor",
-            "value": "true"
-          },
-          {
-            "name": "service_config_suppression_transaction.state.log.replication.factor",
-            "value": "true"
-          },
-          {
-            "name": "service_config_suppression_kafka_broker_count_validator",
-            "value": "true"
+            "value": "2"
           }
         ],
         "serviceType": "KAFKA"
