@@ -97,6 +97,7 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                                 "'environments/describeEnvironment' on a[(]n[)] 'environment' type resource " +
                                 "with resource identifier: 'crn:cdp:environments:.*").withKey("EnvironmentGetAction"))
                 .validate();
+        createDatalake(testContext);
         testContext
                 .given(EnvironmentTestDto.class)
                 .given(UmsTestDto.class)
