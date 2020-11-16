@@ -60,10 +60,13 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndStackPermitcheckIsFalse() {
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY)).thenReturn(Boolean.FALSE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)).thenReturn(Boolean.TRUE);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.FALSE);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.TRUE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, false, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertFalse(result);
@@ -72,11 +75,13 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMPermitcheckIsFalse() {
-        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
                 .thenReturn(Boolean.TRUE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)).thenReturn(Boolean.FALSE);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.FALSE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, false, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertFalse(result);
@@ -85,11 +90,13 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMAndStackPermitcheckIsFalse() {
-        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
                 .thenReturn(Boolean.FALSE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)).thenReturn(Boolean.FALSE);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.FALSE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, false, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertFalse(result);
@@ -98,10 +105,13 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnTrueWhenNotLockedAndCMAndStackPermitcheckIsTrue() {
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY)).thenReturn(Boolean.TRUE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)).thenReturn(Boolean.TRUE);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.TRUE);
+        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+                .thenReturn(Boolean.TRUE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, false, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertTrue(result);
@@ -110,9 +120,10 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseIfLockedAndCheckerReturnsFalse() {
+        ImageFilterParams imageFilterParams = createImageFilterParams(true, true);
         when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.FALSE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, true, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertFalse(result);
@@ -121,13 +132,18 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnTrueIfLockedAndCheckerReturnsTrue() {
+        ImageFilterParams imageFilterParams = createImageFilterParams(true, true);
         when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.TRUE);
 
-        Predicate<Image> predicate = underTest.filterCmAndStackVersion(currentImage, true, activatedParcels, reason);
+        Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
         boolean result = predicate.test(candidateImage);
 
         assertTrue(result);
         assertLockedCommon();
+    }
+
+    private ImageFilterParams createImageFilterParams(boolean lockComponents, boolean checkUpgradeMatrix) {
+        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, checkUpgradeMatrix);
     }
 
     private void assertLockedCommon() {

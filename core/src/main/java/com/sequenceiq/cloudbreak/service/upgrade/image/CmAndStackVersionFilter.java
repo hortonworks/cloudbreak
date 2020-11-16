@@ -29,10 +29,10 @@ public class CmAndStackVersionFilter {
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
 
-    public Predicate<Image> filterCmAndStackVersion(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, Mutable<String> reason) {
+    public Predicate<Image> filterCmAndStackVersion(ImageFilterParams imageFilterParams, Mutable<String> reason) {
         return candidateImage -> {
-            updateReason(lockComponents, activatedParcels, reason);
-            return isUpgradePermitted(currentImage, lockComponents, activatedParcels, candidateImage);
+            updateReason(imageFilterParams.isLockComponents(), imageFilterParams.getActivatedParcels(), reason);
+            return isUpgradePermitted(imageFilterParams, candidateImage);
         };
     }
 
@@ -45,18 +45,18 @@ public class CmAndStackVersionFilter {
         }
     }
 
-    private boolean isUpgradePermitted(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, Image candidateImage) {
-        return lockComponents
-                ? lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)
-                : isUnlockedCmAndStackUpgradePermitted(currentImage, candidateImage);
+    private boolean isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
+        return imageFilterParams.isLockComponents()
+                ? lockedComponentChecker.isUpgradePermitted(imageFilterParams.getCurrentImage(), candidateImage, imageFilterParams.getActivatedParcels())
+                : isUnlockedCmAndStackUpgradePermitted(imageFilterParams, candidateImage);
     }
 
-    private boolean isUnlockedCmAndStackUpgradePermitted(Image currentImage, Image candidateImage) {
-        return isCmAndStackUpgradePermitted(currentImage, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
-                && isCmAndStackUpgradePermitted(currentImage, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY);
+    private boolean isUnlockedCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
+        return isCmAndStackUpgradePermitted(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
+                && isCmAndStackUpgradePermitted(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY);
     }
 
-    private boolean isCmAndStackUpgradePermitted(Image currentImage, Image candidateImage, String versionKey, String buildNumberKey) {
-        return upgradePermissionProvider.permitCmAndStackUpgrade(currentImage, candidateImage, versionKey, buildNumberKey);
+    private boolean isCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage, String versionKey, String buildNumberKey) {
+        return upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, versionKey, buildNumberKey);
     }
 }
