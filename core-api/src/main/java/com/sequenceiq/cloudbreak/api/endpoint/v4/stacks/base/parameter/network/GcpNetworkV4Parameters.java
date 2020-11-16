@@ -99,4 +99,15 @@ public class GcpNetworkV4Parameters extends MappableBase implements JsonEntity {
         noFirewallRules = getBoolean(parameters, "noFirewallRules");
         noPublicIp = getBoolean(parameters, "noPublicIp");
     }
+
+    @Override
+    public String toString() {
+        return "GcpNetworkV4Parameters{" +
+                "networkId='" + networkId + '\'' +
+                ", subnetId='" + subnetId + '\'' +
+                ", sharedProjectId='" + sharedProjectId + '\'' +
+                ", noPublicIp=" + noPublicIp +
+                ", noFirewallRules=" + noFirewallRules +
+                '}';
+    }
 }

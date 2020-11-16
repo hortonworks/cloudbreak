@@ -47,4 +47,11 @@ public class AwsNetworkV4Parameters extends MappableBase {
     public void parse(Map<String, Object> parameters) {
         subnetId = getParameterOrNull(parameters, "subnetId");
     }
+
+    @Override
+    public String toString() {
+        return "AwsNetworkV4Parameters{" +
+                "subnetId='" + subnetId + '\'' +
+                '}';
+    }
 }

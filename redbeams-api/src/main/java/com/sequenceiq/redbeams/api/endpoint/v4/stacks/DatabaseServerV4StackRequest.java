@@ -24,4 +24,10 @@ public class DatabaseServerV4StackRequest extends DatabaseServerV4StackBase {
         this.securityGroup = securityGroup;
     }
 
+    @Override
+    public String toString() {
+        return "DatabaseServerV4StackRequest{" +
+                "securityGroup=" + securityGroup +
+                '}';
+    }
 }

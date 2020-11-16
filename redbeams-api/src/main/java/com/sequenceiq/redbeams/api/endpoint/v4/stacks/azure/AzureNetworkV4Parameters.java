@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,8 +12,6 @@ import com.sequenceiq.redbeams.doc.ModelDescriptions.AzureNetworkModelDescriptio
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-
-import java.util.Map;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -48,5 +48,12 @@ public class AzureNetworkV4Parameters extends MappableBase {
     @Override
     public void parse(Map<String, Object> parameters) {
         subnets = getParameterOrNull(parameters, SUBNETS);
+    }
+
+    @Override
+    public String toString() {
+        return "AzureNetworkV4Parameters{" +
+                "subnets='" + subnets + '\'' +
+                '}';
     }
 }

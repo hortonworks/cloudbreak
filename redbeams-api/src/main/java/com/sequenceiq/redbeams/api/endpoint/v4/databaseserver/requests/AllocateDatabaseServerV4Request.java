@@ -174,4 +174,18 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
         return aws;
     }
 
+    @Override
+    public String toString() {
+        return "AllocateDatabaseServerV4Request{" +
+                "name='" + name + '\'' +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", clusterCrn='" + clusterCrn + '\'' +
+                ", network=" + network +
+                ", databaseServer=" + databaseServer +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                ", sslConfig=" + sslConfig +
+                '}';
+    }
 }
