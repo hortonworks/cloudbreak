@@ -543,7 +543,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public int startCluster() throws CloudbreakException {
+    public int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException {
         try {
             startClouderaManager(stack, apiClient);
             startAgents(stack, apiClient);

@@ -37,7 +37,7 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
         ClusterStartResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            int requestId = apiConnectors.getConnector(stack).startCluster();
+            int requestId = apiConnectors.getConnector(stack).startCluster(stack.getRunningInstanceMetaDataSet());
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {
             result = new ClusterStartResult(e.getMessage(), e, request);

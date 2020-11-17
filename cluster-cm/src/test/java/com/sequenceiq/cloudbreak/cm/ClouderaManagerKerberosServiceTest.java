@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -121,7 +122,7 @@ public class ClouderaManagerKerberosServiceTest {
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
         verify(clustersResourceApi).deployClientConfig(cluster.getName());
-        verify(modificationService).startCluster();
+        verify(modificationService).startCluster(anySet());
     }
 
     @Test
