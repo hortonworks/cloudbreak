@@ -7,6 +7,8 @@ public enum CommonStatus {
     FAILED;
 
     public boolean resourceExists() {
-        return CREATED.equals(this) || DETACHED.equals(this);
+        return CREATED.equals(this)
+                || DETACHED.equals(this)
+                || REQUESTED.equals(this);
     }
 }
