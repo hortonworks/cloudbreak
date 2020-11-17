@@ -16,13 +16,16 @@ public class AnonymizerUtil {
             new ReplacePattern("(?i)("
                     + "password=|password\":\"|password:|password |"
                     + "pass=|pass\":\"|pass:|pass |"
+                    + "secret=|secret\":\"|secret:|secret |"
                     + "key=|key\":\"|key:|key |"
                     + "credential=|credential\":\"|credential:|credential "
                     + ")([^\\s'\"]*)", REPLACEMENT),
             //WASB
             new ReplacePattern("(?i)(\\.blob\\.core\\.windows\\.net\":\")([^\\s'\"])*", REPLACEMENT),
             //CM
-            new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),
+            //KNOX
+            new ReplacePattern("(\"name\":\\s*\"[^\"]*secret\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT)
     };
 
     private AnonymizerUtil() {
