@@ -457,6 +457,20 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsUserHasRightsCache", key = "{ #actorCrn, #memberCrn, #rightChecks }")
     public List<Boolean> hasRights(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
+        return hasRightsNoCache(actorCrn, memberCrn, rightChecks, requestId);
+    }
+
+    /**
+     * Retrieves whether the member has the specified rights. This method specifically does not cache
+     * results for cases where caching affects application correctness.
+     *
+     * @param actorCrn    the CRN of the actor
+     * @param memberCrn   the CRN of the member
+     * @param rightChecks the rights to check
+     * @param requestId   an optional request id
+     * @return a list of booleans indicating whether the member has the specified rights
+     */
+    public List<Boolean> hasRightsNoCache(String actorCrn, String memberCrn, List<AuthorizationProto.RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
                 rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {

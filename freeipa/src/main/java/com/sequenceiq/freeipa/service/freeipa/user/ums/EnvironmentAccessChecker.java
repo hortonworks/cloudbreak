@@ -51,7 +51,7 @@ public class EnvironmentAccessChecker {
         requireNonNull(requestId, "requestId is null");
 
         try {
-            List<Boolean> hasRights = grpcUmsClient.hasRights(INTERNAL_ACTOR_CRN, memberCrn, rightChecks, requestId);
+            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(INTERNAL_ACTOR_CRN, memberCrn, rightChecks, requestId);
             return new EnvironmentAccessRights(hasRights.get(0), hasRights.get(1));
         } catch (StatusRuntimeException e) {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have
