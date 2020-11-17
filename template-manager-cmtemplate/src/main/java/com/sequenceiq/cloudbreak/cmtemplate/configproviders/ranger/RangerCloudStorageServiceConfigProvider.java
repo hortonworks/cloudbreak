@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.common.model.CloudStorageCdpService.HBASE_ROOT;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_METASTORE_WAREHOUSE;
 import static com.sequenceiq.common.model.CloudStorageCdpService.HIVE_REPLICA_WAREHOUSE;
@@ -37,6 +38,8 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
 
     private static final String CLOUD_STORAGE_PATHS = "cloud_storage_paths";
 
+    private static final String HBASE_ROOT_DIR = "hbase.rootdir";
+
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
         String cmVersion = templatePreparationObject.getProductDetailsView().getCm().getVersion();
@@ -57,6 +60,8 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
                     .map(location -> cloudPaths.add(RANGER_AUDIT.name() + "=" + location.getValue()))
                     .orElseGet(() -> cloudPaths.add(RANGER_AUDIT.name() + "=" + getDefaultRangerAuditUrl(templateProcessor, templatePreparationObject)));
 
+            ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HBASE_ROOT_DIR)
+                    .ifPresent(location -> cloudPaths.add(HBASE_ROOT.name() + "=" + location.getValue()));
 
             String cloudPath = cloudPaths.stream().collect(Collectors.joining(","));
             return List.of(getRangerAuditConfig(templateProcessor, templatePreparationObject), config(CLOUD_STORAGE_PATHS, cloudPath));

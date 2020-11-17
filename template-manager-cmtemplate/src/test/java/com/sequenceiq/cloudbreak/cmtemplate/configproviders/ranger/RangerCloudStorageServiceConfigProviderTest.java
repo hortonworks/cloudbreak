@@ -55,7 +55,8 @@ public class RangerCloudStorageServiceConfigProviderTest {
         assertEquals("HIVE_METASTORE_WAREHOUSE=s3a://bucket/warehouse/tablespace/managed/hive," +
                 "HIVE_REPLICA_WAREHOUSE=s3a://bucket/hive_replica_functions_dir," +
                 "HIVE_METASTORE_EXTERNAL_WAREHOUSE=s3a://bucket/warehouse/tablespace/external/hive," +
-                "RANGER_AUDIT=s3a://bucket/ranger/audit", serviceConfigs.get(1).getValue());
+                "RANGER_AUDIT=s3a://bucket/ranger/audit," +
+                "HBASE_ROOT=s3a://bucket/hbase", serviceConfigs.get(1).getValue());
     }
 
     @Test
@@ -92,7 +93,8 @@ public class RangerCloudStorageServiceConfigProviderTest {
         assertEquals("HIVE_METASTORE_WAREHOUSE=abfs://data@your-san.dfs.core.windows.net/warehouse/tablespace/managed/hive," +
                 "HIVE_REPLICA_WAREHOUSE=abfs://data@your-san.dfs.core.windows.net/hive_replica_functions_dir," +
                 "HIVE_METASTORE_EXTERNAL_WAREHOUSE=abfs://data@your-san.dfs.core.windows.net/warehouse/tablespace/external/hive," +
-                "RANGER_AUDIT=abfs://data@your-san.dfs.core.windows.net/ranger/audit", serviceConfigs.get(1).getValue());
+                "RANGER_AUDIT=abfs://data@your-san.dfs.core.windows.net/ranger/audit," +
+                "HBASE_ROOT=abfs://data@your-san.dfs.core.windows.net/hbase", serviceConfigs.get(1).getValue());
     }
 
     @Test
@@ -164,6 +166,8 @@ public class RangerCloudStorageServiceConfigProviderTest {
                     "abfs://data@your-san.dfs.core.windows.net/hive_replica_functions_dir")));
             locations.add(new StorageLocationView(buildStorageLocation("hive.metastore.warehouse.external.dir",
                     "abfs://data@your-san.dfs.core.windows.net/warehouse/tablespace/external/hive")));
+            locations.add(new StorageLocationView(buildStorageLocation("hbase.rootdir",
+                    "abfs://data@your-san.dfs.core.windows.net/hbase")));
         }
         AdlsGen2FileSystemConfigurationsView fileSystemConfigurationsView =
                 new AdlsGen2FileSystemConfigurationsView(new AdlsGen2FileSystem(), locations, false);
@@ -193,6 +197,8 @@ public class RangerCloudStorageServiceConfigProviderTest {
                         "s3a://bucket/hive_replica_functions_dir")));
                 locations.add(new StorageLocationView(buildStorageLocation("hive.metastore.warehouse.external.dir",
                         "s3a://bucket/warehouse/tablespace/external/hive")));
+                locations.add(new StorageLocationView(buildStorageLocation("hbase.rootdir",
+                        "s3a://bucket/hbase")));
             }
         }
         S3FileSystemConfigurationsView fileSystemConfigurationsView =
