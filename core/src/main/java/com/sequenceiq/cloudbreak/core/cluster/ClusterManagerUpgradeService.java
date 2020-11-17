@@ -10,6 +10,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -34,6 +36,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ClusterManagerUpgradeService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterManagerUpgradeService.class);
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -65,10 +68,16 @@ public class ClusterManagerUpgradeService {
         clusterApiConnectors.getConnector(stack).removeUnusedParcels(blueprintProducts);
     }
 
-    public void upgradeClusterManager(Long stackId) throws CloudbreakOrchestratorException, CloudbreakException {
+    public void upgradeClusterManager(Long stackId, boolean runtimeServicesStartNeeded) throws CloudbreakOrchestratorException, CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stopClusterServices(stack);
         upgradeClusterManager(stack);
+        if (runtimeServicesStartNeeded) {
+            LOGGER.info("Starting cluster runtime services after CM upgrade, it's needed if cluster runtime version hasn't been changed");
+            startClusterServices(stack);
+        } else {
+            LOGGER.info("Runtime services won't be started after CM upgrade, it's not needed if cluster runtime version has been changed");
+        }
     }
 
     private void upgradeClusterManager(Stack stack) throws CloudbreakOrchestratorException {
@@ -83,6 +92,10 @@ public class ClusterManagerUpgradeService {
 
     private void stopClusterServices(Stack stack) throws CloudbreakException {
         clusterApiConnectors.getConnector(stack).stopCluster(true);
+    }
+
+    private void startClusterServices(Stack stack) throws CloudbreakException {
+        clusterApiConnectors.getConnector(stack).startCluster();
     }
 
     private SaltConfig createSaltConfig(Cluster cluster) {
