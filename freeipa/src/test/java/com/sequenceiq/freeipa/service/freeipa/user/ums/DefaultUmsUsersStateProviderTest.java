@@ -95,7 +95,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
             return UserSyncConstants.RIGHTS.stream()
                     .map(right -> actorRights.get(right))
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient).hasRights(eq(INTERNAL_ACTOR_CRN), anyString(), any(List.class), any(Optional.class));
+        }).when(grpcUmsClient).hasRightsNoCache(eq(INTERNAL_ACTOR_CRN), anyString(), any(List.class), any(Optional.class));
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(2, String.class);
