@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.HttpTransport;
@@ -80,6 +81,10 @@ public final class GcpStackUtil {
     public static final String NO_FIREWALL_RULES = "noFirewallRules";
 
     public static final String REGION = "region";
+
+    public static final String TOKEN_ERROR = "The specified key for service account does not exist in the %s project";
+
+    public static final String AUTHORIZATION_ERROR = "We could not authorize the credential on google side: %s";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
@@ -416,6 +421,33 @@ public final class GcpStackUtil {
             return Boolean.FALSE;
         }
         return noPublicIp;
+    }
+
+    public static GcpResourceException getMissingServiceAccountKeyError(TokenResponseException e, String projectId) {
+        if (e.getDetails() != null) {
+            if (e.getDetails().getError() != null) {
+                if (e.getDetails().getError().equals("invalid_grant")) {
+                    String format = String.format(TOKEN_ERROR, projectId);
+                    LOGGER.info(format, e);
+                    return new GcpResourceException(format);
+                } else {
+                    LOGGER.info(e.getStatusMessage());
+                    return new GcpResourceException(String.format(AUTHORIZATION_ERROR,
+                            e.getDetails().getError()));
+                }
+            } else if (e.getDetails().getErrorDescription() != null) {
+                String format = String.format(AUTHORIZATION_ERROR, e.getDetails().getErrorDescription());
+                LOGGER.info(format, e);
+                return new GcpResourceException(format);
+            } else if (e.getDetails().getErrorUri() != null) {
+                String format = String.format(AUTHORIZATION_ERROR, e.getDetails().getErrorDescription());
+                LOGGER.info(format, e);
+                return new GcpResourceException(format);
+            }
+        }
+        String format = String.format(AUTHORIZATION_ERROR, e.getMessage());
+        LOGGER.info(format, e);
+        return new GcpResourceException(format);
     }
 
     public static Boolean noFirewallRules(Network network) {

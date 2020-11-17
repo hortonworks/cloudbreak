@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static java.util.Collections.singletonList;
@@ -25,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Addresses;
@@ -457,6 +459,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 LOGGER.debug("Instance {} is not in {} state - won't start it.", state, instanceId);
                 return null;
             }
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
             throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
         }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,6 +21,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Disks.Insert;
@@ -136,6 +139,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                         if (operation.getHttpErrorStatusCode() != null) {
                             throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
                         }
+                    } catch (TokenResponseException e) {
+                        throw getMissingServiceAccountKeyError(e, projectId);
                     } catch (GoogleJsonResponseException e) {
                         throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
                     }
@@ -182,6 +187,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     if (operation.getHttpErrorStatusCode() != null) {
                         throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), volume.getId());
                     }
+                } catch (TokenResponseException e) {
+                    getMissingServiceAccountKeyError(e, context.getProjectId());
                 } catch (GoogleJsonResponseException e) {
                     exceptionHandler(e, resource.getName(), resourceType());
                 } catch (IOException e) {
