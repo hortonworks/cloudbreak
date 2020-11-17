@@ -106,6 +106,9 @@ dependencies {
     testImplementation group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
   }
 
+  implementation project(":structuredevent-model")
+  implementation project(":structuredevent-api-cdp")
+  implementation project(':audit-connector')
   implementation project(':authorization-common')
   implementation project(':cloud-reactor-api')
   implementation project(':cloud-reactor')

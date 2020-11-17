@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
@@ -19,7 +20,7 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
-public class EnvironmentDto implements Payload, AccountAwareResource {
+public class EnvironmentDto implements Payload, AccountAwareResource, EnvironmentDetails {
 
     private Long id;
 
@@ -134,10 +135,12 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
         this.credential = credential;
     }
 
+    @Override
     public String getCloudPlatform() {
         return cloudPlatform;
     }
 
+    @Override
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
@@ -146,10 +149,12 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
         return Json.silent(regions);
     }
 
+    @Override
     public Set<Region> getRegions() {
         return regions;
     }
 
+    @Override
     public void setRegions(Set<Region> regions) {
         this.regions = regions;
     }
@@ -178,10 +183,12 @@ public class EnvironmentDto implements Payload, AccountAwareResource {
         this.deletionTimestamp = deletionTimestamp;
     }
 
+    @Override
     public NetworkDto getNetwork() {
         return network;
     }
 
+    @Override
     public void setNetwork(NetworkDto network) {
         this.network = network;
     }

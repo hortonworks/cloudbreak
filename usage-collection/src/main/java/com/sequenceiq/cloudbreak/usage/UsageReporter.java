@@ -51,4 +51,18 @@ public interface UsageReporter {
      */
     void cdpDatalakeClusterStatusChanged(
             UsageProto.CDPDatalakeClusterStatusChanged details);
+
+    /**
+     * Reports that an CDP Environment has been requested.
+     * @param details the event details
+     */
+    void cdpEnvironmentRequested(
+            UsageProto.CDPEnvironmentRequested details);
+
+    /**
+     * Reports that an CDP Environment status has been changed.
+     * @param details the event status details
+     */
+    void cdpEnvironmentStatusChanged(
+            UsageProto.CDPEnvironmentStatusChanged details);
 }

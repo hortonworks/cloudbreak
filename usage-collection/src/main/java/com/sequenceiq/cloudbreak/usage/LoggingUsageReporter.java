@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.google.common.io.BaseEncoding;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 /**
  * A usage reporter that logs usage events.
  */
+@Service
 public class LoggingUsageReporter implements UsageReporter {
     private static final Logger BINARY_EVENT_LOGGER = LoggerFactory.getLogger("CDP_BINARY_USAGE_EVENT");
 
@@ -51,6 +53,22 @@ public class LoggingUsageReporter implements UsageReporter {
         checkNotNull(details);
         log(eventBuilder()
                 .setCdpDatalakeClusterStatusChanged(details)
+                .build());
+    }
+
+    @Override
+    public void cdpEnvironmentRequested(UsageProto.CDPEnvironmentRequested details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpEnvironmentRequested(details)
+                .build());
+    }
+
+    @Override
+    public void cdpEnvironmentStatusChanged(UsageProto.CDPEnvironmentStatusChanged details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpEnvironmentStatusChanged(details)
                 .build());
     }
 
