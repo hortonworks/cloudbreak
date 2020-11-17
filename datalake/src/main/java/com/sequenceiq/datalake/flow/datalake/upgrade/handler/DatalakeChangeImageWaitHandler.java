@@ -54,7 +54,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
         try {
             LOGGER.info("Start polling change image process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-            upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Change image");
+            upgradeService.waitCloudbreakFlowDuringUpgrade(sdxId, pollingConfig, "Change image");
             String imageId = upgradeService.getImageId(sdxId);
             String expectedImageId = request.getUpgradeOption().getUpgrade().getImageId();
             if (Objects.equals(imageId, expectedImageId)) {

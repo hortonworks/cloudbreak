@@ -52,7 +52,7 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
         try {
             LOGGER.info("Start polling cluster upgrade process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-            upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "Stack Upgrade");
+            upgradeService.waitCloudbreakFlowDuringUpgrade(sdxId, pollingConfig, "Stack Upgrade");
             response = new DatalakeImageChangeEvent(sdxId, userId, request.getImageId());
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Upgrade polling exited before timeout. Cause: ", userBreakException);

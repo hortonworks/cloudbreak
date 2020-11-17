@@ -53,7 +53,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
         try {
             LOGGER.info("Start polling cluster VM replacement process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
-            upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "VM replace");
+            upgradeService.waitCloudbreakFlowDuringUpgrade(sdxId, pollingConfig, "VM replace");
             response = new DatalakeUpgradeSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
             LOGGER.error("VM replace polling exited before timeout. Cause: ", userBreakException);

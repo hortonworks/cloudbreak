@@ -32,7 +32,6 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
-import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -55,9 +54,6 @@ public class SdxUpgradeService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
-
-    @Inject
-    private AvailabilityChecker availabilityChecker;
 
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         SdxCluster cluster = sdxService.getById(id);
@@ -144,7 +140,7 @@ public class SdxUpgradeService {
         }
     }
 
-    public void waitCloudbreakFlow(Long id, PollingConfig pollingConfig, String pollingMessage) {
+    public void waitCloudbreakFlowDuringUpgrade(Long id, PollingConfig pollingConfig, String pollingMessage) {
         SdxCluster sdxCluster = sdxService.getById(id);
         Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
@@ -164,7 +160,7 @@ public class SdxUpgradeService {
                     LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak, id: {}", pollingMessage, sdxCluster.getId());
                     return AttemptResults.justContinue();
                 } else {
-                    return getStackResponseAttemptResult(sdxCluster, pollingMessage, flowState);
+                    return getStackResponseAfterUpgradeResult(sdxCluster, pollingMessage, flowState);
                 }
             }
         } catch (javax.ws.rs.NotFoundException e) {
@@ -173,13 +169,13 @@ public class SdxUpgradeService {
         }
     }
 
-    private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, FlowState flowState)
+    private AttemptResult<StackV4Response> getStackResponseAfterUpgradeResult(SdxCluster sdxCluster, String pollingMessage, FlowState flowState)
             throws JsonProcessingException {
         StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
-        if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
+        if (isStackAndClusterInProperState(stackV4Response, cluster)) {
             return AttemptResults.finishWith(stackV4Response);
         } else {
             if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
@@ -199,6 +195,13 @@ public class SdxUpgradeService {
                 }
             }
         }
+    }
+
+    private boolean isStackAndClusterInProperState(StackV4Response stackV4Response, ClusterV4Response cluster) {
+        return stackV4Response.getStatus().isAvailable()
+                && cluster != null
+                && cluster.getStatus() != null
+                && (cluster.getStatus().isAvailable() || cluster.getStatus().isStopped());
     }
 
     private AttemptResult<StackV4Response> sdxUpgradeFailed(SdxCluster sdxCluster, String statusReason, String pollingMessage) {
