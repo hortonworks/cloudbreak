@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEve
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -58,7 +59,9 @@ public class DatalakeDatabaseRestoreActions {
             protected void prepareExecution(DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(BACKUP_ID, payload.getBackupId());
-                variables.put(RESTORE_ID, payload.getRestoreId());
+                if (!Strings.isNullOrEmpty(payload.getRestoreId())) {
+                    variables.put(RESTORE_ID, payload.getRestoreId());
+                }
                 variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
             }
 
