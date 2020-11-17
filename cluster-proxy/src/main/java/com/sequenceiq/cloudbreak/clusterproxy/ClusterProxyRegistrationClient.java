@@ -39,11 +39,10 @@ public class ClusterProxyRegistrationClient {
             LOGGER.info("Cluster Proxy config registration response: {}", response);
             return response.getBody();
         } catch (Exception e) {
-            String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy. URL: '%s'",
-                    configRegistrationRequest.getClusterCrn(), registerConfigUrl);
-            LOGGER.error(message, e);
+            String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy.",
+                    configRegistrationRequest.getClusterCrn());
+            LOGGER.error(message + " URL: " + registerConfigUrl, e);
             throw new ClusterProxyException(message, e);
-
         }
     }
 
@@ -55,9 +54,9 @@ public class ClusterProxyRegistrationClient {
                     requestEntity(configUpdateRequest), ConfigRegistrationResponse.class);
             LOGGER.info("Cluster Proxy config update response: {}", response);
         } catch (Exception e) {
-            String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy. URL: '%s'",
-                    configUpdateRequest.getClusterCrn(), updateConfigUrl);
-            LOGGER.error(message, e);
+            String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy.",
+                    configUpdateRequest.getClusterCrn());
+            LOGGER.error(message + " URL: " + updateConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -70,9 +69,9 @@ public class ClusterProxyRegistrationClient {
                     requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
             LOGGER.info("Cluster proxy deregistration response: {}", response);
         } catch (Exception e) {
-            String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy. URL: '%s'",
-                    clusterIdentifier, removeConfigUrl);
-            LOGGER.error(message, e);
+            String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy.",
+                    clusterIdentifier);
+            LOGGER.error(message + " URL: " + removeConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -86,9 +85,9 @@ public class ClusterProxyRegistrationClient {
             LOGGER.info("Cluster proxy read configuration response: {}", response);
             return response.getBody();
         } catch (Exception e) {
-            String message = String.format("Error reading cluster proxy configuration for cluster identifer '%s' from Cluster Proxy. URL: '%s'",
-                    clusterIdentifier, readConfigUrl);
-            LOGGER.error(message, e);
+            String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy.",
+                    clusterIdentifier);
+            LOGGER.error(message + " URL: " + readConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
