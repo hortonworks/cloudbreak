@@ -170,6 +170,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
+                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
                     LOGGER.info("Start Datalake upgrade vm replacement for {} ", payload.getResourceId());
                     sdxUpgradeService.upgradeOs(payload.getResourceId());
@@ -221,7 +222,6 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeUpgradeSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx upgrade was finalized with sdx id: {}", payload.getResourceId());
-                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_UPGRADE_FINISHED,
