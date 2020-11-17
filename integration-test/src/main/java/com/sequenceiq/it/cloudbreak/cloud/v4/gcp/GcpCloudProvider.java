@@ -257,16 +257,20 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
-        return cloudStorage
+        return isStorageParametersPresent() ? cloudStorage
                 .withFileSystemType(getFileSystemType())
                 .withBaseLocation(getBaseLocation())
-                .withGcs(getGcs());
+                .withGcs(getGcs()) : cloudStorage;
     }
 
     private GcsCloudStorageV1Parameters getGcs() {
         GcsCloudStorageV1Parameters alma = new GcsCloudStorageV1Parameters();
         alma.setServiceAccountEmail(gcpProperties.getCloudStorage().getGcs().getServiceAccount());
         return alma;
+    }
+
+    private Boolean isStorageParametersPresent() {
+        return !StringUtils.isEmpty(gcpProperties.getCloudStorage().getBaseLocation());
     }
 
     @Override
@@ -277,7 +281,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), "test");
     }
 
     public String getInstanceProfile() {
