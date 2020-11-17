@@ -69,6 +69,7 @@ public class ClusterManagerUpgradeService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stopClusterServices(stack);
         upgradeClusterManager(stack);
+        startClusterServices(stack);
     }
 
     private void upgradeClusterManager(Stack stack) throws CloudbreakOrchestratorException {
@@ -83,6 +84,10 @@ public class ClusterManagerUpgradeService {
 
     private void stopClusterServices(Stack stack) throws CloudbreakException {
         clusterApiConnectors.getConnector(stack).stopCluster(true);
+    }
+
+    private void startClusterServices(Stack stack) throws CloudbreakException {
+        clusterApiConnectors.getConnector(stack).startCluster();
     }
 
     private SaltConfig createSaltConfig(Cluster cluster) {

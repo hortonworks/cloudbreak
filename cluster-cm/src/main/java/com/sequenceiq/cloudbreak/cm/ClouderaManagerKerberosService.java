@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 
-import java.util.Collections;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -19,8 +17,8 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
-import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
+import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -65,7 +63,7 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
             ApiCommand deployClusterConfig = clustersResourceApi.deployClientConfig(cluster.getName());
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfig.getId());
-            modificationService.startCluster(Collections.emptySet());
+            modificationService.startCluster();
         }
     }
 

@@ -69,8 +69,8 @@ public interface ClusterApi {
         clusterModificationService().stopCluster(disableKnoxAutorestart);
     }
 
-    default int startCluster(Set<InstanceMetaData> hostsInCluster) throws CloudbreakException {
-        return clusterModificationService().startCluster(hostsInCluster);
+    default int startCluster() throws CloudbreakException {
+        return clusterModificationService().startCluster();
     }
 
     default Map<String, String> gatherInstalledParcels(String stackName) {
