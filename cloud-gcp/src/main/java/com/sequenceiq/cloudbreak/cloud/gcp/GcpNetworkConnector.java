@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_NETWORK;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Subnetwork;
@@ -102,6 +104,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 createSubnet(context, auth, buildSubnetForCreation(networkCreationRequest, createdSubnet.getCidr()), createdSubnet);
             }
             return new CreatedCloudNetwork(networkCreationRequest.getEnvName(), networkResource.getName(), getCreatedSubnets(subnetList));
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), GCP_NETWORK, networkCreationRequest.getEnvName());
         } catch (IOException e) {
@@ -121,6 +125,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
                 deleteSubnet(context, auth, network, subnetId);
             }
             deleteNetwork(context, auth, network, networkDeletionRequest.getNetworkId());
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, networkDeletionRequest.getStackName(), GCP_NETWORK);
         } catch (IOException e) {
@@ -156,6 +162,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             }
             String ipCidrRange = subnet.getIpCidrRange();
             return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, projectId);
         } catch (IOException e) {
             throw new GcpResourceException("Describe subnets failed due to IO exception", GCP_NETWORK, subnetId);
         }

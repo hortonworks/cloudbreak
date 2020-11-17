@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.buildCompute
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.buildStorage;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getBucket;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getImageName;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 
@@ -11,16 +12,17 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 
-import com.google.api.services.compute.model.GuestOsFeature;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Images.Get;
 import com.google.api.services.compute.Compute.Images.Insert;
+import com.google.api.services.compute.model.GuestOsFeature;
 import com.google.api.services.compute.model.Image;
 import com.google.api.services.compute.model.Image.RawDisk;
 import com.google.api.services.compute.model.ImageList;
@@ -106,6 +108,8 @@ public class GcpProvisionSetup implements Setup {
             if (READY.equals(status)) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             }
+        } catch (TokenResponseException e) {
+            getMissingServiceAccountKeyError(e, projectId);
         } catch (IOException e) {
             LOGGER.info("Failed to retrieve image copy status", e);
             return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);

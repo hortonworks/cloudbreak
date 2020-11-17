@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
+
 import java.io.IOException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.InstancesListResponse;
@@ -55,6 +58,8 @@ public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService 
             } else {
                 return ExternalDatabaseStatus.DELETED;
             }
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, projectId);
         } catch (IOException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }

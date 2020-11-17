@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Firewalls.Update;
@@ -129,6 +131,8 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             Operation operation = compute.firewalls().update(projectId, resourceName, fireWall).execute();
             CloudResource cloudResource = createOperationAwareCloudResource(resource, operation);
             return checkResources(context, auth, Collections.singletonList(cloudResource)).get(0);
+        } catch (TokenResponseException e) {
+            throw getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
             throw new GcpResourceException("Failed to update resource!", GCP_FIREWALL_IN, resourceName, e);
         }
