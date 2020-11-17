@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.event.cdp;
 
-import java.io.Serializable;
-
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,7 +10,7 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CDPStructuredFlowEvent<T extends Serializable> extends CDPStructuredEvent {
+public class CDPStructuredFlowEvent<T> extends CDPStructuredEvent {
 
     private FlowDetails flow;
 
