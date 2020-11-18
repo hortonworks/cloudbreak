@@ -48,6 +48,7 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -131,18 +132,18 @@ public class GcpPlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         String networkId = null;
-        String subnetId = null;
+        List<String> subnetIds = new ArrayList<>();
         String sharedProjectId = null;
         if (filters != null) {
             networkId = filters.getOrDefault("networkId", null);
-            subnetId = filters.getOrDefault("subnetId", null);
+            subnetIds = getSubnetIds(filters);
             sharedProjectId = filters.getOrDefault("sharedProjectId", null);
         }
 
-        LOGGER.debug("Get subnets with filter values, networkId : {}, subnetId : {}", networkId, subnetId);
+        LOGGER.debug("Get subnets with filter values, networkId : {}, subnetId : {}", networkId, subnetIds);
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         NetworkList networkList = getNetworkList(compute, projectId, networkId, sharedProjectId);
-        SubnetworkList subnetworkList = getSubnetworkList(region, compute, projectId, subnetId, sharedProjectId);
+        SubnetworkList subnetworkList = getSubnetworkList(region, compute, projectId, subnetIds, sharedProjectId);
 
         // GCP VPCs are global. Subnets have a global scope in region. So picking the first availability zone in the region for subnet.
         String zone = compute.regions().get(projectId, region.value())
@@ -186,21 +187,41 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudNetworks(result);
     }
 
-    public SubnetworkList getSubnetworkList(Region region, Compute compute, String projectId, String subnetId, String sharedProjectId) throws IOException {
-        SubnetworkList subnetworkList;
-        if (StringUtils.isEmpty(subnetId)) {
-            subnetworkList = compute.subnetworks()
-                    .list(projectId, region.value()).execute();
+    public List<String> getSubnetIds(Map<String, String> filters) {
+        List<String> subnetIds = new ArrayList<>();
+        String subnetId = filters.getOrDefault("subnetId", null);
+        if (!Strings.isNullOrEmpty(subnetId)) {
+            subnetIds.add(subnetId);
         } else {
-            if (!Strings.isNullOrEmpty(sharedProjectId)) {
-                subnetworkList = new SubnetworkList()
-                        .setItems(Collections.singletonList(compute.subnetworks().get(sharedProjectId, region.value(), subnetId).execute()));
-            } else {
-                subnetworkList = new SubnetworkList()
-                        .setItems(Collections.singletonList(compute.subnetworks().get(projectId, region.value(), subnetId).execute()));
+            String subnetIdsString = filters.getOrDefault("subnetIds", null);
+            if (!Strings.isNullOrEmpty(subnetIdsString)) {
+                subnetIds = List.of(subnetIdsString.split(","));
+            }
+        }
+        return subnetIds;
+    }
+
+    private SubnetworkList getSubnetworkList(Region region, Compute compute, String projectId, List<String> subnetIds,
+        String sharedProjectId) throws IOException {
+        SubnetworkList subnetworkList;
+        validateSubnetRequest(subnetIds, sharedProjectId);
+        if (subnetIds.isEmpty()) {
+            subnetworkList = compute.subnetworks().list(projectId, region.value()).execute();
+        } else {
+            String tmpProjectId = !Strings.isNullOrEmpty(sharedProjectId) ? sharedProjectId : projectId;
+            subnetworkList = new SubnetworkList().setItems(new ArrayList<>());
+            for (String subnetId : subnetIds) {
+                Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
+                subnetworkList.getItems().add(subnetwork);
             }
         }
         return subnetworkList;
+    }
+
+    private void validateSubnetRequest(List<String> subnetIds, String sharedProjectId) {
+        if (!Strings.isNullOrEmpty(sharedProjectId) && subnetIds.isEmpty()) {
+            throw new CloudConnectorException("If shared project id defined then subnet Id required.");
+        }
     }
 
     public NetworkList getNetworkList(Compute compute, String projectId, String networkId, String sharedProjectId) throws IOException {

@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.stack;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -18,10 +19,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.filter.NetworkFilterProvider;
 
 @Service
 public class NetworkService {
@@ -37,6 +40,9 @@ public class NetworkService {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Inject
+    private Map<CloudPlatform, NetworkFilterProvider> networkFilterProviderMap;
+
     public Map<String, String> getFilteredSubnetWithCidr(Stack stack) {
         Map<String, Object> attributes = stack.getNetwork().getAttributes().getMap();
         String networkId = (String) attributes.getOrDefault("networkId", attributes.get("vpcId"));
@@ -49,8 +55,9 @@ public class NetworkService {
     public Map<String, String> getFilteredSubnetWithCidr(String environmentCrn, Stack stack, String networkId, Collection<String> subnetIds) {
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
+        Map<String, String> filter = getFilter(stack, networkId, subnetIds);
         CloudNetworks cloudNetworks =
-                cloudParameterService.getCloudNetworks(cloudCredential, stack.getRegion(), stack.getPlatformvariant(), Collections.emptyMap());
+                cloudParameterService.getCloudNetworks(cloudCredential, stack.getRegion(), stack.getPlatformvariant(), filter);
         LOGGER.debug("Received Cloud networks for region [{}]: {}", stack.getRegion(), cloudNetworks.getCloudNetworkResponses().get(stack.getRegion()));
         return cloudNetworks.getCloudNetworkResponses().getOrDefault(stack.getRegion(), Collections.emptySet()).stream()
                 .filter(cloudNetwork -> {
@@ -63,5 +70,14 @@ public class NetworkService {
                 .filter(cloudSubnet -> StringUtils.isNoneBlank(cloudSubnet.getId(), cloudSubnet.getCidr()))
                 .filter(cloudSubnet -> subnetIds.contains(cloudSubnet.getId()) || subnetIds.contains(cloudSubnet.getName()))
                 .collect(Collectors.toMap(CloudSubnet::getId, CloudSubnet::getCidr));
+    }
+
+    public Map<String, String> getFilter(Stack stack, String networkId, Collection<String> subnetIds) {
+        Map<String, String> filter = new HashMap<>();
+        NetworkFilterProvider networkFilterProvider = networkFilterProviderMap.get(CloudPlatform.valueOf(stack.getCloudPlatform()));
+        if (networkFilterProvider != null) {
+            filter = networkFilterProvider.provide(stack.getNetwork(), networkId, subnetIds);
+        }
+        return filter;
     }
 }
