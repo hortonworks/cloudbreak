@@ -248,7 +248,7 @@
           },
           {
             "name": "enable_ranger_authorization",
-            "value": "false"
+            "value": "true"
           }
         ],
         "serviceType": "SOLR"
