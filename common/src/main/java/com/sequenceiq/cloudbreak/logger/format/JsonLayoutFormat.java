@@ -19,8 +19,8 @@ public class JsonLayoutFormat extends SimpleLayoutFormat {
     }
 
     @Override
-    public String format(ILoggingEvent event, String message) {
-        String filteredLogMessage = super.format(event, message);
+    public String format(ILoggingEvent event, String message, String loggerNameFilter) {
+        String filteredLogMessage = super.format(event, message, loggerNameFilter);
         return jsonLayout.doLayout(event, filteredLogMessage);
     }
 }
