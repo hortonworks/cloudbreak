@@ -14,7 +14,7 @@ public class AnonymizerUtil {
     private static final ReplacePattern[] PATTERNS = {
             //common PW
             new ReplacePattern("(?i)("
-                    + "password=|password\":\"|password:|password |"
+                    + "password=\'|password=|password\":\"|password:|password |"
                     + "pass=|pass\":\"|pass:|pass |"
                     + "key=|key\":\"|key:|key |"
                     + "credential=|credential\":\"|credential:|credential "
@@ -22,7 +22,9 @@ public class AnonymizerUtil {
             //WASB
             new ReplacePattern("(?i)(\\.blob\\.core\\.windows\\.net\":\")([^\\s'\"])*", REPLACEMENT),
             //CM
-            new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),
+            //FreeIPA
+            new ReplacePattern("(ldapmodify .* -w ')([^\\s'\"]*)", REPLACEMENT)
     };
 
     private AnonymizerUtil() {

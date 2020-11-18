@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.json;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -194,7 +196,7 @@ public class Json implements Serializable {
             JSONArray.fromObject(value);
             return true;
         } catch (JSONException e) {
-            LOGGER.debug("This json is not an Array: {}", e.getMessage());
+            LOGGER.debug("This json is not an Array: {}", anonymize(e.getMessage()));
             return false;
         }
     }
