@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,8 +34,16 @@ public class CloudStack {
 
     private final Optional<SpiFileSystem> fileSystem;
 
+    private final List<CloudLoadBalancer> loadBalancers;
+
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem) {
+        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem, Collections.emptyList());
+    }
+
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
+            String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
+            List<CloudLoadBalancer> loadBalancers) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -45,6 +54,7 @@ public class CloudStack {
         this.loginUserName = loginUserName;
         this.publicKey = publicKey;
         this.fileSystem = Optional.ofNullable(fileSystem);
+        this.loadBalancers = loadBalancers;
     }
 
     public List<Group> getGroups() {
@@ -89,6 +99,10 @@ public class CloudStack {
 
     public String getLoginUserName() {
         return loginUserName;
+    }
+
+    public List<CloudLoadBalancer> getLoadBalancers() {
+        return loadBalancers;
     }
 
     @Override

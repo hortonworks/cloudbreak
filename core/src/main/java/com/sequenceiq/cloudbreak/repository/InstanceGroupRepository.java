@@ -32,4 +32,7 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
             "FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceGroup> findInstanceGroupInStackByHostName(@Param("stackId") Long stackId, @Param("hostName") String hostName);
+
+    @Query("SELECT i FROM InstanceGroup i INNER JOIN i.targetGroups tg LEFT JOIN FETCH i.targetGroups WHERE tg.id= :targetGroupId")
+    Set<InstanceGroup> findByTargetGroupId(@Param("targetGroupId") Long targetGroupId);
 }

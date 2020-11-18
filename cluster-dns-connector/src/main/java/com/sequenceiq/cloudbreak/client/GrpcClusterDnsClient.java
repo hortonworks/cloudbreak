@@ -79,6 +79,30 @@ public class GrpcClusterDnsClient {
         }
     }
 
+    public CreateDnsEntryResponse createOrUpdateDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment,
+            String cloudDns, String hostedZoneId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.info("Create a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, cloudDns);
+            CreateDnsEntryResponse response = client.createDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
+                endpoint, environment, cloudDns, hostedZoneId);
+            LOGGER.info("Dns entry creation finished for cloud DNS {}", cloudDns);
+            return response;
+        }
+    }
+
+    public DeleteDnsEntryResponse deleteDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment,
+            String cloudDns, String hostedZoneId, Optional<String> requestId) {
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            LOGGER.info("Delete a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, client);
+            DeleteDnsEntryResponse response = client.deleteDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
+                endpoint, environment, cloudDns, hostedZoneId);
+            LOGGER.info("Dns entry deletion finished for cloud DNS {}", cloudDns);
+            return response;
+        }
+    }
+
     private ManagedChannelWrapper makeWrapper() {
         return new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(clusterDnsConfig.getEndpoint(), clusterDnsConfig.getPort())

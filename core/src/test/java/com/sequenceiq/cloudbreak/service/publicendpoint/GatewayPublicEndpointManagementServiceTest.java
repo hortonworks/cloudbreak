@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.junit.jupiter.api.Assertions;
@@ -34,9 +36,11 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,6 +95,9 @@ class GatewayPublicEndpointManagementServiceTest {
 
     @Mock
     private CertificateCreationService certificateCreationService;
+
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     @InjectMocks
     private GatewayPublicEndpointManagementService underTest;
@@ -630,5 +637,179 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(1))
                 .deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(gatewayIp)));
+    }
+
+    @Test
+    void testGenerateCertAndSaveForStackWithLoadBalancerWithCloudDns() throws IOException {
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint("gateway");
+        loadBalancer.setDns("http://cloud.dns");
+        loadBalancer.setHostedZoneId("1");
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+        stack.setLoadBalancers(Set.of(loadBalancer));
+
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String lbEndpointName = loadBalancer.getEndpoint();
+        String commonName = "hashofshorthostname.anenvname.xcu2-8y8x.dev.cldr.work";
+        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        String lbfqdn = lbEndpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        String envName = "anEnvName";
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        String cloudDns = loadBalancer.getDns();
+        String hostedZoneId = loadBalancer.getHostedZoneId();
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+            .builder()
+            .withName(envName)
+            .build();
+        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+            .setWorkloadSubdomain(accountWorkloadSubdomain)
+            .build();
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+        when(domainNameProvider.getCommonName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(commonName);
+        when(domainNameProvider.getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
+        when(domainNameProvider.getFullyQualifiedEndpointName(lbEndpointName, envName, accountWorkloadSubdomain)).thenReturn(lbfqdn);
+        when(certificateCreationService.create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
+            .thenReturn(List.of());
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+            eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
+        when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
+            eq(hostedZoneId))).thenReturn(Boolean.TRUE);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
+
+        verify(environmentClientService, times(3)).getByCrn(anyString());
+        verify(grpcUmsClient, times(2)).getAccountDetails(USER_CRN, "123", Optional.empty());
+        verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
+        verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain);
+        verify(certificateCreationService, times(1))
+            .create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+        verify(dnsManagementService, times(1))
+            .createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
+        verify(dnsManagementService, times(1))
+            .createOrUpdateDnsEntryWithCloudDns(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
+                eq(hostedZoneId));
+        verify(securityConfigService, times(2)).save(any(SecurityConfig.class));
+        Assertions.assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void testGenerateCertAndSaveForStackWithLoadBalancerWithIpAddress() throws IOException {
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint("gateway");
+        loadBalancer.setIp("1.2.3.4");
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+        stack.setLoadBalancers(Set.of(loadBalancer));
+
+        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        String endpointName = primaryGatewayInstance.getShortHostname();
+        String lbEndpointName = loadBalancer.getEndpoint();
+        String commonName = "hashofshorthostname.anenvname.xcu2-8y8x.dev.cldr.work";
+        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        String lbfqdn = lbEndpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
+        String envName = "anEnvName";
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        String lbIp = loadBalancer.getIp();
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+            .builder()
+            .withName(envName)
+            .build();
+        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+            .setWorkloadSubdomain(accountWorkloadSubdomain)
+            .build();
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+        when(domainNameProvider.getCommonName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(commonName);
+        when(domainNameProvider.getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
+        when(domainNameProvider.getFullyQualifiedEndpointName(lbEndpointName, envName, accountWorkloadSubdomain)).thenReturn(lbfqdn);
+        when(certificateCreationService.create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
+            .thenReturn(List.of());
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+            eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
+            eq(List.of(lbIp)))).thenReturn(Boolean.TRUE);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+
+        boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
+
+        verify(environmentClientService, times(3)).getByCrn(anyString());
+        verify(grpcUmsClient, times(2)).getAccountDetails(USER_CRN, "123", Optional.empty());
+        verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
+        verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain);
+        verify(certificateCreationService, times(1))
+            .create(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+        verify(dnsManagementService, times(1))
+            .createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
+        verify(dnsManagementService, times(1))
+            .createOrUpdateDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(lbIp)));
+        verify(securityConfigService, times(2)).save(any(SecurityConfig.class));
+        Assertions.assertEquals(Boolean.TRUE, result);
+    }
+
+    @Test
+    void testDeleteDnsEntryForLoadBalancerWithCloudDns() {
+        Cluster cluster = TestUtil.cluster();
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint("gateway");
+        loadBalancer.setDns("http://cloud.dns");
+        loadBalancer.setHostedZoneId("1");
+        Stack stack = cluster.getStack();
+        stack.setCluster(cluster);
+        stack.setLoadBalancers(Set.of(loadBalancer));
+
+        String lbEndpointName = loadBalancer.getEndpoint();
+        String envName = "anEnvName";
+        String cloudDns = loadBalancer.getDns();
+        String hostedZoneId = loadBalancer.getHostedZoneId();
+
+        when(dnsManagementService.deleteDnsEntryWithCloudDns(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
+            eq(hostedZoneId))).thenReturn(Boolean.TRUE);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteLoadBalancerDnsEntry(stack, envName));
+
+        verify(dnsManagementService, times(1))
+            .deleteDnsEntryWithCloudDns(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
+                eq(hostedZoneId));
+    }
+
+    @Test
+    void testDeleteDnsEntryForLoadBalancerWithIpAddress() {
+        Cluster cluster = TestUtil.cluster();
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint("gateway");
+        loadBalancer.setIp("1.2.3.4");
+        Stack stack = cluster.getStack();
+        stack.setCluster(cluster);
+        stack.setLoadBalancers(Set.of(loadBalancer));
+
+        String lbEndpointName = loadBalancer.getEndpoint();
+        String envName = "anEnvName";
+        String ip = loadBalancer.getIp();
+
+        when(dnsManagementService.deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
+            eq(List.of(ip)))).thenReturn(Boolean.TRUE);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteLoadBalancerDnsEntry(stack, envName));
+
+        verify(dnsManagementService, times(1))
+            .deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
+                eq(List.of(ip)));
     }
 }

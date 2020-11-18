@@ -8,6 +8,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +41,9 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -61,13 +66,21 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsViewProvider;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -156,6 +169,18 @@ public class StackToCloudStackConverterTest {
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
+
+    @Mock
+    private LoadBalancerConfigService loadBalancerConfigService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -172,6 +197,8 @@ public class StackToCloudStackConverterTest {
         when(cloudFileSystemViewProvider.getCloudFileSystemView(any(), any(), any())).thenReturn(Optional.empty());
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Collections.emptySet());
+        when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Collections.emptySet());
     }
 
     @Test
@@ -914,6 +941,49 @@ public class StackToCloudStackConverterTest {
         assertEquals("RAW", parameters.get("keyEncryptionMethod"));
         assertEquals(EncryptionType.CUSTOM.name(), parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE));
         assertEquals("myKey", parameters.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
+    }
+
+    @Test
+    public void testConvertWithKnoxLoadBalancer() {
+        Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
+        InstanceGroup instanceGroup1 = mock(InstanceGroup.class);
+        InstanceGroup instanceGroup2 = mock(InstanceGroup.class);
+        when(instanceGroup1.getGroupName()).thenReturn("group1");
+        when(instanceGroup2.getGroupName()).thenReturn("group2");
+        instanceGroups.add(instanceGroup1);
+        instanceGroups.add(instanceGroup2);
+        when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
+        Template template = new Template();
+        template.setVolumeTemplates(Sets.newHashSet());
+        when(instanceGroup1.getTemplate()).thenReturn(template);
+        when(instanceGroup1.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup1.getStack()).thenReturn(stack);
+        when(instanceGroup2.getTemplate()).thenReturn(template);
+        when(instanceGroup2.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
+        when(instanceGroup2.getStack()).thenReturn(stack);
+        TargetGroup targetGroup = mock(TargetGroup.class);
+        when(targetGroup.getType()).thenReturn(TargetGroupType.KNOX);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        when(loadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        when(loadBalancer.getId()).thenReturn(1L);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+        when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
+        when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(Set.of(instanceGroup1, instanceGroup2));
+        when(loadBalancerConfigService.getPortsForTargetGroup(any(TargetGroup.class))).thenReturn(Set.of(443));
+
+        CloudStack result = underTest.convert(stack);
+
+        assertEquals(1, result.getLoadBalancers().size());
+        CloudLoadBalancer cloudLoadBalancer = result.getLoadBalancers().iterator().next();
+        assertEquals(LoadBalancerType.PRIVATE, cloudLoadBalancer.getType());
+        assertEquals(Set.of(443), cloudLoadBalancer.getPortToTargetGroupMapping().keySet());
+        Set<String> groupNames = cloudLoadBalancer.getPortToTargetGroupMapping().values().stream()
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet())
+            .stream()
+            .map(Group::getName)
+            .collect(Collectors.toSet());
+        assertEquals(Set.of("group1", "group2"), groupNames);
     }
 
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
+import com.amazonaws.services.cloudformation.model.ListStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.OnFailure;
 import com.amazonaws.services.cloudformation.model.Parameter;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
@@ -84,6 +85,20 @@ public class AwsStackRequestHelper {
     public DeleteStackRequest createDeleteStackRequest(String cFStackName) {
         return new DeleteStackRequest()
                 .withStackName(cFStackName);
+    }
+
+    public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
+        return new UpdateStackRequest()
+            .withStackName(cFStackName)
+            .withParameters(getStackParameters(ac, stack, cFStackName, subnet))
+            .withTemplateBody(cfTemplate)
+            .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
+            .withCapabilities(CAPABILITY_IAM);
+    }
+
+    public ListStackResourcesRequest createListStackResourcesRequest(String cFStackName) {
+        return new ListStackResourcesRequest()
+            .withStackName(cFStackName);
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {

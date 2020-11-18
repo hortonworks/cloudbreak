@@ -162,6 +162,12 @@ public class StackServiceTest {
     @Mock
     private FlowLogService flowLogService;
 
+    @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private TargetGroupPersistenceService targetGroupPersistenceService;
+
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -23,6 +24,10 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
@@ -150,4 +155,21 @@ public class CloudFormationStackUtil {
         return new DescribeInstancesRequest().withInstanceIds(instanceIds);
     }
 
+    public LoadBalancer getLoadBalancerByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
+        String cFStackName = getCfStackName(ac);
+        AmazonCloudFormationRetryClient amazonCfClient =
+            awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonElasticLoadBalancingClient amazonElbClient =
+            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+
+        DescribeStackResourceResult stackResourceResult = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
+            .withStackName(cFStackName)
+            .withLogicalResourceId(logicalId));
+        String loadBalancerArn = stackResourceResult.getStackResourceDetail().getPhysicalResourceId();
+
+        DescribeLoadBalancersResult loadBalancersResult = amazonElbClient.describeLoadBalancers(new DescribeLoadBalancersRequest()
+            .withLoadBalancerArns(Collections.singletonList(loadBalancerArn)));
+
+        return loadBalancersResult.getLoadBalancers().get(0);
+    }
 }

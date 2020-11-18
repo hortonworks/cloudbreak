@@ -10,9 +10,11 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -69,6 +72,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     private Json attributes;
 
     private int initialNodeCount;
+
+    @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
+    private Set<TargetGroup> targetGroups = new HashSet<>();
 
     public String getGroupName() {
         return groupName;
@@ -206,6 +212,18 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         Map<String, Object> attributeMap = attributes.getMap();
         attributeMap.put(InstanceGroup.IDENTITY_TYPE_ATTRIBUTE, cloudIdentityType);
         attributes = new Json(attributeMap);
+    }
+
+    public Set<TargetGroup> getTargetGroups() {
+        return targetGroups;
+    }
+
+    public void setTargetGroups(Set<TargetGroup> targetGroups) {
+        this.targetGroups = targetGroups;
+    }
+
+    public void addTargetGroup(TargetGroup targetGroup) {
+        targetGroups.add(targetGroup);
     }
 
     @SuppressFBWarnings("EQ_COMPARETO_USE_OBJECT_EQUALS")
