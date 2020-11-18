@@ -148,6 +148,7 @@
             "refName": "yarn-GATEWAY-BASE",
             "roleType": "GATEWAY",
             "base": true,
+            "configs": [
               {
                 "name": "mapreduce_client_env_safety_valve",
                 "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
