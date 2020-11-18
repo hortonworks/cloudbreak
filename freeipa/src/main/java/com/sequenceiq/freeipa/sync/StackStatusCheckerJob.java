@@ -122,6 +122,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                                 LOGGER.debug("results is empty, skip update");
                             }
                         }
+                    } else if (alreadyDeletedCount > 0) {
+                        SyncResult syncResult =  new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
+                                DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
+                        updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
                     }
                 });
                 return null;
