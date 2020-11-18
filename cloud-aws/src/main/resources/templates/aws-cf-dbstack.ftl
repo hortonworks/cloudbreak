@@ -56,13 +56,15 @@
         "Description": "Master username",
         "AllowedPattern": "[A-Za-z][A-Za-z0-9]+",
         "MinLength": 1,
-        "MaxLength": 16
+        "MaxLength": 16,
+        "NoEcho": "true"
     },
     "MasterUserPasswordParameter": {
         "Type": "String",
         "Description": "Master user password",
         "MinLength": 8,
-        "MaxLength": 30
+        "MaxLength": 30,
+        "NoEcho": "true"
     },
     "MultiAZParameter": {
         "Type": "String",
