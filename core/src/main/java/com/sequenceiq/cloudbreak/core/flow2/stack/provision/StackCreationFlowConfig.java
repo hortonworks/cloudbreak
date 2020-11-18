@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.COLLECT_LOADBALANCER_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.COLLECT_METADATA_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.COLLECT_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.CREATE_CREDENTIAL_FAILED_EVENT;
@@ -26,6 +27,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.TLS_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTMETADATA_LOADBALANCER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTMETADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.CREATE_CREDENTIAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.CREATE_USER_DATA_STATE;
@@ -65,7 +67,9 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)
             .from(START_PROVISIONING_STATE).to(PROVISIONING_FINISHED_STATE).event(LAUNCH_STACK_FINISHED_EVENT).failureEvent(LAUNCH_STACK_FAILED_EVENT)
             .from(PROVISIONING_FINISHED_STATE).to(COLLECTMETADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
-            .from(COLLECTMETADATA_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
+            .from(COLLECTMETADATA_STATE).to(COLLECTMETADATA_LOADBALANCER_STATE).event(COLLECT_LOADBALANCER_METADATA_FINISHED_EVENT)
+                    .failureEvent(COLLECT_METADATA_FAILED_EVENT)
+            .from(COLLECTMETADATA_LOADBALANCER_STATE).to(GET_TLS_INFO_STATE).event(GET_TLS_INFO_FINISHED_EVENT).failureEvent(GET_TLS_INFO_FAILED_EVENT)
             .from(GET_TLS_INFO_STATE).to(TLS_SETUP_STATE).event(SSHFINGERPRINTS_EVENT).failureEvent(SSHFINGERPRINTS_FAILED_EVENT)
             .from(TLS_SETUP_STATE).to(STACK_CREATION_FINISHED_STATE).event(TLS_SETUP_FINISHED_EVENT).defaultFailureEvent()
             .from(STACK_CREATION_FINISHED_STATE).to(FINAL_STATE).event(STACK_CREATION_FINISHED_EVENT).defaultFailureEvent()

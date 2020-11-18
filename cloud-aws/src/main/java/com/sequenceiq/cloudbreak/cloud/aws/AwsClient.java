@@ -26,6 +26,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
@@ -168,6 +169,15 @@ public class AwsClient {
 
     public AmazonCloudFormationRetryClient createCloudFormationRetryClient(AmazonCloudFormationClient amazonCloudFormationClient) {
         return new AmazonCloudFormationRetryClient(amazonCloudFormationClient, retry);
+    }
+
+    public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonElasticLoadBalancingClient client = isRoleAssumeRequired(awsCredential) ?
+            new AmazonElasticLoadBalancingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
+            new AmazonElasticLoadBalancingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
+        client.setRegion(RegionUtils.getRegion(regionName));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
+        return client;
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {

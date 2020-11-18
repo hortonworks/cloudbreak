@@ -36,6 +36,10 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -1366,6 +1370,116 @@ public class CloudFormationTemplateBuilderTest {
                 .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupmaster\" } }")
                 .contains("\"PlacementGroupgateway\" : {\"Type\" : \"AWS::EC2::PlacementGroup\",\"Properties\" : {\"Strategy\" : \"partition\"}}")
                 .contains("\"Placement\" : { \"GroupName\" : { \"Ref\" : \"PlacementGroupgateway\" } }");
+    }
+
+    @Test
+    public void buildTestWithSingleLoadBalancerBeforeUpdate() {
+        //GIVEN
+        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, false);
+
+        //WHEN
+        modelContext = new ModelContext()
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withLoadBalancers(List.of(awsLoadBalancer));
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"Scheme\" : \"internal\"")
+            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
+            .doesNotContain("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+    }
+
+    @Test
+    public void buildTestWithSingleLoadBalancerAfterUpdate() {
+        //GIVEN
+        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, true);
+
+        //WHEN
+        modelContext = new ModelContext()
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withLoadBalancers(List.of(awsLoadBalancer));
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"Scheme\" : \"internal\"")
+            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
+            .contains("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+    }
+
+    @Test
+    public void buildTestWithMultipleLoadBalancers() {
+        //GIVEN
+        List<AwsLoadBalancer> awsLoadBalancers = List.of(
+            setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, true),
+            setupLoadBalancer(AwsLoadBalancerScheme.PUBLIC, 888, true)
+        );
+
+        //WHEN
+        modelContext = new ModelContext()
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withLoadBalancers(awsLoadBalancers);
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"Scheme\" : \"internal\"")
+            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
+            .contains("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"")
+            .contains("\"LoadBalancerPublic\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"Scheme\" : \"internet-facing\"")
+            .contains("\"TargetGroupPort888Public\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"Targets\" : [{ \"Id\" : \"instance1-888\" },{ \"Id\" : \"instance2-888\" }]}}")
+            .contains("\"ListenerPort888Public\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+    }
+
+    private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
+        AwsTargetGroup targetGroup = new AwsTargetGroup(port, scheme, 1, List.of("instance1-" + port, "instance2-" + port));
+        AwsListener listener = new AwsListener(port, List.of(targetGroup), scheme);
+        AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme, List.of(listener));
+        if (setArn) {
+            targetGroup.setArn("arn://targetgroup");
+            loadBalancer.setArn("arn://loadbalancer");
+            loadBalancer.validateListenerConfigIsSet();
+        }
+        return loadBalancer;
     }
 
     private CloudStack initCloudStackWithInstanceProfile() {

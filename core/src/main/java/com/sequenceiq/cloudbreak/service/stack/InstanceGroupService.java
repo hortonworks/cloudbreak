@@ -85,4 +85,8 @@ public class InstanceGroupService {
             save(instanceGroup);
         }
     }
+
+    public Set<InstanceGroup> findByTargetGroupId(Long targetGroupId) {
+        return repository.findByTargetGroupId(targetGroupId);
+    }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -131,5 +134,11 @@ public class YarnMetadataCollector implements MetadataCollector {
             }
         }
         return cloudInstances;
+    }
+
+    @Override
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
+        // no-op
+        return Collections.emptyList();
     }
 }

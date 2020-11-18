@@ -3,6 +3,11 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +52,12 @@ public class MetadataSetupService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     @Inject
     private Clock clock;
@@ -164,6 +175,44 @@ public class MetadataSetupService {
             }
         }
         return new InstanceMetaData();
+    }
+
+    public void saveLoadBalancerMetadata(Stack stack, Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetadataList) {
+        try {
+            LOGGER.info("Save load balancer metadata for stack: {}", stack.getName());
+
+            Set<LoadBalancer> allLoadBalancerMetadata = loadBalancerPersistenceService.findByStackId(stack.getId());
+
+            for (CloudLoadBalancerMetadata cloudLoadBalancerMetadata : cloudLoadBalancerMetadataList) {
+                LoadBalancer loadBalancerEntry = createLoadBalancerMetadataIfAbsent(allLoadBalancerMetadata,
+                    stack, cloudLoadBalancerMetadata.getType());
+
+                loadBalancerEntry.setDns(cloudLoadBalancerMetadata.getCloudDns());
+                loadBalancerEntry.setHostedZoneId(cloudLoadBalancerMetadata.getHostedZoneId());
+                loadBalancerEntry.setIp(cloudLoadBalancerMetadata.getIp());
+                loadBalancerEntry.setType(cloudLoadBalancerMetadata.getType());
+                String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack, cloudLoadBalancerMetadata.getType());
+                LOGGER.info("Saving load balancer endpoint as: {}", endpoint);
+                loadBalancerEntry.setEndpoint(endpoint);
+
+                loadBalancerPersistenceService.save(loadBalancerEntry);
+            }
+        } catch (Exception ex) {
+            throw new CloudbreakServiceException("Load balancer metadata collection failed", ex);
+        }
+    }
+
+    private LoadBalancer createLoadBalancerMetadataIfAbsent(Iterable<LoadBalancer> allLoadBalancerMetadata,
+            Stack stack, LoadBalancerType type) {
+        if (stack != null && type != null) {
+            for (LoadBalancer loadBalancerMetadata : allLoadBalancerMetadata) {
+                if (Objects.equals(stack.getId(), loadBalancerMetadata.getStack().getId()) &&
+                        type == loadBalancerMetadata.getType()) {
+                    return loadBalancerMetadata;
+                }
+            }
+        }
+        return new LoadBalancer();
     }
 
 }

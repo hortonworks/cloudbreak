@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
@@ -178,8 +179,18 @@ public class StackCreationService {
     public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
         Stack stack = context.getStack();
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_METADATA_COLLECTION, "Load balancer metadata collection");
         LOGGER.debug("Metadata setup DONE.");
+        Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
+        stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
+        return stackWithMetadata;
+    }
+
+    public Stack setupLoadBalancerMetadata(StackContext context, CollectLoadBalancerMetadataResult collectMetadataResult) {
+        Stack stack = context.getStack();
+        metadatSetupService.saveLoadBalancerMetadata(stack, collectMetadataResult.getResults());
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
+        LOGGER.debug("Load balancer metadata setup DONE.");
         Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
         stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
         return stackWithMetadata;
