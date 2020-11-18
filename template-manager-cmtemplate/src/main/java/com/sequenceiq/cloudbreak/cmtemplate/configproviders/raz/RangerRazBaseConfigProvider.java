@@ -30,7 +30,7 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
 
             return hostgroupViews.stream()
-                    .filter(hg -> hg.getName().toLowerCase().equals("master"))
+                    .filter(hg -> hg.getName().toLowerCase().equals("master") || hg.getName().toLowerCase().equals("main"))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();

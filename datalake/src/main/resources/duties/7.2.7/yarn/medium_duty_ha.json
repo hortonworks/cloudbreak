@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "yarn": {
           "cpus": 4,

@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "instanceType": "Standard_D16s_v3",
         "attachedVolumes": [

@@ -9,7 +9,7 @@
     "hostTemplates": [
       {
         "cardinality": 2,
-        "refName": "master",
+        "refName": "main",
         "roleConfigGroupsRefNames": [
           "hive-HIVEMETASTORE-BASE",
           "ranger-RANGER_ADMIN-BASE",
