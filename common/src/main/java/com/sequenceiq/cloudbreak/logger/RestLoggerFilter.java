@@ -25,6 +25,8 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RestLoggerFilter.class);
 
+    private static final int MAX_SIZE = 30000;
+
     private final boolean restLoggerEnabled;
 
     public RestLoggerFilter(boolean restLoggerEnabled) {
@@ -39,7 +41,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(wrappedRequest, wrappedResponse);
 
-        if (restLoggerEnabled) {
+        if (restLoggerEnabled && !excludePathPattern(request.getRequestURI())) {
             DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
             formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
             Date end = new Date(System.currentTimeMillis());
@@ -62,6 +64,13 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         wrappedResponse.copyBodyToResponse();
     }
 
+    private boolean excludePathPattern(String requestPath) {
+        if (requestPath.contains("/metrics") || requestPath.contains("/autoscale")) {
+            return true;
+        }
+        return false;
+    }
+
     @NotNull
     private ContentCachingResponseWrapper getWrappedResponse(HttpServletResponse response) {
         return new ContentCachingResponseWrapper(response);
@@ -76,6 +85,9 @@ public class RestLoggerFilter extends OncePerRequestFilter {
         String contentString;
         try {
             contentString = new String(content, contentEncoding);
+            if (contentString.length() > MAX_SIZE) {
+                contentString = "WARNING - The response size is too large to log.";
+            }
         } catch (UnsupportedEncodingException e) {
             contentString = "We were not able to encode the content: " + e.getMessage();
         }
