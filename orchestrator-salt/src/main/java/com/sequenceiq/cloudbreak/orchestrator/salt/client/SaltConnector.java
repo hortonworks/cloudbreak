@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_FINGERPRINT_DISTRIBUTE;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_HOSTNAME_ENDPOINT;
 import static java.util.Collections.singletonMap;
@@ -178,7 +179,7 @@ public class SaltConnector implements Closeable {
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         try {
-            LOGGER.debug("Salt run has been executed. fun: {}, response: {}", fun, JsonUtil.writeValueAsString(responseEntity));
+            LOGGER.debug("Salt run has been executed. fun: {}, response: {}", fun, anonymize(JsonUtil.writeValueAsString(responseEntity)));
         } catch (JsonProcessingException e) {
             LOGGER.error("Can not read response from salt", e);
         }
