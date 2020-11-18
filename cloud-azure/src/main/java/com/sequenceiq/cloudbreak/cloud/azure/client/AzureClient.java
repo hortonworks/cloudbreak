@@ -743,12 +743,14 @@ public class AzureClient {
         return privatednsManager.privateZones().list();
     }
 
-    public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services) {
+    public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services,
+            String resourceGroupName) {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZoneList();
         for (AzurePrivateDnsZoneServiceEnum service : services) {
             String dnsZoneName = service.getDnsZoneName();
             Optional<PrivateZone> privateZoneWithNetworkLink = privateDnsZoneList.stream()
+                    .filter(privateZone -> !privateZone.resourceGroupName().equals(resourceGroupName))
                     .filter(privateZone -> privateZone.name().equals(dnsZoneName))
                     .filter(privateZone -> privateZone.provisioningState().equals(SUCCEEDED))
                     .filter(privateZone -> Objects.nonNull(getNetworkLinkByPrivateDnsZone(privateZone.resourceGroupName(), dnsZoneName, networkLinkId)))
