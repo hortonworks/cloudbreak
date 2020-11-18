@@ -150,14 +150,6 @@
             "base": true,
             "configs": [
               {
-                "name": "mapreduce_map_memory_mb",
-                "value": 4096
-              },
-              {
-                "name": "mapreduce_reduce_memory_mb",
-                "value": 4096
-              },
-              {
                 "name": "mapreduce_client_env_safety_valve",
                 "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
               }
@@ -285,10 +277,6 @@
           {
             "name": "mapreduce_yarn_service",
             "ref": "yarn"
-          },
-          {
-            "name": "tez_container_size",
-            "value": "4096"
           },
           {
             "name": "tez_auto_reducer_parallelism",
