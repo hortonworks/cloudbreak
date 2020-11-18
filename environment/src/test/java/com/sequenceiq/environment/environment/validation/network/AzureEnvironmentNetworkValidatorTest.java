@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.network;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -36,6 +37,8 @@ import com.sequenceiq.environment.parameters.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkValidatorTest {
+
+    private static final String MY_SINGLE_RG = "mySingleRg";
 
     private AzureEnvironmentNetworkValidator underTest;
 
@@ -102,7 +105,7 @@ class AzureEnvironmentNetworkValidatorTest {
                 .build();
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(true));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
@@ -120,7 +123,7 @@ class AzureEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = getNetworkDto(azureParams);
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
@@ -146,13 +149,14 @@ class AzureEnvironmentNetworkValidatorTest {
         String message = "Network link for the network aNetworkLink already exists for Private DNS Zone "
                 + "privatelink.postgres.database.azure.com in resource group mySingleRg. Please ensure that there is no existing network link and try again!";
 
-        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         AzureParams azureParams = getAzureParams("", "networkResourceGroupName");
         NetworkDto networkDto = getNetworkDto(azureParams);
 
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        when(azureNetworkLinkService.validateExistingNetworkLink(any(), any())).thenReturn(azureValidationResultBuilder.error(message).build());
+        when(azureNetworkLinkService.validateExistingNetworkLink(any(), any(), eq(MY_SINGLE_RG))).
+                thenReturn(azureValidationResultBuilder.error(message).build());
 
         underTest.validateDuringFlow(environmentDto, networkDto, envValidationResultBuilder);
 
@@ -164,13 +168,13 @@ class AzureEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenPrivateEndpointAndNetworkLinkNotExists() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        EnvironmentDto environmentDto = environmentDtoWithSingleRg("mySingleRg", ResourceGroupUsagePattern.USE_SINGLE);
+        EnvironmentDto environmentDto = environmentDtoWithSingleRg(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
         AzureParams azureParams = getAzureParams("", "networkResourceGroupName");
         NetworkDto networkDto = getNetworkDto(azureParams);
 
         when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(getCloudSubnets(false));
         when(azureCloudSubnetParametersService.isPrivateEndpointNetworkPoliciesDisabled(any())).thenCallRealMethod();
-        when(azureNetworkLinkService.validateExistingNetworkLink(any(), any())).thenReturn(null);
+        when(azureNetworkLinkService.validateExistingNetworkLink(any(), any(), eq(MY_SINGLE_RG))).thenReturn(null);
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 

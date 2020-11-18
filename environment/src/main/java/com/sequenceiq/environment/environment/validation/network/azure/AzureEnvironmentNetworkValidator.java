@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -147,11 +146,14 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     }
 
     private void checkPrivateEndpointForExistingNetworkLink(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
-        if (networkDto.getServiceEndpointCreation() ==  ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
+        if (networkDto.getServiceEndpointCreation() ==  ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT &&
+                ResourceGroupUsagePattern.USE_MULTIPLE != getResourceGroupUsagePattern(environmentDto)) {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environmentDto.getCredential());
             AzureClient azureClient = azureClientService.getClient(cloudCredential);
-            ValidationResult validationResult = azureNetworkLinkService.validateExistingNetworkLink(azureClient, networkDto.getAzure().getNetworkId());
-            NullUtil.doIfNotNull(validationResult, resultBuilder::merge);
+            Optional<String> resourceGroupName = getAzureResourceGroupDto(environmentDto)
+                    .map(AzureResourceGroupDto::getName);
+            resourceGroupName.ifPresent(rgName -> NullUtil.doIfNotNull(
+                    azureNetworkLinkService.validateExistingNetworkLink(azureClient, networkDto.getAzure().getNetworkId(), rgName), resultBuilder::merge));
         }
     }
 
@@ -198,16 +200,24 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
     private void checkPrivateEndpointsWhenMultipleResourceGroup(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
             ServiceEndpointCreation serviceEndpointCreation) {
-        ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(environmentDto.getParameters())
-                .map(ParametersDto::azureParametersDto)
-                .map(AzureParametersDto::getAzureResourceGroupDto)
-                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
-                .orElse(ResourceGroupUsagePattern.USE_MULTIPLE);
+        ResourceGroupUsagePattern resourceGroupUsagePattern = getResourceGroupUsagePattern(environmentDto);
         if (resourceGroupUsagePattern == ResourceGroupUsagePattern.USE_MULTIPLE
                 && serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT) {
             resultBuilder.error("Private endpoint creation is not supported for multiple resource group deployment model, "
                     + "please use single single resource groups to be able to use private endpoints in Azure!");
         }
+    }
+
+    private ResourceGroupUsagePattern getResourceGroupUsagePattern(EnvironmentDto environmentDto) {
+        return getAzureResourceGroupDto(environmentDto)
+                .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
+                .orElse(ResourceGroupUsagePattern.USE_MULTIPLE);
+    }
+
+    private Optional<AzureResourceGroupDto> getAzureResourceGroupDto(EnvironmentDto environmentDto) {
+        return Optional.ofNullable(environmentDto.getParameters())
+                .map(ParametersDto::azureParametersDto)
+                .map(AzureParametersDto::getAzureResourceGroupDto);
     }
 
     @Override

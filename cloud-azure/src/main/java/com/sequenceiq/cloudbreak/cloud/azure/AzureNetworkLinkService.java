@@ -44,9 +44,9 @@ public class AzureNetworkLinkService {
     @Inject
     private AzureResourceIdProviderService azureResourceIdProviderService;
 
-    public ValidationResult validateExistingNetworkLink(AzureClient azureClient, String networkId) {
+    public ValidationResult validateExistingNetworkLink(AzureClient azureClient, String networkId, String resourceGroupName) {
         List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = azurePrivateEndpointServicesProvider.getEnabledPrivateEndpointServices();
-        return azureClient.validateNetworkLinkExistenceForDnsZones(networkId, enabledPrivateEndpointServices);
+        return azureClient.validateNetworkLinkExistenceForDnsZones(networkId, enabledPrivateEndpointServices, resourceGroupName);
     }
 
     public void checkOrCreateNetworkLinks(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
