@@ -26,7 +26,7 @@ import reactor.fn.timer.Timer;
 public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CheckImageAction.class);
 
-    private static final int REPEAT_TIME = 5000;
+    private static final int REPEAT_TIME = 30000;
 
     private static final int FAULT_TOLERANCE = 5;
 
@@ -47,6 +47,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
         CheckImageResult checkImageResult = stackCreationService.checkImage(context);
         switch (checkImageResult.getImageStatus()) {
             case IN_PROGRESS:
+                setFaultNum(variables, 0);
                 repeat(context);
                 break;
             case CREATE_FINISHED:
