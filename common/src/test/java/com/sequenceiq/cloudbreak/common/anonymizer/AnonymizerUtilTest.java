@@ -57,6 +57,13 @@ public class AnonymizerUtilTest {
     }
 
     @Test
+    public void testCapitalHidePasswordEqualsSingleQuotes() {
+        String testData = " DC=hortonworks,DC=com --ldap-manager-PASSWORD='2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
+        Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-PASSWORD='" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
+                anonymize(testData));
+    }
+
+    @Test
     public void testHideInJson() {
         String testData = "username\":\"admin\",\"external_ranger_admin_password\":\"rangerpassword123\"}}},"
                 + "{\"admin-properties\":{\"properties\":{\"db_root_user\":\"rangerroot\",\"db_root_password\":\"rangerpass\",\"db_host\":\"localhost\"}}}";
@@ -163,5 +170,13 @@ public class AnonymizerUtilTest {
         String testData = " DC=hortonworks,DC=com --ldap-manager-SECRET=2#KQ01DLbUdljJ!AVs --ldap-sync-usern' sd dsds '";
         Assert.assertEquals(" DC=hortonworks,DC=com --ldap-manager-SECRET=" + REPLACEMENT + " --ldap-sync-usern' sd dsds '",
                 anonymize(testData));
+    }
+
+    @Test
+    public void testFreeIpaLdapModifyPassword() {
+        String testData = "ldapmodify x -D 'cn=directory manager' -w 'Cloudera01' -h localhost";
+        String expectedData = "ldapmodify x -D 'cn=directory manager' -w '" + REPLACEMENT + "' -h localhost";
+        Assert.assertEquals(expectedData, anonymize(testData));
+
     }
 }
