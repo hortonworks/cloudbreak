@@ -45,13 +45,13 @@ public class RequestPropertyPermissionChecker extends ResourcePermissionChecker<
             if (fieldObject != null) {
                 checkObject(userCrn, action, authorizationVariableType, fieldObject);
             } else if (!methodAnnotation.skipOnNull()) {
-                throw new AccessDeniedException("One of the requestObject's field is null and it should be authorized, " +
-                        "thus should be filled in.");
+                throw new AccessDeniedException(String.format("Property [%s] of request object is null and it should be authorized, " +
+                        "thus should be filled in.", methodAnnotation.path()));
             }
         } catch (NestedNullException nne) {
             if (!skipOnNull) {
-                throw new AccessDeniedException("One of the requestObject's field is null and it should be authorized, " +
-                        "thus should be filled in.");
+                throw new AccessDeniedException(String.format("Property [%s] of request object is null and it should be authorized, " +
+                        "thus should be filled in.", methodAnnotation.path()));
             }
         } catch (NotFoundException nfe) {
             LOGGER.warn("Resource not found during permission check of resource object, this should be handled by microservice.");

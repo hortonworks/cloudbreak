@@ -139,7 +139,7 @@ public class RequestPropertyPermissionCheckerTest {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("One of the requestObject's field is null and it should be authorized, thus should be filled in.");
+        thrown.expectMessage("Property [field] of request object is null and it should be authorized, thus should be filled in.");
 
         underTest.checkPermissions(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null, 0L);
 
@@ -160,7 +160,7 @@ public class RequestPropertyPermissionCheckerTest {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("One of the requestObject's field is null and it should be authorized, thus should be filled in.");
+        thrown.expectMessage("Property [field.field] of request object is null and it should be authorized, thus should be filled in.");
 
         underTest.checkPermissions(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field.field"), USER_CRN, null, null, 0L);
 
