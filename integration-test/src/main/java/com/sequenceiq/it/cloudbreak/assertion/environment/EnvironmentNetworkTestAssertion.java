@@ -20,11 +20,21 @@ public class EnvironmentNetworkTestAssertion {
             DetailedEnvironmentResponse environment = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(testDto.getName());
             if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
                 containsRightNumberOfSubnetsOnAws(environment);
+                hasThreePrivateSubnet(environment);
             } else if (CloudPlatform.AZURE.name().equals(environment.getCloudPlatform())) {
                 containsRightNumberOfSubnetsOnAzure(environment);
             }
             return testDto;
         };
+    }
+
+    private static void hasThreePrivateSubnet(DetailedEnvironmentResponse environment) {
+        long numberOfPrivateSubnet = environment.getNetwork().getCbSubnets().values().stream()
+                .filter(cloudSubnet -> cloudSubnet.getType().equals(SubnetType.PRIVATE))
+                .count();
+        if (numberOfPrivateSubnet != 3) {
+            throw new IllegalArgumentException("the number of private networks should be 3");
+        }
     }
 
     private static void containsRightNumberOfSubnetsOnAws(DetailedEnvironmentResponse environment) {
