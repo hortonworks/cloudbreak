@@ -174,13 +174,13 @@ public interface SdxEndpoint {
     @Path("/versions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "versions")
-    List<String> versions();
+    List<String> versions(@QueryParam("cloudPlatform") String cloudPlatform);
 
     @GET
     @Path("/advertisedruntimes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
-    List<AdvertisedRuntime> advertisedRuntimes();
+    List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform);
 
     @POST
     @Path("{name}/backupDatabase")
