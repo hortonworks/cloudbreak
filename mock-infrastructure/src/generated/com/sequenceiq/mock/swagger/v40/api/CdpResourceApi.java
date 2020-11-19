@@ -28,10 +28,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "CdpResource", description = "the CdpResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface CdpResourceApi {
 
     Logger log = LoggerFactory.getLogger(CdpResourceApi.class);
@@ -56,7 +56,7 @@ public interface CdpResourceApi {
     @RequestMapping(value = "/cdp/remoteContext/byContext/{dataContextName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRemoteDataContext> getRemoteContext(@ApiParam(value = "The name of the DataContext.",required=true) @PathVariable("dataContextName") String dataContextName) {
+    default ResponseEntity<ApiRemoteDataContext> getRemoteContext(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the DataContext.",required=true) @PathVariable("dataContextName") String dataContextName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -81,7 +81,7 @@ public interface CdpResourceApi {
     @RequestMapping(value = "/cdp/remoteContext/byCluster/{clusterName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRemoteDataContext> getRemoteContextByCluster(@ApiParam(value = "The name of the DataContext.",required=true) @PathVariable("clusterName") String clusterName) {
+    default ResponseEntity<ApiRemoteDataContext> getRemoteContextByCluster(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the DataContext.",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -107,7 +107,7 @@ public interface CdpResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiRemoteDataContext> postRemoteContext(@ApiParam(value = ""  )  @Valid @RequestBody ApiRemoteDataContext body) {
+    default ResponseEntity<ApiRemoteDataContext> postRemoteContext(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiRemoteDataContext body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

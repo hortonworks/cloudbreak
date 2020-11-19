@@ -9,6 +9,7 @@ import org.apache.commons.collections.CollectionUtils;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Lists;
+import com.google.gson.annotations.SerializedName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApplyFullResponse {
@@ -16,6 +17,7 @@ public class ApplyFullResponse {
     private boolean error;
 
     @JsonProperty("return")
+    @SerializedName("return")
     private List<Map<String, FullNodeResponse>> result;
 
     public Iterable<Map<String, FullNodeResponse>> getResult() {

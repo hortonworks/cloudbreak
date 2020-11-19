@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ExternalUserMappingsResource", description = "the ExternalUserMappingsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface ExternalUserMappingsResourceApi {
 
     Logger log = LoggerFactory.getLogger(ExternalUserMappingsResourceApi.class);
@@ -58,7 +58,7 @@ public interface ExternalUserMappingsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiExternalUserMappingList> createExternalUserMappings(@ApiParam(value = "List of external user mappings to create."  )  @Valid @RequestBody ApiExternalUserMappingList body) {
+    default ResponseEntity<ApiExternalUserMappingList> createExternalUserMappings(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of external user mappings to create."  )  @Valid @RequestBody ApiExternalUserMappingList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -83,7 +83,7 @@ public interface ExternalUserMappingsResourceApi {
     @RequestMapping(value = "/externalUserMappings/{uuid}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiExternalUserMapping> deleteExternalUserMapping(@ApiParam(value = "The uuid of the external user mapping to delete.",required=true) @PathVariable("uuid") String uuid) {
+    default ResponseEntity<ApiExternalUserMapping> deleteExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The uuid of the external user mapping to delete.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -108,7 +108,7 @@ public interface ExternalUserMappingsResourceApi {
     @RequestMapping(value = "/externalUserMappings/{uuid}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalUserMapping> readExternalUserMapping(@ApiParam(value = "The external user mapping to read.",required=true) @PathVariable("uuid") String uuid) {
+    default ResponseEntity<ApiExternalUserMapping> readExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The external user mapping to read.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -133,7 +133,7 @@ public interface ExternalUserMappingsResourceApi {
     @RequestMapping(value = "/externalUserMappings",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalUserMappingList> readExternalUserMappings(@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiExternalUserMappingList> readExternalUserMappings(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -159,7 +159,7 @@ public interface ExternalUserMappingsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiExternalUserMapping> updateExternalUserMapping(@ApiParam(value = "Uuid of the external user mapping being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The external user mapping information."  )  @Valid @RequestBody ApiExternalUserMapping body) {
+    default ResponseEntity<ApiExternalUserMapping> updateExternalUserMapping(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Uuid of the external user mapping being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The external user mapping information."  )  @Valid @RequestBody ApiExternalUserMapping body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

@@ -137,8 +137,8 @@ public class StackSyncActions {
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(),
+                    stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
                     isStatusUpdateEnabled(variables));

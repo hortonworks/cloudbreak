@@ -43,8 +43,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getName())
                 .withCluster(getTestContext().init(ClusterTestDto.class).getRequest())
-                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest())
-                .withGatewayPort(getCloudProvider().gatewayPort(this));
+                .withInstanceGroups(getTestContext().init(InstanceGroupTestDto.class).getRequest());
     }
 
     private DistroXTemplateTestDto withInstanceGroups(InstanceGroupV4Request instanceGroupTestDto) {

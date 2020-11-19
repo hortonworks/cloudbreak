@@ -346,6 +346,7 @@ public class ServiceEndpointCollector {
     }
 
     private void addNameNodeUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+        LOGGER.debug("Select {} service from {}", exposedServiceCollector.getNameNodeService().getServiceName(), privateIps);
         List<String> hdfsUrls = privateIps.get(exposedServiceCollector.getNameNodeService().getServiceName())
                 .stream()
                 .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))

@@ -31,10 +31,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "AuthServiceRoleConfigGroupsResource", description = "the AuthServiceRoleConfigGroupsResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface AuthServiceRoleConfigGroupsResourceApi {
 
     Logger log = LoggerFactory.getLogger(AuthServiceRoleConfigGroupsResourceApi.class);
@@ -59,7 +59,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
     @RequestMapping(value = "/cm/authService/roleConfigGroups/{roleConfigGroupName}/config",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiConfigList> readConfig(@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiConfigList> readConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -84,7 +84,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
     @RequestMapping(value = "/cm/authService/roleConfigGroups/{roleConfigGroupName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRoleConfigGroup> readRoleConfigGroup(@ApiParam(value = "The name of the requested group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName) {
+    default ResponseEntity<ApiRoleConfigGroup> readRoleConfigGroup(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the requested group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -109,7 +109,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
     @RequestMapping(value = "/cm/authService/roleConfigGroups",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRoleConfigGroupList> readRoleConfigGroups() {
+    default ResponseEntity<ApiRoleConfigGroupList> readRoleConfigGroups(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -134,7 +134,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
     @RequestMapping(value = "/cm/authService/roleConfigGroups/{roleConfigGroupName}/roles",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRoleList> readRoles(@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName) {
+    default ResponseEntity<ApiRoleList> readRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -160,7 +160,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "The new config information for the group."  )  @Valid @RequestBody ApiConfigList body) {
+    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the role config group.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "The new config information for the group."  )  @Valid @RequestBody ApiConfigList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -186,7 +186,7 @@ public interface AuthServiceRoleConfigGroupsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiRoleConfigGroup> updateRoleConfigGroup(@ApiParam(value = "The name of the group to update.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "The optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "The updated role config group."  )  @Valid @RequestBody ApiRoleConfigGroup body) {
+    default ResponseEntity<ApiRoleConfigGroup> updateRoleConfigGroup(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the group to update.",required=true) @PathVariable("roleConfigGroupName") String roleConfigGroupName,@ApiParam(value = "The optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "The updated role config group."  )  @Valid @RequestBody ApiRoleConfigGroup body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

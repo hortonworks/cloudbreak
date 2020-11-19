@@ -151,6 +151,7 @@ public class NetworkCreationRequestFactory {
         return new CloudContext(
                 environment.getId(),
                 environment.getName(),
+                environment.getResourceCrn(),
                 environment.getCloudPlatform(),
                 environment.getCloudPlatform(),
                 location(Region.region(environment.getLocation().getName())),

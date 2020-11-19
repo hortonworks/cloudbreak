@@ -28,9 +28,12 @@ public class CloudContext {
 
     private final String accountId;
 
-    public CloudContext(Long id, String name, String platform, String userId, String accountId) {
+    private final String crn;
+
+    public CloudContext(Long id, String name, String crn, String platform, String userId, String accountId) {
         this.id = id;
         this.name = name;
+        this.crn = crn;
         this.platform = Platform.platform(platform);
         this.userId = userId;
         this.accountId = accountId;
@@ -39,14 +42,15 @@ public class CloudContext {
         userName = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String userId, Long workspaceId) {
-        this(id, name, platform, userId, workspaceId.toString());
+    public CloudContext(Long id, String name, String crn, String platform, String userId, Long workspaceId) {
+        this(id, name, crn, platform, userId, workspaceId.toString());
     }
 
-    public CloudContext(Long id, String name, String platform, String variant,
+    public CloudContext(Long id, String name, String crn, String platform, String variant,
             Location location, String userId, String accountId) {
         this.id = id;
         this.name = name;
+        this.crn = crn;
         this.platform = Platform.platform(platform);
         this.variant = Variant.variant(variant);
         this.location = location;
@@ -55,15 +59,16 @@ public class CloudContext {
         userName = null;
     }
 
-    public CloudContext(Long id, String name, String platform, String variant,
+    public CloudContext(Long id, String name, String crn, String platform, String variant,
                         Location location, String userId, Long workspaceId) {
-        this(id, name, platform, variant, location, userId, workspaceId.toString());
+        this(id, name, crn, platform, variant, location, userId, workspaceId.toString());
     }
 
-    public CloudContext(Long id, String name, String platform, String variant,
+    public CloudContext(Long id, String name, String crn, String platform, String variant,
             Location location, String userId, String userName, String accountId) {
         this.id = id;
         this.name = name;
+        this.crn = crn;
         this.platform = Platform.platform(platform);
         this.variant = Variant.variant(variant);
         this.location = location;
@@ -72,9 +77,9 @@ public class CloudContext {
         this.userName = userName;
     }
 
-    public CloudContext(Long id, String name, String platform, String variant,
+    public CloudContext(Long id, String name, String crn, String platform, String variant,
                         Location location, String userId, String userName, Long workspaceId) {
-        this(id, name, platform, variant, location, userId, userName, workspaceId.toString());
+        this(id, name, crn, platform, variant, location, userId, userName, workspaceId.toString());
     }
 
     public Long getId() {
@@ -111,6 +116,10 @@ public class CloudContext {
 
     public String getUserName() {
         return userName;
+    }
+
+    public String getCrn() {
+        return crn;
     }
 
     @Override

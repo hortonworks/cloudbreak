@@ -32,10 +32,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "TimeSeriesResource", description = "the TimeSeriesResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface TimeSeriesResourceApi {
 
     Logger log = LoggerFactory.getLogger(TimeSeriesResourceApi.class);
@@ -60,7 +60,7 @@ public interface TimeSeriesResourceApi {
     @RequestMapping(value = "/timeseries/entityTypeAttributes",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiTimeSeriesEntityAttributeList> getEntityTypeAttributes() {
+    default ResponseEntity<ApiTimeSeriesEntityAttributeList> getEntityTypeAttributes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -85,7 +85,7 @@ public interface TimeSeriesResourceApi {
     @RequestMapping(value = "/timeseries/entityTypes",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiTimeSeriesEntityTypeList> getEntityTypes() {
+    default ResponseEntity<ApiTimeSeriesEntityTypeList> getEntityTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -110,7 +110,7 @@ public interface TimeSeriesResourceApi {
     @RequestMapping(value = "/timeseries/schema",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiMetricSchemaList> getMetricSchema() {
+    default ResponseEntity<ApiMetricSchemaList> getMetricSchema(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -135,7 +135,7 @@ public interface TimeSeriesResourceApi {
     @RequestMapping(value = "/timeseries",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiTimeSeriesResponseList> queryTimeSeries(@ApiParam(value = "to return the response in. The content types \"application/json\" and \"text/csv\" are supported. This defaults to \"application/json\". If \"text/csv\" is specified then we return one row per time series data point, and we don't return any of the metadata.", defaultValue = "application/json") @Valid @RequestParam(value = "contentType", required = false, defaultValue="application/json") String contentType,@ApiParam(value = "Aggregate rollup level desired for the response data. Valid values are RAW, TEN_MINUTELY, HOURLY, SIX_HOURLY, DAILY, and WEEKLY. Note that if the mustUseDesiredRollup parameter is not set, then the monitoring server can decide to return a different rollup level.", defaultValue = "RAW") @Valid @RequestParam(value = "desiredRollup", required = false, defaultValue="RAW") String desiredRollup,@ApiParam(value = "Start of the period to query in ISO 8601 format (defaults to 5 minutes before the end of the period).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "If set then the tsquery will return data with the desired aggregate rollup level.", defaultValue = "false") @Valid @RequestParam(value = "mustUseDesiredRollup", required = false, defaultValue="false") Boolean mustUseDesiredRollup,@ApiParam(value = "Tsquery to run against the CM time-series data store.") @Valid @RequestParam(value = "query", required = false) String query,@ApiParam(value = "End of the period to query in ISO 8601 format (defaults to current time).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
+    default ResponseEntity<ApiTimeSeriesResponseList> queryTimeSeries(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "to return the response in. The content types \"application/json\" and \"text/csv\" are supported. This defaults to \"application/json\". If \"text/csv\" is specified then we return one row per time series data point, and we don't return any of the metadata.", defaultValue = "application/json") @Valid @RequestParam(value = "contentType", required = false, defaultValue="application/json") String contentType,@ApiParam(value = "Aggregate rollup level desired for the response data. Valid values are RAW, TEN_MINUTELY, HOURLY, SIX_HOURLY, DAILY, and WEEKLY. Note that if the mustUseDesiredRollup parameter is not set, then the monitoring server can decide to return a different rollup level.", defaultValue = "RAW") @Valid @RequestParam(value = "desiredRollup", required = false, defaultValue="RAW") String desiredRollup,@ApiParam(value = "Start of the period to query in ISO 8601 format (defaults to 5 minutes before the end of the period).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "If set then the tsquery will return data with the desired aggregate rollup level.", defaultValue = "false") @Valid @RequestParam(value = "mustUseDesiredRollup", required = false, defaultValue="false") Boolean mustUseDesiredRollup,@ApiParam(value = "Tsquery to run against the CM time-series data store.") @Valid @RequestParam(value = "query", required = false) String query,@ApiParam(value = "End of the period to query in ISO 8601 format (defaults to current time).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -161,7 +161,7 @@ public interface TimeSeriesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiTimeSeriesResponseList> queryTimeSeries_0(@ApiParam(value = "Request object containing information used when retrieving timeseries data."  )  @Valid @RequestBody ApiTimeSeriesRequest body) {
+    default ResponseEntity<ApiTimeSeriesResponseList> queryTimeSeries_0(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Request object containing information used when retrieving timeseries data."  )  @Valid @RequestBody ApiTimeSeriesRequest body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

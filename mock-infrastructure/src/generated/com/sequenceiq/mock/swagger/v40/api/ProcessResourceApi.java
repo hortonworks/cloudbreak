@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ProcessResource", description = "the ProcessResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface ProcessResourceApi {
 
     Logger log = LoggerFactory.getLogger(ProcessResourceApi.class);
@@ -57,7 +57,7 @@ public interface ProcessResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/process/configFiles/{configFileName}",
         produces = { "application/octet-stream" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<Resource> getConfigFile(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the config file to get.",required=true) @PathVariable("configFileName") String configFileName,@ApiParam(value = "",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<Resource> getConfigFile(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Name of the config file to get.",required=true) @PathVariable("configFileName") String configFileName,@ApiParam(value = "",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("")) {
                 try {
@@ -82,7 +82,7 @@ public interface ProcessResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}/process",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiProcess> getProcess(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiProcess> getProcess(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("roleName") String roleName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

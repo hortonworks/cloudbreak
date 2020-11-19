@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
+import com.sequenceiq.cloudbreak.util.HostUtil;
 
 @Component
 public class ClouderaManagerApiClientProvider {
@@ -93,7 +94,7 @@ public class ClouderaManagerApiClientProvider {
                 cmClient.setBasePath(clientConfig.getClusterProxyUrl() + "/proxy/" + clientConfig.getClusterCrn() + "/cb-internal" + context);
                 cmClient.addDefaultHeader("Proxy-Ignore-Auth", "true");
                 cmClient.addDefaultHeader("Proxy-With-Timeout", clusterProxyTimeout.toString());
-            } else if (port != null) {
+            } else if (port != null && !HostUtil.hasPort(clientConfig.getApiAddress())) {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + ':' + port + context);
             } else {
                 cmClient.setBasePath("https://" + clientConfig.getApiAddress() + context);

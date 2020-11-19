@@ -51,7 +51,7 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @ApiModelProperty(hidden = true)
     private YarnInstanceGroupV4Parameters yarn;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = false)
     private MockInstanceGroupV4Parameters mock;
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")

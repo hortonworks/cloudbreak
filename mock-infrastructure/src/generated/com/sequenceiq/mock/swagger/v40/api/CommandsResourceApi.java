@@ -30,10 +30,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "CommandsResource", description = "the CommandsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface CommandsResourceApi {
 
     Logger log = LoggerFactory.getLogger(CommandsResourceApi.class);
@@ -58,7 +58,7 @@ public interface CommandsResourceApi {
     @RequestMapping(value = "/commands/{commandId}/abort",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> abortCommand(@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
+    default ResponseEntity<ApiCommand> abortCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -83,7 +83,7 @@ public interface CommandsResourceApi {
     @RequestMapping(value = "/commands/{commandId}/logs/stderr",
         produces = { "application/octet-stream" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<Resource> getStandardError(@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
+    default ResponseEntity<Resource> getStandardError(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("")) {
                 try {
@@ -108,7 +108,7 @@ public interface CommandsResourceApi {
     @RequestMapping(value = "/commands/{commandId}/logs/stdout",
         produces = { "application/octet-stream" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<Resource> getStandardOutput(@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
+    default ResponseEntity<Resource> getStandardOutput(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("")) {
                 try {
@@ -133,7 +133,7 @@ public interface CommandsResourceApi {
     @RequestMapping(value = "/commands/{commandId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCommand> readCommand(@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
+    default ResponseEntity<ApiCommand> readCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command id.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -158,7 +158,7 @@ public interface CommandsResourceApi {
     @RequestMapping(value = "/commands/{commandId}/retry",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> retry(@ApiParam(value = "ID of the command that needs to be run.",required=true) @PathVariable("commandId") BigDecimal commandId) {
+    default ResponseEntity<ApiCommand> retry(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "ID of the command that needs to be run.",required=true) @PathVariable("commandId") BigDecimal commandId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

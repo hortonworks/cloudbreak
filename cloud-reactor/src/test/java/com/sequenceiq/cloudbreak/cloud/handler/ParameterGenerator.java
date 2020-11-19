@@ -52,7 +52,7 @@ public class ParameterGenerator {
 
     public CloudContext createCloudContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        return new CloudContext(STACK_ID, "teststack", "TESTCONNECTOR", "TESTVARIANT",
+        return new CloudContext(STACK_ID, "teststack", "testCrn", "TESTCONNECTOR", "TESTVARIANT",
                 location, USER_ID, WORKSPACE_ID);
     }
 

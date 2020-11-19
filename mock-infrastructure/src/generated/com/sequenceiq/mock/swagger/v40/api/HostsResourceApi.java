@@ -36,10 +36,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "HostsResource", description = "the HostsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface HostsResourceApi {
 
     Logger log = LoggerFactory.getLogger(HostsResourceApi.class);
@@ -65,7 +65,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<List<ApiEntityTag>> addTags(@ApiParam(value = "Name of the host",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "List of tags to add to the host"  )  @Valid @RequestBody List<ApiEntityTag> body) {
+    default ResponseEntity<List<ApiEntityTag>> addTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the host",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "List of tags to add to the host"  )  @Valid @RequestBody List<ApiEntityTag> body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -91,7 +91,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiHostList> createHosts(@ApiParam(value = "The list of hosts to create"  )  @Valid @RequestBody ApiHostList body) {
+    default ResponseEntity<ApiHostList> createHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The list of hosts to create"  )  @Valid @RequestBody ApiHostList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -116,7 +116,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiHostList> deleteAllHosts() {
+    default ResponseEntity<ApiHostList> deleteAllHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -141,7 +141,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiHost> deleteHost(@ApiParam(value = "The ID of the host to remove",required=true) @PathVariable("hostId") String hostId) {
+    default ResponseEntity<ApiHost> deleteHost(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host to remove",required=true) @PathVariable("hostId") String hostId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -167,7 +167,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.DELETE)
-    default ResponseEntity<List<ApiEntityTag>> deleteTags(@ApiParam(value = "Name of the host to remove tags from",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "List of tags to remove from the host"  )  @Valid @RequestBody List<ApiEntityTag> body) {
+    default ResponseEntity<List<ApiEntityTag>> deleteTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the host to remove tags from",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "List of tags to remove from the host"  )  @Valid @RequestBody List<ApiEntityTag> body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -192,7 +192,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}/commands/enterMaintenanceMode",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The ID of the host",required=true) @PathVariable("hostId") String hostId) {
+    default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host",required=true) @PathVariable("hostId") String hostId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -217,7 +217,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}/commands/exitMaintenanceMode",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The ID of the host",required=true) @PathVariable("hostId") String hostId) {
+    default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host",required=true) @PathVariable("hostId") String hostId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -243,7 +243,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> generateHostCerts(@ApiParam(value = "The ID of the host to generate a certificate for.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = ""  )  @Valid @RequestBody ApiGenerateHostCertsArguments body) {
+    default ResponseEntity<ApiCommand> generateHostCerts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host to generate a certificate for.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = ""  )  @Valid @RequestBody ApiGenerateHostCertsArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -268,7 +268,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}/metrics",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiMetricList> getMetrics(@ApiParam(value = "The host's ID.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Start of the period to query.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "Network interfaces to query for metrics (default = all).") @Valid @RequestParam(value = "ifs", required = false) List<String> ifs,@ApiParam(value = "Filter for which metrics to query.") @Valid @RequestParam(value = "metrics", required = false) List<String> metrics,@ApiParam(value = "Whether to query for network interface metrics.", defaultValue = "true") @Valid @RequestParam(value = "queryNw", required = false, defaultValue="true") Boolean queryNw,@ApiParam(value = "Whether to query for storage metrics.", defaultValue = "true") @Valid @RequestParam(value = "queryStorage", required = false, defaultValue="true") Boolean queryStorage,@ApiParam(value = "Storage context IDs to query for metrics (default = all).") @Valid @RequestParam(value = "storageIds", required = false) List<String> storageIds,@ApiParam(value = "End of the period to query.", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiMetricList> getMetrics(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The host's ID.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Start of the period to query.") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "Network interfaces to query for metrics (default = all).") @Valid @RequestParam(value = "ifs", required = false) List<String> ifs,@ApiParam(value = "Filter for which metrics to query.") @Valid @RequestParam(value = "metrics", required = false) List<String> metrics,@ApiParam(value = "Whether to query for network interface metrics.", defaultValue = "true") @Valid @RequestParam(value = "queryNw", required = false, defaultValue="true") Boolean queryNw,@ApiParam(value = "Whether to query for storage metrics.", defaultValue = "true") @Valid @RequestParam(value = "queryStorage", required = false, defaultValue="true") Boolean queryStorage,@ApiParam(value = "Storage context IDs to query for metrics (default = all).") @Valid @RequestParam(value = "storageIds", required = false) List<String> storageIds,@ApiParam(value = "End of the period to query.", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -294,7 +294,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> migrateRoles(@ApiParam(value = "The ID of the host on which the roles to migrate currently reside",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiMigrateRolesArguments body) {
+    default ResponseEntity<ApiCommand> migrateRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host on which the roles to migrate currently reside",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Arguments for the command."  )  @Valid @RequestBody ApiMigrateRolesArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -319,7 +319,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiHost> readHost(@ApiParam(value = "The ID of the host to read.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The view to materialize. Defaults to 'full'.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "full") @Valid @RequestParam(value = "view", required = false, defaultValue="full") String view) {
+    default ResponseEntity<ApiHost> readHost(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host to read.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The view to materialize. Defaults to 'full'.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "full") @Valid @RequestParam(value = "view", required = false, defaultValue="full") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -344,7 +344,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}/config",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiConfigList> readHostConfig(@ApiParam(value = "The ID of the host.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiConfigList> readHostConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -369,7 +369,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiHostList> readHosts(@ApiParam(value = "Optional host config name to filter hosts by. Available from v40.") @Valid @RequestParam(value = "configName", required = false) String configName,@ApiParam(value = "host config value associated with config name. Available from v40.") @Valid @RequestParam(value = "configValue", required = false) String configValue,@ApiParam(value = "The view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiHostList> readHosts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Optional host config name to filter hosts by. Available from v40.") @Valid @RequestParam(value = "configName", required = false) String configName,@ApiParam(value = "host config value associated with config name. Available from v40.") @Valid @RequestParam(value = "configValue", required = false) String configValue,@ApiParam(value = "The view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -394,7 +394,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostname}/tags",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<List<ApiEntityTag>> readTags(@ApiParam(value = "The name of the host",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "Number of tags", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Index of the first tag to retrieve", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
+    default ResponseEntity<List<ApiEntityTag>> readTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the host",required=true) @PathVariable("hostname") String hostname,@ApiParam(value = "Number of tags", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Index of the first tag to retrieve", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -419,7 +419,7 @@ public interface HostsResourceApi {
     @RequestMapping(value = "/hosts/{hostId}/commands/resetHostId",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> resetHostId(@ApiParam(value = "The ID of the host that should be affected.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "New ID the the host should report.") @Valid @RequestParam(value = "newHostId", required = false) String newHostId) {
+    default ResponseEntity<ApiCommand> resetHostId(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host that should be affected.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "New ID the the host should report.") @Valid @RequestParam(value = "newHostId", required = false) String newHostId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -445,7 +445,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiHost> updateHost(@ApiParam(value = "The hostId to update",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The updated host object."  )  @Valid @RequestBody ApiHost body) {
+    default ResponseEntity<ApiHost> updateHost(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The hostId to update",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "The updated host object."  )  @Valid @RequestBody ApiHost body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -471,7 +471,7 @@ public interface HostsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiConfigList> updateHostConfig(@ApiParam(value = "The ID of the host.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiConfigList body) {
+    default ResponseEntity<ApiConfigList> updateHostConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The ID of the host.",required=true) @PathVariable("hostId") String hostId,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiConfigList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

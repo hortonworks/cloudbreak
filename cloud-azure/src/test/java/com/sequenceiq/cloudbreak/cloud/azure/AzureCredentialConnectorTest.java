@@ -42,7 +42,7 @@ public class AzureCredentialConnectorTest {
 
     private static final String PLATFORM = "AWS";
 
-    private static final CloudContext TEST_CLOUD_CONTEXT = new CloudContext(1L, "test", PLATFORM, USER_ID, WORKSPACE_ID);
+    private static final CloudContext TEST_CLOUD_CONTEXT = new CloudContext(1L, "test", "crn", PLATFORM, USER_ID, WORKSPACE_ID);
 
     @InjectMocks
     private AzureCredentialConnector underTest;

@@ -31,10 +31,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "HostTemplatesResource", description = "the HostTemplatesResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface HostTemplatesResourceApi {
 
     Logger log = LoggerFactory.getLogger(HostTemplatesResourceApi.class);
@@ -60,7 +60,7 @@ public interface HostTemplatesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> applyHostTemplate(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template to apply.",required=true) @PathVariable("hostTemplateName") String hostTemplateName,@ApiParam(value = "Whether to start the newly created roles or not.") @Valid @RequestParam(value = "startRoles", required = false) Boolean startRoles,@ApiParam(value = "List of hosts to apply the host template to."  )  @Valid @RequestBody ApiHostRefList body) {
+    default ResponseEntity<ApiCommand> applyHostTemplate(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template to apply.",required=true) @PathVariable("hostTemplateName") String hostTemplateName,@ApiParam(value = "Whether to start the newly created roles or not.") @Valid @RequestParam(value = "startRoles", required = false) Boolean startRoles,@ApiParam(value = "List of hosts to apply the host template to."  )  @Valid @RequestBody ApiHostRefList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -86,7 +86,7 @@ public interface HostTemplatesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiHostTemplateList> createHostTemplates(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The list of host templates to create."  )  @Valid @RequestBody ApiHostTemplateList body) {
+    default ResponseEntity<ApiHostTemplateList> createHostTemplates(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The list of host templates to create."  )  @Valid @RequestBody ApiHostTemplateList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -111,7 +111,7 @@ public interface HostTemplatesResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/hostTemplates/{hostTemplateName}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiHostTemplate> deleteHostTemplate(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template to delete.",required=true) @PathVariable("hostTemplateName") String hostTemplateName) {
+    default ResponseEntity<ApiHostTemplate> deleteHostTemplate(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template to delete.",required=true) @PathVariable("hostTemplateName") String hostTemplateName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -136,7 +136,7 @@ public interface HostTemplatesResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/hostTemplates/{hostTemplateName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiHostTemplate> readHostTemplate(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("hostTemplateName") String hostTemplateName) {
+    default ResponseEntity<ApiHostTemplate> readHostTemplate(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("hostTemplateName") String hostTemplateName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -161,7 +161,7 @@ public interface HostTemplatesResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/hostTemplates",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiHostTemplateList> readHostTemplates(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName) {
+    default ResponseEntity<ApiHostTemplateList> readHostTemplates(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -187,7 +187,7 @@ public interface HostTemplatesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiHostTemplate> updateHostTemplate(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template with updated fields.",required=true) @PathVariable("hostTemplateName") String hostTemplateName,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostTemplate body) {
+    default ResponseEntity<ApiHostTemplate> updateHostTemplate(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Host template with updated fields.",required=true) @PathVariable("hostTemplateName") String hostTemplateName,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostTemplate body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

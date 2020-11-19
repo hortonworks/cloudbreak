@@ -37,7 +37,7 @@ public class PollerUtilTest {
     public void testWaitForWhenNoInstances() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "");
+        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
@@ -50,7 +50,7 @@ public class PollerUtilTest {
     public void testWaitForWhenHasInstancesAndCompleted() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "");
+        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
@@ -71,7 +71,7 @@ public class PollerUtilTest {
     public void testWaitForWhenHasInstancesAndNotCompleted() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 2);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "");
+        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);

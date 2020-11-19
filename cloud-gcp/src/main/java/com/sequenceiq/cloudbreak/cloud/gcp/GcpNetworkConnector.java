@@ -188,6 +188,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         return new CloudContext(
                 networkRequest.getEnvId(),
                 networkRequest.getEnvName(),
+                null,
                 CloudPlatform.GCP.name(),
                 CloudPlatform.GCP.name(),
                 location(networkRequest.getRegion()),
@@ -199,6 +200,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         return new CloudContext(
                 networkRequest.getEnvId(),
                 networkRequest.getEnvName(),
+                null,
                 CloudPlatform.GCP.name(),
                 CloudPlatform.GCP.name(),
                 location(region(networkRequest.getRegion())),

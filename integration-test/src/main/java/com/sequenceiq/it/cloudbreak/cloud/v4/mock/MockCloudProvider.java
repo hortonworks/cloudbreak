@@ -28,8 +28,6 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.clustertemplate.DistroXTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -38,7 +36,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ImageCatalogEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
@@ -86,7 +83,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public DistroXTestDtoBase distrox(DistroXTestDtoBase distrox) {
-        return distrox.withGatewayPort(10090);
+        return distrox;
     }
 
     @Override
@@ -283,16 +280,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
         return stackAuthenticationEntity;
     }
 
-    @Override
-    public Integer gatewayPort(ClusterTemplateTestDto template) {
-        return 10090;
-    }
-
-    @Override
-    public Integer gatewayPort(DistroXTemplateTestDto template) {
-        return 10090;
-    }
-
     public EnvironmentNetworkTestDto environmentNetwork(EnvironmentNetworkTestDto environmentNetwork) {
         return environmentNetwork
                 .withSubnetIDs(getSubnetIDs())
@@ -304,16 +291,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
         params.setVpcId(getVpcId());
         params.setInternetGatewayId(getInternetGatewayId());
         return params;
-    }
-
-    @Override
-    public Integer gatewayPort(StackTestDtoBase stackEntity) {
-        return 10090;
-    }
-
-    @Override
-    public Integer gatewayPort(FreeIpaTestDto stackEntity) {
-        return 10090;
     }
 
     @Override

@@ -134,7 +134,7 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("master")))
                 .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
 
         ArrayList<CloudResource> allInstances = new ArrayList<>();
@@ -221,7 +221,7 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("master")))
                 .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
 
         List<CloudResource> allInstances = new ArrayList<>();

@@ -1,5 +1,26 @@
 package com.sequenceiq.redbeams.sync;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
+
+import java.util.stream.Stream;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -18,25 +39,6 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.stream.Stream;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class DBStackStatusSyncServiceTest {
@@ -116,6 +118,7 @@ public class DBStackStatusSyncServiceTest {
         cloudContextArgumentCaptor = ArgumentCaptor.forClass(CloudContext.class);
 
         when(dbStack.getEnvironmentId()).thenReturn(ENVIRONMENT_ID);
+        when(dbStack.getResourceCrn()).thenReturn(new InternalCrnBuilder(Crn.Service.REDBEAMS).getInternalCrnForService());
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_ID)).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);

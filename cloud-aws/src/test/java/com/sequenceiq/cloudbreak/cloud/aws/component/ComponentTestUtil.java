@@ -73,7 +73,7 @@ public class ComponentTestUtil {
 
     public AuthenticatedContext getAuthenticatedContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        CloudContext cloudContext = new CloudContext(1L, "cloudContextName", AWS, "variant", location, "owner@company.com", 5L);
+        CloudContext cloudContext = new CloudContext(1L, "cloudContextName", "crn", AWS, "variant", location, "owner@company.com", 5L);
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialName");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }

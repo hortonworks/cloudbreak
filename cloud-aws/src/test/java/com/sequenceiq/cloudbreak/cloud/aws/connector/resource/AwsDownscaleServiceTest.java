@@ -84,7 +84,7 @@ class AwsDownscaleServiceTest {
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
                 new CloudCredential());
         AmazonAutoScalingRetryClient amazonAutoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
@@ -131,7 +131,7 @@ class AwsDownscaleServiceTest {
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
                 new CloudCredential());
         AmazonAutoScalingRetryClient amazonAutoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
@@ -174,7 +174,7 @@ class AwsDownscaleServiceTest {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
         cloudInstances.add(workerInstance1);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "AWS", "AWS",
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
                 Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
                 new CloudCredential());
 

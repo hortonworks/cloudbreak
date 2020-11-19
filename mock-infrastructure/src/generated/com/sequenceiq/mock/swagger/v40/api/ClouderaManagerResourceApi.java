@@ -50,10 +50,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ClouderaManagerResource", description = "the ClouderaManagerResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface ClouderaManagerResourceApi {
 
     Logger log = LoggerFactory.getLogger(ClouderaManagerResourceApi.class);
@@ -79,7 +79,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> addCustomCerts(@ApiParam(value = ""  )  @Valid @RequestBody ApiAddCustomCertsArguments body) {
+    default ResponseEntity<ApiCommand> addCustomCerts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiAddCustomCertsArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -103,7 +103,7 @@ public interface ClouderaManagerResourceApi {
         @ApiResponse(code = 201, message = "Success") })
     @RequestMapping(value = "/cm/trial/begin",
         method = RequestMethod.POST)
-    default ResponseEntity<Void> beginTrial() {
+    default ResponseEntity<Void> beginTrial(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
         } else {
             log.warn("ObjectMapper or HttpServletRequest not configured in default ClouderaManagerResourceApi interface so no example is generated");
@@ -121,7 +121,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> clustersPerfInspectorCommand(@ApiParam(value = "Required arguments for the command. See ApiClustersPerfInspectorArgs."  )  @Valid @RequestBody ApiClustersPerfInspectorArgs body) {
+    default ResponseEntity<ApiCommand> clustersPerfInspectorCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Required arguments for the command. See ApiClustersPerfInspectorArgs."  )  @Valid @RequestBody ApiClustersPerfInspectorArgs body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -147,7 +147,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> collectDiagnosticDataCommand(@ApiParam(value = "The command arguments."  )  @Valid @RequestBody ApiCollectDiagnosticDataArguments body) {
+    default ResponseEntity<ApiCommand> collectDiagnosticDataCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command arguments."  )  @Valid @RequestBody ApiCollectDiagnosticDataArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -172,7 +172,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/deleteCredentials",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> deleteCredentialsCommand(@ApiParam(value = "this can be set to \"all\" or \"unused\"", defaultValue = "all") @Valid @RequestParam(value = "deleteCredentialsMode", required = false, defaultValue="all") String deleteCredentialsMode) {
+    default ResponseEntity<ApiCommand> deleteCredentialsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "this can be set to \"all\" or \"unused\"", defaultValue = "all") @Valid @RequestParam(value = "deleteCredentialsMode", required = false, defaultValue="all") String deleteCredentialsMode) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -196,7 +196,7 @@ public interface ClouderaManagerResourceApi {
         @ApiResponse(code = 201, message = "Success") })
     @RequestMapping(value = "/cm/trial/end",
         method = RequestMethod.POST)
-    default ResponseEntity<Void> endTrial() {
+    default ResponseEntity<Void> endTrial(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
         } else {
             log.warn("ObjectMapper or HttpServletRequest not configured in default ClouderaManagerResourceApi interface so no example is generated");
@@ -214,7 +214,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> generateCmca(@ApiParam(value = ""  )  @Valid @RequestBody ApiGenerateCmcaArguments body) {
+    default ResponseEntity<ApiCommand> generateCmca(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiGenerateCmcaArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -239,7 +239,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/generateCredentials",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> generateCredentialsCommand() {
+    default ResponseEntity<ApiCommand> generateCredentialsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -264,7 +264,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/config",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiConfigList> getConfig(@ApiParam(value = "The view to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiConfigList> getConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -289,7 +289,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/deployment",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiDeployment2> getDeployment2(@ApiParam(value = "May be one of \"export\" (default) or \"export_redacted\".  The latter replaces configurations that are sensitive with the word \"REDACTED\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "export") @Valid @RequestParam(value = "view", required = false, defaultValue="export") String view) {
+    default ResponseEntity<ApiDeployment2> getDeployment2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "May be one of \"export\" (default) or \"export_redacted\".  The latter replaces configurations that are sensitive with the word \"REDACTED\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "export") @Valid @RequestParam(value = "view", required = false, defaultValue="export") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -314,7 +314,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/kerberosInfo",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiKerberosInfo> getKerberosInfo() {
+    default ResponseEntity<ApiKerberosInfo> getKerberosInfo(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -339,7 +339,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/kerberosPrincipals",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiPrincipalList> getKerberosPrincipals(@ApiParam(value = "Whether to include only those principals which do not already exist in Cloudera Manager's database.") @Valid @RequestParam(value = "missingOnly", required = false) Boolean missingOnly) {
+    default ResponseEntity<ApiPrincipalList> getKerberosPrincipals(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Whether to include only those principals which do not already exist in Cloudera Manager's database.") @Valid @RequestParam(value = "missingOnly", required = false) Boolean missingOnly) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -364,7 +364,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/licensedFeatureUsage",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiLicensedFeatureUsage> getLicensedFeatureUsage() {
+    default ResponseEntity<ApiLicensedFeatureUsage> getLicensedFeatureUsage(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -389,7 +389,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/log",
         produces = { "text/plain" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<String> getLog() {
+    default ResponseEntity<String> getLog(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("")) {
                 try {
@@ -414,7 +414,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/scmDbInfo",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiScmDbInfo> getScmDbInfo() {
+    default ResponseEntity<ApiScmDbInfo> getScmDbInfo(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -439,7 +439,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/shutdownReadiness",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiShutdownReadiness> getShutdownReadiness(@ApiParam(value = "End time of the last known activity/workload against the managed clusters, in ISO 8601 format.") @Valid @RequestParam(value = "lastActivityTime", required = false) String lastActivityTime) {
+    default ResponseEntity<ApiShutdownReadiness> getShutdownReadiness(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "End time of the last known activity/workload against the managed clusters, in ISO 8601 format.") @Valid @RequestParam(value = "lastActivityTime", required = false) String lastActivityTime) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -464,7 +464,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/version",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiVersionInfo> getVersion() {
+    default ResponseEntity<ApiVersionInfo> getVersion(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -490,7 +490,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostInstallCommand(@ApiParam(value = "Hosts to perform installation on"  )  @Valid @RequestBody ApiHostInstallArguments body) {
+    default ResponseEntity<ApiCommand> hostInstallCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Hosts to perform installation on"  )  @Valid @RequestBody ApiHostInstallArguments body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -516,7 +516,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsDecommissionCommand(@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsDecommissionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -542,7 +542,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsOfflineOrDecommissionCommand(@ApiParam(value = "offline timeout in seconds. Specify as null to get the default timeout (4 hours). Ignored if service does not support he offline operation.") @Valid @RequestParam(value = "offlineTimeout", required = false) BigDecimal offlineTimeout,@ApiParam(value = "list of host names to decommission."  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsOfflineOrDecommissionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "offline timeout in seconds. Specify as null to get the default timeout (4 hours). Ignored if service does not support he offline operation.") @Valid @RequestParam(value = "offlineTimeout", required = false) BigDecimal offlineTimeout,@ApiParam(value = "list of host names to decommission."  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -568,7 +568,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsPerfInspectorCommand(@ApiParam(value = "Required arguments for the command. See ApiHostsPerfInspectorArgs."  )  @Valid @RequestBody ApiHostsPerfInspectorArgs body) {
+    default ResponseEntity<ApiCommand> hostsPerfInspectorCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Required arguments for the command. See ApiHostsPerfInspectorArgs."  )  @Valid @RequestBody ApiHostsPerfInspectorArgs body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -594,7 +594,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsRecommissionAndExitMaintenanceModeCommand(@ApiParam(value = "", allowableValues = "RECOMMISSION, RECOMMISSION_WITH_START", defaultValue = "recommission") @Valid @RequestParam(value = "recommissionType", required = false, defaultValue="recommission") String recommissionType,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsRecommissionAndExitMaintenanceModeCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "RECOMMISSION, RECOMMISSION_WITH_START", defaultValue = "recommission") @Valid @RequestParam(value = "recommissionType", required = false, defaultValue="recommission") String recommissionType,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -620,7 +620,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsRecommissionCommand(@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsRecommissionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -646,7 +646,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsRecommissionWithStartCommand(@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsRecommissionWithStartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -672,7 +672,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> hostsStartRolesCommand(@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
+    default ResponseEntity<ApiCommand> hostsStartRolesCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiHostNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -697,7 +697,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/importAdminCredentials",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> importAdminCredentials(@ApiParam(value = "Password for the Account Manager.  return Information about the submitted command.") @Valid @RequestParam(value = "password", required = false) String password,@ApiParam(value = "Username of the Account Manager. Full name including the Kerberos realm must be specified.") @Valid @RequestParam(value = "username", required = false) String username) {
+    default ResponseEntity<ApiCommand> importAdminCredentials(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Password for the Account Manager.  return Information about the submitted command.") @Valid @RequestParam(value = "password", required = false) String password,@ApiParam(value = "Username of the Account Manager. Full name including the Kerberos realm must be specified.") @Valid @RequestParam(value = "username", required = false) String username) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -723,7 +723,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> importClusterTemplate(@ApiParam(value = "if true the parcels repositories in the cluster template will be added.", defaultValue = "false") @Valid @RequestParam(value = "addRepositories", required = false, defaultValue="false") Boolean addRepositories,@ApiParam(value = "cluster template"  )  @Valid @RequestBody ApiClusterTemplate body) {
+    default ResponseEntity<ApiCommand> importClusterTemplate(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "if true the parcels repositories in the cluster template will be added.", defaultValue = "false") @Valid @RequestParam(value = "addRepositories", required = false, defaultValue="false") Boolean addRepositories,@ApiParam(value = "cluster template"  )  @Valid @RequestBody ApiClusterTemplate body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -748,7 +748,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/importKerberosPrincipal",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> importKerberosPrincipal(@ApiParam(value = "Key-version number of the password.  return Information about the submitted command.") @Valid @RequestParam(value = "kvno", required = false) BigDecimal kvno,@ApiParam(value = "Password for the Kerberos principal. Cloudera Manager will encrypt the principal and password and use it when needed for a daemon.") @Valid @RequestParam(value = "password", required = false) String password,@ApiParam(value = "Name of the principal. Full name including the Kerberos realm must be specified. If it already exists, it will be overwritten.") @Valid @RequestParam(value = "principal", required = false) String principal) {
+    default ResponseEntity<ApiCommand> importKerberosPrincipal(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Key-version number of the password.  return Information about the submitted command.") @Valid @RequestParam(value = "kvno", required = false) BigDecimal kvno,@ApiParam(value = "Password for the Kerberos principal. Cloudera Manager will encrypt the principal and password and use it when needed for a daemon.") @Valid @RequestParam(value = "password", required = false) String password,@ApiParam(value = "Name of the principal. Full name including the Kerberos realm must be specified. If it already exists, it will be overwritten.") @Valid @RequestParam(value = "principal", required = false) String principal) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -773,7 +773,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/inspectHosts",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> inspectHostsCommand() {
+    default ResponseEntity<ApiCommand> inspectHostsCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -798,7 +798,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -823,7 +823,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/instances/{cmServerId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCmServer> readInstance(@ApiParam(value = "The CM server ID.",required=true) @PathVariable("cmServerId") String cmServerId) {
+    default ResponseEntity<ApiCmServer> readInstance(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The CM server ID.",required=true) @PathVariable("cmServerId") String cmServerId) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -848,7 +848,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/instances",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCmServerList> readInstances() {
+    default ResponseEntity<ApiCmServerList> readInstances(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -873,7 +873,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/license",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiLicense> readLicense() {
+    default ResponseEntity<ApiLicense> readLicense(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -898,7 +898,7 @@ public interface ClouderaManagerResourceApi {
     @RequestMapping(value = "/cm/commands/refreshParcelRepos",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> refreshParcelRepos() {
+    default ResponseEntity<ApiCommand> refreshParcelRepos(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -924,7 +924,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Settings to update."  )  @Valid @RequestBody ApiConfigList body) {
+    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Settings to update."  )  @Valid @RequestBody ApiConfigList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -950,7 +950,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiDeployment2> updateDeployment2(@ApiParam(value = "If true, the current deployment is deleted before the specified deployment is applied", defaultValue = "false") @Valid @RequestParam(value = "deleteCurrentDeployment", required = false, defaultValue="false") Boolean deleteCurrentDeployment,@ApiParam(value = "The deployment to create"  )  @Valid @RequestBody ApiDeployment2 body) {
+    default ResponseEntity<ApiDeployment2> updateDeployment2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "If true, the current deployment is deleted before the specified deployment is applied", defaultValue = "false") @Valid @RequestParam(value = "deleteCurrentDeployment", required = false, defaultValue="false") Boolean deleteCurrentDeployment,@ApiParam(value = "The deployment to create"  )  @Valid @RequestBody ApiDeployment2 body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -976,7 +976,7 @@ public interface ClouderaManagerResourceApi {
         produces = { "application/json" }, 
         consumes = { "multipart/form-data" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiLicense> updateLicense(@ApiParam(value = "") @Valid @RequestPart(value="license", required=false) MultipartFile license) {
+    default ResponseEntity<ApiLicense> updateLicense(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "") @Valid @RequestPart(value="license", required=false) MultipartFile license) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

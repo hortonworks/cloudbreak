@@ -41,6 +41,8 @@ public class AzureTemplateBuilderDbTest {
 
     private static final String STACK_NAME = "myStack";
 
+    private static final String STACK_CRN = "crn";
+
     private static final String PLATFORM = "Azure";
 
     private static final String VARIANT = "";
@@ -87,7 +89,7 @@ public class AzureTemplateBuilderDbTest {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
 
-        cloudContext = new CloudContext(STACK_ID, STACK_NAME, PLATFORM, VARIANT, Location.location(Region.region(REGION)), USER_ID, ACCOUNT_ID);
+        cloudContext = new CloudContext(STACK_ID, STACK_NAME, STACK_CRN, PLATFORM, VARIANT, Location.location(Region.region(REGION)), USER_ID, ACCOUNT_ID);
     }
 
     @ParameterizedTest(name = "{0}")

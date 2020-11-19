@@ -5,35 +5,37 @@
  */
 package com.sequenceiq.mock.swagger.v40.api;
 
-import com.sequenceiq.mock.swagger.model.ApiUser2;
-import com.sequenceiq.mock.swagger.model.ApiUser2List;
-import com.sequenceiq.mock.swagger.model.ApiUserSessionList;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
+import java.io.IOException;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.mock.swagger.model.ApiUser2;
+import com.sequenceiq.mock.swagger.model.ApiUser2List;
+import com.sequenceiq.mock.swagger.model.ApiUserSessionList;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "UsersResource", description = "the UsersResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface UsersResourceApi {
 
     Logger log = LoggerFactory.getLogger(UsersResourceApi.class);
@@ -59,7 +61,7 @@ public interface UsersResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiUser2List> createUsers2(@ApiParam(value = "List of users to create."  )  @Valid @RequestBody ApiUser2List body) {
+    default ResponseEntity<ApiUser2List> createUsers2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of users to create."  )  @Valid @RequestBody ApiUser2List body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -84,7 +86,7 @@ public interface UsersResourceApi {
     @RequestMapping(value = "/users/{userName}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiUser2> deleteUser2(@ApiParam(value = "The name of the user to delete.",required=true) @PathVariable("userName") String userName) {
+    default ResponseEntity<ApiUser2> deleteUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The name of the user to delete.",required=true) @PathVariable("userName") String userName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -108,7 +110,7 @@ public interface UsersResourceApi {
         @ApiResponse(code = 201, message = "Success") })
     @RequestMapping(value = "/users/expireSessions/{userName}",
         method = RequestMethod.POST)
-    default ResponseEntity<Void> expireSessions(@ApiParam(value = "",required=true) @PathVariable("userName") String userName) {
+    default ResponseEntity<Void> expireSessions(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("userName") String userName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
         } else {
             log.warn("ObjectMapper or HttpServletRequest not configured in default UsersResourceApi interface so no example is generated");
@@ -125,7 +127,7 @@ public interface UsersResourceApi {
     @RequestMapping(value = "/users/sessions",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiUserSessionList> getSessions() {
+    default ResponseEntity<ApiUserSessionList> getSessions(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -150,7 +152,7 @@ public interface UsersResourceApi {
     @RequestMapping(value = "/users/{userName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiUser2> readUser2(@ApiParam(value = "The user to read.",required=true) @PathVariable("userName") String userName) {
+    default ResponseEntity<ApiUser2> readUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The user to read.",required=true) @PathVariable("userName") String userName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -175,7 +177,7 @@ public interface UsersResourceApi {
     @RequestMapping(value = "/users",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiUser2List> readUsers2(@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiUser2List> readUsers2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -201,7 +203,7 @@ public interface UsersResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiUser2> updateUser2(@ApiParam(value = "User name being updated.",required=true) @PathVariable("userName") String userName,@ApiParam(value = "The user information."  )  @Valid @RequestBody ApiUser2 body) {
+    default ResponseEntity<ApiUser2> updateUser2(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "User name being updated.",required=true) @PathVariable("userName") String userName,@ApiParam(value = "The user information."  )  @Valid @RequestBody ApiUser2 body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

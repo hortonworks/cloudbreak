@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "WatchedDirResource", description = "the WatchedDirResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface WatchedDirResourceApi {
 
     Logger log = LoggerFactory.getLogger(WatchedDirResourceApi.class);
@@ -58,7 +58,7 @@ public interface WatchedDirResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiWatchedDir> addWatchedDirectory(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The directory to be added."  )  @Valid @RequestBody ApiWatchedDir body) {
+    default ResponseEntity<ApiWatchedDir> addWatchedDirectory(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The directory to be added."  )  @Valid @RequestBody ApiWatchedDir body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -83,7 +83,7 @@ public interface WatchedDirResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/watcheddir",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiWatchedDirList> listWatchedDirectories(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiWatchedDirList> listWatchedDirectories(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -108,7 +108,7 @@ public interface WatchedDirResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/watcheddir/{directoryPath}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiWatchedDir> removeWatchedDirectory(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The directory path to be removed.",required=true) @PathVariable("directoryPath") String directoryPath,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiWatchedDir> removeWatchedDirectory(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The directory path to be removed.",required=true) @PathVariable("directoryPath") String directoryPath,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

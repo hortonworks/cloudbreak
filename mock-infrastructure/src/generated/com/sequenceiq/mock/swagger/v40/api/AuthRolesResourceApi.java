@@ -30,10 +30,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "AuthRolesResource", description = "the AuthRolesResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface AuthRolesResourceApi {
 
     Logger log = LoggerFactory.getLogger(AuthRolesResourceApi.class);
@@ -59,7 +59,7 @@ public interface AuthRolesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiAuthRoleList> createAuthRoles(@ApiParam(value = "List of auth roles to create."  )  @Valid @RequestBody ApiAuthRoleList body) {
+    default ResponseEntity<ApiAuthRoleList> createAuthRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "List of auth roles to create."  )  @Valid @RequestBody ApiAuthRoleList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -84,7 +84,7 @@ public interface AuthRolesResourceApi {
     @RequestMapping(value = "/authRoles/{uuid}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiAuthRole> deleteAuthRole(@ApiParam(value = "The uuid of the auth role to delete.",required=true) @PathVariable("uuid") String uuid) {
+    default ResponseEntity<ApiAuthRole> deleteAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The uuid of the auth role to delete.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -109,7 +109,7 @@ public interface AuthRolesResourceApi {
     @RequestMapping(value = "/authRoles/{uuid}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiAuthRole> readAuthRole(@ApiParam(value = "The auth role to read.",required=true) @PathVariable("uuid") String uuid) {
+    default ResponseEntity<ApiAuthRole> readAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The auth role to read.",required=true) @PathVariable("uuid") String uuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -134,7 +134,7 @@ public interface AuthRolesResourceApi {
     @RequestMapping(value = "/authRoles",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiAuthRoleList> readAuthRoles(@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiAuthRoleList> readAuthRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -159,7 +159,7 @@ public interface AuthRolesResourceApi {
     @RequestMapping(value = "/authRoles/metadata",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiAuthRoleMetadataList> readAuthRolesMetadata(@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiAuthRoleMetadataList> readAuthRolesMetadata(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -185,7 +185,7 @@ public interface AuthRolesResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiAuthRole> updateAuthRole(@ApiParam(value = "Uuid of the auth role being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The auth role information."  )  @Valid @RequestBody ApiAuthRole body) {
+    default ResponseEntity<ApiAuthRole> updateAuthRole(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Uuid of the auth role being updated.",required=true) @PathVariable("uuid") String uuid,@ApiParam(value = "The auth role information."  )  @Valid @RequestBody ApiAuthRole body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

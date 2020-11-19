@@ -50,7 +50,7 @@ public abstract class AbstractStackProvisionAction<P extends Payload> extends Ab
         Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
                 location, stack.getOwner(), stack.getOwner(), stack.getAccountId());
         CloudCredential cloudCredential = credentialConverter.convert(credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn()));
         CloudStack cloudStack = cloudStackConverter.convert(stack);

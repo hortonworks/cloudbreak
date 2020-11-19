@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "RoleCommandsResource", description = "the RoleCommandsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface RoleCommandsResourceApi {
 
     Logger log = LoggerFactory.getLogger(RoleCommandsResourceApi.class);
@@ -58,7 +58,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> formatCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the NameNodes to format."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> formatCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the NameNodes to format."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -84,7 +84,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsBootstrapStandByCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the stand-by NameNodes to bootstrap."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsBootstrapStandByCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the stand-by NameNodes to bootstrap."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -110,7 +110,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsEnterSafemode(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to enter safemode."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsEnterSafemode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to enter safemode."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -136,7 +136,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsFinalizeMetadataUpgrade(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to finalize the upgrade."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsFinalizeMetadataUpgrade(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to finalize the upgrade."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -162,7 +162,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsInitializeAutoFailoverCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the controllers to initialize."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsInitializeAutoFailoverCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the controllers to initialize."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -188,7 +188,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsInitializeSharedDirCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the NameNodes."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsInitializeSharedDirCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the NameNodes."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -214,7 +214,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsLeaveSafemode(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to leave safemode."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsLeaveSafemode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to leave safemode."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -240,7 +240,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> hdfsSaveNamespace(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to save namespace."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> hdfsSaveNamespace(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "NameNodes for which to save namespace."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -266,7 +266,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> jmapDump(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jmap."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> jmapDump(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jmap."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -292,7 +292,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> jmapHisto(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jmap."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> jmapHisto(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jmap."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -318,7 +318,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> jstack(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jstack."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> jstack(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to jstack."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -344,7 +344,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> lsof(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to lsof."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> lsof(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the names of the roles to lsof."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -370,7 +370,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> refreshCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> refreshCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -396,7 +396,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> restartCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The name of the roles to restart."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The name of the roles to restart."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -422,7 +422,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> roleCommandByName(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the name of command to execute.",required=true) @PathVariable("commandName") String commandName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the roles to run this command on."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> roleCommandByName(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the name of command to execute.",required=true) @PathVariable("commandName") String commandName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "the roles to run this command on."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -448,7 +448,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> startCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles to start."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles to start."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -474,7 +474,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> stopCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The role type."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The role type."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -500,7 +500,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> syncHueDbCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the Hue server roles."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> syncHueDbCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the Hue server roles."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -526,7 +526,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> zooKeeperCleanupCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> zooKeeperCleanupCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -552,7 +552,7 @@ public interface RoleCommandsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiBulkCommandList> zooKeeperInitCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
+    default ResponseEntity<ApiBulkCommandList> zooKeeperInitCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The names of the roles."  )  @Valid @RequestBody ApiRoleNameList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

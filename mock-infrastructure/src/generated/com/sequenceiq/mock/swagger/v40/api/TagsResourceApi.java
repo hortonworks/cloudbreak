@@ -28,10 +28,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "TagsResource", description = "the TagsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface TagsResourceApi {
 
     Logger log = LoggerFactory.getLogger(TagsResourceApi.class);
@@ -56,7 +56,7 @@ public interface TagsResourceApi {
     @RequestMapping(value = "/tags",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiTagToEntitiesList> getTags(@ApiParam(value = "Number of tags to search for. Maximum value for limit is 1000.", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Starting index of the list", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
+    default ResponseEntity<ApiTagToEntitiesList> getTags(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Number of tags to search for. Maximum value for limit is 1000.", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Starting index of the list", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -81,7 +81,7 @@ public interface TagsResourceApi {
     @RequestMapping(value = "/tags/{tagName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiTagToEntitiesList> readTagsByName(@ApiParam(value = "Name of the tag",required=true) @PathVariable("tagName") String tagName,@ApiParam(value = "Number of entries to search for. Maximum value for limit is 1000.", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Starting index of the list", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
+    default ResponseEntity<ApiTagToEntitiesList> readTagsByName(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the tag",required=true) @PathVariable("tagName") String tagName,@ApiParam(value = "Number of entries to search for. Maximum value for limit is 1000.", defaultValue = "10") @Valid @RequestParam(value = "limit", required = false, defaultValue="10") Integer limit,@ApiParam(value = "Starting index of the list", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

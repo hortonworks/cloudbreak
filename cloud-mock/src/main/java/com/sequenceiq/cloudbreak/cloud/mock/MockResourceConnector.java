@@ -3,20 +3,16 @@ package com.sequenceiq.cloudbreak.cloud.mock;
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import static java.util.Collections.emptyList;
 
-import java.security.KeyManagementException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -49,8 +45,6 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     public static final String MOCK_RDS_HOST = "mockrdshost";
 
-    public static final int VOLUME_COUNT_PER_MOCK_INSTANCE = 5;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MockResourceConnector.class);
 
     @Inject
@@ -65,46 +59,21 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) {
-        List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
-        Iterator<String> instanceIdIterator = getInstanceIdIterator(authenticatedContext);
+        List<CloudVmInstanceStatus> instanceIdIterator = launch(authenticatedContext, stack);
         CloudContext cloudContext = authenticatedContext.getCloudContext();
-        String instancId = "";
-        for (Group group : stack.getGroups()) {
-            for (int i = 0; i < group.getInstancesSize(); i++) {
-                instancId = getNextInsanceId(instanceIdIterator, instancId);
-                CloudResource instanceResource = generateResource("cloudinstance" + cloudResourceStatuses.size(), cloudContext,
-                        group.getName(), ResourceType.MOCK_INSTANCE, instancId);
-                generateResource("cloudtemplate" + cloudResourceStatuses.size(), cloudContext, group.getName(), ResourceType.MOCK_TEMPLATE, instancId);
-                for (int j = 0; j < VOLUME_COUNT_PER_MOCK_INSTANCE; j++) {
-                    generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, group.getName(), ResourceType.MOCK_VOLUME, instancId);
-                }
-                cloudResourceStatuses.add(new CloudResourceStatus(instanceResource, CREATED));
-            }
-        }
-        return cloudResourceStatuses;
+        return generateResources(cloudContext, instanceIdIterator);
     }
 
-    private String getNextInsanceId(Iterator<String> instanceIdIterator, String instancId) {
-        if (instanceIdIterator.hasNext()) {
-            instancId = instanceIdIterator.next();
-        }
-        return instancId;
+    private List<CloudVmInstanceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+        CloudVmInstanceStatus[] cloudVmInstanceStatusArray = mockUrlFactory.get(authenticatedContext, "/spi/launch")
+                .post(Entity.entity(cloudStack, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+        return Arrays.asList(cloudVmInstanceStatusArray);
     }
 
-    private Iterator<String> getInstanceIdIterator(AuthenticatedContext authenticatedContext) {
-        try {
-            CloudVmInstanceStatus[] cloudVmInstanceStatusArray = mockUrlFactory.get("/spi/cloud_instance_statuses").post(null, CloudVmInstanceStatus[].class);
-            List<String> instanceIds = Arrays.stream(cloudVmInstanceStatusArray)
-                    .filter(instanceStatus -> InstanceStatus.STARTED == instanceStatus.getStatus())
-                    .map(CloudVmInstanceStatus::getCloudInstance)
-                    .map(CloudInstance::getInstanceId)
-                    .sorted(new MockInstanceIdComparator())
-                    .collect(Collectors.toList());
-            return instanceIds.iterator();
-        } catch (KeyManagementException e) {
-            LOGGER.error("Couldn't fetch CloudInstances", e);
-            throw new RuntimeException("Couldn't fetch CloudInstances", e);
-        }
+    private List<CloudVmInstanceStatus> resize(AuthenticatedContext authenticatedContext, List<Group> groups) {
+        CloudVmInstanceStatus[] cloudVmInstanceStatusArray = mockUrlFactory.get(authenticatedContext, "/spi/add_instance")
+                .post(Entity.entity(groups, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+        return Arrays.asList(cloudVmInstanceStatusArray);
     }
 
     @Override
@@ -132,11 +101,15 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
-        return emptyList();
+        CloudVmInstanceStatus[] post = mockUrlFactory.get(authenticatedContext, "/spi/cloud_instance_statuses")
+                .post(Entity.entity(resources, MediaType.APPLICATION_JSON_TYPE), CloudVmInstanceStatus[].class);
+        return generateResources(authenticatedContext.getCloudContext(), Arrays.asList(post));
     }
 
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
+        try (Response ignore = mockUrlFactory.get(authenticatedContext, "/spi/terminate").delete()) {
+        }
         return emptyList();
     }
 
@@ -153,44 +126,39 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
-        List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
-        for (CloudResource cloudResource : resources) {
-            CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(cloudResource, CREATED);
-            cloudResourceStatuses.add(cloudResourceStatus);
-        }
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
-        Iterator<String> instanceIdIterator = getInstanceIdIterator(authenticatedContext);
-        String instanaceId = "";
-        for (Group scaledGroup : scaledGroups) {
-            for (int i = 0; i < scaledGroup.getInstances().size(); i++) {
-                instanaceId = getNextInsanceId(instanceIdIterator, instanaceId);
-                CloudResource instanceResource = generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext,
-                        scaledGroup.getName(), ResourceType.MOCK_INSTANCE, instanaceId);
-                generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, scaledGroup.getName(), ResourceType.MOCK_TEMPLATE,
-                        instanaceId);
-                for (int j = 0; j < VOLUME_COUNT_PER_MOCK_INSTANCE; j++) {
-                    generateResource("cloudvolume" + cloudResourceStatuses.size(), cloudContext, scaledGroup.getName(), ResourceType.MOCK_VOLUME,
-                            instanaceId);
-                }
-                cloudResourceStatuses.add(new CloudResourceStatus(instanceResource, CREATED));
-            }
-        }
+        List<Group> groups = scaledGroups.stream()
+                .map(g -> {
+                    List<CloudInstance> newInstances = g.getInstances().stream()
+                            .filter(i -> i.getTemplate().getStatus() == InstanceStatus.CREATE_REQUESTED)
+                            .collect(Collectors.toList());
+                    return new Group(g.getName(), g.getType(), newInstances, g.getSecurity(), g.getReferenceInstanceConfiguration(),
+                            g.getInstanceAuthentication(), g.getLoginUserName(), g.getPublicKey(), g.getRootVolumeSize(), g.getIdentity());
+                }).collect(Collectors.toList());
 
-        return cloudResourceStatuses;
+        List<CloudVmInstanceStatus> resized = resize(authenticatedContext, groups);
+        return generateResources(cloudContext, resized);
     }
 
-    private CloudResource generateResource(String name, CloudContext cloudContext, String group, ResourceType type, String instanceId) {
-        String generatedRandom = RandomStringUtils.random(100);
-        Map<String, Object> params = new HashMap<>();
-        params.put("generated", generatedRandom);
+    private List<CloudResourceStatus> generateResources(CloudContext cloudContext, List<CloudVmInstanceStatus> resize) {
+        List<CloudResourceStatus> ret = new ArrayList<>();
+        for (CloudVmInstanceStatus cloudVmInstanceStatus : resize) {
+            CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
+            CloudResource instanceResource = generateResource("cloudinstance" + ret.size(), cloudContext, cloudInstance, ResourceType.MOCK_INSTANCE);
+            ret.add(new CloudResourceStatus(instanceResource, CREATED));
+        }
+        return ret;
+    }
+
+    private CloudResource generateResource(String name, CloudContext cloudContext, CloudInstance cloudInstance, ResourceType type) {
         CloudResource resource = new Builder()
                 .type(type)
                 .status(CommonStatus.CREATED)
-                .group(group)
+                .group(cloudInstance.getTemplate().getGroupName())
                 .name(name)
-                .instanceId(instanceId)
-                .params(params)
+                .instanceId(cloudInstance.getInstanceId())
+                .params(cloudInstance.getParameters())
                 .persistent(true)
                 .build();
         resourceNotifier.notifyAllocation(resource, cloudContext);
@@ -206,11 +174,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms, Object resourcesToRemove) {
-        try {
-            mockUrlFactory.get("/spi/terminate_instances").post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), String.class);
-        } catch (KeyManagementException e) {
-            throw new RuntimeException("rest error", e);
-        }
+        mockUrlFactory.get(authenticatedContext, "/spi/terminate_instances").post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), String.class);
         return emptyList();
     }
 

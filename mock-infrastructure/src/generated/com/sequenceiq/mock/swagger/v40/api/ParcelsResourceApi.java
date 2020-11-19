@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "ParcelsResource", description = "the ParcelsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface ParcelsResourceApi {
 
     Logger log = LoggerFactory.getLogger(ParcelsResourceApi.class);
@@ -57,7 +57,7 @@ public interface ParcelsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/usage",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiParcelUsage> getParcelUsage(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName) {
+    default ResponseEntity<ApiParcelUsage> getParcelUsage(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -82,7 +82,7 @@ public interface ParcelsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiParcelList> readParcels(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiParcelList> readParcels(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

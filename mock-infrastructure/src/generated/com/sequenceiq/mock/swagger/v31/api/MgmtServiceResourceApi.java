@@ -5,37 +5,39 @@
  */
 package com.sequenceiq.mock.swagger.v31.api;
 
+import java.io.IOException;
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
 import com.sequenceiq.mock.swagger.model.ApiRoleTypeList;
 import com.sequenceiq.mock.swagger.model.ApiService;
 import com.sequenceiq.mock.swagger.model.ApiServiceConfig;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.annotations.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "MgmtServiceResource", description = "the MgmtServiceResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface MgmtServiceResourceApi {
 
     Logger log = LoggerFactory.getLogger(MgmtServiceResourceApi.class);
@@ -59,7 +61,7 @@ public interface MgmtServiceResourceApi {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/service/autoAssignRoles",
         method = RequestMethod.PUT)
-    default ResponseEntity<Void> autoAssignRoles() {
+    default ResponseEntity<Void> autoAssignRoles(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
         } else {
             log.warn("ObjectMapper or HttpServletRequest not configured in default MgmtServiceResourceApi interface so no example is generated");
@@ -75,7 +77,7 @@ public interface MgmtServiceResourceApi {
         @ApiResponse(code = 204, message = "Success") })
     @RequestMapping(value = "/cm/service/autoConfigure",
         method = RequestMethod.PUT)
-    default ResponseEntity<Void> autoConfigure() {
+    default ResponseEntity<Void> autoConfigure(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
         } else {
             log.warn("ObjectMapper or HttpServletRequest not configured in default MgmtServiceResourceApi interface so no example is generated");
@@ -92,7 +94,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiService> deleteCMS() {
+    default ResponseEntity<ApiService> deleteCMS(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -117,7 +119,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands/enterMaintenanceMode",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> enterMaintenanceMode() {
+    default ResponseEntity<ApiCommand> enterMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -142,7 +144,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands/exitMaintenanceMode",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> exitMaintenanceMode() {
+    default ResponseEntity<ApiCommand> exitMaintenanceMode(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -167,7 +169,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiCommandList> listActiveCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -192,7 +194,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/roleTypes",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiRoleTypeList> listRoleTypes() {
+    default ResponseEntity<ApiRoleTypeList> listRoleTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -217,7 +219,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiService> readService(@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiService> readService(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -242,7 +244,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/config",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiServiceConfig> readServiceConfig(@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiServiceConfig> readServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The view of the data to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -267,7 +269,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands/restart",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> restartCommand() {
+    default ResponseEntity<ApiCommand> restartCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -293,7 +295,7 @@ public interface MgmtServiceResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiService> setupCMS(@ApiParam(value = "Role configuration overrides."  )  @Valid @RequestBody ApiService body) {
+    default ResponseEntity<ApiService> setupCMS(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Role configuration overrides."  )  @Valid @RequestBody ApiService body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -318,7 +320,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands/start",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> startCommand() {
+    default ResponseEntity<ApiCommand> startCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -343,7 +345,7 @@ public interface MgmtServiceResourceApi {
     @RequestMapping(value = "/cm/service/commands/stop",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> stopCommand() {
+    default ResponseEntity<ApiCommand> stopCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -369,7 +371,7 @@ public interface MgmtServiceResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiServiceConfig> updateServiceConfig(@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiServiceConfig body) {
+    default ResponseEntity<ApiServiceConfig> updateServiceConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Configuration changes."  )  @Valid @RequestBody ApiServiceConfig body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

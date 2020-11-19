@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -151,6 +152,7 @@ public class StopDatabaseServerFailedActionTest {
         when(dbStack.getRegion()).thenReturn(DB_STACK_REGION);
         when(dbStack.getAvailabilityZone()).thenReturn(DB_STACK_AZ);
         when(dbStack.getEnvironmentId()).thenReturn(DB_STACK_ENV_ID);
+        when(dbStack.getResourceCrn()).thenReturn(new InternalCrnBuilder(Crn.Service.REDBEAMS).getInternalCrnForService());
         when(ownerCrn.getUserId()).thenReturn(USER_NAME);
         when(ownerCrn.getAccountId()).thenReturn(ACCOUNT_ID);
         when(credentialService.getCredentialByEnvCrn(DB_STACK_ENV_ID)).thenReturn(credential);

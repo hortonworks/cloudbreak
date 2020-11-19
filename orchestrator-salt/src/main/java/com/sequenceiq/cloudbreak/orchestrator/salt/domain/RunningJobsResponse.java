@@ -5,11 +5,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RunningJobsResponse {
 
     @JsonProperty("return")
+    @SerializedName("return")
     private List<Map<String, Map<String, Object>>> result;
 
     public Iterable<Map<String, Map<String, Object>>> getResult() {

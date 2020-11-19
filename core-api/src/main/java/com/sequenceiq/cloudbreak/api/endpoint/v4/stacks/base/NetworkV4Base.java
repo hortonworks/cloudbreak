@@ -32,7 +32,7 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
     private OpenStackNetworkV4Parameters openstack;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = false)
     private MockNetworkV4Parameters mock;
 
     @ApiModelProperty(hidden = true)
