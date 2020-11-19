@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,8 +99,9 @@ public class CDPConfigService {
         return defaultRuntime;
     }
 
-    public List<String> getDatalakeVersions() {
+    public List<String> getDatalakeVersions(String cloudPlatform) {
         List<String> runtimeVersions = cdpStackRequests.keySet().stream()
+                .filter(filterByCloudPlatformIfPresent(cloudPlatform))
                 .map(CDPConfigKey::getRuntimeVersion)
                 .distinct()
                 .sorted(Comparator.reverseOrder())
@@ -108,8 +111,17 @@ public class CDPConfigService {
         return runtimeVersions;
     }
 
-    public List<AdvertisedRuntime> getAdvertisedRuntimes() {
-        List<String> runtimeVersions = getDatalakeVersions().stream()
+    public Predicate<CDPConfigKey> filterByCloudPlatformIfPresent(String cloudPlatform) {
+        return cdpStack -> {
+            if (StringUtils.isEmpty(cloudPlatform) || cdpStack.getCloudPlatform().equalsIgnoreCase(cloudPlatform)) {
+                return true;
+            }
+            return false;
+        };
+    }
+
+    public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform) {
+        List<String> runtimeVersions = getDatalakeVersions(cloudPlatform).stream()
                 .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).collect(Collectors.toList());
 
         List<AdvertisedRuntime> advertisedRuntimes = new ArrayList<>();
