@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.7 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry"
     },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
     "instanceGroups": [
       {
         "nodeCount": 1,

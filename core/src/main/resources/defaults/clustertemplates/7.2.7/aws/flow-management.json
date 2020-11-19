@@ -7,6 +7,9 @@
     "cluster": {
       "blueprintName": "7.2.7 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry"
     },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
     "instanceGroups": [
       {
         "nodeCount": 1,
