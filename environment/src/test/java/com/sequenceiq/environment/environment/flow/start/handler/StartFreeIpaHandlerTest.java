@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
@@ -45,10 +46,13 @@ class StartFreeIpaHandlerTest {
     private EventSender mockEventSender;
 
     @Mock
-    private Event<EnvironmentDto> mockEnvironmentDtoEvent;
+    private Event<EnvironmentStartDto> mockEnvironmentDtoEvent;
 
     @Mock
-    private EnvironmentDto mockEnvironmentDto;
+    private EnvironmentStartDto mockEnvironmentDto;
+
+    @Mock
+    private EnvironmentDto environmentDto;
 
     @Mock
     private DescribeFreeIpaResponse mockDescribeFreeIpaResponse;
@@ -63,8 +67,9 @@ class StartFreeIpaHandlerTest {
         MockitoAnnotations.initMocks(this);
 
         when(mockEnvironmentDtoEvent.getData()).thenReturn(mockEnvironmentDto);
-        when(mockEnvironmentDto.getResourceCrn()).thenReturn(MOCK_ENV_CRN);
-        when(mockEnvironmentDto.getId()).thenReturn(ENV_ID);
+        when(environmentDto.getResourceCrn()).thenReturn(MOCK_ENV_CRN);
+        when(environmentDto.getId()).thenReturn(ENV_ID);
+        when(mockEnvironmentDto.getEnvironmentDto()).thenReturn(environmentDto);
         when(mockEnvironmentDtoEvent.getHeaders()).thenReturn(mockEventHeaders);
 
         underTest = new StartFreeIpaHandler(mockEventSender, mockFreeIpaPollerService, mockFreeIpaService);
@@ -83,7 +88,7 @@ class StartFreeIpaHandlerTest {
         ArgumentCaptor<EnvStartFailedEvent> startFailedEventCaptor = ArgumentCaptor.forClass(EnvStartFailedEvent.class);
         verify(mockEventSender, times(1)).sendEvent(startFailedEventCaptor.capture(), eq(mockEventHeaders));
         EnvStartFailedEvent envStartFailedEvent = startFailedEventCaptor.getValue();
-        assertThat(envStartFailedEvent.getEnvironmentDto()).isEqualTo(mockEnvironmentDto);
+        assertThat(envStartFailedEvent.getEnvironmentDto()).isEqualTo(environmentDto);
         assertThat(envStartFailedEvent.getEnvironmentStatus()).isEqualTo(EnvironmentStatus.START_FREEIPA_FAILED);
     }
 

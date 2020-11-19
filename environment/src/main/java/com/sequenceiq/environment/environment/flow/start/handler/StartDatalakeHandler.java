@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
@@ -15,7 +16,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentStartDto> {
 
     private final SdxPollerService sdxPollerService;
 
@@ -30,19 +31,20 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentDto
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+    public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
+        EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             sdxPollerService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
             EnvStartEvent envStartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                     .withSelector(EnvStartStateSelectors.ENV_START_DATAHUB_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
+                    .withDataHubStart(environmentStartDtoEvent.getData().getDataHubStart())
                     .build();
-            eventSender().sendEvent(envStartEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(envStartEvent, environmentStartDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto, e, EnvironmentStatus.START_DATALAKE_FAILED);
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(failedEvent, environmentStartDtoEvent.getHeaders());
         }
     }
 }

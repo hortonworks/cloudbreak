@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
@@ -20,7 +21,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class SynchronizeUsersHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class SynchronizeUsersHandler extends EventSenderAwareHandler<EnvironmentStartDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SynchronizeUsersHandler.class);
 
@@ -43,9 +44,9 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
+    public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
         LOGGER.debug("User synchronization is {}.", synchronizeOnStartEnabled ? "enabled" : "disabled");
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+        EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             if (synchronizeOnStartEnabled) {
                 freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
@@ -61,11 +62,12 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
                     .withSelector(EnvStartStateSelectors.FINISH_ENV_START_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
+                    .withDataHubStart(environmentStartDtoEvent.getData().getDataHubStart())
                     .build();
-            eventSender().sendEvent(envStartEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(envStartEvent, environmentStartDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto, e, EnvironmentStatus.START_SYNCHRONIZE_USERS_FAILED);
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(failedEvent, environmentStartDtoEvent.getHeaders());
         }
     }
 
