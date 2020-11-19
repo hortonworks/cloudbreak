@@ -269,10 +269,6 @@
               {
                 "name": "nifi.registry.properties.ignored",
                 "value": "nifi.registry.security.identity.provider,nifi.registry.kerberos.spnego.principal,nifi.registry.kerberos.spnego.keytab.location,nifi.registry.kerberos.spnego.authentication.expiration"
-              },
-              {
-                "name": "xml.providers.flowPersistenceProvider.file-provider.class",
-                "value": "org.apache.nifi.registry.provider.flow.DatabaseFlowPersistenceProvider"
               }
             ]
           }
