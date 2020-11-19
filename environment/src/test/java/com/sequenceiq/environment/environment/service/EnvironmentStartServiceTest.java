@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.common.api.type.DataHubStartAction.START_ALL;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -46,9 +47,9 @@ public class EnvironmentStartServiceTest {
         environmentDto.setParentEnvironmentCrn(null);
         when(environmentService.getByCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(environmentDto);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN, START_ALL));
 
-        verify(reactorFlowManager).triggerStartFlow(ENV_ID, ENV_NAME, USER_CRN);
+        verify(reactorFlowManager).triggerStartFlow(ENV_ID, ENV_NAME, USER_CRN, START_ALL);
     }
 
     @Test
@@ -60,9 +61,9 @@ public class EnvironmentStartServiceTest {
         parentEnvironmentDto.setStatus(EnvironmentStatus.AVAILABLE);
         when(environmentService.getByCrnAndAccountId(PARENT_ENV_CRN, ACCOUNT_ID)).thenReturn(parentEnvironmentDto);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN, START_ALL));
 
-        verify(reactorFlowManager).triggerStartFlow(ENV_ID, ENV_NAME, USER_CRN);
+        verify(reactorFlowManager).triggerStartFlow(ENV_ID, ENV_NAME, USER_CRN, START_ALL);
     }
 
     @Test
@@ -75,7 +76,7 @@ public class EnvironmentStartServiceTest {
         parentEnvironmentDto.setStatus(EnvironmentStatus.ENV_STOPPED);
         when(environmentService.getByCrnAndAccountId(PARENT_ENV_CRN, ACCOUNT_ID)).thenReturn(parentEnvironmentDto);
 
-        Assertions.assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN)))
+        Assertions.assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startByCrn(ENV_CRN, START_ALL)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessageContaining(parentEnvironmentDto.getName());
     }

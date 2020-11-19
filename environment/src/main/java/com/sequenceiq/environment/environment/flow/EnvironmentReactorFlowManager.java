@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
@@ -103,13 +104,14 @@ public class EnvironmentReactorFlowManager {
         eventSender.sendEvent(envStopEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerStartFlow(long envId, String envName, String userCrn) {
+    public void triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
         LOGGER.info("Environment start flow triggered.");
         EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                 .withAccepted(new Promise<>())
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
+                .withDataHubStart(dataHubStartAction)
                 .build();
 
         eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));

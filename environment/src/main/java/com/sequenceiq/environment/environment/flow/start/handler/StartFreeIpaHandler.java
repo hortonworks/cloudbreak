@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
@@ -17,7 +18,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
-public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> {
+public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentStartDto> {
 
     private final FreeIpaPollerService freeIpaPollerService;
 
@@ -35,8 +36,8 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
     }
 
     @Override
-    public void accept(Event<EnvironmentDto> environmentDtoEvent) {
-        EnvironmentDto environmentDto = environmentDtoEvent.getData();
+    public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
+        EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
                 if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStartable()) {
@@ -48,11 +49,12 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto>
                     .withSelector(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
+                    .withDataHubStart(environmentStartDtoEvent.getData().getDataHubStart())
                     .build();
-            eventSender().sendEvent(envStartEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(envStartEvent, environmentStartDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvStartFailedEvent failedEvent = new EnvStartFailedEvent(environmentDto, e, EnvironmentStatus.START_FREEIPA_FAILED);
-            eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(failedEvent, environmentStartDtoEvent.getHeaders());
         }
     }
 

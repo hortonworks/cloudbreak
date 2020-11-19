@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
@@ -48,7 +49,12 @@ public class EnvStartActions {
                 EnvStartState envStartState = EnvStartState.START_FREEIPA_STATE;
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
                         envStartState);
-                sendEvent(context, EnvStartHandlerSelectors.START_FREEIPA_HANDLER_EVENT.selector(), envDto);
+                EnvironmentStartDto environmentStartDto = EnvironmentStartDto.builder()
+                        .withDataHubStart(payload.getDataHubStartAction())
+                        .withEnvironmentDto(envDto)
+                        .withId(envDto.getId())
+                        .build();
+                sendEvent(context, EnvStartHandlerSelectors.START_FREEIPA_HANDLER_EVENT.selector(), environmentStartDto);
             }
         };
     }
@@ -64,7 +70,12 @@ public class EnvStartActions {
                 EnvStartState envStartState = EnvStartState.SYNCHRONIZE_USERS_STATE;
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
                         envStartState);
-                sendEvent(context, EnvStartHandlerSelectors.SYNCHRONIZE_USERS_HANDLER_EVENT.selector(), envDto);
+                EnvironmentStartDto environmentStartDto = EnvironmentStartDto.builder()
+                        .withDataHubStart(payload.getDataHubStartAction())
+                        .withEnvironmentDto(envDto)
+                        .withId(envDto.getId())
+                        .build();
+                sendEvent(context, EnvStartHandlerSelectors.SYNCHRONIZE_USERS_HANDLER_EVENT.selector(), environmentStartDto);
             }
         };
     }
@@ -80,7 +91,12 @@ public class EnvStartActions {
                 EnvStartState envStartState = EnvStartState.START_DATALAKE_STATE;
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
                         envStartState);
-                sendEvent(context, EnvStartHandlerSelectors.START_DATALAKE_HANDLER_EVENT.selector(), envDto);
+                EnvironmentStartDto environmentStartDto = EnvironmentStartDto.builder()
+                        .withDataHubStart(payload.getDataHubStartAction())
+                        .withEnvironmentDto(envDto)
+                        .withId(envDto.getId())
+                        .build();
+                sendEvent(context, EnvStartHandlerSelectors.START_DATALAKE_HANDLER_EVENT.selector(), environmentStartDto);
             }
         };
     }
@@ -96,7 +112,12 @@ public class EnvStartActions {
                 EnvStartState envStartState = EnvStartState.START_DATAHUB_STATE;
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent,
                         envStartState);
-                sendEvent(context, EnvStartHandlerSelectors.START_DATAHUB_HANDLER_EVENT.selector(), envDto);
+                EnvironmentStartDto environmentStartDto = EnvironmentStartDto.builder()
+                        .withDataHubStart(payload.getDataHubStartAction())
+                        .withEnvironmentDto(envDto)
+                        .withId(envDto.getId())
+                        .build();
+                sendEvent(context, EnvStartHandlerSelectors.START_DATAHUB_HANDLER_EVENT.selector(), environmentStartDto);
             }
         };
     }

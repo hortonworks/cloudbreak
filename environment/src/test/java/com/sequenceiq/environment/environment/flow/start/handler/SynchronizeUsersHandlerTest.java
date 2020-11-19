@@ -24,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentStartDto;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartFailedEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartHandlerSelectors;
@@ -50,10 +51,13 @@ class SynchronizeUsersHandlerTest {
     private FreeIpaService freeIpaService;
 
     @Mock
-    private Event<EnvironmentDto> environmentDtoEvent;
+    private Event<EnvironmentStartDto> environmentDtoEvent;
 
     @Mock
-    private EnvironmentDto environmentDto;
+    private EnvironmentStartDto environmentDto;
+
+    @Mock
+    private EnvironmentDto mockEnvironmentDto;
 
     @Mock
     private DescribeFreeIpaResponse describeFreeIpaResponse;
@@ -71,8 +75,9 @@ class SynchronizeUsersHandlerTest {
     void setUp() {
         when(environmentDtoEvent.getData()).thenReturn(environmentDto);
         when(environmentDtoEvent.getHeaders()).thenReturn(eventHeaders);
-        lenient().when(environmentDto.getResourceCrn()).thenReturn(ENV_CRN);
-        lenient().when(environmentDto.getId()).thenReturn(ENV_ID);
+        lenient().when(mockEnvironmentDto.getResourceCrn()).thenReturn(ENV_CRN);
+        lenient().when(mockEnvironmentDto.getId()).thenReturn(ENV_ID);
+        when(environmentDto.getEnvironmentDto()).thenReturn(mockEnvironmentDto);
     }
 
     @Test

@@ -19,6 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -162,14 +163,14 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "startEnvironmentByNameV1")
-    void postStartByName(@PathParam("name") String name);
+    void postStartByName(@PathParam("name") String name, @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
 
     @POST
     @Path("/crn/{crn}/start")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "startEnvironmentByCrnV1")
-    void postStartByCrn(@PathParam("crn") String crn);
+    void postStartByCrn(@PathParam("crn") String crn, @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
 
     @POST
     @Path("/name/{name}/stop")
