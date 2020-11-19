@@ -247,6 +247,7 @@ public class StackRequestManifester {
                 try {
                     // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
                     mappingsConfig = idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+                    validateMappingsConfig(mappingsConfig, stackRequest);
                 } catch (IdbmmsOperationException e) {
                     throw new BadRequestException(String.format("Unable to get mappings: %s", e.getMessage()), e);
                 }
@@ -266,6 +267,16 @@ public class StackRequestManifester {
             // getAccountMapping() != null is possible only in case of SdxInternalClusterRequest, in which case the user-given values will be honored.
             LOGGER.info("{} for stack {} in environment {}.", cloudStorage == null ? "Cloud storage is disabled" : "Applying user-provided mappings",
                     stackName, environmentCrn);
+        }
+    }
+
+    void validateMappingsConfig(MappingsConfig mappingsConfig, StackV4Request stackRequest) {
+        // Validate RAZ if enabled, making sure that the RAZ mapping exists when it is required.
+        if (stackRequest.getCluster().isRangerRazEnabled()) {
+            if (!mappingsConfig.getActorMappings().containsKey("rangerraz")) {
+                LOGGER.error("IDBMMS mappings must contain the RAZ role if RAZ is to be created!");
+                throw new BadRequestException("IDBMMS mappings must contain the RAZ role if RAZ is to be created!");
+            }
         }
     }
 

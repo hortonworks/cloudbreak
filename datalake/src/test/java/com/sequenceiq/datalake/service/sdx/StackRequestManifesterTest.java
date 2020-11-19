@@ -217,6 +217,36 @@ public class StackRequestManifesterTest {
     }
 
     @Test
+    void testRAZSetupCloudStorageAccountMappingsWithRAZMapping() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
+        clusterV4Request.setCloudStorage(cloudStorage);
+        when(idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+
+        // Enable RAZ for this test and make sure role is checked for.
+        clusterV4Request.setRangerRazEnabled(true);
+        when(mappingsConfig.getActorMappings()).thenReturn(Map.of("rangerraz", ""));
+
+        // Should not throw an error.
+        underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS);
+    }
+
+    @Test
+    void testRAZSetupCloudStorageAccountMappingsWithoutRAZMapping() {
+        when(stackV4Request.getCluster()).thenReturn(clusterV4Request);
+        when(stackV4Request.getName()).thenReturn(STACK_NAME);
+        clusterV4Request.setCloudStorage(cloudStorage);
+        when(idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+
+        // Enable RAZ without mapping which should throw an error.
+        clusterV4Request.setRangerRazEnabled(true);
+        when(mappingsConfig.getActorMappings()).thenReturn(Map.of());
+        Assertions.assertThrows(
+                BadRequestException.class,
+                () -> underTest.setupCloudStorageAccountMapping(stackV4Request, ENVIRONMENT_CRN, IdBrokerMappingSource.IDBMMS, CLOUD_PLATFORM_AWS));
+    }
+
+    @Test
     public void testAddAzureIdbrokerMsiToTelemetry() {
         Map<String, Object> attributes = new HashMap<>();
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
