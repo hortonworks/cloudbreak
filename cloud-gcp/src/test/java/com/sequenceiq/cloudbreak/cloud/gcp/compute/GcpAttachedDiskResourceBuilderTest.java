@@ -117,7 +117,7 @@ class GcpAttachedDiskResourceBuilderTest {
     @BeforeEach
     void setUp() throws Exception {
         privateCrn = "crn";
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "crn", "GCP", USER_ID, WORKSPACE_ID);
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
 

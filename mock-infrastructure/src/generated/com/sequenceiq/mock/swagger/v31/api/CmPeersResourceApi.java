@@ -30,10 +30,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "CmPeersResource", description = "the CmPeersResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface CmPeersResourceApi {
 
     Logger log = LoggerFactory.getLogger(CmPeersResourceApi.class);
@@ -59,7 +59,7 @@ public interface CmPeersResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCmPeer> createPeer(@ApiParam(value = "Peer to create (see above)."  )  @Valid @RequestBody ApiCmPeer body) {
+    default ResponseEntity<ApiCmPeer> createPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Peer to create (see above)."  )  @Valid @RequestBody ApiCmPeer body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -84,7 +84,7 @@ public interface CmPeersResourceApi {
     @RequestMapping(value = "/cm/peers/{peerName}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiCmPeer> deletePeer(@ApiParam(value = "Name of peer to delete.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to delete. If null, REPLICATION peer type will be deleted.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
+    default ResponseEntity<ApiCmPeer> deletePeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to delete.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to delete. If null, REPLICATION peer type will be deleted.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -109,7 +109,7 @@ public interface CmPeersResourceApi {
     @RequestMapping(value = "/cm/peers",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCmPeerList> listPeers() {
+    default ResponseEntity<ApiCmPeerList> listPeers(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -134,7 +134,7 @@ public interface CmPeersResourceApi {
     @RequestMapping(value = "/cm/peers/{peerName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCmPeer> readPeer(@ApiParam(value = "Name of peer to retrieve.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to retrieve. If null, REPLICATION peer type will be returned.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
+    default ResponseEntity<ApiCmPeer> readPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to retrieve.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to retrieve. If null, REPLICATION peer type will be returned.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -159,7 +159,7 @@ public interface CmPeersResourceApi {
     @RequestMapping(value = "/cm/peers/{peerName}/commands/test",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> testPeer(@ApiParam(value = "Name of peer to test.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to test. If null, REPLICATION peer type will be tested.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
+    default ResponseEntity<ApiCommand> testPeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to test.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Type of peer to test. If null, REPLICATION peer type will be tested.", allowableValues = "REPLICATION, STATUS_AGGREGATION") @Valid @RequestParam(value = "type", required = false) String type) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -185,7 +185,7 @@ public interface CmPeersResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiCmPeer> updatePeer(@ApiParam(value = "Name of peer to update.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Updated peer information."  )  @Valid @RequestBody ApiCmPeer body) {
+    default ResponseEntity<ApiCmPeer> updatePeer(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of peer to update.",required=true) @PathVariable("peerName") String peerName,@ApiParam(value = "Updated peer information."  )  @Valid @RequestBody ApiCmPeer body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

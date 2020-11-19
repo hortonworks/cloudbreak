@@ -8,10 +8,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Streams;
+import com.google.gson.annotations.SerializedName;
 
 public class MinionIpAddressesResponse {
 
     @JsonProperty("return")
+    @SerializedName("return")
     private List<Map<String, JsonNode>> result;
 
     @JsonIgnore

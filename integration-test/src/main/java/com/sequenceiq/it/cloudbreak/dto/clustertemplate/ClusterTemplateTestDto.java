@@ -38,8 +38,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public ClusterTemplateTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withDistroXTemplate(getTestContext().init(DistroXTemplateTestDto.class, getCloudPlatform()).getRequest())
-                .withGatewayPort(getCloudProvider().gatewayPort(this));
+                .withDistroXTemplate(getTestContext().init(DistroXTemplateTestDto.class, getCloudPlatform()).getRequest());
     }
 
     public ClusterTemplateTestDto withDistroXTemplate() {

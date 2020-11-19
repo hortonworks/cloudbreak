@@ -132,7 +132,7 @@ public class AwsAuthenticatorTest {
     }
 
     private AuthenticatedContext testAuthenticate(Map<String, Object> parameters) {
-        CloudContext context = new CloudContext(1L, "context", "AWS", "AWS", Location.location(Region.region("country")), "user", "account");
+        CloudContext context = new CloudContext(1L, "context", "crn", "AWS", "AWS", Location.location(Region.region("country")), "user", "account");
         CloudCredential credential = new CloudCredential("id", "alma", parameters, false);
         AuthenticatedContext auth = underTest.authenticate(context, credential);
         assertTrue(auth.hasParameter(AmazonEC2Client.class.getName()),

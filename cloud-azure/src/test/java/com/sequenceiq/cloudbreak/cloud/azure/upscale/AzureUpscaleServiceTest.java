@@ -177,7 +177,7 @@ public class AzureUpscaleServiceTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
-        return new CloudContext(null, STACK_NAME, null, null, location, null, null, "");
+        return new CloudContext(null, STACK_NAME, null, null, null, location, null, null, "");
     }
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {

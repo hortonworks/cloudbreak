@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
-import java.security.KeyManagementException;
-
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -30,20 +28,16 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
             if (response.getStatus() != 200) {
                 throw new CloudConnectorException(response.readEntity(String.class));
             }
-        } catch (KeyManagementException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
     @Override
     public void unregister(PublicKeyUnregisterRequest request) {
         try (Response response = mockUrlFactory.get("/spi/unregister_public_key")
-                .post(Entity.entity(request.getPublicKeyId(), MediaType.APPLICATION_JSON_TYPE))) {
+                .post(Entity.entity(request.getPublicKeyId(), MediaType.TEXT_PLAIN))) {
             if (response.getStatus() != 200) {
                 throw new CloudConnectorException(response.readEntity(String.class));
             }
-        } catch (KeyManagementException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 
@@ -55,8 +49,6 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
             }
             Boolean entity = response.readEntity(Boolean.class);
             return entity != null && entity;
-        } catch (KeyManagementException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
         }
     }
 

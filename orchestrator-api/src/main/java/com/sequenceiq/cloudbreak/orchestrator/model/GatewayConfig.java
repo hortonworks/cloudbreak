@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceEndpoint;
+import com.sequenceiq.cloudbreak.util.HostUtil;
 
 public class GatewayConfig {
 
@@ -112,6 +113,9 @@ public class GatewayConfig {
     }
 
     public String getGatewayUrl() {
+        if (HostUtil.hasPort(connectionAddress)) {
+            return String.format("%s://%s%s", protocol, connectionAddress, path.orElse(""));
+        }
         return String.format("%s://%s:%d%s", protocol, connectionAddress, gatewayPort, path.orElse(""));
     }
 

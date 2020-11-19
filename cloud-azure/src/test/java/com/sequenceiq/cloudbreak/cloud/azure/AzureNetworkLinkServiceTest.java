@@ -66,7 +66,7 @@ public class AzureNetworkLinkServiceTest {
 
     @Before
     public void setUp() {
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "");
+        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         ac = new AuthenticatedContext(cloudContext, cloudCredential);
 

@@ -150,7 +150,7 @@ public class GcpInstanceResourceBuilderTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
-        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "crn", "GCP", USER_ID, WORKSPACE_ID);
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = GcpStackUtil.getProjectId(cloudCredential);

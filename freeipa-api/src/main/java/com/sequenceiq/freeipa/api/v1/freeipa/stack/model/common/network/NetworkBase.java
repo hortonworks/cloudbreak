@@ -28,7 +28,7 @@ public abstract class NetworkBase extends ProviderParametersBase {
     @ApiModelProperty(NetworkModelDescription.OPEN_STACK_PARAMETERS)
     private OpenStackNetworkParameters openstack;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = false)
     private MockNetworkParameters mock;
 
     @ApiModelProperty(hidden = true)

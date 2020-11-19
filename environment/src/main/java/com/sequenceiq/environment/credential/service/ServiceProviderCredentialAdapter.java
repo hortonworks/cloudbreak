@@ -75,7 +75,7 @@ public class ServiceProviderCredentialAdapter {
         boolean changed = false;
         credential = credentialPrerequisiteService.decorateCredential(credential);
         CloudContext cloudContext =
-                new CloudContext(credential.getId(), credential.getName(), credential.getCloudPlatform(), TEMP_USER_ID, accountId);
+                new CloudContext(credential.getId(), credential.getName(), credential.getResourceCrn(), credential.getCloudPlatform(), TEMP_USER_ID, accountId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
         CredentialVerificationRequest request = requestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential, creationVerification);
@@ -130,8 +130,8 @@ public class ServiceProviderCredentialAdapter {
     }
 
     public Map<String, String> interactiveLogin(Credential credential, String accountId, String userId) {
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
-                credential.getCloudPlatform(), userId, accountId);
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.getResourceCrn(), credential.getCloudPlatform(),
+                userId, accountId);
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         LOGGER.debug("Requesting interactive login cloudPlatform {} and creator {}.", credential.getCloudPlatform(), userId);
         InteractiveLoginRequest request = requestProvider.getInteractiveLoginRequest(cloudContext, cloudCredential);
@@ -157,8 +157,8 @@ public class ServiceProviderCredentialAdapter {
     }
 
     public Credential initCodeGrantFlow(Credential credential, String accountId, String userId) {
-        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(),
-                credential.getCloudPlatform(), userId, accountId);
+        CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.getResourceCrn(), credential.getCloudPlatform(),
+                userId, accountId);
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         LOGGER.debug("Requesting code grant flow cloudPlatform {} and creator {}.", credential.getCloudPlatform(), userId);
         InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);

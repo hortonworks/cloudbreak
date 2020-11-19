@@ -39,7 +39,7 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @ApiModelProperty(StackModelDescription.OPENSTACK_PARAMETERS)
     private YarnStackV4Parameters yarn;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = false)
     private MockStackV4Parameters mock;
 
     @ApiModelProperty

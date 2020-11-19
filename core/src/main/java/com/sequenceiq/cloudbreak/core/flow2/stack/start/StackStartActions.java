@@ -162,8 +162,8 @@ public class StackStartActions {
             MDCBuilder.buildMdcContext(stack);
             List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(),
+                    stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);
         }

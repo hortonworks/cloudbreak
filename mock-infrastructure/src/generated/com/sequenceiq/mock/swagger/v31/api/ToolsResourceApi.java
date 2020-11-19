@@ -28,10 +28,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "ToolsResource", description = "the ToolsResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface ToolsResourceApi {
 
     Logger log = LoggerFactory.getLogger(ToolsResourceApi.class);
@@ -56,7 +56,7 @@ public interface ToolsResourceApi {
     @RequestMapping(value = "/tools/echo",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiEcho> echo(@ApiParam(value = "The message to echo back", defaultValue = "Hello, World!") @Valid @RequestParam(value = "message", required = false, defaultValue="Hello, World!") String message) {
+    default ResponseEntity<ApiEcho> echo(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The message to echo back", defaultValue = "Hello, World!") @Valid @RequestParam(value = "message", required = false, defaultValue="Hello, World!") String message) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -81,7 +81,7 @@ public interface ToolsResourceApi {
     @RequestMapping(value = "/tools/echoError",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiEcho> echoError(@ApiParam(value = "The error message to echo", defaultValue = "Default error message") @Valid @RequestParam(value = "message", required = false, defaultValue="Default error message") String message) {
+    default ResponseEntity<ApiEcho> echoError(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The error message to echo", defaultValue = "Default error message") @Valid @RequestParam(value = "message", required = false, defaultValue="Default error message") String message) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

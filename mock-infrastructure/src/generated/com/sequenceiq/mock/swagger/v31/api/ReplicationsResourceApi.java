@@ -34,10 +34,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "ReplicationsResource", description = "the ReplicationsResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface ReplicationsResourceApi {
 
     Logger log = LoggerFactory.getLogger(ReplicationsResourceApi.class);
@@ -63,7 +63,7 @@ public interface ReplicationsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> collectDiagnosticData(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Schedule ID",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view,@ApiParam(value = "Replication collection arguments"  )  @Valid @RequestBody ApiReplicationDiagnosticsCollectionArgs body) {
+    default ResponseEntity<ApiCommand> collectDiagnosticData(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Schedule ID",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view,@ApiParam(value = "Replication collection arguments"  )  @Valid @RequestBody ApiReplicationDiagnosticsCollectionArgs body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -89,7 +89,7 @@ public interface ReplicationsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiReplicationScheduleList> createSchedules(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of the replication schedules to create."  )  @Valid @RequestBody ApiReplicationScheduleList body) {
+    default ResponseEntity<ApiReplicationScheduleList> createSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "List of the replication schedules to create."  )  @Valid @RequestBody ApiReplicationScheduleList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -114,7 +114,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiReplicationScheduleList> deleteAllSchedules(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiReplicationScheduleList> deleteAllSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -139,7 +139,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiReplicationSchedule> deleteSchedule(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiReplicationSchedule> deleteSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -164,7 +164,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/replicationState",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiReplicationState> getReplicationState(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiReplicationState> getReplicationState(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "view to materialize", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -189,7 +189,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}/history",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiReplicationCommandList> readHistory(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Maximum number of commands to retrieve.", defaultValue = "20") @Valid @RequestParam(value = "limit", required = false, defaultValue="20") Integer limit,@ApiParam(value = "Index of first command to retrieve.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiReplicationCommandList> readHistory(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Maximum number of commands to retrieve.", defaultValue = "20") @Valid @RequestParam(value = "limit", required = false, defaultValue="20") Integer limit,@ApiParam(value = "Index of first command to retrieve.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -214,7 +214,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiReplicationSchedule> readSchedule(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiReplicationSchedule> readSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "The view to materialize.", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -239,7 +239,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiReplicationScheduleList> readSchedules(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "provides summary or detailed view, default is summary", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiReplicationScheduleList> readSchedules(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "provides summary or detailed view, default is summary", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -265,7 +265,7 @@ public interface ReplicationsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> runCopyListing(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody String body) {
+    default ResponseEntity<ApiCommand> runCopyListing(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody String body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -290,7 +290,7 @@ public interface ReplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/replications/{scheduleId}/run",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> runSchedule(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Whether to execute a dry run.", defaultValue = "false") @Valid @RequestParam(value = "dryRun", required = false, defaultValue="false") Boolean dryRun) {
+    default ResponseEntity<ApiCommand> runSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "Whether to execute a dry run.", defaultValue = "false") @Valid @RequestParam(value = "dryRun", required = false, defaultValue="false") Boolean dryRun) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -316,7 +316,7 @@ public interface ReplicationsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiReplicationSchedule> updateSchedule(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiReplicationSchedule body) {
+    default ResponseEntity<ApiReplicationSchedule> updateSchedule(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "Id of an existing replication schedule.",required=true) @PathVariable("scheduleId") BigDecimal scheduleId,@ApiParam(value = "The service name.",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = ""  )  @Valid @RequestBody ApiReplicationSchedule body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "ParcelResource", description = "the ParcelResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface ParcelResourceApi {
 
     Logger log = LoggerFactory.getLogger(ParcelResourceApi.class);
@@ -57,7 +57,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/activate",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> activateCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> activateCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -82,7 +82,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/cancelDistribution",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> cancelDistributionCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> cancelDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -107,7 +107,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/cancelDownload",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> cancelDownloadCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> cancelDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -132,7 +132,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/deactivate",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> deactivateCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> deactivateCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -157,7 +157,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiParcel> readParcel(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiParcel> readParcel(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -182,7 +182,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/removeDownload",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> removeDownloadCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> removeDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -207,7 +207,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startDistribution",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> startDistributionCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> startDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -232,7 +232,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startDownload",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> startDownloadCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> startDownloadCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -257,7 +257,7 @@ public interface ParcelResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/parcels/products/{product}/versions/{version}/commands/startRemovalOfDistribution",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> startRemovalOfDistributionCommand(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
+    default ResponseEntity<ApiCommand> startRemovalOfDistributionCommand(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "the product",required=true) @PathVariable("product") String product,@ApiParam(value = "the version",required=true) @PathVariable("version") String version) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

@@ -64,6 +64,8 @@ class AwsRdsLaunchServiceTest {
 
     private static final String STACK_NAME = "myStack";
 
+    private static final String STACK_CRN = "crn";
+
     private static final String STACK_NAME_CF = STACK_NAME + "-" + STACK_ID;
 
     private static final String PLATFORM = "AWS";
@@ -151,7 +153,7 @@ class AwsRdsLaunchServiceTest {
         Region region = Region.region(REGION);
         AvailabilityZone availabilityZone = AvailabilityZone.availabilityZone(AVAILABILITY_ZONE);
         Location location = Location.location(region, availabilityZone);
-        CloudContext cloudContext = new CloudContext(STACK_ID, STACK_NAME, PLATFORM, VARIANT, location, USER_ID, ACCOUNT_ID);
+        CloudContext cloudContext = new CloudContext(STACK_ID, STACK_NAME, STACK_CRN, PLATFORM, VARIANT, location, USER_ID, ACCOUNT_ID);
 
         CloudCredential cloudCredential = new CloudCredential();
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);

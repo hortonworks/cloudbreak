@@ -51,8 +51,8 @@ public class StackInstanceStatusChecker {
             List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData);
             cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                    location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
+            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(),
+                    stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId());
             CloudCredential cloudCredential = getCloudCredential(stack.getEnvironmentCrn());
             result = getCloudVmInstanceStatuses(cloudInstances, cloudContext, cloudCredential);
         }

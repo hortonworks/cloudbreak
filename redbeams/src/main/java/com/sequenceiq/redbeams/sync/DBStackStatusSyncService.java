@@ -1,35 +1,35 @@
 package com.sequenceiq.redbeams.sync;
 
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
+import java.util.Optional;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackStatusUpdater;
-
-import java.util.Optional;
-
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static java.util.Optional.empty;
-import static java.util.Optional.ofNullable;
 
 @Component
 public class DBStackStatusSyncService {
@@ -104,8 +104,8 @@ public class DBStackStatusSyncService {
         try {
             Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
             String accountId = dbStack.getOwnerCrn().getAccountId();
-            CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getCloudPlatform(), dbStack.getPlatformVariant(),
-                    location, dbStack.getOwnerCrn().getUserId(), dbStack.getUserName(), accountId);
+            CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
+                    dbStack.getPlatformVariant(), location, dbStack.getOwnerCrn().getUserId(), dbStack.getUserName(), accountId);
             Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
             CloudCredential cloudCredential = credentialConverter.convert(credential);
 

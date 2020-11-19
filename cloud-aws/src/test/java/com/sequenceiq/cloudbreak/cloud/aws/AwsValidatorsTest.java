@@ -82,7 +82,7 @@ public class AwsValidatorsTest {
 
     @BeforeEach
     public void prepare() {
-        CloudContext cloudContext = new CloudContext(1L, "stackName", "AWS", "AWS", Location.location(Region.region("region")), "user", "account");
+        CloudContext cloudContext = new CloudContext(1L, "stackName", "crn", "AWS", "AWS", Location.location(Region.region("region")), "user", "account");
         CloudCredential cloudCredential = null;
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
 

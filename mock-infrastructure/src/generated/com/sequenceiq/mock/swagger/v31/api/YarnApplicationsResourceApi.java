@@ -30,10 +30,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "YarnApplicationsResource", description = "the YarnApplicationsResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface YarnApplicationsResourceApi {
 
     Logger log = LoggerFactory.getLogger(YarnApplicationsResourceApi.class);
@@ -58,7 +58,7 @@ public interface YarnApplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/yarnApplications/attributes",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiYarnApplicationAttributeList> getYarnApplicationAttributes(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiYarnApplicationAttributeList> getYarnApplicationAttributes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -83,7 +83,7 @@ public interface YarnApplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/yarnApplications",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiYarnApplicationResponse> getYarnApplications(@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "A filter to apply to the applications. A basic filter tests the value of an attribute and looks something like 'executing = true' or 'user = root'. Multiple basic filters can be combined into a complex expression using standard and / or boolean logic and parenthesis. An example of a complex filter is: 'application_duration > 5s and (user = root or user = myUserName').", defaultValue = "") @Valid @RequestParam(value = "filter", required = false, defaultValue="") String filter,@ApiParam(value = "Start of the period to query in ISO 8601 format (defaults to 5 minutes before the 'to' time).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The maximum number of applications to return. Applications will be returned in the following order: <ul> <li> All executing applications, ordered from longest to shortest running </li> <li> All completed applications order by end time descending. </li> </ul>", defaultValue = "100") @Valid @RequestParam(value = "limit", required = false, defaultValue="100") Integer limit,@ApiParam(value = "The offset to start returning applications from. This is useful for paging through lists of applications. Note that this has non-deterministic behavior if executing applications are included in the response because they can disappear from the list while paging. To exclude executing applications from the response and a 'executing = false' clause to your filter.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "End of the period to query in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
+    default ResponseEntity<ApiYarnApplicationResponse> getYarnApplications(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName,@ApiParam(value = "A filter to apply to the applications. A basic filter tests the value of an attribute and looks something like 'executing = true' or 'user = root'. Multiple basic filters can be combined into a complex expression using standard and / or boolean logic and parenthesis. An example of a complex filter is: 'application_duration > 5s and (user = root or user = myUserName').", defaultValue = "") @Valid @RequestParam(value = "filter", required = false, defaultValue="") String filter,@ApiParam(value = "Start of the period to query in ISO 8601 format (defaults to 5 minutes before the 'to' time).") @Valid @RequestParam(value = "from", required = false) String from,@ApiParam(value = "The maximum number of applications to return. Applications will be returned in the following order: <ul> <li> All executing applications, ordered from longest to shortest running </li> <li> All completed applications order by end time descending. </li> </ul>", defaultValue = "100") @Valid @RequestParam(value = "limit", required = false, defaultValue="100") Integer limit,@ApiParam(value = "The offset to start returning applications from. This is useful for paging through lists of applications. Note that this has non-deterministic behavior if executing applications are included in the response because they can disappear from the list while paging. To exclude executing applications from the response and a 'executing = false' clause to your filter.", defaultValue = "0") @Valid @RequestParam(value = "offset", required = false, defaultValue="0") Integer offset,@ApiParam(value = "End of the period to query in ISO 8601 format (defaults to now).", defaultValue = "now") @Valid @RequestParam(value = "to", required = false, defaultValue="now") String to) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -108,7 +108,7 @@ public interface YarnApplicationsResourceApi {
     @RequestMapping(value = "/clusters/{clusterName}/services/{serviceName}/yarnApplications/{applicationId}/kill",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiYarnKillResponse> killYarnApplication(@ApiParam(value = "The applicationId to kill",required=true) @PathVariable("applicationId") String applicationId,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
+    default ResponseEntity<ApiYarnKillResponse> killYarnApplication(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The applicationId to kill",required=true) @PathVariable("applicationId") String applicationId,@ApiParam(value = "",required=true) @PathVariable("clusterName") String clusterName,@ApiParam(value = "The name of the service",required=true) @PathVariable("serviceName") String serviceName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

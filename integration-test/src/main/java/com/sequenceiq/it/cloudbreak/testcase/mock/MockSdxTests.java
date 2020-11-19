@@ -156,7 +156,7 @@ public class MockSdxTests extends AbstractMockTest {
     public void repairTerminatedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER, IDBROKER),
-                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/terminate", w -> w),
+                instanceBasePath -> getExecuteQueryToMockInfrastructure().call(instanceBasePath + "/terminate", w -> w),
                 SdxClusterStatusResponse.DELETED_ON_PROVIDER_SIDE);
     }
 
@@ -169,7 +169,7 @@ public class MockSdxTests extends AbstractMockTest {
     public void repairTerminatedMaster(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER),
-                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/terminate", w -> w),
+                instanceBasePath -> getExecuteQueryToMockInfrastructure().call(instanceBasePath + "/terminate", w -> w),
                 SdxClusterStatusResponse.CLUSTER_AMBIGUOUS);
     }
 
@@ -182,7 +182,7 @@ public class MockSdxTests extends AbstractMockTest {
     public void repairStoppedMasterAndIdbroker(MockedTestContext testContext) {
         testRepair(testContext,
                 List.of(MASTER, IDBROKER),
-                instanceId -> getExecuteQueryToMockInfrastructure().call("/spi/" + instanceId + "/stop", w -> w),
+                instanceBasePath -> getExecuteQueryToMockInfrastructure().call(instanceBasePath + "/stop", w -> w),
                 SdxClusterStatusResponse.STOPPED);
     }
 
@@ -223,7 +223,7 @@ public class MockSdxTests extends AbstractMockTest {
                     for (HostGroupType hostGroupType : hostGroups) {
                         instancesToDelete.addAll(sdxUtil.getInstanceIds(testDto, client, hostGroupType.getName()));
                     }
-                    instancesToDelete.forEach(actionOnNode);
+                    instancesToDelete.forEach(instanceId -> actionOnNode.accept("/" + testDto.getCrn() + "/spi/" + instanceId));
                     return testDto;
                 })
                 .await(stateBeforeRepair)

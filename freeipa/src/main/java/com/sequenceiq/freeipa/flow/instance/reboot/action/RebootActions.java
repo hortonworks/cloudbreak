@@ -106,8 +106,8 @@ public class RebootActions {
                 MDCBuilder.buildMdcContext(stack);
 
                 Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-                CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                        location, stack.getOwner(), stack.getAccountId());
+                CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(),
+                        stack.getCloudPlatform(), location, stack.getOwner(), stack.getAccountId());
                 Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
                 CloudCredential cloudCredential = credentialConverter.convert(credential);
                 return new RebootContext(flowParameters, stack, instances, cloudContext, cloudCredential);

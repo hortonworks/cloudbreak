@@ -23,8 +23,6 @@ import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
-import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
-import com.sequenceiq.it.cloudbreak.dto.clustertemplate.DistroXTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -269,16 +267,6 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public EnvironmentSecurityAccessTestDto environmentSecurityAccess(EnvironmentSecurityAccessTestDto environmentSecurityAccessTestDto) {
         return getDelegate(environmentSecurityAccessTestDto).environmentSecurityAccess(environmentSecurityAccessTestDto);
-    }
-
-    @Override
-    public Integer gatewayPort(ClusterTemplateTestDto template) {
-        return delegate.gatewayPort(template);
-    }
-
-    @Override
-    public Integer gatewayPort(DistroXTemplateTestDto template) {
-        return delegate.gatewayPort(template);
     }
 
     @Override

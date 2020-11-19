@@ -157,6 +157,6 @@ public class AzureStorageTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(REGION, AvailabilityZone.availabilityZone("westus2"));
-        return new CloudContext(null, STACK_NAME, null, null, location, null, null, "");
+        return new CloudContext(null, STACK_NAME, null, null, null, location, null, null, "");
     }
 }

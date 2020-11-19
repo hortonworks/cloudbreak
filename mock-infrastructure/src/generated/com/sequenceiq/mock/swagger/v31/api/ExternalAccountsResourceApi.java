@@ -34,10 +34,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:01:08.932+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T20:16:58.188+01:00")
 
 @Api(value = "ExternalAccountsResource", description = "the ExternalAccountsResource API")
-@RequestMapping(value = "/api/v31")
+@RequestMapping(value = "/{mockUuid}/api/v31")
 public interface ExternalAccountsResourceApi {
 
     Logger log = LoggerFactory.getLogger(ExternalAccountsResourceApi.class);
@@ -63,7 +63,7 @@ public interface ExternalAccountsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiExternalAccount> createAccount(@ApiParam(value = ""  )  @Valid @RequestBody ApiExternalAccount body) {
+    default ResponseEntity<ApiExternalAccount> createAccount(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiExternalAccount body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -88,7 +88,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/delete/{name}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiExternalAccount> deleteAccount(@ApiParam(value = "",required=true) @PathVariable("name") String name) {
+    default ResponseEntity<ApiExternalAccount> deleteAccount(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("name") String name) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -113,7 +113,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/account/{name}/commands/{commandName}",
         produces = { "application/json" }, 
         method = RequestMethod.POST)
-    default ResponseEntity<ApiCommand> externalAccountCommandByName(@ApiParam(value = "The command name.",required=true) @PathVariable("commandName") String commandName,@ApiParam(value = "The external account name.",required=true) @PathVariable("name") String name) {
+    default ResponseEntity<ApiCommand> externalAccountCommandByName(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The command name.",required=true) @PathVariable("commandName") String commandName,@ApiParam(value = "The external account name.",required=true) @PathVariable("name") String name) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -138,7 +138,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/supportedCategories",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalAccountCategoryList> getSupportedCategories() {
+    default ResponseEntity<ApiExternalAccountCategoryList> getSupportedCategories(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -163,7 +163,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/supportedTypes/{categoryName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalAccountTypeList> getSupportedTypes(@ApiParam(value = "",required=true) @PathVariable("categoryName") String categoryName) {
+    default ResponseEntity<ApiExternalAccountTypeList> getSupportedTypes(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("categoryName") String categoryName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -188,7 +188,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/typeInfo/{typeName}/commandsByName",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiCommandMetadataList> listExternalAccountCommands(@ApiParam(value = "The external account type name",required=true) @PathVariable("typeName") String typeName) {
+    default ResponseEntity<ApiCommandMetadataList> listExternalAccountCommands(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The external account type name",required=true) @PathVariable("typeName") String typeName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -213,7 +213,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/account/{name}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalAccount> readAccount(@ApiParam(value = "",required=true) @PathVariable("name") String name,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
+    default ResponseEntity<ApiExternalAccount> readAccount(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("name") String name,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -238,7 +238,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/accountByDisplayName/{displayName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalAccount> readAccountByDisplayName(@ApiParam(value = "",required=true) @PathVariable("displayName") String displayName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
+    default ResponseEntity<ApiExternalAccount> readAccountByDisplayName(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("displayName") String displayName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -263,7 +263,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/type/{typeName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiExternalAccountList> readAccounts(@ApiParam(value = "",required=true) @PathVariable("typeName") String typeName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
+    default ResponseEntity<ApiExternalAccountList> readAccounts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "",required=true) @PathVariable("typeName") String typeName,@ApiParam(value = "", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY") @Valid @RequestParam(value = "view", required = false) String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -288,7 +288,7 @@ public interface ExternalAccountsResourceApi {
     @RequestMapping(value = "/externalAccounts/account/{name}/config",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiConfigList> readConfig(@ApiParam(value = "The external account name",required=true) @PathVariable("name") String name,@ApiParam(value = "The view to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
+    default ResponseEntity<ApiConfigList> readConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The external account name",required=true) @PathVariable("name") String name,@ApiParam(value = "The view to materialize, either \"summary\" or \"full\".", allowableValues = "EXPORT, EXPORT_REDACTED, FULL, FULL_WITH_HEALTH_CHECK_EXPLANATION, SUMMARY", defaultValue = "summary") @Valid @RequestParam(value = "view", required = false, defaultValue="summary") String view) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -314,7 +314,7 @@ public interface ExternalAccountsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiExternalAccount> updateAccount(@ApiParam(value = ""  )  @Valid @RequestBody ApiExternalAccount body) {
+    default ResponseEntity<ApiExternalAccount> updateAccount(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = ""  )  @Valid @RequestBody ApiExternalAccount body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -340,7 +340,7 @@ public interface ExternalAccountsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.PUT)
-    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "The external account name",required=true) @PathVariable("name") String name,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Settings to update."  )  @Valid @RequestBody ApiConfigList body) {
+    default ResponseEntity<ApiConfigList> updateConfig(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "The external account name",required=true) @PathVariable("name") String name,@ApiParam(value = "Optional message describing the changes.") @Valid @RequestParam(value = "message", required = false) String message,@ApiParam(value = "Settings to update."  )  @Valid @RequestBody ApiConfigList body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

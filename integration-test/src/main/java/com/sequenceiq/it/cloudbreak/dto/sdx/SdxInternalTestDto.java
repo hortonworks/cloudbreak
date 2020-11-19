@@ -204,7 +204,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 .withInstanceGroupsEntity(InstanceGroupTestDto.sdxHostGroup(getTestContext()))
                 .withInstanceGroups(MASTER.getName(), IDBROKER.getName())
                 .withStackAuthentication(getAuthentication(getTestContext().given(StackAuthenticationTestDto.class), templateJson))
-                .withGatewayPort(getGatewayPort(stack, templateJson))
+//                .withGatewayPort(getGatewayPort(stack, templateJson))
                 .withCluster(cluster);
         SdxInternalTestDto sdxInternalTestDto = withStackRequest(stack.getRequest());
         sdxInternalTestDto.withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());

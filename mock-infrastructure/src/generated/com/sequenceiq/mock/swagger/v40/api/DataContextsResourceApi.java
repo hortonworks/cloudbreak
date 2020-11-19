@@ -29,10 +29,10 @@ import javax.validation.constraints.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-10-26T08:00:53.907+01:00")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2020-11-16T21:48:33.802+01:00")
 
 @Api(value = "DataContextsResource", description = "the DataContextsResource API")
-@RequestMapping(value = "/api/v40")
+@RequestMapping(value = "/{mockUuid}/api/v40")
 public interface DataContextsResourceApi {
 
     Logger log = LoggerFactory.getLogger(DataContextsResourceApi.class);
@@ -58,7 +58,7 @@ public interface DataContextsResourceApi {
         produces = { "application/json" }, 
         consumes = { "application/json" },
         method = RequestMethod.POST)
-    default ResponseEntity<ApiDataContext> createDataContext(@ApiParam(value = "DataContext to be created."  )  @Valid @RequestBody ApiDataContext body) {
+    default ResponseEntity<ApiDataContext> createDataContext(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "DataContext to be created."  )  @Valid @RequestBody ApiDataContext body) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -83,7 +83,7 @@ public interface DataContextsResourceApi {
     @RequestMapping(value = "/dataContexts/{dataContextName}",
         produces = { "application/json" }, 
         method = RequestMethod.DELETE)
-    default ResponseEntity<ApiDataContext> deleteDataContext(@ApiParam(value = "Name of the datacontext.",required=true) @PathVariable("dataContextName") String dataContextName) {
+    default ResponseEntity<ApiDataContext> deleteDataContext(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the datacontext.",required=true) @PathVariable("dataContextName") String dataContextName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -108,7 +108,7 @@ public interface DataContextsResourceApi {
     @RequestMapping(value = "/dataContexts/{dataContextName}",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiDataContext> readDataContext(@ApiParam(value = "Name of the datacontext.",required=true) @PathVariable("dataContextName") String dataContextName) {
+    default ResponseEntity<ApiDataContext> readDataContext(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid,@ApiParam(value = "Name of the datacontext.",required=true) @PathVariable("dataContextName") String dataContextName) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {
@@ -133,7 +133,7 @@ public interface DataContextsResourceApi {
     @RequestMapping(value = "/dataContexts",
         produces = { "application/json" }, 
         method = RequestMethod.GET)
-    default ResponseEntity<ApiDataContextList> readDataContexts() {
+    default ResponseEntity<ApiDataContextList> readDataContexts(@ApiParam(value = "The unique id of CB cluster (works in CB test framework only)",required=true) @PathVariable("mockUuid") String mockUuid) {
         if(getObjectMapper().isPresent() && getAcceptHeader().isPresent()) {
             if (getAcceptHeader().get().contains("application/json")) {
                 try {

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.mock.legacy.clouderamanager.DefaultModelService;
+import com.sequenceiq.mock.clouderamanager.DefaultModelService;
 
 @RestController
 @RequestMapping("/tests")
@@ -22,6 +22,6 @@ public class TestRelatedController {
     @GetMapping("/new")
     public void newTest() {
         LOGGER.info("Re-init test data");
-        defaultModelService.reinit();
+//        defaultModelService.reinit();
     }
 }

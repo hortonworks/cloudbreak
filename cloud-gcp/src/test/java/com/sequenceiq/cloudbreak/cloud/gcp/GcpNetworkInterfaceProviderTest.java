@@ -142,7 +142,7 @@ public class GcpNetworkInterfaceProviderTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(null, AvailabilityZone.availabilityZone(AZ));
-        return new CloudContext(null, "test-cluster", null, null, location, null, null, "");
+        return new CloudContext(null, "test-cluster", null, null, null, location, null, null, "");
     }
 
     private List<CloudResource> createCloudResources() {

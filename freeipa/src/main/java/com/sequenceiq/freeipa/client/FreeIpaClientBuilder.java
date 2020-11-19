@@ -49,6 +49,7 @@ import com.googlecode.jsonrpc4j.JsonRpcClient.RequestListener;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.util.HostUtil;
 import com.sequenceiq.freeipa.client.auth.InvalidPasswordException;
 import com.sequenceiq.freeipa.client.auth.InvalidUserOrRealmException;
 import com.sequenceiq.freeipa.client.auth.PasswordExpiredException;
@@ -281,6 +282,9 @@ public class FreeIpaClientBuilder {
         String scheme = clientConfig.hasSSLConfigs() ? "https://" : "http://";
         String path = StringUtils.isBlank(basePath) ? "" : basePath;
         path += context;
+        if (HostUtil.hasPort(apiAddress)) {
+            return new URL(scheme + apiAddress + path);
+        }
         return new URL(scheme + apiAddress + ':' + port + path);
     }
 

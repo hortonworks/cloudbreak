@@ -6,11 +6,13 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.SerializedName;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PingResponse {
 
     @JsonProperty("return")
+    @SerializedName("return")
     private List<Map<String, Boolean>> result;
 
     public List<Map<String, Boolean>> getResult() {

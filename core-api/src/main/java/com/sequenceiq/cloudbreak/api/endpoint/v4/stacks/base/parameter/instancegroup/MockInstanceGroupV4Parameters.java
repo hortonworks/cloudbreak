@@ -18,6 +18,6 @@ public class MockInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase
     @JsonIgnore
     @ApiModelProperty(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.GCP;
+        return CloudPlatform.MOCK;
     }
 }
