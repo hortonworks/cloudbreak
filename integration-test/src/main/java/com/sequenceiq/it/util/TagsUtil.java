@@ -99,7 +99,8 @@ public class TagsUtil {
     }
 
     private void validateOwnerTag(TaggedResponse response, String tag, TestContext testContext) {
-        if (response.getTagValue(tag).equals(testContext.getActingUserName())) {
+        if (response.getTagValue(tag).equals(testContext.getActingUserName())
+                || response.getTagValue(tag).equals(sanitize(testContext.getActingUserName()))) {
             Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
                     testContext.getActingUserName()));
         } else {
@@ -108,6 +109,10 @@ public class TagsUtil {
             throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ", tag,
                     response.getTagValue(tag), testContext.getActingUserName()));
         }
+    }
+
+    private String sanitize(String value) {
+        return value.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
     }
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
