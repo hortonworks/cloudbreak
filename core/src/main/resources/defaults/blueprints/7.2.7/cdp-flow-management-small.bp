@@ -269,6 +269,10 @@
               {
                 "name": "nifi.registry.properties.ignored",
                 "value": "nifi.registry.security.identity.provider,nifi.registry.kerberos.spnego.principal,nifi.registry.kerberos.spnego.keytab.location,nifi.registry.kerberos.spnego.authentication.expiration"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-configurable-user-group-provider.property.User Group Provider 2",
+                "value": "shell-user-group-provider"
               }
             ]
           }
