@@ -273,6 +273,64 @@
     },
     </#if>
 
+    <#list loadBalancers as loadBalancer>
+    "${loadBalancer.name}" : {
+      "Type" : "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties" : {
+        "IpAddressType" : "ipv4",
+        "Scheme" : "${loadBalancer.awsScheme}",
+        "Subnets" : [ { "Ref" : "SubnetId" } ],
+        "Type" : "network"
+      }
+    }
+
+      <#list loadBalancer.listeners as listener>
+        <#if loadBalancer.createListeners>
+        ,"${listener.name}" : {
+          "Type" : "AWS::ElasticLoadBalancingV2::Listener",
+          "Properties" : {
+            "DefaultActions" : [
+              <#list listener.targetGroups as targetGroup>
+              {
+                "Order" : ${targetGroup.order},
+                "TargetGroupArn" : "${targetGroup.arn}",
+                "Type" : "forward"
+              }<#if (targetGroup_index + 1) != listener.targetGroups?size>,</#if>
+              </#list>
+            ],
+            "LoadBalancerArn" : "${loadBalancer.arn}",
+            "Port" : ${listener.port},
+            "Protocol" : "TCP"
+          }
+        }
+      </#if>
+
+        <#list listener.targetGroups as targetGroup>
+        ,"${targetGroup.name}" : {
+          "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+          "Properties" : {
+            "Port" : ${targetGroup.port},
+            "Protocol" : "TCP",
+            "TargetType" : "instance",
+            <#if existingVPC>
+            "VpcId" : { "Ref" : "VPCId" }
+            <#else>
+            "VpcId" : { "Ref" : "VPC" }
+            </#if>
+            <#if targetGroup.instanceIds?size != 0 >
+            ,"Targets" : [
+              <#list targetGroup.instanceIds as i>
+                { "Id" : "${i}" }<#if (i_index + 1) != targetGroup.instanceIds?size>,</#if>
+              </#list>
+            ]
+            </#if>
+          }
+        }
+        </#list>
+      </#list>
+      ,
+    </#list>
+
     <#list instanceGroups as group>
 	"${group.autoScalingGroupName}" : {
       "Type" : "AWS::AutoScaling::AutoScalingGroup",

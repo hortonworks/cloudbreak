@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
@@ -23,4 +24,6 @@ public interface MetadataCollector {
      */
     List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
             List<CloudInstance> vms, List<CloudInstance> allInstances);
+
+    List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<String> loadBalancerTypes);
 }

@@ -48,4 +48,31 @@ public class DnsManagementService {
         }
         return false;
     }
+
+    public boolean createOrUpdateDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment, String cloudDns,
+            String hostedZoneId) {
+        try {
+            LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(actorCrn, accountId, endpoint, environment, cloudDns, hostedZoneId, requestIdOptional);
+            LOGGER.info("DNS entry has been created with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to create DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns, e);
+        }
+        return false;
+    }
+
+    public boolean deleteDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment, String cloudDns, String hostedZoneId) {
+        try {
+            LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
+            Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
+            grpcClusterDnsClient.deleteDnsEntryWithCloudDns(actorCrn, accountId, endpoint, environment, cloudDns, hostedZoneId, requestIdOptional);
+            LOGGER.info("DNS entry has been deleted with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns);
+            return true;
+        } catch (Exception e) {
+            LOGGER.warn("Failed to delete DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'", endpoint, environment, cloudDns, e);
+        }
+        return false;
+    }
 }

@@ -4,8 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 
-import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Rule;
@@ -54,7 +54,7 @@ public class InstanceGroupRequestToInstanceGroupConverterTest extends AbstractJs
         // WHEN
         InstanceGroup instanceGroup = underTest.convert(request);
         // THEN
-        assertAllFieldsNotNull(instanceGroup, Collections.singletonList("stack"));
+        assertAllFieldsNotNull(instanceGroup, List.of("stack", "targetGroups"));
     }
 
     private Mappable getMappable() {

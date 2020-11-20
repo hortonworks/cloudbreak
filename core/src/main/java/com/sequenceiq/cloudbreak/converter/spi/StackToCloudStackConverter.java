@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -56,12 +58,19 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerService;
+import com.sequenceiq.cloudbreak.service.stack.TargetGroupService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
@@ -99,6 +108,18 @@ public class StackToCloudStackConverter {
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private LoadBalancerService loadBalancerService;
+
+    @Inject
+    private TargetGroupService targetGroupService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
+
     public CloudStack convert(Stack stack) {
         return convert(stack, Collections.emptySet());
     }
@@ -128,9 +149,11 @@ public class StackToCloudStackConverter {
             template = stackTemplate.getTemplate();
         }
         Map<String, String> parameters = buildCloudStackParameters(stack);
+        List<CloudLoadBalancer> cloudLoadBalancers = buildLoadBalancers(stack, instanceGroups);
 
         return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack), template,
-                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), cloudFileSystem);
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
+                cloudFileSystem, cloudLoadBalancers);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
@@ -235,6 +258,26 @@ public class StackToCloudStackConverter {
             LOGGER.warn("Cluster or blueprint is null for stack id:[{}] name:[{}]", stack.getId(), stack.getName());
         }
         return groups;
+    }
+
+    private List<CloudLoadBalancer> buildLoadBalancers(Stack stack, List<Group> instanceGroups) {
+        List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
+        for (LoadBalancer loadBalancer : loadBalancerService.findByStackId(stack.getId())) {
+            CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.valueOf(loadBalancer.getType()));
+            for (TargetGroup targetGroup : targetGroupService.findByLoadBalancerId(loadBalancer.getId())) {
+                Set<Integer> ports = loadBalancerConfigService.getPortsForTargetGroup(targetGroup);
+                Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
+                    .map(InstanceGroup::getGroupName)
+                    .collect(Collectors.toSet());
+                for (Integer port : ports) {
+                    cloudLoadBalancer.addPortToTargetGroupMapping(port, instanceGroups.stream()
+                        .filter(ig -> targetInstanceGroupName.contains(ig.getName()))
+                        .collect(Collectors.toSet()));
+                }
+            }
+            cloudLoadBalancers.add(cloudLoadBalancer);
+        }
+        return cloudLoadBalancers;
     }
 
     private InstanceAuthentication buildInstanceAuthentication(StackAuthentication stackAuthentication) {

@@ -32,3 +32,4 @@ auth:
     hbase.cloudstorage.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
+    loadbalancer.enable: false

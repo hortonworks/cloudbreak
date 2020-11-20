@@ -122,7 +122,10 @@ class EntitlementServiceTest {
                 {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, true},
 
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
-                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true}
+                {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
+
+                {"CDP_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::loadBalancerEnabled, false},
+                {"CDP_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::loadBalancerEnabled, true}
         };
     }
 

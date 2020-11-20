@@ -101,6 +101,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
+        // TODO do we need to deregister the load balancer DNS here as well?
         return ipsByFqdn
                 .entrySet()
                 .stream()

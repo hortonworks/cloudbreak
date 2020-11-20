@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
@@ -46,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -57,6 +61,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserData
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -81,6 +86,9 @@ public class StackCreationActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private LoadBalancerService loadBalancerService;
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
@@ -210,6 +218,28 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
+                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
+                        context.getCloudCredential(),  context.getCloudStack());
+                sendEvent(newContext);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                List<String> loadBalancerTypes = loadBalancerService.findByStackId(context.getStack().getId()).stream()
+                    .map(LoadBalancer::getType)
+                    .collect(Collectors.toList());
+                return new CollectLoadBalancerMetadataRequest(context.getCloudContext(), context.getCloudCredential(),
+                    loadBalancerTypes);
+            }
+        };
+    }
+
+    @Bean(name = "COLLECTMETADATA_LOADBALANCER_STATE")
+    public Action<?, ?> collectLoadBalancerMetadataAction() {
+        return new AbstractStackCreationAction<>(CollectLoadBalancerMetadataResult.class) {
+            @Override
+            protected void doExecute(StackContext context, CollectLoadBalancerMetadataResult payload, Map<Object, Object> variables) {
+                Stack stack = stackCreationService.setupLoadBalancerMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
                         context.getCloudStack());
                 if (newContext.getStack().getTunnel().useCcm()) {

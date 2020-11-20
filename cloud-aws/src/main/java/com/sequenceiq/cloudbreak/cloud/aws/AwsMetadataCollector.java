@@ -17,11 +17,14 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
+import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -29,10 +32,12 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
@@ -170,5 +175,29 @@ public class AwsMetadataCollector implements MetadataCollector {
         return instancesResult.getReservations().stream()
                 .flatMap(reservation -> reservation.getInstances().stream())
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<String> loadBalancerTypes) {
+        LOGGER.debug("Collect AWS load balanacer metadata, for cluster {}", ac.getCloudContext().getName());
+
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+
+        List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
+        try {
+            for (String type : loadBalancerTypes) {
+                String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.valueOf(type));
+                LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName, region);
+                cloudLoadBalancerMetadata.add(new CloudLoadBalancerMetadata(
+                    LoadBalancerType.valueOf(type),
+                    loadBalancer.getDNSName(),
+                    loadBalancer.getCanonicalHostedZoneId(),
+                    null
+                ));
+            }
+            return cloudLoadBalancerMetadata;
+        } catch (RuntimeException e) {
+            throw new CloudConnectorException(e.getMessage(), e);
+        }
     }
 }

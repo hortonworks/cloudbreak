@@ -19,6 +19,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HEALTH_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -164,6 +165,10 @@ public class EntitlementService {
 
     public boolean databaseWireEncryptionEnabled(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
+    }
+
+    public boolean loadBalancerEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_LOAD_BALANCER);
     }
 
     public List<String> getEntitlements(String actorCrn, String accountId) {

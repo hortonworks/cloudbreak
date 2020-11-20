@@ -231,6 +231,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableDatabaseWireEncryption false", "enableDatabaseWireEncryption", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION", false},
                 {"enableDatabaseWireEncryption true", "enableDatabaseWireEncryption", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION", true},
+
+                {"loadBalancerEnabled false", "loadBalancerEnabled", false, "CDP_LOAD_BALANCER", false},
+                {"loadBalancerEnabled true", "loadBalancerEnabled", true, "CDP_LOAD_BALANCER", true},
         };
     }
 

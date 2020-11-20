@@ -68,6 +68,8 @@ import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -200,6 +202,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @Convert(converter = DatabaseAvailabilityTypeConverter.class)
     private DatabaseAvailabilityType externalDatabaseCreationType;
+
+    @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<LoadBalancer> loadBalancers = new HashSet<>();
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -574,6 +579,15 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return metaData.orElse(null);
     }
 
+    public InstanceGroup getGatewayGroup() {
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                return instanceGroup;
+            }
+        }
+        return null;
+    }
+
     public Network getNetwork() {
         return network;
     }
@@ -809,5 +823,19 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
         this.externalDatabaseCreationType = externalDatabaseCreationType;
+    }
+
+    public Set<LoadBalancer> getLoadBalancers() {
+        return loadBalancers;
+    }
+
+    public void setLoadBalancers(Set<LoadBalancer> loadBalancers) {
+        this.loadBalancers = loadBalancers;
+    }
+
+    public List<TargetGroup> getTargetGroupAsList() {
+        return loadBalancers.stream()
+            .flatMap(loadBalancer -> loadBalancer.getTargetGroups().stream())
+            .collect(Collectors.toList());
     }
 }

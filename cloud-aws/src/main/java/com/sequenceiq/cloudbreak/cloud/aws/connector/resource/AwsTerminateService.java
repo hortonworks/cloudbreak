@@ -112,12 +112,9 @@ public class AwsTerminateService {
         resumeAutoScalingPolicies(ac, stack);
         LOGGER.debug("Delete cloudformation stack from resources");
         DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
-        cfRetryClient.deleteStack(deleteStackRequest);
-        Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = amazonCloudFormationClient.waiters().stackDeleteComplete();
         try {
-            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                    .withPollingStrategy(getBackoffCancellablePollingStrategy(null));
-            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
+            retryService.testWith2SecDelayMax5Times(() -> isStackDeleted(cfRetryClient, amazonCloudFormationClient,
+                describeStacksRequest, deleteStackRequest));
         } catch (Exception e) {
             LOGGER.debug("Cloudformation stack delete failed ", e);
             throw new CloudConnectorException(e.getMessage(), e);
@@ -133,6 +130,20 @@ public class AwsTerminateService {
                 throw e;
             }
             throw new ActionFailedException("Stack not exists");
+        }
+        return Boolean.TRUE;
+    }
+
+    private Boolean isStackDeleted(AmazonCloudFormationRetryClient cfRetryClient, AmazonCloudFormationClient amazonCloudFormationClient,
+            DescribeStacksRequest describeStacksRequest, DeleteStackRequest deleteStackRequest) {
+        cfRetryClient.deleteStack(deleteStackRequest);
+        Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = amazonCloudFormationClient.waiters().stackDeleteComplete();
+        try {
+            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
+                .withPollingStrategy(getBackoffCancellablePollingStrategy(null));
+            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
+        } catch (Exception e) {
+            throw new ActionFailedException(e.getMessage());
         }
         return Boolean.TRUE;
     }

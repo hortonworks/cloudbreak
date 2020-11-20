@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import java.security.KeyPair;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
@@ -18,9 +21,11 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -37,6 +42,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private LoadBalancerService loadBalancerService;
+
     public boolean isCertRenewalTriggerable(Stack stack) {
         return manageCertificateAndDnsInPem()
                 && stack != null
@@ -52,6 +60,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 success = generateCertAndSaveForStack(stack);
             }
             updateDnsEntryForCluster(stack);
+            updateDnsEntryForLoadBalancers(stack);
         } else {
             LOGGER.info("External FQDN and valid certificate creation is disabled.");
         }
@@ -92,6 +101,41 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return null;
     }
 
+    public void updateDnsEntryForLoadBalancers(Stack stack) {
+        Set<LoadBalancer> loadBalancers = loadBalancerService.findByStackId(stack.getId());
+        if (loadBalancers.isEmpty()) {
+            LOGGER.info("No load balancers in stack {}", stack.getId());
+            return;
+        }
+
+        LOGGER.info("Update load balancer DNS entries");
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+
+        for (LoadBalancer loadBalancer : loadBalancers) {
+            Optional<String> endpoint = Optional.ofNullable(loadBalancer.getEndpoint());
+            if (endpoint.isEmpty()) {
+                LOGGER.error("No endpoint set for load balancer. Can't register domain.");
+                continue;
+            }
+            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                    endpoint.get(), environment.getName(), loadBalancer.getDns());
+                getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint.get(),
+                    environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+            } else if (loadBalancer.getIp() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                    endpoint.get(), environment.getName(), loadBalancer.getIp());
+                getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint.get(),
+                    environment.getName(), false, List.of(loadBalancer.getIp()));
+            } else {
+                LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
+                    "DNS registration will be skipped.", loadBalancer.getEndpoint());
+            }
+        }
+    }
+
     public String deleteDnsEntry(Stack stack, String environmentName) {
         String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -112,6 +156,40 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environmentName, ip);
         getDnsManagementService().deleteDnsEntryWithIp(actorCrn, accountId, endpointName, environmentName, false, List.of(ip));
         return ip;
+    }
+
+    public void deleteLoadBalancerDnsEntry(Stack stack, String environmentName) {
+        Set<LoadBalancer> loadBalancers = loadBalancerService.findByStackId(stack.getId());
+        if (loadBalancers.isEmpty()) {
+            LOGGER.info("No load balancers in stack {}", stack.getId());
+            return;
+        }
+
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        if (StringUtils.isEmpty(environmentName)) {
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+            environmentName = environment.getName();
+        }
+
+        for (LoadBalancer loadBalancer : loadBalancers) {
+            Optional<String> endpoint = Optional.ofNullable(loadBalancer.getEndpoint());
+            if (endpoint.isEmpty()) {
+                LOGGER.debug("No endpoint set for load balancer. Skipping DNS entry deletion.");
+                continue;
+            }
+            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+                LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                    endpoint.get(), environmentName, loadBalancer.getDns());
+                getDnsManagementService().deleteDnsEntryWithCloudDns(userCrn, accountId, endpoint.get(),
+                    environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+            } else if (loadBalancer.getIp() != null) {
+                LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                    endpoint.get(), environmentName, loadBalancer.getIp());
+                getDnsManagementService().deleteDnsEntryWithIp(userCrn, accountId, endpoint.get(),
+                    environmentName, false, List.of(loadBalancer.getIp()));
+            }
+        }
     }
 
     public boolean renewCertificate(Stack stack) {
@@ -136,12 +214,22 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         try {
             KeyPair keyPair = getKeyPairForStack(stack);
             String endpointName = getEndpointNameForStack(stack);
+            Set<String> loadBalancerEndpoints = getLoadBalancerNamesForStack(stack);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
             String workloadSubdomain = getWorkloadSubdomain(userCrn);
+
             String commonName = getDomainNameProvider().getCommonName(endpointName, environmentName, workloadSubdomain);
             String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(endpointName, environmentName, workloadSubdomain);
-            List<String> subjectAlternativeNames = List.of(commonName, fullyQualifiedEndpointName);
+            List<String> subjectAlternativeNames = new ArrayList<>();
+            subjectAlternativeNames.add(commonName);
+            subjectAlternativeNames.add(fullyQualifiedEndpointName);
+            for (String loadBalancerEndpoint : loadBalancerEndpoints) {
+                String loadBalanacerEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
+                    loadBalancerEndpoint, environmentName, workloadSubdomain);
+                subjectAlternativeNames.add(loadBalanacerEndpointName);
+            }
+
             LOGGER.info("Acquiring certificate with common name:{} and SANs: {}", commonName, String.join(",", subjectAlternativeNames));
             PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
             List<String> certs = getCertificateCreationService().create(userCrn, accountId, endpointName, environmentName, csr);
@@ -182,5 +270,10 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     private String getEndpointNameForStack(Stack stack) {
         return stack.getPrimaryGatewayInstance().getShortHostname();
+    }
+
+    private Set<String> getLoadBalancerNamesForStack(Stack stack) {
+        return loadBalancerService.findByStackId(stack.getId()).stream()
+            .map(LoadBalancer::getEndpoint).collect(Collectors.toSet());
     }
 }

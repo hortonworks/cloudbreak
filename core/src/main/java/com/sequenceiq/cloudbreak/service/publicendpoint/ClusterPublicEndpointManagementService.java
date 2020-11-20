@@ -32,6 +32,7 @@ public class ClusterPublicEndpointManagementService {
 
     public void terminate(Stack stack) {
         gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
+        gatewayPublicEndpointManagementService.deleteLoadBalancerDnsEntry(stack, null);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack));
     }
 

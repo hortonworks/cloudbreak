@@ -26,6 +26,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
@@ -38,6 +39,7 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonElbV2RetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -168,6 +170,23 @@ public class AwsClient {
 
     public AmazonCloudFormationRetryClient createCloudFormationRetryClient(AmazonCloudFormationClient amazonCloudFormationClient) {
         return new AmazonCloudFormationRetryClient(amazonCloudFormationClient, retry);
+    }
+
+    public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonElasticLoadBalancingClient client = isRoleAssumeRequired(awsCredential) ?
+            new AmazonElasticLoadBalancingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
+            new AmazonElasticLoadBalancingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
+        client.setRegion(RegionUtils.getRegion(regionName));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
+        return client;
+    }
+
+    public AmazonElbV2RetryClient createElbV2RetryClient(AwsCredentialView awsCredential, String regionName) {
+        return new AmazonElbV2RetryClient(createElasticLoadBalancingClient(awsCredential, regionName), retry);
+    }
+
+    public AmazonElbV2RetryClient createElbV2RetryClient(AmazonElasticLoadBalancingClient amazonElasticLoadBalancingClient) {
+        return new AmazonElbV2RetryClient(amazonElasticLoadBalancingClient, retry);
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {

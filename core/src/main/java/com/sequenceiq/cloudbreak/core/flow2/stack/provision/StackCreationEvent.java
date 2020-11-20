@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
@@ -33,6 +34,8 @@ public enum StackCreationEvent implements FlowEvent {
     LAUNCH_STACK_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchStackResult.class)),
     COLLECT_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
     COLLECT_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
+    COLLECT_LOADBALANCER_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectLoadBalancerMetadataResult.class)),
+    COLLECT_LOADBALANCER_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectLoadBalancerMetadataResult.class)),
     SSHFINGERPRINTS_EVENT(CloudPlatformResult.selector(GetSSHFingerprintsResult.class)),
     SSHFINGERPRINTS_FAILED_EVENT(CloudPlatformResult.failureSelector(GetSSHFingerprintsResult.class)),
     GET_TLS_INFO_FINISHED_EVENT(CloudPlatformResult.selector(GetTlsInfoResult.class)),

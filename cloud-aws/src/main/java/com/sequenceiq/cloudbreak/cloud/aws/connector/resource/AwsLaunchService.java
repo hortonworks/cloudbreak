@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +22,9 @@ import org.springframework.stereotype.Service;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
+import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
@@ -36,6 +40,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -43,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -114,6 +123,8 @@ public class AwsLaunchService {
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+
+        ModelContext modelContext = null;
         try {
             cfRetryClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
@@ -125,24 +136,7 @@ public class AwsLaunchService {
 
             String cidr = network.getSubnet().getCidr();
             String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
-            AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-            ModelContext modelContext = new ModelContext()
-                    .withAuthenticatedContext(ac)
-                    .withStack(stack)
-                    .withExistingVpc(existingVPC)
-                    .withExistingIGW(awsNetworkView.isExistingIGW())
-                    .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
-                    .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
-                    .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
-                    .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                    .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
-                    .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
-                    .withTemplate(stack.getTemplate())
-                    .withDefaultSubnet(subnet)
-                    .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
-                    .withVpcCidrs(network.getNetworkCidrs())
-                    .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
-                    .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
+            modelContext = buildDefaultModelContext(ac, stack, resourceNotifier);
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfRetryClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
@@ -171,7 +165,130 @@ public class AwsLaunchService {
 
         awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, stack, regionName, credentialView);
 
+        updateCloudformationWithLoadBalancer(ac, stack, resourceNotifier, modelContext, instances);
+
         return awsResourceConnector.check(ac, instances);
+    }
+
+    private ModelContext buildDefaultModelContext(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier) {
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
+        Network network = stack.getNetwork();
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
+
+        boolean existingVPC = awsNetworkView.isExistingVPC();
+        boolean existingSubnet = awsNetworkView.isExistingSubnet();
+
+        String cidr = network.getSubnet().getCidr();
+        String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
+        ModelContext modelContext = new ModelContext()
+            .withAuthenticatedContext(ac)
+            .withStack(stack)
+            .withExistingVpc(existingVPC)
+            .withExistingIGW(awsNetworkView.isExistingIGW())
+            .withExistingSubnetCidr(existingSubnet ? awsNetworkService.getExistingSubnetCidr(ac, stack) : null)
+            .withExistinVpcCidr(awsNetworkService.getVpcCidrs(ac, stack))
+            .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
+            .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
+            .withEnableInstanceProfile(awsInstanceProfileView.isInstanceProfileAvailable())
+            .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
+            .withTemplate(stack.getTemplate())
+            .withDefaultSubnet(subnet)
+            .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
+            .withVpcCidrs(network.getNetworkCidrs())
+            .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
+            .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
+
+        return modelContext;
+    }
+
+    private void updateCloudformationWithLoadBalancer(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
+            ModelContext modelContext, List<CloudResource> instances) {
+
+        if (stack.getLoadBalancers().isPresent() && !stack.getLoadBalancers().get().isEmpty()) {
+            if (modelContext == null) {
+                modelContext = buildDefaultModelContext(ac, stack, resourceNotifier);
+            }
+
+            List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
+            List<CloudLoadBalancer> cloudLoadBalancers = stack.getLoadBalancers().get();
+            for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
+                awsLoadBalancers.add(convert(cloudLoadBalancer, stack, instances));
+            }
+
+            modelContext.withLoadBalancers(awsLoadBalancers);
+            ListStackResourcesResult result = updateCloudFormationStack(ac, stack, modelContext);
+
+            for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
+                for (AwsListener listener : loadBalancer.getListeners()) {
+                    for (AwsTargetGroup targetGroup : listener.getTargetGroups()) {
+                        Optional<StackResourceSummary> targetGroupSummary = result.getStackResourceSummaries().stream()
+                            .filter(stackResourceSummary -> targetGroup.getName().equals(stackResourceSummary.getLogicalResourceId()))
+                            .findFirst();
+                        if (targetGroupSummary.isEmpty()) {
+                            throw new CloudConnectorException("Could not create load balancer listeners: target group not found.");
+                        }
+                        targetGroup.setArn(targetGroupSummary.get().getPhysicalResourceId());
+                    }
+                }
+                Optional<StackResourceSummary> loadBalancerSummary = result.getStackResourceSummaries().stream()
+                    .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
+                    .findFirst();
+                if (loadBalancerSummary.isEmpty()) {
+                    throw new CloudConnectorException("Could not create load balancer listeners: load balancer not found.");
+                }
+                loadBalancer.setArn(loadBalancerSummary.get().getPhysicalResourceId());
+                loadBalancer.canCreateListeners();
+            }
+
+            updateCloudFormationStack(ac, stack, modelContext);
+        }
+    }
+
+    private AwsLoadBalancer convert(CloudLoadBalancer cloudLoadBalancer, CloudStack stack, List<CloudResource> instances) {
+        int order = 1;
+        List<AwsListener> awsListeners = new ArrayList<>();
+        AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(cloudLoadBalancer.getType().name());
+        for (Map.Entry<Integer, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
+            List<CloudResource> lbTargetInstances = instances.stream()
+                .filter(instance -> entry.getValue().stream().anyMatch(tg -> tg.getName().equals(instance.getGroup())))
+                .collect(Collectors.toList());
+            List<String> instanceIds = lbTargetInstances.stream().map(CloudResource::getInstanceId).collect(Collectors.toList());
+
+            AwsTargetGroup targetGroup = new AwsTargetGroup(entry.getKey(), scheme, order++, instanceIds);
+            awsListeners.add(new AwsListener(entry.getKey(), Collections.singletonList(targetGroup), scheme));
+        }
+        return new AwsLoadBalancer(scheme, awsListeners);
+    }
+
+    private ListStackResourcesResult updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext) {
+        String cFStackName = cfStackUtil.getCfStackName(ac);
+        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
+        String regionName = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
+        Network network = stack.getNetwork();
+        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        boolean existingVPC = awsNetworkView.isExistingVPC();
+        boolean existingSubnet = awsNetworkView.isExistingSubnet();
+        String cidr = network.getSubnet().getCidr();
+        String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? awsNetworkService.findNonOverLappingCIDR(ac, stack) : cidr;
+
+        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+
+        String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
+        LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
+        cfRetryClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+
+        Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
+        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+        run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
+            () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.UPDATE_FAILED));
+
+        return cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
 
     private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient cfRetryClient,
