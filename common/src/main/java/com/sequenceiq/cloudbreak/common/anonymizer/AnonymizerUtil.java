@@ -14,7 +14,7 @@ public class AnonymizerUtil {
     private static final ReplacePattern[] PATTERNS = {
             //common PW
             new ReplacePattern("(?i)("
-                    + "password=|password\":\"|password:|password |"
+                    + "password=\'|password=|password\":\"|password:|password |"
                     + "pass=|pass\":\"|pass:|pass |"
                     + "secret=|secret\":\"|secret:|secret |"
                     + "key=|key\":\"|key:|key |"
@@ -25,7 +25,9 @@ public class AnonymizerUtil {
             //CM
             new ReplacePattern("(\"name\":\\s*\"[^\"]*password\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),
             //KNOX
-            new ReplacePattern("(\"name\":\\s*\"[^\"]*secret\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT)
+            new ReplacePattern("(\"name\":\\s*\"[^\"]*secret\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),
+            //FreeIPA
+            new ReplacePattern("(ldapmodify .* -w ')([^\\s'\"]*)", REPLACEMENT)
     };
 
     private AnonymizerUtil() {
