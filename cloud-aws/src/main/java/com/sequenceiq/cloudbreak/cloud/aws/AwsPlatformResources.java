@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
 import static java.util.Collections.singletonList;
@@ -443,7 +444,7 @@ public class AwsPlatformResources implements PlatformResources {
                             !hasInternetGateway,
                             subnet.getMapPublicIpOnLaunch(),
                             hasInternetGateway,
-                            PUBLIC)
+                            hasInternetGateway ? PUBLIC : PRIVATE)
             );
         }
         return subnets;

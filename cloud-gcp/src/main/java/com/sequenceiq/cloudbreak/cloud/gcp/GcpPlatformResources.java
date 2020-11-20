@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.io.IOException;
@@ -165,6 +166,7 @@ public class GcpPlatformResources implements PlatformResources {
             if (subnetworkList != null && network.getSubnetworks() != null) {
                 for (Subnetwork subnetwork : subnetworkList.getItems()) {
                     if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
+                        boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
                         subnets.add(
                                 new CloudSubnet(
                                         subnetwork.getId().toString(),
@@ -173,8 +175,8 @@ public class GcpPlatformResources implements PlatformResources {
                                         subnetwork.getIpCidrRange(),
                                         subnetwork.getPrivateIpGoogleAccess(),
                                         !subnetwork.getPrivateIpGoogleAccess(),
-                                        !Strings.isNullOrEmpty(subnetwork.getGatewayAddress()),
-                                        PUBLIC));
+                                        igwAvailable,
+                                        igwAvailable ? PUBLIC : PRIVATE));
                     }
                 }
             }
