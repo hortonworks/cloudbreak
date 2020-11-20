@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_REQUESTED;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -100,6 +102,9 @@ public class ClusterRepairService {
 
     @Inject
     private RdsConfigService rdsConfigService;
+
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -265,8 +270,11 @@ public class ClusterRepairService {
             if (isCreatedFromBaseImage(stack)) {
                 validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
-            if (!isGatewayDatabaseAvailable(stack.getCluster())) {
-                validationResult.add("Action is only supported if Cloudera Manager state is stored in external Database.");
+            EmbeddedDatabaseInfo embeddedDatabaseInfo =
+                    embeddedDatabaseService.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId(), stack);
+            if (!embeddedDatabaseInfo.isEmbeddedDatabaseOnAttachedDiskEnabled() && !isGatewayDatabaseAvailable(stack.getCluster())) {
+                validationResult.add(
+                        "Action is only supported if Cloudera Manager state is stored in external Database or in embedded database on attached disk.");
             }
         }
         return validationResult;

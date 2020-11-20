@@ -32,6 +32,9 @@ public class PostgresConfigService {
     @Inject
     private RedbeamsDbCertificateProvider dbCertificateProvider;
 
+    @Inject
+    private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
+
     public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, Stack stack, Cluster cluster) {
         Map<String, Object> postgresConfig = initPostgresConfig(stack, cluster);
 
@@ -56,10 +59,11 @@ public class PostgresConfigService {
         Map<String, Object> postgresConfig = new HashMap<>();
         if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
             postgresConfig.put("configure_remote_db", "true");
+        } else {
+            postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stack));
         }
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
                 postgresConfig.putAll(provider.createServicePillarConfigMapIfNeeded(stack, cluster)));
         return postgresConfig;
     }
-
 }

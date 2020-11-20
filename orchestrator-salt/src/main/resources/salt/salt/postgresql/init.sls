@@ -1,6 +1,9 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
+{% set postgres_directory = salt['pillar.get']('postgres:postgres_directory') %}
+{% set postgres_log_directory = salt['pillar.get']('postgres:postgres_log_directory') %}
+{% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
 
 {% if 'None' != configure_remote_db %}
 
@@ -22,16 +25,50 @@ init-services-db-remote:
 
 {%- else %}
 
+{%- if postgres_data_on_attached_disk %}
+
+{{ postgres_directory }}:
+  file.directory:
+    - user: postgres
+    - group: postgres
+    - mode: 700
+
+{{ postgres_log_directory }}:
+  file.directory:
+    - user: root
+    - group: root
+    - mode: 755
+
+{%- endif %}
+
 init-db-with-utf8:
   cmd.run:
-    - name: rm -rf /var/lib/pgsql/data && runuser -l postgres sh -c 'initdb --locale=en_US.UTF-8 /var/lib/pgsql/data > /var/lib/pgsql/initdb.log' && rm /var/log/pgsql_listen_address_configured
-    - unless: grep -q UTF-8 /var/lib/pgsql/initdb.log
+    - name: rm -rf {{ postgres_directory }}/data && runuser -l postgres sh -c 'initdb --locale=en_US.UTF-8 {{ postgres_directory }}/data > {{ postgres_directory }}/initdb.log' && rm -f {{ postgres_log_directory }}/pgsql_listen_address_configured
+    - unless: grep -q UTF-8 {{ postgres_directory }}/initdb.log
+
+{%- if postgres_data_on_attached_disk %}
+
+{%- set command = 'systemctl show -p FragmentPath postgresql' %}
+{%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
+
+change-db-location:
+  file.replace:
+    - name: {{ unitFile }}
+    - pattern: "Environment=PGDATA=.*"
+    - repl: Environment=PGDATA={{ postgres_directory }}/data
+    - unless: grep "Environment=PGDATA={{ postgres_directory }}/data" {{ unitFile }}
+
+{%- endif %}
 
 start-postgresql:
   service.running:
     - enable: True
     - require:
       - cmd: init-db-with-utf8
+{%- if postgres_data_on_attached_disk %}
+    - watch:
+      - file: /usr/lib/systemd/system/postgresql-10.service
+{%- endif %}
     - name: postgresql
 
 /opt/salt/scripts/conf_pgsql_listen_address.sh:
@@ -44,11 +81,11 @@ start-postgresql:
 
 configure-listen-address:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/pgsql_listen_address_configured
+    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/pgsql_listen_address_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_listen_address.sh
       - service: start-postgresql
-    - unless: test -f /var/log/pgsql_listen_address_configured
+    - unless: test -f {{ postgres_log_directory }}/pgsql_listen_address_configured
 
 /opt/salt/scripts/conf_pgsql_max_connections.sh:
   file.managed:
@@ -60,11 +97,11 @@ configure-listen-address:
 
 configure-max-connections:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/pgsql_max_connections_configured
+    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/pgsql_max_connections_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_max_connections.sh
       - service: start-postgresql
-    - unless: test -f /var/log/pgsql_max_connections_configured
+    - unless: test -f {{ postgres_log_directory }}/pgsql_max_connections_configured
 
 /opt/salt/scripts/init_db.sh:
   file.managed:
@@ -80,8 +117,8 @@ configure-max-connections:
 
 init-services-db:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/init-services-db-executed
-    - unless: test -f /var/log/init-services-db-executed
+    - name: runuser -l postgres -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/init-services-db-executed
+    - unless: test -f {{ postgres_log_directory }}/init-services-db-executed
     - require:
       - file: /opt/salt/scripts/init_db.sh
       - cmd: configure-listen-address
