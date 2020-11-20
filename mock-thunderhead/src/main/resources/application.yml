@@ -33,3 +33,4 @@ auth:
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true
+    embedded.database.on.attached.disk.enable: false

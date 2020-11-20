@@ -231,6 +231,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
 
+    private static final String CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK = "CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK";
+
     private static final String CDP_SHOW_CLI = "CDP_SHOW_CLI";
 
     private static final String MOCK_RESOURCE = "mock_resource";
@@ -320,6 +322,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.database.wire.encryption.enable}")
     private boolean enableDatabaseWireEncryption;
+
+    @Value("${auth.mock.embedded.database.on.attached.disk.enable}")
+    private boolean enableEmbeddedDatabaseOnAttachedDisk;
 
     private String cbLicense;
 
@@ -630,6 +635,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatabaseWireEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
+        }
+        if (enableEmbeddedDatabaseOnAttachedDisk) {
+            builder.addEntitlements(createEntitlement(CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

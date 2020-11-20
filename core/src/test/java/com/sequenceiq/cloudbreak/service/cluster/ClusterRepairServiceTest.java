@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -70,6 +71,9 @@ import com.sequenceiq.flow.domain.StateStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterRepairServiceTest {
+    private static final String ACCOUNT_ID = "cloudera";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:test@cloudera.com";
 
     private static final long STACK_ID = 1;
 
@@ -109,6 +113,9 @@ public class ClusterRepairServiceTest {
 
     @Mock
     private RdsConfigService rdsConfigService;
+
+    @Mock
+    private EmbeddedDatabaseService embeddedDatabaseService;
 
     @InjectMocks
     private ClusterRepairService underTest;
@@ -186,8 +193,33 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack))
+                .thenReturn(new EmbeddedDatabaseInfo(false, 0));
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
+
+        assertTrue(result.isSuccess());
+        verifyNoInteractions(stackUpdater, flowManager, resourceService);
+    }
+
+    @Test
+    public void testCanRepairPrewarmedGatewayWithEmbeddedDbOnAttachedDisk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(image.isPrewarmed()).thenReturn(true);
+        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack))
+                .thenReturn(new EmbeddedDatabaseInfo(true, 0));
+
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertTrue(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -208,8 +240,10 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack))
+                .thenReturn(new EmbeddedDatabaseInfo(false, 0));
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertFalse(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -229,8 +263,10 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack))
+                .thenReturn(new EmbeddedDatabaseInfo(false, 0));
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertFalse(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);

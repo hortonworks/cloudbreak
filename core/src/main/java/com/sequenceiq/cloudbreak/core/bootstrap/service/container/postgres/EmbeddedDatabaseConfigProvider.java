@@ -1,0 +1,67 @@
+package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
+
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseInfo;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
+import com.sequenceiq.cloudbreak.template.VolumeUtils;
+
+@Component
+public class EmbeddedDatabaseConfigProvider {
+    public static final String POSTGRES_DIRECTORY_KEY = "postgres_directory";
+
+    public static final String POSTGRES_LOG_DIRECTORY_KEY = "postgres_log_directory";
+
+    public static final String POSTGRES_DATA_ON_ATTACHED_DISK_KEY = "postgres_data_on_attached_disk";
+
+    public static final String POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql";
+
+    public static final String POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql/log";
+
+    public static final String POSTGRES_DEFAULT_DIRECTORY = "/var/lib/pgsql";
+
+    public static final String POSTGRES_DEFAULT_LOG_DIRECTORY = "/var/log";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDatabaseConfigProvider.class);
+
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
+    public Map<String, Object> collectEmbeddedDatabaseConfigs(Stack stack) {
+        Map<String, Object> result;
+        EmbeddedDatabaseInfo embeddedDatabaseInfo =
+                embeddedDatabaseService.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId(), stack);
+        if (embeddedDatabaseInfo.isEmbeddedDatabaseOnAttachedDiskEnabled()) {
+            LOGGER.info("Attached disk will be used to store data for postgres sql server, as '{}' entitlement is enabled",
+                    Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
+            result = createEmbeddedDbOnAttachedDiskConfig(embeddedDatabaseInfo.getAttachedDisksCount());
+        } else {
+            LOGGER.info("Default settings for data storage will be used for postgres sql server, as '{}' entitlement is disabled or no disks attached",
+                    Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
+            result = Map.of(
+                    POSTGRES_DIRECTORY_KEY, POSTGRES_DEFAULT_DIRECTORY,
+                    POSTGRES_LOG_DIRECTORY_KEY, POSTGRES_DEFAULT_LOG_DIRECTORY,
+                    POSTGRES_DATA_ON_ATTACHED_DISK_KEY, false);
+        }
+        LOGGER.debug("Embedded Postgres sql server pillar parameters: {}", result);
+        return result;
+    }
+
+    private Map<String, Object> createEmbeddedDbOnAttachedDiskConfig(int volumeCount) {
+        return Map.of(
+            POSTGRES_DIRECTORY_KEY, VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK),
+            POSTGRES_LOG_DIRECTORY_KEY, VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK),
+            POSTGRES_DATA_ON_ATTACHED_DISK_KEY, true);
+    }
+}
