@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Component;
 
@@ -34,6 +35,9 @@ public class ImageCatalogMockServerSetup {
 
     private String mockImageCatalogServer;
 
+    @Value("${integrationtest.cloudbreak.server}")
+    private String defaultCloudbreakServer;
+
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
@@ -48,14 +52,19 @@ public class ImageCatalogMockServerSetup {
     }
 
     private String getCloudbreakUnderTestVersion(String cbServerAddress) {
+        WebTarget target;
         Client client = RestClientUtil.get();
-        WebTarget target = client.target(cbServerAddress + "/info");
+        if (cbServerAddress.contains("dps.mow")) {
+            target = client.target(defaultCloudbreakServer + "/cloud/cb/info");
+        } else {
+            target = client.target(cbServerAddress + "/info");
+        }
         try (Response response = target.request().get()) {
             CBVersion cbVersion = response.readEntity(CBVersion.class);
             LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), cbVersion.getApp().getVersion());
             return cbVersion.getApp().getVersion();
         } catch (Exception e) {
-            LOGGER.error("Cannot fetch the CB version", e);
+            LOGGER.error(String.format("Cannot fetch the CB version at '%s'", cbServerAddress), e);
             throw e;
         }
     }
