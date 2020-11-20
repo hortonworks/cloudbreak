@@ -1,5 +1,10 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.DWX;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.MLX;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
+import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +17,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -31,17 +35,17 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     @Override
     public boolean isApplicableForDwx(CloudSubnet cloudSubnet) {
         return cloudSubnet.getType() == null
-                || SubnetType.PUBLIC.equals(cloudSubnet.getType())
-                || SubnetType.PRIVATE.equals(cloudSubnet.getType())
-                || SubnetType.DWX.equals(cloudSubnet.getType());
+                || PUBLIC.equals(cloudSubnet.getType())
+                || PRIVATE.equals(cloudSubnet.getType())
+                || DWX.equals(cloudSubnet.getType());
     }
 
     @Override
     public boolean isApplicableForMlx(CloudSubnet cloudSubnet) {
         return cloudSubnet.getType() == null
-                || SubnetType.PUBLIC.equals(cloudSubnet.getType())
-                || SubnetType.PRIVATE.equals(cloudSubnet.getType())
-                || SubnetType.MLX.equals(cloudSubnet.getType());
+                || PUBLIC.equals(cloudSubnet.getType())
+                || PRIVATE.equals(cloudSubnet.getType())
+                || MLX.equals(cloudSubnet.getType());
     }
 
     @Override
@@ -86,7 +90,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
                                 !subnet.isPublicSubnet(),
                                 subnet.isMapPublicIpOnLaunch(),
                                 subnet.isIgwAvailable(),
-                                SubnetType.PUBLIC)
+                                subnet.isIgwAvailable() ? PUBLIC : PRIVATE)
                         )
                 )
         );
