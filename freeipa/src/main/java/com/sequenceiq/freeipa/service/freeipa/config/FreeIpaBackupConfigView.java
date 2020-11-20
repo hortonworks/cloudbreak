@@ -31,6 +31,8 @@ public class FreeIpaBackupConfigView {
 
     private final String awsRegion;
 
+    private String gcpServiceAccount;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaBackupConfigView(FreeIpaBackupConfigView.Builder builder) {
         enabled = builder.enabled;
@@ -42,6 +44,7 @@ public class FreeIpaBackupConfigView {
         azureInstanceMsi = builder.azureInstanceMsi;
         proxyUrl = builder.proxyUrl;
         awsRegion = builder.awsRegion;
+        gcpServiceAccount = builder.gcpServiceAccount;
     }
 
     public String getLocation() {
@@ -80,6 +83,14 @@ public class FreeIpaBackupConfigView {
         return awsRegion;
     }
 
+    public String getGcpServiceAccount() {
+        return gcpServiceAccount;
+    }
+
+    public void setGcpServiceAccount(String gcpServiceAccount) {
+        this.gcpServiceAccount = gcpServiceAccount;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -90,6 +101,7 @@ public class FreeIpaBackupConfigView {
         map.put("initial_full_enabled", initialFullEnabled);
         map.put("platform", ObjectUtils.defaultIfNull(platform, EMPTY_CONFIG_DEFAULT));
         map.put("azure_instance_msi", ObjectUtils.defaultIfNull(azureInstanceMsi, EMPTY_CONFIG_DEFAULT));
+        map.put("gcp_service_account", ObjectUtils.defaultIfNull(gcpServiceAccount, EMPTY_CONFIG_DEFAULT));
         map.put("http_proxy", ObjectUtils.defaultIfNull(proxyUrl, EMPTY_CONFIG_DEFAULT));
         map.put("aws_region", ObjectUtils.defaultIfNull(awsRegion, EMPTY_CONFIG_DEFAULT));
         return map;
@@ -110,6 +122,8 @@ public class FreeIpaBackupConfigView {
         private String platform;
 
         private String azureInstanceMsi;
+
+        private String gcpServiceAccount;
 
         private String proxyUrl;
 
@@ -161,6 +175,11 @@ public class FreeIpaBackupConfigView {
 
         public Builder withAwsRegion(String awsRegion) {
             this.awsRegion = awsRegion;
+            return this;
+        }
+
+        public Builder withGcpServiceAccount(String gcpServiceAccount) {
+            this.gcpServiceAccount = gcpServiceAccount;
             return this;
         }
     }

@@ -98,6 +98,10 @@ public class FreeIpaConfigService {
                 builder.withPlatform(CloudPlatform.AZURE.name())
                         .withAzureInstanceMsi(backup.getAdlsGen2().getManagedIdentity());
                 LOGGER.debug("Backups will be configured to use Azure Blob storage");
+            } else if (backup.getGcs() != null) {
+                builder.withPlatform(CloudPlatform.GCP.name())
+                        .withGcpServiceAccount(backup.getGcs().getServiceAccountEmail());
+                LOGGER.debug("Backups will be configured to use GCP storage");
             }
             if (proxyConfig != null) {
                 LOGGER.debug("Proxy will be configured for backup: {}", proxyConfig.getName());

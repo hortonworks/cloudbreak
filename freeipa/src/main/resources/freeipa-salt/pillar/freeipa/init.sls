@@ -13,5 +13,6 @@ freeipa:
     platform:
     location:
     azure_instance_msi:
+    gcp_service_account:
     http_proxy:
     aws_region:
