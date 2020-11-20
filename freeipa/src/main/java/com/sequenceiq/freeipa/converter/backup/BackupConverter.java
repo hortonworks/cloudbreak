@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -53,6 +54,11 @@ public class BackupConverter {
                 adlsGen2Params.setSecure(adlsGen2FromRequest.isSecure());
                 adlsGen2Params.setManagedIdentity(adlsGen2FromRequest.getManagedIdentity());
                 backup.setAdlsGen2(adlsGen2Params);
+            } else if (loggingRequest.getGcs() != null) {
+                GcsCloudStorageV1Parameters gcsParams = new GcsCloudStorageV1Parameters();
+                GcsCloudStorageV1Parameters gcsFromRequest = loggingRequest.getGcs();
+                gcsParams.setServiceAccountEmail(gcsFromRequest.getServiceAccountEmail());
+                backup.setGcs(gcsParams);
             }
         }
     }

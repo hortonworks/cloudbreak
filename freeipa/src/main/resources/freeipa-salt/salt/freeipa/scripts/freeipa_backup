@@ -31,6 +31,7 @@ config=( # set default values in config array
     [backup_location]=""
     [backup_platform]="LOCAL"
     [azure_instance_msi]=""
+    [gcp_service_account]=""
     [logfile]="/var/log/ipabackup.log"
     [statusfileprefix]="/var/log/ipabackup_status_"
     [backup_path]="/var/lib/ipa/backup"

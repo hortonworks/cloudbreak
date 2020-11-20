@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -11,6 +12,8 @@ public class Backup {
     private S3CloudStorageV1Parameters s3;
 
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
+
+    private GcsCloudStorageV1Parameters gcs;
 
     private boolean monthlyFullEnabled;
 
@@ -64,5 +67,13 @@ public class Backup {
 
     public void setHourlyEnabled(boolean hourlyEnabled) {
         this.hourlyEnabled = hourlyEnabled;
+    }
+
+    public GcsCloudStorageV1Parameters getGcs() {
+        return gcs;
+    }
+
+    public void setGcs(GcsCloudStorageV1Parameters gcs) {
+        this.gcs = gcs;
     }
 }
