@@ -59,7 +59,7 @@ public class ApiExceptionRetryPolicy implements RetryPolicy {
             return handleStatusCodeNotZero(context, code);
         } else {
             LOGGER.debug("HTTP status code is 0");
-            return false;
+            return true;
         }
     }
 
