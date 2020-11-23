@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -31,6 +32,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -182,6 +184,16 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         parameters.setResourceGroupName(azureProperties.getNetwork().getResourceGroupName());
         return network.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
+    }
+
+    @Override
+    public ServiceEndpointCreation serviceEndpoint() {
+        ServiceEndpointCreation serviceEndpointCreation =
+                ResourceGroupTest.isSingleResourceGroup(getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE))
+                ? ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT
+                : ServiceEndpointCreation.DISABLED;
+        LOGGER.debug("Azure service endpoint creation: {}", serviceEndpointCreation);
+        return serviceEndpointCreation;
     }
 
     @Override

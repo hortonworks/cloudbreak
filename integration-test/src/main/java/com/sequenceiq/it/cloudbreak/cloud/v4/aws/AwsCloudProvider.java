@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsEncryptionV1Parameters;
@@ -158,6 +159,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public NetworkV4TestDto network(NetworkV4TestDto network) {
         return network.withAws(networkParameters());
+    }
+
+    @Override
+    public ServiceEndpointCreation serviceEndpoint() {
+        return ServiceEndpointCreation.ENABLED;
     }
 
     public AwsNetworkV4Parameters networkParameters() {
