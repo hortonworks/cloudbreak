@@ -5,6 +5,7 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -16,6 +17,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -25,6 +27,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
+
+import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
+import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +49,9 @@ public class DatalakeDatabaseBackupActions {
 
     @Inject
     private SdxDatabaseDrService sdxDatabaseDrService;
+
+    @Inject
+    private SdxService sdxService;
 
     @Bean(name = "DATALAKE_DATABASE_BACKUP_START_STATE")
     public Action<?, ?> datalakeBackup() {
@@ -142,7 +150,12 @@ public class DatalakeDatabaseBackupActions {
                 LOGGER.info("Full datalake backup is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 String backupId = (String) variables.get(BACKUP_ID);
-                sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                SdxDatabaseBackupStatusResponse backupStatusResponse =
+                        sdxDatabaseDrService.getDatabaseBackupStatus(sdxCluster, operationId);
+                if (backupStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
+                    sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
+                }
                 sendEvent(context, DatalakeFullBackupWaitRequest.from(context, backupId));
             }
 
