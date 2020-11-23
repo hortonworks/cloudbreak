@@ -588,6 +588,7 @@ public class UmsClient {
         CreateAccessKeyRequest.Builder builder = CreateAccessKeyRequest.newBuilder();
         builder.setAccountId(accountId)
                 .setMachineUserNameOrCrn(machineUserName)
+                .setInternal(true)
                 .setType(accessKeyType);
         if (!UserManagementProto.AccessKeyType.Value.UNSET.equals(accessKeyType)) {
             builder.setType(accessKeyType);

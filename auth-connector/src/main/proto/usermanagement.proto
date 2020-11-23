@@ -608,7 +608,7 @@ message AccessKey {
   // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
   uint64 creationDateMs = 8;
   AccessKeyUsage lastUsage = 6;
-  // Whether this is an internal machine user. Internal machine users are made
+  // Whether this is an internal access key. Internal access keys are made
   // by platform services and not end-users. They are filtered out of default
   // listing operations and cannot be modified by end-user operations. Note that
   // it is possible for end-users to list by ID or CRN and otherwise
@@ -1009,6 +1009,12 @@ message CreateAccessKeyRequest {
   }
   // The type of access key to create
   AccessKeyType.Value type = 5;
+  // Whether this should be an internal access key. Internal access keys are made
+  // by platform services and not end-users. They are filtered out of default
+  // listing operations and cannot be modified by end-user operations. Note that
+  // it is possible for end-users to list by ID or CRN and otherwise
+  // determine the existence of an internal access key.
+  bool internal = 11;
 }
 
 message CreateAccessKeyResponse {
