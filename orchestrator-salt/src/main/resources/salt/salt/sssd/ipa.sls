@@ -65,7 +65,7 @@ removing_dns_entries:
 
 add_dns_record:
   cmd.run:
-    - name: /opt/salt/scripts/add_dns_record.sh && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/dnsrecord-add-executed
+    - name: /opt/salt/scripts/add_dns_record.sh 2>&1 | tee -a /var/log/dnsrecord-add.log && test ${PIPESTATUS[0]} -eq 0 && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/dnsrecord-add-executed
     - runas: root
     - failhard: True
     - unless: test -f /var/log/dnsrecord-add-executed
