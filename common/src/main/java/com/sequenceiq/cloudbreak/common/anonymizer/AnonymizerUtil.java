@@ -27,7 +27,9 @@ public class AnonymizerUtil {
             //KNOX
             new ReplacePattern("(\"name\":\\s*\"[^\"]*secret\",\\s*\"value\":\\s*\")[^\\s'\"]*", REPLACEMENT),
             //FreeIPA
-            new ReplacePattern("(ldapmodify .* -w ')([^\\s'\"]*)", REPLACEMENT)
+            new ReplacePattern("(ldapmodify .* -w ')([^\\s'\"]*)", REPLACEMENT),
+            // AZURE DB ARM TEMPLATE
+            new ReplacePattern("(\"type\": \"securestring\",\\s*\"defaultValue\" : \\s*\")[^\\s'\"]*", REPLACEMENT)
     };
 
     private AnonymizerUtil() {

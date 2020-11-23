@@ -131,6 +131,13 @@ public class AnonymizerUtilTest {
     }
 
     @Test
+    public void testHideAzureDbArmTemplateSecretsInJson() {
+        String testData = "{\"type\": \"securestring\",\"defaultValue\" : \"7hiihnuqtlthgp57o6otvf04im\",\"minLength\"1}";
+        Assert.assertEquals("{\"type\": \"securestring\",\"defaultValue\" : \"" + REPLACEMENT + "\",\"minLength\"1}",
+                anonymize(testData));
+    }
+
+    @Test
     public void testHideSecretSingleQuote() {
         String testData = " DC=hortonworks,DC=com '--ldap-manager-secret=2#KQ01DLbUdljJ!AVs' --ldap-sync-usern' sd dsds '";
         Assert.assertEquals(" DC=hortonworks,DC=com '--ldap-manager-secret=" + REPLACEMENT + "' --ldap-sync-usern' sd dsds '",
