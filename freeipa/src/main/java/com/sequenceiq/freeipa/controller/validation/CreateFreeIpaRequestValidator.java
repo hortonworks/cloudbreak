@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.controller.validation;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -42,10 +40,6 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
             validationBuilder.error("FreeIPA request must contain at least one instance group.");
         } else {
             int nodesPerInstanceGroup = subject.getInstanceGroups().get(0).getNodeCount();
-            if ((nodesPerInstanceGroup > 1 || subject.getInstanceGroups().size() > 1) &&
-                    !entitlementService.freeIpaHaEnabled(INTERNAL_ACTOR_CRN, accountId)) {
-                validationBuilder.error("The FreeIPA HA capability is disabled.");
-            }
             if (subject.getInstanceGroups().stream().filter(ig -> ig.getNodeCount() != nodesPerInstanceGroup || ig.getNodeCount() < 1).count() > 0) {
                 validationBuilder.error("All instance groups in the FreeIPA request must contain the same number of nodes per instance group " +
                         "and there must be at least 1 instance per instance group.");
