@@ -1,10 +1,12 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -16,10 +18,13 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +50,9 @@ public class DatalakeDatabaseRestoreActions {
 
     @Inject
     private SdxDatabaseDrService sdxDatabaseDrService;
+
+    @Inject
+    private SdxService sdxService;
 
     @Bean(name = "DATALAKE_DATABASE_RESTORE_START_STATE")
     public Action<?, ?> datalakeRestore() {
@@ -145,7 +153,12 @@ public class DatalakeDatabaseRestoreActions {
                 LOGGER.info("Full datalake restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 String restoreId = (String) variables.get(RESTORE_ID);
-                sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
+                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                SdxDatabaseRestoreStatusResponse restoreStatusResponse =
+                        sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);
+                if (restoreStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
+                    sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
+                }
                 sendEvent(context, DatalakeFullRestoreWaitRequest.from(context, restoreId));
             }
 
@@ -157,7 +170,7 @@ public class DatalakeDatabaseRestoreActions {
         };
     }
 
-    @Bean(name = "DATALAKE_DATABASE_RESTORE_FINISHED_STATE")
+    @Bean(name = "DATALAKE_RESTORE_FINISHED_STATE")
     public Action<?, ?> finishedRestoreAction() {
         return new AbstractSdxAction<>(DatalakeRestoreSuccessEvent.class) {
 
@@ -218,7 +231,7 @@ public class DatalakeDatabaseRestoreActions {
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
-                sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
+                sendEvent(context, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
             @Override
