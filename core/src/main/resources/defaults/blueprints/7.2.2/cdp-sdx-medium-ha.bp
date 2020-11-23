@@ -314,12 +314,6 @@
             },
             {
               "base": true,
-              "configs": [
-                {
-                  "name": "dfs_journalnode_edits_dir",
-                  "value": "/dfs/jn"
-                }
-              ],
               "refName": "hdfs-JOURNALNODE-BASE",
               "roleType": "JOURNALNODE"
             }
