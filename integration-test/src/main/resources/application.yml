@@ -69,6 +69,7 @@ integrationtest:
   upgrade:
     currentRuntimeVersion: 7.2.0
     targetRuntimeVersion: 7.2.6
+  privateEndpointEnabled: false
 
   spot:
     enabledCloudPlatforms:

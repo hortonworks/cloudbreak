@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -83,6 +84,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
         imageSettings.withImageCatalog(commonCloudProperties.getImageCatalogName());
         return imageSettings;
+    }
+
+    @Override
+    public ServiceEndpointCreation serviceEndpoint() {
+        return ServiceEndpointCreation.DISABLED;
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
+import static com.sequenceiq.it.cloudbreak.PrivateEndpointTest.PRIVATE_ENDPOINT_ENABLED;
+import static com.sequenceiq.it.cloudbreak.PrivateEndpointTest.PRIVATE_ENDPOINT_USAGE;
+
 import java.util.Set;
 
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -9,7 +12,6 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcp
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -33,7 +35,9 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
     }
 
     public EnvironmentNetworkTestDto valid() {
-        return getCloudProvider().network(this);
+        return getCloudProvider()
+                .network(this)
+                .withTryUseServiceEndpoints();
     }
 
     public EnvironmentNetworkTestDto withAzure(EnvironmentNetworkAzureParams azure) {
@@ -71,8 +75,16 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         return this;
     }
 
+    public EnvironmentNetworkTestDto withTryUseServiceEndpoints() {
+        if (PRIVATE_ENDPOINT_ENABLED.equals(getTestParameter().get(PRIVATE_ENDPOINT_USAGE))) {
+            LOGGER.debug("Private endpoints enabled via environment parameters");
+            withServiceEndpoints();
+        }
+        return this;
+    }
+
     public EnvironmentNetworkTestDto withServiceEndpoints() {
-        getRequest().setServiceEndpointCreation(ServiceEndpointCreation.ENABLED);
+        getRequest().setServiceEndpointCreation(getCloudProvider().serviceEndpoint());
         return this;
     }
 
