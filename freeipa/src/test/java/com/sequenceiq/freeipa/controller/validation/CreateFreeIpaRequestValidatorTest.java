@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.controller.validation;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -53,7 +52,6 @@ class CreateFreeIpaRequestValidatorTest {
 
     @Test
     void validateShouldNotContainErrors() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setNodeCount(1);
@@ -66,7 +64,6 @@ class CreateFreeIpaRequestValidatorTest {
 
     @Test
     void validateShouldNotContainErrorsForHA() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setNodeCount(2);
@@ -78,21 +75,7 @@ class CreateFreeIpaRequestValidatorTest {
     }
 
     @Test
-    void validateShouldContainErrorsWhenHaEntitlementIsNotEnabled() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.FALSE);
-        CreateFreeIpaRequest request = new CreateFreeIpaRequest();
-        InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
-        instanceGroupRequest.setNodeCount(2);
-        request.setInstanceGroups(List.of(instanceGroupRequest));
-
-        ValidationResult result = underTest.validate(request);
-
-        assertThat(result.hasError()).isTrue();
-    }
-
-    @Test
     void validateShouldContainErrorsWhenThereAreNoInstanceGroups() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
 
         ValidationResult result = underTest.validate(request);
@@ -102,7 +85,6 @@ class CreateFreeIpaRequestValidatorTest {
 
     @Test
     void validateShouldContainErrorsWhenThereAreZeroNodes() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setNodeCount(0);
@@ -115,7 +97,6 @@ class CreateFreeIpaRequestValidatorTest {
 
     @Test
     void validateShouldContainErrorsWhenThereAreTooManyNodes() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setNodeCount(5);
@@ -128,7 +109,6 @@ class CreateFreeIpaRequestValidatorTest {
 
     @Test
     void validateShouldContainErrorsWhenThereAreTooManyInstanceGroups() {
-        when(entitlementService.freeIpaHaEnabled(any(), any())).thenReturn(Boolean.TRUE);
         CreateFreeIpaRequest request = new CreateFreeIpaRequest();
         InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
         instanceGroupRequest.setNodeCount(1);
