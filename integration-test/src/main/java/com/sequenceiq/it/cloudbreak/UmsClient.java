@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsChannelConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
-import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.it.IntegrationTestContext;
 
 import io.opentracing.Tracer;
@@ -33,9 +33,9 @@ public class UmsClient extends MicroserviceClient {
 
     public static synchronized UmsClient createProxyUmsClient(Tracer tracer) {
         UmsClient clientEntity = new UmsClient();
-        UmsConfig config = UmsConfig.createConfig("ums.thunderhead-dev.cloudera.com", 8982);
         UmsClientConfig clientConfig = new UmsClientConfig();
-        clientEntity.umsClient = GrpcUmsClient.createClient(config, clientConfig, tracer);
+        clientEntity.umsClient = GrpcUmsClient.createClient(
+                UmsChannelConfig.newManagedChannelWrapper("ums.thunderhead-dev.cloudera.com", 8982), clientConfig, tracer);
         return clientEntity;
     }
 

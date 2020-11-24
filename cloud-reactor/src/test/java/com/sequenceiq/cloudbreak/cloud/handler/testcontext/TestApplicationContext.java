@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -63,7 +64,7 @@ import reactor.Environment;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class)})
 @Configuration
-@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
+@ComponentScans({@ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
         @ComponentScan("com.sequenceiq.cloudbreak.auth")})
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
@@ -110,6 +111,9 @@ public class TestApplicationContext {
 
     @Mock
     private Tracer tracer;
+
+    @Mock
+    private ManagedChannelWrapper managedChannelWrapper;
 
     @Inject
     private ParameterGenerator g;
@@ -210,5 +214,10 @@ public class TestApplicationContext {
     @Bean
     public ResourceRetriever getResourceRetrieval() {
         return resourceRetriever;
+    }
+
+    @Bean
+    public ManagedChannelWrapper managedChannelWrapper() {
+        return managedChannelWrapper;
     }
 }
