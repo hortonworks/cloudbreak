@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,8 +76,12 @@ public class ExternalDatabaseService {
         LOGGER.info("Terminate external {} database server in environment {} for DataHub {}",
                 externalDatabase.name(), environment.getName(), cluster.getName());
         try {
-            DatabaseServerV4Response response = redbeamsClient.deleteByCrn(cluster.getDatabaseServerCrn(), forced);
-            waitAndGetDatabase(cluster, response.getCrn(), DatabaseOperation.DELETION, false);
+            if (externalDatabaseReferenceExist(cluster.getDatabaseServerCrn())) {
+                DatabaseServerV4Response response = redbeamsClient.deleteByCrn(cluster.getDatabaseServerCrn(), forced);
+                waitAndGetDatabase(cluster, response.getCrn(), DatabaseOperation.DELETION, false);
+            } else {
+                LOGGER.warn("[INVESTIGATE] The external database type was {} but there was no crn", externalDatabase);
+            }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server is deleted on redbeams side {}", cluster.getDatabaseServerCrn());
         }
@@ -87,8 +92,12 @@ public class ExternalDatabaseService {
                 externalDatabase.name(), environment.getName(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
         try {
-            redbeamsClient.startByCrn(databaseCrn);
-            waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.START, false);
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                redbeamsClient.startByCrn(databaseCrn);
+                waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.START, false);
+            } else {
+                LOGGER.warn("[INVESTIGATE] The external database type was {} but there was no crn", externalDatabase);
+            }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
         }
@@ -99,11 +108,19 @@ public class ExternalDatabaseService {
                 externalDatabase.name(), environment.getName(), cluster.getName());
         String databaseCrn = cluster.getDatabaseServerCrn();
         try {
-            redbeamsClient.stopByCrn(databaseCrn);
-            waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.STOP, false);
+            if (externalDatabaseReferenceExist(databaseCrn)) {
+                redbeamsClient.stopByCrn(databaseCrn);
+                waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.STOP, false);
+            } else {
+                LOGGER.warn("[INVESTIGATE] The external database type was {} but there was no crn", externalDatabase);
+            }
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
         }
+    }
+
+    private boolean externalDatabaseReferenceExist(String databaseCrn) {
+        return !Strings.isNullOrEmpty(databaseCrn);
     }
 
     private void updateClusterWithDatabaseServerCrn(Cluster cluster, String databaseServerCrn) {
