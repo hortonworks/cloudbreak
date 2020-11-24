@@ -28,6 +28,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -147,9 +148,9 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             SubnetworkList ownProjectSubnets = compute.subnetworks().list(projectId, region).execute();
             Set<Subnetwork> collect = ownProjectSubnets.getItems()
                     .stream()
-                    .filter(e -> e.getName().equals(subnetId))
+                    .filter(e -> e.getName().equals(subnetId) || e.getId().toString().equals(subnetId))
                     .collect(Collectors.toSet());
-            if (collect.isEmpty()) {
+            if (collect.isEmpty() && !Strings.isNullOrEmpty(sharedProjectId)) {
                 subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
             } else {
                 subnet = collect
