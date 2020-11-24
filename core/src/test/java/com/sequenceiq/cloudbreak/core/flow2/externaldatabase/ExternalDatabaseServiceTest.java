@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -128,6 +130,16 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
+    void terminateDatabaseWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.terminateDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse, true);
+
+        verify(redbeamsClient, never()).deleteByCrn(anyString(), anyBoolean());
+    }
+
+    @Test
     void startDatabase() throws JsonProcessingException {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn(RDBMS_CRN);
@@ -142,6 +154,16 @@ class ExternalDatabaseServiceTest {
     }
 
     @Test
+    void startDatabaseWhenCrnNull() {
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.startDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient, never()).startByCrn(anyString());
+    }
+
+    @Test
     void stopDatabase() throws JsonProcessingException {
         Cluster cluster = spy(new Cluster());
         cluster.setDatabaseServerCrn(RDBMS_CRN);
@@ -153,5 +175,15 @@ class ExternalDatabaseServiceTest {
         underTest.stopDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
 
         verify(redbeamsClient).stopByCrn(RDBMS_CRN);
+    }
+
+    @Test
+    void stopDatabaseWhenCrnNull() {
+        Cluster cluster = spy(new Cluster());
+        cluster.setDatabaseServerCrn(null);
+
+        underTest.stopDatabase(cluster, DatabaseAvailabilityType.HA, environmentResponse);
+
+        verify(redbeamsClient, never()).stopByCrn(anyString());
     }
 }
