@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter.CM_PACKAGE_KEY;
-
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -16,12 +14,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChe
 
 @Component
 public class CmAndStackVersionFilter {
-
-    private static final String STACK_PACKAGE_KEY = "stack";
-
-    private static final String CDH_BUILD_NUMBER_KEY = "cdh-build-number";
-
-    private static final String CM_BUILD_NUMBER_KEY = "cm-build-number";
 
     @Inject
     private LockedComponentChecker lockedComponentChecker;
@@ -52,11 +44,7 @@ public class CmAndStackVersionFilter {
     }
 
     private boolean isUnlockedCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return isCmAndStackUpgradePermitted(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY)
-                && isCmAndStackUpgradePermitted(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY);
-    }
-
-    private boolean isCmAndStackUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage, String versionKey, String buildNumberKey) {
-        return upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, versionKey, buildNumberKey);
+        return upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage)
+                && upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage);
     }
 }
