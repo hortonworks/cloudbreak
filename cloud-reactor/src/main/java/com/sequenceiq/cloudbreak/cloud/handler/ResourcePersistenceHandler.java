@@ -46,6 +46,7 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
                     notificationPersisted.getPromise().onNext(new ResourcePersisted());
                 })
                 .checkIfRecoverable(e -> e instanceof TransientDataAccessException)
-                .ifNotRecoverable(e -> notification.getPromise().onError(e)).run();
+                .ifNotRecoverable(e -> notification.getPromise().onError(e))
+                .run();
     }
 }

@@ -80,6 +80,8 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         AmazonEc2RetryClient client = getAmazonEc2RetryClient(auth);
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        LOGGER.debug("Creating attach volume requests and submitting to executor for stack '{}',   group '{}'",
+                auth.getCloudContext().getName(), group.getName());
         List<Future<?>> futures = volumeSetAttributes.getVolumes().stream()
                 .filter(volume -> !StringUtils.equals(AwsDiskType.Ephemeral.value(), volume.getType()))
                 .map(volume -> new AttachVolumeRequest()
@@ -89,9 +91,11 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
                 .map(request -> intermediateBuilderExecutor.submit(() -> client.attachVolume(request)))
                 .collect(Collectors.toList());
 
+        LOGGER.debug("Waiting for attach volumes request");
         for (Future<?> future : futures) {
             future.get();
         }
+        LOGGER.debug("Attach volume requests sent");
 
         volumeSet.setInstanceId(instance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
@@ -131,6 +135,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         ResourceStatus volumeSetStatus = result.getVolumes().stream()
                 .map(com.amazonaws.services.ec2.model.Volume::getState)
                 .allMatch("in-use"::equals) ? ResourceStatus.CREATED : ResourceStatus.IN_PROGRESS;
+        LOGGER.debug("[{}] volume set status is {}", String.join(",", volumeIds), volumeSetStatus);
         return collectCloudResourceStatuses(volumeResources, volumeSetStatus);
     }
 
