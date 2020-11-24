@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,10 +25,10 @@ import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
-import com.sequenceiq.cloudbreak.auth.altus.config.UmsConfig;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
+import io.opentracing.Tracer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GrpcUmsClientTest {
@@ -41,26 +40,29 @@ public class GrpcUmsClientTest {
     private static final String TEST_ROLE_2 = "TestRole2";
 
     @Mock
-    private UmsConfig umsConfig;
+    private ManagedChannelWrapper channelWrapper;
 
     @Mock
     private UmsClientConfig umsClientConfig;
 
     @Mock
-    private UmsClient umsClient;
+    private Tracer tracer;
 
     @InjectMocks
     private GrpcUmsClient underTest;
 
     private GrpcUmsClient underTestWithMockUmsClient;
 
+    @Mock
+    private UmsClient umsClient;
+
+    @Mock
+    private ManagedChannel managedChannel;
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         underTestWithMockUmsClient = spy(underTest);
-        ManagedChannel managedChannel = mock(ManagedChannel.class);
-        ManagedChannelWrapper managedChannelWrapper = mock(ManagedChannelWrapper.class);
-        doReturn(managedChannel).when(managedChannelWrapper).getChannel();
-        doReturn(managedChannelWrapper).when(underTestWithMockUmsClient).makeWrapper();
+        doReturn(managedChannel).when(channelWrapper).getChannel();
         doReturn(umsClient).when(underTestWithMockUmsClient).makeClient(any(ManagedChannel.class), anyString());
     }
 
