@@ -2,11 +2,14 @@ package com.sequenceiq.environment.environment.validation.securitygroup.gcp;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -53,6 +56,12 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
                 region.getName(),
                 getCloudPlatform().name(),
                 null);
+
+        Map<String, String> filters = new HashMap<>();
+        if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getGcp().getSharedProjectId())) {
+            filters.put(GcpStackUtil.SHARED_PROJECT_ID, environmentDto.getNetwork().getGcp().getSharedProjectId());
+        }
+        request.setFilters(filters);
 
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
 

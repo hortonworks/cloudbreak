@@ -55,6 +55,6 @@ public class SecurityGroupV4RequestToSecurityGroupConverter extends AbstractConv
             }
             return convertedSet;
         }
-        return Set.of();
+        return new HashSet<>();
     }
 }
