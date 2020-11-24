@@ -160,7 +160,7 @@
 
      <buffer tag,time>
         @type file
-        path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}_CM_COMMAND
+        path /var/log/{{ fluent.binary }}/{{fluent.providerPrefix}}
         timekey {{fluent.partitionIntervalMin}}m
         timekey_wait 0s
         total_limit_size  1024MB
