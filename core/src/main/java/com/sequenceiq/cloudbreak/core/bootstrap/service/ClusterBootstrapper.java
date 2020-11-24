@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -111,6 +112,9 @@ public class ClusterBootstrapper {
 
     @Inject
     private SaltBootstrapFingerprintVersionChecker fingerprintVersionChecker;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -255,7 +259,8 @@ public class ClusterBootstrapper {
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
-        for (InstanceMetaData im : stack.getNotDeletedInstanceMetaDataSet()) {
+        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        for (InstanceMetaData im : notDeletedInstanceMetaDataSet) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
@@ -263,8 +268,10 @@ public class ClusterBootstrapper {
                 String instanceId = im.getInstanceId();
                 String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
                 nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, generatedHostName, domain, im.getInstanceGroupName()));
+                initializeDiscoveryFqdnOfInstanceMetadata(im, domain, generatedHostName);
             }
         }
+        instanceMetaDataService.saveAll(notDeletedInstanceMetaDataSet);
         return nodes;
     }
 
@@ -285,7 +292,7 @@ public class ClusterBootstrapper {
 
         Iterator<String> iterator = recoveryHostNames.iterator();
         for (InstanceMetaData im : metaDataSet) {
-            Node node = createNode(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
+            Node node = createNodeAndInitFqdnInInstanceMetadata(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
                 // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
@@ -297,6 +304,7 @@ public class ClusterBootstrapper {
             }
             allNodes.add(node);
         }
+        instanceMetaDataService.saveAll(metaDataSet);
         try {
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
@@ -319,7 +327,7 @@ public class ClusterBootstrapper {
     }
 
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
-            throws CloudbreakException, CloudbreakOrchestratorException {
+            throws CloudbreakOrchestratorException {
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
@@ -357,7 +365,8 @@ public class ClusterBootstrapper {
      * Even if the domain has changed keep the rest of the nodes domain.
      * Note: if we recovered a node the private id is not the same as it is in the hostname
      */
-    private Node createNode(Stack stack, InstanceMetaData im, String domain, Map<String, AtomicLong> hostGroupNodeIndexes, Set<String> clusterNodeNames) {
+    private Node createNodeAndInitFqdnInInstanceMetadata(Stack stack, InstanceMetaData im, String domain, Map<String, AtomicLong> hostGroupNodeIndexes,
+            Set<String> clusterNodeNames) {
         String discoveryFQDN = im.getDiscoveryFQDN();
         String instanceId = im.getInstanceId();
         String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
@@ -365,8 +374,14 @@ public class ClusterBootstrapper {
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, im.getShortHostname(), domain, im.getInstanceGroupName());
         } else {
             String hostname = clusterNodeNameGenerator.getNodeNameForInstanceMetadata(im, stack, hostGroupNodeIndexes, clusterNodeNames);
+            initializeDiscoveryFqdnOfInstanceMetadata(im, domain, hostname);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), instanceId, instanceType, hostname, domain, im.getInstanceGroupName());
         }
+    }
+
+    private void initializeDiscoveryFqdnOfInstanceMetadata(InstanceMetaData im, String domain, String hostname) {
+        String generatedFqdn = String.format("%s.%s", hostname, domain);
+        im.setDiscoveryFQDN(generatedFqdn);
     }
 
     private void validatePollingResultForCancellation(PollingResult pollingResult, String cancelledMessage) {

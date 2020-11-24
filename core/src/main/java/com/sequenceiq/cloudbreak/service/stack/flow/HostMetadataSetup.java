@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -69,10 +70,16 @@ public class HostMetadataSetup {
                 Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
                 LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
                 for (InstanceMetaData instanceMetaData : metadataToUpdate) {
-                    String address = members.get(instanceMetaData.getPrivateIp());
-                    instanceMetaData.setDiscoveryFQDN(address);
-                    LOGGER.info("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
-                            instanceMetaData.getDiscoveryFQDN());
+                    String privateIp = instanceMetaData.getPrivateIp();
+                    String fqdnFromTheCluster = members.get(privateIp);
+                    String discoveryFQDN = instanceMetaData.getDiscoveryFQDN();
+                    if (StringUtils.isEmpty(discoveryFQDN) || !discoveryFQDN.equals(fqdnFromTheCluster)) {
+                        instanceMetaData.setDiscoveryFQDN(fqdnFromTheCluster);
+                        LOGGER.info("Discovery FQDN has been updated for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(),
+                                fqdnFromTheCluster, discoveryFQDN);
+                    } else {
+                        LOGGER.debug("There is no need to update the FQDN for node, private ip: '{}' with FQDN: '{}'", privateIp, discoveryFQDN);
+                    }
                 }
             } else {
                 LOGGER.info("There is no hosts to update");
