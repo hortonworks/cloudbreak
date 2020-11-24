@@ -25,7 +25,7 @@ public class AzurePremiumValidatorService {
                 .toLowerCase();
 
         String transformedFlavor = flavor.replaceAll(segment, transformedSegment).toLowerCase();
-        String[] items = { "_ds", "_ls", "_gs", "_fs", "_es_v3", "_eis_v3" };
+        String[] items = { "_ds", "_das", "_ls", "_gs", "_fs", "_es_v3", "_eis_v3" };
         return Arrays.stream(items).parallel().anyMatch(transformedFlavor::contains);
     }
 }
