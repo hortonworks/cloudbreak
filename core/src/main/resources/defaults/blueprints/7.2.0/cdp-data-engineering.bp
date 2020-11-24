@@ -104,7 +104,7 @@
           },
           {
             "name": "yarn_service_mapred_safety_valve",
-            "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property>"
+            "value": "<property><name>mapreduce.fileoutputcommitter.algorithm.version</name><value>1</value></property><property><name>mapreduce.input.fileinputformat.list-status.num-threads</name><value>100</value></property>"
           }
         ],
         "roleConfigGroups": [
