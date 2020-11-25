@@ -78,6 +78,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Credential credential = credentialConverter.convert(request);
         credential.setType(AUDIT);
+        credential.setVerifyPermissions(false);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         Set<Credential> auditCredentialsByPlatfom = credentialService
                 .listAvailablesByAccountId(accountId, AUDIT)
