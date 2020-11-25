@@ -46,10 +46,16 @@ public class DatalakeDatabaseRestoreFlowConfig extends AbstractFlowConfiguration
                     .failureState(DATALAKE_DATABASE_RESTORE_COULD_NOT_START_STATE)
                     .failureEvent(DATALAKE_DATABASE_RESTORE_COULD_NOT_START_EVENT)
 
+                    .from(DATALAKE_DATABASE_RESTORE_COULD_NOT_START_STATE)
+                    .to(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .event(DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT)
+                    .failureState(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .failureEvent(DATALAKE_DATABASE_RESTORE_FAILED_EVENT)
+
                     .from(DATALAKE_DATABASE_RESTORE_IN_PROGRESS_STATE)
                     .to(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
                     .event(DATALAKE_FULL_RESTORE_IN_PROGRESS_EVENT)
-                    .failureState(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .failureState(DATALAKE_DATABASE_RESTORE_FAILED_STATE)
                     .failureEvent(DATALAKE_DATABASE_RESTORE_FAILED_EVENT)
 
                     .from(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
@@ -63,8 +69,10 @@ public class DatalakeDatabaseRestoreFlowConfig extends AbstractFlowConfiguration
                     .event(DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_DATABASE_RESTORE_FAILED_STATE)
-                    .to(FINAL_STATE)
-                    .event(DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT).defaultFailureEvent()
+                    .to(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .event(DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT)
+                    .failureState(DATALAKE_FULL_RESTORE_IN_PROGRESS_STATE)
+                    .failureEvent(DATALAKE_DATABASE_RESTORE_FAILED_EVENT)
 
                     .from(DATALAKE_RESTORE_FAILED_STATE)
                     .to(FINAL_STATE)
@@ -73,7 +81,7 @@ public class DatalakeDatabaseRestoreFlowConfig extends AbstractFlowConfiguration
                     .build();
 
     private static final FlowEdgeConfig<DatalakeDatabaseRestoreState, DatalakeDatabaseRestoreEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATALAKE_DATABASE_RESTORE_FAILED_STATE, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATALAKE_RESTORE_FAILED_STATE, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT);
 
     public DatalakeDatabaseRestoreFlowConfig() {
         super(DatalakeDatabaseRestoreState.class, DatalakeDatabaseRestoreEvent.class);
@@ -108,6 +116,6 @@ public class DatalakeDatabaseRestoreFlowConfig extends AbstractFlowConfiguration
 
     @Override
     public DatalakeDatabaseRestoreEvent getRetryableEvent() {
-        return DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT;
+        return DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
     }
 }
