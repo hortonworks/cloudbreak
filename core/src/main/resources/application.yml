@@ -210,7 +210,8 @@ cb:
         r5dn.2xlarge,
         r5dn.4xlarge,
         r5dn.8xlarge,
-        r5dn.16xlarge
+        r5dn.16xlarge,
+        x1e.2xlarge
 
     hostkey.verify: false
     role.session.name: cdp-provisioning
