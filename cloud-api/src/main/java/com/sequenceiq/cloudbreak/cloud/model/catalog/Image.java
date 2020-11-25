@@ -124,6 +124,10 @@ public class Image {
         return packageVersions == null ? new HashMap<>() : packageVersions;
     }
 
+    public String getPackageVersion(ImagePackageVersion packageVersion) {
+        return getPackageVersions().get(packageVersion.getKey());
+    }
+
     public boolean isPrewarmed() {
         return stackDetails != null && stackDetails.getRepo() != null && stackDetails.getRepo().getStack() != null;
     }

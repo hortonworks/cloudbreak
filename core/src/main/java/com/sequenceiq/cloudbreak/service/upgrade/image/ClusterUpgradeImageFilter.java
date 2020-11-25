@@ -17,14 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @Component
 public class ClusterUpgradeImageFilter {
-
-    public static final String CM_PACKAGE_KEY = "cm";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeImageFilter.class);
 
@@ -87,14 +86,14 @@ public class ClusterUpgradeImageFilter {
     private Predicate<Image> filterIgnoredCmVersion(Mutable<String> reason) {
         return image -> {
             reason.setValue("There are no eligible images with supported Cloudera Manager or CDP version.");
-            return !image.getPackageVersions().get(CM_PACKAGE_KEY).contains(IGNORED_CM_VERSION);
+            return !image.getPackageVersion(ImagePackageVersion.CM).contains(IGNORED_CM_VERSION);
         };
     }
 
     private Predicate<Image> filterNonCmImages(Mutable<String> reason) {
         return image -> {
             reason.setValue("There are no eligible images to upgrade available with Cloudera Manager packages.");
-            return isNotEmpty(image.getPackageVersions().get(CM_PACKAGE_KEY));
+            return isNotEmpty(image.getPackageVersion(ImagePackageVersion.CM));
         };
     }
 
