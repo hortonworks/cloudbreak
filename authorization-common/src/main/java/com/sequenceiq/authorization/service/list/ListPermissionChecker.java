@@ -20,6 +20,8 @@ import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseColl
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
 @Component
 public class ListPermissionChecker {
@@ -29,6 +31,9 @@ public class ListPermissionChecker {
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Object checkPermissions(FilterListBasedOnPermissions methodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, long startTime) {
         AuthorizationResourceAction action = methodAnnotation.action();
@@ -36,26 +41,30 @@ public class ListPermissionChecker {
             commonPermissionCheckingUtils.checkPermissionForUser(action, userCrn);
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
-        List<String> allResourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnsInAccount();
-        Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(action, userCrn, allResourceCrns)
-                .entrySet()
-                .stream()
-                .filter(Map.Entry::getValue)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
-        Object result = commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
-        switch (ListResponseFilteringType.getByClass(result.getClass())) {
-            case SET:
-                return filterSet(filteredResourceCrns, (Set) result);
-            case LIST:
-                return filterList(filteredResourceCrns, (List) result);
-            case FILTERABLE_RESPONSE_MODEL:
-                return filterAuthorizationFilterableResponse(filteredResourceCrns, (AuthorizationFilterableResponseCollection) result);
-            case UNSUPPORTED:
-            default:
-                throw new IllegalStateException("Response of list API should be List, Set or an instance of " +
-                        "AuthorizationFilterableResponseCollection interface");
+        if (entitlementService.listFilteringEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId())) {
+            List<String> allResourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnsInAccount();
+            Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(action, userCrn, allResourceCrns)
+                    .entrySet()
+                    .stream()
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toSet());
+            Object result = commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
+            switch (ListResponseFilteringType.getByClass(result.getClass())) {
+                case SET:
+                    return filterSet(filteredResourceCrns, (Set) result);
+                case LIST:
+                    return filterList(filteredResourceCrns, (List) result);
+                case FILTERABLE_RESPONSE_MODEL:
+                    return filterAuthorizationFilterableResponse(filteredResourceCrns, (AuthorizationFilterableResponseCollection) result);
+                case UNSUPPORTED:
+                default:
+                    throw new IllegalStateException("Response of list API should be List, Set or an instance of " +
+                            "AuthorizationFilterableResponseCollection interface");
 
+            }
+        } else {
+            return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
     }
 

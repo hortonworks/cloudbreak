@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HEALTH_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LIST_FILTERING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -52,6 +53,10 @@ public class EntitlementService {
 
     public boolean isEntitledFor(String actorCrn, String accountId, Entitlement entitledFor) {
         return isEntitlementRegistered(actorCrn, accountId, entitledFor);
+    }
+
+    public boolean listFilteringEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_LIST_FILTERING);
     }
 
     public boolean azureEnabled(String actorCrn, String accountId) {
