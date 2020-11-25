@@ -315,7 +315,13 @@ public class ClusterRepairService {
     }
 
     private Predicate<Resource> inInstances(Set<String> instanceIds) {
-        return resource -> instanceIds.contains(resource.getInstanceId());
+        return resource -> {
+            if (resource.getInstanceId() != null) {
+                return instanceIds.contains(resource.getInstanceId());
+            } else {
+                return false;
+            }
+        };
     }
 
     private Resource updateDeleteVolumesFlag(boolean deleteVolumes, Resource volumeSet) {

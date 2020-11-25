@@ -92,26 +92,50 @@ public class AwsUpscaleService {
         try {
             awsAutoScalingService.scheduleStatusChecks(scaledGroups, ac, cloudFormationClient, timeBeforeASUpdate);
         } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
-            recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize,
-                    amazonAutoscalingFailed);
+            LOGGER.info("Amazon autoscaling group update failed", amazonAutoscalingFailed);
+            recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, amazonAutoscalingFailed);
+            sendASGUpdateFailedMessage(amazonASClient, desiredAutoscalingGroupsByName, amazonAutoscalingFailed);
         }
-        awsAutoScalingService.suspendAutoScaling(ac, stack);
-        List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
-        associateElasticIpWithNewInstances(stack, resources, cloudFormationClient, amazonEC2Client, scaledGroups, instances);
+        try {
+            awsAutoScalingService.suspendAutoScaling(ac, stack);
+            List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
+            associateElasticIpWithNewInstances(stack, resources, cloudFormationClient, amazonEC2Client, scaledGroups, instances);
 
-        List<Group> groupsWithNewInstances = getGroupsWithNewInstances(scaledGroups);
-        List<CloudResource> newInstances = getNewInstances(scaledGroups, instances);
-        List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(scaledGroups, resources);
-        List<CloudResource> networkResources = resources.stream()
-                .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
-                .collect(Collectors.toList());
-        awsComputeResourceService.buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
+            List<Group> groupsWithNewInstances = getGroupsWithNewInstances(scaledGroups);
+            List<CloudResource> newInstances = getNewInstances(scaledGroups, instances);
+            List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(scaledGroups, resources);
+            List<CloudResource> networkResources = resources.stream()
+                    .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
+                    .collect(Collectors.toList());
+            List<CloudResourceStatus> cloudResourceStatuses = awsComputeResourceService
+                    .buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
-        awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
-
-        awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
-
+            List<String> failedResources = cloudResourceStatuses.stream().map(CloudResourceStatus::getCloudResource)
+                    .filter(cloudResource -> CommonStatus.FAILED == cloudResource.getStatus())
+                    .map(cloudResource -> cloudResource.getType() + " - " + cloudResource.getName())
+                    .collect(Collectors.toList());
+            if (!failedResources.isEmpty()) {
+                throw new RuntimeException("Additional resource creation failed: " + failedResources);
+            }
+            awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
+            awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
+        } catch (RuntimeException runtimeException) {
+            recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, runtimeException);
+            throw new CloudConnectorException(String.format("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
+                            "Original autoscaling group state has been recovered. Exception: %s", runtimeException.getMessage()), runtimeException);
+        }
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
+    }
+
+    private void sendASGUpdateFailedMessage(AmazonAutoScalingRetryClient amazonASClient, Map<String, Group> desiredAutoscalingGroupsByName,
+            AmazonAutoscalingFailed amazonAutoscalingFailed) {
+        int desiredCount = desiredAutoscalingGroupsByName.values().stream().map(Group::getInstancesSize).reduce(Integer::sum).orElse(0);
+        Map<String, Integer> asgSizeAfterFail = getAutoScalingGroupsBySize(desiredAutoscalingGroupsByName.keySet(), amazonASClient);
+        int successCount = asgSizeAfterFail.values().stream().reduce(Integer::sum).orElse(0);
+        LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state has been recovered");
+        throw new CloudConnectorException(String.format("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state "
+                        + "(%d instances instead of %d), please check your quotas on AWS. Original autoscaling group state has been recovered.",
+                successCount, desiredCount), amazonAutoscalingFailed);
     }
 
     private void recoverOriginalState(AuthenticatedContext ac,
@@ -119,12 +143,10 @@ public class AwsUpscaleService {
             AmazonAutoScalingRetryClient amazonASClient,
             Map<String, Group> desiredAutoscalingGroupsByName,
             Map<String, Integer> originalAutoScalingGroupsBySize,
-            AmazonAutoscalingFailed amazonAutoscalingFailedException) {
-        LOGGER.info("Amazon autoscaling group update failed, suspend autoscaling", amazonAutoscalingFailedException);
-        LOGGER.debug("Collecting info about desired and achieved instance counts");
-        int desiredCount = desiredAutoscalingGroupsByName.values().stream().map(Group::getInstancesSize).reduce(Integer::sum).orElse(0);
-        Map<String, Integer> asgSizeAfterFail = getAutoScalingGroupsBySize(desiredAutoscalingGroupsByName.keySet(), amazonASClient);
-        int successCount = asgSizeAfterFail.values().stream().reduce(Integer::sum).orElse(0);
+            Exception originalException) {
+            LOGGER.info("Recover original state of the autoscaling group", originalException);
+            LOGGER.debug("Collecting info about desired and achieved instance counts");
+
         try {
             awsAutoScalingService.suspendAutoScaling(ac, stack);
             List<Instance> instancesFromASGs = getInstancesInAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName.keySet());
@@ -151,17 +173,12 @@ public class AwsUpscaleService {
                 }
             }
             awsAutoScalingService.scheduleStatusChecks(originalAutoScalingGroupsBySize, ac, timeBeforeASUpdate);
-        } catch (Exception autoscalingFailed) {
-            autoscalingFailed.addSuppressed(amazonAutoscalingFailedException);
-            LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state recover is failed", autoscalingFailed);
-            throw new CloudConnectorException("AWS Autoscaling Group update failed: '" + amazonAutoscalingFailedException.getMessage() +
-                    "'. We tried to recover to the original state, but it failed also: '" + autoscalingFailed.getMessage() +
-                    "' Please check your autoscaling groups on AWS.", autoscalingFailed);
+        } catch (Exception recoverFailedException) {
+            recoverFailedException.addSuppressed(originalException);
+            LOGGER.info("Original autoscaling group state recover is failed", recoverFailedException);
+            throw new CloudConnectorException("Upscale failed: " + originalException.getMessage() + ", We tried to recover to the original state, " +
+                    "but recover failed also: '" + recoverFailedException.getMessage() + "' Please check your autoscaling groups on AWS.");
         }
-        LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state has been recovered");
-        throw new CloudConnectorException(String.format("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state "
-                + "(%d instances instead of %d), please check your quotas on AWS. Original autoscaling group state has been recovered.",
-                successCount, desiredCount), amazonAutoscalingFailedException);
     }
 
     private void updateAutoscalingGroups(AmazonAutoScalingRetryClient amazonASClient,

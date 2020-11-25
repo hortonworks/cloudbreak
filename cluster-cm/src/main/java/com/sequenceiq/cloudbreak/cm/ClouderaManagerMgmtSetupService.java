@@ -151,7 +151,7 @@ public class ClouderaManagerMgmtSetupService {
         try {
             mgmtRolesResourceApi.createRoles(mgmtRoles);
         } catch (ApiException ex) {
-            if (!ex.getResponseBody().contains("The maximum number of instances")) {
+            if (ex.getResponseBody() == null || !ex.getResponseBody().contains("The maximum number of instances")) {
                 throw ex;
             }
         }

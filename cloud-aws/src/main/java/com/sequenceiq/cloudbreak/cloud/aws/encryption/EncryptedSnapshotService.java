@@ -129,7 +129,7 @@ public class EncryptedSnapshotService {
 
     private Collection<Tag> prepareTagList(AuthenticatedContext ac, CloudStack cloudStack, AwsInstanceView awsInstanceView) {
         String ebsEncryptedTag = getEncryptedSnapshotName(awsInstanceView);
-        Collection<com.amazonaws.services.ec2.model.Tag> tags = awsTaggingService.prepareEc2Tags(ac, cloudStack.getTags());
+        Collection<com.amazonaws.services.ec2.model.Tag> tags = awsTaggingService.prepareEc2Tags(cloudStack.getTags());
         tags.add(new Tag().withKey(ebsEncryptedTag).withValue(ebsEncryptedTag));
         return tags;
     }

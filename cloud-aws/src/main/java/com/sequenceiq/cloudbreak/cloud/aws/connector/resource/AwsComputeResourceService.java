@@ -55,8 +55,7 @@ public class AwsComputeResourceService {
             awsContextService.addResourcesToContext(contextResources, context, groupsWithNewInstances);
         }
 
-        Long threshold = (long) newInstances.size();
-        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances, AdjustmentType.EXACT, threshold);
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
     }
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources) {

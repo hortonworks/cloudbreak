@@ -88,7 +88,7 @@ public class ComputeResourceService {
 
     public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             Iterable<Group> groups) {
-        return buildResourcesForUpscale(ctx, auth, cloudStack, groups, AdjustmentType.BEST_EFFORT, null);
+        return buildResourcesForUpscale(ctx, auth, cloudStack, groups, AdjustmentType.EXACT, (long) getFullNodeCount(groups));
     }
 
     public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
@@ -247,6 +247,14 @@ public class ComputeResourceService {
         return result;
     }
 
+    private int getFullNodeCount(Iterable<Group> groups) {
+        int fullNodeCount = 0;
+        for (Group group : groups) {
+            fullNodeCount += group.getInstancesSize();
+        }
+        return fullNodeCount;
+    }
+
     private class ResourceBuilder {
 
         private final ResourceBuilderContext ctx;
@@ -282,8 +290,9 @@ public class ComputeResourceService {
                     List<List<CloudResourceStatus>> cloudResourceStatusChunks = waitForRequests(futures).get(FutureResult.SUCCESS);
                     List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(cloudResourceStatusChunks);
                     List<CloudResourceStatus> failedResources = filterResourceStatuses(resourceStatuses, ResourceStatus.FAILED);
-                    cloudFailureHandler.rollback(auth, failedResources, group, getFullNodeCount(groups), ctx,
-                            resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
+                    CloudFailureContext cloudFailureContext = new CloudFailureContext(auth, new ScaleContext(upscale, adjustmentType, threshold), ctx);
+                    cloudFailureHandler.rollback(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders, getFullNodeCount(groups)
+                    );
                     results.addAll(filterResourceStatuses(resourceStatuses, ResourceStatus.CREATED));
                 }
             }
@@ -341,14 +350,6 @@ public class ComputeResourceService {
         private Optional<ComputeResourceBuilder<ResourceBuilderContext>> determineComputeResourceBuilder(CloudResource resource) {
             return resourceBuilders.compute(auth.getCloudContext().getPlatform())
                     .stream().filter(rb -> rb.resourceType().equals(resource.getType())).findFirst();
-        }
-
-        private int getFullNodeCount(Iterable<Group> groups) {
-            int fullNodeCount = 0;
-            for (Group group : groups) {
-                fullNodeCount += group.getInstancesSize();
-            }
-            return fullNodeCount;
         }
 
         private Iterable<Group> getOrderedCopy(Iterable<Group> groups) {

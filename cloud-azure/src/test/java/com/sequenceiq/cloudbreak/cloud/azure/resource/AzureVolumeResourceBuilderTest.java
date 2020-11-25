@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -7,8 +9,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +23,15 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.microsoft.azure.PagedList;
+import com.microsoft.azure.management.compute.Disk;
+import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
@@ -35,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -161,5 +172,93 @@ public class AzureVolumeResourceBuilderTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertNotEquals(volumeSetResource, result.get(0));
+    }
+
+    @Test
+    public void deleteTestWhenDiskIsDeletedOnAzure() throws InterruptedException {
+        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        when(context.getNetworkResources()).thenReturn(List.of(mock));
+        ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume("volume-1", "device", 100, "ssd"));
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
+                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")))
+                .name("volume").build();
+        PagedList<Disk> pagedList = mock(PagedList.class);
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        underTest.delete(context, auth, volumeSetResource);
+        verify(azureUtils, times(0)).deleteManagedDisks(any(), any());
+    }
+
+    @Test
+    public void deleteTestWhenDiskIsOnAzureAndNotAttached() throws InterruptedException {
+        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        when(context.getNetworkResources()).thenReturn(List.of(mock));
+        ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd"));
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
+                .params(Map.of(
+                        CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")
+                ))
+                .name("volume").build();
+        List<Disk> diskList = new ArrayList<>();
+        Disk disk1 = mock(Disk.class);
+        when(disk1.id()).thenReturn("vol1");
+        Disk disk2 = mock(Disk.class);
+        when(disk2.id()).thenReturn("vol2");
+        Disk disk3 = mock(Disk.class);
+        when(disk3.id()).thenReturn("vol3");
+        PagedList<Disk> pagedList = mock(PagedList.class);
+        diskList.add(disk1);
+        diskList.add(disk2);
+        diskList.add(disk3);
+        when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
+        underTest.delete(context, auth, volumeSetResource);
+        verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
+        verify(azureClient, times(0)).getVirtualMachine(any(), any());
+        verify(azureClient, times(0)).detachDiskFromVm(any(), any());
+        Collection<String> deletedAzureManagedDisks = captor.getValue();
+        assertThat(deletedAzureManagedDisks, containsInAnyOrder("vol1"));
+    }
+
+    @Test
+    public void deleteTestWhenDiskIsOnAzureAndAttached() throws InterruptedException {
+        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        when(context.getNetworkResources()).thenReturn(List.of(mock));
+        ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd"));
+        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
+                .params(Map.of(
+                        CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")
+                ))
+                .instanceId("instance1")
+                .name("volume").build();
+        List<Disk> diskList = new ArrayList<>();
+        Disk disk1 = mock(Disk.class);
+        when(disk1.id()).thenReturn("vol1");
+        when(disk1.isAttachedToVirtualMachine()).thenReturn(true);
+        Disk disk2 = mock(Disk.class);
+        when(disk2.id()).thenReturn("vol2");
+        when(disk2.isAttachedToVirtualMachine()).thenReturn(true);
+        Disk disk3 = mock(Disk.class);
+        when(disk3.id()).thenReturn("vol3");
+        when(disk3.isAttachedToVirtualMachine()).thenReturn(true);
+        PagedList<Disk> pagedList = mock(PagedList.class);
+        diskList.add(disk1);
+        diskList.add(disk2);
+        diskList.add(disk3);
+        when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
+        when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        when(azureClient.getVirtualMachine(any(), eq("instance1"))).thenReturn(virtualMachine);
+        ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
+        underTest.delete(context, auth, volumeSetResource);
+
+        verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
+        verify(azureClient, times(1)).getVirtualMachine(eq("resource-group"), eq("instance1"));
+        verify(azureClient, times(1)).detachDiskFromVm(eq("vol1"), eq(virtualMachine));
+        Collection<String> deletedAzureManagedDisks = captor.getValue();
+        assertThat(deletedAzureManagedDisks, containsInAnyOrder("vol1"));
     }
 }
