@@ -1,25 +1,16 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter.CM_PACKAGE_KEY;
-
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
 
 @Service
 public class UpgradePermissionProvider {
-
-    protected static final String STACK_PACKAGE_KEY = "stack";
-
-    protected static final String CDH_BUILD_NUMBER_KEY = "cdh-build-number";
-
-    protected static final String CM_BUILD_NUMBER_KEY = "cm-build-number";
 
     @Inject
     private ComponentBuildNumberComparator componentBuildNumberComparator;
@@ -31,26 +22,22 @@ public class UpgradePermissionProvider {
     private ComponentVersionComparator componentVersionComparator;
 
     public boolean permitCmUpgrade(ImageFilterParams imageFilterParams, Image image) {
-        return permitUpgrade(imageFilterParams, image, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY, false);
+        return permitUpgrade(imageFilterParams, image, ImagePackageVersion.CM, ImagePackageVersion.CM_BUILD_NUMBER, false);
     }
 
     public boolean permitStackUpgrade(ImageFilterParams imageFilterParams, Image image) {
-        return permitUpgrade(imageFilterParams, image, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY, imageFilterParams.isCheckUpgradeMatrix());
+        return permitUpgrade(imageFilterParams, image, ImagePackageVersion.STACK, ImagePackageVersion.CDH_BUILD_NUMBER,
+                imageFilterParams.isCheckUpgradeMatrix());
     }
 
-    private boolean permitUpgrade(ImageFilterParams imageFilterParams, Image image, String versionKey, String buildNumberKey, boolean checkUpgradeMatrix) {
-        String currentVersion = getVersionFromImage(imageFilterParams.getCurrentImage(), versionKey);
-        String newVersion = getVersionFromImage(image, versionKey);
+    private boolean permitUpgrade(ImageFilterParams imageFilterParams, Image image, ImagePackageVersion version, ImagePackageVersion buildNumber,
+            boolean checkUpgradeMatrix) {
+        String currentVersion = imageFilterParams.getCurrentImage().getPackageVersion(version);
+        String newVersion = image.getPackageVersion(version);
         return versionsArePresent(currentVersion, newVersion)
                 && currentVersion.equals(newVersion)
-                        ? permitCmAndStackUpgradeByBuildNumber(imageFilterParams.getCurrentImage(), image, buildNumberKey)
+                        ? permitCmAndStackUpgradeByBuildNumber(imageFilterParams.getCurrentImage(), image, buildNumber.getKey())
                         : permitCmAndStackUpgradeByComponentVersion(currentVersion, newVersion, checkUpgradeMatrix);
-    }
-
-    private String getVersionFromImage(Image image, String key) {
-        return Optional.ofNullable(image.getPackageVersions())
-                .map(map -> map.get(key))
-                .orElse(null);
     }
 
     private boolean versionsArePresent(String currentVersion, String newVersion) {

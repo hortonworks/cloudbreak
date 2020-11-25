@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider.CDH_BUILD_NUMBER_KEY;
-import static com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider.CM_BUILD_NUMBER_KEY;
-import static com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider.STACK_PACKAGE_KEY;
-import static com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter.CM_PACKAGE_KEY;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
@@ -21,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
 
@@ -46,12 +43,12 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(componentVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
 
-        when(componentBuildNumberComparator.compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY)).thenReturn(true);
+        when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(true);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
         assertTrue(actual);
-        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY);
+        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         verifyNoInteractions(upgradeMatrixService, componentVersionComparator);
     }
 
@@ -62,12 +59,12 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage(componentVersion, "2001");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
 
-        when(componentBuildNumberComparator.compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY)).thenReturn(false);
+        when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
         assertFalse(actual);
-        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY);
+        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         verifyNoInteractions(upgradeMatrixService, componentVersionComparator);
     }
 
@@ -168,23 +165,23 @@ public class UpgradePermissionProviderTest {
         Image candidateImage = createImage("7.2.1", null);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
 
-        when(componentBuildNumberComparator.compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY)).thenReturn(false);
+        when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
 
         boolean actual = underTest.permitStackUpgrade(imageFilterParams, candidateImage);
 
         assertFalse(actual);
-        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, CDH_BUILD_NUMBER_KEY);
+        verify(componentBuildNumberComparator).compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey());
         verifyNoInteractions(upgradeMatrixService, componentVersionComparator);
     }
 
     private Image createImage(String version, String buildNumber) {
         Map<String, String> packageVersions = new HashMap<>();
         // cm
-        packageVersions.put(CM_PACKAGE_KEY, version);
-        packageVersions.put(CM_BUILD_NUMBER_KEY, buildNumber);
+        packageVersions.put(ImagePackageVersion.CM.getKey(), version);
+        packageVersions.put(ImagePackageVersion.CM_BUILD_NUMBER.getKey(), buildNumber);
         // cdh
-        packageVersions.put(STACK_PACKAGE_KEY, version);
-        packageVersions.put(CDH_BUILD_NUMBER_KEY, buildNumber);
+        packageVersions.put(ImagePackageVersion.STACK.getKey(), version);
+        packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), buildNumber);
         return new Image(null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null);
     }
 }

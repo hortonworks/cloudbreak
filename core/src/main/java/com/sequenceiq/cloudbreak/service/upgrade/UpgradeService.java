@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -53,8 +54,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Component
 public class UpgradeService {
-
-    private static final String SALT_BOOTSTRAP = "salt-bootstrap";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeService.class);
 
@@ -274,9 +273,9 @@ public class UpgradeService {
     private Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> packageVersionFilter(Map<String, String> packageVersions) {
         return image -> {
             Map<String, String> catalogPackageVersions = new HashMap<>(image.getPackageVersions());
-            catalogPackageVersions.remove(SALT_BOOTSTRAP);
+            catalogPackageVersions.remove(ImagePackageVersion.SALT_BOOTSTRAP.getKey());
             Map<String, String> originalPackageVersions = new HashMap<>(packageVersions);
-            originalPackageVersions.remove(SALT_BOOTSTRAP);
+            originalPackageVersions.remove(ImagePackageVersion.SALT_BOOTSTRAP.getKey());
             return originalPackageVersions.equals(catalogPackageVersions);
         };
     }
