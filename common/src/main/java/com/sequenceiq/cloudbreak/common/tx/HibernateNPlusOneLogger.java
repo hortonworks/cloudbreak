@@ -28,7 +28,7 @@ public class HibernateNPlusOneLogger extends HibernateStatementStatistics {
         if (queryCount > maxStatementWarning) {
             LOGGER.warn("Warning threshold: {}, {}", maxStatementWarning, message, new HibernateNPlusOneException(queryCount));
         } else {
-            LOGGER.debug("Warning threshold: {}, {}", maxStatementWarning, message);
+            LOGGER.trace("Warning threshold: {}, {}", maxStatementWarning, message);
         }
     }
 }
