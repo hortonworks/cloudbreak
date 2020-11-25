@@ -46,10 +46,16 @@ public class DatalakeDatabaseBackupFlowConfig extends AbstractFlowConfiguration<
                     .failureState(DATALAKE_DATABASE_BACKUP_COULD_NOT_START_STATE)
                     .failureEvent(DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT)
 
+                    .from(DATALAKE_DATABASE_BACKUP_COULD_NOT_START_STATE)
+                    .to(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
+                    .event(DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT)
+                    .failureState(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
+                    .failureEvent(DATALAKE_DATABASE_BACKUP_FAILED_EVENT)
+
                     .from(DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE)
                     .to(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
                     .event(DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT)
-                    .failureState(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
+                    .failureState(DATALAKE_DATABASE_BACKUP_FAILED_STATE)
                     .failureEvent(DATALAKE_DATABASE_BACKUP_FAILED_EVENT)
 
                     .from(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
@@ -63,8 +69,10 @@ public class DatalakeDatabaseBackupFlowConfig extends AbstractFlowConfiguration<
                     .event(DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_DATABASE_BACKUP_FAILED_STATE)
-                    .to(FINAL_STATE)
-                    .event(DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT).defaultFailureEvent()
+                    .to(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
+                    .event(DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT)
+                    .failureState(DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE)
+                    .failureEvent(DATALAKE_DATABASE_BACKUP_FAILED_EVENT)
 
                     .from(DATALAKE_BACKUP_FAILED_STATE)
                     .to(FINAL_STATE)
@@ -74,7 +82,7 @@ public class DatalakeDatabaseBackupFlowConfig extends AbstractFlowConfiguration<
                     .build();
 
     private static final FlowEdgeConfig<DatalakeDatabaseBackupState, DatalakeDatabaseBackupEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATALAKE_DATABASE_BACKUP_FAILED_STATE, DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATALAKE_BACKUP_FAILED_STATE, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT);
 
     public DatalakeDatabaseBackupFlowConfig() {
         super(DatalakeDatabaseBackupState.class, DatalakeDatabaseBackupEvent.class);
