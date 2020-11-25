@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.start.FreeIpaServiceStartService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.sync.StackStatusCheckerJob;
@@ -23,6 +24,9 @@ public class RebootService {
 
     @Inject
     private StackStatusCheckerJob stackStatusCheckerJob;
+
+    @Inject
+    private FreeIpaServiceStartService freeIpaServiceStartService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -45,6 +49,7 @@ public class RebootService {
 
     public void finishInstanceReboot(RebootContext context, RebootInstancesResult rebootInstancesResult) {
         Stack stack = context.getStack();
+        freeIpaServiceStartService.pollFreeIpaHealth(stack);
         stackStatusCheckerJob.syncAStack(stack);
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.CREATED);
     }
