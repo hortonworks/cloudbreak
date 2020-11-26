@@ -14,6 +14,7 @@ import javax.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.assertion.audit.RecipeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -25,6 +26,9 @@ public class RecipeTest extends AbstractMockTest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private RecipeAuditGrpcServiceAssertion recipeAuditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -40,6 +44,9 @@ public class RecipeTest extends AbstractMockTest {
         testContext
                 .given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
+                .when(recipeTestClient.deleteV4())
+                .then(recipeAuditGrpcServiceAssertion::create)
+                .then(recipeAuditGrpcServiceAssertion::delete)
                 .validate();
     }
 
@@ -149,7 +156,8 @@ public class RecipeTest extends AbstractMockTest {
                 .withName(recipeName)
                 .when(recipeTestClient.createV4())
                 .when(recipeTestClient.deleteV4())
-
+                .then(recipeAuditGrpcServiceAssertion::create)
+                .then(recipeAuditGrpcServiceAssertion::delete)
                 .when(recipeTestClient.listV4());
 
         testContext
