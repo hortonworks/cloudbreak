@@ -68,7 +68,7 @@ public class GrainUploaderTest {
 
         ArgumentCaptor<GrainAddRunner> grainAddRunnerArgumentCaptor = ArgumentCaptor.forClass(GrainAddRunner.class);
 
-        verify(saltCommandRunner, atLeastOnce()).runSaltCommand(eq(saltConnector), grainAddRunnerArgumentCaptor.capture(), eq(exitCriteriaModel),
+        verify(saltCommandRunner, atLeastOnce()).runModifyGrainCommand(eq(saltConnector), grainAddRunnerArgumentCaptor.capture(), eq(exitCriteriaModel),
                 eq(exitCriteria));
         List<GrainAddRunner> allValues = grainAddRunnerArgumentCaptor.getAllValues();
         assertEquals(8, allValues.size());
