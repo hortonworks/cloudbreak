@@ -128,13 +128,13 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
                     kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig), forced);
             cleanUpFreeIpa(stack, hostsToRemove);
-            List<InstanceMetaData> decommisionedInstances = decommissionedHostNames.stream()
+            List<InstanceMetaData> decommissionedInstances = decommissionedHostNames.stream()
                     .map(hostsToRemove::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
-            decommisionedInstances.forEach(clusterDecomissionService::deleteHostFromCluster);
+            decommissionedInstances.forEach(clusterDecomissionService::deleteHostFromCluster);
             clusterDecomissionService.deleteUnusedCredentialsFromCluster();
-            updateInstanceStatuses(decommisionedInstances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
+            updateInstanceStatuses(decommissionedInstances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
             clusterDecomissionService.restartStaleServices();
 
             result = new DecommissionResult(request, decommissionedHostNames);
