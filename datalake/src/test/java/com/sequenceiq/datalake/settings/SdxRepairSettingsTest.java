@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 class SdxRepairSettingsTest {

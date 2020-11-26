@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResu
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;

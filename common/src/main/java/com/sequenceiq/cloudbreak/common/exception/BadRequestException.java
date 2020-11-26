@@ -1,4 +1,4 @@
-package com.sequenceiq.datalake.controller.exception;
+package com.sequenceiq.cloudbreak.common.exception;
 
 import java.util.Objects;
 

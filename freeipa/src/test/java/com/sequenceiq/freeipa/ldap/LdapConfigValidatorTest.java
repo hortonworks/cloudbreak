@@ -8,9 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.secret.SecretTestUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 
 @ExtendWith(MockitoExtension.class)
 public class LdapConfigValidatorTest {

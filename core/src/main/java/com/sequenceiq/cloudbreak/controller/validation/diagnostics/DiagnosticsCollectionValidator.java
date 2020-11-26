@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
