@@ -13,6 +13,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -24,6 +25,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClientFactory;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
 import com.sequenceiq.freeipa.client.model.RPCMessage;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
@@ -136,6 +138,7 @@ public class FreeIpaHealthDetailsService {
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getInstanceId));
     }
 
+    @Retryable(RetryableFreeIpaClientException.class)
     public RPCResponse<Boolean> checkFreeIpaHealth(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
         RPCResponse<Boolean> result;
         if (healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(stack)) {
@@ -150,10 +153,10 @@ public class FreeIpaHealthDetailsService {
         try (FreeIpaHealthCheckClient client = freeIpaHealthCheckClientFactory.getClient(stack, instance)) {
             return client.nodeHealth();
         } catch (FreeIpaClientException e) {
-            throw e;
+            throw new RetryableFreeIpaClientException("Error during healthcheck", e);
         } catch (Exception e) {
             LOGGER.error("FreeIPA health check failed", e);
-            throw new FreeIpaClientException("FreeIPA health check failed", e);
+            throw new RetryableFreeIpaClientException("FreeIPA health check failed", e);
         }
     }
 
