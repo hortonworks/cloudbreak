@@ -1,16 +1,17 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @ExtendWith(MockitoExtension.class)
 class UserSyncRequestValidatorTest {

@@ -1,17 +1,18 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.stereotype.Component;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-import java.util.Set;
-
-import static java.util.Objects.requireNonNull;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
 public class UserSyncRequestValidator {

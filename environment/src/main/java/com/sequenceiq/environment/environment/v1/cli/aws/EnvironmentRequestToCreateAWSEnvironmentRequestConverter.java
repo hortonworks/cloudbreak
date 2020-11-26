@@ -12,7 +12,7 @@ import com.cloudera.cdp.environments.model.AwsLogStorageRequest;
 import com.cloudera.cdp.environments.model.CreateAWSEnvironmentRequest;
 import com.cloudera.cdp.environments.model.SecurityAccessRequest;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;

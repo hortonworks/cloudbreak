@@ -7,7 +7,7 @@ import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.support.GenericConversionService;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 public class CloudbreakConversionServiceFactoryBean extends ConversionServiceFactoryBean {
 

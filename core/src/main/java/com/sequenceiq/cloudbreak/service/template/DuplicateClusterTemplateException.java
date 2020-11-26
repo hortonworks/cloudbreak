@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 public class DuplicateClusterTemplateException extends BadRequestException {
 
