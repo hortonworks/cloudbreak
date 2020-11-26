@@ -94,6 +94,15 @@ public class ImageCatalogMockServerSetup {
                 cdhRuntime);
     }
 
+    public String getPreWarmedImageCatalogUrlWithCmAndCdhVersions(String cmVersion, String cdhVersion) {
+        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&cm=%s",
+                mockImageCatalogServer,
+                "catalog-with-prewarmed",
+                cbVersion,
+                cdhVersion,
+                cmVersion);
+    }
+
     public String getUpgradeImageCatalogUrl() {
         return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
