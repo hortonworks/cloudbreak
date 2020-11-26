@@ -9,7 +9,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 public class HttpMediaTypeNotSupportedExceptionMapper extends BaseExceptionMapper<HttpMediaTypeNotSupportedException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(HttpMediaTypeNotSupportedException exception) {
         return Status.NOT_ACCEPTABLE;
     }
 

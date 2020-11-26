@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class AccessDeniedExceptionMapper extends BaseExceptionMapper<AccessDeniedException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(AccessDeniedException exception) {
         return Status.FORBIDDEN;
     }
 

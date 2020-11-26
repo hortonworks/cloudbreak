@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 public class GetCloudParameterExceptionMapper extends BaseExceptionMapper<GetCloudParameterException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(GetCloudParameterException exception) {
         return BAD_REQUEST;
     }
 

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class UnsupportedOperationFailedExceptionMapper extends BaseExceptionMapper<UnsupportedOperationException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(UnsupportedOperationException exception) {
         return Status.BAD_REQUEST;
     }
 

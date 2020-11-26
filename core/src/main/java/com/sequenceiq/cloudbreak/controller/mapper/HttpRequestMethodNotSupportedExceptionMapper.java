@@ -16,8 +16,8 @@ public class HttpRequestMethodNotSupportedExceptionMapper extends BaseExceptionM
     }
 
     @Override
-    Status getResponseStatus() {
-        return Status.BAD_REQUEST;
+    Status getResponseStatus(HttpRequestMethodNotSupportedException exception) {
+        return Status.METHOD_NOT_ALLOWED;
     }
 
     @Override

@@ -25,7 +25,7 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(DuplicateKeyValueException exception) {
         return Status.CONFLICT;
     }
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class EntityNotFoundExceptionMapper extends BaseExceptionMapper<EntityNotFoundException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(EntityNotFoundException exception) {
         return Status.NOT_FOUND;
     }
 
