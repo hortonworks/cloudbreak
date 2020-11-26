@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 public class TerminationFailedExceptionMapper extends SendNotificationExceptionMapper<TerminationFailedException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(TerminationFailedException exception) {
         return Status.BAD_REQUEST;
     }
 

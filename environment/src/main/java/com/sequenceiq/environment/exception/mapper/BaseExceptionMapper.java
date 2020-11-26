@@ -38,12 +38,14 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
                     LOGGER.debug(errorMessage, exception);
                     break;
                 case INFO_INT:
+                    LOGGER.info(errorMessage);
+                    break;
                 default:
                     LOGGER.info(errorMessage, exception);
                     break;
             }
         }
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        return Response.status(getResponseStatus(exception)).entity(getEntity(exception)).build();
     }
 
     @SuppressWarnings("unchecked")
@@ -60,22 +62,20 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
         return new ExceptionResponse(getErrorMessage(exception));
     }
 
-    abstract Status getResponseStatus();
+    abstract Status getResponseStatus(T exception);
 
     abstract Class<T> getExceptionType();
 
     protected String getErrorMessage(T throwable) {
         notNull(throwable, "throwable");
-        String message = ExceptionUtils.getRootCause(throwable).getMessage();
-        LOGGER.debug("Exception text has been mapped: {}", message);
-        return message;
+        return ExceptionUtils.getRootCause(throwable).getMessage();
     }
 
     private boolean logException() {
         return true;
     }
 
-    private Level getLogLevel() {
+    protected Level getLogLevel() {
         return DEBUG;
     }
 

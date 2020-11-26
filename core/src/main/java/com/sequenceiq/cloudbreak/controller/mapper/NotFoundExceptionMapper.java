@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
@@ -9,13 +8,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 
+import ch.qos.logback.classic.Level;
+
 @Component
 public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NotFoundExceptionMapper.class);
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(NotFoundException exception) {
         return Status.NOT_FOUND;
     }
 
@@ -25,8 +26,12 @@ public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundExcepti
     }
 
     @Override
-    public Response toResponse(NotFoundException exception) {
-        LOGGER.info("Resource not found: {}", getErrorMessage(exception));
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+    protected String getErrorMessage(NotFoundException exception) {
+        return "Resource not found: " + super.getErrorMessage(exception);
+    }
+
+    @Override
+    protected Level getLogLevel() {
+        return Level.INFO;
     }
 }

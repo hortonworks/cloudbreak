@@ -14,7 +14,7 @@ public class DataIntegrityViolationExceptionMapper extends SendNotificationExcep
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(DataIntegrityViolationException exception) {
         return Status.BAD_REQUEST;
     }
 

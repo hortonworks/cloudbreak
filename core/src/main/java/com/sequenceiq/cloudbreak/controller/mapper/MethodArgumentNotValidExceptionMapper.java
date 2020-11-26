@@ -30,7 +30,7 @@ public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<M
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(MethodArgumentNotValidException exception) {
         return Status.BAD_REQUEST;
     }
 

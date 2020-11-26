@@ -18,7 +18,7 @@ public class AuthenticationCredentialsNotFoundExceptionMapper extends BaseExcept
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(AuthenticationCredentialsNotFoundException exception) {
         return Status.UNAUTHORIZED;
     }
 

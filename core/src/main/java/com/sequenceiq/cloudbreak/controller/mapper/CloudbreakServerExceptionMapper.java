@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 public class CloudbreakServerExceptionMapper extends BaseExceptionMapper<CloudbreakServiceException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(CloudbreakServiceException exception) {
         return Status.BAD_REQUEST;
     }
 

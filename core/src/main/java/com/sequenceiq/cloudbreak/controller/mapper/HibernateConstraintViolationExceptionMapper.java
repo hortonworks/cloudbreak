@@ -14,7 +14,7 @@ public class HibernateConstraintViolationExceptionMapper extends SendNotificatio
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConstraintViolationException exception) {
         return Status.BAD_REQUEST;
     }
 

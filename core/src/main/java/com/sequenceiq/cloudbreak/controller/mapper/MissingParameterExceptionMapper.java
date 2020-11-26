@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.service.stack.resource.definition.MissingParame
 public class MissingParameterExceptionMapper extends BaseExceptionMapper<MissingParameterException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(MissingParameterException exception) {
         return Status.BAD_REQUEST;
     }
 

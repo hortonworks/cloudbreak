@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
-import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.AutoscaleV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.BlueprintUtilV4Controller;
@@ -127,7 +126,6 @@ public class EndpointConfig extends ResourceConfig {
         for (ExceptionMapper<?> mapper : exceptionMappers) {
             register(mapper);
         }
-        register(WebApplicaitonExceptionMapper.class);
         register(DefaultExceptionMapper.class);
     }
 

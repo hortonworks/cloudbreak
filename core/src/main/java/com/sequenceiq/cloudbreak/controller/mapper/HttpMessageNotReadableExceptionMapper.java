@@ -18,7 +18,7 @@ public class HttpMessageNotReadableExceptionMapper extends BaseExceptionMapper<H
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(HttpMessageNotReadableException exception) {
         return Status.BAD_REQUEST;
     }
 

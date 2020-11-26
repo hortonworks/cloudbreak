@@ -43,7 +43,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
                     break;
             }
         }
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        return Response.status(getResponseStatus(exception)).entity(getEntity(exception)).build();
     }
 
     protected String getErrorMessage(E exception) {
@@ -72,7 +72,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return DEBUG;
     }
 
-    abstract Status getResponseStatus();
+    abstract Status getResponseStatus(E exception);
 
     abstract Class<E> getExceptionType();
 }
