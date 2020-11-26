@@ -58,6 +58,9 @@ public class FreeIpaClientFactory {
 
     private static final RequestListener CLUSTER_PROXY_ERROR_LISTENER = new ClusterProxyErrorRpcListener();
 
+    private static final String CANT_BUILD_CLIENT_MSG = "Couldn't build FreeIPA client. "
+            + "Check if the FreeIPA security rules have not changed and the instance is in running state. ";
+
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
@@ -129,6 +132,8 @@ public class FreeIpaClientFactory {
                     }
                 }
                 return client.orElseThrow(() -> createFreeIpaUnableToBuildClient(new FreeIpaHostNotAvailableException("No FreeIPA client was available")));
+            } catch (RetryableFreeIpaClientException e) {
+                throw createFreeIpaUnableToBuildClient(e);
             } catch (Exception e) {
                 throw createFreeIpaUnableToBuildClient(e);
             }
@@ -230,10 +235,15 @@ public class FreeIpaClientFactory {
     }
 
     private FreeIpaClientException createFreeIpaUnableToBuildClient(Exception e) {
-        String message = String.format("Couldn't build FreeIPA client. "
-                + "Check if the FreeIPA security rules have not changed and the instance is in running state. " + e.getLocalizedMessage());
+        String message = CANT_BUILD_CLIENT_MSG + e.getLocalizedMessage();
         LOGGER.error(message);
         return new FreeIpaClientException(message, e);
+    }
+
+    private RetryableFreeIpaClientException createFreeIpaUnableToBuildClient(RetryableFreeIpaClientException e) {
+        String message = CANT_BUILD_CLIENT_MSG + e.getLocalizedMessage();
+        LOGGER.error(message);
+        return new RetryableFreeIpaClientException(message, e);
     }
 
     public String getAdminUser() {

@@ -27,6 +27,11 @@ public class RetryableFreeIpaClientException extends FreeIpaClientException {
         this.exceptionForRestApi = exceptionForRestApi;
     }
 
+    public RetryableFreeIpaClientException(String message, RetryableFreeIpaClientException cause) {
+        super(message, cause, cause.getStatusCode());
+        exceptionForRestApi = cause.exceptionForRestApi;
+    }
+
     public Exception getExceptionForRestApi() {
         return exceptionForRestApi;
     }

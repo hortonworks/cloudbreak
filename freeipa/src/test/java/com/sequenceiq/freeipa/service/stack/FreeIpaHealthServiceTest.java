@@ -322,7 +322,7 @@ public class FreeIpaHealthServiceTest {
             Assert.assertTrue(!nodeHealth.getIssues().isEmpty());
             Assert.assertEquals(InstanceStatus.UNREACHABLE, nodeHealth.getStatus());
             Assert.assertTrue(nodeHealth.getIssues().size() == 1);
-            Assert.assertTrue(nodeHealth.getIssues().get(0).equals("failure"));
+            Assert.assertTrue(nodeHealth.getIssues().get(0).equals("Error during healthcheck"));
         }
     }
 

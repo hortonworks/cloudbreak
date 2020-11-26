@@ -79,7 +79,7 @@ public class FreeIpaHealthCheckClientFactory {
             restClient = RestClientUtil.createClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey(),
                     connetionTimeoutMillis, readTimeoutMillis, restDebug);
         } catch (Exception e) {
-            throw new FreeIpaClientException("Unable to create client for FreeIPA health checks", e);
+            throw new RetryableFreeIpaClientException("Unable to create client for FreeIPA health checks", e);
         }
         URL freeIpaHealthCheckUrl = getIpaHealthCheckUrl(clientConfig, port, basePath);
         return new FreeIpaHealthCheckClient(restClient, freeIpaHealthCheckUrl, headers, listener);
