@@ -11,16 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.structuredevent.service.audit.LegacyEventDataExtractor;
-import com.sequenceiq.cloudbreak.structuredevent.auditeventname.rest.RestResourceAuditEventConverter;
+import com.google.common.base.CaseFormat;
 import com.sequenceiq.cloudbreak.audit.model.ApiRequestData;
 import com.sequenceiq.cloudbreak.audit.model.AuditEventName;
 import com.sequenceiq.cloudbreak.audit.model.EventData;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.structuredevent.auditeventname.rest.RestResourceAuditEventConverter;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
+import com.sequenceiq.cloudbreak.structuredevent.service.audit.LegacyEventDataExtractor;
 
 @Component
 public class RestLegacyEventDataExtractor implements LegacyEventDataExtractor<StructuredRestCallEvent> {
@@ -109,6 +110,10 @@ public class RestLegacyEventDataExtractor implements LegacyEventDataExtractor<St
     }
 
     private RestResourceAuditEventConverter getConverter(String resourceType) {
-        return resourceAuditEventConverters.get(resourceType + "RestResourceAuditEventConverter");
+        return resourceAuditEventConverters.get(formatResourceName(resourceType) + "RestResourceAuditEventConverter");
+    }
+
+    private String formatResourceName(String resource) {
+        return CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, resource);
     }
 }

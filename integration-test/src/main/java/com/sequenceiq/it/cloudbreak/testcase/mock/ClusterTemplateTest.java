@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.assertion.audit.ClusterTemplateAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.clustertemplate.ClusterTemplateTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -60,6 +61,9 @@ public class ClusterTemplateTest extends AbstractMockTest {
     @Inject
     private DistroXTestClient distroXClient;
 
+    @Inject
+    private ClusterTemplateAuditGrpcServiceAssertion clusterTemplateAuditGrpcServiceAssertion;
+
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a prepared environment",
@@ -80,6 +84,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .then(ClusterTemplateTestAssertion.getResponse(), RunningParameter.key(generatedKey))
                 .then(ClusterTemplateTestAssertion.checkStackTemplateAfterClusterTemplateCreation(), RunningParameter.key(generatedKey))
                 .when(clusterTemplateTestClient.deleteV4(), RunningParameter.key(generatedKey))
+                .then(clusterTemplateAuditGrpcServiceAssertion::create)
+                .then(clusterTemplateAuditGrpcServiceAssertion::delete)
                 .validate();
     }
 
