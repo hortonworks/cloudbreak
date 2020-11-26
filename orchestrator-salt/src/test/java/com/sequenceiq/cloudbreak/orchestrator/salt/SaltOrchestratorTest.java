@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
@@ -216,7 +217,9 @@ public class SaltOrchestratorTest {
         verifyNew(HighStateAllRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
         verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateAllRunner), eq(true));
-        verify(saltCommandRunner, times(4)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
+        verify(saltCommandRunner, times(2)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
+                any(ExitCriteriaModel.class), any(ExitCriteria.class));
+        verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(SaltConnector.class), any(ModifyGrainBase.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));
         verify(grainUploader, times(1)).uploadGrains(anySet(), anyList(), any(ExitCriteriaModel.class), any(SaltConnector.class),
                 any(ExitCriteria.class));
