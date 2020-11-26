@@ -74,6 +74,10 @@ public class EntitlementService {
         return isEntitlementRegistered(actorCrn, accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
     }
 
+    public boolean enableDistroxInstanceTypesEnabled(String actorCrn, String accountId) {
+        return isEntitlementRegistered(actorCrn, accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
+    }
+
     public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
         return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA_REPAIR);
     }

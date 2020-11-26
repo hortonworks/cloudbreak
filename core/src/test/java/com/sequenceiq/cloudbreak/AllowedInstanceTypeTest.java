@@ -64,7 +64,7 @@ public class AllowedInstanceTypeTest {
                 .map(ct -> templateCache.getDefaultClusterTemplate(new String(Base64.getDecoder().decode(ct.getValue()))))
                 .filter(ct -> CloudPlatform.AZURE.name().equalsIgnoreCase(ct.getCloudPlatform()))
                 .forEach(ctr -> validateClusterTemplate(ctr, azureSupportedTypes));
-        assertNotNull(awsSupportedTypes);
+        assertNotNull(azureSupportedTypes);
     }
 
     private void validateClusterTemplate(DefaultClusterTemplateV4Request clusterTemplate, List<String> supportedTypes) {

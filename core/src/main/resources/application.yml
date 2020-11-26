@@ -210,7 +210,8 @@ cb:
         r5dn.2xlarge,
         r5dn.4xlarge,
         r5dn.8xlarge,
-        r5dn.16xlarge
+        r5dn.16xlarge,
+        x1e.2xlarge
 
     hostkey.verify: false
     role.session.name: cdp-provisioning
@@ -260,6 +261,10 @@ cb:
         Standard_D16s_v3,
         Standard_D32_v3,
         Standard_D32s_v3,
+        Standard_D64_v3,
+        Standard_D64s_v3,
+        Standard_D64a_v4,
+        Standard_D64as_v4,
         Standard_E8_v3,
         Standard_E16_v3,
         Standard_E32_v3,
