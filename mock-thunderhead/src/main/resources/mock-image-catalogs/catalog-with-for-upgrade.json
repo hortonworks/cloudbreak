@@ -14,7 +14,7 @@
         "os_type": "redhat7",
         "uuid": "aaa778fc-7f17-4535-9021-515351df3691",
         "package-versions": {
-          "cm": "CDH_RUNTIME",
+          "cm": "CM_VERSION",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME"
@@ -32,7 +32,7 @@
           "build-number": "1922354"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CDH_RUNTIME/redhat7/yum/"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CM_VERSION/redhat7/yum/"
         },
         "version": "CDH_RUNTIME",
         "build-number": "5949264",
@@ -81,7 +81,7 @@
         "os_type": "redhat7",
         "uuid": "bbbeadd2-5B95-4EC9-B300-13dc43208b64",
         "package-versions": {
-          "cm": "CDH_RUNTIME",
+          "cm": "CM_VERSION",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME"
@@ -99,7 +99,7 @@
           "build-number": "1922354"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CDH_RUNTIME/redhat7/yum/"
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1922616/cm7/CM_VERSION/redhat7/yum/"
         },
         "build-number": "5949264",
         "version": "CDH_RUNTIME",

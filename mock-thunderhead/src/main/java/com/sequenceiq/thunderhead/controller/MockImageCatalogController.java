@@ -19,7 +19,8 @@ public class MockImageCatalogController {
     @ResponseBody
     public String auth(@RequestParam("catalog-name") String name,
             @RequestParam("cb-version") String cbVersion,
-            @RequestParam("runtime") String runtime) {
-        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime);
+            @RequestParam("runtime") String runtime,
+            @RequestParam(name = "cm", required = false) String cm) {
+        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime, cm);
     }
 }

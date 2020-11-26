@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Res
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
@@ -73,7 +74,7 @@ public class StackMatrixService {
     private ClouderaManagerStackDescriptorV4Response getImageBasedCMStackDescriptor(DefaultCDHInfo stackInfo, Image image) {
         ClouderaManagerStackDescriptorV4Response stackDescriptorV4 = converterUtil.convert(stackInfo, ClouderaManagerStackDescriptorV4Response.class);
         RepositoryInfo cmInfo = new RepositoryInfo();
-        cmInfo.setVersion(image.getVersion());
+        cmInfo.setVersion(image.getPackageVersion(ImagePackageVersion.CM));
         cmInfo.setRepo(image.getRepo().entrySet().stream().collect(Collectors.toMap(Entry::getKey, e -> {
             RepositoryDetails repo = new RepositoryDetails();
             repo.setBaseurl(e.getValue());

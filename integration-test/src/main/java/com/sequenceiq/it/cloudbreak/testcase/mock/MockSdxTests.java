@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.assertion.CBAssertion.assertEquals;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
@@ -17,16 +18,23 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.util.ResourceUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -40,6 +48,9 @@ public class MockSdxTests extends AbstractMockTest {
 
     @Inject
     private SdxUtil sdxUtil;
+
+    @Inject
+    private ImageCatalogTestClient imageCatalogTestClient;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -110,6 +121,56 @@ public class MockSdxTests extends AbstractMockTest {
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.DELETED, key(sdxInternal))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running CloudSdxInternalTestDtobreak",
+            when = "start an sdx cluster with different CM and CDH versions",
+            then = "versions should be correct"
+    )
+    public void testSdxCreateWithDifferentCmAndCdhVersions(MockedTestContext testContext) {
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
+        String clouderaManager = "cm";
+        String cluster = "cmcluster";
+        String imageSettings = "imageSettingsUpgrade";
+
+        String cmVersion = "7.3.0";
+        String cdhVersion = "7.2.7";
+
+        testContext
+                .given(ImageCatalogTestDto.class)
+                .withName(upgradeImageCatalogName)
+                .withUrl(getImageCatalogMockServerSetup().getPreWarmedImageCatalogUrlWithCmAndCdhVersions(cmVersion, cdhVersion))
+                .when(imageCatalogTestClient.createV4(), key(upgradeImageCatalogName))
+                .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(clouderaManager, ClouderaManagerTestDto.class)
+                .given(cluster, ClusterTestDto.class)
+                .withClouderaManager(clouderaManager)
+                .given(imageSettings, ImageSettingsTestDto.class)
+                .withImageId("f6e778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given(stack, StackTestDto.class)
+                .withCluster(cluster)
+                .withImageSettings(imageSettings)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest(key(cluster), key(stack))
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then((tc, testDto, client) -> {
+                    SdxClusterDetailResponse sdx = testDto.getResponse();
+                    assertEquals(sdx.getRuntime(), cdhVersion);
+                    assertEquals(sdx.getStackV4Response().getCluster().getCm().getRepository().getVersion(), cmVersion);
+                    return testDto;
+                })
                 .validate();
     }
 
