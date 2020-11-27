@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dto.ParametersDto;
@@ -140,7 +141,6 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         return cloudPlatform;
     }
 
-    @Override
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
@@ -154,7 +154,6 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         return regions;
     }
 
-    @Override
     public void setRegions(Set<Region> regions) {
         this.regions = regions;
     }
@@ -189,6 +188,13 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
     }
 
     @Override
+    public EnvironmentFeatures getEnvironmentTelemetryFeatures() {
+        if (telemetry != null) {
+            return telemetry.getFeatures();
+        }
+        return null;
+    }
+
     public void setNetwork(NetworkDto network) {
         this.network = network;
     }

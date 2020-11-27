@@ -956,6 +956,14 @@ message CDPEnvironmentDetails {
     string resourceGroupType = 5;
 }
 
+message CDPEnvironmentTelemetryFeatureDetails {
+    // Workday analytics is enabled on this environment
+    string workloadAnalytics = 1;
+
+    // Cluster log collection is enabled on this environment
+    string clusterLogsCollection = 2;
+}
+
 message CDPProxyDetails {
     bool proxy = 1;
 }
@@ -981,9 +989,11 @@ message CDPEnvironmentRequested {
 
     CDPOperationDetails operationDetails = 1;
 
-    CDPEnvironmentDetails cdpEnvironmentDetails = 2;
+    CDPEnvironmentDetails environmentDetails = 2;
 
-    CDPNetworkDetails cdpNetworkDetails = 3;
+    CDPNetworkDetails networkDetails = 3;
+
+    CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;
 }
 
 // Generated when Environment status has changed
