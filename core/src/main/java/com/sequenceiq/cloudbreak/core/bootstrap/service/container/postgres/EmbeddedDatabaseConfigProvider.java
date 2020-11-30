@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -10,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseInfo;
@@ -40,8 +37,7 @@ public class EmbeddedDatabaseConfigProvider {
 
     public Map<String, Object> collectEmbeddedDatabaseConfigs(Stack stack) {
         Map<String, Object> result;
-        EmbeddedDatabaseInfo embeddedDatabaseInfo =
-                embeddedDatabaseService.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId(), stack);
+        EmbeddedDatabaseInfo embeddedDatabaseInfo = embeddedDatabaseService.getEmbeddedDatabaseInfo(stack);
         if (embeddedDatabaseInfo.isEmbeddedDatabaseOnAttachedDiskEnabled()) {
             LOGGER.info("Attached disk will be used to store data for postgres sql server, as '{}' entitlement is enabled",
                     Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);

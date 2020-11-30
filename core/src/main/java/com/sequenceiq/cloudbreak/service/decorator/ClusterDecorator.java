@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -14,6 +16,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
@@ -51,6 +55,9 @@ public class ClusterDecorator {
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
     @Measure(ClusterDecorator.class)
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, Blueprint blueprint, User user, Workspace workspace,
             @Nonnull Stack stack, String parentEnvironmentCloudPlatform) {
@@ -58,6 +65,7 @@ public class ClusterDecorator {
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
+        setupEmbeddedDatabase(cluster, stack);
         prepareAutoTlsFlag(cluster, request, stack, parentEnvironmentCloudPlatform);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
@@ -102,5 +110,10 @@ public class ClusterDecorator {
                     PlatformParameters platformParameters = connector.parameters();
                     return platformParameters.isAutoTlsSupported();
                 }));
+    }
+
+    private void setupEmbeddedDatabase(Cluster cluster, Stack stack) {
+        cluster.setEmbeddedDatabaseOnAttachedDisk(embeddedDatabaseService.getEmbeddedDatabaseInfo(
+                INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId(), stack, cluster).isEmbeddedDatabaseOnAttachedDiskEnabled());
     }
 }

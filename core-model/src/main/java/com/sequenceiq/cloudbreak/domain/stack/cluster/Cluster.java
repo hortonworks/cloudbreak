@@ -234,6 +234,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
+    @Column(nullable = false)
+    private Boolean embeddedDatabaseOnAttachedDisk = Boolean.FALSE;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -769,6 +772,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCertExpirationState(CertExpirationState certExpirationState) {
         this.certExpirationState = certExpirationState;
+    }
+
+    public Boolean getEmbeddedDatabaseOnAttachedDisk() {
+        return embeddedDatabaseOnAttachedDisk;
+    }
+
+    public void setEmbeddedDatabaseOnAttachedDisk(Boolean embeddedDatabaseOnAttachedDisk) {
+        this.embeddedDatabaseOnAttachedDisk = embeddedDatabaseOnAttachedDisk;
     }
 
     @Override

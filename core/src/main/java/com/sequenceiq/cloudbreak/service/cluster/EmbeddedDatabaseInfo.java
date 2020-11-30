@@ -5,8 +5,8 @@ public class EmbeddedDatabaseInfo {
 
     private final int attachedDisksCount;
 
-    public EmbeddedDatabaseInfo(boolean embeddedDatabaseOnAttachedDiskEnabled, int attachedDisksCount) {
-        this.embeddedDatabaseOnAttachedDiskEnabled = embeddedDatabaseOnAttachedDiskEnabled;
+    public EmbeddedDatabaseInfo(int attachedDisksCount) {
+        this.embeddedDatabaseOnAttachedDiskEnabled = attachedDisksCount > 0;
         this.attachedDisksCount = attachedDisksCount;
     }
 

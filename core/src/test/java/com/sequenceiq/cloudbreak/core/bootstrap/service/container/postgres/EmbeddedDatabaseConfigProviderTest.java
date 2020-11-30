@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DATA_ON_ATTACHED_DISK_KEY;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DEFAULT_DIRECTORY;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DEFAULT_LOG_DIRECTORY;
@@ -8,12 +7,15 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgre
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_LOG_DIRECTORY_KEY;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,11 +23,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -53,34 +53,30 @@ public class EmbeddedDatabaseConfigProviderTest {
     public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskEnabled(String testName, int volumeCount) {
         // GIVEN
         Stack stack = createStack(volumeCount);
-        Mockito.when(embeddedDatabaseService.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack))
-                .thenReturn(new EmbeddedDatabaseInfo(true, volumeCount));
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(stack)).thenReturn(new EmbeddedDatabaseInfo(volumeCount));
         // WHEN
-        Map<String, Object> actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.collectEmbeddedDatabaseConfigs(stack));
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
         // THEN
-        Assertions.assertTrue((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
-        Assertions.assertEquals(
-                VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK), actualResult.get(POSTGRES_DIRECTORY_KEY));
-        Assertions.assertEquals(
-                VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK), actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertTrue((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
+        assertEquals(VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK), actualResult.get(POSTGRES_DIRECTORY_KEY));
+        assertEquals(VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK), actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
     }
 
     @Test
-    public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskDisabled() {
+    public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskDisabledOrNoAttachedVolumes() {
         // GIVEN
-        Stack stack = createStack(1);
-        Mockito.when(embeddedDatabaseService.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack)).thenReturn(new EmbeddedDatabaseInfo(false, 0));
+        Stack stack = createStack(0);
+        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(stack)).thenReturn(new EmbeddedDatabaseInfo(0));
         // WHEN
-        Map<String, Object> actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.collectEmbeddedDatabaseConfigs(stack));
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
         // THEN
-        Assertions.assertFalse((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
-        Assertions.assertEquals(POSTGRES_DEFAULT_DIRECTORY, actualResult.get(POSTGRES_DIRECTORY_KEY));
-        Assertions.assertEquals(POSTGRES_DEFAULT_LOG_DIRECTORY, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertFalse((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
+        assertEquals(POSTGRES_DEFAULT_DIRECTORY, actualResult.get(POSTGRES_DIRECTORY_KEY));
+        assertEquals(POSTGRES_DEFAULT_LOG_DIRECTORY, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
     }
 
     private static Stream<Arguments> volumeCounts() {
         return Stream.of(
-                Arguments.arguments("No attached volume", 0),
                 Arguments.arguments("One attached volume", 1),
                 Arguments.arguments("Five attached volume", 5));
     }

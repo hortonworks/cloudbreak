@@ -82,8 +82,8 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then(SdxUpgradeTestAssertion
-                        .validateUnsuccessfulUpgrade("Action is only supported if Cloudera Manager state is stored in external Database."))
+                .then(SdxUpgradeTestAssertion.validateUnsuccessfulUpgrade(
+                        "Action is only supported if Cloudera Manager state is stored in external Database or in embedded database on attached disk."))
                 .validate();
     }
 

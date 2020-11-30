@@ -43,7 +43,7 @@ public class EmbeddedDatabaseServiceTest {
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack));
+                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
         // THEN
         assertTrue(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
         assertEquals(5, actualResult.getAttachedDisksCount());
@@ -56,7 +56,7 @@ public class EmbeddedDatabaseServiceTest {
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack));
+                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
         // THEN
         assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
         assertEquals(0, actualResult.getAttachedDisksCount());
@@ -69,7 +69,7 @@ public class EmbeddedDatabaseServiceTest {
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack));
+                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
         // THEN
         assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
         assertEquals(0, actualResult.getAttachedDisksCount());
@@ -82,7 +82,7 @@ public class EmbeddedDatabaseServiceTest {
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack));
+                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
         // THEN
         assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
         assertEquals(0, actualResult.getAttachedDisksCount());
