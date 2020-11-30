@@ -66,7 +66,7 @@ public class LoggingRequestValidatorTest {
         // WHEN
         boolean result = underTest.isValid(loggingRequest, context);
         // THEN
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
@@ -82,11 +82,23 @@ public class LoggingRequestValidatorTest {
     }
 
     @Test
-    public void testValidateValidBasePath() {
+    public void testValidateValidBasePathWhenUsingS3a() {
         // GIVEN
         LoggingRequest loggingRequest = new LoggingRequest();
         loggingRequest.setS3(new S3CloudStorageV1Parameters());
-        loggingRequest.setStorageLocation("basePath/custom");
+        loggingRequest.setStorageLocation("s3://basePath/custom");
+        // WHEN
+        boolean result = underTest.isValid(loggingRequest, context);
+        // THEN
+        assertTrue(result);
+    }
+
+    @Test
+    public void testValidateValidBasePathWhenUsingS3N() {
+        // GIVEN
+        LoggingRequest loggingRequest = new LoggingRequest();
+        loggingRequest.setS3(new S3CloudStorageV1Parameters());
+        loggingRequest.setStorageLocation("s3n://basePath/custom");
         // WHEN
         boolean result = underTest.isValid(loggingRequest, context);
         // THEN
