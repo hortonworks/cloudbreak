@@ -57,6 +57,8 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final long POLL_FOR_ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
 
+    private static final long POLL_FOR_TWO_HOURS = TimeUnit.HOURS.toSeconds(2);
+
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
@@ -188,7 +190,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public PollingResult startPollingCdpRuntimeParcelDownload(Stack stack, ApiClient apiClient, BigDecimal commandId, ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_TWO_HOURS,
                 new ClouderaManagerUpgradeParcelDownloadListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, parcelResource));
     }
 
