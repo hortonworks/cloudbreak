@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.RootCert;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -29,13 +30,14 @@ public class FreeIpaRootCertificateService {
     private RootCertRegisterService rootCertRegisterService;
 
     public String getRootCertificate(String environmentCrn, String accountId) throws FreeIpaClientException {
-        Optional<RootCert> rootCert = rootCertService.findByEnvironmentCrn(environmentCrn);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        Optional<RootCert> rootCert = rootCertService.findByStackId(stack.getId());
         if (rootCert.isPresent()) {
             LOGGER.debug("FreeIPA CA cert found in DB for env: {}", environmentCrn);
             return rootCert.get().getCert();
         } else {
             LOGGER.debug("FreeIPA CA cert not found in DB for env: {}", environmentCrn);
-            Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
             return rootCertRegisterService.register(stack).getCert();
         }
     }

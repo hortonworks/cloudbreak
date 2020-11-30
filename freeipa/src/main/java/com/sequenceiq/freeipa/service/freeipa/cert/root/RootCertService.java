@@ -16,8 +16,8 @@ public class RootCertService {
     @Inject
     private RootCertRepository repository;
 
-    public Optional<RootCert> findByEnvironmentCrn(String environmentCrn) {
-        return repository.findByEnvironmentCrn(environmentCrn);
+    public Optional<RootCert> findByStackId(Long stackId) {
+        return repository.findByStackId(stackId);
     }
 
     public void deleteByStack(Stack stack) {

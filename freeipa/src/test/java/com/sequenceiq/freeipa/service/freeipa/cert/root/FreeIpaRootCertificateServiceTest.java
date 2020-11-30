@@ -25,6 +25,8 @@ class FreeIpaRootCertificateServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final Long STACK_ID = 1L;
+
     @Mock
     private StackService stackService;
 
@@ -41,7 +43,10 @@ class FreeIpaRootCertificateServiceTest {
     public void testFetchFromDb() throws FreeIpaClientException {
         RootCert rootCert = new RootCert();
         rootCert.setCert("test");
-        when(rootCertService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(rootCert));
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(rootCertService.findByStackId(STACK_ID)).thenReturn(Optional.of(rootCert));
 
         String result = underTest.getRootCertificate(ENV_CRN, ACCOUNT_ID);
 
@@ -53,8 +58,8 @@ class FreeIpaRootCertificateServiceTest {
     public void testNotInDb() throws FreeIpaClientException {
         RootCert rootCert = new RootCert();
         rootCert.setCert("test");
-        when(rootCertService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.empty());
         Stack stack = new Stack();
+        stack.setId(STACK_ID);
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
         when(rootCertRegisterService.register(stack)).thenReturn(rootCert);
 
