@@ -104,15 +104,15 @@ public class ImageService {
             Blueprint blueprint, boolean useBaseImage, boolean baseImageEnabled,
             User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        if (useBaseImage && !baseImageEnabled) {
-            throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
-        }
 
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
             LOGGER.debug("Image id is specified for the stack.");
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
             return checkIfBasePermitted(image, baseImageEnabled);
+        } else if (useBaseImage && !baseImageEnabled) {
+            throw new CloudbreakImageCatalogException("Inconsistent request, base images are disabled but custom repo information is submitted!");
         }
+
         String clusterVersion = getClusterVersion(blueprint);
 
         Set<String> operatingSystems;

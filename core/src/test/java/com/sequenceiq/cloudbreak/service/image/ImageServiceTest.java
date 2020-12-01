@@ -10,12 +10,14 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -32,7 +34,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
+import java.util.stream.Stream;
+
 public class ImageServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
@@ -78,8 +81,18 @@ public class ImageServiceTest {
 
     private ImageSettingsV4Request imageSettingsV4Request;
 
-    @Before
+    private static Stream<Arguments> baseImageFlags() {
+        return Stream.of(
+                Arguments.of(true, true),
+                Arguments.of(true, false),
+                Arguments.of(false, true),
+                Arguments.of(false, false)
+        );
+    }
+
+    @BeforeEach
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         imageSettingsV4Request = new ImageSettingsV4Request();
         imageSettingsV4Request.setCatalog("aCatalog");
         imageSettingsV4Request.setId("anImageId");
@@ -90,6 +103,7 @@ public class ImageServiceTest {
 
     @Test
     public void testUseBaseImageAndDisabledBaseImageShouldReturnError() {
+        imageSettingsV4Request.setId(null);
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class, () ->
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
@@ -101,6 +115,25 @@ public class ImageServiceTest {
                         TestUtil.user(USER_ID, USER_ID_STRING),
                         image -> true));
         assertEquals("Inconsistent request, base images are disabled but custom repo information is submitted!", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @MethodSource("baseImageFlags")
+    public void theProvidedPrewarmedImageShouldBeUsedRegardlessBaseImageFlags(boolean useBaseImage, boolean baseImageEnabled)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        StatedImage expected = ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION);
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString()))
+                .thenReturn(expected);
+        StatedImage actual = underTest.determineImageFromCatalog(
+                        WORKSPACE_ID,
+                        imageSettingsV4Request,
+                        PLATFORM,
+                        TestUtil.blueprint(),
+                        useBaseImage,
+                        baseImageEnabled,
+                        TestUtil.user(USER_ID, USER_ID_STRING),
+                        image -> true);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -277,4 +310,5 @@ public class ImageServiceTest {
         imageCatalog.setResourceCrn("someCrn");
         return imageCatalog;
     }
+
 }
