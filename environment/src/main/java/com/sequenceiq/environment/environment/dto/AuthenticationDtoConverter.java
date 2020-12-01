@@ -1,16 +1,34 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
+import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 
 @Component
 public class AuthenticationDtoConverter {
 
+    private final PublicKeyValidator publicKeyValidator;
+
+    public AuthenticationDtoConverter(PublicKeyValidator publicKeyValidator) {
+        this.publicKeyValidator = publicKeyValidator;
+    }
+
     public EnvironmentAuthentication dtoToAuthentication(AuthenticationDto authenticationDto) {
         EnvironmentAuthentication environmentAuthentication = new EnvironmentAuthentication();
+        if (StringUtils.isNotEmpty(authenticationDto.getPublicKey())) {
+            ValidationResult validationResult = publicKeyValidator.validatePublicKey(authenticationDto.getPublicKey());
+            if (!validationResult.hasError()) {
+                List<String> parts = Arrays.asList(StringUtils.split(authenticationDto.getPublicKey(), " "));
+                environmentAuthentication.setPublicKey(String.format("%s %s %s", parts.get(0), parts.get(1), authenticationDto.getLoginUserName()));
+            }
+        }
         environmentAuthentication.setLoginUserName(authenticationDto.getLoginUserName());
-        environmentAuthentication.setPublicKey(authenticationDto.getPublicKey());
         environmentAuthentication.setPublicKeyId(authenticationDto.getPublicKeyId());
         environmentAuthentication.setManagedKey(authenticationDto.isManagedKey());
         return environmentAuthentication;

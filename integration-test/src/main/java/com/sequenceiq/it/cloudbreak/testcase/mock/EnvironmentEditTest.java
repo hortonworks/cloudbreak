@@ -28,6 +28,13 @@ public class EnvironmentEditTest extends AbstractMockTest {
             + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
             + "KR495VFmuOepLYz5I8Dn sequence-eu";
 
+    private static final String INVALID_PUBLIC_KEY = "invalid-ssh-rsa "
+            + "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
+            + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
+            + "UYQ/yi0imocARlOiFdPRlZGTN0XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaK"
+            + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
+            + "KR495VFmuOepLYz5I8Dn sequence-eu";
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -129,6 +136,8 @@ public class EnvironmentEditTest extends AbstractMockTest {
             when = "change authentication",
             then = "get validation errors")
     public void authenticationEditValidationErrors(MockedTestContext testContext) {
+        String errorPattern = ".*'non-existing-public-key'.*\\s.*The uploaded SSH Public Key is invalid.*"
+                + "\\s.*ecdsa-sha2-nistp384.*\\s.*either publicKey or publicKeyId.*";
         testContext
                 .given(HttpMock.class).whenRequested(SpiEndpoints.GetPublicKey.class).get()
                 .pathVariable("publicKeyId", "id")
@@ -139,13 +148,12 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
 
                 .given(EnvironmentAuthenticationTestDto.class)
-                .withPublicKeyId("non-exists-public-key")
-                .withPublicKey(PUBLIC_KEY)
+                .withPublicKeyId("non-existing-public-key")
+                .withPublicKey(INVALID_PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication(), key("all-defined"))
                 .expect(BadRequestException.class, key("all-defined")
-                        .withExpectedMessage("1. The publicKeyId with name of 'non-exists-public-key' does not exists on the provider\n" +
-                                "2. You should define either publicKey or publicKeyId only"))
+                        .withExpectedMessage(errorPattern))
 
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId(null)
@@ -153,7 +161,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication(), key("non-defined"))
                 .expect(BadRequestException.class, key("non-defined")
-                        .withExpectedMessage("1. You should define publicKey or publicKeyId"))
+                        .withExpectedMessage("1. You should define either the publicKey or the publicKeyId."))
                 .validate();
     }
 

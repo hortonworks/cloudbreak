@@ -40,6 +40,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +62,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private CredentialService credentialService;
 
+    @Mock
+    private PublicKeyValidator publicKeyValidator;
+
     @InjectMocks
     private EnvironmentValidatorService underTest;
 
@@ -71,6 +75,7 @@ class EnvironmentValidatorServiceTest {
                 platformParameterService,
                 environmentResourceService,
                 credentialService,
+                publicKeyValidator,
                 singleton(CloudPlatform.AWS.name()),
                 singleton(CloudPlatform.YARN.name())
         );
@@ -243,9 +248,10 @@ class EnvironmentValidatorServiceTest {
 
         when(environmentResourceService.isPublicKeyIdExists(environment, "pub-key-id")).thenReturn(true);
         when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.of(connector));
+        when(publicKeyValidator.validatePublicKey(anyString())).thenReturn(ValidationResult.empty());
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. You should define either publicKey or publicKeyId only", validationResult.getFormattedErrors());
+        assertEquals("1. You should define either publicKey or publicKeyId only, but not both.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -257,7 +263,7 @@ class EnvironmentValidatorServiceTest {
                 .build();
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. You should define publicKey or publicKeyId", validationResult.getFormattedErrors());
+        assertEquals("1. You should define either the publicKey or the publicKeyId.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -276,7 +282,7 @@ class EnvironmentValidatorServiceTest {
 
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. The publicKeyId with name of 'pub-key-id' does not exists on the provider", validationResult.getFormattedErrors());
+        assertEquals("1. The publicKeyId with name of 'pub-key-id' does not exist on the provider.", validationResult.getFormattedErrors());
     }
 
     @Test

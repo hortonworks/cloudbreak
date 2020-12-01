@@ -1,31 +1,37 @@
 package com.sequenceiq.environment.environment.dto;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Objects;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
+import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 
 class AuthenticationDtoConverterTest {
 
     public static final String LOGIN = "login";
 
-    public static final String PUBLIC_KEY = "key";
+    public static final String PUBLIC_KEY = "ssh-rsa public-key";
 
     public static final String PUBLIC_KEY_ID = "id";
 
-    private AuthenticationDtoConverter underTest;
+    private final PublicKeyValidator publicKeyValidator = Mockito.mock(PublicKeyValidator.class);
+
+    private final AuthenticationDtoConverter underTest = new AuthenticationDtoConverter(publicKeyValidator);
 
     @BeforeEach
     void setUp() {
-        underTest = new AuthenticationDtoConverter();
+        when(publicKeyValidator.validatePublicKey(anyString())).thenReturn(ValidationResult.empty());
     }
 
     @Test
-    void dtoToAuthentication() {
+    void testDtoToAuthentication() {
         AuthenticationDto dto = AuthenticationDto.builder()
                 .withLoginUserName(LOGIN)
                 .withPublicKey(PUBLIC_KEY)
@@ -35,15 +41,15 @@ class AuthenticationDtoConverterTest {
 
         EnvironmentAuthentication result = underTest.dtoToAuthentication(dto);
 
-        assertThat(result)
-                .matches(m -> Objects.equals(m.getLoginUserName(), dto.getLoginUserName()))
-                .matches(m -> Objects.equals(m.getPublicKey(), dto.getPublicKey()))
-                .matches(m -> Objects.equals(m.getPublicKeyId(), dto.getPublicKeyId()))
-                .matches(m -> Objects.equals(m.isManagedKey(), dto.isManagedKey()));
+        verify(publicKeyValidator, Mockito.times(1)).validatePublicKey(anyString());
+        assertEquals(dto.getLoginUserName(), result.getLoginUserName());
+        assertEquals("ssh-rsa public-key login", result.getPublicKey());
+        assertEquals(dto.getPublicKeyId(), result.getPublicKeyId());
+        assertEquals(dto.isManagedKey(), result.isManagedKey());
     }
 
     @Test
-    void authenticationToDto() {
+    void testAuthenticationToDto() {
         EnvironmentAuthentication environment = new EnvironmentAuthentication();
         environment.setId(123L);
         environment.setLoginUserName(LOGIN);
@@ -53,10 +59,26 @@ class AuthenticationDtoConverterTest {
 
         AuthenticationDto result = underTest.authenticationToDto(environment);
 
-        assertThat(result)
-                .matches(m -> Objects.equals(m.getLoginUserName(), environment.getLoginUserName()))
-                .matches(m -> Objects.equals(m.getPublicKey(), environment.getPublicKey()))
-                .matches(m -> Objects.equals(m.getPublicKeyId(), environment.getPublicKeyId()))
-                .matches(m -> Objects.equals(m.isManagedKey(), environment.isManagedKey()));
+        verify(publicKeyValidator, Mockito.times(0)).validatePublicKey(anyString());
+        assertEquals(environment.getLoginUserName(), result.getLoginUserName());
+        assertEquals(environment.getPublicKey(), result.getPublicKey());
+        assertEquals(environment.getPublicKeyId(), result.getPublicKeyId());
+        assertEquals(environment.isManagedKey(), result.isManagedKey());
+    }
+
+    @Test
+    void testSshKeyCreation() {
+        String testKey = "ssh-rsa AAAASASFAS3532== banana@apple.com";
+        AuthenticationDto dto = AuthenticationDto.builder()
+                .withLoginUserName(LOGIN)
+                .withPublicKey(testKey)
+                .withPublicKeyId(PUBLIC_KEY_ID)
+                .withManagedKey(true)
+                .build();
+
+        EnvironmentAuthentication environmentAuthentication = underTest.dtoToAuthentication(dto);
+
+        verify(publicKeyValidator, Mockito.times(1)).validatePublicKey(anyString());
+        assertEquals("ssh-rsa AAAASASFAS3532== login", environmentAuthentication.getPublicKey());
     }
 }

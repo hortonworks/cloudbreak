@@ -217,7 +217,7 @@ public class EnvironmentModificationService {
                     environmentResourceService.deletePublicKey(environment, oldSshKeyId);
                 }
             } else {
-                LOGGER.info("Create and update was not run successfully. We are reverting the authentication to the previous version");
+                LOGGER.info("Authentication modification was unsuccessful. The authentication was reverted to the previous version.");
                 environment.setAuthentication(originalAuthentication);
             }
         }
