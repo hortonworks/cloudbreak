@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 
@@ -18,10 +17,10 @@ public class AzureManagedImageCreationPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureManagedImageCreationPoller.class);
 
-    @Value("${cb.azure.poller.image.checkinterval:1000}")
+    @Value("${cb.azure.poller.image.checkinterval:5000}")
     private int creationCheckInterval;
 
-    @Value("${cb.azure.poller.image.maxattempt:100}")
+    @Value("${cb.azure.poller.image.maxattempt:60}")
     private int creationCheckMaxAttempt;
 
     @Value("${cb.azure.poller.image.maxfailurenumber:5}")
@@ -33,15 +32,10 @@ public class AzureManagedImageCreationPoller {
     @Inject
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
-    public void startPolling(AuthenticatedContext ac, AzureManagedImageCreationCheckerContext checkerContext) {
+    public void startPolling(AuthenticatedContext ac, AzureManagedImageCreationCheckerContext checkerContext) throws Exception {
         PollTask<Boolean> managedImageCreationStatusCheckerTask = azurePollTaskFactory.managedImageCreationCheckerTask(ac, checkerContext);
-        try {
-            LOGGER.info("Start polling managed image creation: {}", checkerContext.getAzureImageInfo().getImageNameWithRegion());
+        LOGGER.info("Start polling managed image creation: {}", checkerContext.getAzureImageInfo().getImageNameWithRegion());
             syncPollingScheduler.schedule(managedImageCreationStatusCheckerTask, creationCheckInterval,
                     creationCheckMaxAttempt, maxTolerableFailureNumber);
-        } catch (Exception e) {
-            LOGGER.error("Managed image creation failed.", e);
-            throw new CloudConnectorException(e);
-        }
     }
 }

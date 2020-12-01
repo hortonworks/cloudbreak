@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image;
 
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -45,7 +46,12 @@ public class AzureImageService {
         }
 
         LOGGER.debug("Custom image found in '{}' resource group with name '{}'", azureImageInfo.getResourceGroup(), azureImageInfo.getImageNameWithRegion());
-        azureManagedImageCreationPoller.startPolling(ac, new AzureManagedImageCreationCheckerContext(azureImageInfo, client));
+        try {
+            azureManagedImageCreationPoller.startPolling(ac, new AzureManagedImageCreationCheckerContext(azureImageInfo, client));
+        } catch (Exception e) {
+            LOGGER.warn("Exception when polling for existing cloudbreak image: ", e);
+            throw new CloudConnectorException(e);
+        }
         return Optional.of(new AzureImage(azureImageInfo.getImageId(), azureImageInfo.getImageNameWithRegion(), true));
     }
 
@@ -57,6 +63,7 @@ public class AzureImageService {
             customImage = Optional.of(
                     client.createImage(azureImageInfo.getImageNameWithRegion(), azureImageInfo.getResourceGroup(), fromVhdUri, azureImageInfo.getRegion()));
         } catch (CloudException e) {
+            LOGGER.warn("Exception when creating custom image", e);
             customImage = handleCustomImageCreationException(azureImageInfo, ac, client, checkerContext, e);
         }
         return customImage
@@ -70,16 +77,25 @@ public class AzureImageService {
     }
 
     private Optional<VirtualMachineCustomImage> handleCustomImageCreationException(AzureImageInfo azureImageInfo, AuthenticatedContext ac,
-            AzureClient client, AzureManagedImageCreationCheckerContext checkerContext, CloudException e) {
-        Optional<VirtualMachineCustomImage> customImage;
-        azureManagedImageCreationPoller.startPolling(ac, checkerContext);
-        customImage = findImage(azureImageInfo, client);
-        if (customImage.isEmpty()) {
-            LOGGER.error("Failed to create custom image.", e);
-            updateImageStatus(ac, azureImageInfo.getImageNameWithRegion(), azureImageInfo.getImageId(), CommonStatus.FAILED);
-            throw new CloudConnectorException(e);
+            AzureClient client, AzureManagedImageCreationCheckerContext checkerContext, CloudException originalException) {
+        Exception onError = originalException;
+        try {
+            azureManagedImageCreationPoller.startPolling(ac, checkerContext);
+        } catch (TimeoutException e) {
+            LOGGER.warn("Timeout during polling for image creation: ", e);
+        } catch (Exception e) {
+            LOGGER.warn("Exception during polling for image creation: ", e);
+            onError = e;
+        } finally {
+            Optional<VirtualMachineCustomImage> customImage;
+            customImage = findImage(azureImageInfo, client);
+            if (customImage.isEmpty()) {
+                updateImageStatus(ac, azureImageInfo.getImageNameWithRegion(), azureImageInfo.getImageId(), CommonStatus.FAILED);
+                LOGGER.error("Failed to create custom image, throwing: ", onError);
+                throw new CloudConnectorException(onError);
+            }
+            return customImage;
         }
-        return customImage;
     }
 
     private Optional<VirtualMachineCustomImage> findImage(AzureImageInfo azureImageInfo, AzureClient client) {
