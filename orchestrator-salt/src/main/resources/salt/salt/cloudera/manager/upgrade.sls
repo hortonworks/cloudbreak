@@ -8,6 +8,14 @@ stop-cloudera-scm-server:
   service.dead:
     - name: cloudera-scm-server
 
+{% if grains['os_family'] == 'RedHat' %}
+
+yum_cleanup_all_before_cm_server_install:
+  cmd.run:
+    - name: yum clean all
+
+{% endif %}
+
 upgrade-cloudera-server:
   pkg.latest:
     - pkgs:

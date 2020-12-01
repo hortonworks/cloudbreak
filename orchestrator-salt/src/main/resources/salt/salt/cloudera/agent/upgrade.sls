@@ -8,6 +8,14 @@ stop-cloudera-scm-agent:
   service.dead:
     - name: cloudera-scm-agent
 
+{% if grains['os_family'] == 'RedHat' %}
+
+yum_cleanup_all_before_cm_agent_install:
+  cmd.run:
+    - name: yum clean all
+
+{% endif %}
+
 upgrade-cloudera-agent:
   pkg.latest:
     - pkgs:
