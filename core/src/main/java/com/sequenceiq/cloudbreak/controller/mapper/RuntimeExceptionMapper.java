@@ -15,7 +15,7 @@ public class RuntimeExceptionMapper extends BaseExceptionMapper<RuntimeException
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(RuntimeException exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 

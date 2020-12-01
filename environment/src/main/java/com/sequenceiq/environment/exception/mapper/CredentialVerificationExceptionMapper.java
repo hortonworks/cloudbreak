@@ -7,7 +7,7 @@ import com.sequenceiq.environment.credential.exception.CredentialVerificationExc
 public class CredentialVerificationExceptionMapper extends BaseExceptionMapper<CredentialVerificationException> {
 
     @Override
-    Response.Status getResponseStatus() {
+    Response.Status getResponseStatus(CredentialVerificationException exception) {
         return Response.Status.BAD_REQUEST;
     }
 

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -88,6 +89,9 @@ public class ClusterBootstrapperTest {
     @Mock
     private HostOrchestrator hostOrchestrator;
 
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
     @Test
     public void shouldUseReachableInstances() throws CloudbreakException, CloudbreakImageNotFoundException {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
@@ -115,5 +119,6 @@ public class ClusterBootstrapperTest {
         verify(stack).getReachableInstanceMetaDataSet();
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
+        verify(instanceMetaDataService).saveAll(stack.getReachableInstanceMetaDataSet());
     }
 }

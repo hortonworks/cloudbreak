@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.converter.ConversionException;
 public class ConversionExceptionMapper extends SendNotificationExceptionMapper<ConversionException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConversionException exception) {
         return Status.BAD_REQUEST;
     }
 

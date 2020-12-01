@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class IllegalStateExceptionMapper extends SendNotificationExceptionMapper<IllegalStateException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(IllegalStateException exception) {
         return Status.BAD_REQUEST;
     }
 

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class ConversionFailedExceptionMapper extends SendNotificationExceptionMapper<ConversionFailedException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConversionFailedException exception) {
         return Status.BAD_REQUEST;
     }
 

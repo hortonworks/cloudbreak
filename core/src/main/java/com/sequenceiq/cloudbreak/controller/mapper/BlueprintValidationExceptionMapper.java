@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationExceptio
 public class BlueprintValidationExceptionMapper extends BaseExceptionMapper<BlueprintValidationException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(BlueprintValidationException exception) {
         return Status.BAD_REQUEST;
     }
 

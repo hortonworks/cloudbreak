@@ -36,7 +36,7 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConstraintViolationException exception) {
         return Status.BAD_REQUEST;
     }
 

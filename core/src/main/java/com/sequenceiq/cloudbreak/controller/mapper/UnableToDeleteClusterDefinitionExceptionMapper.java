@@ -16,7 +16,7 @@ public class UnableToDeleteClusterDefinitionExceptionMapper extends BaseExceptio
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(UnableToDeleteClusterDefinitionException exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 

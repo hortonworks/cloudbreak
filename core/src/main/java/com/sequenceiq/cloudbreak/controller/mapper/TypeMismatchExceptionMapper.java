@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class TypeMismatchExceptionMapper extends BaseExceptionMapper<TypeMismatchException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(TypeMismatchException exception) {
         return Status.BAD_REQUEST;
     }
 

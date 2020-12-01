@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_S
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
+import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -282,7 +283,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
-        ApiCommand deployClientConfigCmd = getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig);
+        ApiCommand deployClientConfigCmd = checkedMeasure(
+                () -> getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig),
+                LOGGER,
+                "The DeployClusterClientConfig command registration to CM took {} ms");
         pollDeployConfig(deployClientConfigCmd);
         ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
         pollRefresh(refreshServicesCmd);

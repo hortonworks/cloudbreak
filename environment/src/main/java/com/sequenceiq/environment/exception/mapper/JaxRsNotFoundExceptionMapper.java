@@ -5,20 +5,18 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import ch.qos.logback.classic.Level;
 
 @Component
 public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JaxRsNotFoundExceptionMapper.class);
 
     @Context
     private UriInfo uriInfo;
 
     @Override
-    Response.Status getResponseStatus() {
+    Response.Status getResponseStatus(NotFoundException notFoundException) {
         return Response.Status.NOT_FOUND;
     }
 
@@ -28,9 +26,14 @@ public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundEx
     }
 
     @Override
-    public Response toResponse(NotFoundException exception) {
+    protected String getErrorMessage(NotFoundException throwable) {
         String absolutePath = uriInfo.getRequestUri().getPath();
-        LOGGER.info("Couldn't find the specified resource on path '{}', error message: {}", absolutePath, getErrorMessage(exception));
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        String errorMessage = super.getErrorMessage(throwable);
+        return String.format("Couldn't find the specified resource on path '%s', error message: %s", absolutePath, errorMessage);
+    }
+
+    @Override
+    protected Level getLogLevel() {
+        return Level.INFO;
     }
 }
