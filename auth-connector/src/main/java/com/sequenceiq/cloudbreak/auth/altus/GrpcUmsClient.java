@@ -188,7 +188,7 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #userCrn, #accountId }")
+    @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #actorCrn, #userCrn, #accountId }")
     public MachineUser getMachineUserDetails(String actorCrn, String userCrn, String accountId, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         LOGGER.debug("Getting machine user information for {} using request ID {}", userCrn, requestId);
@@ -361,7 +361,7 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the account associated with this user CRN
      */
-    @Cacheable(cacheNames = "umsAccountCache", key = "{ #accountId }")
+    @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #accountId }")
     public Account getAccountDetails(String actorCrn, String accountId, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         LOGGER.debug("Getting information for account ID {} using request ID {}", accountId, requestId);
@@ -374,7 +374,7 @@ public class GrpcUmsClient {
         return client.listAssigmentsOfUser(RequestIdUtil.getOrGenerate(requestId), userCrn);
     }
 
-    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkResourceRight(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
@@ -383,7 +383,7 @@ public class GrpcUmsClient {
         return makeCheckRightCall(actorCrn, userCrn, right, resource, requestId);
     }
 
-    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
+    @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #actorCrn, #userCrn, #right, #resource }")
     public boolean checkResourceRightLegacy(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
@@ -397,7 +397,7 @@ public class GrpcUmsClient {
         return makeCheckRightCall(actorCrn, userCrn, right, resource, requestId);
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
     public boolean checkAccountRight(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
@@ -406,7 +406,7 @@ public class GrpcUmsClient {
         return makeCheckRightCall(actorCrn, userCrn, right, null, requestId);
     }
 
-    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
+    @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #actorCrn, #userCrn, #right }")
     public boolean checkAccountRightLegacy(String actorCrn, String userCrn, String right, Optional<String> requestId) {
         if (InternalCrnBuilder.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
@@ -690,8 +690,6 @@ public class GrpcUmsClient {
         LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
     }
 
-    // Cache evict does not work with this key, we need to wait 60s
-    // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
         LOGGER.info("Unassigning {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
@@ -699,8 +697,6 @@ public class GrpcUmsClient {
         LOGGER.info("Unassigned {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
     }
 
-    // Cache evict does not work with this key, we need to wait 60s
-    // @CacheEvict(cacheNames = {"umsUserRightsCache", "umsUserRoleAssigmentsCache", "umsResourceAssigneesCache"}, key = "#userCrn")
     public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
         try {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
