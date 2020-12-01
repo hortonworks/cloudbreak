@@ -89,7 +89,7 @@ public class AzureImageServiceTest {
     }
 
     @Test
-    public void testFindCustomImageWhenImageExistsOnAzure() {
+    public void testFindCustomImageWhenImageExistsOnAzure() throws Exception {
         imagePresent(true);
 
         Optional<AzureImage> azureImageOptional = underTest.findImage(azureImageInfo, azureClient, authenticatedContext);
@@ -99,7 +99,7 @@ public class AzureImageServiceTest {
     }
 
     @Test
-    public void testFindCustomImageWhenImageIsRequested() {
+    public void testFindCustomImageWhenImageIsRequested() throws Exception {
         imagePresent(false);
         imageRequested(true);
 
@@ -110,7 +110,7 @@ public class AzureImageServiceTest {
     }
 
     @Test
-    public void testFindCustomImageWhenImageWasNotRequested() {
+    public void testFindCustomImageWhenImageWasNotRequested() throws Exception {
         imagePresent(false);
         imageRequested(false);
 
@@ -181,7 +181,7 @@ public class AzureImageServiceTest {
 
     }
 
-    private void verifyPollingStarted() {
+    private void verifyPollingStarted() throws Exception {
         ArgumentCaptor<AzureManagedImageCreationCheckerContext> captor = ArgumentCaptor.forClass(AzureManagedImageCreationCheckerContext.class);
         verify(azureManagedImageCreationPoller).startPolling(any(), captor.capture());
         assertEquals(CUSTOM_IMAGE_NAME_WITH_REGION, captor.getValue().getAzureImageInfo().getImageNameWithRegion());
