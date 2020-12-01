@@ -19,6 +19,9 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 
 import ch.qos.logback.classic.Level;
 
+/**
+ * We can add the superclass as a {@code T}, the @{code {@link org.glassfish.jersey.spi.ExceptionMappers}} will find the closest type to the mapped exception.
+ */
 abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapper<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
@@ -71,7 +74,7 @@ abstract class BaseExceptionMapper<T extends Throwable> implements ExceptionMapp
         return ExceptionUtils.getRootCause(throwable).getMessage();
     }
 
-    private boolean logException() {
+    protected boolean logException() {
         return true;
     }
 

@@ -12,6 +12,11 @@ public class CredentialVerificationResult extends CloudPlatformResult {
         this.cloudCredentialStatus = cloudCredentialStatus;
     }
 
+    public CredentialVerificationResult(String statusReason, Exception errorDetails, Long resourceId, CloudCredentialStatus cloudCredentialStatus) {
+        super(statusReason, errorDetails, resourceId);
+        this.cloudCredentialStatus = cloudCredentialStatus;
+    }
+
     public CredentialVerificationResult(String statusReason, Exception errorDetails, Long resourceId) {
         super(statusReason, errorDetails, resourceId);
     }

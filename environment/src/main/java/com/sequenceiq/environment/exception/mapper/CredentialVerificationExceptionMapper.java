@@ -1,15 +1,11 @@
 package com.sequenceiq.environment.exception.mapper;
 
-import javax.ws.rs.core.Response;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.credential.exception.CredentialVerificationException;
 
-public class CredentialVerificationExceptionMapper extends BaseExceptionMapper<CredentialVerificationException> {
-
-    @Override
-    Response.Status getResponseStatus(CredentialVerificationException exception) {
-        return Response.Status.BAD_REQUEST;
-    }
+@Component
+public class CredentialVerificationExceptionMapper extends SearchCauseExceptionMapper<CredentialVerificationException> {
 
     @Override
     Class<CredentialVerificationException> getExceptionType() {
