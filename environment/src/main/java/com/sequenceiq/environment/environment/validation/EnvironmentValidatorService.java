@@ -37,6 +37,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
+import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -58,6 +59,8 @@ public class EnvironmentValidatorService {
 
     private final CredentialService credentialService;
 
+    private final PublicKeyValidator publicKeyValidator;
+
     private final Set<String> enabledParentPlatforms;
 
     private final Set<String> enabledChildPlatforms;
@@ -66,12 +69,14 @@ public class EnvironmentValidatorService {
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
+            PublicKeyValidator publicKeyValidator,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
         this.credentialService = credentialService;
+        this.publicKeyValidator = publicKeyValidator;
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
     }
@@ -137,7 +142,6 @@ public class EnvironmentValidatorService {
             }
         });
         return validationResultBuilder.build();
-
     }
 
     public ValidationResult validateAuthenticationModification(EnvironmentEditDto editDto, Environment environment) {
@@ -151,16 +155,24 @@ public class EnvironmentValidatorService {
         } else {
             String publicKey = authenticationDto.getPublicKey();
             if (isNotEmpty(publicKeyId) && isNotEmpty(publicKey)) {
-                validationResultBuilder.error("You should define either publicKey or publicKeyId only");
+                validationResultBuilder.error("You should define either publicKey or publicKeyId only, but not both.");
             }
             if (StringUtils.isEmpty(publicKeyId) && StringUtils.isEmpty(publicKey)) {
-                validationResultBuilder.error("You should define publicKey or publicKeyId");
+                validationResultBuilder.error("You should define either the publicKey or the publicKeyId.");
             }
             if (isNotEmpty(publicKeyId) && !environmentResourceService.isPublicKeyIdExists(environment, publicKeyId)) {
-                validationResultBuilder.error(String.format("The publicKeyId with name of '%s' does not exists on the provider", publicKeyId));
+                validationResultBuilder.error(String.format("The publicKeyId with name of '%s' does not exist on the provider.", publicKeyId));
+            }
+            if (isNotEmpty(publicKey)) {
+                ValidationResult validationResult = publicKeyValidator.validatePublicKey(publicKey);
+                validationResultBuilder.merge(validationResult);
             }
         }
         return validationResultBuilder.build();
+    }
+
+    public ValidationResult validatePublicKey(String publicKey) {
+        return publicKeyValidator.validatePublicKey(publicKey);
     }
 
     private void fetchSecurityGroup(EnvironmentEditDto editDto, Environment environment, String securityGroupId) {

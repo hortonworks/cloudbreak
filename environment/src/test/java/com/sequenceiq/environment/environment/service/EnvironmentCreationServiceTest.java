@@ -21,10 +21,12 @@ import java.util.Optional;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -94,6 +96,11 @@ class EnvironmentCreationServiceTest {
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
+    @BeforeEach
+    void setup() {
+        when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
+    }
+
     @Test
     void testCreateOccupied() {
         EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
@@ -101,8 +108,10 @@ class EnvironmentCreationServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .build();
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(true);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
+        verify(validatorService, Mockito.times(0)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -142,8 +151,10 @@ class EnvironmentCreationServiceTest {
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
         when(entitlementService.azureEnabled(eq(CRN), eq(ACCOUNT_ID))).thenReturn(false);
+
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -186,6 +197,7 @@ class EnvironmentCreationServiceTest {
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
         verify(environmentService).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
@@ -240,6 +252,7 @@ class EnvironmentCreationServiceTest {
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
         verify(environmentService).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any());
@@ -287,6 +300,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
@@ -334,6 +348,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
