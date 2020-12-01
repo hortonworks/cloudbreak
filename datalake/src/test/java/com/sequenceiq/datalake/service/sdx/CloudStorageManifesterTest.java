@@ -68,9 +68,9 @@ public class CloudStorageManifesterTest {
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         clusterV4Request.setBlueprintName(exampleBlueprintName);
         environment.setCloudPlatform("AWS");
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest),
-                "instance profile must be defined for S3");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest));
+        assertEquals(exception.getMessage(), "instance profile must be defined for S3");
     }
 
     @Test
@@ -427,9 +427,22 @@ public class CloudStorageManifesterTest {
         params.setInstanceProfile("instanceProfile");
         cloudStorageRequest.setS3(params);
 
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest),
-                "AWS baselocation missing protocol. please specify s3a://");
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest));
+        assertEquals(exception.getMessage(), "AWS baselocation missing protocol. please specify s3a://");
+    }
+
+    @Test
+    public void stripWhitespacesWhenBaseLocationHasWhiteSpaces() {
+        String baseLocationWithWhiteSpaces = "s3a://cloudbreak bucket/something ";
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation(baseLocationWithWhiteSpaces);
+        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
+        params.setInstanceProfile("instanceProfile");
+        cloudStorageRequest.setS3(params);
+
+        underTest.normalizeCloudStorageRequest(cloudStorageRequest);
+        assertEquals("s3a://cloudbreak bucket/something", cloudStorageRequest.getBaseLocation());
     }
 
     @Test

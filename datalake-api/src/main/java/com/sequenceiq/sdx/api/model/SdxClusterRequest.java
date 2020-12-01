@@ -108,4 +108,16 @@ public class SdxClusterRequest implements TaggableRequest {
     public void setEnableRangerRaz(boolean enableRangerRaz) {
         this.enableRangerRaz = enableRangerRaz;
     }
+
+    @Override
+    public String toString() {
+        return "SdxClusterRequest{" +
+                "clusterShape=" + clusterShape +
+                ", runtime='" + runtime + '\'' +
+                ", cloudStorage=" + cloudStorage +
+                ", externalDatabase=" + externalDatabase +
+                ", aws=" + aws +
+                ", enableRangerRaz=" + enableRangerRaz +
+                '}';
+    }
 }
