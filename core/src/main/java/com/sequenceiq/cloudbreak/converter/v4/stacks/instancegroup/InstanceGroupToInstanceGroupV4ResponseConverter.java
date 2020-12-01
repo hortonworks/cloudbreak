@@ -40,6 +40,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         }
         instanceGroupResponse.setNodeCount(source.getNodeCount());
         instanceGroupResponse.setName(source.getGroupName());
+        instanceGroupResponse.setType(source.getInstanceGroupType());
         return instanceGroupResponse;
     }
 }
