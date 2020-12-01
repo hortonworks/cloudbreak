@@ -50,7 +50,7 @@
             "configs": [
               {
                 "name": "xml.authorizers.userGroupProvider.file-user-group-provider.enabled",
-                "value": "false"
+                "value": "true"
               },
               {
                 "name": "xml.authorizers.accessPolicyProvider.file-access-policy-provider.enabled",
@@ -188,7 +188,7 @@
             "configs": [
               {
                 "name": "xml.authorizers.userGroupProvider.file-user-group-provider.enabled",
-                "value": "false"
+                "value": "true"
               },
               {
                 "name": "xml.authorizers.accessPolicyProvider.file-access-policy-provider.enabled",
