@@ -28,10 +28,19 @@ verlte() {
     [  "$1" = "`echo -e "$1\n$2" | sort -V | head -n1`" ]
 }
 
+if [[ ! $CB_VERSION =~ ^([0-9]+\.)?([0-9]+\.)?(\*|[0-9]+)(\-b[0-9]+)?$ ]]; then
+  echo CB_VERSION \($CB_VERSION\) does not look like as a valid version number
+  echo Exit with failure
+  exit 1
+fi
+
+
 VERSION=$(echo $CB_VERSION | cut -f 1 -d '-')
+echo Determine previous version number based on current version \(which is $VERSION from input $CB_VERSION\),
 MAJOR_VERSION=$(echo $VERSION | cut -f 1 -d '.')
 MINOR_VERSION=$(echo $VERSION | cut -f 2 -d '.')
 PATCH_VERSION=$(echo $VERSION | cut -f 3 -d '.')
+echo where major version number is: $MAJOR_VERSION, minor: $MINOR_VERSION, patch: $PATCH_VERSION
 PREVIOUS_MINOR_VERSION=$MAJOR_VERSION.$(expr $MINOR_VERSION - 1).$PATCH_VERSION
 PREVIOUS_MINOR_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=${PREVIOUS_MINOR_VERSION}" | jq -r '.latest_build_version')
 PREVIOUS_BUILD=$(curl "http://release.infra.cloudera.com/hwre-api/listbuilds?stack=CB&release=$VERSION" | jq '.full_list_versions[0]' | tr -d '"')
