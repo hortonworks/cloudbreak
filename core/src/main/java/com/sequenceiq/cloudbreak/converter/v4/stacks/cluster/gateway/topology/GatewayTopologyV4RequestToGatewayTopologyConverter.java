@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.Gat
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
 public class GatewayTopologyV4RequestToGatewayTopologyConverter extends AbstractConversionServiceAwareConverter<GatewayTopologyV4Request, GatewayTopology> {

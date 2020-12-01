@@ -28,14 +28,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChe
 class CmAndStackVersionFilterTest {
     private static final String V_7_0_3 = "7.0.3";
 
-    private static final String STACK_PACKAGE_KEY = "stack";
-
-    private static final String CM_PACKAGE_KEY = "cm";
-
-    private static final String CDH_BUILD_NUMBER_KEY = "cdh-build-number";
-
-    private static final String CM_BUILD_NUMBER_KEY = "cm-build-number";
-
     @Mock
     private LockedComponentChecker lockedComponentChecker;
 
@@ -61,9 +53,9 @@ class CmAndStackVersionFilterTest {
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndStackPermitcheckIsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
@@ -76,9 +68,9 @@ class CmAndStackVersionFilterTest {
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMPermitcheckIsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
-        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
@@ -91,9 +83,9 @@ class CmAndStackVersionFilterTest {
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMAndStackPermitcheckIsFalse() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
-        lenient().when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
@@ -106,9 +98,9 @@ class CmAndStackVersionFilterTest {
     @Test
     public void testFilterShouldReturnTrueWhenNotLockedAndCMAndStackPermitcheckIsTrue() {
         ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, STACK_PACKAGE_KEY, CDH_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
-        when(upgradePermissionProvider.permitCmAndStackUpgrade(imageFilterParams, candidateImage, CM_PACKAGE_KEY, CM_BUILD_NUMBER_KEY))
+        when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);

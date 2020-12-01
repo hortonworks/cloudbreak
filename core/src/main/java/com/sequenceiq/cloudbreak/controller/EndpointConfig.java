@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilte
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroxUpgradeV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -77,7 +78,8 @@ public class EndpointConfig extends ResourceConfig {
             CloudProviderServicesV4Controller.class,
             FlowController.class,
             FlowPublicController.class,
-            AuthorizationInfoController.class
+            AuthorizationInfoController.class,
+            DistroxUpgradeV1Controller.class
     );
 
     @Value("${info.app.version:unspecified}")

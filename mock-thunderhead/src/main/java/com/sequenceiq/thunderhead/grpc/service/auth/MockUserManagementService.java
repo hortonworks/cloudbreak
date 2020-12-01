@@ -196,6 +196,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
 
+    private static final String CDP_RUNTIME_UPGRADE_DATAHUB = "CDP_RUNTIME_UPGRADE_DATAHUB";
+
     private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
 
     private static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
@@ -282,6 +284,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.runtime.upgrade.enable}")
     private boolean runtimeUpgradeEnabled;
+
+    @Value("${auth.mock.datahub.runtime.upgrade.enable}")
+    private boolean datahubRuntimeUpgradeEnabled;
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
@@ -589,6 +594,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (runtimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE));
+        }
+        if (datahubRuntimeUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));

@@ -4,7 +4,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -260,6 +261,23 @@ public class GcpPlatformResources implements PlatformResources {
             properties.put("network", getNetworkName(firewall));
             CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
             result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+        }
+
+        if (filters != null) {
+            String sharedProjectId = filters.get(SHARED_PROJECT_ID);
+            if (!Strings.isNullOrEmpty(sharedProjectId)) {
+                try {
+                    FirewallList sharedProjectFirewalls = compute.firewalls().list(sharedProjectId).execute();
+                    for (Firewall firewall : sharedProjectFirewalls.getItems()) {
+                        Map<String, Object> properties = new HashMap<>();
+                        properties.put("network", getNetworkName(firewall));
+                        CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
+                        result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+                    }
+                } catch (Exception ex) {
+                    LOGGER.warn(String.format("We can not read the host project with id %s", sharedProjectId));
+                }
+            }
         }
 
         return new CloudSecurityGroups(result);

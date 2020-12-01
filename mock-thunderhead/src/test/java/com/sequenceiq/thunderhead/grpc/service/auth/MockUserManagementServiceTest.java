@@ -200,6 +200,9 @@ public class MockUserManagementServiceTest {
                 {"runtimeUpgradeEnabled false", "runtimeUpgradeEnabled", false, "CDP_RUNTIME_UPGRADE", false},
                 {"runtimeUpgradeEnabled true", "runtimeUpgradeEnabled", true, "CDP_RUNTIME_UPGRADE", true},
 
+                {"datahubRuntimeUpgradeEnabled false", "datahubRuntimeUpgradeEnabled", false, "CDP_RUNTIME_UPGRADE_DATAHUB", false},
+                {"datahubRuntimeUpgradeEnabled true", "datahubRuntimeUpgradeEnabled", true, "CDP_RUNTIME_UPGRADE_DATAHUB", true},
+
                 {"razEnabled false", "razEnabled", false, "CDP_RAZ", false},
                 {"razEnabled true", "razEnabled", true, "CDP_RAZ", true},
 

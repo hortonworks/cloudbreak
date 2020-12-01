@@ -20,6 +20,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +28,8 @@ import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.cloudwatch.model.DescribeAlarmsResult;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -169,6 +172,12 @@ public class AwsRepairTest {
     private AwsClient awsClient;
 
     @MockBean
+    private AmazonCloudWatchClient cloudWatchClient;
+
+    @MockBean
+    private DescribeAlarmsResult describeAlarmsResult;
+
+    @MockBean
     private Waiter<DescribeAutoScalingGroupsRequest> describeAutoScalingGroupsRequestWaiter;
 
     @MockBean
@@ -196,6 +205,9 @@ public class AwsRepairTest {
         when(cfWaiters.stackDeleteComplete()).thenReturn(cfStackWaiter);
         when(awsClient.createAutoScalingRetryClient(any(), anyString())).thenReturn(amazonAutoScalingRetryClient);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
+        when(awsClient.createCloudWatchClient(any(), anyString())).thenReturn(cloudWatchClient);
+        when(cloudWatchClient.describeAlarms(any())).thenReturn(describeAlarmsResult);
+        when(describeAlarmsResult.getMetricAlarms()).thenReturn(Collections.emptyList());
         when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
         when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
         when(amazonEC2Client.waiters()).thenReturn(ecWaiters);

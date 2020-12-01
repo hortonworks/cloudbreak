@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.component;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -114,6 +115,10 @@ public class TestConfig {
     public SyncPollingScheduler<?> syncPollingScheduler() throws Exception {
         SyncPollingScheduler<?> syncPollingScheduler = mock(SyncPollingScheduler.class);
         when(syncPollingScheduler.schedule(any())).thenAnswer(
+                getAnswer()
+        );
+
+        when(syncPollingScheduler.schedule(any(), anyInt(), anyInt(), anyInt())).thenAnswer(
                 getAnswer()
         );
 

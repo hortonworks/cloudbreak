@@ -122,7 +122,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
 
         // TODO temporary until CCM not really integrated
-        if (request.getSecurityAccess() == null) {
+        if (request.getSecurityAccess() == null && !CloudPlatform.GCP.name().equals(cloudPlatform)) {
             SecurityAccessDto securityAccess = SecurityAccessDto.builder()
                     .withCidr("0.0.0.0/0")
                     .build();

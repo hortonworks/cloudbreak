@@ -130,4 +130,9 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses().size();
     }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
 }

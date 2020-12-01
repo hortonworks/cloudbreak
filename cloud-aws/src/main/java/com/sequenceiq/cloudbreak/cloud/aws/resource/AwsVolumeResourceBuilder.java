@@ -199,10 +199,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     }))
                     .collect(Collectors.toList()));
         }
-
+        LOGGER.debug("Waiting for volumes creation requests");
         for (Future<?> future : futures) {
             future.get();
         }
+        LOGGER.debug("Volume creation requests sent");
 
         return buildableResource.stream()
                 .peek(resource -> {
@@ -343,7 +344,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumeIds);
         DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
         ResourceStatus volumeSetStatus = getResourceStatus(result);
-        LOGGER.debug("Reduced resource status for volume set is {}", volumeSetStatus);
+        LOGGER.debug("[{}] volume set status is {}", String.join(",", volumeIds), volumeSetStatus);
         return volumeResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
                 .collect(Collectors.toList());

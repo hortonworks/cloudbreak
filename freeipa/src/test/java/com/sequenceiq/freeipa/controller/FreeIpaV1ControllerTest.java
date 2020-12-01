@@ -23,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
@@ -32,15 +33,14 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
+import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
-import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 

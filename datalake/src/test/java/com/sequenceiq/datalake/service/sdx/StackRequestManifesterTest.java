@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -41,7 +42,6 @@ import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.model.CloudIdentityType;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 
 @ExtendWith(MockitoExtension.class)

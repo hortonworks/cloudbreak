@@ -5,7 +5,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Provider
 @Component

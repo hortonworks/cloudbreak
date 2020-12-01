@@ -49,7 +49,7 @@ public class GrainUploader {
 
     private void addGrainToHosts(Set<Node> allNodes, ExitCriteriaModel exitModel, SaltConnector sc, ExitCriteria exitCriteria,
             Entry<Entry<String, String>, Collection<String>> grainForHosts) throws Exception {
-        saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(new HashSet<>(grainForHosts.getValue()), allNodes, grainForHosts.getKey().getKey(),
+        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(new HashSet<>(grainForHosts.getValue()), allNodes, grainForHosts.getKey().getKey(),
                         grainForHosts.getKey().getValue()), exitModel, exitCriteria);
     }
 }

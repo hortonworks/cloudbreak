@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.conf.ConverterMockProvider;
 import com.sequenceiq.cloudbreak.conf.RepositoryMockProvider;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayTopologyV4RequestValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.GatewayV4RequestValidator;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;

@@ -124,7 +124,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
 
     private void checkRestEvents(List<AuditProto.CdpAuditEvent> restEvents, String eventName) {
         if (restEvents.isEmpty()) {
-            throw new TestFailException(eventName + " rest audit log must contains only 1 item but has " + restEvents.size());
+            throw new TestFailException(eventName + " rest audit log must contain only 1 item but has " + restEvents.size());
         }
     }
 

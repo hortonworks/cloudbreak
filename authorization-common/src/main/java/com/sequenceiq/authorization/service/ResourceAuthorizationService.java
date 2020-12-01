@@ -31,6 +31,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.RightUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+
+import io.grpc.StatusRuntimeException;
 
 @Service
 public class ResourceAuthorizationService {
@@ -50,7 +53,7 @@ public class ResourceAuthorizationService {
     private List<AuthorizationFactory<? extends Annotation>> authorizationFactories;
 
     public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Optional<String> requestId) {
-        boolean authzEntitled = entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId());
+        boolean authzEntitled = isAuthorizationEntitlementRegistered(userCrn);
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper(authzEntitled);
         getAuthorization(userCrn, proceedingJoinPoint, methodSignature).ifPresent(authorization -> {
             if (LOGGER.isDebugEnabled()) {
@@ -70,6 +73,14 @@ public class ResourceAuthorizationService {
                 }
             }, () -> LOGGER.debug("Resource authorization was successfull."));
         });
+    }
+
+    private boolean isAuthorizationEntitlementRegistered(String userCrn) {
+        try {
+            return entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId());
+        } catch (StatusRuntimeException e) {
+            throw new BadRequestException(e.getMessage(), e);
+        }
     }
 
     private List<Boolean> checkWithUms(String userCrn, Optional<String> requestId, boolean authzEntitled,

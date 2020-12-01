@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
@@ -78,6 +78,7 @@ public class AuditCredentialV1Controller extends NotificationController implemen
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Credential credential = credentialConverter.convert(request);
         credential.setType(AUDIT);
+        credential.setVerifyPermissions(false);
         notify(ResourceEvent.CREDENTIAL_CREATED);
         Set<Credential> auditCredentialsByPlatfom = credentialService
                 .listAvailablesByAccountId(accountId, AUDIT)

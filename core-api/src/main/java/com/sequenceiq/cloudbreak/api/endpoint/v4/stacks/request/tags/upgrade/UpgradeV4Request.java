@@ -27,6 +27,8 @@ public class UpgradeV4Request {
     @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.DRY_RUN)
     private Boolean dryRun;
 
+    private Boolean replaceVms = Boolean.TRUE;
+
     @ApiModelProperty(ModelDescriptions.UpgradeModelDescription.SHOW_AVAILABLE_IMAGES)
     private UpgradeShowAvailableImages showAvailableImages = UpgradeShowAvailableImages.DO_NOT_SHOW;
 
@@ -72,6 +74,14 @@ public class UpgradeV4Request {
 
     public void setShowAvailableImages(UpgradeShowAvailableImages showAvailableImages) {
         this.showAvailableImages = showAvailableImages;
+    }
+
+    public Boolean getReplaceVms() {
+        return replaceVms;
+    }
+
+    public void setReplaceVms(Boolean replaceVms) {
+        this.replaceVms = replaceVms;
     }
 
     public boolean isEmpty() {

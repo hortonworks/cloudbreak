@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 class AwsCloudWatchServiceTest {
 
     private static final String REGION = "region";
-
-    private static final Map<String, String> PARAMETERS = Map.of("createCloudWatchAlarm", Boolean.TRUE.toString());
 
     @Mock
     private AwsClient awsClient;
@@ -72,7 +69,6 @@ class AwsCloudWatchServiceTest {
         CloudInstance instance2 = mock(CloudInstance.class);
         CloudInstance instance3 = mock(CloudInstance.class);
         List<Group> groups = List.of(group);
-        when(stack.getParameters()).thenReturn(PARAMETERS);
         when(stack.getGroups()).thenReturn(groups);
         when(group.getInstances()).thenReturn(List.of(instance1, instance2, instance3));
         when(instance1.getInstanceId()).thenReturn(instanceId1);
@@ -144,7 +140,6 @@ class AwsCloudWatchServiceTest {
         CloudStack stack = mock(CloudStack.class);
         Group group = mock(Group.class);
         List<Group> groups = List.of(group);
-        when(stack.getParameters()).thenReturn(PARAMETERS);
         when(stack.getGroups()).thenReturn(groups);
         when(group.getInstances()).thenReturn(cloudInstances);
         when(awsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(cloudWatchClient);
@@ -195,11 +190,10 @@ class AwsCloudWatchServiceTest {
         CloudStack stack = mock(CloudStack.class);
         Group group = mock(Group.class);
         List<Group> groups = List.of(group);
-        when(stack.getParameters()).thenReturn(PARAMETERS);
         when(stack.getGroups()).thenReturn(groups);
         when(group.getInstances()).thenReturn(cloudInstances);
         when(awsClient.createCloudWatchClient(credentialView, REGION)).thenReturn(cloudWatchClient);
-        AmazonCloudWatchException exception = new AmazonCloudWatchException("No permissions to descrive cloudwatch alarms");
+        AmazonCloudWatchException exception = new AmazonCloudWatchException("No permissions to describe cloudwatch alarms");
         when(cloudWatchClient.describeAlarms(any())).thenThrow(exception);
 
         underTest.deleteCloudWatchAlarmsForSystemFailures(stack, REGION, credentialView);

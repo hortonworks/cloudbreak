@@ -101,6 +101,11 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
     }
 
     @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
+    @Override
     public int order() {
         return 500;
     }

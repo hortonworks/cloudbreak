@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,7 +33,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -44,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -53,9 +51,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 public class ClusterUpgradeAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -81,24 +76,29 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public UpgradeV4Response checkForUpgradesByName(Long workspaceId, String stackName, boolean lockComponents) {
-        Stack stack = stackService.getByNameInWorkspace(stackName, workspaceId);
+    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, Boolean replaceVms) {
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
-            Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
             if (!stack.getStatus().isAvailable()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
                 LOGGER.warn(upgradeOptions.getReason());
-            } else if (validationResult.isError()) {
-                upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
-                LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
+            } else if (shouldValidateForRepair(lockComponents, replaceVms)) {
+                LOGGER.debug("Validate for repair");
+                Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.repairWithDryRun(stack.getId());
+                if (validationResult.isError()) {
+                    upgradeOptions.setReason(String.join(",", validationResult.getError().getValidationErrors()));
+                    LOGGER.warn(String.format("Cannot upgrade cluster because: %s", upgradeOptions.getReason()));
+                }
             }
         }
         return upgradeOptions;
     }
 
-    public UpgradeV4Response checkForNotAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions) {
+    private boolean shouldValidateForRepair(boolean lockComponents, Boolean replaceVms) {
+        return lockComponents || replaceVms == null || replaceVms;
+    }
 
+    public UpgradeV4Response checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions) {
         String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
                 .filter(stackViewV4Response -> !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
                         || (stackViewV4Response.getCluster() != null
@@ -116,7 +116,7 @@ public class ClusterUpgradeAvailabilityService {
         List<ImageInfoV4Response> filteredUpgradeCandidates;
         // We would like to upgrade to latest available if no request params exist
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) {
-            filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(getComparator()).orElseThrow());
+            filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
             LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
         } else {
             String requestImageId = upgradeRequest.getImageId();
@@ -228,9 +228,5 @@ public class ClusterUpgradeAvailabilityService {
                     .filter(imageInfoV4Response -> imageInfoV4Response.getImageId().equalsIgnoreCase(requestImageId))
                     .collect(Collectors.toList());
         }
-    }
-
-    private Comparator<ImageInfoV4Response> getComparator() {
-        return Comparator.comparing(ImageInfoV4Response::getCreated);
     }
 }

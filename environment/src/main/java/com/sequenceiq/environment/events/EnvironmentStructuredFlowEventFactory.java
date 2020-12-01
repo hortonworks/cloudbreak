@@ -14,9 +14,12 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPStructuredFlowEventFactory;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.ha.NodeConfig;
 
@@ -28,6 +31,9 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
 
     @Inject
     private EnvironmentService environmentService;
+
+    @Inject
+    private EnvironmentDtoConverter environmentDtoConverter;
 
     @Inject
     private NodeConfig nodeConfig;
@@ -47,8 +53,11 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
         CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, environment.getId(),
                 environment.getName(), nodeConfig.getId(), serviceVersion, environment.getAccountId(), environment.getResourceCrn(), environment.getCreator(),
                 environment.getResourceCrn(), null);
-        CDPStructuredFlowEvent event = new CDPStructuredFlowEvent(operationDetails, flowDetails, null, environment.getStatus().name(),
-                getReason(environment));
+
+        EnvironmentDetails environmentDetails = environmentDtoConverter.environmentToDto(environment);
+
+        CDPEnvironmentStructuredFlowEvent event = new CDPEnvironmentStructuredFlowEvent(operationDetails, flowDetails, environmentDetails,
+                environment.getStatus().name(), getReason(environment));
         if (exception != null) {
             event.setException(ExceptionUtils.getStackTrace(exception));
         }

@@ -12,19 +12,10 @@
       "Effect": "Allow",
       "Action": [
         "s3:AbortMultipartUpload",
-        "s3:GetObject",
         "s3:ListMultipartUploadParts",
         "s3:PutObject"
       ],
       "Resource": "arn:aws:s3:::${LOGS_LOCATION_BASE}/*"
-    },
-    {
-      "Effect": "Deny",
-      "Action": "s3:GetObject",
-      "Resource": [
-        "arn:aws:s3:::${LOGS_LOCATION_BASE}/cluster-backups",
-        "arn:aws:s3:::${LOGS_LOCATION_BASE}/cluster-backups/*"
-      ]
     }
   ]
 }

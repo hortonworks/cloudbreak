@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.NotImplementedException;
 
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.flow.api.model.FlowIdentifier;

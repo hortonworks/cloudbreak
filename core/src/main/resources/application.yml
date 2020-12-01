@@ -453,6 +453,9 @@ cb:
     salt.new.service.leave.retry: 5
     salt.new.service.retry.onerror: 20
     salt.recipe.execution.retry: 180
+    salt.modifygrain:
+        maxretry: 30
+        maxerrorretry: 10
 
   address.resolving.timeout: 60000
 
@@ -547,6 +550,7 @@ cb:
           - name: cloudera-manager-agent
             pattern: "(.*)-.*"
         prewarmed: true
+  paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy

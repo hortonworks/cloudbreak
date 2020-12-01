@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.CBAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.audit.BlueprintAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -17,6 +18,9 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
+
+    @Inject
+    private BlueprintAuditGrpcServiceAssertion blueprintAuditGrpcServiceAssertion;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -36,6 +40,9 @@ public class CmTemplateBlueprintTest extends BlueprintTestBase {
                 .withBlueprint(super.getValidCMTemplateText())
                 .when(blueprintTestClient.createV4(), key(blueprintName))
                 .then((tc, entity, cc) -> checkBlueprintNameMatches(entity, blueprintName))
+                .when(blueprintTestClient.deleteV4())
+                .then(blueprintAuditGrpcServiceAssertion::create)
+                .then(blueprintAuditGrpcServiceAssertion::delete)
                 .validate();
     }
 

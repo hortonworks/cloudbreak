@@ -1,10 +1,10 @@
 package com.sequenceiq.redbeams.controller.mapper;
 
-import com.sequenceiq.redbeams.exception.BadRequestException;
-
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
 public class SpringBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {

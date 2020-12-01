@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.WasbIdentity;
-import com.sequenceiq.cloudbreak.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;

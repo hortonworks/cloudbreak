@@ -16,14 +16,15 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
@@ -41,10 +42,10 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
@@ -53,7 +54,6 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
-import com.sequenceiq.freeipa.service.stack.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
@@ -170,10 +170,6 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public String getRootCertificate(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {

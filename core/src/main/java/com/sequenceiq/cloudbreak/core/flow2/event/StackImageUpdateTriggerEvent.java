@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
 import reactor.rx.Promise;
 
@@ -23,6 +24,13 @@ public class StackImageUpdateTriggerEvent extends StackEvent {
         this.newImageId = newImageId;
         this.imageCatalogName = imageCatalogName;
         this.imageCatalogUrl = imageCatalogUrl;
+    }
+
+    public StackImageUpdateTriggerEvent(String selector, ImageChangeDto imageChangeDto) {
+        super(selector, imageChangeDto.getStackId());
+        newImageId = imageChangeDto.getImageId();
+        imageCatalogName = imageChangeDto.getImageCatalogName();
+        imageCatalogUrl = imageChangeDto.getImageCatalogUrl();
     }
 
     public StackImageUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String newImageId) {

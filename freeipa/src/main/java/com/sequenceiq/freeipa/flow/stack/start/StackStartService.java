@@ -31,6 +31,9 @@ public class StackStartService {
     @Inject
     private StackStartStopService stackStartStopService;
 
+    @Inject
+    private FreeIpaServiceStartService freeIpaServiceStartService;
+
     public void startStack(Stack stack) {
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.START_IN_PROGRESS, "Stack infrastructure is now starting.");
     }
@@ -43,6 +46,7 @@ public class StackStartService {
     public void finishStackStart(StackStartContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
         Stack stack = context.getStack();
         metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, null);
+        freeIpaServiceStartService.pollFreeIpaHealth(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Stack infrastructure started successfully.");
     }
 

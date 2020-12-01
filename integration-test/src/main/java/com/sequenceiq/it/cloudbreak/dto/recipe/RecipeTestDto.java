@@ -115,6 +115,11 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     }
 
     @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
+    @Override
     public int order() {
         return 500;
     }

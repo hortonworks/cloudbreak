@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 
 class DiagnosticsCollectionValidatorTest {
 

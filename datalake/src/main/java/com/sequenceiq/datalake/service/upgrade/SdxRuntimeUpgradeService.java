@@ -13,18 +13,12 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -33,17 +27,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.CMLicenseUtil;
+import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
+import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.client.RestClientFactory;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -86,7 +80,10 @@ public class SdxRuntimeUpgradeService {
     private GrpcUmsClient umsClient;
 
     @Inject
-    private RestClientFactory restClientFactory;
+    private PaywallAccessChecker paywallAccessChecker;
+
+    @Inject
+    private CMLicenseParser cmLicenseParser;
 
     public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
         return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName, accountId);
@@ -152,7 +149,7 @@ public class SdxRuntimeUpgradeService {
                 LOGGER.debug("Filtering for latest image per runtimes {}", latestImageByRuntime.keySet());
 
             } else if (upgradeSdxClusterRequest.isDryRun()) {
-                ImageInfoV4Response latestImage = upgradeCandidates.stream().max(getComparator()).orElseThrow();
+                ImageInfoV4Response latestImage = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
                 upgradeV4Response.setUpgradeCandidates(List.of(latestImage));
                 LOGGER.debug("Choosing latest image with id {} as dry-run is specified", latestImage.getImageId());
 
@@ -188,30 +185,9 @@ public class SdxRuntimeUpgradeService {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
         String accountId = sdxService.getAccountIdFromCrn(userCrn);
         Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
-        JsonCMLicense license = CMLicenseUtil.parseLicense(account.getClouderaManagerLicenseKey())
+        JsonCMLicense license = cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
                 .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
-        checkPaywallAccess(license);
-    }
-
-    private void checkPaywallAccess(JsonCMLicense license) {
-        Client client = restClientFactory.getOrCreateDefault();
-        WebTarget target = client.target(paywallUrl);
-        HttpAuthenticationFeature basicAuth = HttpAuthenticationFeature.basicBuilder()
-                .credentials(license.getPaywallUsername(), license.getPaywallPassword()).build();
-        target.register(basicAuth);
-        LOGGER.info("Send paywall probe request to {}", paywallUrl);
-        String errorMessage = "The Cloudera Manager license is not valid to authenticate to paywall, "
-                + "please contact a Cloudera administrator to update it.";
-        try (Response response = target.request().get()) {
-            int responseStatus = response.getStatus();
-            LOGGER.info("Paywall probe response status code: {}", responseStatus);
-            if (HttpStatus.OK.value() != responseStatus) {
-                throw new BadRequestException(errorMessage);
-            }
-        } catch (ProcessingException e) {
-            LOGGER.info("Cannot send probe request to paywall", e);
-            throw new BadRequestException(errorMessage);
-        }
+        paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
     private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms) {
@@ -227,7 +203,7 @@ public class SdxRuntimeUpgradeService {
         String imageId;
 
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
-            ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(getComparator()).orElseThrow();
+            ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
             imageId = imageInfoV4Response.getImageId();
             LOGGER.debug("Choosing latest image with id {} as either upgrade request is empty or lockComponents is true", imageId);
         } else {
@@ -241,7 +217,7 @@ public class SdxRuntimeUpgradeService {
                 imageId = validateRuntime(upgradeCandidates, runtime);
                 LOGGER.debug("Chosen image with id {} for {} runtime specified in the request", imageId, runtime);
             } else {
-                throw new BadRequestException(String.format("Invalid upgrade request, please validate the contents: %s", upgradeRequest.toString()));
+                throw new BadRequestException(String.format("Invalid upgrade request, please validate the contents: %s", upgradeRequest));
             }
         }
         return imageId;
@@ -279,7 +255,7 @@ public class SdxRuntimeUpgradeService {
             }
             throw new BadRequestException(errorMessage);
         } else {
-            ImageInfoV4Response imageInfoV4Response = imagesWithMatchingRuntime.get().max(getComparator()).orElseThrow();
+            ImageInfoV4Response imageInfoV4Response = imagesWithMatchingRuntime.get().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
             imageId = imageInfoV4Response.getImageId();
         }
         return imageId;
@@ -305,9 +281,4 @@ public class SdxRuntimeUpgradeService {
     public boolean isOsUpgrade(SdxUpgradeRequest request) {
         return Boolean.TRUE.equals(request.getLockComponents()) && StringUtils.isEmpty(request.getRuntime());
     }
-
-    private Comparator<ImageInfoV4Response> getComparator() {
-        return Comparator.comparing(ImageInfoV4Response::getCreated);
-    }
-
 }

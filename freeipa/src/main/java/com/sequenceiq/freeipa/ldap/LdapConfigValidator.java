@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.controller.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
 public class LdapConfigValidator {

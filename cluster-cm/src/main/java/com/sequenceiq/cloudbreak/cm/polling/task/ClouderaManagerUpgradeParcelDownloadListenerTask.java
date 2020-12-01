@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,6 +9,7 @@ import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
+import com.cloudera.api.swagger.model.ApiParcelState;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
@@ -35,9 +37,7 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     @Override
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
 
-        ApiClient apiClient = pollerObject.getApiClient();
-        ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
-        ApiParcel apiParcel = parcelResourceApi.readParcel(parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
+        ApiParcel apiParcel = getApiParcel(pollerObject);
         String parcelStage = apiParcel.getStage();
 
         if (!ParcelStatus.DOWNLOADED.name().equals(parcelStage)
@@ -51,8 +51,27 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to download parcel in time.");
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi)  {
+
+        //when downloading, progress and totalProgress will show the current number of bytes downloaded
+        // and the total number of bytes needed to be downloaded respectively.
+        String baseMessage = "Operation timed out. Failed to download parcel in time.";
+        try {
+            ApiParcel apiParcel = getApiParcel(toolsResourceApi);
+            ApiParcelState parcelState = apiParcel.getState();
+            String progress = FileUtils.byteCountToDisplaySize(parcelState.getProgress().toBigInteger());
+            String totalProgress = FileUtils.byteCountToDisplaySize(parcelState.getTotalProgress().toBigInteger());
+            String progressMessage = String.format(" %s out of total %s has been downloaded!", progress, totalProgress);
+            throw new ClouderaManagerOperationFailedException(baseMessage + progressMessage);
+        } catch (ApiException e) {
+            throw new ClouderaManagerOperationFailedException(baseMessage);
+        }
+    }
+
+    private ApiParcel getApiParcel(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
+        ApiClient apiClient = pollerObject.getApiClient();
+        ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
+        return parcelResourceApi.readParcel(parcelResource.getClusterName(), parcelResource.getProduct(), parcelResource.getVersion());
     }
 
     @Override

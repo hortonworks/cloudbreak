@@ -7,19 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation.Builder;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -36,13 +30,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
+import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
+import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.datalake.controller.exception.BadRequestException;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -101,6 +98,12 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Mock
     private RestClientFactory restClientFactory;
+
+    @Mock
+    private PaywallAccessChecker paywallAccessChecker;
+
+    @Mock
+    private CMLicenseParser cmLicenseParser;
 
     @InjectMocks
     private SdxRuntimeUpgradeService underTest;
@@ -412,18 +415,10 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
         when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
-        Client clientMock = mock(Client.class);
-        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
-        WebTarget targetMock = mock(WebTarget.class);
-        when(clientMock.target(anyString())).thenReturn(targetMock);
-        Builder requestMock = mock(Builder.class);
-        when(targetMock.request()).thenReturn(requestMock);
-        Response mockResponse = mock(Response.class);
-        when(requestMock.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(HttpStatus.OK.value());
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -454,18 +449,14 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
         when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
-        Client clientMock = mock(Client.class);
-        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
-        WebTarget targetMock = mock(WebTarget.class);
-        when(clientMock.target(anyString())).thenReturn(targetMock);
-        Builder requestMock = mock(Builder.class);
-        when(targetMock.request()).thenReturn(requestMock);
-        Response mockResponse = mock(Response.class);
-        when(requestMock.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(HttpStatus.UNAUTHORIZED.value());
+
+        doThrow(new BadRequestException("The Cloudera Manager license is not valid to authenticate to paywall, "
+                + "please contact a Cloudera administrator to update it."))
+                .when(paywallAccessChecker).checkPaywallAccess(any(JsonCMLicense.class), anyString());
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -502,16 +493,10 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
         when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
-        Client clientMock = mock(Client.class);
-        when(restClientFactory.getOrCreateDefault()).thenReturn(clientMock);
-        WebTarget targetMock = mock(WebTarget.class);
-        when(clientMock.target(anyString())).thenReturn(targetMock);
-        Builder requestMock = mock(Builder.class);
-        when(targetMock.request()).thenReturn(requestMock);
-        when(requestMock.get()).thenThrow(new ProcessingException("Failed to send request"));
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -527,6 +512,9 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeRequest.setLockComponents(false);
         sdxUpgradeRequest.setImageId(null);
         sdxUpgradeRequest.setReplaceVms(REPAIR_AFTER_UPGRADE);
+        doThrow(new BadRequestException("The Cloudera Manager license is not valid to authenticate to paywall, "
+                        + "please contact a Cloudera administrator to update it."))
+                .when(paywallAccessChecker).checkPaywallAccess(any(JsonCMLicense.class), anyString());
 
         try {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
