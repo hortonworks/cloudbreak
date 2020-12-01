@@ -75,6 +75,7 @@ public class CloudStorageManifester {
             String blueprint, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
+        normalizeCloudStorageRequest(cloudStorage);
         validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
         FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(
                 blueprint,
@@ -163,6 +164,10 @@ public class CloudStorageManifester {
         return cloudStorage.getAdlsGen2() != null
                 && (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getManagedIdentity())
                 || (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName())));
+    }
+
+    protected void normalizeCloudStorageRequest(SdxCloudStorageRequest cloudStorageRequest) {
+        cloudStorageRequest.setBaseLocation(cloudStorageRequest.getBaseLocation().strip());
     }
 
     private void setStorageLocations(FileSystemParameterV4Responses fileSystemRecommendations, CloudStorageRequest cloudStorageRequest) {
