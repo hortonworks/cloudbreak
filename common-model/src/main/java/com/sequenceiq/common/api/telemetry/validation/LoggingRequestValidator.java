@@ -9,7 +9,6 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.model.FileSystemType;
 
 public class LoggingRequestValidator implements ConstraintValidator<ValidLoggingRequest, LoggingRequest> {
 
@@ -25,8 +24,8 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }
-            if (isProviderSpecificDataProvided(value) && !isValidPath(value)) {
-                String msg = "Storage location path is invalid in logging request";
+            if (value.getS3() != null && !isValidPath(value.getStorageLocation())) {
+                String msg = "Storage location parameter is invalid (s3) in logging request";
                 context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 return false;
             }
@@ -39,34 +38,12 @@ public class LoggingRequestValidator implements ConstraintValidator<ValidLogging
         return true;
     }
 
-    public boolean isProviderSpecificDataProvided(LoggingRequest value) {
-        return value.getS3() != null || value.getAdlsGen2() != null || value.getGcs() != null;
-    }
-
-    private boolean isValidPath(LoggingRequest value) {
-        boolean valid = false;
+    private boolean isValidPath(String path) {
         try {
-            Paths.get(value.getStorageLocation());
-            if (value.getS3() != null && isValidPathPrefix(value, FileSystemType.S3)) {
-                valid = true;
-            } else if (value.getGcs() != null && isValidPathPrefix(value, FileSystemType.GCS)) {
-                valid = true;
-            } else if (value.getAdlsGen2() != null && isValidPathPrefix(value, FileSystemType.ADLS_GEN_2)) {
-                valid = true;
-            }
+            Paths.get(path);
         } catch (InvalidPathException ex) {
-            // valid = false
+            return false;
         }
-        return valid && !StringUtils.containsWhitespace(value.getStorageLocation());
-    }
-
-    private boolean isValidPathPrefix(LoggingRequest value, FileSystemType fileSystemType) {
-        boolean valid = false;
-        for (String loggingProtocol : fileSystemType.getLoggingProtocol()) {
-            if (value.getStorageLocation().startsWith(loggingProtocol + "://")) {
-                valid = true;
-            }
-        }
-        return valid;
+        return !StringUtils.containsWhitespace(path);
     }
 }
