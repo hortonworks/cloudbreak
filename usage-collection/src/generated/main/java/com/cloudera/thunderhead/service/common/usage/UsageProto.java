@@ -57189,7 +57189,7 @@ public final class UsageProto {
   }
   /**
    * <pre>
-   * The status of a CDP Cloudbreak workspace.
+   * The status of a CDP environment
    * </pre>
    *
    * Protobuf type {@code usage.CDPEnvironmentStatus}
@@ -57276,7 +57276,7 @@ public final class UsageProto {
       UNSET(0),
       /**
        * <pre>
-       * The status when a workspace is trying to create a kubernetes cluster.
+       * The status when CDP CP is trying to create an environment.
        * </pre>
        *
        * <code>CREATE_STARTED = 1;</code>
@@ -57284,7 +57284,7 @@ public final class UsageProto {
       CREATE_STARTED(1),
       /**
        * <pre>
-       * The status when a workspace is done creating a kubernetes cluster.
+       * The status when CDP CP is done creating an environment.
        * </pre>
        *
        * <code>CREATE_FINISHED = 2;</code>
@@ -57292,7 +57292,7 @@ public final class UsageProto {
       CREATE_FINISHED(2),
       /**
        * <pre>
-       * The status when a workspace failed to provision a kubernetes cluster.
+       * The status when CDP CP failed to provision an environment.
        * </pre>
        *
        * <code>CREATE_FAILED = 3;</code>
@@ -57300,7 +57300,7 @@ public final class UsageProto {
       CREATE_FAILED(3),
       /**
        * <pre>
-       * The status when a workspace is trying to deprovision the running kubernetes cluster.
+       * The status when CDP CP is trying to delete an environment.
        * </pre>
        *
        * <code>DELETE_STARTED = 4;</code>
@@ -57308,7 +57308,7 @@ public final class UsageProto {
       DELETE_STARTED(4),
       /**
        * <pre>
-       * The status when a workspace is done deprovisioning the kubernetes cluster.
+       * The status when CDP CP is done deleting an environment.
        * </pre>
        *
        * <code>DELETE_FINISHED = 5;</code>
@@ -57316,7 +57316,7 @@ public final class UsageProto {
       DELETE_FINISHED(5),
       /**
        * <pre>
-       * The status when a workspace failed to deprovision the kubernetes cluster.
+       *  The status when CDP CP failed to delete an environment.
        * </pre>
        *
        * <code>DELETE_FAILED = 6;</code>
@@ -57324,7 +57324,7 @@ public final class UsageProto {
       DELETE_FAILED(6),
       /**
        * <pre>
-       * The status when a workspace is trying to suspend.
+       * The status when an environment is trying to suspend.
        * </pre>
        *
        * <code>SUSPEND_STARTED = 7;</code>
@@ -57332,7 +57332,7 @@ public final class UsageProto {
       SUSPEND_STARTED(7),
       /**
        * <pre>
-       * The status when a workspace is suspended.
+       * The status when an environment is suspended.
        * </pre>
        *
        * <code>SUSPEND_FINISHED = 8;</code>
@@ -57340,7 +57340,7 @@ public final class UsageProto {
       SUSPEND_FINISHED(8),
       /**
        * <pre>
-       * The status when a workspace failed to suspend.
+       * The status when an environment failed to suspend.
        * </pre>
        *
        * <code>SUSPEND_FAILED = 9;</code>
@@ -57348,7 +57348,7 @@ public final class UsageProto {
       SUSPEND_FAILED(9),
       /**
        * <pre>
-       * The status when a workspace is trying to resume.
+       * The status when an environment is trying to resume.
        * </pre>
        *
        * <code>RESUME_STARTED = 10;</code>
@@ -57356,7 +57356,7 @@ public final class UsageProto {
       RESUME_STARTED(10),
       /**
        * <pre>
-       * The status when a workspace completed resuming.
+       * The status when an environment completed resuming.
        * </pre>
        *
        * <code>RESUME_FINISHED = 11;</code>
@@ -57364,7 +57364,7 @@ public final class UsageProto {
       RESUME_FINISHED(11),
       /**
        * <pre>
-       * The status when a workspace failed to resume.
+       * The status when an environment failed to resume.
        * </pre>
        *
        * <code>RESUME_FAILED = 12;</code>
@@ -57383,7 +57383,7 @@ public final class UsageProto {
       public static final int UNSET_VALUE = 0;
       /**
        * <pre>
-       * The status when a workspace is trying to create a kubernetes cluster.
+       * The status when CDP CP is trying to create an environment.
        * </pre>
        *
        * <code>CREATE_STARTED = 1;</code>
@@ -57391,7 +57391,7 @@ public final class UsageProto {
       public static final int CREATE_STARTED_VALUE = 1;
       /**
        * <pre>
-       * The status when a workspace is done creating a kubernetes cluster.
+       * The status when CDP CP is done creating an environment.
        * </pre>
        *
        * <code>CREATE_FINISHED = 2;</code>
@@ -57399,7 +57399,7 @@ public final class UsageProto {
       public static final int CREATE_FINISHED_VALUE = 2;
       /**
        * <pre>
-       * The status when a workspace failed to provision a kubernetes cluster.
+       * The status when CDP CP failed to provision an environment.
        * </pre>
        *
        * <code>CREATE_FAILED = 3;</code>
@@ -57407,7 +57407,7 @@ public final class UsageProto {
       public static final int CREATE_FAILED_VALUE = 3;
       /**
        * <pre>
-       * The status when a workspace is trying to deprovision the running kubernetes cluster.
+       * The status when CDP CP is trying to delete an environment.
        * </pre>
        *
        * <code>DELETE_STARTED = 4;</code>
@@ -57415,7 +57415,7 @@ public final class UsageProto {
       public static final int DELETE_STARTED_VALUE = 4;
       /**
        * <pre>
-       * The status when a workspace is done deprovisioning the kubernetes cluster.
+       * The status when CDP CP is done deleting an environment.
        * </pre>
        *
        * <code>DELETE_FINISHED = 5;</code>
@@ -57423,7 +57423,7 @@ public final class UsageProto {
       public static final int DELETE_FINISHED_VALUE = 5;
       /**
        * <pre>
-       * The status when a workspace failed to deprovision the kubernetes cluster.
+       *  The status when CDP CP failed to delete an environment.
        * </pre>
        *
        * <code>DELETE_FAILED = 6;</code>
@@ -57431,7 +57431,7 @@ public final class UsageProto {
       public static final int DELETE_FAILED_VALUE = 6;
       /**
        * <pre>
-       * The status when a workspace is trying to suspend.
+       * The status when an environment is trying to suspend.
        * </pre>
        *
        * <code>SUSPEND_STARTED = 7;</code>
@@ -57439,7 +57439,7 @@ public final class UsageProto {
       public static final int SUSPEND_STARTED_VALUE = 7;
       /**
        * <pre>
-       * The status when a workspace is suspended.
+       * The status when an environment is suspended.
        * </pre>
        *
        * <code>SUSPEND_FINISHED = 8;</code>
@@ -57447,7 +57447,7 @@ public final class UsageProto {
       public static final int SUSPEND_FINISHED_VALUE = 8;
       /**
        * <pre>
-       * The status when a workspace failed to suspend.
+       * The status when an environment failed to suspend.
        * </pre>
        *
        * <code>SUSPEND_FAILED = 9;</code>
@@ -57455,7 +57455,7 @@ public final class UsageProto {
       public static final int SUSPEND_FAILED_VALUE = 9;
       /**
        * <pre>
-       * The status when a workspace is trying to resume.
+       * The status when an environment is trying to resume.
        * </pre>
        *
        * <code>RESUME_STARTED = 10;</code>
@@ -57463,7 +57463,7 @@ public final class UsageProto {
       public static final int RESUME_STARTED_VALUE = 10;
       /**
        * <pre>
-       * The status when a workspace completed resuming.
+       * The status when an environment completed resuming.
        * </pre>
        *
        * <code>RESUME_FINISHED = 11;</code>
@@ -57471,7 +57471,7 @@ public final class UsageProto {
       public static final int RESUME_FINISHED_VALUE = 11;
       /**
        * <pre>
-       * The status when a workspace failed to resume.
+       * The status when an environment failed to resume.
        * </pre>
        *
        * <code>RESUME_FAILED = 12;</code>
@@ -57709,7 +57709,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The status of a CDP Cloudbreak workspace.
+     * The status of a CDP environment
      * </pre>
      *
      * Protobuf type {@code usage.CDPEnvironmentStatus}
@@ -57910,7 +57910,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * The CDP account ID of the event
+     * The CDP account id of the event
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -57918,7 +57918,7 @@ public final class UsageProto {
     java.lang.String getAccountId();
     /**
      * <pre>
-     * The CDP account ID of the event
+     * The CDP account id of the event
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -58108,7 +58108,7 @@ public final class UsageProto {
     private volatile java.lang.Object accountId_;
     /**
      * <pre>
-     * The CDP account ID of the event
+     * The CDP account id of the event
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -58127,7 +58127,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The CDP account ID of the event
+     * The CDP account id of the event
      * </pre>
      *
      * <code>string accountId = 1;</code>
@@ -58688,7 +58688,7 @@ public final class UsageProto {
       private java.lang.Object accountId_ = "";
       /**
        * <pre>
-       * The CDP account ID of the event
+       * The CDP account id of the event
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -58707,7 +58707,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The CDP account ID of the event
+       * The CDP account id of the event
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -58727,7 +58727,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The CDP account ID of the event
+       * The CDP account id of the event
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -58744,7 +58744,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The CDP account ID of the event
+       * The CDP account id of the event
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -58757,7 +58757,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The CDP account ID of the event
+       * The CDP account id of the event
        * </pre>
        *
        * <code>string accountId = 1;</code>
@@ -59247,24 +59247,6 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getAvailabilityZonesBytes();
-
-    /**
-     * <pre>
-     * Type of Azure single resource group is
-     * </pre>
-     *
-     * <code>string resourceGroupType = 5;</code>
-     */
-    java.lang.String getResourceGroupType();
-    /**
-     * <pre>
-     * Type of Azure single resource group is
-     * </pre>
-     *
-     * <code>string resourceGroupType = 5;</code>
-     */
-    com.google.protobuf.ByteString
-        getResourceGroupTypeBytes();
   }
   /**
    * Protobuf type {@code usage.CDPEnvironmentDetails}
@@ -59283,7 +59265,6 @@ public final class UsageProto {
       region_ = "";
       numberOfAvailabilityZones_ = 0;
       availabilityZones_ = "";
-      resourceGroupType_ = "";
     }
 
     @java.lang.Override
@@ -59331,12 +59312,6 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               availabilityZones_ = s;
-              break;
-            }
-            case 42: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              resourceGroupType_ = s;
               break;
             }
             default: {
@@ -59493,48 +59468,6 @@ public final class UsageProto {
       }
     }
 
-    public static final int RESOURCEGROUPTYPE_FIELD_NUMBER = 5;
-    private volatile java.lang.Object resourceGroupType_;
-    /**
-     * <pre>
-     * Type of Azure single resource group is
-     * </pre>
-     *
-     * <code>string resourceGroupType = 5;</code>
-     */
-    public java.lang.String getResourceGroupType() {
-      java.lang.Object ref = resourceGroupType_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        resourceGroupType_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Type of Azure single resource group is
-     * </pre>
-     *
-     * <code>string resourceGroupType = 5;</code>
-     */
-    public com.google.protobuf.ByteString
-        getResourceGroupTypeBytes() {
-      java.lang.Object ref = resourceGroupType_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        resourceGroupType_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -59561,9 +59494,6 @@ public final class UsageProto {
       if (!getAvailabilityZonesBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, availabilityZones_);
       }
-      if (!getResourceGroupTypeBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, resourceGroupType_);
-      }
       unknownFields.writeTo(output);
     }
 
@@ -59586,9 +59516,6 @@ public final class UsageProto {
       }
       if (!getAvailabilityZonesBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, availabilityZones_);
-      }
-      if (!getResourceGroupTypeBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, resourceGroupType_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -59613,8 +59540,6 @@ public final class UsageProto {
           == other.getNumberOfAvailabilityZones());
       result = result && getAvailabilityZones()
           .equals(other.getAvailabilityZones());
-      result = result && getResourceGroupType()
-          .equals(other.getResourceGroupType());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -59634,8 +59559,6 @@ public final class UsageProto {
       hash = (53 * hash) + getNumberOfAvailabilityZones();
       hash = (37 * hash) + AVAILABILITYZONES_FIELD_NUMBER;
       hash = (53 * hash) + getAvailabilityZones().hashCode();
-      hash = (37 * hash) + RESOURCEGROUPTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + getResourceGroupType().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -59777,8 +59700,6 @@ public final class UsageProto {
 
         availabilityZones_ = "";
 
-        resourceGroupType_ = "";
-
         return this;
       }
 
@@ -59809,7 +59730,6 @@ public final class UsageProto {
         result.region_ = region_;
         result.numberOfAvailabilityZones_ = numberOfAvailabilityZones_;
         result.availabilityZones_ = availabilityZones_;
-        result.resourceGroupType_ = resourceGroupType_;
         onBuilt();
         return result;
       }
@@ -59870,10 +59790,6 @@ public final class UsageProto {
         }
         if (!other.getAvailabilityZones().isEmpty()) {
           availabilityZones_ = other.availabilityZones_;
-          onChanged();
-        }
-        if (!other.getResourceGroupType().isEmpty()) {
-          resourceGroupType_ = other.resourceGroupType_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -60185,95 +60101,6 @@ public final class UsageProto {
         onChanged();
         return this;
       }
-
-      private java.lang.Object resourceGroupType_ = "";
-      /**
-       * <pre>
-       * Type of Azure single resource group is
-       * </pre>
-       *
-       * <code>string resourceGroupType = 5;</code>
-       */
-      public java.lang.String getResourceGroupType() {
-        java.lang.Object ref = resourceGroupType_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          resourceGroupType_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Type of Azure single resource group is
-       * </pre>
-       *
-       * <code>string resourceGroupType = 5;</code>
-       */
-      public com.google.protobuf.ByteString
-          getResourceGroupTypeBytes() {
-        java.lang.Object ref = resourceGroupType_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          resourceGroupType_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Type of Azure single resource group is
-       * </pre>
-       *
-       * <code>string resourceGroupType = 5;</code>
-       */
-      public Builder setResourceGroupType(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        resourceGroupType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Type of Azure single resource group is
-       * </pre>
-       *
-       * <code>string resourceGroupType = 5;</code>
-       */
-      public Builder clearResourceGroupType() {
-        
-        resourceGroupType_ = getDefaultInstance().getResourceGroupType();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Type of Azure single resource group is
-       * </pre>
-       *
-       * <code>string resourceGroupType = 5;</code>
-       */
-      public Builder setResourceGroupTypeBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        resourceGroupType_ = value;
-        onChanged();
-        return this;
-      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -60333,7 +60160,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Workday analytics is enabled on this environment
+     * Workload analytics is enabled on this environment
      * </pre>
      *
      * <code>string workloadAnalytics = 1;</code>
@@ -60341,7 +60168,7 @@ public final class UsageProto {
     java.lang.String getWorkloadAnalytics();
     /**
      * <pre>
-     * Workday analytics is enabled on this environment
+     * Workload analytics is enabled on this environment
      * </pre>
      *
      * <code>string workloadAnalytics = 1;</code>
@@ -60456,7 +60283,7 @@ public final class UsageProto {
     private volatile java.lang.Object workloadAnalytics_;
     /**
      * <pre>
-     * Workday analytics is enabled on this environment
+     * Workload analytics is enabled on this environment
      * </pre>
      *
      * <code>string workloadAnalytics = 1;</code>
@@ -60475,7 +60302,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Workday analytics is enabled on this environment
+     * Workload analytics is enabled on this environment
      * </pre>
      *
      * <code>string workloadAnalytics = 1;</code>
@@ -60859,7 +60686,7 @@ public final class UsageProto {
       private java.lang.Object workloadAnalytics_ = "";
       /**
        * <pre>
-       * Workday analytics is enabled on this environment
+       * Workload analytics is enabled on this environment
        * </pre>
        *
        * <code>string workloadAnalytics = 1;</code>
@@ -60878,7 +60705,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Workday analytics is enabled on this environment
+       * Workload analytics is enabled on this environment
        * </pre>
        *
        * <code>string workloadAnalytics = 1;</code>
@@ -60898,7 +60725,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Workday analytics is enabled on this environment
+       * Workload analytics is enabled on this environment
        * </pre>
        *
        * <code>string workloadAnalytics = 1;</code>
@@ -60915,7 +60742,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Workday analytics is enabled on this environment
+       * Workload analytics is enabled on this environment
        * </pre>
        *
        * <code>string workloadAnalytics = 1;</code>
@@ -60928,7 +60755,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Workday analytics is enabled on this environment
+       * Workload analytics is enabled on this environment
        * </pre>
        *
        * <code>string workloadAnalytics = 1;</code>
@@ -61091,6 +60918,10 @@ public final class UsageProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Shows whether a proxy is used
+     * </pre>
+     *
      * <code>bool proxy = 1;</code>
      */
     boolean getProxy();
@@ -61175,6 +61006,10 @@ public final class UsageProto {
     public static final int PROXY_FIELD_NUMBER = 1;
     private boolean proxy_;
     /**
+     * <pre>
+     * Shows whether a proxy is used
+     * </pre>
+     *
      * <code>bool proxy = 1;</code>
      */
     public boolean getProxy() {
@@ -61487,12 +61322,20 @@ public final class UsageProto {
 
       private boolean proxy_ ;
       /**
+       * <pre>
+       * Shows whether a proxy is used
+       * </pre>
+       *
        * <code>bool proxy = 1;</code>
        */
       public boolean getProxy() {
         return proxy_;
       }
       /**
+       * <pre>
+       * Shows whether a proxy is used
+       * </pre>
+       *
        * <code>bool proxy = 1;</code>
        */
       public Builder setProxy(boolean value) {
@@ -61502,6 +61345,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Shows whether a proxy is used
+       * </pre>
+       *
        * <code>bool proxy = 1;</code>
        */
       public Builder clearProxy() {
@@ -61569,7 +61416,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * CDP_PROVIDED, CUSTOMER_PROVIDED
+     * Whether the network is created by CDP CP or by the customer
      * </pre>
      *
      * <code>string networkType = 1;</code>
@@ -61577,7 +61424,7 @@ public final class UsageProto {
     java.lang.String getNetworkType();
     /**
      * <pre>
-     * CDP_PROVIDED, CUSTOMER_PROVIDED
+     * Whether the network is created by CDP CP or by the customer
      * </pre>
      *
      * <code>string networkType = 1;</code>
@@ -61586,55 +61433,81 @@ public final class UsageProto {
         getNetworkTypeBytes();
 
     /**
+     * <pre>
+     * How CDP CP connects to the environment
+     * </pre>
+     *
      * <code>string connectivity = 2;</code>
      */
     java.lang.String getConnectivity();
     /**
+     * <pre>
+     * How CDP CP connects to the environment
+     * </pre>
+     *
      * <code>string connectivity = 2;</code>
      */
     com.google.protobuf.ByteString
         getConnectivityBytes();
 
     /**
+     * <pre>
+     * How many public subnets are used
+     * </pre>
+     *
      * <code>int32 numberPublicSubnets = 3;</code>
      */
     int getNumberPublicSubnets();
 
     /**
+     * <pre>
+     * How many public subnets are used
+     * </pre>
+     *
      * <code>int32 numberPrivateSubnets = 4;</code>
      */
     int getNumberPrivateSubnets();
 
     /**
-     * <code>string privateSubnetCreation = 5;</code>
-     */
-    java.lang.String getPrivateSubnetCreation();
-    /**
-     * <code>string privateSubnetCreation = 5;</code>
-     */
-    com.google.protobuf.ByteString
-        getPrivateSubnetCreationBytes();
-
-    /**
-     * <code>string serviceEndpointCreation = 6;</code>
+     * <pre>
+     * Private endpoints are created for this particular environment
+     * </pre>
+     *
+     * <code>string serviceEndpointCreation = 5;</code>
      */
     java.lang.String getServiceEndpointCreation();
     /**
-     * <code>string serviceEndpointCreation = 6;</code>
+     * <pre>
+     * Private endpoints are created for this particular environment
+     * </pre>
+     *
+     * <code>string serviceEndpointCreation = 5;</code>
      */
     com.google.protobuf.ByteString
         getServiceEndpointCreationBytes();
 
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     boolean hasProxyDetails();
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails getProxyDetails();
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder getProxyDetailsOrBuilder();
   }
@@ -61655,7 +61528,6 @@ public final class UsageProto {
       connectivity_ = "";
       numberPublicSubnets_ = 0;
       numberPrivateSubnets_ = 0;
-      privateSubnetCreation_ = "";
       serviceEndpointCreation_ = "";
     }
 
@@ -61708,16 +61580,10 @@ public final class UsageProto {
             case 42: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              privateSubnetCreation_ = s;
-              break;
-            }
-            case 50: {
-              java.lang.String s = input.readStringRequireUtf8();
-
               serviceEndpointCreation_ = s;
               break;
             }
-            case 58: {
+            case 50: {
               com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.Builder subBuilder = null;
               if (proxyDetails_ != null) {
                 subBuilder = proxyDetails_.toBuilder();
@@ -61766,7 +61632,7 @@ public final class UsageProto {
     private volatile java.lang.Object networkType_;
     /**
      * <pre>
-     * CDP_PROVIDED, CUSTOMER_PROVIDED
+     * Whether the network is created by CDP CP or by the customer
      * </pre>
      *
      * <code>string networkType = 1;</code>
@@ -61785,7 +61651,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * CDP_PROVIDED, CUSTOMER_PROVIDED
+     * Whether the network is created by CDP CP or by the customer
      * </pre>
      *
      * <code>string networkType = 1;</code>
@@ -61807,6 +61673,10 @@ public final class UsageProto {
     public static final int CONNECTIVITY_FIELD_NUMBER = 2;
     private volatile java.lang.Object connectivity_;
     /**
+     * <pre>
+     * How CDP CP connects to the environment
+     * </pre>
+     *
      * <code>string connectivity = 2;</code>
      */
     public java.lang.String getConnectivity() {
@@ -61822,6 +61692,10 @@ public final class UsageProto {
       }
     }
     /**
+     * <pre>
+     * How CDP CP connects to the environment
+     * </pre>
+     *
      * <code>string connectivity = 2;</code>
      */
     public com.google.protobuf.ByteString
@@ -61841,6 +61715,10 @@ public final class UsageProto {
     public static final int NUMBERPUBLICSUBNETS_FIELD_NUMBER = 3;
     private int numberPublicSubnets_;
     /**
+     * <pre>
+     * How many public subnets are used
+     * </pre>
+     *
      * <code>int32 numberPublicSubnets = 3;</code>
      */
     public int getNumberPublicSubnets() {
@@ -61850,50 +61728,24 @@ public final class UsageProto {
     public static final int NUMBERPRIVATESUBNETS_FIELD_NUMBER = 4;
     private int numberPrivateSubnets_;
     /**
+     * <pre>
+     * How many public subnets are used
+     * </pre>
+     *
      * <code>int32 numberPrivateSubnets = 4;</code>
      */
     public int getNumberPrivateSubnets() {
       return numberPrivateSubnets_;
     }
 
-    public static final int PRIVATESUBNETCREATION_FIELD_NUMBER = 5;
-    private volatile java.lang.Object privateSubnetCreation_;
-    /**
-     * <code>string privateSubnetCreation = 5;</code>
-     */
-    public java.lang.String getPrivateSubnetCreation() {
-      java.lang.Object ref = privateSubnetCreation_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        privateSubnetCreation_ = s;
-        return s;
-      }
-    }
-    /**
-     * <code>string privateSubnetCreation = 5;</code>
-     */
-    public com.google.protobuf.ByteString
-        getPrivateSubnetCreationBytes() {
-      java.lang.Object ref = privateSubnetCreation_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        privateSubnetCreation_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int SERVICEENDPOINTCREATION_FIELD_NUMBER = 6;
+    public static final int SERVICEENDPOINTCREATION_FIELD_NUMBER = 5;
     private volatile java.lang.Object serviceEndpointCreation_;
     /**
-     * <code>string serviceEndpointCreation = 6;</code>
+     * <pre>
+     * Private endpoints are created for this particular environment
+     * </pre>
+     *
+     * <code>string serviceEndpointCreation = 5;</code>
      */
     public java.lang.String getServiceEndpointCreation() {
       java.lang.Object ref = serviceEndpointCreation_;
@@ -61908,7 +61760,11 @@ public final class UsageProto {
       }
     }
     /**
-     * <code>string serviceEndpointCreation = 6;</code>
+     * <pre>
+     * Private endpoints are created for this particular environment
+     * </pre>
+     *
+     * <code>string serviceEndpointCreation = 5;</code>
      */
     public com.google.protobuf.ByteString
         getServiceEndpointCreationBytes() {
@@ -61924,22 +61780,34 @@ public final class UsageProto {
       }
     }
 
-    public static final int PROXYDETAILS_FIELD_NUMBER = 7;
+    public static final int PROXYDETAILS_FIELD_NUMBER = 6;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails proxyDetails_;
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     public boolean hasProxyDetails() {
       return proxyDetails_ != null;
     }
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails getProxyDetails() {
       return proxyDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.getDefaultInstance() : proxyDetails_;
     }
     /**
-     * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+     * <pre>
+     * Metadata around what type of proxy is used in this environment
+     * </pre>
+     *
+     * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder getProxyDetailsOrBuilder() {
       return getProxyDetails();
@@ -61971,14 +61839,11 @@ public final class UsageProto {
       if (numberPrivateSubnets_ != 0) {
         output.writeInt32(4, numberPrivateSubnets_);
       }
-      if (!getPrivateSubnetCreationBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, privateSubnetCreation_);
-      }
       if (!getServiceEndpointCreationBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, serviceEndpointCreation_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, serviceEndpointCreation_);
       }
       if (proxyDetails_ != null) {
-        output.writeMessage(7, getProxyDetails());
+        output.writeMessage(6, getProxyDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -62003,15 +61868,12 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, numberPrivateSubnets_);
       }
-      if (!getPrivateSubnetCreationBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, privateSubnetCreation_);
-      }
       if (!getServiceEndpointCreationBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, serviceEndpointCreation_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, serviceEndpointCreation_);
       }
       if (proxyDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, getProxyDetails());
+          .computeMessageSize(6, getProxyDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -62037,8 +61899,6 @@ public final class UsageProto {
           == other.getNumberPublicSubnets());
       result = result && (getNumberPrivateSubnets()
           == other.getNumberPrivateSubnets());
-      result = result && getPrivateSubnetCreation()
-          .equals(other.getPrivateSubnetCreation());
       result = result && getServiceEndpointCreation()
           .equals(other.getServiceEndpointCreation());
       result = result && (hasProxyDetails() == other.hasProxyDetails());
@@ -62065,8 +61925,6 @@ public final class UsageProto {
       hash = (53 * hash) + getNumberPublicSubnets();
       hash = (37 * hash) + NUMBERPRIVATESUBNETS_FIELD_NUMBER;
       hash = (53 * hash) + getNumberPrivateSubnets();
-      hash = (37 * hash) + PRIVATESUBNETCREATION_FIELD_NUMBER;
-      hash = (53 * hash) + getPrivateSubnetCreation().hashCode();
       hash = (37 * hash) + SERVICEENDPOINTCREATION_FIELD_NUMBER;
       hash = (53 * hash) + getServiceEndpointCreation().hashCode();
       if (hasProxyDetails()) {
@@ -62214,8 +62072,6 @@ public final class UsageProto {
 
         numberPrivateSubnets_ = 0;
 
-        privateSubnetCreation_ = "";
-
         serviceEndpointCreation_ = "";
 
         if (proxyDetailsBuilder_ == null) {
@@ -62254,7 +62110,6 @@ public final class UsageProto {
         result.connectivity_ = connectivity_;
         result.numberPublicSubnets_ = numberPublicSubnets_;
         result.numberPrivateSubnets_ = numberPrivateSubnets_;
-        result.privateSubnetCreation_ = privateSubnetCreation_;
         result.serviceEndpointCreation_ = serviceEndpointCreation_;
         if (proxyDetailsBuilder_ == null) {
           result.proxyDetails_ = proxyDetails_;
@@ -62323,10 +62178,6 @@ public final class UsageProto {
         if (other.getNumberPrivateSubnets() != 0) {
           setNumberPrivateSubnets(other.getNumberPrivateSubnets());
         }
-        if (!other.getPrivateSubnetCreation().isEmpty()) {
-          privateSubnetCreation_ = other.privateSubnetCreation_;
-          onChanged();
-        }
         if (!other.getServiceEndpointCreation().isEmpty()) {
           serviceEndpointCreation_ = other.serviceEndpointCreation_;
           onChanged();
@@ -62366,7 +62217,7 @@ public final class UsageProto {
       private java.lang.Object networkType_ = "";
       /**
        * <pre>
-       * CDP_PROVIDED, CUSTOMER_PROVIDED
+       * Whether the network is created by CDP CP or by the customer
        * </pre>
        *
        * <code>string networkType = 1;</code>
@@ -62385,7 +62236,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * CDP_PROVIDED, CUSTOMER_PROVIDED
+       * Whether the network is created by CDP CP or by the customer
        * </pre>
        *
        * <code>string networkType = 1;</code>
@@ -62405,7 +62256,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * CDP_PROVIDED, CUSTOMER_PROVIDED
+       * Whether the network is created by CDP CP or by the customer
        * </pre>
        *
        * <code>string networkType = 1;</code>
@@ -62422,7 +62273,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * CDP_PROVIDED, CUSTOMER_PROVIDED
+       * Whether the network is created by CDP CP or by the customer
        * </pre>
        *
        * <code>string networkType = 1;</code>
@@ -62435,7 +62286,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * CDP_PROVIDED, CUSTOMER_PROVIDED
+       * Whether the network is created by CDP CP or by the customer
        * </pre>
        *
        * <code>string networkType = 1;</code>
@@ -62454,6 +62305,10 @@ public final class UsageProto {
 
       private java.lang.Object connectivity_ = "";
       /**
+       * <pre>
+       * How CDP CP connects to the environment
+       * </pre>
+       *
        * <code>string connectivity = 2;</code>
        */
       public java.lang.String getConnectivity() {
@@ -62469,6 +62324,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * How CDP CP connects to the environment
+       * </pre>
+       *
        * <code>string connectivity = 2;</code>
        */
       public com.google.protobuf.ByteString
@@ -62485,6 +62344,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * How CDP CP connects to the environment
+       * </pre>
+       *
        * <code>string connectivity = 2;</code>
        */
       public Builder setConnectivity(
@@ -62498,6 +62361,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * How CDP CP connects to the environment
+       * </pre>
+       *
        * <code>string connectivity = 2;</code>
        */
       public Builder clearConnectivity() {
@@ -62507,6 +62374,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * How CDP CP connects to the environment
+       * </pre>
+       *
        * <code>string connectivity = 2;</code>
        */
       public Builder setConnectivityBytes(
@@ -62523,12 +62394,20 @@ public final class UsageProto {
 
       private int numberPublicSubnets_ ;
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPublicSubnets = 3;</code>
        */
       public int getNumberPublicSubnets() {
         return numberPublicSubnets_;
       }
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPublicSubnets = 3;</code>
        */
       public Builder setNumberPublicSubnets(int value) {
@@ -62538,6 +62417,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPublicSubnets = 3;</code>
        */
       public Builder clearNumberPublicSubnets() {
@@ -62549,12 +62432,20 @@ public final class UsageProto {
 
       private int numberPrivateSubnets_ ;
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPrivateSubnets = 4;</code>
        */
       public int getNumberPrivateSubnets() {
         return numberPrivateSubnets_;
       }
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPrivateSubnets = 4;</code>
        */
       public Builder setNumberPrivateSubnets(int value) {
@@ -62564,6 +62455,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * How many public subnets are used
+       * </pre>
+       *
        * <code>int32 numberPrivateSubnets = 4;</code>
        */
       public Builder clearNumberPrivateSubnets() {
@@ -62573,78 +62468,13 @@ public final class UsageProto {
         return this;
       }
 
-      private java.lang.Object privateSubnetCreation_ = "";
-      /**
-       * <code>string privateSubnetCreation = 5;</code>
-       */
-      public java.lang.String getPrivateSubnetCreation() {
-        java.lang.Object ref = privateSubnetCreation_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          privateSubnetCreation_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <code>string privateSubnetCreation = 5;</code>
-       */
-      public com.google.protobuf.ByteString
-          getPrivateSubnetCreationBytes() {
-        java.lang.Object ref = privateSubnetCreation_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          privateSubnetCreation_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <code>string privateSubnetCreation = 5;</code>
-       */
-      public Builder setPrivateSubnetCreation(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        privateSubnetCreation_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string privateSubnetCreation = 5;</code>
-       */
-      public Builder clearPrivateSubnetCreation() {
-        
-        privateSubnetCreation_ = getDefaultInstance().getPrivateSubnetCreation();
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>string privateSubnetCreation = 5;</code>
-       */
-      public Builder setPrivateSubnetCreationBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        privateSubnetCreation_ = value;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object serviceEndpointCreation_ = "";
       /**
-       * <code>string serviceEndpointCreation = 6;</code>
+       * <pre>
+       * Private endpoints are created for this particular environment
+       * </pre>
+       *
+       * <code>string serviceEndpointCreation = 5;</code>
        */
       public java.lang.String getServiceEndpointCreation() {
         java.lang.Object ref = serviceEndpointCreation_;
@@ -62659,7 +62489,11 @@ public final class UsageProto {
         }
       }
       /**
-       * <code>string serviceEndpointCreation = 6;</code>
+       * <pre>
+       * Private endpoints are created for this particular environment
+       * </pre>
+       *
+       * <code>string serviceEndpointCreation = 5;</code>
        */
       public com.google.protobuf.ByteString
           getServiceEndpointCreationBytes() {
@@ -62675,7 +62509,11 @@ public final class UsageProto {
         }
       }
       /**
-       * <code>string serviceEndpointCreation = 6;</code>
+       * <pre>
+       * Private endpoints are created for this particular environment
+       * </pre>
+       *
+       * <code>string serviceEndpointCreation = 5;</code>
        */
       public Builder setServiceEndpointCreation(
           java.lang.String value) {
@@ -62688,7 +62526,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>string serviceEndpointCreation = 6;</code>
+       * <pre>
+       * Private endpoints are created for this particular environment
+       * </pre>
+       *
+       * <code>string serviceEndpointCreation = 5;</code>
        */
       public Builder clearServiceEndpointCreation() {
         
@@ -62697,7 +62539,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>string serviceEndpointCreation = 6;</code>
+       * <pre>
+       * Private endpoints are created for this particular environment
+       * </pre>
+       *
+       * <code>string serviceEndpointCreation = 5;</code>
        */
       public Builder setServiceEndpointCreationBytes(
           com.google.protobuf.ByteString value) {
@@ -62715,13 +62561,21 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder> proxyDetailsBuilder_;
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public boolean hasProxyDetails() {
         return proxyDetailsBuilder_ != null || proxyDetails_ != null;
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails getProxyDetails() {
         if (proxyDetailsBuilder_ == null) {
@@ -62731,7 +62585,11 @@ public final class UsageProto {
         }
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public Builder setProxyDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails value) {
         if (proxyDetailsBuilder_ == null) {
@@ -62747,7 +62605,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public Builder setProxyDetails(
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.Builder builderForValue) {
@@ -62761,7 +62623,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public Builder mergeProxyDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails value) {
         if (proxyDetailsBuilder_ == null) {
@@ -62779,7 +62645,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public Builder clearProxyDetails() {
         if (proxyDetailsBuilder_ == null) {
@@ -62793,7 +62663,11 @@ public final class UsageProto {
         return this;
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.Builder getProxyDetailsBuilder() {
         
@@ -62801,7 +62675,11 @@ public final class UsageProto {
         return getProxyDetailsFieldBuilder().getBuilder();
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder getProxyDetailsOrBuilder() {
         if (proxyDetailsBuilder_ != null) {
@@ -62812,7 +62690,11 @@ public final class UsageProto {
         }
       }
       /**
-       * <code>.usage.CDPProxyDetails proxyDetails = 7;</code>
+       * <pre>
+       * Metadata around what type of proxy is used in this environment
+       * </pre>
+       *
+       * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder> 
@@ -62885,53 +62767,101 @@ public final class UsageProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     boolean hasOperationDetails();
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails();
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder();
 
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     boolean hasEnvironmentDetails();
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails();
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder();
 
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     boolean hasNetworkDetails();
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails();
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder();
 
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     boolean hasTelemetryFeatureDetails();
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails();
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder();
@@ -63062,18 +62992,30 @@ public final class UsageProto {
     public static final int OPERATIONDETAILS_FIELD_NUMBER = 1;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails operationDetails_;
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public boolean hasOperationDetails() {
       return operationDetails_ != null;
     }
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails() {
       return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.getDefaultInstance() : operationDetails_;
     }
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
@@ -63083,18 +63025,30 @@ public final class UsageProto {
     public static final int ENVIRONMENTDETAILS_FIELD_NUMBER = 2;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails environmentDetails_;
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     public boolean hasEnvironmentDetails() {
       return environmentDetails_ != null;
     }
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails() {
       return environmentDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.getDefaultInstance() : environmentDetails_;
     }
     /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder() {
@@ -63104,18 +63058,30 @@ public final class UsageProto {
     public static final int NETWORKDETAILS_FIELD_NUMBER = 3;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails networkDetails_;
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     public boolean hasNetworkDetails() {
       return networkDetails_ != null;
     }
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails() {
       return networkDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.getDefaultInstance() : networkDetails_;
     }
     /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
      * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder() {
@@ -63125,18 +63091,30 @@ public final class UsageProto {
     public static final int TELEMETRYFEATUREDETAILS_FIELD_NUMBER = 4;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails_;
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     public boolean hasTelemetryFeatureDetails() {
       return telemetryFeatureDetails_ != null;
     }
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails() {
       return telemetryFeatureDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.getDefaultInstance() : telemetryFeatureDetails_;
     }
     /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder() {
@@ -63553,12 +63531,20 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder> operationDetailsBuilder_;
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public boolean hasOperationDetails() {
         return operationDetailsBuilder_ != null || operationDetails_ != null;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails() {
@@ -63569,6 +63555,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder setOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails value) {
@@ -63585,6 +63575,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder setOperationDetails(
@@ -63599,6 +63593,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder mergeOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails value) {
@@ -63617,6 +63615,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder clearOperationDetails() {
@@ -63631,6 +63633,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.Builder getOperationDetailsBuilder() {
@@ -63639,6 +63645,10 @@ public final class UsageProto {
         return getOperationDetailsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
@@ -63650,6 +63660,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -63670,12 +63684,20 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder> environmentDetailsBuilder_;
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public boolean hasEnvironmentDetails() {
         return environmentDetailsBuilder_ != null || environmentDetails_ != null;
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails() {
@@ -63686,6 +63708,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public Builder setEnvironmentDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails value) {
@@ -63702,6 +63728,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public Builder setEnvironmentDetails(
@@ -63716,6 +63746,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public Builder mergeEnvironmentDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails value) {
@@ -63734,6 +63768,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public Builder clearEnvironmentDetails() {
@@ -63748,6 +63786,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder getEnvironmentDetailsBuilder() {
@@ -63756,6 +63798,10 @@ public final class UsageProto {
         return getEnvironmentDetailsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder() {
@@ -63767,6 +63813,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentDetails environmentDetails = 2;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -63787,12 +63837,20 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder> networkDetailsBuilder_;
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public boolean hasNetworkDetails() {
         return networkDetailsBuilder_ != null || networkDetails_ != null;
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails() {
@@ -63803,6 +63861,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public Builder setNetworkDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails value) {
@@ -63819,6 +63881,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public Builder setNetworkDetails(
@@ -63833,6 +63899,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public Builder mergeNetworkDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails value) {
@@ -63851,6 +63921,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public Builder clearNetworkDetails() {
@@ -63865,6 +63939,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder getNetworkDetailsBuilder() {
@@ -63873,6 +63951,10 @@ public final class UsageProto {
         return getNetworkDetailsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder() {
@@ -63884,6 +63966,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
        * <code>.usage.CDPNetworkDetails networkDetails = 3;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -63904,12 +63990,20 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder> telemetryFeatureDetailsBuilder_;
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public boolean hasTelemetryFeatureDetails() {
         return telemetryFeatureDetailsBuilder_ != null || telemetryFeatureDetails_ != null;
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails() {
@@ -63920,6 +64014,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public Builder setTelemetryFeatureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails value) {
@@ -63936,6 +64034,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public Builder setTelemetryFeatureDetails(
@@ -63950,6 +64052,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public Builder mergeTelemetryFeatureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails value) {
@@ -63968,6 +64074,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public Builder clearTelemetryFeatureDetails() {
@@ -63982,6 +64092,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder getTelemetryFeatureDetailsBuilder() {
@@ -63990,6 +64104,10 @@ public final class UsageProto {
         return getTelemetryFeatureDetailsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder() {
@@ -64001,6 +64119,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -64074,32 +64196,60 @@ public final class UsageProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     boolean hasOperationDetails();
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails();
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder();
 
     /**
+     * <pre>
+     * The environment's status before the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
      */
     int getOldStatusValue();
     /**
+     * <pre>
+     * The environment's status before the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getOldStatus();
 
     /**
+     * <pre>
+     * The environment's status after the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
      */
     int getNewStatusValue();
     /**
+     * <pre>
+     * The environment's status after the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getNewStatus();
@@ -64234,18 +64384,30 @@ public final class UsageProto {
     public static final int OPERATIONDETAILS_FIELD_NUMBER = 1;
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails operationDetails_;
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public boolean hasOperationDetails() {
       return operationDetails_ != null;
     }
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails() {
       return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.getDefaultInstance() : operationDetails_;
     }
     /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
      * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
@@ -64255,12 +64417,20 @@ public final class UsageProto {
     public static final int OLDSTATUS_FIELD_NUMBER = 2;
     private int oldStatus_;
     /**
+     * <pre>
+     * The environment's status before the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
      */
     public int getOldStatusValue() {
       return oldStatus_;
     }
     /**
+     * <pre>
+     * The environment's status before the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getOldStatus() {
@@ -64272,12 +64442,20 @@ public final class UsageProto {
     public static final int NEWSTATUS_FIELD_NUMBER = 3;
     private int newStatus_;
     /**
+     * <pre>
+     * The environment's status after the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
      */
     public int getNewStatusValue() {
       return newStatus_;
     }
     /**
+     * <pre>
+     * The environment's status after the change.
+     * </pre>
+     *
      * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getNewStatus() {
@@ -64701,12 +64879,20 @@ public final class UsageProto {
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder> operationDetailsBuilder_;
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public boolean hasOperationDetails() {
         return operationDetailsBuilder_ != null || operationDetails_ != null;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails getOperationDetails() {
@@ -64717,6 +64903,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder setOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails value) {
@@ -64733,6 +64923,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder setOperationDetails(
@@ -64747,6 +64941,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder mergeOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails value) {
@@ -64765,6 +64963,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public Builder clearOperationDetails() {
@@ -64779,6 +64981,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetails.Builder getOperationDetailsBuilder() {
@@ -64787,6 +64993,10 @@ public final class UsageProto {
         return getOperationDetailsFieldBuilder().getBuilder();
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
@@ -64798,6 +65008,10 @@ public final class UsageProto {
         }
       }
       /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
        * <code>.usage.CDPOperationDetails operationDetails = 1;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -64816,12 +65030,20 @@ public final class UsageProto {
 
       private int oldStatus_ = 0;
       /**
+       * <pre>
+       * The environment's status before the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
        */
       public int getOldStatusValue() {
         return oldStatus_;
       }
       /**
+       * <pre>
+       * The environment's status before the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
        */
       public Builder setOldStatusValue(int value) {
@@ -64830,6 +65052,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * The environment's status before the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getOldStatus() {
@@ -64838,6 +65064,10 @@ public final class UsageProto {
         return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * The environment's status before the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
        */
       public Builder setOldStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value value) {
@@ -64850,6 +65080,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * The environment's status before the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value oldStatus = 2;</code>
        */
       public Builder clearOldStatus() {
@@ -64861,12 +65095,20 @@ public final class UsageProto {
 
       private int newStatus_ = 0;
       /**
+       * <pre>
+       * The environment's status after the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
        */
       public int getNewStatusValue() {
         return newStatus_;
       }
       /**
+       * <pre>
+       * The environment's status after the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
        */
       public Builder setNewStatusValue(int value) {
@@ -64875,6 +65117,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * The environment's status after the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
        */
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value getNewStatus() {
@@ -64883,6 +65129,10 @@ public final class UsageProto {
         return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNRECOGNIZED : result;
       }
       /**
+       * <pre>
+       * The environment's status after the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
        */
       public Builder setNewStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value value) {
@@ -64895,6 +65145,10 @@ public final class UsageProto {
         return this;
       }
       /**
+       * <pre>
+       * The environment's status after the change.
+       * </pre>
+       *
        * <code>.usage.CDPEnvironmentStatus.Value newStatus = 3;</code>
        */
       public Builder clearNewStatus() {
@@ -65607,36 +65861,35 @@ public final class UsageProto {
       "\013\022\021\n\rRESUME_FAILED\020\014\"\205\001\n\023CDPOperationDet" +
       "ails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002" +
       " \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiatorC" +
-      "rn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\"\306\001\n" +
+      "rn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\"\253\001\n" +
       "\025CDPEnvironmentDetails\022D\n\017environmentTyp" +
       "e\030\001 \001(\0162+.usage.CDPEnvironmentsEnvironme" +
       "ntType.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOf" +
       "AvailabilityZones\030\003 \001(\005\022\031\n\021availabilityZ" +
-      "ones\030\004 \001(\t\022\031\n\021resourceGroupType\030\005 \001(\t\"a\n" +
-      "%CDPEnvironmentTelemetryFeatureDetails\022\031" +
-      "\n\021workloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogs" +
-      "Collection\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005p" +
-      "roxy\030\001 \001(\010\"\347\001\n\021CDPNetworkDetails\022\023\n\013netw" +
-      "orkType\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023n" +
-      "umberPublicSubnets\030\003 \001(\005\022\034\n\024numberPrivat" +
-      "eSubnets\030\004 \001(\005\022\035\n\025privateSubnetCreation\030" +
-      "\005 \001(\t\022\037\n\027serviceEndpointCreation\030\006 \001(\t\022," +
-      "\n\014proxyDetails\030\007 \001(\0132\026.usage.CDPProxyDet" +
-      "ails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020oper" +
-      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\0228\n\022environmentDetails\030\002 \001(\0132\034.usa" +
-      "ge.CDPEnvironmentDetails\0220\n\016networkDetai" +
-      "ls\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M\n\027te" +
-      "lemetryFeatureDetails\030\004 \001(\0132,.usage.CDPE" +
-      "nvironmentTelemetryFeatureDetails\"\326\001\n\033CD" +
-      "PEnvironmentStatusChanged\0224\n\020operationDe" +
-      "tails\030\001 \001(\0132\032.usage.CDPOperationDetails\022" +
-      "4\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvironmen" +
-      "tStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage" +
-      ".CDPEnvironmentStatus.Value\022\025\n\rfailureRe" +
-      "ason\030\004 \001(\tBV\n-com.cloudera.thunderhead.s" +
-      "ervice.common.usageB\nUsageProtoZ\031com/clo" +
-      "udera/cdp/protobufb\006proto3"
+      "ones\030\004 \001(\t\"a\n%CDPEnvironmentTelemetryFea" +
+      "tureDetails\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035" +
+      "\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CDPProx" +
+      "yDetails\022\r\n\005proxy\030\001 \001(\010\"\310\001\n\021CDPNetworkDe" +
+      "tails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectivi" +
+      "ty\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034\n" +
+      "\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serviceEn" +
+      "dpointCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 \001" +
+      "(\0132\026.usage.CDPProxyDetails\"\212\002\n\027CDPEnviro" +
+      "nmentRequested\0224\n\020operationDetails\030\001 \001(\013" +
+      "2\032.usage.CDPOperationDetails\0228\n\022environm" +
+      "entDetails\030\002 \001(\0132\034.usage.CDPEnvironmentD" +
+      "etails\0220\n\016networkDetails\030\003 \001(\0132\030.usage.C" +
+      "DPNetworkDetails\022M\n\027telemetryFeatureDeta" +
+      "ils\030\004 \001(\0132,.usage.CDPEnvironmentTelemetr" +
+      "yFeatureDetails\"\326\001\n\033CDPEnvironmentStatus" +
+      "Changed\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
+      "e.CDPOperationDetails\0224\n\toldStatus\030\002 \001(\016" +
+      "2!.usage.CDPEnvironmentStatus.Value\0224\n\tn" +
+      "ewStatus\030\003 \001(\0162!.usage.CDPEnvironmentSta" +
+      "tus.Value\022\025\n\rfailureReason\030\004 \001(\tBV\n-com." +
+      "cloudera.thunderhead.service.common.usag" +
+      "eB\nUsageProtoZ\031com/cloudera/cdp/protobuf" +
+      "b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -65949,7 +66202,7 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
-        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "ResourceGroupType", });
+        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", });
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
       getDescriptor().getMessageTypes().get(50);
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_fieldAccessorTable = new
@@ -65967,7 +66220,7 @@ public final class UsageProto {
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
-        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "PrivateSubnetCreation", "ServiceEndpointCreation", "ProxyDetails", });
+        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
       getDescriptor().getMessageTypes().get(53);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new
