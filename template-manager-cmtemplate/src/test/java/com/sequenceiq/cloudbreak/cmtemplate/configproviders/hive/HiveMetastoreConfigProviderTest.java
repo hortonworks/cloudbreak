@@ -50,6 +50,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @ExtendWith(MockitoExtension.class)
 class HiveMetastoreConfigProviderTest {
 
+    private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
+
     @Mock
     private CmTemplateProcessor templateProcessor;
 
@@ -126,6 +128,7 @@ class HiveMetastoreConfigProviderTest {
     void getServiceConfigsTestDbOnlyWithSsl() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
+                .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
@@ -143,7 +146,7 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
                 entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
                 entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
-                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=verify-full&sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem")
+                entry(JDBC_URL_OVERRIDE, "jdbc:postgresql://10.1.1.1:5432/hive?sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
@@ -174,6 +177,7 @@ class HiveMetastoreConfigProviderTest {
     void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigs() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
+                .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
         initHmsServiceConfigs(List.of(config("foo", "bar")));
@@ -193,6 +197,7 @@ class HiveMetastoreConfigProviderTest {
     void getServiceConfigsTestDbOnlyWithSslAndTemplateWithHarmlessHmsServiceConfigsAndDummyCustomHmsDbKeys() {
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsConfigs(Set.of(createRdsConfig(RdsSslMode.ENABLED)))
+                .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
         initHmsServiceConfigs(List.of(config("foo", "bar"), config(HIVE_METASTORE_DATABASE_HOST, null)));

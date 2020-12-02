@@ -146,6 +146,8 @@ cb:
     cert.file: database.crt
     ssl: false
 
+  externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
+
   aws:
     spotinstances.enabled: true
     disabled.instance.types:

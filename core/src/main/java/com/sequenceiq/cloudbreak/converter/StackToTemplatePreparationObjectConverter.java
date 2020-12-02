@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
@@ -93,6 +94,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private PostgresConfigService postgresConfigService;
+
+    @Inject
+    private RedbeamsDbCertificateProvider dbCertificateProvider;
 
     @Inject
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -210,6 +214,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
+                    .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
                     .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withIdBroker(idbroker)

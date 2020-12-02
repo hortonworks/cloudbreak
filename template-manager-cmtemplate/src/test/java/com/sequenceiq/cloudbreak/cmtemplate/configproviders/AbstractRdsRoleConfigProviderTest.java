@@ -1,46 +1,30 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.views.RdsView;
 
+@ExtendWith(MockitoExtension.class)
 class AbstractRdsRoleConfigProviderTest {
 
-    private AbstractRdsRoleConfigProvider subject = new AbstractRdsRoleConfigProvider() {
-        @Override
-        protected DatabaseType dbType() {
-            return DatabaseType.RANGER;
-        }
+    private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
 
-        @Override
-        protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-            return List.of();
-        }
-
-        @Override
-        public String getServiceType() {
-            return "service";
-        }
-
-        @Override
-        public List<String> getRoleTypes() {
-            return List.of("role1", "role2");
-        }
-    };
+    private AbstractRdsRoleConfigProvider subject;
 
     @Mock
     private CmTemplateProcessor templateProcessor;
@@ -50,7 +34,27 @@ class AbstractRdsRoleConfigProviderTest {
 
     @BeforeEach
     void setup() {
-        initMocks(this);
+        subject = new AbstractRdsRoleConfigProvider() {
+            @Override
+            protected DatabaseType dbType() {
+                return DatabaseType.RANGER;
+            }
+
+            @Override
+            protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
+                return List.of();
+            }
+
+            @Override
+            public String getServiceType() {
+                return "service";
+            }
+
+            @Override
+            public List<String> getRoleTypes() {
+                return List.of("role1", "role2");
+            }
+        };
     }
 
     @Test
@@ -59,7 +63,7 @@ class AbstractRdsRoleConfigProviderTest {
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.TRUE);
 
-        assertTrue(subject.isConfigurationNeeded(templateProcessor, source));
+        assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isTrue();
     }
 
     @Test
@@ -68,15 +72,41 @@ class AbstractRdsRoleConfigProviderTest {
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.FALSE);
 
-        assertFalse(subject.isConfigurationNeeded(templateProcessor, source));
+        assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isFalse();
     }
 
     @Test
     void configurationNotNeededIfRdsConfigAbsent() {
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(null);
-        when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.TRUE);
 
-        assertFalse(subject.isConfigurationNeeded(templateProcessor, source));
+        assertThat(subject.isConfigurationNeeded(templateProcessor, source)).isFalse();
+    }
+
+    @Test
+    void getRdsConfigTestWhenRdsConfigPresent() {
+        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
+
+        assertThat(subject.getRdsConfig(source)).isSameAs(rdsConfig);
+    }
+
+    @Test
+    void getRdsConfigTestWhenRdsConfigAbsent() {
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(null);
+
+        assertThat(subject.getRdsConfig(source)).isNull();
+    }
+
+    @Test
+    void getRdsViewTest() {
+        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
+        when(source.getRdsSslCertificateFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+
+        RdsView rdsView = subject.getRdsView(source);
+
+        assertThat(rdsView).isNotNull();
+        assertThat(rdsView.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
     }
 
 }

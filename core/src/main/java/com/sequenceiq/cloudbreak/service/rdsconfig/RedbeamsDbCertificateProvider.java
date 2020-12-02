@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 
 @Service
 public class RedbeamsDbCertificateProvider {
@@ -27,11 +29,18 @@ public class RedbeamsDbCertificateProvider {
 
     private final StackService stackService;
 
+    private final String certsPath;
+
     public RedbeamsDbCertificateProvider(RedbeamsDbServerConfigurer dbServerConfigurer, DatalakeResourcesService datalakeResourcesService,
-            StackService stackService) {
+            StackService stackService, @Value("${cb.externaldatabase.ssl.rootcerts.path:}") String certsPath) {
         this.dbServerConfigurer = dbServerConfigurer;
         this.datalakeResourcesService = datalakeResourcesService;
         this.stackService = stackService;
+        this.certsPath = certsPath;
+    }
+
+    public String getSslCertsFilePath() {
+        return certsPath;
     }
 
     public Set<String> getRelatedSslCerts(Stack stack, Cluster cluster) {
@@ -45,7 +54,7 @@ public class RedbeamsDbCertificateProvider {
     private void getDatalakeDatabaseRootCerts(Stack stack, Set<String> result) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             if (stack.getDatalakeResourceId() != null) {
-                LOGGER.debug("Gathering datalake and it's database if exists for the cluster");
+                LOGGER.debug("Gathering datalake and its database if exists for the cluster");
                 Optional<DatalakeResources> datalakeResource = datalakeResourcesService.findById(stack.getDatalakeResourceId());
                 if (datalakeResource.isPresent()) {
                     Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
@@ -70,10 +79,10 @@ public class RedbeamsDbCertificateProvider {
             LOGGER.info("Gathering cluster's(crn:'{}', name: '{}') remote database root certificates", stackResourceCrn, clusterName);
             String databaseServerCrn = cluster.getDatabaseServerCrn();
             DatabaseServerV4Response databaseServer = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
-            if (databaseServer.getSslConfig() != null) {
-                SslMode sslMode = databaseServer.getSslConfig().getSslMode();
-                if (SslMode.ENABLED.equals(sslMode)) {
-                    Set<String> sslCertificates = databaseServer.getSslConfig().getSslCertificates();
+            SslConfigV4Response sslConfig = databaseServer.getSslConfig();
+            if (sslConfig != null) {
+                if (SslMode.isEnabled(sslConfig.getSslMode())) {
+                    Set<String> sslCertificates = sslConfig.getSslCertificates();
                     result.addAll(sslCertificates);
                     LOGGER.info("Number of certificates found:'{}' for cluster(crn:'{}', name: '{}')", sslCertificates.size(), stackResourceCrn, clusterName);
                 }
