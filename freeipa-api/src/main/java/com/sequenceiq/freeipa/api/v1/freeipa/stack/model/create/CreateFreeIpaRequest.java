@@ -11,6 +11,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -30,6 +32,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CreateFreeIpaRequest implements TaggableRequest {
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;

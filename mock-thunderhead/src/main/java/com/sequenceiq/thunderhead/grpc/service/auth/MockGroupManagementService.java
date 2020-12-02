@@ -26,8 +26,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListG
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 
 import io.grpc.stub.StreamObserver;
@@ -121,7 +120,7 @@ class MockGroupManagementService {
     Group createGroup(String accountId, String groupName) {
         LOGGER.info("Create group {} for account {}", groupName, accountId);
         String groupId = UUID.randomUUID().toString();
-        String groupCrn = mockCrnService.createCrn(accountId, Crn.Service.IAM, ResourceType.GROUP, groupId).toString();
+        String groupCrn = mockCrnService.createCrn(accountId, CrnResourceDescriptor.GROUP, groupId).toString();
         return Group.newBuilder()
                 .setGroupId(groupId)
                 .setCrn(groupCrn)

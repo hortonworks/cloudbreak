@@ -22,6 +22,7 @@ import javax.ws.rs.core.MediaType;
 import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -72,13 +73,13 @@ public interface SdxEndpoint {
     @Path("/crn/{clusterCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster by crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByCrn")
-    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn String clusterCrn);
+    SdxClusterResponse getByCrn(@PathParam("clusterCrn") @ValidCrn(resource = CrnResourceDescriptor.DATALAKE) String clusterCrn);
 
     @GET
     @Path("/envcrn/{envCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "get SDX cluster by environment crn", produces = MediaType.APPLICATION_JSON, nickname = "getSdxByEnvCrn")
-    List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn String envCrn);
+    List<SdxClusterResponse> getByEnvCrn(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn);
 
     @GET
     @Path("{name}/detail")
@@ -215,14 +216,15 @@ public interface SdxEndpoint {
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_mapping")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Set ranger cloud identity mapping", produces = MediaType.APPLICATION_JSON, nickname = "setRangerCloudIdentityMapping")
-    RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn String envCrn,
+    RangerCloudIdentitySyncStatus setRangerCloudIdentityMapping(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
             @NotNull @Valid SetRangerCloudIdentityMappingRequest request);
 
     @GET
     @Path("/envcrn/{envCrn}/ranger_cloud_identity_sync_status")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get status of a ranger cloud identity sync", produces = MediaType.APPLICATION_JSON, nickname = "getRangerCloudIdentitySyncStatus")
-    RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@PathParam("envCrn") @ValidCrn String envCrn, long commandId);
+    RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(@PathParam("envCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
+            long commandId);
 
     @PUT
     @Path("{name}/rotate_autotls_certificates")

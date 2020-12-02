@@ -15,8 +15,10 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentChangeSecur
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteByNameAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByCrnsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentDeleteMultipleByNamesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentGetByCrnAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentListAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
@@ -34,6 +36,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> describe() {
         return new EnvironmentGetAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> describeByCrn() {
+        return new EnvironmentGetByCrnAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> refresh() {
@@ -62,6 +68,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> deleteMultipleByNames(String... envNames) {
         return new EnvironmentDeleteMultipleByNamesAction(Set.of(envNames));
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> deleteMultipleByCrns(String... crns) {
+        return new EnvironmentDeleteMultipleByCrnsAction(Set.of(crns));
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> changeCredential() {

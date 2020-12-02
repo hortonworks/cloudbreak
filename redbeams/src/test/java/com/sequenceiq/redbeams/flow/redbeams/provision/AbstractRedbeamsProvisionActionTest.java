@@ -10,8 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -67,7 +67,10 @@ public class AbstractRedbeamsProvisionActionTest {
 
         dbStack = new DBStack();
         dbStack.setId(101L);
-        dbStack.setResourceCrn(new InternalCrnBuilder(Crn.Service.REDBEAMS).getInternalCrnForService());
+        dbStack.setResourceCrn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+                .setAccountId("acc")
+                .setResource("resource")
+                .build());
         dbStack.setName("mystack");
         dbStack.setRegion("us-east-1");
         dbStack.setAvailabilityZone("us-east-1b");

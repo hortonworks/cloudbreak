@@ -6,7 +6,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;

@@ -24,6 +24,7 @@ import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -152,10 +153,8 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
 
     private String createCRN(String accountId) {
         throwIfNull(accountId, IllegalArgumentException::new);
-        return Crn.builder()
-                .setService(Crn.Service.DATAHUB)
+        return Crn.builder(CrnResourceDescriptor.RECIPE)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.RECIPE)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

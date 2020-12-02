@@ -35,6 +35,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -340,10 +341,8 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     private String createCRN(@Nonnull String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
+        return Crn.builder(CrnResourceDescriptor.CREDENTIAL)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CREDENTIAL)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

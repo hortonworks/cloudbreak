@@ -18,9 +18,11 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.common.api.type.DataHubStartAction;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -117,14 +119,14 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getEnvironmentV1ByCrn")
-    DetailedEnvironmentResponse getByCrn(@PathParam("crn") String crn);
+    DetailedEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @DELETE
     @Path("/crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentV1ByCrn")
-    SimpleEnvironmentResponse deleteByCrn(@PathParam("crn") String crn,
+    SimpleEnvironmentResponse deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
@@ -133,7 +135,7 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.DELETE_MULTIPLE_BY_CRN, produces = MediaType.APPLICATION_JSON,
             notes = ENVIRONMENT_NOTES, nickname = "deleteEnvironmentsByCrn", httpMethod = "DELETE")
-    SimpleEnvironmentResponses deleteMultipleByCrns(Set<String> crns,
+    SimpleEnvironmentResponses deleteMultipleByCrns(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) Set<String> crns,
         @QueryParam("cascading") @DefaultValue("false") boolean cascading,
         @QueryParam("forced") @DefaultValue("false") boolean forced);
 
@@ -142,21 +144,24 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.EDIT_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "editEnvironmentV1ByCrn")
-    DetailedEnvironmentResponse editByCrn(@PathParam("crn") String crn, @NotNull EnvironmentEditRequest request);
+    DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @NotNull EnvironmentEditRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_credential")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_CREDENTIAL_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeCredentialInEnvironmentV1ByCrn")
-    DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@PathParam("crn") String crn, @Valid EnvironmentChangeCredentialRequest request);
+    DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @Valid EnvironmentChangeCredentialRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_telemetry_features")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_TELEMETRY_FEATURES_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "changeTelemetryFeaturesInEnvironmentV1ByCrn")
-    DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(@PathParam("crn") String crn, @Valid FeaturesRequest request);
+    DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @Valid FeaturesRequest request);
 
     @POST
     @Path("/name/{name}/start")
@@ -170,7 +175,8 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "startEnvironmentByCrnV1")
-    void postStartByCrn(@PathParam("crn") String crn, @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
+    void postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+            @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
 
     @POST
     @Path("/name/{name}/stop")
@@ -184,21 +190,21 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "stopEnvironmentByCrnV1")
-    void postStopByCrn(@PathParam("crn") String crn);
+    void postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @GET
     @Path("/crn/{crn}/verify_credential")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.VERIFY_CREDENTIAL_BY_CRN, notes = ENVIRONMENT_NOTES,
             nickname = "verifyCredentialByEnvCrn", httpMethod = "GET")
-    CredentialResponse verifyCredentialByEnvCrn(@PathParam("crn") String crn);
+    CredentialResponse verifyCredentialByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @POST
     @Path("/crn/{crn}/cli_create")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CLI_COMMAND, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "getCreateEnvironmentForCliByCrn")
-    Object getCreateEnvironmentForCliByCrn(@PathParam("crn") String crn);
+    Object getCreateEnvironmentForCliByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @POST
     @Path("cli_create")
@@ -212,5 +218,5 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_CONFIG_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateConfigsInEnvironmentByCrnV1")
-    void updateConfigsInEnvironmentByCrn(@PathParam("crn") String crn);
+    void updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 }

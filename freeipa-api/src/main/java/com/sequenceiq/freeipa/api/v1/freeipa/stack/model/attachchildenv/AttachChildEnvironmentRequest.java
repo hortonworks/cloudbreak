@@ -4,6 +4,8 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -14,10 +16,12 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttachChildEnvironmentRequest {
 
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.PARENT_ENVIRONMENT_CRN, required = true)
     private String parentEnvironmentCrn;
 
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CHILD_ENVIRONMENT_CRN, required = true)
     private String childEnvironmentCrn;

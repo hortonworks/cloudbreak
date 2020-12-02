@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -36,7 +36,7 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
 
     public KerberosConfig createKerberosConfig(KerberosConfig kerberosConfig, String accountId) {
         kerberosConfig.setAccountId(accountId);
-        kerberosConfig.setResourceCrn(crnService.createCrn(kerberosConfig.getAccountId(), Crn.ResourceType.KERBEROS));
+        kerberosConfig.setResourceCrn(crnService.createCrn(kerberosConfig.getAccountId(), CrnResourceDescriptor.KERBEROS));
         LOGGER.debug("Trying to save KerberosConfig: {}", kerberosConfig);
         checkIfExists(kerberosConfig);
         return kerberosConfigRepository.save(kerberosConfig);

@@ -1,22 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
-import io.grpc.StatusRuntimeException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,20 +9,37 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
+
+import io.grpc.StatusRuntimeException;
+
 @ExtendWith(MockitoExtension.class)
 class UmsUsersStateProviderDispatcherTest {
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final Set<String> ENVIRONMENT_CRNS = Set.of(
-            Crn.builder()
-            .setPartition(Crn.Partition.CDP)
-            .setService(Crn.Service.ENVIRONMENTS)
-            .setAccountId(ACCOUNT_ID)
-            .setResourceType(Crn.ResourceType.ENVIRONMENT)
-            .setResource(UUID.randomUUID().toString())
-            .build()
-            .toString()
+            Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+                    .setAccountId(ACCOUNT_ID)
+                    .setResource(UUID.randomUUID().toString())
+                    .build()
+                    .toString()
     );
 
     @Mock
@@ -96,8 +96,8 @@ class UmsUsersStateProviderDispatcherTest {
 
     @Test
     void testPartialSync() {
-        Set<String> userCrns = Set.of(createActorCrn(Crn.ResourceType.USER));
-        Set<String> machineUserCrns = Set.of(createActorCrn(Crn.ResourceType.MACHINE_USER));
+        Set<String> userCrns = Set.of(createActorCrn(CrnResourceDescriptor.USER));
+        Set<String> machineUserCrns = Set.of(createActorCrn(CrnResourceDescriptor.MACHINE_USER));
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
         when(defaultUmsUsersStateProvider.get(anyString(), anyString(), any(Set.class),
@@ -123,12 +123,9 @@ class UmsUsersStateProviderDispatcherTest {
                                 .build()));
     }
 
-    private String createActorCrn(Crn.ResourceType resourceType) {
-        return Crn.builder()
-                .setPartition(Crn.Partition.CDP)
-                .setService(Crn.Service.IAM)
+    private String createActorCrn(CrnResourceDescriptor resourceDescriptor) {
+        return Crn.builder(resourceDescriptor)
                 .setAccountId(ACCOUNT_ID)
-                .setResourceType(resourceType)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

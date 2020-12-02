@@ -12,8 +12,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -76,7 +76,10 @@ public class AbstractRedbeamsTerminationActionTest {
         dbStack.setPlatformVariant("GovCloud");
         dbStack.setEnvironmentId("myenv");
         dbStack.setOwnerCrn(Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com"));
-        dbStack.setResourceCrn(new InternalCrnBuilder(Crn.Service.REDBEAMS).getInternalCrnForService());
+        dbStack.setResourceCrn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
+                .setAccountId("acc")
+                .setResource("resource")
+                .build());
 
         credential = new Credential("userId", null, "userCrn");
 

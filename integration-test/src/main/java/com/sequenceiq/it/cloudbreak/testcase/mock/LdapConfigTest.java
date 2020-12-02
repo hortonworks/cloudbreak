@@ -15,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 
 public class LdapConfigTest extends AbstractMockTest {
@@ -204,10 +205,11 @@ public class LdapConfigTest extends AbstractMockTest {
             then = "getting BadRequestException because only one ldap can exist with same environment in an account at the same time")
     public void testCreateLdapWithSameEnvironment(MockedTestContext testContext) {
         String name = resourcePropertyProvider().getName();
+        String envCrn = testContext.get(EnvironmentTestDto.class).getCrn();
         testContext
                 .given(name, LdapTestDto.class)
                 .valid()
-                .withEnvironmentCrn(name)
+                .withEnvironmentCrn(envCrn)
                 .when(ldapTestClient.createV1(), RunningParameter.key(name))
                 .then((tc, entity, cc) -> {
                     assertNotNull(entity);
@@ -217,7 +219,7 @@ public class LdapConfigTest extends AbstractMockTest {
 
                 .given(name, LdapTestDto.class)
                 .valid()
-                .withEnvironmentCrn(name)
+                .withEnvironmentCrn(envCrn)
                 .when(ldapTestClient.createV1(), RunningParameter.key(name))
                 .expect(BadRequestException.class,
                         RunningParameter.expectedMessage("environment is already exists")

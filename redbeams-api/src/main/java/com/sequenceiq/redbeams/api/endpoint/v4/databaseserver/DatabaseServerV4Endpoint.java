@@ -18,6 +18,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
@@ -54,7 +55,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.LIST, notes = DatabaseServerNotes.LIST,
             nickname = "listDatabaseServers")
     DatabaseServerV4Responses list(
-            @ValidCrn @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn
     );
 
@@ -63,7 +64,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CRN, notes = DatabaseServerNotes.GET_BY_CRN,
             nickname = "getDatabaseServerByCrn")
     DatabaseServerV4Response getByCrn(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -71,7 +72,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.GET_BY_NAME, notes = DatabaseServerNotes.GET_BY_NAME,
             nickname = "getDatabaseServerByName")
     DatabaseServerV4Response getByName(
-            @ValidCrn @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
             @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
     );
@@ -100,7 +101,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.RELEASE, notes = DatabaseServerNotes.RELEASE,
             nickname = "releaseManagedDatabaseServer")
     DatabaseServerV4Response release(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @POST
@@ -117,7 +118,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_CRN, notes = DatabaseServerNotes.DELETE_BY_CRN,
             nickname = "deleteDatabaseServerByCrn")
     DatabaseServerV4Response deleteByCrn(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
@@ -126,7 +127,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_BY_NAME, notes = DatabaseServerNotes.DELETE_BY_NAME,
             nickname = "deleteDatabaseServerByName")
     DatabaseServerV4Response deleteByName(
-            @ValidCrn @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
             @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name,
             @QueryParam("force") @DefaultValue("false") boolean force
@@ -138,7 +139,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
             consumes = MediaType.APPLICATION_JSON, nickname = "deleteMultipleDatabaseServersByCrn")
     DatabaseServerV4Responses deleteMultiple(
-            @ApiParam(DatabaseServerParamDescriptions.CRNS) Set<@ValidCrn String> crns,
+            @ApiParam(DatabaseServerParamDescriptions.CRNS) @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) Set<String> crns,
             @QueryParam("force") @DefaultValue("false") boolean force
     );
 
@@ -165,7 +166,7 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.START, notes = DatabaseServerNotes.START,
             nickname = "startDatabaseServer")
     void start(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @PUT
@@ -173,6 +174,6 @@ public interface DatabaseServerV4Endpoint {
     @ApiOperation(value = DatabaseServerOpDescription.STOP, notes = DatabaseServerNotes.STOP,
             nickname = "stopDatabaseServer")
     void stop(
-            @ValidCrn @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
 }

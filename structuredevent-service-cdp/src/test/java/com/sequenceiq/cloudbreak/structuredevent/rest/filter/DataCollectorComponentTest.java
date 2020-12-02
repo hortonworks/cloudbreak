@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 
@@ -32,12 +33,9 @@ public class DataCollectorComponentTest {
 
     private Map<String, AccountAwareResourceRepository<?, ?>> pathRepositoryMap = new HashMap<>();
 
-    private final String userCrn = new Crn.Builder()
+    private final String userCrn = new Crn.Builder(CrnResourceDescriptor.USER)
             .setResource("res")
-            .setResourceType(Crn.ResourceType.USER)
             .setAccountId("acc")
-            .setService(Crn.Service.IAM)
-            .setPartition(Crn.Partition.CDP)
             .build()
             .toString();
 

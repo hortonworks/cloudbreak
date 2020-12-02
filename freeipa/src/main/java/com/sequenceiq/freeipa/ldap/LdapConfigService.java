@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -39,7 +39,7 @@ public class LdapConfigService extends AbstractArchivistService<LdapConfig> {
 
     public LdapConfig createLdapConfig(LdapConfig ldapConfig, String accountId) {
         ldapConfig.setAccountId(accountId);
-        ldapConfig.setResourceCrn(crnService.createCrn(ldapConfig.getAccountId(), Crn.ResourceType.LDAP));
+        ldapConfig.setResourceCrn(crnService.createCrn(ldapConfig.getAccountId(), CrnResourceDescriptor.LDAP));
         LOGGER.debug("Trying to save LdapConfig: {}", ldapConfig);
         checkIfExists(ldapConfig);
         return ldapConfigRepository.save(ldapConfig);

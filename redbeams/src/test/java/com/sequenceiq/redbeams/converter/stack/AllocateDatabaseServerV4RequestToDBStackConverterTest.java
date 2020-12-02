@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -196,10 +197,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(databaseServerSSlCertificateConfig.getCertsByPlatform(any())).thenReturn(Set.of("super-cert"));
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
-        when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder()
-                .setService(Crn.Service.REDBEAMS)
+        when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
                 .setAccountId("accountid")
-                .setResourceType(Crn.ResourceType.DATABASE_SERVER)
                 .setResource("1")
                 .build());
     }

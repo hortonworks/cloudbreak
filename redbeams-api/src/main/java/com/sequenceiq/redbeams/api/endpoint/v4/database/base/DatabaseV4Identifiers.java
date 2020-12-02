@@ -7,6 +7,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.Database;
@@ -26,7 +27,7 @@ public class DatabaseV4Identifiers implements Serializable {
     private String name;
 
     @NotNull
-    @ValidCrn
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @ApiModelProperty(value = Database.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 

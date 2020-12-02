@@ -8,6 +8,8 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.kerberos.doc.KerberosConfigModelDescription;
 import com.sequenceiq.freeipa.api.v1.kerberos.validation.ValidKerberosRequest;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
@@ -41,6 +43,7 @@ public class CreateKerberosConfigRequest {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;

@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.Maps;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -107,7 +107,7 @@ public class CreateFreeIpaRequestToStackConverter {
         stack.setAccountId(accountId);
         stack.setName(source.getName());
         stack.setCreated(System.currentTimeMillis());
-        stack.setResourceCrn(crnService.createCrn(accountId, Crn.ResourceType.FREEIPA));
+        stack.setResourceCrn(crnService.createCrn(accountId, CrnResourceDescriptor.FREEIPA));
         MDCBuilder.addResourceCrn(stack.getResourceCrn());
         stack.setGatewayport(source.getGatewayPort() == null ? nginxPort : source.getGatewayPort());
         stack.setStackStatus(new StackStatus(stack, "Stack provision requested.", DetailedStackStatus.PROVISION_REQUESTED));

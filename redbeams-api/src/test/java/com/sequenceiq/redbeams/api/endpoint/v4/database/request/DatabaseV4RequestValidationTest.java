@@ -3,8 +3,6 @@ package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.base.Strings;
-
 import java.util.Arrays;
 import java.util.Set;
 
@@ -19,6 +17,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
+
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
 @RunWith(Parameterized.class)
 public class DatabaseV4RequestValidationTest {
@@ -35,7 +37,11 @@ public class DatabaseV4RequestValidationTest {
 
     private static final String DATABASE_TYPE = "hive";
 
-    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:cloudera:environment:myenv";
+    private static final String ENVIRONMENT_CRN = Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+            .setAccountId("cloudera")
+            .setResource("myenv")
+            .build()
+            .toString();
 
     private static ValidatorFactory validatorFactory;
 

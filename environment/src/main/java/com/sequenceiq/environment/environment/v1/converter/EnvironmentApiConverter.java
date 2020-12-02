@@ -19,6 +19,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -136,10 +137,8 @@ public class EnvironmentApiConverter {
     }
 
     private String createCrn(@Nonnull String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
+        return Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

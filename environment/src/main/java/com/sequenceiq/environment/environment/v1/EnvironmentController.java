@@ -30,9 +30,12 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -45,7 +48,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
-import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -141,7 +143,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DetailedEnvironmentResponse getByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public DetailedEnvironmentResponse getByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentResponseConverter.dtoToDetailedResponse(environmentDto);
@@ -159,7 +161,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponse deleteByCrn(@ResourceCrn @TenantAwareParam String crn, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponse deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
+            boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(
@@ -181,7 +184,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DELETE_ENVIRONMENT)
-    public SimpleEnvironmentResponses deleteMultipleByCrns(@ResourceCrnList Set<String> crns, boolean cascading, boolean forced) {
+    public SimpleEnvironmentResponses deleteMultipleByCrns(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrnList Set<String> crns,
+            boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(
@@ -201,7 +205,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public DetailedEnvironmentResponse editByCrn(@ResourceCrn String crn, @NotNull EnvironmentEditRequest request) {
+    public DetailedEnvironmentResponse editByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
+            @NotNull EnvironmentEditRequest request) {
         EnvironmentEditDto editDto = environmentApiConverter.initEditDto(request);
         EnvironmentDto result = environmentModificationService.editByCrn(crn, editDto);
         return environmentResponseConverter.dtoToDetailedResponse(result);
@@ -240,7 +245,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.CHANGE_CREDENTIAL)
-    public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@ResourceCrn String crn,
+    public DetailedEnvironmentResponse changeCredentialByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
             @RequestObject @Valid EnvironmentChangeCredentialRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto result = environmentModificationService.changeCredentialByEnvironmentCrn(accountId, crn,
@@ -250,7 +255,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(@ResourceCrn String crn, @Valid FeaturesRequest request) {
+    public DetailedEnvironmentResponse changeTelemetryFeaturesByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn,
+            @Valid FeaturesRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentFeatures features = environmentApiConverter.convertToEnvironmentTelemetryFeatures(request);
         EnvironmentDto result = environmentModificationService.changeTelemetryFeaturesByEnvironmentCrn(accountId, crn, features);
@@ -265,7 +271,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_ENVIRONMENT)
-    public void postStartByCrn(@ResourceCrn @TenantAwareParam String crn, DataHubStartAction dataHubStartAction) {
+    public void postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
+            DataHubStartAction dataHubStartAction) {
         environmentStartService.startByCrn(crn, dataHubStartAction);
     }
 
@@ -277,13 +284,13 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
-    public void postStopByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public void postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         environmentStopService.stopByCrn(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public CredentialResponse verifyCredentialByEnvCrn(@ResourceCrn String crn) {
+    public CredentialResponse verifyCredentialByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByEnvironmentCrnAndAccountId(crn, accountId, ENVIRONMENT);
         Credential verifiedCredential = credentialService.verify(credential);
@@ -300,7 +307,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public Object getCreateEnvironmentForCliByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public Object getCreateEnvironmentForCliByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         return environmentService.getCreateEnvironmentForCli(environmentDto);
@@ -316,7 +323,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @InternalOnly
-    public void updateConfigsInEnvironmentByCrn(@ResourceCrn @TenantAwareParam String crn) {
+    public void updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         stackConfigUpdateService.updateAllStackConfigsByCrn(crn);
     }
 }

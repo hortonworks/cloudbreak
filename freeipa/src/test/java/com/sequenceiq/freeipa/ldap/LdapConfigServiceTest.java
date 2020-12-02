@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.ldap;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -14,7 +13,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -49,7 +48,7 @@ public class LdapConfigServiceTest {
         LdapConfig ldapConfig = new LdapConfig();
         ldapConfig.setEnvironmentCrn(ENVIRONMENT_ID);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(crnService.createCrn(ACCOUNT_ID, Crn.ResourceType.LDAP)).thenReturn(RESOURCE_CRN);
+        Mockito.when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.LDAP)).thenReturn(RESOURCE_CRN);
         Mockito.when(ldapConfigRepository.save(ldapConfig)).thenReturn(ldapConfig);
         // WHEN
         underTest.createLdapConfig(ldapConfig);

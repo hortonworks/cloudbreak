@@ -14,13 +14,17 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+
 @Documented
-@Constraint(validatedBy = CrnValidator.class)
+@Constraint(validatedBy = { CrnValidator.class, CrnCollectionValidator.class })
 @Target({ METHOD, FIELD, CONSTRUCTOR, PARAMETER, TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidCrn {
 
-    String message() default "Invalid Crn Provided";
+    String message() default "Invalid Crn(s) Provided";
+
+    CrnResourceDescriptor[] resource();
 
     Class<?>[] groups() default {};
 

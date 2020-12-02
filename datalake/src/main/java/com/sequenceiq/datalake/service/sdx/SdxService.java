@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Req
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -694,10 +695,8 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     }
 
     private String createCrn(@Nonnull String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.DATALAKE)
+        return Crn.builder(CrnResourceDescriptor.DATALAKE)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.DATALAKE)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

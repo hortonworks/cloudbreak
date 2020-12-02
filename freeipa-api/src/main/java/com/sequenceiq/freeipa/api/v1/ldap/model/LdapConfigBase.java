@@ -9,8 +9,10 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.freeipa.api.v1.ldap.doc.LdapConfigModelDescription;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
@@ -80,6 +82,7 @@ public abstract class LdapConfigBase {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String certificate;
 
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @NotEmpty
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;

@@ -1,22 +1,14 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
 import java.security.SecureRandom;
 import java.util.Collection;
@@ -30,15 +22,25 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @ExtendWith(MockitoExtension.class)
 class BaseUmsUsersStateProviderTest {
@@ -47,11 +49,8 @@ class BaseUmsUsersStateProviderTest {
 
     protected static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
-    protected static final String ACTOR_CRN = Crn.builder()
+    protected static final String ACTOR_CRN = Crn.builder(CrnResourceDescriptor.USER)
             .setAccountId(ACCOUNT_ID)
-            .setPartition(Crn.Partition.CDP)
-            .setResourceType(Crn.ResourceType.USER)
-            .setService(Crn.Service.IAM)
             .setResource(UUID.randomUUID().toString())
             .build()
             .toString();
@@ -161,11 +160,8 @@ class BaseUmsUsersStateProviderTest {
     }
 
     private static String createEnvironmentCrn() {
-        return Crn.builder()
+        return Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setAccountId(ACCOUNT_ID)
-                .setPartition(Crn.Partition.CDP)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
-                .setService(Crn.Service.ENVIRONMENTS)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
@@ -286,11 +282,8 @@ class BaseUmsUsersStateProviderTest {
                         return UserManagementProto.User.newBuilder()
                                 .setFirstName(RandomStringUtils.randomAlphabetic(10))
                                 .setLastName(RandomStringUtils.randomAlphabetic(10))
-                                .setCrn(Crn.builder()
+                                .setCrn(Crn.builder(CrnResourceDescriptor.USER)
                                         .setAccountId(ACCOUNT_ID)
-                                        .setPartition(Crn.Partition.CDP)
-                                        .setResourceType(Crn.ResourceType.USER)
-                                        .setService(Crn.Service.IAM)
                                         .setResource(UUID.randomUUID().toString())
                                         .build()
                                         .toString())
@@ -308,11 +301,8 @@ class BaseUmsUsersStateProviderTest {
                         return UserManagementProto.MachineUser.newBuilder()
                                 .setMachineUserId(id)
                                 .setMachineUserName(RandomStringUtils.randomAlphabetic(10))
-                                .setCrn(Crn.builder()
+                                .setCrn(Crn.builder(CrnResourceDescriptor.MACHINE_USER)
                                         .setAccountId(ACCOUNT_ID)
-                                        .setPartition(Crn.Partition.CDP)
-                                        .setResourceType(Crn.ResourceType.MACHINE_USER)
-                                        .setService(Crn.Service.IAM)
                                         .setResource(UUID.randomUUID().toString())
                                         .build()
                                         .toString())
@@ -330,11 +320,8 @@ class BaseUmsUsersStateProviderTest {
                         String id = UUID.randomUUID().toString();
                         return UserManagementProto.Group.newBuilder()
                                 .setGroupName(name)
-                                .setCrn(Crn.builder()
+                                .setCrn(Crn.builder(CrnResourceDescriptor.GROUP)
                                         .setAccountId(ACCOUNT_ID)
-                                        .setPartition(Crn.Partition.CDP)
-                                        .setResourceType(Crn.ResourceType.GROUP)
-                                        .setService(Crn.Service.IAM)
                                         .setResource(name + "/" + id)
                                         .build()
                                         .toString())
