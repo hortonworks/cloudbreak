@@ -891,43 +891,43 @@ message CDPCMLWorkspaceStatusChanged {
   string toVersion = 6;
 }
 
-// The status of a CDP Cloudbreak workspace.
+// The status of a CDP environment
 message CDPEnvironmentStatus {
   enum Value {
     // A value indicating the enum is unset.
     UNSET = 0;
-    // The status when a workspace is trying to create a kubernetes cluster.
+    // The status when CDP CP is trying to create an environment.
     CREATE_STARTED = 1;
-    // The status when a workspace is done creating a kubernetes cluster.
+    // The status when CDP CP is done creating an environment.
     CREATE_FINISHED = 2;
-    // The status when a workspace failed to provision a kubernetes cluster.
+    // The status when CDP CP failed to provision an environment.
     CREATE_FAILED = 3;
 
-    // The status when a workspace is trying to deprovision the running kubernetes cluster.
+    // The status when CDP CP is trying to delete an environment.
     DELETE_STARTED = 4;
-    // The status when a workspace is done deprovisioning the kubernetes cluster.
+    // The status when CDP CP is done deleting an environment.
     DELETE_FINISHED = 5;
-    // The status when a workspace failed to deprovision the kubernetes cluster.
+    //  The status when CDP CP failed to delete an environment.
     DELETE_FAILED = 6;
 
-    // The status when a workspace is trying to suspend.
+    // The status when an environment is trying to suspend.
     SUSPEND_STARTED = 7;
-    // The status when a workspace is suspended.
+    // The status when an environment is suspended.
     SUSPEND_FINISHED = 8;
-    // The status when a workspace failed to suspend.
+    // The status when an environment failed to suspend.
     SUSPEND_FAILED = 9;
 
-    // The status when a workspace is trying to resume.
+    // The status when an environment is trying to resume.
     RESUME_STARTED = 10;
-    // The status when a workspace completed resuming.
+    // The status when an environment completed resuming.
     RESUME_FINISHED = 11;
-    // The status when a workspace failed to resume.
+    // The status when an environment failed to resume.
     RESUME_FAILED = 12;
   }
 }
 
 message CDPOperationDetails {
-    // The CDP account ID of the event
+    // The CDP account id of the event
     string accountId = 1;
     // The CRN for the resource
     string resourceCrn = 2;
@@ -942,69 +942,60 @@ message CDPOperationDetails {
 message CDPEnvironmentDetails {
     // Cloud provider identifier
     CDPEnvironmentsEnvironmentType.Value environmentType = 1;
-
     // Region of the deployment
     string region = 2;
-
     // Number of availability zones used in the environment
     int32 numberOfAvailabilityZones = 3;
-
     // Number of availability zones used in the environment
     string availabilityZones = 4;
-
-    // Type of Azure single resource group is
-    string resourceGroupType = 5;
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {
-    // Workday analytics is enabled on this environment
+    // Workload analytics is enabled on this environment
     string workloadAnalytics = 1;
-
     // Cluster log collection is enabled on this environment
     string clusterLogsCollection = 2;
 }
 
 message CDPProxyDetails {
+    // Shows whether a proxy is used
     bool proxy = 1;
 }
 
 message CDPNetworkDetails {
-    // CDP_PROVIDED, CUSTOMER_PROVIDED
+    // Whether the network is created by CDP CP or by the customer
     string networkType = 1;
-
+    // How CDP CP connects to the environment
     string connectivity = 2;
-
+    // How many public subnets are used
     int32 numberPublicSubnets = 3;
-
+    // How many public subnets are used
     int32 numberPrivateSubnets = 4;
-
-    string privateSubnetCreation = 5;
-
-    string serviceEndpointCreation = 6;
-
-    CDPProxyDetails proxyDetails = 7;
+    // Private endpoints are created for this particular environment
+    string serviceEndpointCreation = 5;
+    // Metadata around what type of proxy is used in this environment
+    CDPProxyDetails proxyDetails = 6;
 }
 
 message CDPEnvironmentRequested {
-
+    // Operation metadata
     CDPOperationDetails operationDetails = 1;
-
+    // Environment metadata
     CDPEnvironmentDetails environmentDetails = 2;
-
+    // Network metadata
     CDPNetworkDetails networkDetails = 3;
-
+    // Data collection metadata
     CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;
 }
 
 // Generated when Environment status has changed
 message CDPEnvironmentStatusChanged {
-
+  // Operation metadata
   CDPOperationDetails operationDetails = 1;
-
+  // The environment's status before the change.
   CDPEnvironmentStatus.Value oldStatus = 2;
-
+  // The environment's status after the change.
   CDPEnvironmentStatus.Value newStatus = 3;
-
   // Describe the reason of the failure if any
   string failureReason = 4;
 }
