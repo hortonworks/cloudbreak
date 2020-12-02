@@ -25,5 +25,12 @@ dependencies {
     implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
     implementation group: 'com.google.protobuf',                name: 'protobuf-java-util',          version: '3.10.0'
 
+    compile project(':cloud-reactor')
+    compile project(':structuredevent-model')
+    compile project(':structuredevent-api-cdp')
+    compile project(':auth-connector')
+    compile project(':audit-connector')
+    compile project(':secret-engine')
+
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 }
