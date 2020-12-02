@@ -52,11 +52,12 @@ public class SecretAspectService {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
+                LOGGER.error("Given entity isn't instance of {}. Secret is not updated!",
+                        AccountIdAwareResource.class.getSimpleName(), e);
+                throw new SecretOperationException(e.getMessage());
             } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
+                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not updated!", e);
+                throw new SecretOperationException(e.getMessage());
             }
         }
 
@@ -92,11 +93,12 @@ public class SecretAspectService {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
+                LOGGER.error("Given entity isn't instance of {}. Secret is not deleted!",
+                        AccountIdAwareResource.class.getSimpleName(), e);
+                throw new SecretOperationException(e.getMessage());
             } catch (Exception e) {
                 LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
-                throw new SecretOperationException(e);
+                throw new SecretOperationException(e.getMessage());
             }
         }
 
@@ -122,14 +124,12 @@ public class SecretAspectService {
         return arg instanceof Collection ? (Collection<Object>) arg : Collections.singleton(arg);
     }
 
-    private String findAccountId(Object entity) {
+    private String findAccountId(Object entity) throws IllegalArgumentException {
         return Optional.ofNullable(entity)
                 .filter(e -> e instanceof AccountIdAwareResource)
                 .map(e -> (AccountIdAwareResource) e)
                 .map(AccountIdAwareResource::getAccountId)
-                .orElseGet(() -> {
-                    LOGGER.warn("{} must be a subclass of {}", entity.getClass().getSimpleName(), AccountIdAwareResource.class.getSimpleName());
-                    return "undefined";
-                });
+                .orElseThrow(() -> new IllegalArgumentException(
+                        entity.getClass().getSimpleName() + " must be a subclass of " + AccountIdAwareResource.class.getSimpleName()));
     }
 }
