@@ -18,9 +18,11 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -83,6 +85,7 @@ public class EnvironmentCreationService {
         }
 
         Environment environment = initializeEnvironment(creationDto);
+        initializeEnvironmentTunnel(environment);
         if (StringUtils.isNotEmpty(creationDto.getParentEnvironmentName())) {
             LOGGER.debug("Setting parent environment '{}'.", creationDto.getParentEnvironmentName());
             Optional<Environment> parentEnvironment = environmentService.
@@ -121,6 +124,21 @@ public class EnvironmentCreationService {
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
         LOGGER.info("Environment is initialized for creation.");
         return environment;
+    }
+
+    private void initializeEnvironmentTunnel(Environment environment) {
+        Tunnel tunnel = environment.getExperimentalFeaturesJson().getTunnel();
+        boolean ccmV2Enabled = entitlementService.ccmV2Enabled(environment.getAccountId());
+        if (Tunnel.CCMV2 == tunnel && !ccmV2Enabled) {
+            throw new BadRequestException("CCMV2 not enabled for account.");
+        } else if (Tunnel.CCM == tunnel && ccmV2Enabled) {
+            ExperimentalFeatures experimentalFeaturesJson = environment.getExperimentalFeaturesJson();
+            experimentalFeaturesJson.setTunnel(Tunnel.CCMV2);
+            environment.setExperimentalFeaturesJson(experimentalFeaturesJson);
+            LOGGER.info("Environment is initialized with CCMV2 tunnel.");
+        } else {
+            LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
+        }
     }
 
     private void createAndSetParameters(Environment environment, ParametersDto parameters) {

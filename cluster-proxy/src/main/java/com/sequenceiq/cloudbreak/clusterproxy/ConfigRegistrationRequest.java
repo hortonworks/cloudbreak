@@ -34,9 +34,16 @@ public class ConfigRegistrationRequest {
     @JsonProperty
     private List<TunnelEntry> tunnels;
 
+    @JsonProperty("useCCMv2")
+    private boolean useCcmV2;
+
+    @JsonProperty
+    private List<CcmV2Config> ccmV2Configs;
+
     @JsonCreator
     public ConfigRegistrationRequest(String clusterCrn, String knoxUrl, String accountId, boolean useTunnel, List<TunnelEntry> tunnelEntries,
-            List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates) {
+            List<String> aliases, List<ClusterServiceConfig> services, List<String> certificates, boolean useCcmV2,
+            List<CcmV2Config> ccmV2Configs) {
         this.clusterCrn = clusterCrn;
         this.uriOfKnox = knoxUrl;
         this.accountId = accountId;
@@ -45,6 +52,8 @@ public class ConfigRegistrationRequest {
         this.aliases = aliases;
         this.services = services;
         this.certificates = certificates;
+        this.useCcmV2 = useCcmV2;
+        this.ccmV2Configs = ccmV2Configs;
     }
 
     public String getClusterCrn() {
@@ -53,6 +62,38 @@ public class ConfigRegistrationRequest {
 
     public List<ClusterServiceConfig> getServices() {
         return services;
+    }
+
+    public List<CcmV2Config> getCcmV2Configs() {
+        return ccmV2Configs;
+    }
+
+    public boolean isUseCcmV2() {
+        return useCcmV2;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public String getUriOfKnox() {
+        return uriOfKnox;
+    }
+
+    public List<String> getAliases() {
+        return aliases;
+    }
+
+    public List<String> getCertificates() {
+        return certificates;
+    }
+
+    public boolean isUseTunnel() {
+        return useTunnel;
+    }
+
+    public List<TunnelEntry> getTunnels() {
+        return tunnels;
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
@@ -72,13 +113,15 @@ public class ConfigRegistrationRequest {
                 Objects.equals(aliases, that.aliases) &&
                 Objects.equals(services, that.services) &&
                 Objects.equals(certificates, that.certificates) &&
-                Objects.equals(tunnels, that.tunnels);
+                Objects.equals(tunnels, that.tunnels) &&
+                Objects.equals(useCcmV2, that.useCcmV2) &&
+                Objects.equals(ccmV2Configs, that.ccmV2Configs);
     }
     //CHECKSTYLE:ON
 
     @Override
     public int hashCode() {
-        return Objects.hash(accountId, clusterCrn, uriOfKnox, aliases, services, certificates, useTunnel, tunnels);
+        return Objects.hash(accountId, clusterCrn, uriOfKnox, aliases, services, certificates, useTunnel, tunnels, useCcmV2, ccmV2Configs);
     }
 
     @Override
@@ -92,6 +135,8 @@ public class ConfigRegistrationRequest {
                 ", certificates=" + certificates +
                 ", useTunnel=" + useTunnel +
                 ", tunnels=" + tunnels +
+                ", useCcmV2=" + useCcmV2 +
+                ", ccmV2Configs=" + ccmV2Configs +
                 '}';
     }
 }

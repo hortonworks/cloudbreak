@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.termination.event.ccm;
 
 import java.util.Objects;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
 
@@ -13,18 +14,22 @@ public class CcmKeyDeregistrationRequest extends TerminationEvent {
 
     private final String keyId;
 
-    private final Boolean useCcm;
+    private final Tunnel tunnel;
 
     private final String minaSshdServiceId;
 
-    public CcmKeyDeregistrationRequest(Long stackId, Boolean forced, String actorCrn, String accountId, String keyId, Boolean useCcm,
-            String minaSshdServiceId) {
+    private final String ccmV2AgentCrn;
+
+    @SuppressWarnings("ExecutableStatementCount")
+    public CcmKeyDeregistrationRequest(Long stackId, Boolean forced, String actorCrn, String accountId, String keyId, Tunnel tunnel,
+            String minaSshdServiceId, String ccmV2AgentCrn) {
         super(EventSelectorUtil.selector(CcmKeyDeregistrationRequest.class), stackId, forced);
         this.actorCrn = Objects.requireNonNull(actorCrn, "actorCrn is null");
         this.accountId = Objects.requireNonNull(accountId, "accountId is null");
         this.keyId = Objects.requireNonNull(keyId, "keyId is null");
-        this.useCcm = useCcm;
+        this.tunnel = tunnel;
         this.minaSshdServiceId = minaSshdServiceId;
+        this.ccmV2AgentCrn = ccmV2AgentCrn;
     }
 
     public String getActorCrn() {
@@ -39,11 +44,15 @@ public class CcmKeyDeregistrationRequest extends TerminationEvent {
         return keyId;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public Tunnel getTunnel() {
+        return tunnel;
     }
 
     public String getMinaSshdServiceId() {
         return minaSshdServiceId;
+    }
+
+    public String getCcmV2AgentCrn() {
+        return ccmV2AgentCrn;
     }
 }

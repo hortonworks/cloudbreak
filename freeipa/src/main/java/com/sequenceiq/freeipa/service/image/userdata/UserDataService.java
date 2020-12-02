@@ -1,8 +1,5 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -10,18 +7,16 @@ import java.util.concurrent.Future;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterSupplier;
-import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
-import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
-import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
-import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -35,6 +30,7 @@ import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.cloud.PlatformParameterService;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -55,8 +51,11 @@ public class UserDataService {
     @Inject
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
-    @Autowired(required = false)
+    @Autowired
     private CcmParameterSupplier ccmParameterSupplier;
+
+    @Autowired
+    private CcmV2ParameterSupplier ccmV2ParameterSupplier;
 
     @Inject
     private CrnService crnService;
@@ -73,6 +72,15 @@ public class UserDataService {
     @Inject
     private ImageService imageService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private CcmUserDataService ccmUserDataService;
+
+    @Inject
+    private FreeIpaService freeIpaService;
+
     public void createUserData(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
@@ -88,34 +96,14 @@ public class UserDataService {
         String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
-            CcmParameters ccmParameters = fetchCcmParameters(stack);
+            CcmConnectivityParameters ccmParameters = ccmUserDataService.fetchAndSaveCcmParameters(stack);
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(Platform.platform(stack.getCloudPlatform()), cbSshKeyDer, sshUser, platformParameters,
                     saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
-            if (ccmParameters != null) {
-                String minaSshdServiceId = ccmParameters.getServerParameters().getMinaSshdServiceId();
-                if (StringUtils.isNotBlank(minaSshdServiceId)) {
-                    LOGGER.debug("Add Minasshdserviceid [{}] to stack [{}]", minaSshdServiceId, stack.getResourceCrn());
-                    stack.setMinaSshdServiceId(minaSshdServiceId);
-                    stackService.save(stack);
-                }
-            }
         } catch (InterruptedException | ExecutionException e) {
             LOGGER.error("Failed to get Platform parmaters", e);
             throw new GetCloudParameterException("Failed to get Platform parmaters", e);
         }
-    }
-
-    private CcmParameters fetchCcmParameters(Stack stack) {
-        CcmParameters ccmParameters = null;
-        if ((ccmParameterSupplier != null) && stack.getTunnel().useCcm()) {
-            int gatewayPort = Optional.ofNullable(stack.getGatewayport()).orElse(ServiceFamilies.GATEWAY.getDefaultPort());
-            Map<KnownServiceIdentifier, Integer> tunneledServicePorts = Collections.singletonMap(KnownServiceIdentifier.GATEWAY, gatewayPort);
-            String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
-            String actorCrn = Objects.requireNonNull(crnService.getUserCrn(), "userCrn is null");
-            ccmParameters = ccmParameterSupplier.getCcmParameters(actorCrn, stack.getAccountId(), keyId, tunneledServicePorts).orElse(null);
-        }
-        return ccmParameters;
     }
 }

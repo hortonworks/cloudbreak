@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +47,15 @@ public class MDCBuilder {
         if (requestId.isPresent()) {
             MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId.get());
         }
+    }
+
+    public static String getOrGenerateRequestId() {
+        String requestId = MDC.get(LoggerContextKey.REQUEST_ID.toString());
+        if (null == requestId) {
+            requestId = UUID.randomUUID().toString();
+            MDC.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
+        }
+        return requestId;
     }
 
     public static void addEnvCrn(String env) {

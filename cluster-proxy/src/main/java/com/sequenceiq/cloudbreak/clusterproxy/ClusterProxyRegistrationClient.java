@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -38,6 +39,11 @@ public class ClusterProxyRegistrationClient {
 
             LOGGER.info("Cluster Proxy config registration response: {}", response);
             return response.getBody();
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy, " +
+                            "Error Response Body '%s'", configRegistrationRequest.getClusterCrn(), e.getResponseBodyAsString());
+            LOGGER.error(message + " URL: " + registerConfigUrl, e);
+            throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy.",
                     configRegistrationRequest.getClusterCrn());
@@ -53,6 +59,11 @@ public class ClusterProxyRegistrationClient {
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(updateConfigUrl,
                     requestEntity(configUpdateRequest), ConfigRegistrationResponse.class);
             LOGGER.info("Cluster Proxy config update response: {}", response);
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy, " +
+                            "Error Response Body '%s'", configUpdateRequest.getClusterCrn(), e.getResponseBodyAsString());
+            LOGGER.error(message + " URL: " + updateConfigUrl, e);
+            throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy.",
                     configUpdateRequest.getClusterCrn());
@@ -68,6 +79,11 @@ public class ClusterProxyRegistrationClient {
             ResponseEntity<ConfigRegistrationResponse> response = restTemplate.postForEntity(removeConfigUrl,
                     requestEntity(new ConfigDeleteRequest(clusterIdentifier)), ConfigRegistrationResponse.class);
             LOGGER.info("Cluster proxy deregistration response: {}", response);
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy, " +
+                            "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
+            LOGGER.error(message + " URL: " + removeConfigUrl, e);
+            throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);
@@ -84,6 +100,11 @@ public class ClusterProxyRegistrationClient {
                     requestEntity(new ReadConfigRequest(clusterIdentifier)), ReadConfigResponse.class);
             LOGGER.info("Cluster proxy read configuration response: {}", response);
             return response.getBody();
+        } catch (RestClientResponseException e) {
+            String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy, " +
+                            "Error Response Body '%s'", clusterIdentifier, e.getResponseBodyAsString());
+            LOGGER.error(message + " URL: " + readConfigUrl, e);
+            throw new ClusterProxyException(message, e);
         } catch (Exception e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);

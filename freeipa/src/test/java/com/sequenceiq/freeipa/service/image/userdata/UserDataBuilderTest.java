@@ -17,8 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultInstanceParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultServerParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultTunnelParameters;
@@ -66,6 +69,8 @@ public class UserDataBuilderTest {
         DefaultInstanceParameters instanceParameters = new DefaultInstanceParameters("tunnel-id", "key-id", "private-key");
         DefaultTunnelParameters nginxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.GATEWAY, 9443);
         CcmParameters ccmParameters = new DefaultCcmParameters(serverParameters, instanceParameters, List.of(nginxTunnel));
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmParameters);
+
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         ScriptParams scriptParams = mock(ScriptParams.class);
         when(scriptParams.getDiskPrefix()).thenReturn("sd");
@@ -73,9 +78,29 @@ public class UserDataBuilderTest {
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
         String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", ccmParameters, null);
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-init.sh");
+        Assert.assertEquals(expectedUserData, userData);
+    }
+
+    @Test
+    @DisplayName("test if CCM V2 parameters are passed the user data contains them")
+    public void testBuildUserDataWithCCMV2Params() throws IOException {
+        CcmV2Parameters ccmV2Parameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate");
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
+
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        ScriptParams scriptParams = mock(ScriptParams.class);
+        when(scriptParams.getDiskPrefix()).thenReturn("sd");
+        when(scriptParams.getStartLabel()).thenReturn(98);
+        when(platformParameters.scriptParams()).thenReturn(scriptParams);
+
+        String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
+
+        String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-v2-init.sh");
         Assert.assertEquals(expectedUserData, userData);
     }
 
@@ -89,10 +114,9 @@ public class UserDataBuilderTest {
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
         String userData = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", null, null);
+                "cloudbreak", platformParameters, "pass", "cert", new CcmConnectivityParameters(), null);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-init.sh");
         Assert.assertEquals(expectedUserData, userData);
     }
-
 }

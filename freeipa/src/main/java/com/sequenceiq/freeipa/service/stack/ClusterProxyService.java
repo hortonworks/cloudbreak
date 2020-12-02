@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_BACKEND_ID_FORMAT;
+
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
@@ -174,8 +177,12 @@ public class ClusterProxyService {
 
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withServices(serviceConfigs)
-                .withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs))
                 .withAccountId(stack.getAccountId());
+        if (stack.getTunnel().useCcmV1()) {
+            requestBuilder.withTunnelEntries(createTunnelEntries(stack, tunnelGatewayConfigs));
+        } else if (stack.getTunnel().useCcmV2()) {
+            requestBuilder.withCcmV2Entries(createCcmV2Configs(stack, tunnelGatewayConfigs));
+        }
         ConfigRegistrationRequest request = requestBuilder.build();
         LOGGER.debug("Registring cluser proxy configuration [{}]", request);
         ConfigRegistrationResponse response = clusterProxyRegistrationClient.registerConfig(request);
@@ -267,19 +274,25 @@ public class ClusterProxyService {
         return intervalInSecV1;
     }
 
+    private List<CcmV2Config> createCcmV2Configs(Stack stack, List<GatewayConfig> gatewayConfigs) {
+        return gatewayConfigs.stream()
+                .map(gatewayConfig -> new CcmV2Config(
+                        stack.getCcmV2AgentCrn(),
+                        String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), gatewayConfig.getInstanceId()),
+                        gatewayConfig.getPrivateAddress(),
+                        getNginxPort(stack)))
+                .collect(Collectors.toList());
+    }
+
     private List<TunnelEntry> createTunnelEntries(Stack stack, List<GatewayConfig> gatewayConfigs) {
-        if (stack.getTunnel().useCcm()) {
-            return gatewayConfigs.stream()
-                    .map(gatewayConfig -> new TunnelEntry(
-                            gatewayConfig.getInstanceId(),
-                            GATEWAY_SERVICE_TYPE,
-                            gatewayConfig.getPrivateAddress(),
-                            getNginxPort(stack),
-                            stack.getMinaSshdServiceId()))
-                    .collect(Collectors.toList());
-        } else {
-            return List.of();
-        }
+        return gatewayConfigs.stream()
+                .map(gatewayConfig -> new TunnelEntry(
+                        gatewayConfig.getInstanceId(),
+                        GATEWAY_SERVICE_TYPE,
+                        gatewayConfig.getPrivateAddress(),
+                        getNginxPort(stack),
+                        stack.getMinaSshdServiceId()))
+                .collect(Collectors.toList());
     }
 
     public String getProxyPath(String crn) {

@@ -198,6 +198,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
 
+    private static final String CDP_CCM_V2 = "CDP_CCM_V2";
+
     private static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
 
     private static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
@@ -291,6 +293,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.raz.enable}")
     private boolean razEnabled;
+
+    @Value("${auth.mock.ccmv2.enable}")
+    private boolean ccmV2Enabled;
 
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
@@ -604,6 +609,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (razEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));
+        }
+        if (ccmV2Enabled) {
+            builder.addEntitlements(createEntitlement(CDP_CCM_V2));
         }
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));

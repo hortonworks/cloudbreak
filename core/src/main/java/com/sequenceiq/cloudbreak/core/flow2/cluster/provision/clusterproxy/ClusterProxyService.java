@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
+import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_BACKEND_ID_FORMAT;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
@@ -99,7 +101,8 @@ public class ClusterProxyService {
     }
 
     private void registerGateway(Stack stack) {
-        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl(stack));
+        String knoxUrl = stack.getTunnel().useCcmV2() ? knoxUrlForCcmV2(stack) : knoxUrl(stack);
+        ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
         clusterProxyRegistrationClient.updateConfig(request);
     }
 
@@ -111,8 +114,10 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
-        if (stack.getTunnel().useCcm()) {
+        if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
+        } else if (stack.getTunnel().useCcmV2()) {
+            requestBuilder.withAccountId(getAccountId(stack)).withCcmV2Entries(ccmV2Configs(stack));
         }
         return requestBuilder.build();
     }
@@ -120,8 +125,11 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
-        if (stack.getTunnel().useCcm()) {
+        if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
+        } else if (stack.getTunnel().useCcmV2()) {
+            requestBuilder.withAccountId(getAccountId(stack))
+                    .withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         }
         return requestBuilder.build();
     }
@@ -145,6 +153,14 @@ public class ClusterProxyService {
         TunnelEntry knoxTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
                 gatewayIp, ServiceFamilies.KNOX.getDefaultPort(), stack.getMinaSshdServiceId());
         return asList(gatewayTunnel, knoxTunnel);
+    }
+
+    private List<CcmV2Config> ccmV2Configs(Stack stack) {
+        InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
+        return List.of(new CcmV2Config(stack.getCcmV2AgentCrn(),
+                String.format(CCMV2_BACKEND_ID_FORMAT, stack.getCcmV2AgentCrn(), primaryGateway.getInstanceId()),
+                primaryGateway.getPublicIpWrapper(),
+                ServiceFamilies.GATEWAY.getDefaultPort()));
     }
 
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {
@@ -178,6 +194,14 @@ public class ClusterProxyService {
         String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
         Cluster cluster = stack.getCluster();
         return String.format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
+    }
+
+    private String knoxUrlForCcmV2(Stack stack) {
+        String gatewayIp = stack.getPrimaryGatewayInstance().getPublicIpWrapper();
+        Cluster cluster = stack.getCluster();
+        return String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
+                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
+                cluster.getGateway().getPath());
     }
 
     private String clusterId(Cluster cluster) {

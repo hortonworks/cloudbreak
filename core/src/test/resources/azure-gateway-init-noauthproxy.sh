@@ -19,6 +19,7 @@ export IS_PROXY_ENABLED=true
 export PROXY_HOST=proxy.host
 export PROXY_PORT=1234
 export IS_CCM_ENABLED=false
+export IS_CCM_V2_ENABLED=false
 
 date >> /tmp/time.txt
 
