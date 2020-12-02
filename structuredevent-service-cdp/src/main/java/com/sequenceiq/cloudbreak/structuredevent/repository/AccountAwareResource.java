@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.repository;
 
-public interface AccountAwareResource {
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+
+public interface AccountAwareResource extends AccountIdAwareResource {
 
     Long getId();
 
