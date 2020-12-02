@@ -36,10 +36,8 @@ public class CrnTest {
 
     @Test
     public void testBuilder() {
-        Crn crn = Crn.builder()
-            .setService(Crn.Service.IAM)
+        Crn crn = Crn.builder(CrnResourceDescriptor.USER)
             .setAccountId("accountId")
-            .setResourceType(Crn.ResourceType.USER)
             .setResource("userId")
             .build();
 
@@ -104,18 +102,14 @@ public class CrnTest {
 
     @Test
     public void testGetUserId() {
-        Crn crn = Crn.builder()
-            .setService(Crn.Service.IAM)
+        Crn crn = Crn.builder(CrnResourceDescriptor.USER)
             .setAccountId("accountId")
-            .setResourceType(Crn.ResourceType.USER)
             .setResource("userId")
             .build();
         assertEquals("userId", crn.getUserId());
 
-        crn = Crn.builder()
-            .setService(Crn.Service.IAM)
+        crn = Crn.builder(CrnResourceDescriptor.USER)
             .setAccountId("accountId")
-            .setResourceType(Crn.ResourceType.USER)
             .setResource("externalId/userId")
             .build();
         assertEquals("userId", crn.getUserId());

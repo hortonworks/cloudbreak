@@ -49,6 +49,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -506,11 +507,8 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetWhenEnvDefault() {
         String name = "cdp-default";
-        ImageCatalog actual = ThreadBasedUserCrnProvider.doAs(Crn.builder()
+        ImageCatalog actual = ThreadBasedUserCrnProvider.doAs(Crn.builder(CrnResourceDescriptor.USER)
                 .setAccountId("ACCOUNT_ID")
-                .setResourceType(Crn.ResourceType.USER)
-                .setService(Crn.Service.DATAHUB)
-                .setPartition(Crn.Partition.CDP)
                 .setResource("USER")
                 .build().toString(), () -> underTest.get(ORG_ID, name));
 

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
@@ -85,10 +86,8 @@ public class AccountTagService {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ACCOUNTTAG)
+        return Crn.builder(CrnResourceDescriptor.ACCOUNT_TAG)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.ACCOUNT_TAG)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

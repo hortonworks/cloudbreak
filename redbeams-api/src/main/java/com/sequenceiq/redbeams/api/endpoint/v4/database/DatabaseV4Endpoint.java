@@ -16,6 +16,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
@@ -48,7 +49,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.LIST, notes = DatabaseNotes.LIST,
             nickname = "listDatabases")
     DatabaseV4Responses list(
-        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
         @QueryParam("environmentCrn") String environmentCrn
     );
 
@@ -66,7 +67,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.GET_BY_CRN, notes = DatabaseNotes.GET_BY_CRN,
             nickname = "getDatabaseByCrn")
     DatabaseV4Response getByCrn(
-        @ValidCrn @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
+        @ValidCrn(resource = CrnResourceDescriptor.DATABASE) @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @GET
@@ -74,7 +75,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.GET_BY_NAME, notes = DatabaseNotes.GET_BY_NAME,
             nickname = "getDatabaseByName")
     DatabaseV4Response getByName(
-        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
         @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
@@ -84,7 +85,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_CRN, notes = DatabaseNotes.DELETE_BY_CRN,
             nickname = "deleteDatabaseByCrn")
     DatabaseV4Response deleteByCrn(
-        @ValidCrn @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
+        @ValidCrn(resource = CrnResourceDescriptor.DATABASE) @NotNull @ApiParam(DatabaseParamDescriptions.CRN) @PathParam("crn") String crn
     );
 
     @DELETE
@@ -92,7 +93,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_BY_NAME, notes = DatabaseNotes.DELETE_BY_NAME,
             nickname = "deleteDatabaseByName")
     DatabaseV4Response deleteByName(
-        @ValidCrn @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
+        @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseParamDescriptions.ENVIRONMENT_CRN, required = true)
         @QueryParam("environmentCrn") String environmentCrn,
         @ApiParam(DatabaseParamDescriptions.NAME) @PathParam("name") String name
     );
@@ -103,7 +104,7 @@ public interface DatabaseV4Endpoint {
     @ApiOperation(value = DatabaseOpDescription.DELETE_MULTIPLE_BY_CRN, notes = DatabaseNotes.DELETE_MULTIPLE_BY_CRN,
             consumes = MediaType.APPLICATION_JSON, nickname = "deleteMultipleDatabasesByCrn")
     DatabaseV4Responses deleteMultiple(
-        @ApiParam(DatabaseParamDescriptions.CRNS) Set<@ValidCrn String> crns
+        @ApiParam(DatabaseParamDescriptions.CRNS) @ValidCrn(resource = CrnResourceDescriptor.DATABASE) Set<String> crns
     );
 
     @POST

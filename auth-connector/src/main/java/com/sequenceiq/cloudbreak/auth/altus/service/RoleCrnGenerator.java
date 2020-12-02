@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
 public class RoleCrnGenerator {
 
@@ -27,23 +28,18 @@ public class RoleCrnGenerator {
     }
 
     public static Crn getResourceRoleCrn(String resourceRoleName) {
-        return getBaseIamCrnBuilder()
-                .setResourceType(Crn.ResourceType.RESOURCE_ROLE)
+        return Crn.builder(CrnResourceDescriptor.RESOURCE_ROLE)
+                .setOldPartition()
+                .setAccountId(ACCOUNT_IN_IAM_CRNS)
                 .setResource(resourceRoleName)
                 .build();
     }
 
     public static Crn getRoleCrn(String roleName) {
-        return getBaseIamCrnBuilder()
-                .setResourceType(Crn.ResourceType.ROLE)
+        return Crn.builder(CrnResourceDescriptor.ROLE)
+                .setOldPartition()
+                .setAccountId(ACCOUNT_IN_IAM_CRNS)
                 .setResource(roleName)
                 .build();
-    }
-
-    private static Crn.Builder getBaseIamCrnBuilder() {
-        return Crn.builder()
-                .setPartition(Crn.Partition.ALTUS)
-                .setAccountId(ACCOUNT_IN_IAM_CRNS)
-                .setService(Crn.Service.IAM);
     }
 }

@@ -26,6 +26,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -41,19 +42,15 @@ import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigServic
 @ExtendWith(MockitoExtension.class)
 class RedbeamsTerminationServiceTest {
 
-    private static final Crn SERVER_CRN = Crn.builder()
-            .setService(Crn.Service.IAM)
+    private static final Crn SERVER_CRN = Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
             .setAccountId("accountId")
-            .setResourceType(Crn.ResourceType.DATABASE_SERVER)
             .setResource("resource")
             .build();
 
     private static final String SERVER_CRN_STRING = SERVER_CRN.toString();
 
-    private static final Crn SERVER_2_CRN = Crn.builder()
-            .setService(Crn.Service.IAM)
+    private static final Crn SERVER_2_CRN = Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
             .setAccountId("accountId")
-            .setResourceType(Crn.ResourceType.DATABASE_SERVER)
             .setResource("resourceother")
             .build();
 

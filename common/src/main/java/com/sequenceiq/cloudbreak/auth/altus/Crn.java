@@ -573,7 +573,20 @@ public class Crn {
                 && Objects.equal(this.resource, other.resource);
     }
 
-    public static Builder builder() {
+    public static Crn copyWithDifferentAccountId(Crn base, String accountId) {
+        return new Crn(base.getPartition(),
+                base.getService(),
+                base.getRegion(),
+                accountId,
+                base.getResourceType(),
+                base.getResource());
+    }
+
+    public static Builder builder(CrnResourceDescriptor crnResourceDescriptor) {
+        return new Builder(crnResourceDescriptor);
+    }
+
+    static Builder builder() {
         return new Builder();
     }
 
@@ -591,23 +604,25 @@ public class Crn {
 
         private String resource;
 
-        public Builder setPartition(Partition partition) {
-            this.partition = checkNotNull(partition);
-            return this;
+        public Builder() {
         }
 
-        public Builder setService(Service service) {
-            this.service = checkNotNull(service);
+        public Builder(CrnResourceDescriptor crnResourceDescriptor) {
+            service = crnResourceDescriptor.getServiceType();
+            resourceType = crnResourceDescriptor.getResourceType();
+        }
+
+        /**
+         * @deprecated ALTUS was replaced by CDP and is kept here for backward compatibility reasons (e.g., dynamodb serialized CRNs).
+         */
+        @Deprecated
+        public Builder setOldPartition() {
+            this.partition = Partition.ALTUS;
             return this;
         }
 
         public Builder setAccountId(String accountId) {
             this.accountId = checkNotNull(accountId);
-            return this;
-        }
-
-        public Builder setResourceType(ResourceType resourceType) {
-            this.resourceType = checkNotNull(resourceType);
             return this;
         }
 
@@ -617,12 +632,29 @@ public class Crn {
         }
 
         public Crn build() {
+            checkNotNull(resourceType);
+            checkNotNull(service);
             return new Crn(partition,
                     service,
                     region,
                     accountId,
                     resourceType,
                     resource);
+        }
+
+        Builder setService(Service service) {
+            this.service = checkNotNull(service);
+            return this;
+        }
+
+        Builder setResourceType(ResourceType resourceType) {
+            this.resourceType = checkNotNull(resourceType);
+            return this;
+        }
+
+        private Builder setPartition(Partition partition) {
+            this.partition = partition;
+            return this;
         }
 
     }

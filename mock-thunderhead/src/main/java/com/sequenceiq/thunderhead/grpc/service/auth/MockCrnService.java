@@ -1,6 +1,6 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
-import static com.sequenceiq.cloudbreak.auth.InternalCrnBuilder.INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import org.slf4j.Logger;
@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.thunderhead.grpc.GrpcActorContext;
 
 import io.grpc.Status;
@@ -17,16 +18,9 @@ class MockCrnService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCrnService.class);
 
-    Crn createCrn(String baseCrn, Crn.ResourceType resourceType, String resource) {
-        Crn crn = Crn.fromString(baseCrn);
-        return createCrn(crn.getAccountId(), crn.getService(), resourceType, resource);
-    }
-
-    Crn createCrn(String accountId, Crn.Service service, Crn.ResourceType resourceType, String resource) {
-        return Crn.builder()
+    Crn createCrn(String accountId, CrnResourceDescriptor resourceDescriptor, String resource) {
+        return Crn.builder(resourceDescriptor)
                 .setAccountId(accountId)
-                .setService(service)
-                .setResourceType(resourceType)
                 .setResource(resource)
                 .build();
     }

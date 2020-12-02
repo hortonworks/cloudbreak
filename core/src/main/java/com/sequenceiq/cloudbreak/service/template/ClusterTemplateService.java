@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -411,10 +412,8 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     public String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.DATAHUB)
+        return Crn.builder(CrnResourceDescriptor.CLUSTER_DEF)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CLUSTER_DEFINITION)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

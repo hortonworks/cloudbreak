@@ -43,6 +43,7 @@ import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
@@ -387,12 +388,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-        imageCatalog.setResourceCrn(Crn.builder()
+        imageCatalog.setResourceCrn(Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
                 .setResource(CDP_DEFAULT_CATALOG_NAME)
-                .setPartition(Crn.Partition.CDP)
-                .setService(Crn.Service.DATAHUB)
                 .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
                 .build()
                 .toString());
         return imageCatalog;
@@ -402,12 +400,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
-        imageCatalog.setResourceCrn(Crn.builder()
+        imageCatalog.setResourceCrn(Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
                 .setResource(CLOUDBREAK_DEFAULT_CATALOG_NAME)
-                .setPartition(Crn.Partition.CDP)
-                .setService(Crn.Service.DATAHUB)
                 .setAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
                 .build()
                 .toString());
         return imageCatalog;
@@ -618,10 +613,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.DATAHUB)
+        return Crn.builder(CrnResourceDescriptor.IMAGE_CATALOG)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.IMAGE_CATALOG)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

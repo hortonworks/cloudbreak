@@ -1,7 +1,5 @@
 package com.sequenceiq.periscope.service;
 
-import static com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType.DATAHUB_AUTOSCALE_CONFIG;
-
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
@@ -172,10 +171,8 @@ public class AlertService {
     }
 
     private String createAlertCrn(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.AUTOSCALE)
+        return Crn.builder(CrnResourceDescriptor.ALERT)
                 .setAccountId(accountId)
-                .setResourceType(DATAHUB_AUTOSCALE_CONFIG)
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
     }

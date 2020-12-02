@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
@@ -57,7 +57,7 @@ public class KerberosConfigServiceTest {
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentCrn(ENVIRONMENT_ID);
         Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(crnService.createCrn(ACCOUNT_ID, Crn.ResourceType.KERBEROS)).thenReturn(RESOURCE_CRN);
+        Mockito.when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.KERBEROS)).thenReturn(RESOURCE_CRN);
         Mockito.when(kerberosConfigRepository.save(kerberosConfig)).thenReturn(kerberosConfig);
         // WHEN
         underTest.createKerberosConfig(kerberosConfig);

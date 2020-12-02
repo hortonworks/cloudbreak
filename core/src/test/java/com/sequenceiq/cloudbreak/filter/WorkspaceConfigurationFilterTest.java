@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -114,11 +115,9 @@ public class WorkspaceConfigurationFilterTest {
     }
 
     private CloudbreakUser createCbUserWithCrn() {
-        String userCrn = Crn.builder()
+        String userCrn = Crn.builder(CrnResourceDescriptor.USER)
                 .setAccountId("1")
                 .setResource("1")
-                .setResourceType(Crn.ResourceType.USER)
-                .setService(Crn.Service.IAM)
                 .build().toString();
         return new CloudbreakUser("userId", userCrn, "username", "email", "tenant");
     }

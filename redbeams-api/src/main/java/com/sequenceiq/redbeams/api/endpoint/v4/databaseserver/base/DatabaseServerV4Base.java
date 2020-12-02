@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidDatabaseVendor;
 import com.sequenceiq.redbeams.doc.ModelDescriptions.DatabaseServer;
@@ -45,7 +46,7 @@ public abstract class DatabaseServerV4Base implements Serializable {
     private String connectionDriver;
 
     @NotNull
-    @ValidCrn
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 

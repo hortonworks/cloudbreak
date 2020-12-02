@@ -14,6 +14,9 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -88,6 +91,38 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListed)
                 .when(environmentTestClient.delete())
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an available environment",
+            when = "a get and delete request is sent for the environment with invalid crn",
+            then = "requests should fail with validation error")
+    public void testGetAndDeleteEnvironmentWithInvalidCrn(MockedTestContext testContext) {
+        String invalidCrn = Crn.builder(CrnResourceDescriptor.DATALAKE).setResource("dl").setAccountId("acc").build().toString();
+        String otherInvalidCrn = Crn.builder(CrnResourceDescriptor.DATAHUB).setResource("dh").setAccountId("acc").build().toString();
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .getResponse().setCrn(invalidCrn);
+        testContext
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.describeByCrn())
+                .expect(BadRequestException.class,
+                        RunningParameter.expectedMessage(".*Crn provided: " +
+                                "crn:cdp:datalake:us-west-1:acc:datalake:dl has invalid resource type or service type. " +
+                                "Accepted service type / resource type pairs: [(]environments,environment[)].*")
+                                .withKey("EnvironmentGetByCrnAction"))
+                .when(environmentTestClient.deleteMultipleByCrns(invalidCrn, otherInvalidCrn))
+                .expect(BadRequestException.class,
+                        RunningParameter.expectedMessage(".*Crns provided: \\[crn:cdp:datalake:us-west-1:acc:datalake:dl," +
+                                "crn:cdp:datahub:us-west-1:acc:cluster:dh\\] have invalid resource type or service type. " +
+                                "Accepted service type / resource type pairs: [(]environments,environment[)].*")
+                                .withKey("EnvironmentDeleteMultipleByCrnsAction"))
                 .validate();
     }
 

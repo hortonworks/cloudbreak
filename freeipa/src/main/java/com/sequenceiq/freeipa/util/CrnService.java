@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
 @Component
 public class CrnService {
@@ -56,11 +57,9 @@ public class CrnService {
         return ThreadBasedUserCrnProvider.getUserCrn();
     }
 
-    public String createCrn(String accountId, Crn.ResourceType resourceType) {
-        return Crn.builder()
-                .setService(Crn.Service.FREEIPA)
+    public String createCrn(String accountId, CrnResourceDescriptor resourceDescriptor) {
+        return Crn.builder(resourceDescriptor)
                 .setAccountId(accountId)
-                .setResourceType(resourceType)
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
     }

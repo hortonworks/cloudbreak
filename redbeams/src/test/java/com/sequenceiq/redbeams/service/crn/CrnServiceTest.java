@@ -11,6 +11,7 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
@@ -21,10 +22,8 @@ public class CrnServiceTest {
 
     private static final String TEST_USER_ID = "bob";
 
-    private static final Crn CRN = Crn.builder()
-        .setService(Crn.Service.IAM)
+    private static final Crn CRN = Crn.builder(CrnResourceDescriptor.USER)
         .setAccountId(TEST_ACCOUNT_ID)
-        .setResourceType(Crn.ResourceType.USER)
         .setResource(TEST_USER_ID)
         .build();
 

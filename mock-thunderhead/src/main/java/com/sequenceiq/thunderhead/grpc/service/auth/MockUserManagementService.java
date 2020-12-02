@@ -131,7 +131,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
@@ -447,12 +447,12 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
         PolicyDefinition policyDefinition = PolicyDefinition.newBuilder().addStatement(policyStatement).build();
         Policy powerUserPolicy = Policy.newBuilder()
-                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, ResourceType.POLICY, "PowerUserPolicy").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, CrnResourceDescriptor.POLICY, "PowerUserPolicy").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .setPolicyDefinition(policyDefinition)
                 .build();
         Role powerUserRole = Role.newBuilder()
-                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, Crn.Service.IAM, ResourceType.ROLE, "PowerUser").toString())
+                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, CrnResourceDescriptor.ROLE, "PowerUser").toString())
                 .setCreationDateMs(CREATION_DATE_MS)
                 .addPolicy(powerUserPolicy)
                 .build();
@@ -531,11 +531,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     }
 
     private User createUser(String accountId, String userName) {
-        Crn actorCrn = Crn.safeFromString(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn());
-        String userCrn = Crn.builder()
-                .setService(actorCrn.getService())
+        String userCrn = Crn.builder(CrnResourceDescriptor.USER)
                 .setAccountId(accountId)
-                .setResourceType(actorCrn.getResourceType())
                 .setResource(userName)
                 .build().toString();
         return User.newBuilder()
@@ -567,7 +564,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                 crnString = machineUserIdOrCrn;
             } else {
                 userName = machineUserIdOrCrn;
-                Crn crn = mockCrnService.createCrn(accountId, Crn.Service.IAM, ResourceType.MACHINE_USER, userName);
+                Crn crn = mockCrnService.createCrn(accountId, CrnResourceDescriptor.MACHINE_USER, userName);
                 crnString = crn.toString();
             }
             responseObserver.onNext(
@@ -899,11 +896,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (sshPublicKey.isPresent()) {
             Crn actorCrn = Crn.safeFromString(request.getActorCrn());
             builder.addSshPublicKey(SshPublicKey.newBuilder(sshPublicKey.get())
-                    .setCrn(Crn.builder()
+                    .setCrn(Crn.builder(CrnResourceDescriptor.PUBLIC_KEY)
                             .setAccountId(actorCrn.getAccountId())
-                            .setPartition(actorCrn.getPartition())
-                            .setService(Crn.Service.IAM)
-                            .setResourceType(ResourceType.PUBLIC_KEY)
                             .setResource(UUID.randomUUID().toString())
                             .build()
                             .toString())
@@ -1024,15 +1018,15 @@ public class MockUserManagementService extends UserManagementImplBase {
     private ResourceAssignee createResourceAssignee(String resourceCrn) {
         return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, CrnResourceDescriptor.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 
     private ResourceAssignment createResourceAssigment(String assigneeCrn) {
-        String resourceCrn = mockCrnService.createCrn(assigneeCrn, ResourceType.WORKSPACE, Crn.fromString(assigneeCrn).getAccountId()).toString();
+        String resourceCrn = mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.CREDENTIAL, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, ResourceType.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.RESOURCE_ROLE, "WorkspaceManager").toString())
                 .build();
     }
 

@@ -14,6 +14,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -150,10 +151,8 @@ public class AccountTelemetryService {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ACCOUNTTELEMETRY)
+        return Crn.builder(CrnResourceDescriptor.ACCOUNT_TELEMETRY)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.ACCOUNT_TELEMETRY)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

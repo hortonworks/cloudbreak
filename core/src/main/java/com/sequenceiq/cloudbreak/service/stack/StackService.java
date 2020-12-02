@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
@@ -793,10 +794,8 @@ public class StackService implements ResourceIdProvider {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.DATAHUB)
+        return Crn.builder(CrnResourceDescriptor.DATAHUB)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.CLUSTER)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

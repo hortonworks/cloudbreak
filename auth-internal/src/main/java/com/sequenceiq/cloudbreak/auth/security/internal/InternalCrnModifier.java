@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 
 @Service
 public class InternalCrnModifier {
@@ -63,12 +63,7 @@ public class InternalCrnModifier {
 
     private String getAccountIdModifiedCrn(String userCrnString, String accountId) {
         Crn userCrn = Crn.fromString(userCrnString);
-        Crn newUserCrn = Crn.builder()
-                .setService(userCrn.getService())
-                .setAccountId(accountId)
-                .setResourceType(userCrn.getResourceType())
-                .setResource(userCrn.getResource())
-                .build();
+        Crn newUserCrn = Crn.copyWithDifferentAccountId(userCrn, accountId);
         LOGGER.debug("Changing internal CRN to {}", newUserCrn);
         createNewUser(newUserCrn);
         return newUserCrn.toString();

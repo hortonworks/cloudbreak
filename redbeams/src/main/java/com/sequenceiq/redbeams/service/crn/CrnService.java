@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -37,30 +38,28 @@ public class CrnService {
     }
 
     public Crn createCrn(DatabaseConfig resource) {
-        return createCrn(resource, Crn.ResourceType.DATABASE);
+        return createCrn(resource, CrnResourceDescriptor.DATABASE);
     }
 
     public Crn createCrn(DatabaseServerConfig resource) {
-        return createCrn(resource, Crn.ResourceType.DATABASE_SERVER);
+        return createCrn(resource, CrnResourceDescriptor.DATABASE_SERVER);
     }
 
     public Crn createCrn(DBStack resource) {
         // We want this resource to be DATABASE_SERVER as well, since this resource will end up
         // being attached to a database server.
-        return createCrn(resource, Crn.ResourceType.DATABASE_SERVER);
+        return createCrn(resource, CrnResourceDescriptor.DATABASE_SERVER);
     }
 
-    private Crn createCrn(Object resource, Crn.ResourceType resourceType) {
+    private Crn createCrn(Object resource, CrnResourceDescriptor resourceDescriptor) {
         if (resource == null) {
             throw new IllegalArgumentException("Cannot create CRN for null resource");
         }
 
         String resourceId = uuidGeneratorService.randomUuid();
 
-        return Crn.builder()
-                .setService(Crn.Service.REDBEAMS)
+        return Crn.builder(resourceDescriptor)
                 .setAccountId(getCurrentAccountId())
-                .setResourceType(resourceType)
                 .setResource(resourceId)
                 .build();
     }

@@ -29,6 +29,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -162,11 +163,8 @@ public class RecipeServiceTest {
         recipe.setContent("bnllaGVoZSwgbmEgZXogZWd5IGZhc3phIGJhc2U2NCBjdWNj");
         recipe.setId(1L);
         recipe.setArchived(false);
-        recipe.setResourceCrn(Crn.builder()
-                .setPartition(Crn.Partition.CDP)
-                .setService(Crn.Service.ENVIRONMENTS)
+        recipe.setResourceCrn(Crn.builder(CrnResourceDescriptor.RECIPE)
                 .setAccountId("account")
-                .setResourceType(Crn.ResourceType.RECIPE)
                 .setResource("name")
                 .build().toString());
         recipe.setWorkspace(getWorkspace());

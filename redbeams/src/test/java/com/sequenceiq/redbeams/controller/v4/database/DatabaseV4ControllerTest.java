@@ -15,6 +15,7 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.DatabaseV4Responses;
@@ -26,10 +27,8 @@ import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
 public class DatabaseV4ControllerTest {
 
-    private static final Crn CRN = Crn.builder()
-            .setService(Crn.Service.IAM)
+    private static final Crn CRN = Crn.builder(CrnResourceDescriptor.DATABASE)
             .setAccountId("account")
-            .setResourceType(Crn.ResourceType.DATABASE)
             .setResource("resource")
             .build();
 

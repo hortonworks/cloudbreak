@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -362,9 +363,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
@@ -399,9 +398,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
@@ -429,9 +426,7 @@ class SdxServiceTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());
-        detailedEnvironmentResponse.setCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());
@@ -840,9 +835,7 @@ class SdxServiceTest {
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
         detailedEnvironmentResponse.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
-        detailedEnvironmentResponse.setCrn(Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
-                .setResourceType(Crn.ResourceType.ENVIRONMENT)
+        detailedEnvironmentResponse.setCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                 .setResource(UUID.randomUUID().toString())
                 .setAccountId(UUID.randomUUID().toString())
                 .build().toString());

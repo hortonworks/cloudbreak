@@ -13,12 +13,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.Crn.ResourceType;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -123,10 +123,8 @@ public class NetworkService {
     }
 
     private String createCRN(@Nonnull String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
+        return Crn.builder(CrnResourceDescriptor.NETWORK)
                 .setAccountId(accountId)
-                .setResourceType(ResourceType.NETWORK)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

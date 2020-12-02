@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
@@ -96,10 +97,8 @@ public class ProxyConfigService  {
     }
 
     private String createCRN(String accountId) {
-        return Crn.builder()
-                .setService(Crn.Service.ENVIRONMENTS)
+        return Crn.builder(CrnResourceDescriptor.PROXY)
                 .setAccountId(accountId)
-                .setResourceType(Crn.ResourceType.PROXY_CONIFG)
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();

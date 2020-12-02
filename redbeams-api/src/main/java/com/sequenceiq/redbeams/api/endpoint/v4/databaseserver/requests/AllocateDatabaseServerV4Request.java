@@ -6,6 +6,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -34,12 +35,12 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     private String name;
 
     @NotNull
-    @ValidCrn
+    @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @ApiModelProperty(value = DatabaseServer.ENVIRONMENT_CRN, required = true)
     private String environmentCrn;
 
     @NotNull
-    @ValidCrn
+    @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
     @ApiModelProperty(value = DatabaseServer.CLUSTER_CRN, required = true)
     private String clusterCrn;
 
