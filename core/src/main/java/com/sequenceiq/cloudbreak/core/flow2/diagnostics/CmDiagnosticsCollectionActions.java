@@ -131,9 +131,11 @@ public class CmDiagnosticsCollectionActions {
                 String storageLocation;
                 if (StringUtils.isNotBlank(parameters.getS3Location())) {
                     storageLocation = "s3://" + Paths.get(parameters.getS3Bucket(), parameters.getS3Location()).toString();
-                } else {
+                } else if (StringUtils.isNotBlank(parameters.getAdlsv2StorageLocation())) {
                     storageLocation = "abfs://" + Paths.get(parameters.getAdlsv2StorageContainer(),
                             parameters.getAdlsv2StorageLocation()).toString();
+                } else {
+                    storageLocation = "gs://" + Paths.get(parameters.getGcsBucket(), parameters.getGcsLocation()).toString();
                 }
                 return storageLocation;
             }

@@ -33,6 +33,7 @@ import com.sequenceiq.common.model.diagnostics.AwsDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.CloudStorageDiagnosticsParameters;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
+import com.sequenceiq.common.model.diagnostics.GcsDiagnosticsParameters;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -147,10 +148,13 @@ public class DiagnosticsCollectionActions {
                 if (csDiagnosticsParams instanceof AwsDiagnosticParameters) {
                     AwsDiagnosticParameters awsParameters = (AwsDiagnosticParameters) csDiagnosticsParams;
                     storageLocation = "s3://" + Paths.get(awsParameters.getS3Bucket(), awsParameters.getS3Location()).toString();
-                } else {
+                } else if (csDiagnosticsParams instanceof AzureDiagnosticParameters) {
                     AzureDiagnosticParameters azureParameters = (AzureDiagnosticParameters) csDiagnosticsParams;
                     storageLocation = "abfs://" + Paths.get(azureParameters.getAdlsv2StorageContainer(),
                             azureParameters.getAdlsv2StorageLocation()).toString();
+                } else {
+                    GcsDiagnosticsParameters gcsParameters = (GcsDiagnosticsParameters) csDiagnosticsParams;
+                    storageLocation = "gcs://" + Paths.get(gcsParameters.getBucket(), gcsParameters.getGcsLocation()).toString();
                 }
                 return storageLocation;
             }

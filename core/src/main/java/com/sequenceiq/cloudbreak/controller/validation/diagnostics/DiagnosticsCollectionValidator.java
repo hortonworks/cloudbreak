@@ -50,9 +50,10 @@ public class DiagnosticsCollectionValidator {
         if (telemetry.getLogging() == null) {
             validationBuilder.error("Cloud storage logging is disabled for this cluster");
         } else if (telemetry.getLogging().getS3() == null
-                && telemetry.getLogging().getAdlsGen2() == null) {
+                && telemetry.getLogging().getAdlsGen2() == null
+                && telemetry.getLogging().getGcs() == null) {
             validationBuilder.error(
-                    String.format("S3 or ABFS cloud storage logging setting should be enabled for stack '%s'.", stackCrn));
+                    String.format("S3, ABFS or GCS cloud storage logging setting should be enabled for stack '%s'.", stackCrn));
         }
     }
 }
