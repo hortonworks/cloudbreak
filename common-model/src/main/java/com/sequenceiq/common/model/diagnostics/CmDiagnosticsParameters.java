@@ -50,6 +50,10 @@ public class CmDiagnosticsParameters implements Serializable {
 
     private String adlsv2StorageLocation;
 
+    private String gcsBucket;
+
+    private String gcsLocation;
+
     private CmDiagnosticsParameters() {
     }
 
@@ -173,6 +177,22 @@ public class CmDiagnosticsParameters implements Serializable {
         this.adlsv2StorageLocation = adlsv2StorageLocation;
     }
 
+    public String getGcsBucket() {
+        return gcsBucket;
+    }
+
+    public void setGcsBucket(String gcsBucket) {
+        this.gcsBucket = gcsBucket;
+    }
+
+    public String getGcsLocation() {
+        return gcsLocation;
+    }
+
+    public void setGcsLocation(String gcsLocation) {
+        this.gcsLocation = gcsLocation;
+    }
+
     public Boolean getUpdatePackage() {
         return updatePackage;
     }
@@ -201,6 +221,8 @@ public class CmDiagnosticsParameters implements Serializable {
         parameters.put("adlsv2_storage_account", adlsv2StorageAccount);
         parameters.put("adlsv2_storage_container", adlsv2StorageContainer);
         parameters.put("adlsv2_storage_location", adlsv2StorageLocation);
+        parameters.put("gcs_bucket", gcsBucket);
+        parameters.put("gcs_location", gcsLocation);
         Map<String, Object> fileCollector = new HashMap<>();
         fileCollector.put(FILECOLLECTOR_ROOT, parameters);
         return fileCollector;
@@ -291,6 +313,16 @@ public class CmDiagnosticsParameters implements Serializable {
 
         public CmDiagnosticsParametersBuilder withAdlsv2StorageLocation(String adlsv2StorageLocation) {
             this.diagnosticParameters.setAdlsv2StorageLocation(adlsv2StorageLocation);
+            return this;
+        }
+
+        public CmDiagnosticsParametersBuilder withGcsBucket(String gcsBucket) {
+            this.diagnosticParameters.setGcsBucket(gcsBucket);
+            return this;
+        }
+
+        public CmDiagnosticsParametersBuilder withGcsLocation(String gcsLocation) {
+            this.diagnosticParameters.setGcsLocation(gcsLocation);
             return this;
         }
 

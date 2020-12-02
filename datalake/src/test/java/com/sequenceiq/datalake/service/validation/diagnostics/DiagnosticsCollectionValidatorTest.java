@@ -53,7 +53,7 @@ class DiagnosticsCollectionValidatorTest {
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
-        assertTrue(thrown.getMessage().contains("S3 or ABFS cloud storage logging setting should be enabled for stack"));
+        assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for stack"));
     }
 
     @Test

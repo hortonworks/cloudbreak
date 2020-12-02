@@ -6,6 +6,8 @@
 {% set adlsv2_storage_account = salt['pillar.get']('filecollector:adlsv2_storage_account') %}
 {% set adlsv2_storage_container = salt['pillar.get']('filecollector:adlsv2_storage_container') %}
 {% set adlsv2_storage_location = salt['pillar.get']('filecollector:adlsv2_storage_location') %}
+{% set gcs_bucket = salt['pillar.get']('filecollector:gcs_bucket') %}
+{% set gcs_location = salt['pillar.get']('filecollector:gcs_location') %}
 {% set account_id = salt['pillar.get']('filecollector:accountId') %}
 {% set destination = salt['pillar.get']('filecollector:destination') %}
 {% set issue = salt['pillar.get']('filecollector:issue') %}
@@ -39,6 +41,9 @@
 {% elif adlsv2_storage_location %}
   {% set cloud_storage_upload_params = "abfs upload -p '" + compressed_file_pattern + "' --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
   {% set test_cloud_storage_upload_params = "abfs upload -p /tmp/.test_cloud_storage_upload.txt --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
+{% elif gcs_location %}
+  {% set cloud_storage_upload_params = "gcs upload -p '" + compressed_file_pattern + "' --location " + gcs_location + " --bucket " + gcs_bucket %}
+  {% set test_cloud_storage_upload_params = "gcs upload -p /tmp/.test_cloud_storage_upload.txt --location " + gcs_location + " --bucket " + gcs_bucket %}
 {% endif %}
 
 {% set skip_validation = False %}

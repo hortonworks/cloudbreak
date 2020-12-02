@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
@@ -20,6 +22,8 @@ import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters.AzureDiagnosticParametersBuilder;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters.DiagnosticParametersBuilder;
+import com.sequenceiq.common.model.diagnostics.GcsDiagnosticsParameters;
+import com.sequenceiq.common.model.diagnostics.GcsDiagnosticsParameters.GcsDiagnosticParametersBuilder;
 
 @Component
 public class DiagnosticsDataToParameterConverter {
@@ -31,6 +35,9 @@ public class DiagnosticsDataToParameterConverter {
 
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
+
+    @Inject
+    private GcsConfigGenerator gcsConfigGenerator;
 
     public DiagnosticParameters convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry,
             String clusterType, String clusterVersion, String accountId, String region) {
@@ -50,6 +57,12 @@ public class DiagnosticsDataToParameterConverter {
             azureBuilder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
             azureBuilder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
             builder.withCloudStorageDiagnosticsParameters(azureBuilder.build());
+        } else if (logging.getGcs() != null) {
+            GcsDiagnosticParametersBuilder gcsBuilder = GcsDiagnosticsParameters.builder();
+            GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
+            gcsBuilder.withBucket(gcsConfig.getBucket());
+            gcsBuilder.withGcsLocation(Paths.get(gcsConfig.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+            builder.withCloudStorageDiagnosticsParameters(gcsBuilder.build());
         }
         builder.withDestination(request.getDestination());
         builder.withDescription(request.getDescription());

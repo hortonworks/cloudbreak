@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
+import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
@@ -26,6 +28,9 @@ public class CmDiagnosticsDataToParameterConverter {
     @Inject
     private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
 
+    @Inject
+    private GcsConfigGenerator gcsConfigGenerator;
+
     public CmDiagnosticsParameters convert(BaseCmDiagnosticsCollectionRequest request,
             Telemetry telemetry, String clusterName, String region) {
         Logging logging = telemetry.getLogging();
@@ -40,6 +45,10 @@ public class CmDiagnosticsDataToParameterConverter {
             builder.withAdlsv2StorageAccount(adlsGen2Config.getAccount());
             builder.withAdlsv2StorageContainer(adlsGen2Config.getFileSystem());
             builder.withAdlsv2StorageLocation(Paths.get(adlsGen2Config.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
+        } else if (logging.getGcs() != null) {
+            GcsConfig gcsConfig = gcsConfigGenerator.generateStorageConfig(logging.getStorageLocation());
+            builder.withGcsBucket(gcsConfig.getBucket());
+            builder.withGcsLocation(Paths.get(gcsConfig.getFolderPrefix(), DIAGNOSTICS_SUFFIX_PATH).toString());
         }
         builder.withComments(request.getComments())
                 .withDestination(request.getDestination())
