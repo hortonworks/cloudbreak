@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
+import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
@@ -169,6 +170,114 @@ public class CloudStorageManifesterTest {
                 .filter(r -> r.getType().equals(CloudIdentityType.LOG))
                 .collect(Collectors.toSet()).size());
         assertEquals("logprofile", cloudStorageConfigReq.getIdentities().get(0).getS3().getInstanceProfile());
+    }
+
+    @Test
+    public void whenAzureNotEvenConfiguredWithManagedIdentityShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("abfs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
+        cloudStorageRequest.setAdlsGen2(null);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
+    }
+
+    @Test
+    public void whenAzureConfiguredWithManagedIdentityShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("abfs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
+        AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2.setManagedIdentity("managedidentity");
+        cloudStorageRequest.setAdlsGen2(adlsGen2);
+
+        underTest.validateCloudStorage("AZURE", cloudStorageRequest);
+    }
+
+    @Test
+    public void whenAzureConfiguredWithoutManagedIdentityShouldThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("abfs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
+        AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
+        adlsGen2.setManagedIdentity(null);
+        cloudStorageRequest.setAdlsGen2(adlsGen2);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
+    }
+
+    @Test
+    public void whenAwsNotEvenConfiguredWithRoleShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
+        cloudStorageRequest.setS3(null);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
+    }
+
+    @Test
+    public void whenAwsConfiguredWithRoleShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
+        S3CloudStorageV1Parameters s3 = new S3CloudStorageV1Parameters();
+        s3.setInstanceProfile("role");
+        cloudStorageRequest.setS3(s3);
+
+        underTest.validateCloudStorage("AWS", cloudStorageRequest);
+    }
+
+    @Test
+    public void whenAwsConfiguredWithoutRoleShouldThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("s3a://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
+        S3CloudStorageV1Parameters s3 = new S3CloudStorageV1Parameters();
+        s3.setInstanceProfile(null);
+        cloudStorageRequest.setS3(s3);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
+    }
+
+    @Test
+    public void whenGcsNotEvenConfiguredWithServiceAccountShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("gs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
+        cloudStorageRequest.setGcs(null);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
+    }
+
+    @Test
+    public void whenGcsConfiguredWithServiceAccountShouldNotThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("gs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
+        GcsCloudStorageV1Parameters gcs = new GcsCloudStorageV1Parameters();
+        gcs.setServiceAccountEmail("mail");
+        cloudStorageRequest.setGcs(gcs);
+
+        underTest.validateCloudStorage("GCP", cloudStorageRequest);
+    }
+
+    @Test
+    public void whenGcsConfiguredWithoutRoleShouldThrowException() {
+        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
+        cloudStorageRequest.setBaseLocation("gs://example-path");
+        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
+        GcsCloudStorageV1Parameters gcs = new GcsCloudStorageV1Parameters();
+        gcs.setServiceAccountEmail(null);
+        cloudStorageRequest.setGcs(gcs);
+
+        Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
     }
 
     @Test
