@@ -4,11 +4,14 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterT
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired.OPTIONAL;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
+import org.testng.asserts.SoftAssert;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
@@ -57,6 +60,26 @@ public class ClusterTemplateTestAssertion {
                 throw new IllegalArgumentException(String
                         .format("Mismatch status result, USER_MANAGED expected but got %s", clusterTemplateV4Response.getStatus()));
             }
+
+            List<InstanceGroupV1Request> listOfInstanceGroupFromResponse = new ArrayList<>(clusterTemplateV4Response.getDistroXTemplate().getInstanceGroups());
+            List<InstanceGroupV1Request> listOfInstanceGroupFromRequest = new ArrayList<>(entity.getRequest().getDistroXTemplate().getInstanceGroups());
+            listOfInstanceGroupFromResponse.sort((ig1, ig2) -> ig1.getName().compareTo(ig1.getName()));
+            listOfInstanceGroupFromRequest.sort((ig1, ig2) -> ig1.getName().compareTo(ig1.getName()));
+
+            SoftAssert igAssert = new SoftAssert();
+            IntStream.range(0, listOfInstanceGroupFromResponse.size()).forEach(index -> {
+                InstanceGroupV1Request igFromRequest = listOfInstanceGroupFromRequest.get(index);
+                InstanceGroupV1Request igFromResponse = listOfInstanceGroupFromResponse.get(index);
+                boolean nameEquals = igFromRequest.getName().equals(igFromResponse.getName());
+                igAssert.assertTrue(nameEquals, "request and response instancegroup name should equal. request name: "
+                        + igFromRequest + "response name: " + igFromResponse);
+                if (nameEquals) {
+                    igAssert.assertTrue(igFromRequest.getNodeCount() == igFromResponse.getNodeCount(),
+                            "request and response instancegroup nodeCount should equal but request was " + igFromRequest.getNodeCount()
+                                    + " response: " + igFromResponse.getNodeCount());
+                }
+            });
+            igAssert.assertAll();
 
             return entity;
         };

@@ -141,22 +141,22 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
     private List<InstanceGroupV4Request> getInstanceGroups(Stack stack) {
         List<InstanceGroupV4Request> ret = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            InstanceGroupV4Request instanceGroupV2Request = getConversionService().convert(instanceGroup, InstanceGroupV4Request.class);
-            collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupV2Request);
-            ret.add(instanceGroupV2Request);
+            InstanceGroupV4Request instanceGroupV4Request = getConversionService().convert(instanceGroup, InstanceGroupV4Request.class);
+            collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupV4Request);
+            ret.add(instanceGroupV4Request);
         }
         return ret;
     }
 
-    private void collectInformationsFromActualHostgroup(Cluster cluster, InstanceGroup instanceGroup, InstanceGroupV4Request instanceGroupV2Request) {
+    private void collectInformationsFromActualHostgroup(Cluster cluster, InstanceGroup instanceGroup, InstanceGroupV4Request instanceGroupV4Request) {
         if (cluster != null && cluster.getHostGroups() != null) {
             cluster.getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
                     .findFirst()
                     .ifPresent(hostGroup -> {
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
-                        instanceGroupV2Request.setRecipeNames(recipeNames);
-                        instanceGroupV2Request.setRecoveryMode(hostGroup.getRecoveryMode());
+                        instanceGroupV4Request.setRecipeNames(recipeNames);
+                        instanceGroupV4Request.setRecoveryMode(hostGroup.getRecoveryMode());
                     });
         }
     }
