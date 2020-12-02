@@ -273,6 +273,7 @@ public class TelemetryConverter {
             logging.setStorageLocation(loggingRequest.getStorageLocation());
             logging.setS3(loggingRequest.getS3());
             logging.setAdlsGen2(loggingRequest.getAdlsGen2());
+            logging.setGcs(loggingRequest.getGcs());
             logging.setCloudwatch(CloudwatchParams.copy(loggingRequest.getCloudwatch()));
         }
         return logging;
@@ -338,6 +339,7 @@ public class TelemetryConverter {
             loggingRequest.setStorageLocation(loggingResponse.getStorageLocation());
             loggingRequest.setS3(loggingResponse.getS3());
             loggingRequest.setAdlsGen2(loggingResponse.getAdlsGen2());
+            loggingRequest.setGcs(loggingResponse.getGcs());
             loggingRequest.setCloudwatch(loggingResponse.getCloudwatch());
         }
         return loggingRequest;
