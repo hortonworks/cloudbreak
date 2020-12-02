@@ -13,7 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameterConstants;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -38,7 +43,7 @@ public class UserDataBuilder {
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     public Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmParameters ccmParameters, ProxyConfig proxyConfig) {
+            PlatformParameters parameters, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmParameters, ProxyConfig proxyConfig) {
         Map<InstanceGroupType, String> result = new EnumMap<>(InstanceGroupType.class);
         for (InstanceGroupType type : InstanceGroupType.values()) {
             String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters, proxyConfig);
@@ -49,7 +54,7 @@ public class UserDataBuilder {
     }
 
     private String build(InstanceGroupType type, Platform cloudPlatform, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, String saltBootPassword, String cbCert, CcmParameters ccmParameters, ProxyConfig proxyConfig) {
+            PlatformParameters params, String saltBootPassword, String cbCert, CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -61,9 +66,20 @@ public class UserDataBuilder {
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         model.put("cbCert", cbCert);
-        CcmParameters.addToTemplateModel(type, ccmParameters, model);
+        extendModelWithCcmConnectivity(type, ccmConnectivityParameters, model);
         extendModelWithProxyParams(type, proxyConfig, model);
         return build(model);
+    }
+
+    private void extendModelWithCcmConnectivity(InstanceGroupType type, CcmConnectivityParameters ccmConnectivityParameters, Map<String, Object> model) {
+        if (CcmConnectivityMode.CCMV1.equals(ccmConnectivityParameters.getConnectivityMode())) {
+            CcmParameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmParameters(), model);
+        } else if (CcmConnectivityMode.CCMV2.equals(ccmConnectivityParameters.getConnectivityMode())) {
+            CcmV2Parameters.addToTemplateModel(type, ccmConnectivityParameters.getCcmV2Parameters(), model);
+        } else {
+            model.put(CcmParameterConstants.CCM_ENABLED_KEY, Boolean.FALSE);
+            model.put(CcmV2ParameterConstants.CCM_V2_ENABLED_KEY, Boolean.FALSE);
+        }
     }
 
     private void extendModelWithProxyParams(InstanceGroupType type, ProxyConfig proxyConfig, Map<String, Object> model) {

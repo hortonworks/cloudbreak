@@ -200,6 +200,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String minaSshdServiceId;
 
+    private String ccmV2AgentCrn;
+
     @Convert(converter = DatabaseAvailabilityTypeConverter.class)
     private DatabaseAvailabilityType externalDatabaseCreationType;
 
@@ -579,6 +581,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return metaData.orElse(null);
     }
 
+    public Optional<InstanceGroup> getGatewayHostGroup() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .findFirst();
+    }
+
     public Network getNetwork() {
         return network;
     }
@@ -828,5 +836,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return loadBalancers.stream()
             .flatMap(loadBalancer -> loadBalancer.getTargetGroups().stream())
             .collect(Collectors.toList());
+    }
+
+    public String getCcmV2AgentCrn() {
+        return ccmV2AgentCrn;
+    }
+
+    public void setCcmV2AgentCrn(String ccmV2AgentCrn) {
+        this.ccmV2AgentCrn = ccmV2AgentCrn;
     }
 }

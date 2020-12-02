@@ -35,3 +35,4 @@ auth:
     datahub.runtime.upgrade.enable: true
     embedded.database.on.attached.disk.enable: true
     datalake.loadbalancer.enable: false
+    ccmv2.enable: false

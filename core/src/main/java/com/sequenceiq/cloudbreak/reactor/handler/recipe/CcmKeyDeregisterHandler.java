@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
+import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -34,24 +35,30 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
     @Inject
     private CcmResourceTerminationListener ccmResourceTerminationListener;
 
+    @Inject
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
     @Override
     public void accept(Event<CcmKeyDeregisterRequest> requestEvent) {
         CcmKeyDeregisterRequest request = requestEvent.getData();
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            if (Boolean.TRUE.equals(request.getUseCcm())) {
-                LOGGER.debug("De-registering key from CCM. Cluster CRN: {}",
-                        stack.getResourceCrn());
-                try {
+            try {
+                if (request.getTunnel().useCcmV1()) {
+                    LOGGER.debug("De-registering MinaSshdServiceId '{}' from CCM. Cluster CRN: {}", stack.getMinaSshdServiceId(), stack.getResourceCrn());
                     ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
                             stack.getMinaSshdServiceId());
-                } catch (Exception ex) {
-                    LOGGER.warn("CCM key deregistration failed", ex);
+                    LOGGER.debug("De-registered MinaSshdServiceId '{}' from CCM. Cluster CRN: {}", stack.getMinaSshdServiceId(), stack.getResourceCrn());
+                } else if (request.getTunnel().useCcmV2()) {
+                    LOGGER.debug("De-registering CcmV2AgentCrn '{}' from CCM. Cluster CRN: {}", stack.getCcmV2AgentCrn(), stack.getResourceCrn());
+                    ccmV2AgentTerminationListener.deregisterInvertingProxyAgent(stack.getCcmV2AgentCrn());
+                    LOGGER.debug("De-registered CcmV2AgentCrn '{}' from CCM. Cluster CRN: {}", stack.getCcmV2AgentCrn(), stack.getResourceCrn());
+                } else {
+                    LOGGER.debug("CCM is DISABLED, skipping de-registering of key from CCM. Cluster CRN: {}", stack.getResourceCrn());
                 }
-            } else {
-                LOGGER.info("CCM is DISABLED, skipping de-registering of key from CCM. Cluster CRN: {}",
-                        stack.getResourceCrn());
+            } catch (Exception ex) {
+                LOGGER.warn("CCM key deregistration failed", ex);
             }
             result = new CcmKeyDeregisterSuccess(stack.getId());
         } catch (Exception ex) {

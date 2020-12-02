@@ -1,0 +1,107 @@
+syntax = "proto3";
+
+package clusterconnectivitymanagementv2;
+
+option java_package = "com.cloudera.thunderhead.service.clusterconnectivitymanagementv2";
+option java_outer_classname = "ClusterConnectivityManagementV2Proto";
+
+import "version.proto";
+import "options.proto";
+
+// ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
+service ClusterConnectivityManagementV2 {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+  // CreateOrGetInvertingProxy will create new deployment If it is not already present.
+  // It also polls for the status and updates the status accordingly.
+  rpc CreateOrGetInvertingProxy(CreateOrGetInvertingProxyRequest)
+    returns (CreateOrGetInvertingProxyResponse) {}
+
+  // RemoveInvertingProxy will remove inverting-proxy deployment.
+  // Mainly used for reaper process.
+  rpc RemoveInvertingProxy(RemoveInvertingProxyRequest)
+    returns (RemoveInvertingProxyResponse) {}
+
+  // RegisterAgent for generating and registering agent key-cert pair.
+  rpc RegisterAgent(RegisterAgentRequest)
+    returns (RegisterAgentResponse) {}
+
+  // UnregisterAgent for removing agent key-cert pair while environment deletion.
+  rpc UnregisterAgent(UnregisterAgentRequest)
+    returns (UnregisterAgentResponse) {}
+
+}
+
+message CreateOrGetInvertingProxyRequest {
+  // AccountID for which inverting-proxy should be provisioned.
+  string accountId = 1;
+}
+
+message CreateOrGetInvertingProxyResponse {
+  // Inverting-proxy with required fields.
+  InvertingProxy invertingProxy = 1;
+}
+
+message RemoveInvertingProxyRequest {
+  // AccountID for which inverting-proxy should be deleted.
+  string accountId = 1;
+}
+
+message RemoveInvertingProxyResponse {}
+
+message RegisterAgentRequest {
+  // AccountID for which agent cert-key pair should be registered.
+  string accountId = 1;
+  // Domain name of the workload cluster needs to be provided by provisioner services(e.g. CB)
+  // Certificate will be created for this domain name.
+  string domainName = 2;
+  // Key ID to identify the cluster uniquely.
+  // This will be used to encipher private key.
+  string keyId = 3;
+}
+
+message RegisterAgentResponse {
+  //Inverting proxy agent with required fields.
+  InvertingProxyAgent invertingProxyAgent = 1;
+}
+
+message UnregisterAgentRequest {
+  // Unique identifier for each agent
+  string agentCrn = 1;
+}
+
+message UnregisterAgentResponse {}
+
+message InvertingProxy {
+  enum Status {
+    // Inverting Proxy enters this state as the first step of the creating
+    // deployment. This is a transitory state.
+    CREATING = 0;
+    // Inverting Proxy enters this state when it is ready to accept requests
+    READY = 1;
+    // Inverting Proxy enters this state after a failure of create or
+    // terminate.
+    FAILED = 2;
+  }
+  // InvertingProxyTransitions captures the transition logic described here.
+  // This returns the status of the inverting proxy deployment
+  Status status = 1;
+  // This is the host name where an agent can reach the inverting proxy running control plane.
+  string hostname = 2;
+  // User friendly message explaining why inverting proxy is in failed status
+  // This is not sent if the inverting proxy is created and is ready to accept requests
+  string causeOfFailure = 3;
+  // Certificate of inverting-proxy that needs to be passed to agent.
+  string certificate = 4 [(options.FieldExtension.skipLogging) = true];
+}
+
+message InvertingProxyAgent {
+  // Unique identifier for each agent
+  string agentCrn = 1;
+  // Enciphered Generated key for the agent
+  string encipheredPrivateKey = 2 [(options.FieldExtension.skipLogging) = true];
+  // Generated cert for the agent
+  string certificate = 3 [(options.FieldExtension.skipLogging) = true];
+}

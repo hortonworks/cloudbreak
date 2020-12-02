@@ -17,6 +17,7 @@ export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
 export IS_PROXY_ENABLED=false
 export IS_CCM_ENABLED=false
+export IS_CCM_V2_ENABLED=false
 
 date >> /tmp/time.txt
 

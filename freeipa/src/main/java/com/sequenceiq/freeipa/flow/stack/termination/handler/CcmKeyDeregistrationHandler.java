@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
+import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -27,21 +28,27 @@ public class CcmKeyDeregistrationHandler implements EventHandler<CcmKeyDeregistr
     @Inject
     private EventBus eventBus;
 
+    @Inject
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
     @Override
     public void accept(Event<CcmKeyDeregistrationRequest> requestEvent) {
-
         CcmKeyDeregistrationRequest request = requestEvent.getData();
-        if (Boolean.TRUE.equals(request.getUseCcm())) {
-            LOGGER.debug("De-registering CCM key for freeipa stack {}", request.getResourceId());
-            try {
+        try {
+            if (request.getTunnel().useCcmV1()) {
+                LOGGER.debug("De-registering CCM key '{}' for freeipa stack '{}'", request.getMinaSshdServiceId(), request.getResourceId());
                 ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
                         request.getMinaSshdServiceId());
-            } catch (Exception ex) {
-                LOGGER.warn("CCM key de-registration failed", ex);
+                LOGGER.debug("De-registered CCM key '{}' for freeipa stack '{}'", request.getMinaSshdServiceId(), request.getResourceId());
+            } else if (request.getTunnel().useCcmV2()) {
+                LOGGER.debug("De-registering CCM V2 key '{}' for freeipa stack {}", request.getCcmV2AgentCrn(), request.getResourceId());
+                ccmV2AgentTerminationListener.deregisterInvertingProxyAgent(request.getCcmV2AgentCrn());
+                LOGGER.debug("De-registered CCM V2 key '{}' for freeipa stack {}", request.getCcmV2AgentCrn(), request.getResourceId());
+            } else {
+                LOGGER.debug("CCM is DISABLED, skipping de-registering of key from CCM. FreeIPA stack: {}", request.getResourceId());
             }
-        } else {
-            LOGGER.info("CCM is DISABLED, skipping de-registering of key from CCM. FreeIPA stack: {}",
-                    request.getResourceId());
+        } catch (Exception ex) {
+            LOGGER.warn("CCM key de-registration failed", ex);
         }
 
         Selectable result = new CcmKeyDeregistrationFinished(request.getResourceId(), request.getForced());

@@ -478,6 +478,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public int setCcmV2AgentCrnByStackId(Long id, String ccmV2Configs) {
+            return 0;
+        }
+
+        @Override
         public <S extends Stack> S save(S entity) {
             return entity;
         }

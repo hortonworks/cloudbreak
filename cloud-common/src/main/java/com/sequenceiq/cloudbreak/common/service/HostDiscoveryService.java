@@ -11,6 +11,8 @@ public class HostDiscoveryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HostDiscoveryService.class);
 
+    private static final String DOMAIN_PART_DELIMITER = ".";
+
     @Value("${cb.host.discovery.custom.domain:}")
     private String customDomain;
 
@@ -46,6 +48,10 @@ public class HostDiscoveryService {
             return "";
         }
         return getHostname(customHostnamePrefix, instanceGroupName).replaceAll("_", "") + privateId;
+    }
+
+    public String determineGatewayFqdn(String gatewayHostName, String stackDomain) {
+        return gatewayHostName + DOMAIN_PART_DELIMITER + stackDomain;
     }
 
     private String getHostname(String customHostnamePrefix, String instanceGroupName) {

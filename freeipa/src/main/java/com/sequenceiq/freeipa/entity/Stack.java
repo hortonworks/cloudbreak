@@ -122,6 +122,8 @@ public class Stack implements AccountAwareResource {
 
     private String minaSshdServiceId;
 
+    private String ccmV2AgentCrn;
+
     @Version
     private Long version;
 
@@ -418,6 +420,14 @@ public class Stack implements AccountAwareResource {
         this.version = version;
     }
 
+    public String getCcmV2AgentCrn() {
+        return ccmV2AgentCrn;
+    }
+
+    public void setCcmV2AgentCrn(String ccmV2AgentCrn) {
+        this.ccmV2AgentCrn = ccmV2AgentCrn;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -445,6 +455,7 @@ public class Stack implements AccountAwareResource {
                 ", owner='" + owner + '\'' +
                 ", appVersion='" + appVersion + '\'' +
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
+                ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 '}';
     }
 }

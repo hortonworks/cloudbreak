@@ -51,6 +51,9 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.minasshd.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.clusterconnectivitymanagementv2.*"/>
+    </Match>
+    <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.common.*"/>
     </Match>
     <Match>

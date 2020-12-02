@@ -37,9 +37,11 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
@@ -115,6 +117,129 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+    }
+
+    @Test
+    void testCreateForCcmV2TunnelInitialization() {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCM).build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
+        when(environmentService.save(any(Environment.class))).thenReturn(environment);
+        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(true);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(captor.capture());
+        Environment capturedEnvironment = captor.getValue();
+        assertEquals(Tunnel.CCMV2, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCMV2");
+    }
+
+    @Test
+    void testCreateForCcmV2TunnelInitializationWhenNotEntitled() {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCMV2).build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
+        when(environmentService.save(any(Environment.class))).thenReturn(environment);
+        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+
+        verify(environmentService, never()).save(any());
+        verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
+        verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+    }
+
+    @Test
+    void testCreateForCcmV1TunnelInitialization() {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.CCM).build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
+        when(environmentService.save(any(Environment.class))).thenReturn(environment);
+        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(false);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(captor.capture());
+        Environment capturedEnvironment = captor.getValue();
+        assertEquals(Tunnel.CCM, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be CCM");
+    }
+
+    @Test
+    void testCreateForDirectTunnelInitialization() {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME).withAccountId(ACCOUNT_ID).withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        environment.setExperimentalFeaturesJson(ExperimentalFeatures.builder().withTunnel(Tunnel.DIRECT).build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(new Credential());
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(any())).thenReturn(getCloudRegions());
+        when(environmentService.save(any(Environment.class))).thenReturn(environment);
+        when(entitlementService.ccmV2Enabled(ACCOUNT_ID)).thenReturn(true);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        ArgumentCaptor<Environment> captor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(captor.capture());
+        Environment capturedEnvironment = captor.getValue();
+        assertEquals(Tunnel.DIRECT, capturedEnvironment.getExperimentalFeaturesJson().getTunnel(), "Tunnel should be DIRECT");
     }
 
     @Test

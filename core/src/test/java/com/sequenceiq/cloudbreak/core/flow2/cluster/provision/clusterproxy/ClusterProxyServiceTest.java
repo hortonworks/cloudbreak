@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -14,12 +15,16 @@ import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Config;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyRegistrationClient;
@@ -56,6 +61,8 @@ public class ClusterProxyServiceTest {
 
     private static final String STACK_CRN = "crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:c681a099-bff3-4f3f-8884-1de9604a3a09";
 
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:c681a099-bff3-4f3f-8884-1de9604a3a09";
+
     private static final String MINA_ID = "mina-id";
 
     @Mock
@@ -77,15 +84,136 @@ public class ClusterProxyServiceTest {
     public void shouldRegisterProxyConfigurationWithClusterProxy() throws ClusterProxyException {
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
         response.setX509Unwrapped("X509PublicKey");
-
         ConfigRegistrationRequest request = configRegistrationRequestWithTunnelEntries();
 
         when(clusterProxyRegistrationClient.registerConfig(any())).thenReturn(response);
         when(securityConfigService.findOneByStackId(STACK_ID)).thenReturn(Optional.of(gatewaySecurityConfig()));
 
-        ConfigRegistrationResponse registrationResponse = service.registerCluster(testStackUsingCCM());
+        ConfigRegistrationResponse registrationResponse =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> service.registerCluster(testStackUsingCCM()));
+
         assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
         verify(clusterProxyRegistrationClient).registerConfig(request);
+    }
+
+    @Test
+    public void testRegisterCcmV2WhenCCMV2() throws ClusterProxyException {
+        Stack stack = testStackUsingCCM();
+        stack.setTunnel(Tunnel.CCMV2);
+        stack.setCcmV2AgentCrn("testAgentCrn");
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.registerCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
+        assertEquals(List.of(
+                new CcmV2Config("testAgentCrn", "testAgentCrn-i-abc123", "10.10.10.10",
+                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+
+        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
+        assertNull(proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
+    }
+
+    @Test
+    public void testRegisterCcmV2WhenCCMV1() throws ClusterProxyException {
+        Stack stack = testStackUsingCCM();
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.registerCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(false, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
+        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should not be initialized.");
+
+        assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
+        assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+    }
+
+    @Test
+    public void testReRegisterCcmV2WhenCCMV2() throws ClusterProxyException {
+        Stack stack = testStackUsingCCM();
+        stack.setTunnel(Tunnel.CCMV2);
+        stack.setCcmV2AgentCrn("testAgentCrn");
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.reRegisterCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(true, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should be enabled");
+        assertEquals(List.of(
+                new CcmV2Config("testAgentCrn", "testAgentCrn-i-abc123", "10.10.10.10",
+                        ServiceFamilies.GATEWAY.getDefaultPort())), proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should match");
+
+        assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV2 Knox URI should match");
+
+        assertEquals(false, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be disabled.");
+        assertNull(proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should not be configured.");
+    }
+
+    @Test
+    public void testReRegisterCcmV2WhenCCMV1() throws ClusterProxyException {
+        Stack stack = testStackUsingCCM();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
+
+        ArgumentCaptor<ConfigRegistrationRequest> captor = ArgumentCaptor.forClass(ConfigRegistrationRequest.class);
+        service.reRegisterCluster(stack);
+
+        verify(clusterProxyRegistrationClient).registerConfig(captor.capture());
+        ConfigRegistrationRequest proxyRegisterationReq = captor.getValue();
+        assertEquals(false, proxyRegisterationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
+        assertNull(proxyRegisterationReq.getCcmV2Configs(), "CCMV2 config should not be initialized.");
+
+        assertEquals("https://10.10.10.10/test-cluster", proxyRegisterationReq.getUriOfKnox(), "CCMV1 Knox URI should match");
+
+        assertEquals(true, proxyRegisterationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
+        assertEquals(tunnelEntries(), proxyRegisterationReq.getTunnels(), "CCMV1 tunnel should be configured.");
+    }
+
+    @Test
+    public void testRegisterGatewayConfigurationWithoutCcmEnabled() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
+
+        service.registerGatewayConfiguration(STACK_ID);
+
+        ArgumentCaptor<ConfigUpdateRequest> captor = ArgumentCaptor.forClass(ConfigUpdateRequest.class);
+        verify(clusterProxyRegistrationClient).updateConfig(captor.capture());
+        ConfigUpdateRequest gatewayUpdateRequest = captor.getValue();
+        assertEquals("https://10.10.10.10/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "Gateway Knox URI should match");
+    }
+
+    @Test
+    public void testRegisterGatewayConfigurationWithCcmV1Enabled() {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackUsingCCMAndKnox());
+
+        service.registerGatewayConfiguration(STACK_ID);
+
+        ArgumentCaptor<ConfigUpdateRequest> captor = ArgumentCaptor.forClass(ConfigUpdateRequest.class);
+        verify(clusterProxyRegistrationClient).updateConfig(captor.capture());
+        ConfigUpdateRequest gatewayUpdateRequest = captor.getValue();
+        assertEquals("https://10.10.10.10/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "CCMV1 Knox URI should match");
+    }
+
+    @Test
+    public void testRegisterGatewayConfigurationWithCcmV2Enabled() {
+        Stack testStack = testStackUsingCCMAndKnox();
+        testStack.setTunnel(Tunnel.CCMV2);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStack);
+
+        service.registerGatewayConfiguration(STACK_ID);
+
+        ArgumentCaptor<ConfigUpdateRequest> captor = ArgumentCaptor.forClass(ConfigUpdateRequest.class);
+        verify(clusterProxyRegistrationClient).updateConfig(captor.capture());
+        ConfigUpdateRequest gatewayUpdateRequest = captor.getValue();
+        assertEquals("https://10.10.10.10:9443/knox/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "CCMV2 Knox URI should match");
     }
 
     @Test
@@ -139,12 +267,16 @@ public class ClusterProxyServiceTest {
     }
 
     private ConfigRegistrationRequest configRegistrationRequestWithTunnelEntries() {
-        List<TunnelEntry> tunnelEntries = List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443, MINA_ID),
-                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443, MINA_ID));
+        List<TunnelEntry> tunnelEntries = tunnelEntries();
         return new ConfigRegistrationRequestBuilder(STACK_CRN)
                 .withAliases(List.of(String.valueOf(CLUSTER_ID))).withServices(List.of(cmServiceConfig(), cmInternalServiceConfig()))
                 .withAccountId(TEST_ACCOUNT_ID)
                 .withTunnelEntries(tunnelEntries).build();
+    }
+
+    private List<TunnelEntry> tunnelEntries() {
+        return List.of(new TunnelEntry("i-abc123", "GATEWAY", "10.10.10.10", 9443, MINA_ID),
+                new TunnelEntry("i-abc123", "KNOX", "10.10.10.10", 443, MINA_ID));
     }
 
     private ClusterServiceConfig cmServiceConfig() {
@@ -199,6 +331,14 @@ public class ClusterProxyServiceTest {
         stack.setUseCcm(true);
         stack.setTunnel(Tunnel.CCM);
         stack.setMinaSshdServiceId(MINA_ID);
+        return stack;
+    }
+
+    private Stack testStackUsingCCMAndKnox() {
+        Stack stack = testStackUsingCCM();
+        Gateway gateway = new Gateway();
+        gateway.setPath("test-cluster");
+        stack.getCluster().setGateway(gateway);
         return stack;
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.recipe;
 import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.common.api.type.Tunnel;
 
 public class CcmKeyDeregisterRequest extends StackEvent {
 
@@ -12,14 +13,14 @@ public class CcmKeyDeregisterRequest extends StackEvent {
 
     private final String keyId;
 
-    private final Boolean useCcm;
+    private final Tunnel tunnel;
 
-    public CcmKeyDeregisterRequest(Long stackId, String actorCrn, String accountId, String keyId, Boolean useCcm) {
+    public CcmKeyDeregisterRequest(Long stackId, String actorCrn, String accountId, String keyId, Tunnel tunnel) {
         super(stackId);
         this.actorCrn = Objects.requireNonNull(actorCrn, "actorCrn is null");
         this.accountId = Objects.requireNonNull(accountId, "accountId is null");
         this.keyId = Objects.requireNonNull(keyId, "keyId is null");
-        this.useCcm = useCcm;
+        this.tunnel = tunnel;
     }
 
     public String getActorCrn() {
@@ -34,7 +35,7 @@ public class CcmKeyDeregisterRequest extends StackEvent {
         return keyId;
     }
 
-    public Boolean getUseCcm() {
-        return useCcm;
+    public Tunnel getTunnel() {
+        return tunnel;
     }
 }
