@@ -84,6 +84,9 @@ class EntitlementServiceTest {
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 
+                {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, false},
+                {"CDP_CCM_V2", (EntitlementCheckFunction) EntitlementService::ccmV2Enabled, true},
+
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
 

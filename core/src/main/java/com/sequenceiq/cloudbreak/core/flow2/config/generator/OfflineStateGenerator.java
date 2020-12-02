@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
@@ -467,6 +468,11 @@ public class OfflineStateGenerator {
 
         @Override
         public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
+            return 0;
+        }
+
+        @Override
+        public int setCcmV2ConfigsByStackId(Long id, Json ccmV2Configs) {
             return 0;
         }
 

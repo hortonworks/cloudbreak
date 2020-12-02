@@ -834,6 +834,10 @@ public class StackService implements ResourceIdProvider {
         return stackRepository.setMinaSshdServiceIdByStackId(id, minaSshdServiceId);
     }
 
+    public int setCcmV2ConfigsByStackId(Long id, Json ccmV2Configs) {
+        return stackRepository.setCcmV2ConfigsByStackId(id, ccmV2Configs);
+    }
+
     StackRepository repository() {
         return stackRepository;
     }

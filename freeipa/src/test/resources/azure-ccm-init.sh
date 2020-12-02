@@ -24,6 +24,7 @@ export CCM_TUNNEL_INITIATOR_ID="tunnel-id"
 export CCM_KEY_ID="key-id"
 export CCM_ENCIPHERED_PRIVATE_KEY="cHJpdmF0ZS1rZXk="
 export CCM_GATEWAY_PORT=9443
+export IS_CCM_V2_ENABLED=false
 
 date >> /tmp/time.txt
 

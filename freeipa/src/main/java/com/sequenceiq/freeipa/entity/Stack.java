@@ -115,6 +115,10 @@ public class Stack implements AccountAwareResource {
 
     private String minaSshdServiceId;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json ccmV2Configs;
+
     @Version
     private Long version;
 
@@ -403,6 +407,14 @@ public class Stack implements AccountAwareResource {
         this.version = version;
     }
 
+    public Json getCcmV2Configs() {
+        return ccmV2Configs;
+    }
+
+    public void setCcmV2Configs(Json ccmV2Configs) {
+        this.ccmV2Configs = ccmV2Configs;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -430,6 +442,7 @@ public class Stack implements AccountAwareResource {
                 ", owner='" + owner + '\'' +
                 ", appVersion='" + appVersion + '\'' +
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
+                ", ccmV2Configs='" + ccmV2Configs + '\'' +
                 '}';
     }
 }

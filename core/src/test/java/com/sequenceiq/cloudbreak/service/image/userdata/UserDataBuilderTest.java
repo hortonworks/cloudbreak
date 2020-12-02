@@ -19,8 +19,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultInstanceParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultServerParameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultTunnelParameters;
@@ -75,7 +79,8 @@ public class UserDataBuilderTest {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", null, null);
+                "cloudbreak", getPlatformParameters(), "pass", "cert",
+                new CcmConnectivityParameters(CcmConnectivityMode.NONE), null);
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
@@ -88,14 +93,32 @@ public class UserDataBuilderTest {
         DefaultTunnelParameters nginxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.GATEWAY, 9443);
         DefaultTunnelParameters knoxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.KNOX, 8443);
         CcmParameters ccmParameters = new DefaultCcmParameters(serverParameters, instanceParameters, List.of(nginxTunnel, knoxTunnel));
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmParameters);
 
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmParameters, null);
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
 
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+    }
+
+    @Test
+    public void testBuildUserDataWithCCMV2() throws IOException {
+        CcmV2Parameters ccmV2Parameters = new DefaultCcmV2Parameters("invertingProxyHost", "invertingProxyCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
+                "clusterGatewayDomain");
+        CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
+
+        Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
+                "cloudbreak", getPlatformParameters(), "pass", "cert", ccmConnectivityParameters, null);
+
+        String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-ccm-init.sh");
+        String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-ccm-v2-init.sh");
+
+        Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
+        Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
     }
 
     @Test
@@ -107,7 +130,8 @@ public class UserDataBuilderTest {
                 .withServerPort(1234)
                 .build();
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", null, proxyConfig);
+                "cloudbreak", getPlatformParameters(), "pass", "cert",
+                new CcmConnectivityParameters(CcmConnectivityMode.NONE), proxyConfig);
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
@@ -126,7 +150,8 @@ public class UserDataBuilderTest {
                 .withProxyAuthentication(proxyAuthentication)
                 .build();
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", getPlatformParameters(), "pass", "cert", null, proxyConfig);
+                "cloudbreak", getPlatformParameters(), "pass", "cert",
+                new CcmConnectivityParameters(CcmConnectivityMode.NONE), proxyConfig);
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }

@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_AGENT_CRN;
+import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_CLUSTER_DOMAIN;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -15,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.ccm.endpoint.ServiceFamilies;
+import com.sequenceiq.cloudbreak.clusterproxy.CcmV2Configs;
 import com.sequenceiq.cloudbreak.clusterproxy.ClientCertificate;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
@@ -63,6 +69,9 @@ public class ClusterProxyService {
 
     @Inject
     private ClusterProxyConfiguration clusterProxyConfiguration;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public ConfigRegistrationResponse registerCluster(Stack stack) {
         ConfigRegistrationRequest proxyConfigRequest = createProxyConfigRequest(stack);
@@ -112,7 +121,13 @@ public class ClusterProxyService {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack));
         if (stack.getTunnel().useCcm()) {
-            requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
+            String accountId = getAccountId(stack);
+            requestBuilder.withAccountId(accountId);
+            if (entitlementService.ccmV2Enabled(INTERNAL_ACTOR_CRN, accountId)) {
+                requestBuilder.withCCMV2Entries(ccmV2Configs(stack));
+            } else {
+                requestBuilder.withTunnelEntries(tunnelEntries(stack));
+            }
         }
         return requestBuilder.build();
     }
@@ -121,7 +136,13 @@ public class ClusterProxyService {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster()))).withServices(serviceConfigs(stack)).withKnoxUrl(knoxUrl(stack));
         if (stack.getTunnel().useCcm()) {
-            requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
+            String accountId = getAccountId(stack);
+            requestBuilder.withAccountId(accountId);
+            if (entitlementService.ccmV2Enabled(INTERNAL_ACTOR_CRN, accountId)) {
+                requestBuilder.withCCMV2Entries(ccmV2Configs(stack));
+            } else {
+                requestBuilder.withTunnelEntries(tunnelEntries(stack));
+            }
         }
         return requestBuilder.build();
     }
@@ -145,6 +166,16 @@ public class ClusterProxyService {
         TunnelEntry knoxTunnel = new TunnelEntry(primaryGatewayInstance.getInstanceId(), KnownServiceIdentifier.KNOX.name(),
                 gatewayIp, ServiceFamilies.KNOX.getDefaultPort(), stack.getMinaSshdServiceId());
         return asList(gatewayTunnel, knoxTunnel);
+    }
+
+    private List<CcmV2Configs> ccmV2Configs(Stack stack) {
+        return Optional.ofNullable(stack.getCcmV2Configs())
+                .map(stackConfig -> (Map<String, String>) stackConfig.getSilent(Map.class))
+                .map(ccmV2Config -> new CcmV2Configs(ccmV2Config.get(CCMV2_AGENT_CRN),
+                        ccmV2Config.get(CCMV2_CLUSTER_DOMAIN),
+                        ServiceFamilies.GATEWAY.getDefaultPort()))
+                .map(ccmV2Config -> List.of(ccmV2Config))
+                .orElse(List.of());
     }
 
     private ClusterServiceConfig cmServiceConfig(Stack stack, ClientCertificate clientCertificate, String serviceName, String clusterManagerUrl) {

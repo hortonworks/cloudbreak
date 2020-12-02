@@ -19,6 +19,10 @@ public class ConfigRegistrationRequestBuilder {
 
     private List<TunnelEntry> tunnels;
 
+    private boolean useCcmV2;
+
+    private List<CcmV2Configs> ccmV2Configs;
+
     public ConfigRegistrationRequestBuilder(String clusterCrn) {
         this.clusterCrn = clusterCrn;
     }
@@ -43,6 +47,14 @@ public class ConfigRegistrationRequestBuilder {
         return this;
     }
 
+    public ConfigRegistrationRequestBuilder withCCMV2Entries(List<CcmV2Configs> ccmV2Configs) {
+        if (!ccmV2Configs.isEmpty()) {
+            this.useCcmV2 = true;
+            this.ccmV2Configs = ccmV2Configs;
+        }
+        return this;
+    }
+
     public ConfigRegistrationRequestBuilder withTunnelEntries(List<TunnelEntry> tunnelEntries) {
         if (tunnelEntries != null && !tunnelEntries.isEmpty()) {
             this.useTunnel = true;
@@ -57,6 +69,6 @@ public class ConfigRegistrationRequestBuilder {
     }
 
     public ConfigRegistrationRequest build() {
-        return new ConfigRegistrationRequest(clusterCrn, uriOfKnox, accountId, useTunnel, tunnels, aliases, services, certificates);
+        return new ConfigRegistrationRequest(clusterCrn, uriOfKnox, accountId, useTunnel, tunnels, aliases, services, certificates, useCcmV2, ccmV2Configs);
     }
 }

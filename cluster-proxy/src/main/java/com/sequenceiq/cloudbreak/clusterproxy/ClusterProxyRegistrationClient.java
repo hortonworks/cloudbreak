@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,7 +42,7 @@ public class ClusterProxyRegistrationClient {
         } catch (Exception e) {
             String message = String.format("Error registering proxy configuration for cluster '%s' with Cluster Proxy.",
                     configRegistrationRequest.getClusterCrn());
-            LOGGER.error(message + " URL: " + registerConfigUrl, e);
+            logErrorWithResponseBody(message + " URL: " + registerConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -56,7 +57,7 @@ public class ClusterProxyRegistrationClient {
         } catch (Exception e) {
             String message = String.format("Error updating configuration for cluster '%s' with Cluster Proxy.",
                     configUpdateRequest.getClusterCrn());
-            LOGGER.error(message + " URL: " + updateConfigUrl, e);
+            logErrorWithResponseBody(message + " URL: " + updateConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -71,7 +72,7 @@ public class ClusterProxyRegistrationClient {
         } catch (Exception e) {
             String message = String.format("Error de-registering proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);
-            LOGGER.error(message + " URL: " + removeConfigUrl, e);
+            logErrorWithResponseBody(message + " URL: " + removeConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -87,7 +88,7 @@ public class ClusterProxyRegistrationClient {
         } catch (Exception e) {
             String message = String.format("Error reading cluster proxy configuration for cluster identifier '%s' from Cluster Proxy.",
                     clusterIdentifier);
-            LOGGER.error(message + " URL: " + readConfigUrl, e);
+            logErrorWithResponseBody(message + " URL: " + readConfigUrl, e);
             throw new ClusterProxyException(message, e);
         }
     }
@@ -114,5 +115,12 @@ public class ClusterProxyRegistrationClient {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         return new HttpEntity<>(JsonUtil.writeValueAsString(proxyConfigRequest), headers);
+    }
+
+    private void logErrorWithResponseBody(String message, Exception ex) {
+        if (ex instanceof RestClientResponseException) {
+            message += " ,Error Response Body : " + ((RestClientResponseException) ex).getResponseBodyAsString();
+        }
+        LOGGER.error(message, ex);
     }
 }

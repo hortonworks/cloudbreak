@@ -47,6 +47,17 @@ export CCM_KNOX_PORT=${ccmKnoxPort?c}
 <#else>
 export IS_CCM_ENABLED=false
 </#if>
+<#if ccmV2Enabled!false>
+export IS_CCM_V2_ENABLED=true
+export CCM_V2_INVERTING_PROXY_CERTIFICATE="${ccmV2InvertingProxyCertificate}"
+export CCM_V2_INVERTING_PROXY_HOST="${ccmV2InvertingProxyHost}"
+export CCM_V2_AGENT_CERTIFICATE="${ccmV2AgentCertificate}"
+export CCM_V2_AGENT_ENCIPHERED_KEY="${ccmV2AgentEncipheredKey}"
+export CCM_V2_AGENT_KEY_ID="${ccmV2AgentKeyId}"
+export CCM_V2_AGENT_CRN="${ccmV2AgentCrn}"
+<#else>
+export IS_CCM_V2_ENABLED=false
+</#if>
 
 ${customUserData}
 

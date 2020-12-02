@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
+import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -34,6 +38,12 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
     @Inject
     private CcmResourceTerminationListener ccmResourceTerminationListener;
 
+    @Inject
+    private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public void accept(Event<CcmKeyDeregisterRequest> requestEvent) {
         CcmKeyDeregisterRequest request = requestEvent.getData();
@@ -41,17 +51,19 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             if (Boolean.TRUE.equals(request.getUseCcm())) {
-                LOGGER.debug("De-registering key from CCM. Cluster CRN: {}",
-                        stack.getResourceCrn());
+                LOGGER.debug("De-registering key from CCM. Cluster CRN: {}", stack.getResourceCrn());
                 try {
-                    ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
-                            stack.getMinaSshdServiceId());
+                    if (!entitlementService.ccmV2Enabled(INTERNAL_ACTOR_CRN, request.getAccountId())) {
+                        ccmResourceTerminationListener.deregisterCcmSshTunnelingKey(request.getActorCrn(), request.getAccountId(), request.getKeyId(),
+                                stack.getMinaSshdServiceId());
+                    } else {
+                        ccmV2AgentTerminationListener.deregisterInvertingProxyAgent(stack.getCcmV2Configs());
+                    }
                 } catch (Exception ex) {
                     LOGGER.warn("CCM key deregistration failed", ex);
                 }
             } else {
-                LOGGER.info("CCM is DISABLED, skipping de-registering of key from CCM. Cluster CRN: {}",
-                        stack.getResourceCrn());
+                LOGGER.info("CCM is DISABLED, skipping de-registering of key from CCM. Cluster CRN: {}", stack.getResourceCrn());
             }
             result = new CcmKeyDeregisterSuccess(stack.getId());
         } catch (Exception ex) {

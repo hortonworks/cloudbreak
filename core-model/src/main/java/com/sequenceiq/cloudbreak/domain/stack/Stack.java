@@ -198,6 +198,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String minaSshdServiceId;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json ccmV2Configs;
+
     @Convert(converter = DatabaseAvailabilityTypeConverter.class)
     private DatabaseAvailabilityType externalDatabaseCreationType;
 
@@ -574,6 +578,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return metaData.orElse(null);
     }
 
+    public Optional<InstanceGroup> getGatewayHostGroup() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .findFirst();
+    }
+
     public Network getNetwork() {
         return network;
     }
@@ -809,5 +819,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setExternalDatabaseCreationType(DatabaseAvailabilityType externalDatabaseCreationType) {
         this.externalDatabaseCreationType = externalDatabaseCreationType;
+    }
+
+    public Json getCcmV2Configs() {
+        return ccmV2Configs;
+    }
+
+    public void setCcmV2Configs(Json ccmV2Configs) {
+        this.ccmV2Configs = ccmV2Configs;
     }
 }
