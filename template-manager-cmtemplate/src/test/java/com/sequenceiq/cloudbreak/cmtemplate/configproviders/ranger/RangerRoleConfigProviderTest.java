@@ -50,6 +50,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @ExtendWith(MockitoExtension.class)
 public class RangerRoleConfigProviderTest {
 
+    private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
+
     private static final String ADMIN_GROUP = "cdh_test";
 
     @Mock
@@ -237,6 +239,7 @@ public class RangerRoleConfigProviderTest {
         rdsConfig.setSslMode(RdsSslMode.ENABLED);
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsConfigs(Set.of(rdsConfig))
+                .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
@@ -249,7 +252,7 @@ public class RangerRoleConfigProviderTest {
                 entry(RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE,
                         "<property>" +
                         "<name>ranger.jpa.jdbc.url</name>" +
-                        "<value>jdbc:postgresql://10.1.1.1:5432/ranger?sslmode=verify-full&amp;sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem</value>" +
+                        "<value>jdbc:postgresql://10.1.1.1:5432/ranger?sslmode=verify-full&amp;sslrootcert=" + SSL_CERTS_FILE_PATH + "</value>" +
                         "</property>"),
                 entry(RANGER_DEFAULT_POLICY_GROUPS, ADMIN_GROUP)
         );

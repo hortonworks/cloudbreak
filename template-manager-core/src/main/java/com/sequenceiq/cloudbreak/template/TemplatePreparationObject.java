@@ -53,6 +53,8 @@ public class TemplatePreparationObject {
 
     private final Map<String, RDSConfig> rdsConfigs;
 
+    private final String rdsSslCertificateFilePath;
+
     private final Set<HostgroupView> hostgroupViews;
 
     private final Optional<LdapView> ldapConfig;
@@ -93,6 +95,7 @@ public class TemplatePreparationObject {
                 rdsConfig -> rdsConfig.getType().toLowerCase(),
                 Function.identity()
         ));
+        rdsSslCertificateFilePath = builder.rdsSslCertificateFilePath;
         hostgroupViews = builder.hostgroupViews;
         ldapConfig = builder.ldapConfig;
         gatewayView = builder.gatewayView;
@@ -132,6 +135,10 @@ public class TemplatePreparationObject {
 
     public RDSConfig getRdsConfig(DatabaseType type) {
         return rdsConfigs.get(type.name().toLowerCase());
+    }
+
+    public String getRdsSslCertificateFilePath() {
+        return rdsSslCertificateFilePath;
     }
 
     public Set<HostgroupView> getHostgroupViews() {
@@ -220,6 +227,8 @@ public class TemplatePreparationObject {
 
         private Set<RDSConfig> rdsConfigs = new HashSet<>();
 
+        private String rdsSslCertificateFilePath;
+
         private Set<HostgroupView> hostgroupViews = new HashSet<>();
 
         private Optional<LdapView> ldapConfig = Optional.empty();
@@ -271,6 +280,11 @@ public class TemplatePreparationObject {
 
         public Builder withRdsConfigs(Set<RDSConfig> rdsConfigs) {
             this.rdsConfigs = rdsConfigs;
+            return this;
+        }
+
+        public Builder withRdsSslCertificateFilePath(String rdsSslCertificateFilePath) {
+            this.rdsSslCertificateFilePath = rdsSslCertificateFilePath;
             return this;
         }
 
@@ -400,6 +414,7 @@ public class TemplatePreparationObject {
         public TemplatePreparationObject build() {
             return new TemplatePreparationObject(this);
         }
+
     }
 
 }

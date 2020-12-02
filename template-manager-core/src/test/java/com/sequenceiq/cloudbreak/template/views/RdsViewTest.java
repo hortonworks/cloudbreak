@@ -16,7 +16,9 @@ public class RdsViewTest {
 
     private static final String ASSERT_ERROR_MSG = "The generated connection URL(connectionHost field) is not valid!";
 
-    private static final String SSL_OPTIONS_SUFFIX = "sslmode=verify-full&sslrootcert=/hadoopfs/fs1/database-cacerts/certs.pem";
+    private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
+
+    private static final String SSL_OPTIONS_SUFFIX = "sslmode=verify-full&sslrootcert=" + SSL_CERTS_FILE_PATH;
 
     @Test
     public void testCreateRdsViewWhenConnectionUrlContainsSubprotocolAndSubname() {
@@ -212,23 +214,39 @@ public class RdsViewTest {
     }
 
     @Test
-    public void testCreateRdsViewSslCertificateFileWhenDisabled() {
+    public void testCreateRdsViewSslCertificateFilePathWhenNoFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
-        rdsConfig.setSslMode(RdsSslMode.DISABLED);
 
         RdsView underTest = new RdsView(rdsConfig);
 
-        assertThat(underTest.getSslCertificateFile()).isEqualTo("");
+        assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
     }
 
     @Test
-    public void testCreateRdsViewSslCertificateFileWhenEnabled() {
+    public void testCreateRdsViewSslCertificateFilePathWhenNullFilePath() {
         RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
-        rdsConfig.setSslMode(RdsSslMode.ENABLED);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = new RdsView(rdsConfig, null);
 
-        assertThat(underTest.getSslCertificateFile()).isEqualTo("/hadoopfs/fs1/database-cacerts/certs.pem");
+        assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
+    }
+
+    @Test
+    public void testCreateRdsViewSslCertificateFilePathWhenEmptyFilePath() {
+        RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
+
+        RdsView underTest = new RdsView(rdsConfig, "");
+
+        assertThat(underTest.getSslCertificateFilePath()).isEqualTo("");
+    }
+
+    @Test
+    public void testCreateRdsViewSslCertificateFilePathWhenValidFilePath() {
+        RDSConfig rdsConfig = createRdsConfig("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger", DatabaseVendor.MYSQL);
+
+        RdsView underTest = new RdsView(rdsConfig, SSL_CERTS_FILE_PATH);
+
+        assertThat(underTest.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
     }
 
     static Object[][] sslConnectionUrlDataProvider() {
@@ -249,7 +267,7 @@ public class RdsViewTest {
         RDSConfig rdsConfig = createRdsConfig(connectionUrl, DatabaseVendor.MYSQL);
         rdsConfig.setSslMode(RdsSslMode.ENABLED);
 
-        RdsView underTest = new RdsView(rdsConfig);
+        RdsView underTest = new RdsView(rdsConfig, SSL_CERTS_FILE_PATH);
 
         assertThat(underTest.getConnectionURL()).isEqualTo(connectionUrlExpected);
     }

@@ -29,10 +29,11 @@ echo "Logs at ${LOGFILE}"
 
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
 
-if [[ -f /hadoopfs/fs1/database-cacerts/certs.pem ]]; then
-  export PGSSLROOTCERT=/hadoopfs/fs1/database-cacerts/certs.pem
-  export PGSSLMODE=verify-full
-fi
+{%- from 'postgresql/settings.sls' import postgresql with context %}
+{% if postgresql.ssl_enabled == True %}
+export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
+export PGSSLMODE=verify-full
+{%- endif %}
 
 doLog() {
   set +x

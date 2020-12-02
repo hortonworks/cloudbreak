@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,14 +20,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -80,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -102,6 +100,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class StackToTemplatePreparationObjectConverterTest {
 
     private static final Long TEST_CLUSTER_ID = 1L;
@@ -124,8 +124,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private static final String AVAILABILITY_ZONE = "az-1";
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+    private static final String SSL_CERTS_FILE_PATH = "/foo/bar.pem";
 
     @InjectMocks
     private StackToTemplatePreparationObjectConverter underTest;
@@ -141,6 +140,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private PostgresConfigService postgresConfigService;
+
+    @Mock
+    private RedbeamsDbCertificateProvider dbCertificateProvider;
 
     @Mock
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
@@ -242,7 +244,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
         User user = new User();
@@ -295,6 +297,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString(), anyString(), any(Optional.class))).thenReturn(Collections.EMPTY_LIST);
+        when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
     }
 
     @Test
@@ -305,14 +308,16 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertNotNull(result.getGatewayView());
+        assertThat(result.getGatewayView()).isNotNull();
     }
 
     @Test
     public void testConvertWhenClusterDoesNotGivesAGatewayThenNullShouldBeStored() {
         when(cluster.getGateway()).thenReturn(null);
+
         TemplatePreparationObject result = underTest.convert(stackMock);
-        assertNull(result.getGatewayView());
+
+        assertThat(result.getGatewayView()).isNull();
     }
 
     @Test
@@ -329,8 +334,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertTrue(result.getFileSystemConfigurationView().isPresent());
-        assertEquals(expected, result.getFileSystemConfigurationView().get());
+        assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
+        assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
         verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(clusterServiceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
     }
@@ -346,7 +351,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertFalse(result.getFileSystemConfigurationView().isPresent());
+        assertThat(result.getFileSystemConfigurationView().isPresent()).isFalse();
         verify(fileSystemConfigurationProvider, times(0)).fileSystemConfiguration(clusterServiceFileSystem,
                 stackMock, resourceType -> Collections.EMPTY_LIST, new Json(""), new ConfigQueryEntries());
     }
@@ -354,8 +359,8 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertIfTheAttemptOfObtainingBaseFileSystemConfigurationsViewThrowsIOExceptionThenCloudbreakServiceExceptionShouldComeOutside()
             throws IOException {
-        String iOExceptionMessage = "Unable to obtain BaseFileSystemConfigurationsView";
-        IOException invokedException = new IOException(iOExceptionMessage);
+        String ioExceptionMessage = "Unable to obtain BaseFileSystemConfigurationsView";
+        IOException invokedException = new IOException(ioExceptionMessage);
         FileSystem sourceFileSystem = new FileSystem();
         FileSystem clusterServiceFileSystem = new FileSystem();
         ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
@@ -366,11 +371,8 @@ public class StackToTemplatePreparationObjectConverterTest {
                 eq(configQueryEntries))).thenThrow(invokedException);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
 
-        expectedException.expect(CloudbreakServiceException.class);
-        expectedException.expectMessage(iOExceptionMessage);
-        expectedException.expectCause(is(invokedException));
-
-        underTest.convert(stackMock);
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class, () -> underTest.convert(stackMock));
+        assertThat(cloudbreakServiceException).hasMessage(ioExceptionMessage).hasCause(invokedException);
     }
 
     @Test
@@ -380,13 +382,14 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertTrue(result.getLdapConfig().isPresent());
+        assertThat(result.getLdapConfig().isPresent()).isTrue();
     }
 
     @Test
     public void testConvertWhenClusterFromClusterServiceHasNoLdapConfigThenTheOptionalShouldBeEmpty() {
         TemplatePreparationObject result = underTest.convert(stackMock);
-        assertFalse(result.getLdapConfig().isPresent());
+
+        assertThat(result.getLdapConfig().isPresent()).isFalse();
     }
 
     @Test
@@ -396,7 +399,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertSame(expected, result.getBlueprintView());
+        assertThat(result.getBlueprintView()).isSameAs(expected);
     }
 
     @Test
@@ -406,7 +409,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertEquals(expected, result.getGeneralClusterConfigs());
+        assertThat(result.getGeneralClusterConfigs()).isEqualTo(expected);
     }
 
     @Test
@@ -420,8 +423,8 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertTrue(result.getSharedServiceConfigs().isPresent());
-        assertEquals(expected, result.getSharedServiceConfigs().get());
+        assertThat(result.getSharedServiceConfigs().isPresent()).isTrue();
+        assertThat(result.getSharedServiceConfigs().get()).isEqualTo(expected);
     }
 
     @Test
@@ -433,7 +436,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertEquals(customInputs, result.getCustomInputs());
+        assertThat(result.getCustomInputs()).isEqualTo(customInputs);
     }
 
     @Test
@@ -444,7 +447,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
-        assertTrue(result.getCustomInputs().isEmpty());
+        assertThat(result.getCustomInputs().isEmpty()).isTrue();
     }
 
     @Test
@@ -453,39 +456,39 @@ public class StackToTemplatePreparationObjectConverterTest {
         IOException invokedException = new IOException(ioExceptionMessage);
         when(stackInputs.get(StackInputs.class)).thenThrow(invokedException);
 
-        expectedException.expect(CloudbreakServiceException.class);
-        expectedException.expectMessage(ioExceptionMessage);
-        expectedException.expectCause(is(invokedException));
-
-        underTest.convert(stackMock);
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class, () -> underTest.convert(stackMock));
+        assertThat(cloudbreakServiceException).hasMessage(ioExceptionMessage).hasCause(invokedException);
     }
 
     @Test
     public void testConvertCloudPlatformMatches() {
         TemplatePreparationObject result = underTest.convert(stackMock);
-        assertEquals(CloudPlatform.AWS, result.getCloudPlatform());
+
+        assertThat(result.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
     }
 
     @Test
     public void testMockAccountMappings() {
         when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
+
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
-        assertNotNull(accountMappingView);
-        assertEquals(MOCK_GROUP_MAPPINGS, accountMappingView.getGroupMappings());
-        assertEquals(MOCK_USER_MAPPINGS, accountMappingView.getUserMappings());
+        assertThat(accountMappingView).isNotNull();
+        assertThat(accountMappingView.getGroupMappings()).isEqualTo(MOCK_GROUP_MAPPINGS);
+        assertThat(accountMappingView.getUserMappings()).isEqualTo(MOCK_USER_MAPPINGS);
     }
 
     @Test
     public void testMockAccountMappingsWhenNoFileSystemShouldReturnEmptyList() {
         when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(null);
+
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
-        assertNull(accountMappingView);
+        assertThat(accountMappingView).isNull();
     }
 
     @Test
@@ -502,17 +505,18 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         AccountMappingView accountMappingView = result.getAccountMappingView();
-        assertNotNull(accountMappingView);
-        assertEquals(GROUP_MAPPINGS, accountMappingView.getGroupMappings());
-        assertEquals(USER_MAPPINGS, accountMappingView.getUserMappings());
+        assertThat(accountMappingView).isNotNull();
+        assertThat(accountMappingView.getGroupMappings()).isEqualTo(GROUP_MAPPINGS);
+        assertThat(accountMappingView.getUserMappings()).isEqualTo(USER_MAPPINGS);
     }
 
     @Test
     public void testStackPlacement() {
         TemplatePreparationObject result = underTest.convert(stackMock);
-        assertTrue(result.getPlacementView().isPresent());
-        assertEquals(REGION, result.getPlacementView().get().getRegion());
-        assertEquals(AVAILABILITY_ZONE, result.getPlacementView().get().getAvailabilityZone());
+
+        assertThat(result.getPlacementView().isPresent()).isTrue();
+        assertThat(result.getPlacementView().get().getRegion()).isEqualTo(REGION);
+        assertThat(result.getPlacementView().get().getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
     }
 
     @Test
@@ -526,7 +530,17 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getPrimaryGatewayInstance()).thenReturn(dummyMetadata);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
-        assertEquals("10.0.0.1", result.getGeneralClusterConfigs().getClusterManagerIp());
+
+        assertThat(result.getGeneralClusterConfigs().getClusterManagerIp()).isEqualTo("10.0.0.1");
         verify(gatewayConfigService, times(1)).getPrimaryGatewayIp(any(Stack.class));
     }
+
+    @Test
+    void testRdsSslCertificateFilePath() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getRdsSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
+    }
+
 }

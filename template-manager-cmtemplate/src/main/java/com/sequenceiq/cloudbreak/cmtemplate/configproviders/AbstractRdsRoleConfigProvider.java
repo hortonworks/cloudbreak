@@ -23,7 +23,7 @@ public abstract class AbstractRdsRoleConfigProvider extends AbstractRoleConfigPr
     }
 
     protected RdsView getRdsView(TemplatePreparationObject source) {
-        return new RdsView(getRdsConfig(source));
+        return new RdsView(getRdsConfig(source), source.getRdsSslCertificateFilePath());
     }
 
 }
