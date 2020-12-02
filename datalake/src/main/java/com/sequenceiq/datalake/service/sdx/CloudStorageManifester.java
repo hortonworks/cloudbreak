@@ -126,42 +126,13 @@ public class CloudStorageManifester {
 
     protected void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {
         if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
-            if (isS3Configured(cloudStorage)) {
+            if (cloudStorage.getS3() == null || StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile())) {
                 throw new BadRequestException("instance profile must be defined for S3");
             }
             if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol() + "://")) {
                 throw new BadRequestException("AWS baselocation missing protocol. please specify s3a://");
             }
-        } else  if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudPlatform)) {
-            if (isAzureConfigured(cloudStorage)) {
-                throw new BadRequestException("managed identity, account key, account name must be defined for ABFS");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "://")) {
-                throw new BadRequestException("AZURE baselocation missing protocol. please specify abfs://");
-            }
-        } else if (CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform)) {
-            if (isGcsConfigured(cloudStorage)) {
-                throw new BadRequestException("service account email must be defined for GCS");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol() + "://")) {
-                throw new BadRequestException("GCP baselocation missing protocol. please specify gcs://");
-            }
         }
-    }
-
-    private boolean isS3Configured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getS3() == null || StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile());
-    }
-
-    private boolean isGcsConfigured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getGcs() == null || StringUtils.isEmpty(cloudStorage.getGcs().getServiceAccountEmail());
-    }
-
-    private boolean isAzureConfigured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getAdlsGen2() == null
-                || StringUtils.isEmpty(cloudStorage.getAdlsGen2().getManagedIdentity())
-                || StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey())
-                || StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName());
     }
 
     private void setStorageLocations(FileSystemParameterV4Responses fileSystemRecommendations, CloudStorageRequest cloudStorageRequest) {
