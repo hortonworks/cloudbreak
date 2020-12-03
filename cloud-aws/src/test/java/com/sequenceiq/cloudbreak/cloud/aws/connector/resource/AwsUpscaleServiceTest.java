@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -62,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 class AwsUpscaleServiceTest {
@@ -184,6 +187,7 @@ class AwsUpscaleServiceTest {
         assertEquals("Two new instances should be created", 2, newInstances.size());
         assertThat(newInstances, hasItem(workerInstance4));
         assertThat(newInstances, hasItem(workerInstance5));
+        verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
     }
 
     @Test
@@ -409,6 +413,90 @@ class AwsUpscaleServiceTest {
         Map<String, Integer> desiredGroups = new HashMap<>();
         desiredGroups.put("workerASG", 3);
         verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(desiredGroups), eq(authenticatedContext), any(Date.class));
+        verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
+    }
+
+    @Test
+    void upscaleWithLoadBalancers() {
+        AmazonAutoScalingRetryClient amazonAutoScalingRetryClient = mock(AmazonAutoScalingRetryClient.class);
+        AmazonCloudFormationRetryClient amazonCloudFormationRetryClient = mock(AmazonCloudFormationRetryClient.class);
+        DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
+        List<AutoScalingGroup> autoScalingGroups = new ArrayList<>();
+
+        AutoScalingGroup masterASGroup = new AutoScalingGroup();
+        masterASGroup.setAutoScalingGroupName("masterASG");
+        List<Instance> masterASGInstances = new ArrayList<>();
+        masterASGInstances.add(new Instance().withInstanceId("i-master1"));
+        masterASGInstances.add(new Instance().withInstanceId("i-master2"));
+        masterASGroup.setInstances(masterASGInstances);
+
+        AutoScalingGroup workerASGroup = new AutoScalingGroup();
+        workerASGroup.setAutoScalingGroupName("workerASG");
+        List<Instance> workerASGInstances = new ArrayList<>();
+        workerASGInstances.add(new Instance().withInstanceId("i-worker1"));
+        workerASGInstances.add(new Instance().withInstanceId("i-worker2"));
+        workerASGInstances.add(new Instance().withInstanceId("i-worker3"));
+        workerASGroup.setInstances(workerASGInstances);
+
+        autoScalingGroups.add(masterASGroup);
+        autoScalingGroups.add(workerASGroup);
+
+        describeAutoScalingGroupsResult.setAutoScalingGroups(autoScalingGroups);
+        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(any(DescribeAutoScalingGroupsRequest.class)))
+            .thenReturn(describeAutoScalingGroupsResult);
+        when(awsClient.createAutoScalingRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingRetryClient);
+        when(awsClient.createCloudFormationRetryClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationRetryClient);
+        when(awsClient.createAccess(any(), any())).thenReturn(new AmazonEC2Client());
+
+        when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("worker")))
+            .thenReturn("workerASG");
+        when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationRetryClient.class), eq("master")))
+            .thenReturn("masterASG");
+
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
+            Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
+
+        ArrayList<CloudResource> allInstances = new ArrayList<>();
+        allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
+            .name("worker1").group("worker").instanceId("i-worker1").build());
+        allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
+            .name("worker2").group("worker").instanceId("i-worker2").build());
+        allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
+            .name("worker3").group("worker").instanceId("i-worker3").build());
+        CloudResource workerInstance4 = CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
+            .name("worker4").group("worker").instanceId("i-worker4").build();
+        allInstances.add(workerInstance4);
+        CloudResource workerInstance5 = CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
+            .name("worker5").group("worker").instanceId("i-worker5").build();
+        allInstances.add(workerInstance5);
+        when(cfStackUtil.getInstanceCloudResources(eq(authenticatedContext), eq(amazonCloudFormationRetryClient), eq(amazonAutoScalingRetryClient), anyList()))
+            .thenReturn(allInstances);
+        doNothing().when(cfStackUtil).addLoadBalancerTargets(any(), any(), any());
+
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        List<Group> groups = new ArrayList<>();
+
+        List<CloudLoadBalancer> loadBalancers = List.of(
+            new CloudLoadBalancer(LoadBalancerType.PRIVATE),
+            new CloudLoadBalancer(LoadBalancerType.PUBLIC)
+        );
+
+        Group master = getMasterGroup(instanceAuthentication);
+        groups.add(master);
+
+        Group worker = getWorkerGroup(instanceAuthentication);
+        groups.add(worker);
+
+        Map<String, String> tags = new HashMap<>();
+        tags.put("owner", "cbuser");
+        tags.put("created", "yesterday");
+        CloudStack cloudStack = new CloudStack(groups, getNetwork(), null, emptyMap(), tags, null,
+            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+
+        List<CloudResource> cloudResourceList = Collections.emptyList();
+        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);
+
+        verify(cfStackUtil, times(2)).addLoadBalancerTargets(any(), any(), any());
     }
 
     private Group getWorkerGroup(InstanceAuthentication instanceAuthentication) {

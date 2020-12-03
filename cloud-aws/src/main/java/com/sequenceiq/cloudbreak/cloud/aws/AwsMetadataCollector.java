@@ -181,13 +181,11 @@ public class AwsMetadataCollector implements MetadataCollector {
     public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
         LOGGER.debug("Collect AWS load balancer metadata, for cluster {}", ac.getCloudContext().getName());
 
-        String region = ac.getCloudContext().getLocation().getRegion().value();
-
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
         try {
             for (LoadBalancerType type : loadBalancerTypes) {
                 String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.valueOf(type.name()));
-                LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName, region);
+                LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
                 cloudLoadBalancerMetadata.add(new CloudLoadBalancerMetadata(
                     type,
                     loadBalancer.getDNSName(),

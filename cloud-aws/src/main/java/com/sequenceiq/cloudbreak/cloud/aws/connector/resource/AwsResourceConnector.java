@@ -162,7 +162,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             Object resourcesToRemove) {
-        return awsDownscaleService.downscale(auth, stack, resources, vms, resourcesToRemove);
+        return awsDownscaleService.downscale(auth, stack, resources, vms);
     }
 
     @Override

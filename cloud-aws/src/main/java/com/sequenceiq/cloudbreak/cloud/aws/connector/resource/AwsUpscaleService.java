@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -119,6 +120,10 @@ public class AwsUpscaleService {
             }
             awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
             awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
+
+            for (CloudLoadBalancer loadBalancer : stack.getLoadBalancers()) {
+                cfStackUtil.addLoadBalancerTargets(ac, loadBalancer, newInstances);
+            }
         } catch (RuntimeException runtimeException) {
             recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, runtimeException);
             throw new CloudConnectorException(String.format("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -25,15 +26,27 @@ import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.InvalidTargetException;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
+import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
+import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult;
+import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
+import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -155,21 +168,100 @@ public class CloudFormationStackUtil {
         return new DescribeInstancesRequest().withInstanceIds(instanceIds);
     }
 
-    public LoadBalancer getLoadBalancerByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
-        String cFStackName = getCfStackName(ac);
-        AmazonCloudFormationRetryClient amazonCfClient =
-            awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+    public LoadBalancer getLoadBalancerByLogicalId(AuthenticatedContext ac, String logicalId) {
+        String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonElasticLoadBalancingClient amazonElbClient =
             awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        DescribeStackResourceResult stackResourceResult = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-            .withStackName(cFStackName)
-            .withLogicalResourceId(logicalId));
-        String loadBalancerArn = stackResourceResult.getStackResourceDetail().getPhysicalResourceId();
+        String loadBalancerArn = getResourceArnByLogicalId(ac, logicalId, region);
 
         DescribeLoadBalancersResult loadBalancersResult = amazonElbClient.describeLoadBalancers(new DescribeLoadBalancersRequest()
             .withLoadBalancerArns(Collections.singletonList(loadBalancerArn)));
 
         return loadBalancersResult.getLoadBalancers().get(0);
+    }
+
+    public void addLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToAdd) {
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonElasticLoadBalancingClient amazonElbClient =
+            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+
+        for (Map.Entry<Integer, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
+            // Get a list of the new instances in the target groups
+            Set<String> updatedInstanceIds = getInstanceIdsForGroups(resourcesToAdd, entry.getValue());
+
+            // Find target group ARN
+            AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(loadBalancer.getType().name());
+            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
+
+            // Use ARN to fetch a list of current targets
+            DescribeTargetHealthResult targetHealthResult = amazonElbClient.describeTargetHealth(new DescribeTargetHealthRequest()
+                .withTargetGroupArn(targetGroupArn));
+            List<TargetDescription> targetDescriptions = targetHealthResult.getTargetHealthDescriptions().stream()
+                .map(TargetHealthDescription::getTarget)
+                .collect(Collectors.toList());
+            Set<String> alreadyRegisteredInstanceIds = targetDescriptions.stream()
+                .map(TargetDescription::getId)
+                .collect(Collectors.toSet());
+
+            // Remove any targets that have already been registered from the list being processed
+            updatedInstanceIds.removeAll(alreadyRegisteredInstanceIds);
+
+            // Register any new instances
+            if (!updatedInstanceIds.isEmpty()) {
+                List<TargetDescription> targetsToAdd = updatedInstanceIds.stream()
+                    .map(instanceId -> new TargetDescription().withId(instanceId))
+                    .collect(Collectors.toList());
+                RegisterTargetsResult registerTargetsResult = amazonElbClient.registerTargets(new RegisterTargetsRequest()
+                    .withTargetGroupArn(targetGroupArn)
+                    .withTargets(targetsToAdd));
+            }
+        }
+    }
+
+    public void removeLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToRemove) {
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonElasticLoadBalancingClient amazonElbClient =
+            awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+
+        for (Map.Entry<Integer, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
+            // Get a list of the instance ids to remove
+            Set<String> instancesToRemove = getInstanceIdsForGroups(resourcesToRemove, entry.getValue());
+
+            // Find target group ARN
+            AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(loadBalancer.getType().name());
+            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
+
+            // Deregister any instances that no longer exist
+            if (!instancesToRemove.isEmpty()) {
+                try {
+                    List<TargetDescription> targetsToRemove = instancesToRemove.stream()
+                        .map(instanceId -> new TargetDescription().withId(instanceId))
+                        .collect(Collectors.toList());
+                    DeregisterTargetsResult deregisterTargetsResult = amazonElbClient.deregisterTargets(new DeregisterTargetsRequest()
+                        .withTargetGroupArn(targetGroupArn)
+                        .withTargets(targetsToRemove));
+                } catch (InvalidTargetException ignored) {
+                    // no-op - we tried to remove a target that wasn't in the target group, which is fine
+                }
+            }
+        }
+    }
+
+    private Set<String> getInstanceIdsForGroups(List<CloudResource> resources, Set<Group> groups) {
+        return resources.stream()
+            .filter(instance -> instance.getInstanceId() != null)
+            .map(CloudResource::getInstanceId)
+            .collect(Collectors.toSet());
+    }
+
+    private String getResourceArnByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
+        String cFStackName = getCfStackName(ac);
+        AmazonCloudFormationRetryClient amazonCfClient =
+            awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
+            .withStackName(cFStackName)
+            .withLogicalResourceId(logicalId));
+        return result.getStackResourceDetail().getPhysicalResourceId();
     }
 }
