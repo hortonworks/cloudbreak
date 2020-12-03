@@ -318,13 +318,13 @@
              {% if 'NIFI' in exposed and 'NIFI_NODE' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enabled=true;maxFailoverAttempts=0;failoverSleep=1000</value>
              </param>
              {%- endif %}
              {% if 'NIFI-REGISTRY' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>NIFI-REGISTRY</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enabled=true;maxFailoverAttempts=0;failoverSleep=1000</value>
              </param>
              {%- endif %}
              {% if 'DATA-DISCOVERY-SERVICE-API' in exposed and 'DATA_DISCOVERY_SERVICE_AGENT' in salt['pillar.get']('gateway:location') -%}
@@ -636,6 +636,14 @@
     <service>
         <role>NIFI</role>
         <param name="useTwoWaySsl" value="true" />
+        <param>
+            <name>httpclient.connectionTimeout</name>
+            <value>1m</value>
+        </param>
+        <param>
+            <name>httpclient.socketTimeout</name>
+            <value>1m</value>
+        </param>
         {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
         {%- endfor %}
@@ -648,6 +656,14 @@
         <service>
             <role>NIFI-REGISTRY</role>
             <param name="useTwoWaySsl" value="true" />
+            <param>
+                <name>httpclient.connectionTimeout</name>
+                <value>1m</value>
+            </param>
+            <param>
+                <name>httpclient.socketTimeout</name>
+                <value>1m</value>
+            </param>
             {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_REGISTRY_SERVER'] -%}
             <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI-REGISTRY'] }}</url>
             {%- endfor %}
