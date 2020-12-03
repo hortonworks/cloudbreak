@@ -3,6 +3,7 @@
 include:
   - postgresql.repo
   - cloudera.repo
+  - cloudera.csd
 
 stop-cloudera-scm-server:
   service.dead:

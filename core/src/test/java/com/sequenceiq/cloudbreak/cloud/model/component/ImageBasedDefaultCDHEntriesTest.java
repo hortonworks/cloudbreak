@@ -138,7 +138,7 @@ public class ImageBasedDefaultCDHEntriesTest {
 
     private List<List<String>> getParcels() {
         List<String> parcel = asList("parcel");
-        when(preWarmParcelParser.parseProductFromParcel(parcel)).thenReturn(Optional.of(mock(ClouderaManagerProduct.class)));
+        when(preWarmParcelParser.parseProductFromParcel(parcel, PRE_WARM_CSD)).thenReturn(Optional.of(mock(ClouderaManagerProduct.class)));
 
         return asList(parcel);
     }

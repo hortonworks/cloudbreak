@@ -66,7 +66,7 @@ public class ImageBasedDefaultCDHEntries {
     private List<ClouderaManagerProduct> getParcels(Image image) {
         return image.getPreWarmParcels()
                 .stream()
-                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel))
+                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel, image.getPreWarmCsd()))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toList());
     }

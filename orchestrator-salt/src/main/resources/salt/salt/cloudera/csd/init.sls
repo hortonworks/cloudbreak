@@ -11,4 +11,3 @@ download-csd:
     - require:
       - file: /opt/salt/scripts/csd-downloader.sh
     - shell: /bin/bash
-    - unless: test -f /var/csd_downloaded

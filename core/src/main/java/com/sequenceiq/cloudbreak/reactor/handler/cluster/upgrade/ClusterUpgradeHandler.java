@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -18,6 +17,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -36,7 +36,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private ClusterComponentConfigProvider clusterComponentProvider;
+    private ParcelService parcelService;
 
     @Override
     public String selector() {
@@ -57,12 +57,12 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
         try {
             Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
-            Set<ClusterComponent> components = clusterComponentProvider.getComponentsByClusterId(stack.getCluster().getId());
+            Set<ClusterComponent> components = parcelService.getParcelComponentsByBlueprint(stack);
             connector.upgradeClusterRuntime(components, request.isPatchUpgrade());
 
             result = new ClusterUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
-            LOGGER.info("Cluster upgrade event failed", e);
+            LOGGER.error("Cluster upgrade event failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         }
         return result;

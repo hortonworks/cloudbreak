@@ -110,8 +110,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
     public void restartStaleServices() throws CloudbreakException {
         try {
             applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)
-                    .restartStaleServices(clouderaManagerApiFactory.getMgmtServiceResourceApi(client),
-                            clouderaManagerApiFactory.getClustersResourceApi(client));
+                    .restartStaleServices(clouderaManagerApiFactory.getClustersResourceApi(client));
         } catch (ApiException e) {
             LOGGER.error("Couldn't restart stale services", e);
             throw new CloudbreakException("Couldn't restart stale services", e);

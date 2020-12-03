@@ -228,7 +228,7 @@ public class ImageService {
             components.add(getClusterManagerComponent(stack, statedImage.getImage(), stackType));
         }
         statedImage.getImage().getPreWarmParcels().forEach(parcel -> {
-            Optional<ClouderaManagerProduct> product = preWarmParcelParser.parseProductFromParcel(parcel);
+            Optional<ClouderaManagerProduct> product = preWarmParcelParser.parseProductFromParcel(parcel, statedImage.getImage().getPreWarmCsd());
             product.ifPresent(p -> components.add(new Component(CDH_PRODUCT_DETAILS, p.getName(), new Json(p), stack)));
         });
         return components;

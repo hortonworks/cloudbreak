@@ -51,7 +51,7 @@ public class ParcelMatcher {
     private Map<String, String> getPreWarmedParcels(Image image) {
         return image.getPreWarmParcels()
                 .stream()
-                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel))
+                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel, image.getPreWarmCsd()))
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(ClouderaManagerProduct::getName, ClouderaManagerProduct::getVersion));
     }

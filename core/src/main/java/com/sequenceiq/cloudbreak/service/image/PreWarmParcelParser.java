@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,7 @@ public class PreWarmParcelParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PreWarmParcelParser.class);
 
-    public Optional<ClouderaManagerProduct> parseProductFromParcel(List<String> parcel) {
+    public Optional<ClouderaManagerProduct> parseProductFromParcel(List<String> parcel, List<String> csdList) {
         Optional<String> url = parcel.stream().filter(parcelPart -> parcelPart.startsWith("http://") || parcelPart.startsWith("https://"))
                 .findFirst();
         Optional<String> nameAndVersion = parcel.stream().filter(parcelPart -> parcelPart.endsWith(".parcel"))
@@ -38,7 +39,14 @@ public class PreWarmParcelParser {
             product.setVersion(version);
             LOGGER.info("The URL of the parcel is: '{}'", url.get());
             product.setParcel(url.get());
+            product.setCsd(collectCsdParcels(csdList, name));
             return Optional.of(product);
         }
+    }
+
+    private List<String> collectCsdParcels(List<String> csdList, String name) {
+        return csdList.stream()
+                .filter(csd -> csd.toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
     }
 }
