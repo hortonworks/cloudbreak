@@ -10,11 +10,12 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
 @Entity
-public class SaltSecurityConfig {
+public class SaltSecurityConfig implements AccountIdAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "saltsecurityconfig_generator")
@@ -55,6 +56,8 @@ public class SaltSecurityConfig {
 
     @OneToOne(mappedBy = "saltSecurityConfig")
     private SecurityConfig securityConfig;
+
+    private String accountId;
 
     public Long getId() {
         return id;
@@ -182,5 +185,14 @@ public class SaltSecurityConfig {
 
     public void setSaltBootSignPrivateKeyVault(String saltBootSignPrivateKeyVault) {
         this.saltBootSignPrivateKeyVault = new Secret(saltBootSignPrivateKeyVault);
+    }
+
+    @Override
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 }
