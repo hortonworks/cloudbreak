@@ -69,12 +69,24 @@
 
 {% if salt['pillar.get']('tags:Cloudera-Resource-Name') %}
    {% set resource_crn = salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-resource-name') %}
+   {% set resource_crn = salt['pillar.get']('tags:cloudera-resource-name') %}
+{% else %}
+   {% set resource_crn = '' %}
 {% endif %}
 {% if salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
    {% set creator_crn = salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-creator-resource-name') %}
+   {% set creator_crn = salt['pillar.get']('tags:cloudera-creator-resource-name') %}
+{% else %}
+   {% set creator_crn = '' %}
 {% endif %}
 {% if salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
    {% set environment_crn = salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-environment-resource-name') %}
+   {% set environment_crn = salt['pillar.get']('tags:cloudera-environment-resource-name') %}
+{% else %}
+   {% set environment_crn = '' %}
 {% endif %}
 
 {% if  salt['pillar.get']('filecollector:clusterType') %}
