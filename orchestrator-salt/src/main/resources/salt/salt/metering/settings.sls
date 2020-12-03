@@ -28,13 +28,44 @@
 
 {% if salt['pillar.get']('tags:Cloudera-External-Resource-Name') %}
    {% set metered_cluster_crn = salt['pillar.get']('tags:Cloudera-External-Resource-Name') %}
-{% elif salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-external-resource-name') %}
+   {% set metered_cluster_crn = salt['pillar.get']('tags:cloudera-external-resource-name') %}
+{% elif salt['pillar.get']('tags:cloudera-resource-name') %}
     {% set metered_cluster_crn = salt['pillar.get']('tags:Cloudera-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-resource-name') %}
+    {% set metered_cluster_crn = salt['pillar.get']('tags:cloudera-resource-name') %}
 {% else %}
     {% set metered_cluster_crn = cluster_crn %}
 {% endif %}
+
+{% if salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
+   {% set metered_env_crn = salt['pillar.get']('tags:Cloudera-Environment-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-environment-resource-name') %}
+   {% set metered_env_crn = salt['pillar.get']('tags:cloudera-environment-resource-name') %}
+{% else %}
+   {% set metered_env_crn = '' %}
+{% endif %}
+
+{% if salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
+   {% set metered_creator_crn = salt['pillar.get']('tags:Cloudera-Creator-Resource-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-creator-resource-name') %}
+   {% set metered_creator_crn = salt['pillar.get']('tags:cloudera-creator-resource-name') %}
+{% else %}
+   {% set metered_creator_crn = '' %}
+{% endif %}
+
 {% if salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
    {% set metered_cluster_name = salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-external-cluster-name') %}
+   {% set metered_cluster_name = salt['pillar.get']('tags:cloudera-external-cluster-name') %}
+{% else %}
+   {% set metered_cluster_name = cluster_name %}
+{% endif %}
+
+{% if salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
+   {% set metered_cluster_name = salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
+{% elif salt['pillar.get']('tags:cloudera-external-cluster-name') %}
+   {% set metered_cluster_name = salt['pillar.get']('tags:cloudera-external-cluster-name') %}
 {% else %}
    {% set metered_cluster_name = cluster_name %}
 {% endif %}
@@ -55,5 +86,7 @@
     "serviceVersion": service_version,
     "version": version,
     "meteredClusterCrn": metered_cluster_crn,
-    "meteredClusterName": metered_cluster_name
+    "meteredClusterName": metered_cluster_name,
+    "meteredEnvCrn": metered_env_crn,
+    "meteredCreatorCrn": metered_creator_crn
 }) %}
