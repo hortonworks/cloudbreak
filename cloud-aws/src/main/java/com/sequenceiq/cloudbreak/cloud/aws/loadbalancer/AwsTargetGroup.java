@@ -49,7 +49,7 @@ public class AwsTargetGroup {
         return instanceIds;
     }
 
-    private static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {
+    public static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {
         return TARGET_GROUP_NAME_PREFIX + port +
             StringUtils.capitalize(scheme.name().toLowerCase());
     }
