@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class PreWarmParcelParserTest {
     public void testWithValidParcel() {
         List<String> parcel = List.of(PARCEL_VERSION, PARCEL_URL);
 
-        Optional<ClouderaManagerProduct> result = preWarmParcelParser.parseProductFromParcel(parcel);
+        Optional<ClouderaManagerProduct> result = preWarmParcelParser.parseProductFromParcel(parcel, Collections.emptyList());
 
         assertTrue(result.isPresent());
         assertEquals("SCHEMAREGISTRY", result.get().getName());
@@ -35,7 +36,7 @@ public class PreWarmParcelParserTest {
     public void testWithMissingParcelPart() {
         List<String> parcel = List.of(PARCEL_VERSION);
 
-        Optional<ClouderaManagerProduct> result = preWarmParcelParser.parseProductFromParcel(parcel);
+        Optional<ClouderaManagerProduct> result = preWarmParcelParser.parseProductFromParcel(parcel, Collections.emptyList());
 
         assertTrue(result.isEmpty());
     }

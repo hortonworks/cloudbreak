@@ -3,8 +3,10 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.locked;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -39,15 +41,15 @@ class ParcelMatcherTest {
     @BeforeEach
     public void init() {
         when(image.getPreWarmParcels()).thenReturn(List.of(PREWARMED_PARCEL1, PREWARMED_PARCEL2));
-        when(preWarmParcelParser.parseProductFromParcel(anyList())).thenReturn(Optional.empty());
+        when(preWarmParcelParser.parseProductFromParcel(anyList(), eq(Collections.emptyList()))).thenReturn(Optional.empty());
     }
 
     @Test
     public void testPrewarmedAndActivatedMatching() {
         Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAME", "PARCEL2VERSION");
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL2NAME", "PARCEL2VERSION"));
 
         boolean result = underTest.isMatchingNonCdhParcels(image, activatedParcels);
@@ -58,9 +60,9 @@ class ParcelMatcherTest {
     @Test
     public void testPrewarmedMissingParcel() {
         Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAME", "PARCEL2VERSION");
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
                 .thenReturn(Optional.empty());
 
         boolean result = underTest.isMatchingNonCdhParcels(image, activatedParcels);
@@ -71,9 +73,9 @@ class ParcelMatcherTest {
     @Test
     public void testPrewarmedAndActivatedHasDifferentVersion() {
         Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAME", "PARCEL2VERSION");
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL2NAME", "PARCEL2VERSIONDIFF"));
 
         boolean result = underTest.isMatchingNonCdhParcels(image, activatedParcels);
@@ -84,9 +86,9 @@ class ParcelMatcherTest {
     @Test
     public void testPrewarmedHasExtraParcel() {
         Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION");
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL2NAME", "PARCEL2VERSION"));
 
         boolean result = underTest.isMatchingNonCdhParcels(image, activatedParcels);
@@ -97,9 +99,9 @@ class ParcelMatcherTest {
     @Test
     public void testCdhActivatedParcelIgnored() {
         Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAME", "PARCEL2VERSION", "CDH", "CDHVERSION");
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
-        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2))
+        when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL2NAME", "PARCEL2VERSION"));
 
         boolean result = underTest.isMatchingNonCdhParcels(image, activatedParcels);

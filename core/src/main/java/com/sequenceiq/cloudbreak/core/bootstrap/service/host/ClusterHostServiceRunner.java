@@ -481,7 +481,7 @@ public class ClusterHostServiceRunner {
         return pillarValues;
     }
 
-    private void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+    public void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
         List<String> csdUrls = getCsdUrlList(cluster);
         servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
                 singletonMap("cloudera-manager",

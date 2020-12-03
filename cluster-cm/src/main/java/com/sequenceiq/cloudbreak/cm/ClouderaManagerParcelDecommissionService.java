@@ -31,8 +31,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 
 @Service
-class ClouderaManagerParcelService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelService.class);
+class ClouderaManagerParcelDecommissionService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelDecommissionService.class);
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;

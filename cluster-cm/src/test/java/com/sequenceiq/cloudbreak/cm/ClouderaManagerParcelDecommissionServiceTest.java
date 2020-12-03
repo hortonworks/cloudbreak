@@ -29,9 +29,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
 @ExtendWith(MockitoExtension.class)
-public class ClouderaManagerParcelServiceTest {
+public class ClouderaManagerParcelDecommissionServiceTest {
     @InjectMocks
-    private ClouderaManagerParcelService underTest;
+    private ClouderaManagerParcelDecommissionService underTest;
 
     @Mock
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;

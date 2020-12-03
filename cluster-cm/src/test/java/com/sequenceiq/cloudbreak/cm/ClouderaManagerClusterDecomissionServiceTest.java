@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
-import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -165,18 +164,15 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     @Test
     public void testRestartStaleServices() throws CloudbreakException, ApiException {
         ClouderaManagerModificationService modificationService = Mockito.mock(ClouderaManagerModificationService.class);
-        MgmtServiceResourceApi mgmtServiceResourceApi = Mockito.mock(MgmtServiceResourceApi.class);
         ClustersResourceApi clustersResourceApi = Mockito.mock(ClustersResourceApi.class);
         when(applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)).thenReturn(modificationService);
-        when(clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient)).thenReturn(mgmtServiceResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
 
         underTest.restartStaleServices();
 
         verify(applicationContext).getBean(ClouderaManagerModificationService.class, stack, clientConfig);
-        verify(clouderaManagerApiFactory).getMgmtServiceResourceApi(apiClient);
         verify(clouderaManagerApiFactory).getClustersResourceApi(apiClient);
-        verify(modificationService).restartStaleServices(mgmtServiceResourceApi, clustersResourceApi);
+        verify(modificationService).restartStaleServices(clustersResourceApi);
     }
 
     private Stack createStack() {

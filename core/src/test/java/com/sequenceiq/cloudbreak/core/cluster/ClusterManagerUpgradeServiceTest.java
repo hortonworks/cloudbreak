@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -80,6 +81,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
         verify(clusterApi).startCluster();
     }
@@ -94,7 +96,42 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
         verify(clusterApi, never()).startCluster();
+    }
+
+    @Test
+    public void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException, CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        stack.setType(StackType.DATALAKE);
+
+        underTest.upgradeClusterManager(STACK_ID, true);
+
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
+        verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
+        verify(clusterApi).stopCluster(true);
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
+        verify(clusterApi).startCluster();
+        verify(clusterHostServiceRunner, never()).decoratePillarWithClouderaManagerCsds(any(), any());
+    }
+
+    @Test
+    public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        stack.setType(StackType.WORKLOAD);
+
+        underTest.upgradeClusterManager(STACK_ID, true);
+
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
+        verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
+        verify(clusterApi).stopCluster(true);
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any());
+        verify(clusterApi).startCluster();
+        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerCsds(any(), any());
     }
 }
