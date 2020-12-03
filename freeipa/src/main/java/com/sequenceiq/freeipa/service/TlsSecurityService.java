@@ -47,6 +47,7 @@ public class TlsSecurityService {
         SecurityConfig securityConfig = new SecurityConfig();
         securityConfig.setAccountId(accountId);
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        saltSecurityConfig.setAccountId(accountId);
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
         generateClientKeys(securityConfig);
         generateSaltBootSignKeypair(saltSecurityConfig);
