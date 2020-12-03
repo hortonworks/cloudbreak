@@ -152,7 +152,7 @@ public class RebootActions {
                     return md;
                 }).collect(Collectors.toList());
                 Long stackId = payload.getResourceId();
-                Stack stack = stackService.getStackById(stackId);
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
                 MDCBuilder.buildMdcContext(stack);
                 return new RebootContext(flowParameters, stack, instances, null, null);
             }
