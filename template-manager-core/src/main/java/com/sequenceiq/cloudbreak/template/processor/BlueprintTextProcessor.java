@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
 
@@ -60,6 +61,14 @@ public interface BlueprintTextProcessor {
     AutoscaleRecommendation recommendAutoscale();
 
     ResizeRecommendation recommendResize(List<String> entitlements);
+
+    /**
+     * Retrieves attributes which may need to be configured for a service.
+     * e.g. Whether a YARN NM node is a 'compute-only' node or not.
+     *
+     * @return a map containing hostGroups as key, and a map of serviceName to attributes as the value
+     */
+    Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes();
 
     String getStackVersion();
 

@@ -31,9 +31,12 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -517,6 +520,37 @@ public class CmTemplateProcessorTest {
         underTest = new CmTemplateProcessor(getBlueprintText("input/cdp-invalid-multi-host-template-name.bp"));
         assertEquals(3, underTest.getHostTemplateNames().size());
         assertEquals(2, underTest.getHostTemplateNames().stream().filter("master"::equals).count());
+    }
+
+    @Test
+    public void testYARNServiceAttributes() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/custom-hostgroups-for-nms.bp"));
+        assertEquals(7, underTest.getHostTemplateNames().size());
+        Map<String, Map<String, ServiceAttributes>> attrs = underTest.getHostGroupBasedServiceAttributes();
+        assertEquals(4, attrs.size());
+
+        Map<String, ServiceAttributes> serviceAttributesMap = null;
+
+        serviceAttributesMap = attrs.get("worker");
+        assertEquals(1, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().size());
+        assertEquals(YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().keySet().iterator().next());
+        assertEquals(YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().values().iterator().next());
+
+        serviceAttributesMap = attrs.get("compute");
+        assertEquals(1, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().size());
+        assertEquals(YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().keySet().iterator().next());
+        assertEquals(YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().values().iterator().next());
+
+        // Verify that custom hostGroup names also get marked as "compute" or "worker"
+        serviceAttributesMap = attrs.get("customnm1");
+        assertEquals(1, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().size());
+        assertEquals(YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().keySet().iterator().next());
+        assertEquals(YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().values().iterator().next());
+
+        serviceAttributesMap = attrs.get("customnm2");
+        assertEquals(1, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().size());
+        assertEquals(YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().keySet().iterator().next());
+        assertEquals(YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().values().iterator().next());
     }
 
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {

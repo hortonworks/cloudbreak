@@ -1,6 +1,7 @@
 base:
   '*':
     - nodes.hosts
+    - nodes.hostattrs
     - discovery.init
     - recipes.init
     - unbound.forwarders
