@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -52,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -160,7 +160,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Tags tags = new Tags();
         List<String> tagList = new ArrayList<>();
-        Map<String, String> labels = new HashMap<>();
         String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
         addTag(tagList, groupname);
         // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
@@ -170,13 +169,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         addTag(tagList, GcpStackUtil.getClusterTag(auth.getCloudContext()));
         addTag(tagList, GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
         addTag(tagList, GcpStackUtil.getGroupTypeTag(group.getType()));
-        cloudStack.getTags().forEach((key, value) -> addTag(tagList, mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
+        Map<String, String> labelsFromTags = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        labelsFromTags.forEach((key, value) -> addTag(tagList, mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
-        labels.putAll(cloudStack.getTags());
         tags.setItems(tagList);
 
         instance.setTags(tags);
-        instance.setLabels(labels);
+        instance.setLabels(labelsFromTags);
 
         Metadata metadata = new Metadata();
         metadata.setItems(new ArrayList<>());

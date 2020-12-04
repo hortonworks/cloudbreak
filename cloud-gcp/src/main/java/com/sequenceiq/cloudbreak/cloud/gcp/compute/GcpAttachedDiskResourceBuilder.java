@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -128,7 +129,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                Disk disk = createDisk(projectId, volume, cloudStack.getTags(), volumeSetAttributes);
+                Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
+                Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 
                 gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
                 Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
@@ -223,11 +225,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setSizeGb(Long.valueOf(volume.getSize()));
         disk.setName(volume.getId());
         disk.setType(GcpDiskType.getUrl(projectId, attributes.getAvailabilityZone(), volume.getType()));
-
-        Map<String, String> customTags = new HashMap<>();
-        customTags.putAll(tags);
-        disk.setLabels(customTags);
-
+        disk.setLabels(tags);
         return disk;
     }
 
