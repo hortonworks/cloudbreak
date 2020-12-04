@@ -1,0 +1,62 @@
+package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
+
+import static java.util.Collections.singletonMap;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+
+@Component
+public class HostAttributeDecorator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HostAttributeDecorator.class);
+
+    private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    public HostAttributeDecorator(CmTemplateProcessorFactory cmTemplateProcessorFactory) {
+        this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
+    }
+
+    public Map<String, SaltPillarProperties> createHostAttributePillars(Stack stack, Set<Node> nodes) {
+        stack.getCluster().getBlueprint().getBlueprintText();
+        BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText());
+        Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes();
+
+        Map<String, Map<String, Object>> attributes = new HashMap<>();
+        for (Node node : nodes) {
+            Map<String, Map<String, String>> hgAttributes = getAttributesForHostGroup(node.getHostGroup(), serviceAttributes);
+            Map<String, Object> hostAttributes = new HashMap<>();
+
+            hostAttributes.put("attributes", hgAttributes);
+
+            if (node.getHostGroup() != null) {
+                hostAttributes.put("hostGroup", node.getHostGroup());
+            }
+            attributes.put(node.getHostname(), hostAttributes);
+        }
+        return Map.of("hostattrs", new SaltPillarProperties("/nodes/hostattrs.sls", singletonMap("hostattrs", attributes)));
+    }
+
+    private Map<String, Map<String, String>> getAttributesForHostGroup(String hostGroup, Map<String, Map<String, ServiceAttributes>> serviceAttributes) {
+        Map<String, Map<String, String>> hgAttributes = Optional.ofNullable(serviceAttributes.get(hostGroup)).orElse(Map.of())
+                .entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        v -> v.getValue().getAttributes()));
+        LOGGER.debug("Attributes for hostGroup={}: [{}]", hostGroup, hgAttributes);
+        return hgAttributes;
+    }
+}
