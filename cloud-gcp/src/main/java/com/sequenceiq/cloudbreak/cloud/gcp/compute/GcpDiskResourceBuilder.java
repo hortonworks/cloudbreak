@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -56,9 +56,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
-        Map<String, String> customTags = new HashMap<>();
-        customTags.putAll(cloudStack.getTags());
-        disk.setLabels(customTags);
+        Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        disk.setLabels(labels);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
         insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, cloudStack.getImage().getImageName()));

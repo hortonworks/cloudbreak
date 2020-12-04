@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CommonTagValidator;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 @Component
@@ -29,7 +31,8 @@ public class GcpTagValidator extends CommonTagValidator {
 
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
-        validate(platformParameters.tagSpecification(), cloudStack.getTags());
+        Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        validate(platformParameters.tagSpecification(), labels);
     }
 
     @Override
