@@ -256,11 +256,13 @@ public class GcpPlatformResources implements PlatformResources {
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         FirewallList firewallList = compute.firewalls().list(projectId).execute();
-        for (Firewall firewall : firewallList.getItems()) {
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("network", getNetworkName(firewall));
-            CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
-            result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+        if (firewallList.getItems() != null) {
+            for (Firewall firewall : firewallList.getItems()) {
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("network", getNetworkName(firewall));
+                CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
+                result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+            }
         }
 
         if (filters != null) {
@@ -268,11 +270,13 @@ public class GcpPlatformResources implements PlatformResources {
             if (!Strings.isNullOrEmpty(sharedProjectId)) {
                 try {
                     FirewallList sharedProjectFirewalls = compute.firewalls().list(sharedProjectId).execute();
-                    for (Firewall firewall : sharedProjectFirewalls.getItems()) {
-                        Map<String, Object> properties = new HashMap<>();
-                        properties.put("network", getNetworkName(firewall));
-                        CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
-                        result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+                    if (sharedProjectFirewalls.getItems() != null) {
+                        for (Firewall firewall : sharedProjectFirewalls.getItems()) {
+                            Map<String, Object> properties = new HashMap<>();
+                            properties.put("network", getNetworkName(firewall));
+                            CloudSecurityGroup cloudSecurityGroup = new CloudSecurityGroup(firewall.getName(), firewall.getName(), properties);
+                            result.computeIfAbsent(region.value(), k -> new HashSet<>()).add(cloudSecurityGroup);
+                        }
                     }
                 } catch (Exception ex) {
                     LOGGER.warn(String.format("We can not read the host project with id %s", sharedProjectId));
