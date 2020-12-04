@@ -105,23 +105,31 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     if (!checkableInstances.isEmpty()) {
                         SyncResult syncResult = freeipaChecker.getStatus(stack, checkableInstances);
                         if (DetailedStackStatus.AVAILABLE == syncResult.getStatus()) {
+                            StringBuilder allInstanceStatusInfo = new StringBuilder();
                             for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
-                                updateInstanceStatus(entry.getKey(), entry.getValue());
+                                allInstanceStatusInfo.append(updateInstanceStatus(entry.getKey(), entry.getValue()));
                             }
-                            updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                            String freeipaStatusInfo = updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                            LOGGER.debug(":::Auto sync::: freeipa status from healtch check: " + freeipaStatusInfo + allInstanceStatusInfo.toString());
                         } else {
                             List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
                                     syncResult.getInstanceStatusMap());
+                            String allInstanceStatusInfo = results.stream()
+                                    .map(result -> "instance " + result.getInstanceId() + " is " + result.getStatus())
+                                    .collect(Collectors.joining(". "));
+                            String freeipaStatusInfo = null;
                             if (!results.isEmpty()) {
-                                updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                                freeipaStatusInfo = updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
                             } else {
                                 LOGGER.debug("results is empty, skip update");
                             }
+                            LOGGER.debug(":::Auto sync::: freeipa status from healtch check: " + freeipaStatusInfo + allInstanceStatusInfo);
                         }
                     } else if (alreadyDeletedCount > 0) {
                         SyncResult syncResult =  new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
                                 DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
-                        updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                        String freeipaStatusInfo = updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                        LOGGER.debug(":::Auto sync::: freeipa status from healtch check: " + freeipaStatusInfo);
                     }
                 });
                 return null;
@@ -131,23 +139,28 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void updateInstanceStatus(InstanceMetaData instanceMetaData, DetailedStackStatus detailedStackStatus) {
+    private String updateInstanceStatus(InstanceMetaData instanceMetaData, DetailedStackStatus detailedStackStatus) {
+        String instanceStatusInfo = "";
         switch (detailedStackStatus) {
             case AVAILABLE:
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.CREATED);
+                instanceStatusInfo = String.format("instance %s is %s. ", instanceMetaData.getInstanceId(), InstanceStatus.CREATED.toString());
                 break;
             case UNHEALTHY:
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNHEALTHY);
+                instanceStatusInfo = String.format("instance %s is %s. ", instanceMetaData.getInstanceId(), InstanceStatus.UNHEALTHY.toString());
                 break;
             case UNREACHABLE:
                 setStatusIfNotTheSame(instanceMetaData, InstanceStatus.UNREACHABLE);
+                instanceStatusInfo = String.format("instance %s is %s. ", instanceMetaData.getInstanceId(), InstanceStatus.UNREACHABLE.toString());
                 break;
             default:
                 LOGGER.info(":::Auto sync::: the '{}' status is not converted", detailedStackStatus);
         }
+        return instanceStatusInfo;
     }
 
-    private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount) {
+    private String updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount) {
         DetailedStackStatus status = providerSyncResults == null ? result.getStatus() : getStackStatus(providerSyncResults, result, alreadyDeletedCount);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
@@ -162,6 +175,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                         stack.getStackStatus().getDetailedStackStatus(), status);
             }
         }
+        return String.format("freeipa %s is %s. ", stack.getResourceCrn(), status.getStatus().toString());
     }
 
     private DetailedStackStatus getStackStatus(List<ProviderSyncResult> providerSyncResults, SyncResult result, int alreadyDeletedCount) {
