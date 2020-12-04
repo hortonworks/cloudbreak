@@ -54,6 +54,7 @@ public class DistroXTemplateTestDto extends DeletableTestDto<DistroXV1Request, C
         template.setRootVolume(rootVolume);
         instanceGroup.setTemplate(template);
         instanceGroup.setName(instanceGroupTestDto.getName());
+        instanceGroup.setNodeCount(instanceGroupTestDto.getNodeCount());
         getRequest().setInstanceGroups(Set.of(instanceGroup));
         return this;
     }

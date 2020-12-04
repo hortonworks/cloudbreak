@@ -8,6 +8,7 @@ base:
              - freeipa.services
              - dns
              - logrotate
+             - ccm
 
            'roles:freeipa_primary':
              - match: grain

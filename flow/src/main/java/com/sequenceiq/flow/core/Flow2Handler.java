@@ -198,7 +198,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
                 lastFlowLog.ifPresent(flowLog -> {
                     String nodeId = nodeConfig.getId();
-                    if (flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
+                    if (flowLog.getFinalized() || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
                         updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters);
                     } else {
                         LOGGER.info("Flow {} was handled by another node {}, current node ID is {}, abandoning.",

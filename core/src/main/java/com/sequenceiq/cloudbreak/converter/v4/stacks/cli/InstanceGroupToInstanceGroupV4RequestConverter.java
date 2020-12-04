@@ -24,7 +24,7 @@ public class InstanceGroupToInstanceGroupV4RequestConverter extends AbstractConv
         InstanceGroupV4Request instanceGroupRequest = new InstanceGroupV4Request();
         providerParameterCalculator.parse(source.getAttributes().getMap(), instanceGroupRequest);
         instanceGroupRequest.setName(source.getGroupName());
-        instanceGroupRequest.setNodeCount(source.getNodeCount());
+        instanceGroupRequest.setNodeCount(source.getInitialNodeCount());
         instanceGroupRequest.setType(source.getInstanceGroupType());
         instanceGroupRequest.setRecipeNames(new HashSet<>());
         instanceGroupRequest.setTemplate(getConversionService().convert(source.getTemplate(), InstanceTemplateV4Request.class));

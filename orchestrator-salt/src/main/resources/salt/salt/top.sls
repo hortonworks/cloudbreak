@@ -56,6 +56,7 @@ base:
   'G@roles:gateway or G@roles:knox':
     - match: compound
     - gateway.knox
+    - ccm
 
   'G@roles:idbroker':
     - match: compound
