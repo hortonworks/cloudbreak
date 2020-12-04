@@ -27,6 +27,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseNetworkView;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
@@ -181,7 +182,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         .setPrivateNetwork(subnetworkForRedbeams.getNetwork())
                         .setIpv4Enabled(false)
                 )
-                .setUserLabels(stack.getTags())
+                .setUserLabels(GcpLabelUtil.createLabelsFromTagsMap(stack.getTags()))
                 .setBackupConfiguration(
                         new BackupConfiguration()
                                 .setEnabled(true)
