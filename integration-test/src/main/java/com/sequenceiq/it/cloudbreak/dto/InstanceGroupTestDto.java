@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -121,6 +121,14 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
     public InstanceGroupTestDto withSecurityGroup(SecurityGroupTestDto securityGroup) {
         getRequest().setSecurityGroup(securityGroup.getRequest());
         return this;
+    }
+
+    public InstanceGroupTestDto withTemplate(String key) {
+        InstanceTemplateV4TestDto template = getTestContext().get(key);
+        if (template == null) {
+            throw new IllegalArgumentException("Instance template does not exist for key: " + key + " in test context!");
+        }
+        return withTemplate(template);
     }
 
     public InstanceGroupTestDto withTemplate(InstanceTemplateV4TestDto template) {
