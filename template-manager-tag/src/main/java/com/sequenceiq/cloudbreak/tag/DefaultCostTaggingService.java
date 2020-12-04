@@ -14,14 +14,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 
 @Service
 public class DefaultCostTaggingService implements CostTagging {
-
-    public static final int GCP_MAX_TAG_LEN = 63;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCostTaggingService.class);
 
@@ -117,22 +114,7 @@ public class DefaultCostTaggingService implements CostTagging {
     }
 
     private String transform(String value, String platform) {
-        String valueAfterCheck = Strings.isNullOrEmpty(value) ? "unknown" : value;
-        // GCP labels have strict rules https://cloud.google.com/compute/docs/labeling-resources
-        if ("GCP".equalsIgnoreCase(platform)) {
-            LOGGER.debug("Transforming tag key/value for GCP.");
-            if (Crn.isCrn(valueAfterCheck)) {
-                try {
-                    Crn crn = Crn.fromString(valueAfterCheck);
-                    valueAfterCheck = crn == null ? valueAfterCheck : crn.getResource();
-                } catch (Exception e) {
-                    LOGGER.debug("Ignoring CRN ({}) parse error during tag value generation : {}", valueAfterCheck, e.getMessage());
-                }
-            }
-            String sanitized = valueAfterCheck.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
-            return StringUtils.right(sanitized, GCP_MAX_TAG_LEN);
-        }
-        return valueAfterCheck;
+        return Strings.isNullOrEmpty(value) ? "unknown" : value;
     }
 
     private void validateResourceTagsNotContainTheSameTag(Map<String, String> userDefinedResourceTags, Map<String, String> accountTags) {
