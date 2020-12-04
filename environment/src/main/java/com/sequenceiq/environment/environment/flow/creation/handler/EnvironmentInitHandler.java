@@ -72,6 +72,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
                                 initEnvironment(environment);
                                 goToValidationState(environmentDtoEvent, environmentDto);
                             } catch (Exception e) {
+                                LOGGER.warn("Couldn't initialize environment creation", e);
                                 goToFailedState(environmentDtoEvent, e.getMessage());
                             }
                         }, () -> goToFailedState(environmentDtoEvent, String.format("Environment was not found with id '%s'.", environmentDto.getId()))
