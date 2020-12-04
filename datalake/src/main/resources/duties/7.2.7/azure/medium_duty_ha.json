@@ -11,7 +11,7 @@
     {
       "name": "master",
       "template": {
-        "instanceType": "Standard_D16s_v3",
+        "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
           {
             "count": 1,
@@ -31,7 +31,7 @@
     {
       "name": "gateway",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D8s_v3",
         "attachedVolumes": [
           {
             "count": 1,
@@ -51,7 +51,7 @@
     {
       "name": "core",
       "template": {
-        "instanceType": "Standard_D4s_v3",
+        "instanceType": "Standard_D8s_v3",
         "attachedVolumes": [
           {
             "count": 1,
@@ -71,7 +71,7 @@
     {
       "name": "auxiliary",
       "template": {
-        "instanceType": "Standard_D16s_v3",
+        "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
           {
             "count": 1,
