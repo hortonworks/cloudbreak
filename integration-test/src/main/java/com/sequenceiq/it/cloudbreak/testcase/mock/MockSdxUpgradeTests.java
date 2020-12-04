@@ -15,12 +15,16 @@ import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
+import com.sequenceiq.it.cloudbreak.dto.InstanceTemplateV4TestDto;
+import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -50,10 +54,10 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster",
+            when = "start an sdx cluster with embedded database on root disk",
             then = "Upgrade criteria is not met"
     )
-    public void testSdxUpgradeCriteriaNotMetTest(MockedTestContext testContext) {
+    public void testSdxUpgradeCriteriaNotMetTestWhenEmbeddedDatabaseIsOnRootDisk(MockedTestContext testContext) {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
@@ -74,9 +78,15 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(upgradeImageCatalogName)
+                .given("NoAttachedDisksTemplate", InstanceTemplateV4TestDto.class)
+                .withAttachedVolume(testContext.init(VolumeV4TestDto.class).withCount(0))
+                .given("InstanceGroupWithoutAttachedDisk", InstanceGroupTestDto.class)
+                .withHostGroup(HostGroupType.MASTER)
+                .withTemplate("NoAttachedDisksTemplate")
                 .given(stack, StackTestDto.class)
                 .withCluster(cluster)
                 .withImageSettings(imageSettings)
+                .replaceInstanceGroups("InstanceGroupWithoutAttachedDisk")
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
@@ -90,10 +100,10 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running CloudSdxInternalTestDtobreak",
-            when = "start an sdx cluster",
+            when = "start an sdx cluster with external database",
             then = "Upgrade option should be presented"
     )
-    public void testSdxUpgradeSuccessful(MockedTestContext testContext) {
+    public void testSdxUpgradeSuccessfulWhenExternalDatabaseIsUsed(MockedTestContext testContext) {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
@@ -129,6 +139,46 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)
                 .withExternalDatabaseCrn()
+                .given(imageSettings, ImageSettingsTestDto.class)
+                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
+                .withImageCatalog(upgradeImageCatalogName)
+                .given(stack, StackTestDto.class)
+                .withCluster(cluster)
+                .withImageSettings(imageSettings)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .withStackRequest(key(cluster), key(stack))
+                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .awaitForFlow(key(sdxInternal))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running CloudSdxInternalTestDtobreak",
+            when = "start an sdx cluster with embedded database on attached disk",
+            then = "Upgrade option should be presented"
+    )
+    public void testSdxUpgradeSuccessfulWhenEmbeddedDatabaseIsOnAttachedDisk(MockedTestContext testContext) {
+        String upgradeImageCatalogName = resourcePropertyProvider().getName();
+        createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
+        String sdxInternal = resourcePropertyProvider().getName();
+        String stack = resourcePropertyProvider().getName();
+        String cluster = "cmcluster";
+        String imageSettings = "imageSettingsUpgrade";
+        String networkKey = "someOtherNetwork";
+
+        testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(cluster, ClusterTestDto.class)
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
                 .withImageCatalog(upgradeImageCatalogName)
