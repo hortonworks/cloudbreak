@@ -30,8 +30,13 @@ dependencies {
   compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: '1.22.0') { exclude group: 'org.slf4j' }
   compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
-  compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
-  compile group: 'com.microsoft.azure',         name: 'adal4j',                     version: '1.6.4'
+  compile group: 'com.microsoft.azure',          name: 'azure-storage',              version: azureStorageSdkVersion
+  compile group: 'com.azure',                    name: 'azure-storage-blob',         version: '12.6.0'
+  compile group: 'com.microsoft.azure',          name: 'adal4j',                     version: '1.6.4'
+  compile group: 'com.microsoft.azure',          name: 'msal4j',                     version: '1.8.0'
+  compile group: 'io.projectreactor.addons', name: 'reactor-adapter', version: '3.0.2.RELEASE'
+
+
   compile group: 'org.apache.commons',                 name: 'commons-collections4', version: commonsCollections4Version
   compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
