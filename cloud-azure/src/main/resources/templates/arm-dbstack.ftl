@@ -199,6 +199,19 @@
                 "location": "[parameters('location')]",
                 "resources": []
             },
+            {
+                "type": "Microsoft.Authorization/locks",
+                "apiVersion": "2016-09-01",
+                "scope": "[concat('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]",
+                "dependsOn": [
+                    "[resourceId('Microsoft.DBforPostgreSQL/servers', parameters('dbServerName'))]"
+                ],
+                "name": "[concat(parameters('dbServerName'), '_database_lock')]",
+                    "properties": {
+                        "level": "CanNotDelete",
+                        "notes": "Database created by Cloudbreak should not be deleted.""
+                    }
+            },
     <#if usePrivateEndpoints>
         {
             "type": "Microsoft.Network/privateEndpoints",
