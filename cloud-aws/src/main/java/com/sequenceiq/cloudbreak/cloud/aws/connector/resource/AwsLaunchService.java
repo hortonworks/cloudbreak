@@ -27,12 +27,14 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
+import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNetworkCfTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsSubnetIgwExplorer;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
@@ -110,6 +112,9 @@ public class AwsLaunchService {
 
     @Inject
     private AwsCloudWatchService awsCloudWatchService;
+
+    @Inject
+    private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -217,7 +222,7 @@ public class AwsLaunchService {
 
             List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
             for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
-                awsLoadBalancers.add(convert(cloudLoadBalancer, stack, instances));
+                awsLoadBalancers.add(convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, amazonEC2Client));
             }
 
             modelContext.withLoadBalancers(awsLoadBalancers);
@@ -249,10 +254,19 @@ public class AwsLaunchService {
         }
     }
 
-    private AwsLoadBalancer convert(CloudLoadBalancer cloudLoadBalancer, CloudStack stack, List<CloudResource> instances) {
+    private AwsLoadBalancerScheme determinePublicVsPrivateSchema(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+        String subnetId = awsNetworkView.getExistingSubnet();
+        DescribeRouteTablesResult describeRouteTablesResult = amazonEC2Client.describeRouteTables();
+        return awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnetId)
+                ? AwsLoadBalancerScheme.PUBLIC : AwsLoadBalancerScheme.PRIVATE;
+    }
+
+    private AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
+            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+        AwsLoadBalancerScheme scheme = determinePublicVsPrivateSchema(awsNetworkView, amazonEC2Client);
+
         int order = 1;
         List<AwsListener> awsListeners = new ArrayList<>();
-        AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(cloudLoadBalancer.getType().name());
         for (Map.Entry<Integer, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
             List<CloudResource> lbTargetInstances = instances.stream()
                 .filter(instance -> entry.getValue().stream().anyMatch(tg -> tg.getName().equals(instance.getGroup())))
