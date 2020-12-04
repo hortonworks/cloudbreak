@@ -146,10 +146,13 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         Subnetwork subnet = null;
         try {
             SubnetworkList ownProjectSubnets = compute.subnetworks().list(projectId, region).execute();
-            Set<Subnetwork> collect = ownProjectSubnets.getItems()
-                    .stream()
-                    .filter(e -> e.getName().equals(subnetId) || e.getId().toString().equals(subnetId))
-                    .collect(Collectors.toSet());
+            Set<Subnetwork> collect = new HashSet<>();
+            if (ownProjectSubnets.getItems() != null) {
+                collect = ownProjectSubnets.getItems()
+                        .stream()
+                        .filter(e -> e.getName().equals(subnetId) || e.getId().toString().equals(subnetId))
+                        .collect(Collectors.toSet());
+            }
             if (collect.isEmpty() && !Strings.isNullOrEmpty(sharedProjectId)) {
                 subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
             } else {
