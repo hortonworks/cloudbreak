@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.secret.service;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -13,10 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.service.secret.SecretOperationException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 
 @Service
@@ -125,11 +125,19 @@ public class SecretAspectService {
     }
 
     private String findAccountId(Object entity) throws IllegalArgumentException {
-        return Optional.ofNullable(entity)
-                .filter(e -> e instanceof AccountIdAwareResource)
-                .map(e -> (AccountIdAwareResource) e)
-                .map(AccountIdAwareResource::getAccountId)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        entity.getClass().getSimpleName() + " must be a subclass of " + AccountIdAwareResource.class.getSimpleName()));
+        if (entity != null) {
+            if (entity instanceof AccountIdAwareResource) {
+                String accountId = ((AccountIdAwareResource) entity).getAccountId();
+                if (Strings.isNullOrEmpty(accountId)) {
+                    throw new IllegalArgumentException("Account id is null on " + entity + " object.");
+                }
+                return accountId;
+            } else {
+                throw new IllegalArgumentException(
+                        entity.getClass().getSimpleName() + " must be a subclass of " + AccountIdAwareResource.class.getSimpleName());
+            }
+        } else {
+            throw new IllegalArgumentException("The entity is null");
+        }
     }
 }
