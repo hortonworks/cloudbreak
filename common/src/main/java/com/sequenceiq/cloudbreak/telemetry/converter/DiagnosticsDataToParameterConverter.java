@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
+import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -29,6 +30,9 @@ import com.sequenceiq.common.model.diagnostics.GcsDiagnosticsParameters.GcsDiagn
 public class DiagnosticsDataToParameterConverter {
 
     private static final String DIAGNOSTICS_SUFFIX_PATH = "diagnostics";
+
+    @Inject
+    private SupportBundleConfiguration supportBundleConfiguration;
 
     @Inject
     private S3ConfigGenerator s3ConfigGenerator;
@@ -80,6 +84,11 @@ public class DiagnosticsDataToParameterConverter {
         builder.withUpdatePackage(request.getUpdatePackage());
         builder.withSkipValidation(request.getSkipValidation());
         builder.withAdditionalLogs(request.getAdditionalLogs());
+        if (supportBundleConfiguration.isEnabled()) {
+            builder.withDbusUrl(telemetry.getDatabusEndpoint());
+            builder.withSupportBundleDbusStreamName(supportBundleConfiguration.getDbusStreamName());
+            builder.withSupportBundleDbusAppName(supportBundleConfiguration.getDbusAppName());
+        }
         return builder.build();
     }
 }

@@ -31,6 +31,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
+import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -106,6 +109,10 @@ public class Stack implements AccountAwareResource {
 
     @OneToOne(cascade = CascadeType.ALL)
     private StackStatus stackStatus;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret databusCredential = Secret.EMPTY;
 
     private String template;
 
@@ -294,6 +301,14 @@ public class Stack implements AccountAwareResource {
 
     public void setStackStatus(StackStatus stackStatus) {
         this.stackStatus = stackStatus;
+    }
+
+    public String getDatabusCredential() {
+        return databusCredential.getRaw();
+    }
+
+    public void setDatabusCredential(String databusCredential) {
+        this.databusCredential = new Secret(databusCredential);
     }
 
     public String getOwner() {

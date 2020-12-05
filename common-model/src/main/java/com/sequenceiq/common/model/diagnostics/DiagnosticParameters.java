@@ -47,6 +47,16 @@ public class DiagnosticParameters {
 
     private String clusterVersion;
 
+    private String dbusUrl;
+
+    private String supportBundleDbusAccessKey;
+
+    private String supportBundleDbusPrivateKey;
+
+    private String supportBundleDbusAppName;
+
+    private String supportBundleDbusStreamName;
+
     private CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters;
 
     public Map<String, Object> toMap() {
@@ -70,6 +80,11 @@ public class DiagnosticParameters {
         parameters.put("clusterType", clusterType);
         parameters.put("clusterVersion", clusterVersion);
         parameters.put("mode", null);
+        parameters.put("dbusUrl", dbusUrl);
+        parameters.put("supportBundleDbusAccessKey", supportBundleDbusAccessKey);
+        parameters.put("supportBundleDbusPrivateKey", supportBundleDbusPrivateKey);
+        parameters.put("supportBundleDbusStreamName", supportBundleDbusStreamName);
+        parameters.put("supportBundleDbusAppName", supportBundleDbusAppName);
         if (cloudStorageDiagnosticsParameters != null) {
             for (Map.Entry<String, Object> cloudStorageEntry : cloudStorageDiagnosticsParameters.toMap().entrySet()) {
                 parameters.put(cloudStorageEntry.getKey(), cloudStorageEntry.getValue());
@@ -144,6 +159,26 @@ public class DiagnosticParameters {
         this.clusterVersion = clusterVersion;
     }
 
+    public void setDbusUrl(String dbusUrl) {
+        this.dbusUrl = dbusUrl;
+    }
+
+    public void setSupportBundleDbusAccessKey(String supportBundleDbusAccessKey) {
+        this.supportBundleDbusAccessKey = supportBundleDbusAccessKey;
+    }
+
+    public void setSupportBundleDbusPrivateKey(String supportBundleDbusPrivateKey) {
+        this.supportBundleDbusPrivateKey = supportBundleDbusPrivateKey;
+    }
+
+    public void setSupportBundleDbusAppName(String supportBundleDbusAppName) {
+        this.supportBundleDbusAppName = supportBundleDbusAppName;
+    }
+
+    public void setSupportBundleDbusStreamName(String supportBundleDbusStreamName) {
+        this.supportBundleDbusStreamName = supportBundleDbusStreamName;
+    }
+
     public void setCloudStorageDiagnosticsParameters(CloudStorageDiagnosticsParameters cloudStorageDiagnosticsParameters) {
         this.cloudStorageDiagnosticsParameters = cloudStorageDiagnosticsParameters;
     }
@@ -210,6 +245,26 @@ public class DiagnosticParameters {
 
     public String getClusterVersion() {
         return clusterVersion;
+    }
+
+    public String getDbusUrl() {
+        return dbusUrl;
+    }
+
+    public String getSupportBundleDbusAccessKey() {
+        return supportBundleDbusAccessKey;
+    }
+
+    public String getSupportBundleDbusPrivateKey() {
+        return supportBundleDbusPrivateKey;
+    }
+
+    public String getSupportBundleDbusAppName() {
+        return supportBundleDbusAppName;
+    }
+
+    public String getSupportBundleDbusStreamName() {
+        return supportBundleDbusStreamName;
     }
 
     public CloudStorageDiagnosticsParameters getCloudStorageDiagnosticsParameters() {
@@ -308,6 +363,21 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withSkipValidation(Boolean skipValidation) {
             diagnosticParameters.setSkipValidation(skipValidation);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withDbusUrl(String dbusUrl) {
+            diagnosticParameters.setDbusUrl(dbusUrl);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withSupportBundleDbusStreamName(String supportBundleDbusStreamName) {
+            diagnosticParameters.setSupportBundleDbusStreamName(supportBundleDbusStreamName);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withSupportBundleDbusAppName(String supportBundleDbusAppName) {
+            diagnosticParameters.setSupportBundleDbusAppName(supportBundleDbusAppName);
             return this;
         }
 

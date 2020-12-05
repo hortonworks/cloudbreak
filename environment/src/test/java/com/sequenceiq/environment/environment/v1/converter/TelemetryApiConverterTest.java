@@ -41,7 +41,7 @@ public class TelemetryApiConverterTest {
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
-                altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
+                altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         underTest = new TelemetryApiConverter(telemetryConfiguration);
     }
 

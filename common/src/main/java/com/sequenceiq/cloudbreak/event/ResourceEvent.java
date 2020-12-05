@@ -184,6 +184,7 @@ public enum ResourceEvent {
     STACK_DATALAKE_UPDATE_FINISHED("stack.datalake.update.finished"),
     STACK_DATALAKE_UPDATE_FAILED("stack.datalake.update.failed"),
     STACK_DIAGNOSTICS_INIT_RUNNING("stack.diagnostics.init.running"),
+    STACK_DIAGNOSTICS_ENSURE_MACHINE_USER("stack.diagnostics.ensure.machine.user"),
     STACK_DIAGNOSTICS_COLLECTION_RUNNING("stack.diagnostics.collection.running"),
     STACK_DIAGNOSTICS_UPLOAD_RUNNING("stack.diagnostics.upload.running"),
     STACK_DIAGNOSTICS_CLEANUP_RUNNING("stack.diagnostics.cleanup.running"),

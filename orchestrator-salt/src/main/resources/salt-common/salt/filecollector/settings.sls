@@ -21,6 +21,15 @@
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
 {% set mode = salt['pillar.get']('filecollector:mode') %}
 {% set uuid = salt['pillar.get']('filecollector:uuid') %}
+{% set dbus_url = salt['pillar.get']('filecollector:dbusUrl') %}
+{% if salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
+  {% set support_bundle_dbus_headers = '@support-bundle-app:' + salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
+{% else %}
+  {% set support_bundle_dbus_headers = '' %}
+{% endif %}
+{% set support_bundle_dbus_stream_name = salt['pillar.get']('filecollector:supportBundleDbusStreamName') %}
+{% set support_bundle_dbus_access_key = salt['pillar.get']('filecollector:supportBundleDbusAccessKey') %}
+{% set support_bundle_dbus_private_key = salt['pillar.get']('filecollector:supportBundleDbusPrivateKey') %}
 
 {% if s3_location and not s3_region %}
   {%- set instanceDetails = salt.cmd.run('curl -s http://169.254.169.254/latest/dynamic/instance-identity/document') | load_json %}
@@ -135,5 +144,11 @@
     "clusterVersion": cluster_version,
     "uuid": uuid,
     "accountId": account_id,
-    "cdpTelemetryVersion": cdp_telemetry_version
+    "cdpTelemetryVersion": cdp_telemetry_version,
+    "supportBundleDbusStreamName": support_bundle_dbus_stream_name,
+    "supportBundleDbusHeaders": support_bundle_dbus_headers,
+    "supportBundleDbusAccessKey": support_bundle_dbus_access_key,
+    "supportBundleDbusPrivateKey": support_bundle_dbus_private_key,
+    "compressedFilePattern": compressed_file_pattern,
+    "dbusUrl": dbus_url
 }) %}

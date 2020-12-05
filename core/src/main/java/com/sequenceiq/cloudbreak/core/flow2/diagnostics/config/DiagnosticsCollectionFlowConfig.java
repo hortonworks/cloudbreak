@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollec
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_COLLECTION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_ENSURE_MACHINE_USER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_UPLOAD_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState.FINAL_STATE;
@@ -14,6 +15,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_CLEANUP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPLOAD_EVENT;
 
@@ -39,7 +41,12 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
             .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(DIAGNOSTICS_INIT_STATE).to(DIAGNOSTICS_COLLECTION_STATE)
+            .from(DIAGNOSTICS_INIT_STATE).to(DIAGNOSTICS_ENSURE_MACHINE_USER_STATE)
+            .event(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT)
+            .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(DIAGNOSTICS_ENSURE_MACHINE_USER_STATE).to(DIAGNOSTICS_COLLECTION_STATE)
             .event(START_DIAGNOSTICS_COLLECTION_EVENT)
             .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
             .defaultFailureEvent()

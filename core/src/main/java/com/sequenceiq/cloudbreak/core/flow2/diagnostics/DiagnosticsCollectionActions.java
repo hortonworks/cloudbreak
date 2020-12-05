@@ -12,6 +12,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -76,6 +77,29 @@ public class DiagnosticsCollectionActions {
         };
     }
 
+    @Bean(name = "DIAGNOSTICS_ENSURE_MACHINE_USER_STATE")
+    public Action<?, ?> diagnosticsEnsureMachineUserAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_CREATE_MACHINE_USER_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_ENSURE_MACHINE_USER);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(resourceId)
+                        .withResourceCrn(payload.getResourceCrn())
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.ENSURE_MACHINE_USER_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_COLLECTION_STATE")
     public Action<?, ?> diagnosticsCollectionAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
@@ -131,8 +155,15 @@ public class DiagnosticsCollectionActions {
                         message = "Engineering will receive the logs.";
                         break;
                     case SUPPORT:
-                        message = String.format("Support ticket will be created for the logs. Issue: '%s' Description '%s'",
-                                parameters.getIssue(), parameters.getDescription());
+                        if (StringUtils.isNotBlank(parameters.getIssue())) {
+                            message = String.format("Diagnostics have been sent to support. " +
+                                            "Case number: '%s' Description: '%s'",
+                                    parameters.getIssue(), parameters.getDescription());
+                        } else {
+                            message = String.format("Diagnostics have been sent to support. " +
+                                            "A ticket will be created for the diagnostics. Description: '%s'",
+                                    parameters.getDescription());
+                        }
                         break;
                     default:
                         message = "Location for logs on each node: " + LOCAL_LOG_PATH;

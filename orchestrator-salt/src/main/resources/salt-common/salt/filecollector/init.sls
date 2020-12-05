@@ -111,4 +111,12 @@ check_td_agent_running_systemctl:
   cmd.run:
     - name: "systemctl is-active --quiet td-agent"
     - failhard: True
+{% elif not filecollector.skipValidation and filecollector.destination == "SUPPORT" %}
+check_support_dbus_connection:
+  cmd.run:
+    - name: "cdp-telemetry utils check-connection --url {{ filecollector.dbusUrl }}"
+    - failhard: True{% if filecollector.proxyUrl %}
+    - env: {% if filecollector.proxyProtocol == "https" %}
+       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
+       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
 {% endif %}

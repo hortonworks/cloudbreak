@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.service.altus;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -14,22 +18,36 @@ import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 public class AltusMachineUserService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AltusMachineUserService.class);
+
     private static final String FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN = "%s-fluent-databus-uploader-%s";
 
     private final AltusIAMService altusIAMService;
 
+    private final StackService stackService;
+
     private final ClusterService clusterService;
 
-    public AltusMachineUserService(AltusIAMService altusIAMService, ClusterService clusterService) {
+    private final ComponentConfigProviderService componentConfigProviderService;
+
+    public AltusMachineUserService(
+            AltusIAMService altusIAMService,
+            StackService stackService,
+            ClusterService clusterService,
+            ComponentConfigProviderService componentConfigProviderService) {
         this.altusIAMService = altusIAMService;
+        this.stackService = stackService;
         this.clusterService = clusterService;
+        this.componentConfigProviderService = componentConfigProviderService;
     }
 
     /**
@@ -50,7 +68,7 @@ public class AltusMachineUserService {
      * Delete machine user for fluent based upload with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
+        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry) || isDataBusCredentialAvailable(stack)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> altusIAMService.clearMachineUser(
@@ -71,6 +89,34 @@ public class AltusMachineUserService {
                         accountId
                 )
         );
+    }
+
+    /**
+     * Gather or create DataBus credential for a stack.
+     * On creation it will generate aa new workload user with new access/private keys.
+     * @param stackId id of the stack
+     * @return databus credential holder
+     */
+    public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Long stackId) throws IOException {
+        LOGGER.debug("Get or create databus credential for stack");
+        Stack stack = stackService.get(stackId);
+        Cluster cluster = clusterService.getById(stack.getId());
+        cluster.getDatabusCredential();
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        if (cluster.getDatabusCredential() != null) {
+            LOGGER.debug("Databus credential has been found for the stack");
+            DataBusCredential dataBusCredential = new Json(cluster.getDatabusCredential()).get(DataBusCredential.class);
+            if (isDataBusCredentialStillExist(telemetry, dataBusCredential, stack)) {
+                LOGGER.debug("Databus credential exists both in the stack and on UMS side");
+                return dataBusCredential;
+            } else {
+                LOGGER.debug("Databus credential exists on stack side but does not exists on UMS side, it will be updated ...");
+            }
+        } else {
+            LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
+        }
+        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry);
+        return storeDataBusCredential(altusCredential, stack);
     }
 
     /**
@@ -127,6 +173,10 @@ public class AltusMachineUserService {
 
     public String getFluentDatabusMachineUserName(String clusterType, String resource) {
         return String.format(FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN, clusterType, resource);
+    }
+
+    private boolean isDataBusCredentialAvailable(Stack stack) {
+        return stack.getCluster() != null && StringUtils.isNotBlank(stack.getCluster().getDatabusCredential());
     }
 
     private String getFluentDatabusMachineUserName(Stack stack) {
