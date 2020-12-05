@@ -1,4 +1,5 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
+{%- from 'postgresql/settings.sls' import postgresql with context %}
 
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 {% set postgres_directory = salt['pillar.get']('postgres:postgres_directory') %}
@@ -22,6 +23,9 @@ init-services-db-remote:
     - unless: test -f /var/log/init-services-db-remote-executed
     - require:
       - file: /opt/salt/scripts/init_db_remote.sh
+{% if postgresql.ssl_enabled == True %}
+      - file: {{ postgresql.root_certs_file }}
+{%- endif %}
 
 {%- else %}
 
