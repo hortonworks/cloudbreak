@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 
 @Configuration
 public class TelemetryConfiguration {
@@ -18,14 +19,18 @@ public class TelemetryConfiguration {
 
     private final MonitoringConfiguration monitoringConfiguration;
 
+    private final SupportBundleConfiguration supportBundleConfiguration;
+
     public TelemetryConfiguration(AltusDatabusConfiguration altusDatabusConfiguration,
             MeteringConfiguration meteringConfiguration,
             ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration,
-            MonitoringConfiguration monitoringConfiguration) {
+            MonitoringConfiguration monitoringConfiguration,
+            SupportBundleConfiguration supportBundleConfiguration) {
         this.altusDatabusConfiguration = altusDatabusConfiguration;
         this.meteringConfiguration = meteringConfiguration;
         this.clusterLogsCollectionConfiguration = clusterLogsCollectionConfiguration;
         this.monitoringConfiguration = monitoringConfiguration;
+        this.supportBundleConfiguration = supportBundleConfiguration;
     }
 
     public AltusDatabusConfiguration getAltusDatabusConfiguration() {
@@ -42,5 +47,9 @@ public class TelemetryConfiguration {
 
     public MonitoringConfiguration getMonitoringConfiguration() {
         return monitoringConfiguration;
+    }
+
+    public SupportBundleConfiguration getSupportBundleConfiguration() {
+        return supportBundleConfiguration;
     }
 }

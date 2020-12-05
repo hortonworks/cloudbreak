@@ -47,7 +47,7 @@ public class TelemetryConverterTest {
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, "app", "stream");
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, true, true);
     }
 
@@ -185,7 +185,7 @@ public class TelemetryConverterTest {
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, true, false);
         // WHEN
         TelemetryRequest result = converter.convert(null, sdxClusterResponse);
@@ -261,7 +261,7 @@ public class TelemetryConverterTest {
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(false, null, null);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig);
+                new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, false, true);
         // WHEN
         TelemetryRequest result = converter.convert(response, sdxClusterResponse);

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.telemetry.support.SupportBundleConfiguration;
 import com.sequenceiq.common.api.diagnostics.BaseDiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
@@ -16,7 +17,9 @@ import com.sequenceiq.common.api.type.FeatureSetting;
 
 class DiagnosticsCollectionValidatorTest {
 
-    private final DiagnosticsCollectionValidator underTest = new DiagnosticsCollectionValidator();
+    private final DiagnosticsCollectionValidator underTest =
+            new DiagnosticsCollectionValidator(
+                    new SupportBundleConfiguration(false, null, null));
 
     @Test
     void testWithoutTelemetry() {

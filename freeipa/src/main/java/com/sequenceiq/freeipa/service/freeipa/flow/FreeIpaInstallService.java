@@ -3,11 +3,11 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,8 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -39,6 +37,7 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -136,7 +135,8 @@ public class FreeIpaInstallService {
         }
     }
 
-    private void decoratePillarsWithTelemetryConfigs(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
+    private void decoratePillarsWithTelemetryConfigs(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig)
+            throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
@@ -160,14 +160,18 @@ public class FreeIpaInstallService {
                     databusEnabled, false, telemetry);
             servicePillarConfig.put("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
             if (databusEnabled) {
-                Optional<AltusCredential> credential = ThreadBasedUserCrnProvider
-                        .doAsInternalActor(() -> altusMachineUserService.createMachineUserWithAccessKeys(stack, telemetry));
-                String accessKey = credential.map(AltusCredential::getAccessKey).orElse(null);
-                char[] privateKey = credential.map(AltusCredential::getPrivateKey).orElse(null);
-                DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
-                        null, telemetry.getDatabusEndpoint());
-                servicePillarConfig.put("databus", new SaltPillarProperties("/databus/init.sls",
-                        Collections.singletonMap("databus", databusConfigView.toMap())));
+                LOGGER.debug("Apply DataBus related pillars.");
+                try {
+                    DataBusCredential dbusCredential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack);
+                    String accessKey = dbusCredential.getAccessKey();
+                    char[] privateKey = dbusCredential.getPrivateKey().toCharArray();
+                    DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
+                            null, telemetry.getDatabusEndpoint());
+                    servicePillarConfig.put("databus", new SaltPillarProperties("/databus/init.sls",
+                            Collections.singletonMap("databus", databusConfigView.toMap())));
+                } catch (IOException e) {
+                    throw new CloudbreakOrchestratorFailedException(e);
+                }
             }
         }
     }

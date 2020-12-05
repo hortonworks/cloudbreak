@@ -13,3 +13,23 @@ filecollector_upload_to_cloud_storage:
     - env:
         - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"
 {% endif %}
+
+{% if filecollector.destination == "SUPPORT" %}
+/opt/cdp-telemetry/conf/support_bundle_databus.conf:
+   file.managed:
+    - source: salt://filecollector/template/support_bundle_databus.conf.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: '0600'
+    - failhard: True
+
+filecollector_upload_to_support:
+  cmd.run:
+    - name: "cdp-telemetry databus upload -p {{ filecollector.compressedFilePattern }} -c /opt/cdp-telemetry/conf/support_bundle_databus.conf --stream {{ filecollector.supportBundleDbusStreamName }} --url {{ filecollector.dbusUrl }}"
+    - failhard: True
+    - env:
+        - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"{% if filecollector.proxyUrl %}{% if filecollector.proxyProtocol == "https" %}
+        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
+        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+{% endif %}

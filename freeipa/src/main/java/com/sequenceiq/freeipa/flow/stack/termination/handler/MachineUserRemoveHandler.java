@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,7 +52,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
     private void cleanupMachineUser(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         Telemetry telemetry = stack.getTelemetry();
-        if (telemetry != null && telemetry.isClusterLogsCollectionEnabled()) {
+        if (telemetry != null && (telemetry.isClusterLogsCollectionEnabled() || StringUtils.isNotBlank(stack.getDatabusCredential()))) {
             ThreadBasedUserCrnProvider.doAsInternalActor(() -> altusMachineUserService.cleanupMachineUser(stack, telemetry));
         } else {
             LOGGER.info("Machine user cleanup is not needed.");

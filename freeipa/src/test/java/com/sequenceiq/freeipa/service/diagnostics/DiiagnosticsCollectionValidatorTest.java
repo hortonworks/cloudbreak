@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.controller.validation.diagnostics;
+package com.sequenceiq.freeipa.service.diagnostics;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +15,7 @@ import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
-class DiagnosticsCollectionValidatorTest {
+public class DiiagnosticsCollectionValidatorTest {
 
     private final DiagnosticsCollectionValidator underTest = new DiagnosticsCollectionValidator(
             new SupportBundleConfiguration(false, null, null));
@@ -26,7 +26,8 @@ class DiagnosticsCollectionValidatorTest {
         request.setDestination(DiagnosticsDestination.CLOUD_STORAGE);
         Telemetry telemetry = new Telemetry();
 
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, telemetry, "stackCrn"));
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
 
         assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for this cluster"));
     }
@@ -38,7 +39,8 @@ class DiagnosticsCollectionValidatorTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(new Logging());
 
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, telemetry, "stackCrn"));
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
 
         assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for stack"));
     }
@@ -52,7 +54,7 @@ class DiagnosticsCollectionValidatorTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         telemetry.setLogging(logging);
 
-        underTest.validate(request, telemetry, "stackCrn");
+        underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48");
     }
 
     @Test
@@ -61,7 +63,8 @@ class DiagnosticsCollectionValidatorTest {
         request.setDestination(DiagnosticsDestination.SUPPORT);
         Telemetry telemetry = new Telemetry();
 
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, telemetry, "stackCrn"));
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
 
         assertTrue(thrown.getMessage().contains("Destination SUPPORT is not supported yet."));
     }
@@ -72,7 +75,8 @@ class DiagnosticsCollectionValidatorTest {
         request.setDestination(DiagnosticsDestination.ENG);
         Telemetry telemetry = new Telemetry();
 
-        BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, telemetry, "stackCrn"));
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
 
         assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for this stack"));
     }
@@ -88,6 +92,22 @@ class DiagnosticsCollectionValidatorTest {
         features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
 
-        underTest.validate(request, telemetry, "stackCrn");
+        underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48");
+    }
+
+    @Test
+    void testValidateWithValidEngDestinationButWithWrongVersion() {
+        BaseDiagnosticsCollectionRequest request = new BaseDiagnosticsCollectionRequest();
+        request.setDestination(DiagnosticsDestination.ENG);
+        Telemetry telemetry = new Telemetry();
+        Features features = new Features();
+        FeatureSetting clusterLogsCollection = new FeatureSetting();
+        clusterLogsCollection.setEnabled(true);
+        features.setClusterLogsCollection(clusterLogsCollection);
+        telemetry.setFeatures(features);
+
+        BadRequestException thrown = assertThrows(BadRequestException.class, () ->
+                underTest.validate(request, telemetry, "stackCrn", "2.32.0-b48"));
+        assertTrue(thrown.getMessage().contains("Required freeipa min major/minor version is 2.33"));
     }
 }

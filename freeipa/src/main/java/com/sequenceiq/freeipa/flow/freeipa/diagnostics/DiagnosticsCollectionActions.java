@@ -46,6 +46,24 @@ public class DiagnosticsCollectionActions {
         };
     }
 
+    @Bean(name = "DIAGNOSTICS_ENSURE_MACHINE_USER_STATE")
+    public Action<?, ?> diagnosticsCreateMachineUserAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_CREATE_MACHINE_USER_STATE. resourceCrn: '{}'", resourceCrn);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(payload.getResourceId())
+                        .withResourceCrn(payload.getResourceCrn())
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.ENSURE_MACHINE_USER_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_COLLECTION_STATE")
     public Action<?, ?> diagnosticsCollectionAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {

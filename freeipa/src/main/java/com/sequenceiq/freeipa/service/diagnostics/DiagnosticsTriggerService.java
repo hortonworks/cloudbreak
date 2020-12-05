@@ -37,11 +37,15 @@ public class DiagnosticsTriggerService {
     private FreeIpaFlowManager flowManager;
 
     @Inject
+    private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
+
+    @Inject
     private DiagnosticsDataToParameterConverter diagnosticsDataToParameterConverter;
 
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
+        diagnosticsCollectionValidator.validate(request, stack.getTelemetry(), stack.getResourceCrn(), stack.getAppVersion());
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
         DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, stack.getTelemetry(), FREEIPA_CLUSTER_TYPE,
                 stack.getAppVersion(), stack.getAccountId(), stack.getRegion());

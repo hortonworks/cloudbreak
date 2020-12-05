@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.handler;
 
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT;
-import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors.ENSURE_MACHINE_USER_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_COLLECTION_EVENT;
 
 import java.util.Map;
 
@@ -11,28 +11,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionFailureEvent;
+import com.sequenceiq.freeipa.service.AltusMachineUserService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
+public class DiagnosticsEnsureMachineUserHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsInitHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsEnsureMachineUserHandler.class);
 
     @Inject
     private EventBus eventBus;
 
     @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
+    private AltusMachineUserService altusMachineUserService;
 
-    public DiagnosticsInitHandler(EventSender eventSender) {
+    protected DiagnosticsEnsureMachineUserHandler(EventSender eventSender) {
         super(eventSender);
     }
 
@@ -44,17 +46,23 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         DiagnosticParameters parameters = data.getParameters();
         Map<String, Object> parameterMap = parameters.toMap();
         try {
-            LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            diagnosticsFlowService.init(resourceId, parameterMap);
+            LOGGER.debug("Diagnostics collection ensure machine user operation started. resourceCrn: '{}', parameters: '{}'",
+                    resourceCrn, parameterMap);
+            if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
+                LOGGER.debug("Generating databus credential if required for diagnostics support destination.");
+                DataBusCredential credential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(resourceId);
+                parameters.setSupportBundleDbusAccessKey(credential.getAccessKey());
+                parameters.setSupportBundleDbusPrivateKey(credential.getPrivateKey());
+            }
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
-                    .withSelector(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT.selector())
+                    .withSelector(START_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
-            LOGGER.debug("Diagnostics collection initialization failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
+            LOGGER.debug("Diagnostics collection ensure machine user operation failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
             DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
@@ -62,6 +70,6 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
 
     @Override
     public String selector() {
-        return INIT_DIAGNOSTICS_EVENT.selector();
+        return ENSURE_MACHINE_USER_EVENT.selector();
     }
 }

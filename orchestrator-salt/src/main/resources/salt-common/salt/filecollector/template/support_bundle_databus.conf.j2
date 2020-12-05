@@ -1,0 +1,4 @@
+{%- from 'filecollector/settings.sls' import filecollector with context %}[dbus]
+databus_access_key_id={{ filecollector.supportBundleDbusAccessKey }}
+databus_access_secret_key={{ filecollector.supportBundleDbusPrivateKey }}
+databus_access_secret_key_algo=Ed25519

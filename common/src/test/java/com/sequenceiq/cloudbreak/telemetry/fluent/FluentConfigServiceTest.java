@@ -41,7 +41,7 @@ public class FluentConfigServiceTest {
         ClusterLogsCollectionConfiguration logCollectionConfig =
                 new ClusterLogsCollectionConfiguration(false, null, null);
         TelemetryConfiguration telemetryConfiguration =
-                new TelemetryConfiguration(null, meteringConfiguration, logCollectionConfig, null);
+                new TelemetryConfiguration(null, meteringConfiguration, logCollectionConfig, null, null);
         underTest = new FluentConfigService(new S3ConfigGenerator(), new AdlsGen2ConfigGenerator(), new GcsConfigGenerator(),
                 new AnonymizationRuleResolver(), telemetryConfiguration);
     }
