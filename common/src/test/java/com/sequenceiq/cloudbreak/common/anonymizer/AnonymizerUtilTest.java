@@ -184,6 +184,15 @@ public class AnonymizerUtilTest {
         String testData = "ldapmodify x -D 'cn=directory manager' -w 'Cloudera01' -h localhost";
         String expectedData = "ldapmodify x -D 'cn=directory manager' -w '" + REPLACEMENT + "' -h localhost";
         Assert.assertEquals(expectedData, anonymize(testData));
+    }
 
+    @Test
+    public void testFreeIpaMagBearerToken() {
+        String testData = "IPASESSION: MagBearerToken=abcdefghijklmnopqrstuvwxyz%2f%2bABCDEFGHIJKLMNOPQRSTUVWXYZ3d%3d, " +
+                "Set-Cookie: ipa_session=MagBearerToken=abcdefghijklmnopqrstuvwxyz%2f%2bABCDEFGHIJKLMNOPQRSTUVWXYZ3d%3d;path=/ipa;httponly;secure;, " +
+                "X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', Cache-Control: no-cache]";
+        String expectedData = "IPASESSION: MagBearerToken=" + REPLACEMENT + ", Set-Cookie: ipa_session=MagBearerToken=" + REPLACEMENT +
+                ";path=/ipa;httponly;secure;, X-Frame-Options: DENY, Content-Security-Policy: frame-ancestors 'none', Cache-Control: no-cache]";
+        Assert.assertEquals(expectedData, anonymize(testData));
     }
 }

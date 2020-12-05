@@ -1,11 +1,14 @@
 package com.sequenceiq.freeipa.client;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -232,7 +235,7 @@ public class FreeIpaClientBuilder {
                 throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(String.format(
                         "Encountered unexpected response from FreeIPA; details:%n%n"
                         + "code: %s%n"
-                        + "headers: %s", response.getStatusLine().getStatusCode(), response.getAllHeaders()),
+                        + "headers: %s", response.getStatusLine().getStatusCode(), anonymize(Arrays.toString(response.getAllHeaders()))),
                         response.getStatusLine().getStatusCode()));
             }
         }
@@ -313,7 +316,7 @@ public class FreeIpaClientBuilder {
             CloseableHttpResponse response = client.execute(post);
             LOGGER.debug("Post response:\n"
                     + "code: {}\n"
-                    + "headers: {}", response.getStatusLine().getStatusCode(), response.getAllHeaders());
+                    + "headers: {}", response.getStatusLine().getStatusCode(), anonymize(Arrays.toString(response.getAllHeaders())));
 
             return response;
         }
