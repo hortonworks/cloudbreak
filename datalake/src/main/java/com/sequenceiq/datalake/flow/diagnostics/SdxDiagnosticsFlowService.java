@@ -14,6 +14,7 @@ import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -67,7 +68,8 @@ public class SdxDiagnosticsFlowService {
                 .stopIfException(pollingConfig.getStopPollingIfExceptionOccured())
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
-                    List<FlowLogResponse> flowLogs = flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId());
+                    List<FlowLogResponse> flowLogs = ThreadBasedUserCrnProvider.doAsInternalActor(
+                            () -> flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId()));
                     if (hasFlowFailed(flowLogs)) {
                         return AttemptResults.breakFor(failedMessage);
                     }
