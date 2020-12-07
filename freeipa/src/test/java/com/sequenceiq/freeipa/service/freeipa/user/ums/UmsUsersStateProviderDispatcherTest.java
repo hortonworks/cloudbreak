@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import io.grpc.StatusRuntimeException;
@@ -44,9 +43,6 @@ class UmsUsersStateProviderDispatcherTest {
     );
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private DefaultUmsUsersStateProvider defaultUmsUsersStateProvider;
 
     @Mock
@@ -56,9 +52,7 @@ class UmsUsersStateProviderDispatcherTest {
     private UmsUsersStateProviderDispatcher underTest;
 
     @Test
-    void testFullSyncEntitled() {
-        when(entitlementService.umsUserSyncModelGenerationEnabled(anyString(), anyString()))
-                .thenReturn(true);
+    void testFullSync() {
         Set<String> userCrns = Set.of();
         Set<String> machineUserCrns = Set.of();
 
@@ -78,32 +72,7 @@ class UmsUsersStateProviderDispatcherTest {
     }
 
     @Test
-    void testFullSyncNotEntitled() {
-        when(entitlementService.umsUserSyncModelGenerationEnabled(anyString(), anyString()))
-                .thenReturn(false);
-        Set<String> userCrns = Set.of();
-        Set<String> machineUserCrns = Set.of();
-
-        Map<String, UmsUsersState> expected = createExpectedResponse();
-        when(defaultUmsUsersStateProvider.get(anyString(), anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), anyBoolean()))
-                .thenReturn(expected);
-
-        Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
-        Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
-                ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional);
-
-        assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider, never()).get(anyString(), any(Set.class), any(Optional.class));
-        verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, true);
-    }
-
-    @Test
     void testBulkFallsBackToDefault() {
-        when(entitlementService.umsUserSyncModelGenerationEnabled(anyString(), anyString()))
-                .thenReturn(true);
         Set<String> userCrns = Set.of();
         Set<String> machineUserCrns = Set.of();
 

@@ -420,27 +420,33 @@ public class UserSyncService {
                     BiConsumer<String, String> warnings) throws FreeIpaClientException {
         LOGGER.info("Applying state difference to environment {}.", environmentCrn);
 
-        LOGGER.debug("Starting {} ...", LogEvent.ADD_GROUPS);
+        LOGGER.debug("Starting {} for {} groups ...", LogEvent.ADD_GROUPS,
+                stateDifference.getGroupsToAdd().size());
         addGroups(freeIpaClient, stateDifference.getGroupsToAdd(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.ADD_GROUPS);
 
-        LOGGER.debug("Starting {} ...", LogEvent.ADD_USERS);
+        LOGGER.debug("Starting {} for {} users ...", LogEvent.ADD_USERS,
+                stateDifference.getUsersToAdd().size());
         addUsers(freeIpaClient, stateDifference.getUsersToAdd(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.ADD_USERS);
 
-        LOGGER.debug("Starting {} ...", LogEvent.ADD_USERS_TO_GROUPS);
+        LOGGER.debug("Starting {} for {} group memberships ...", LogEvent.ADD_USERS_TO_GROUPS,
+                stateDifference.getGroupMembershipToAdd().size());
         addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.ADD_USERS_TO_GROUPS);
 
-        LOGGER.debug("Starting {} ...", LogEvent.REMOVE_USERS_FROM_GROUPS);
+        LOGGER.debug("Starting {} for {} group memberships ...", LogEvent.REMOVE_USERS_FROM_GROUPS,
+                stateDifference.getGroupMembershipToRemove().size());
         removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.REMOVE_USERS_FROM_GROUPS);
 
-        LOGGER.debug("Starting {} ...", LogEvent.REMOVE_USERS);
+        LOGGER.debug("Starting {} for {} users ...", LogEvent.REMOVE_USERS,
+                stateDifference.getUsersToRemove().size());
         removeUsers(freeIpaClient, stateDifference.getUsersToRemove(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.REMOVE_USERS);
 
-        LOGGER.debug("Starting {} ...", LogEvent.REMOVE_GROUPS);
+        LOGGER.debug("Starting {} for {} groups ...", LogEvent.REMOVE_GROUPS,
+                stateDifference.getGroupsToRemove().size());
         removeGroups(freeIpaClient, stateDifference.getGroupsToRemove(), warnings);
         LOGGER.debug("Finished {}.", LogEvent.REMOVE_GROUPS);
     }
