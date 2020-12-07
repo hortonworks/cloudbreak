@@ -6,6 +6,10 @@ import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DnsZone {
+    /**
+     * On FreeIPA DNS zone (name) always ends with a '.'
+     * eg. ipaserver0.test.xcu2-8y8x.wl.cloudera.site.
+     */
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String idnsname;
 

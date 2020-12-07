@@ -24,6 +24,8 @@ public class DnsRecord {
 
     private List<String> srvrecord;
 
+    private List<String> cnamerecord;
+
     public String getIdnsname() {
         return idnsname;
     }
@@ -62,6 +64,14 @@ public class DnsRecord {
 
     public void setSrvrecord(List<String> srvrecord) {
         this.srvrecord = srvrecord;
+    }
+
+    public List<String> getCnamerecord() {
+        return cnamerecord;
+    }
+
+    public void setCnamerecord(List<String> cnamerecord) {
+        this.cnamerecord = cnamerecord;
     }
 
     public boolean isHostRelatedRecord(String fqdn, String domain) {
@@ -131,6 +141,10 @@ public class DnsRecord {
         return srvrecord != null && !srvrecord.isEmpty();
     }
 
+    public boolean isCnameRecord() {
+        return cnamerecord != null && !cnamerecord.isEmpty();
+    }
+
     @Override
     public String toString() {
         return "DnsRecord{"
@@ -139,6 +153,7 @@ public class DnsRecord {
                 + ", sshfprecord=" + sshfprecord
                 + ", ptrrecord=" + ptrrecord
                 + ", srvrecord=" + srvrecord
+                + ", cnamerecord=" + cnamerecord
                 + '}';
     }
 }
