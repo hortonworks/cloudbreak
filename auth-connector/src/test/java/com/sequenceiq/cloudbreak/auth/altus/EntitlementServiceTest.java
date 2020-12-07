@@ -96,9 +96,6 @@ class EntitlementServiceTest {
                 {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, true},
                 {"CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE", (EntitlementCheckFunction) EntitlementService::isInternalRepositoryForUpgradeAllowed, false},
 
-                {"CDP_UMS_USER_SYNC_MODEL_GENERATION", (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, false},
-                {"CDP_UMS_USER_SYNC_MODEL_GENERATION", (EntitlementCheckFunction) EntitlementService::umsUserSyncModelGenerationEnabled, true},
-
                 {"CDP_SDX_HBASE_CLOUD_STORAGE", (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, false},
                 {"CDP_SDX_HBASE_CLOUD_STORAGE", (EntitlementCheckFunction) EntitlementService::sdxHbaseCloudStorageEnabled, true},
 

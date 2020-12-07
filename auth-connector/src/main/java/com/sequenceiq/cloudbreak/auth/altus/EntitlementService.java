@@ -26,7 +26,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UMS_USER_SYNC_MODEL_GENERATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
@@ -147,10 +146,6 @@ public class EntitlementService {
 
     public boolean isDifferentDataHubAndDataLakeVersionAllowed(String actorCrn, String accountId) {
         return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE);
-    }
-
-    public boolean umsUserSyncModelGenerationEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_UMS_USER_SYNC_MODEL_GENERATION);
     }
 
     public boolean sdxHbaseCloudStorageEnabled(String actorCrn, String accountId) {
