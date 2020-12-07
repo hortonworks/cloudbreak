@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak.dto.mock;
 
-class SparkUriParameters {
+public class SparkUriParameters {
     private final String uri;
 
     private final Class type;
 
-    SparkUriParameters(String uri, Class type) {
+    public SparkUriParameters(String uri, Class type) {
         this.uri = uri;
         this.type = type;
     }

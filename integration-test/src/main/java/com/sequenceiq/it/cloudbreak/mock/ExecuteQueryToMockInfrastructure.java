@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 
 @Component
 public class ExecuteQueryToMockInfrastructure {
@@ -53,16 +54,17 @@ public class ExecuteQueryToMockInfrastructure {
         }
     }
 
-    public void executeConfigure(String path, Map<String, String> pathVariables, Object body) {
-        executeConfigure(path, pathVariables, w -> w, body);
+    public void executeConfigure(Map<String, String> pathVariables, MockResponse body) {
+        executeConfigure(pathVariables, w -> w, body);
     }
 
-    public void executeConfigure(String path, Map<String, String> pathVariables, Function<WebTarget, WebTarget> decorateWebTarget, Object body) {
-        WebTarget webTarget = buildWebTarget(path + "/configure", decorateWebTarget);
+    public void executeConfigure(Map<String, String> pathVariables, Function<WebTarget, WebTarget> decorateWebTarget, MockResponse body) {
+        String configuredPath = body.getPath();
         for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
-            webTarget = webTarget.resolveTemplate(entry.getKey(), entry.getValue());
+            configuredPath = configuredPath.replace("{" + entry.getKey() + "}", entry.getValue());
         }
-        Invocation.Builder invocation = webTarget.request();
+        Invocation.Builder invocation = buildWebTarget("/configure", decorateWebTarget).request();
+        body.setPath(configuredPath);
         try (Response ignore = invocation.post(Entity.json(body))) {
 
         }

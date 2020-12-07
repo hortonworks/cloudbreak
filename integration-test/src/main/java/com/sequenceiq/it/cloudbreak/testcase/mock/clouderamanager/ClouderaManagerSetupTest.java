@@ -7,9 +7,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
-import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.mock.AbstractMockTest;
 
@@ -28,10 +25,8 @@ public class ClouderaManagerSetupTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .given(HttpMock.class).whenRequested(ClouderaManagerEndpoints.Users.class).get().verify(CheckCount.times(1))
-//                .given(HttpMock.class).whenRequested(ClouderaManagerEndpoints.Users.class).get().verify(CheckCount.times(1))
-//                .then(MockVerification.verify(HttpMethod.GET, ClouderaManagerMock.USERS).exactTimes(1))
-//                .then(MockVerification.verify(HttpMethod.PUT, "/api/v31/users/admin").exactTimes(1))
+                .mockCm().users().get().times(1).verify()
+                .mockCm().usersAdmin().put().times(1).verify()
                 .validate();
     }
 }

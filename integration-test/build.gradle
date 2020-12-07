@@ -49,12 +49,6 @@ uploadBootArchives {
   }
 }
 
-task runMockServer(type:JavaExec) {
-  main = 'com.sequenceiq.it.spark.MockSparkServer'
-  classpath = sourceSets.main.runtimeClasspath
-  systemProperty "MOCK_SERVER_ADDRESS", System.getProperty("MOCK_SERVER_ADDRESS")
-}
-
 dependencies {
   compile project(':cloud-common')
   compile project(':core-api')

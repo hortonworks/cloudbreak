@@ -55,6 +55,7 @@ dependencies {
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-jersey',     version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-web',        version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-actuator',   version: springBootVersion
+  implementation group: 'org.springframework',    name: 'spring-aspects',                 version: springFrameworkVersion
   compile group:  'org.springframework',          name: 'spring-context-support',         version: springFrameworkVersion
   compile group:  'org.springframework.security', name: 'spring-security-jwt',            version: '1.0.10.RELEASE'
   compile group:  'com.fasterxml.jackson.core',   name: 'jackson-core',                   version: jacksonVersion

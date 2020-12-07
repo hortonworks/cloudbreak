@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -19,8 +17,6 @@ import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
 public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
-
-    public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
     @Inject
     private BlueprintTestClient blueprintTestClient;
@@ -71,10 +67,5 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
-    }
-
-    @Override
-    protected List<String> testProfiles() {
-        return List.of(PROFILE_RETURN_HTTP_500);
     }
 }

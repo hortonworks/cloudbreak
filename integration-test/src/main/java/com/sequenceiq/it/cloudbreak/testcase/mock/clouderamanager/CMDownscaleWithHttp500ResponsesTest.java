@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -29,8 +28,6 @@ import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
 public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
-
-    public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMDownscaleWithHttp500ResponsesTest.class);
 
@@ -67,8 +64,6 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider().getName();
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
-//        SetupCmScalingMock mock = new SetupCmScalingMock();
-//        mock.configure(testContext, 3, 15, 6);
         testContext
                 .given("cmpkey", ClouderaManagerProductTestDto.class)
                 .withParcel("someParcel")
@@ -90,10 +85,5 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
                 .when(StackScalePostAction.valid().withDesiredCount(6), key(clusterName))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
                 .validate();
-    }
-
-    @Override
-    protected List<String> testProfiles() {
-        return List.of(PROFILE_RETURN_HTTP_500);
     }
 }

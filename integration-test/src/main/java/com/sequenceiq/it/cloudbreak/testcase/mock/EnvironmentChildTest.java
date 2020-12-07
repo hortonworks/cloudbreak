@@ -53,12 +53,12 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
-                //.then(verifyFreeIpaRequest("dnszone_add", 1))
+                .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(1).verify()
                 .validate();
     }
 
@@ -71,11 +71,11 @@ public class EnvironmentChildTest extends AbstractMockTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
@@ -91,7 +91,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
         testContext
                 .given(PARENT_ENVIRONMENT, EnvironmentTestDto.class)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
+                .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
                 .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
                 .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
                 .validate();
@@ -106,7 +106,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
         String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(EnvironmentTestDto.class)
@@ -124,14 +124,14 @@ public class EnvironmentChildTest extends AbstractMockTest {
     public void testDeleteChildEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.deleteByName())
                 .await(EnvironmentStatus.ARCHIVED)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
-                //.then(verifyFreeIpaRequest("dnszone_del", 1))
+                .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(1).verify()
                 .validate();
     }
 
@@ -170,18 +170,18 @@ public class EnvironmentChildTest extends AbstractMockTest {
     public void testDeleteChildEnvironmentThatHasSibling(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given("child2", EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.deleteByName())
                 .await(EnvironmentStatus.ARCHIVED)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
-//                .then(verifyFreeIpaRequest("dnszone_del", 0))
+                .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(0).verify()
                 .validate();
     }
 
@@ -224,16 +224,6 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 environment.getParentEnvironmentName().equals(environmentResponse.getParentEnvironmentName());
     }
 
-    /*
-    @SuppressWarnings("unchecked")
-    private Assertion<EnvironmentTestDto, EnvironmentClient> verifyFreeIpaRequest(String method, int times) {
-        return (testContext1, testDto, client) ->
-                testDto.then(
-                        MockVerification.verify(HttpMethod.POST, ITResponse.FREEIPA_ROOT + "/session/json")
-                                .bodyContains(method)
-                                .exactTimes(times));
-    }
-*/
     private Assertion<EnvironmentTestDto, EnvironmentClient> checkEnvsAreNotListedByName(List<String> environmentNames) {
         return (testContext, environmentTestDto, environmentClient) -> {
             Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environmentTestDto.getResponseSimpleEnvSet();

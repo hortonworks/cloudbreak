@@ -4,12 +4,12 @@ import java.lang.reflect.Method;
 
 import org.springframework.util.StringUtils;
 
-class SparkUriAnnotationHandler {
+public class SparkUriAnnotationHandler {
     private final Class clazz;
 
     private final Method method;
 
-    SparkUriAnnotationHandler(Class clazz, Method method) {
+    public SparkUriAnnotationHandler(Class clazz, Method method) {
         this.clazz = clazz;
         this.method = method;
     }
@@ -23,7 +23,7 @@ class SparkUriAnnotationHandler {
             annotation = (SparkUri) clazz.getAnnotation(SparkUri.class);
         } else {
             throw new IllegalArgumentException(
-                    clazz.getName() + "or " + method.getName() + " does not have SparkUri annotation"
+                    clazz.getName() + " or " + method.getName() + " does not have SparkUri annotation"
             );
         }
         String url = annotation.url();

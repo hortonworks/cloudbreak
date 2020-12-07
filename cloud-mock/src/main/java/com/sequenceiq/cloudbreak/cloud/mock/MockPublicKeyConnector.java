@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
@@ -7,6 +9,7 @@ import javax.ws.rs.core.Response;
 
 import org.springframework.stereotype.Service;
 
+import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -23,8 +26,9 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
 
     @Override
     public void register(PublicKeyRegisterRequest request) {
+        String json = new Gson().toJson(Map.of("publicKeyId", request.getPublicKeyId(), "publicKey", request.getPublicKey()));
         try (Response response = mockUrlFactory.get("/spi/register_public_key")
-                .post(Entity.entity(request.getPublicKeyId(), MediaType.APPLICATION_JSON_TYPE))) {
+                .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE))) {
             if (response.getStatus() != 200) {
                 throw new CloudConnectorException(response.readEntity(String.class));
             }
@@ -33,8 +37,9 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
 
     @Override
     public void unregister(PublicKeyUnregisterRequest request) {
+        String json = new Gson().toJson(Map.of("publicKeyId", request.getPublicKeyId()));
         try (Response response = mockUrlFactory.get("/spi/unregister_public_key")
-                .post(Entity.entity(request.getPublicKeyId(), MediaType.TEXT_PLAIN))) {
+                .post(Entity.entity(json, MediaType.APPLICATION_JSON_TYPE))) {
             if (response.getStatus() != 200) {
                 throw new CloudConnectorException(response.readEntity(String.class));
             }
@@ -47,8 +52,8 @@ public class MockPublicKeyConnector implements PublicKeyConnector {
             if (response.getStatus() != 200) {
                 throw new CloudConnectorException(response.readEntity(String.class));
             }
-            Boolean entity = response.readEntity(Boolean.class);
-            return entity != null && entity;
+            Map<String, String> entity = response.readEntity(Map.class);
+            return entity != null && !entity.isEmpty();
         }
     }
 

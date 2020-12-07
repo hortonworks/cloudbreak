@@ -24,9 +24,14 @@ import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.FreeIPAEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SaltEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SpiEndpoints;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
@@ -114,7 +119,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public TestContext getTestContext() {
-        return testContext;
+        return testContext.getTestContext();
     }
 
     @Override
@@ -313,5 +318,33 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
             throw new TestFailException("Flow identifier is not present. " +
                     "Make sure you use an endpoint which triggers a flow/flow chain and gives back it's identifier.");
         }
+    }
+
+    public SpiEndpoints<T> mockSpi() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new SpiEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+        }
+        throw new TestFailException("mockSpi is supported by MockedTestContext only.");
+    }
+
+    public SaltEndpoints<T> mockSalt() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new SaltEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+        }
+        throw new TestFailException("mockSalt is supported by MockedTestContext only.");
+    }
+
+    public ClouderaManagerEndpoints<T> mockCm() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new ClouderaManagerEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+        }
+        throw new TestFailException("mockCm is supported by MockedTestContext only.");
+    }
+
+    public FreeIPAEndpoints<T> mockFreeIpa() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new FreeIPAEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+        }
+        throw new TestFailException("mockFreeIpa is supported by MockedTestContext only.");
     }
 }

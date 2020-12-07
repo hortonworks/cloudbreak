@@ -1,6 +1,7 @@
 package com.sequenceiq.mock.spi.controller;
 
-import javax.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,30 +10,24 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sequenceiq.mock.service.ResponseModifierService;
-import com.sequenceiq.mock.spi.MockResponse;
-
 @RestController
 @RequestMapping("/spi")
 public class SpiResourceController {
 
-    @Inject
-    private ResponseModifierService responseModifierService;
+    private Map<String, PublicKey> publicKeys = new HashMap<>();
 
     @PostMapping("/register_public_key")
-    public void registerPublicKey() {
+    public void registerPublicKey(@RequestBody PublicKey publicKey) {
+        publicKeys.put(publicKey.getPublicKeyId(), publicKey);
     }
 
     @PostMapping("/unregister_public_key")
-    public void unregisterPublicKey(@RequestBody String body) {
+    public void unregisterPublicKey(@RequestBody PublicKey publicKey) {
+        publicKeys.remove(publicKey.getPublicKeyId());
     }
 
     @GetMapping("/get_public_key/{publicKeyId}")
-    public Boolean getPubicKeyId(@PathVariable("publicKeyId") String publicKeyId) {
-        MockResponse response = responseModifierService.getResponse("get", "/spi/get_public_key/{publicKeyId}");
-        if (response == null) {
-            return true;
-        }
-        return (Boolean) response.getResponse();
+    public PublicKey getPubicKeyId(@PathVariable("publicKeyId") String publicKeyId) {
+        return publicKeys.get(publicKeyId);
     }
 }

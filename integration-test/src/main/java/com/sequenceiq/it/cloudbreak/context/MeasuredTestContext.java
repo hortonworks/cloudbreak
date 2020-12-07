@@ -48,6 +48,7 @@ public class MeasuredTestContext extends MockedTestContext {
     private MeasuredTestContext(TestContext wrappedTestContext, Measure measure) {
         this.wrappedTestContext = wrappedTestContext;
         wrappedTestContext.setTestContext(this);
+        setTestContext(wrappedTestContext);
         this.measure = measure;
     }
 
@@ -383,16 +384,8 @@ public class MeasuredTestContext extends MockedTestContext {
         return new MeasuredTestContext(testContext, new MeasureAll());
     }
 
-    public TestContext getWrappedTestContext() {
-        return wrappedTestContext;
-    }
-
     public Measure getMeasure() {
         return measure;
-    }
-
-    protected TestContext getTestContext() {
-        return this;
     }
 
     @Override

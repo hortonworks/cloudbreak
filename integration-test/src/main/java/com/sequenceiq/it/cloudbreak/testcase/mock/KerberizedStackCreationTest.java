@@ -14,9 +14,6 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.FreeIpaKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
-import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SaltEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
 public class KerberizedStackCreationTest extends AbstractMockTest {
@@ -54,8 +51,7 @@ public class KerberizedStackCreationTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.addomain.com"))
-                .given(HttpMock.class).whenRequested(SaltEndpoints.SaltActionDistribute.class).post().verify(CheckCount.times(12))
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.addomain.com", 12))
+                .mockSalt().saltActionDistribute().post().times(1).bodyContains("realm.addomain.com", 12).verify()
                 .validate();
     }
 
@@ -78,8 +74,7 @@ public class KerberizedStackCreationTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.addomain.com"))
-                .given(HttpMock.class).whenRequested(SaltEndpoints.SaltActionDistribute.class).post().verify(CheckCount.times(12))
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.addomain.com", 12))
+                .mockSalt().saltActionDistribute().post().times(1).bodyContains("custom.addomain.com", 12).verify()
                 .validate();
     }
 
@@ -102,8 +97,7 @@ public class KerberizedStackCreationTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("realm.freeiparealm.com"))
-                .given(HttpMock.class).whenRequested(SaltEndpoints.SaltActionDistribute.class).post().verify(CheckCount.times(12))
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("realm.freeiparealm.com", 12))
+                .mockSalt().saltActionDistribute().post().times(1).bodyContains("realm.freeiparealm.com", 12).verify()
                 .validate();
     }
 
@@ -126,8 +120,7 @@ public class KerberizedStackCreationTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .then(KerberosTestAssertion.validateCustomDomain("custom.freeipadomain.com"))
-                .given(HttpMock.class).whenRequested(SaltEndpoints.SaltActionDistribute.class).post().verify(CheckCount.times(12))
-//                .then(MockVerification.verify(HttpMethod.POST, SaltMock.SALT_ACTION_DISTRIBUTE).exactTimes(1).bodyContains("custom.freeipadomain.com", 12))
+                .mockSalt().saltActionDistribute().post().times(1).bodyContains("custom.freeipadomain.com", 12).verify()
                 .validate();
     }
 }

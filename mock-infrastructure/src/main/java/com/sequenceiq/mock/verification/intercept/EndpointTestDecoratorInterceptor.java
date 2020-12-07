@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.sequenceiq.mock.service.ResponseModifierService;
 import com.sequenceiq.mock.verification.Call;
 import com.sequenceiq.mock.verification.RequestResponseStorageService;
 
@@ -24,12 +25,16 @@ public class EndpointTestDecoratorInterceptor implements HandlerInterceptor {
     @Inject
     private RequestResponseStorageService requestResponseStorageService;
 
+    @Inject
+    private ResponseModifierService responseModifierService;
+
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         String testName = request.getHeader("test-name");
+        String requestURI = request.getRequestURI();
         if (!StringUtils.isEmpty(testName)) {
             Call call = new Call.Builder()
-                    .uri(request.getRequestURI())
+                    .uri(requestURI)
                     .contentType(request.getContentType())
                     .headers(getHeadersMap(request))
                     .method(request.getMethod())
