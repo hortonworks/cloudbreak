@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,6 +116,36 @@ public class FreeIpaClientExceptionUtil {
             return new RetryableFreeIpaClientException(e.getLocalizedMessage(), e, e.getStatusCode());
         } else {
             return e;
+        }
+    }
+
+    public static void ignoreNotFoundException(FreeIpaClientRunnable runnable, String message, Object... messageParams) throws FreeIpaClientException {
+        try {
+            runnable.run();
+        } catch (FreeIpaClientException e) {
+            if (isNotFoundException(e)) {
+                Optional.ofNullable(message).ifPresentOrElse(
+                        msg -> LOGGER.debug(msg, messageParams),
+                        () -> LOGGER.debug("Not found in FreeIPA ignored. Exception message: {}", e.getMessage()));
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    public static <T> Optional<T> ignoreNotFoundExceptionWithValue(FreeIpaClientCallable<T> callable, String message, Object... messageParams)
+            throws FreeIpaClientException {
+        try {
+            return Optional.ofNullable(callable.run());
+        } catch (FreeIpaClientException e) {
+            if (isNotFoundException(e)) {
+                Optional.ofNullable(message).ifPresentOrElse(
+                        msg -> LOGGER.debug(msg, messageParams),
+                        () -> LOGGER.debug("Not found in FreeIPA ignored. Exception message: {}", e.getMessage()));
+                return Optional.empty();
+            } else {
+                throw e;
+            }
         }
     }
 

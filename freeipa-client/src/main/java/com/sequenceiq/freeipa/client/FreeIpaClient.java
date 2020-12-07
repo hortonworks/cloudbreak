@@ -504,7 +504,7 @@ public class FreeIpaClient {
         return (DnsZone) invoke("dnszone_add", flags, params, DnsZone.class).getResult();
     }
 
-    public DnsRecord getDnsRecord(String dnsZoneName, String recordName) throws FreeIpaClientException {
+    public DnsRecord showDnsRecord(String dnsZoneName, String recordName) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
         Map<String, Object> params = Map.of();
         return (DnsRecord) invoke("dnsrecord_show", flags, params, DnsRecord.class).getResult();
@@ -513,7 +513,15 @@ public class FreeIpaClient {
     public DnsRecord addDnsCnameRecord(String dnsZoneName, String recordName, String cnameRecord) throws FreeIpaClientException {
         List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
         Map<String, Object> params = Map.of(
-                "cnamerecord", Set.of(cnameRecord + "."));
+                "cname_part_hostname", createDnsName(cnameRecord));
+        return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
+    }
+
+    public DnsRecord addDnsARecord(String dnsZoneName, String recordName, String ip, boolean createReverse) throws FreeIpaClientException {
+        List<Object> flags = List.of(dnsZoneName, createDnsName(recordName));
+        Map<String, Object> params = Map.of(
+                "a_part_ip_address", ip,
+                "a_extra_create_reverse", createReverse);
         return (DnsRecord) invoke("dnsrecord_add", flags, params, DnsRecord.class).getResult();
     }
 

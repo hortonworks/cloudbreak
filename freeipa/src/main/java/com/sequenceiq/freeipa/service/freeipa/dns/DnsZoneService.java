@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,6 +12,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -18,7 +22,6 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -43,6 +46,10 @@ public class DnsZoneService {
     @Inject
     private NetworkService networkService;
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnets(AddDnsZoneForSubnetsRequest request, String accountId) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(request.getEnvironmentCrn(), accountId);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
@@ -62,6 +69,10 @@ public class DnsZoneService {
         return response;
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Set<String> listDnsZones(String environmentCrn, String accountId) throws FreeIpaClientException {
         FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
         Set<DnsZone> allDnsZone = freeIpaClient.findAllDnsZone();
@@ -75,21 +86,21 @@ public class DnsZoneService {
         return freeIpaClientFactory.getFreeIpaClientForStack(stack);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void deleteDnsZoneBySubnet(String environmentCrn, String accountId, String subnet) throws FreeIpaClientException {
         FreeIpaClient freeIpaClient = getFreeIpaClient(environmentCrn, accountId);
         String reverseDnsZone = reverseDnsZoneCalculator.reverseDnsZoneForCidr(subnet);
         LOGGER.info("Delete DNS reverse zone [{}], for subnet [{}]", reverseDnsZone, subnet);
-        try {
-            freeIpaClient.deleteDnsZone(reverseDnsZone);
-        } catch (FreeIpaClientException e) {
-            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                LOGGER.info("DNS zone was not present on FreeIPA: {}", reverseDnsZone);
-            } else {
-                throw e;
-            }
-        }
+        ignoreNotFoundException(() -> freeIpaClient.deleteDnsZone(reverseDnsZone), "DNS zone was not present on FreeIPA: {}", reverseDnsZone);
     }
 
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);

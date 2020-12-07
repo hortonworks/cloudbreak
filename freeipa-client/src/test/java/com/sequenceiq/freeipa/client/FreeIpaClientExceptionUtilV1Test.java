@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.client;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -22,14 +25,14 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE)));
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
+        assertTrue(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, MESSAGE, null))));
     }
 
     @Test
     public void testIsDuplicateEntryException() throws Exception {
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE)));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
+        assertTrue(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))));
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, MESSAGE, null))));
@@ -45,11 +48,11 @@ public class FreeIpaClientExceptionUtilV1Test {
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null)),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null)),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null)),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY, FreeIpaErrorCodes.COMMAND_ERROR)));
@@ -65,11 +68,11 @@ public class FreeIpaClientExceptionUtilV1Test {
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null))),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException("", new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY, FreeIpaErrorCodes.COMMAND_ERROR)));
@@ -77,13 +80,13 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testConvertToRetryableIfNeeded() throws Exception {
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+        assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new JsonRpcClientException(AUTHENTICATION_ERROR, MESSAGE, null)))
                 instanceof RetryableFreeIpaClientException);
         Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new JsonRpcClientException(NOT_FOUND, MESSAGE, null)))
                 instanceof RetryableFreeIpaClientException);
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+        assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, HttpStatus.UNAUTHORIZED.value()))
                 instanceof RetryableFreeIpaClientException);
         Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
@@ -103,6 +106,56 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertEquals(ancestor,
                 FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(
                         new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, ancestor)))));
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithoutEx() throws FreeIpaClientException {
+        FreeIpaClientExceptionUtil.ignoreNotFoundException(() -> {
+        }, null);
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithNotFound() throws FreeIpaClientException {
+        FreeIpaClientExceptionUtil.ignoreNotFoundException(
+                () -> {
+                    throw new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null));
+                },
+                null);
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithOtherEx() {
+        Assertions.assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
+                () -> {
+                    throw new FreeIpaClientException("ERROR", new JsonRpcClientException(FreeIpaErrorCodes.COMMAND_ERROR.getValue(), "ERROR", null));
+                },
+                null));
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithValueWithoutEx() throws FreeIpaClientException {
+        Optional<Object> result = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(Object::new, null);
+
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithValueWithNotFound() throws FreeIpaClientException {
+        Optional<Object> result = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(
+                () -> {
+                    throw new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null));
+                },
+                null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void testIgnoreNotFoundWithValueWithOtherEx() {
+        Assertions.assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
+                () -> {
+                    throw new FreeIpaClientException("ERROR", new JsonRpcClientException(FreeIpaErrorCodes.COMMAND_ERROR.getValue(), "ERROR", null));
+                },
+                null));
     }
 
 }
