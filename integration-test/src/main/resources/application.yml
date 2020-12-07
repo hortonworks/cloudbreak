@@ -15,8 +15,6 @@ integrationtest:
   threadCount: 1
   parallel: methods
   timeOut: 6000000
-  spark:
-    sparkPoolSize: 12
   command: suiteurls
   outputdir: .
   publicKeyFile:

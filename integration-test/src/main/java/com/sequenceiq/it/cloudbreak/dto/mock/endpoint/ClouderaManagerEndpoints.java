@@ -1,157 +1,201 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
-import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
-import com.cloudera.api.swagger.model.ApiCommand;
-import com.cloudera.api.swagger.model.ApiCommandList;
-import com.cloudera.api.swagger.model.ApiConfigList;
-import com.cloudera.api.swagger.model.ApiEcho;
-import com.cloudera.api.swagger.model.ApiHostList;
-import com.cloudera.api.swagger.model.ApiHostTemplateList;
-import com.cloudera.api.swagger.model.ApiParcelList;
-import com.cloudera.api.swagger.model.ApiRemoteDataContext;
-import com.cloudera.api.swagger.model.ApiRole;
-import com.cloudera.api.swagger.model.ApiRoleList;
-import com.cloudera.api.swagger.model.ApiService;
-import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiUser2;
-import com.cloudera.api.swagger.model.ApiUser2List;
-import com.cloudera.api.swagger.model.ApiVersionInfo;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
-import com.sequenceiq.it.cloudbreak.dto.mock.answer.AnswerWithoutRequest;
-import com.sequenceiq.it.cloudbreak.dto.mock.answer.ClouderaManagerPreparedRequestAnswer;
-import com.sequenceiq.it.cloudbreak.dto.mock.answer.StringRequestAnswer;
+import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
-public final class ClouderaManagerEndpoints {
+public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
     public static final String API_ROOT = "/api/v31";
 
-    private ClouderaManagerEndpoints() {
+    private T testDto;
+
+    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+
+    public ClouderaManagerEndpoints(T testDto, ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure) {
+        this.testDto = testDto;
+        this.executeQueryToMockInfrastructure = executeQueryToMockInfrastructure;
+    }
+
+    public Users<T> users() {
+        return (Users<T>) EndpointProxyFactory.create(Users.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public Admin<T> usersAdmin() {
+        return (Admin<T>) EndpointProxyFactory.create(Admin.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public ClusterHosts<T> clusterHosts() {
+        return (ClusterHosts<T>) EndpointProxyFactory.create(ClusterHosts.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public ClusterCommands.DeployConfig<T> clusterCommandsDeployConfig() {
+        return (ClusterCommands.DeployConfig<T>) EndpointProxyFactory.create(ClusterCommands.DeployConfig.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public ClusterHostTemplates.CommandsApplyHostTemplate<T> commandsApplyHostTemplate() {
+        return (ClusterHostTemplates.CommandsApplyHostTemplate<T>)
+                EndpointProxyFactory.create(ClusterHostTemplates.CommandsApplyHostTemplate.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public Commands<T> commands() {
+        return (Commands<T>) EndpointProxyFactory.create(Commands.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public ClouderaManagerHosts<T> clouderaManagerHosts() {
+        return (ClouderaManagerHosts<T>) EndpointProxyFactory.create(ClouderaManagerHosts.class, testDto, executeQueryToMockInfrastructure);
     }
 
     @SparkUri(url = API_ROOT + "/cm/importClusterTemplate", requestType = ApiClusterTemplate.class)
-    public interface ClusterTemplateImport {
-        ClouderaManagerPreparedRequestAnswer<ApiCommand, ApiClusterTemplate> post();
+    public interface ClusterTemplateImport<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+
+        @Override
+        DefaultResponseConfigure<T> post();
     }
 
     @SparkUri(url = API_ROOT + "/tools/echo")
-    public interface Echo {
-        AnswerWithoutRequest<ApiEcho> get();
+    public interface Echo<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
     }
 
     @SparkUri(url = API_ROOT + "/cm/version")
-    public interface Version {
-        AnswerWithoutRequest<ApiVersionInfo> get();
+    public interface Version<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
     }
 
     @SparkUri(url = API_ROOT + "/authRoles/metadata")
-    public interface AuthRoles {
-        AnswerWithoutRequest<ApiAuthRoleMetadataList> get();
+    public interface AuthRoles<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
     }
 
     @SparkUri(url = API_ROOT + "/users", requestType = ApiUser2.class)
-    public interface Users {
-        AnswerWithoutRequest<ApiUser2List> get();
+    public interface Users<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
 
-        ClouderaManagerPreparedRequestAnswer<ApiUser2List, ApiUser2> post();
+        DefaultResponseConfigure<T> post();
 
-        @SparkUri(url = API_ROOT + "/users/:user")
-        ClouderaManagerPreparedRequestAnswer<ApiUser2, ApiUser2> put();
+        @SparkUri(url = API_ROOT + "/users/{user}")
+        DefaultResponseConfigure<T> put();
     }
 
-    public interface Commands {
-        @SparkUri(url = API_ROOT + "/cm/commands/:command")
-        StringRequestAnswer<ApiCommand> post();
+    public interface Admin<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/api/v31/users/admin")
+        DefaultResponseConfigure<T> put();
+    }
+
+    public interface CMCommands<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/cm/commands/{command}")
+        DefaultResponseConfigure<T> post();
 
         @SparkUri(url = API_ROOT + "/cm/commands")
-        StringRequestAnswer<ApiCommandList> get();
+        DefaultResponseConfigure<T> get();
+    }
+
+    public interface Commands<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/commands/{commandId}")
+        DefaultResponseConfigure<T> getById();
     }
 
     @SparkUri(url = API_ROOT + "/cm/service")
-    public interface Service {
-        StringRequestAnswer<ApiService> put();
+    public interface Service<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> put();
 
-        AnswerWithoutRequest<ApiService> get();
+        DefaultResponseConfigure<T> get();
 
         @SparkUri(url = API_ROOT + "/cm/service/autoConfigure")
-        StringRequestAnswer<ApiCommand> putAutoConfigure();
+        DefaultResponseConfigure<T> putAutoConfigure();
     }
 
     @SparkUri(url = API_ROOT + "/cm/service/commands")
-    public interface ServiceCommands {
-        @SparkUri(url = API_ROOT + "/cm/service/commands/:command", requestType = String.class)
-        StringRequestAnswer<ApiCommand> post();
+    public interface ServiceCommands<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/cm/service/commands/{command}")
+        DefaultResponseConfigure<T> post();
 
-        AnswerWithoutRequest<ApiCommandList> get();
+        DefaultResponseConfigure<T> get();
     }
 
-    @SparkUri(url = API_ROOT + "/cm/trial/begin", requestType = String.class)
-    public interface FreeTrial {
-        StringRequestAnswer<ApiCommand> post();
+    @SparkUri(url = API_ROOT + "/cm/trial/begin")
+    public interface FreeTrial<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> post();
     }
 
-    @SparkUri(url = API_ROOT + "/cm/config", requestType = String.class)
-    public interface Config {
-        AnswerWithoutRequest<ApiConfigList> get();
+    @SparkUri(url = API_ROOT + "/cm/config")
+    public interface Config<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
 
-        StringRequestAnswer<ApiConfigList> put();
+        DefaultResponseConfigure<T> put();
     }
 
-    public interface CdpRemoteContext {
-        @SparkUri(url = "/api/cdp/remoteContext/byCluster/:clusterName", requestType = String.class)
-        AnswerWithoutRequest<ApiRemoteDataContext> get();
+    public interface CdpRemoteContext<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = "/api/cdp/remoteContext/byCluster/{clusterName}")
+        DefaultResponseConfigure<T> get();
 
-        @SparkUri(url = "/api/cdp/remoteContext", requestType = String.class)
-        StringRequestAnswer<ApiRemoteDataContext> post();
+        @SparkUri(url = "/api/cdp/remoteContext")
+        DefaultResponseConfigure<T> post();
     }
 
-    public interface ClouderaManagerHosts {
+    public interface ClouderaManagerHosts<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         @SparkUri(url = API_ROOT + "/hosts")
-        AnswerWithoutRequest<ApiHostList> get();
+        DefaultResponseConfigure<T> get();
 
-        @SparkUri(url = API_ROOT + "/hosts/:hostId")
-        AnswerWithoutRequest<ApiHostList> getById();
+        @SparkUri(url = API_ROOT + "/hosts/{hostId}")
+        DefaultResponseConfigure<T> getById();
 
-        @SparkUri(url = API_ROOT + "/hosts/:hostId")
-        AnswerWithoutRequest<ApiHostList> deleteById();
+        @SparkUri(url = API_ROOT + "/hosts/{hostId}")
+        DefaultResponseConfigure<T> deleteById();
     }
 
-    public interface ClusterCommands {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/commands")
-        AnswerWithoutRequest<ApiCommandList> get();
+    public interface ClusterCommands<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/commands")
+        DefaultResponseConfigure<T> get();
 
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/commands/:command")
-        StringRequestAnswer<ApiCommand> post();
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/commands/{command}")
+        DefaultResponseConfigure<T> post();
+
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/commands/deployClientConfig")
+        interface DeployConfig<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            DefaultResponseConfigure<T> post();
+        }
     }
 
-    public interface ClusterServices {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/services")
-        AnswerWithoutRequest<ApiServiceList> get();
+    @SparkUri(url = API_ROOT + "/clusters/{clusterName}/services")
+    public interface ClusterServices<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
     }
 
-    public interface ClusterHosts {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/hosts")
-        AnswerWithoutRequest<ApiServiceList> get();
+    @SparkUri(url = API_ROOT + "/clusters/{clusterName}/hosts")
+    public interface ClusterHosts<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
 
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/hosts/:hostId")
-        AnswerWithoutRequest<ApiServiceList> delete();
+        DefaultResponseConfigure<T> post();
+
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/hosts/{hostId}")
+        DefaultResponseConfigure<T> delete();
     }
 
-    public interface ClusterHostTemplates {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/hostTemplates")
-        AnswerWithoutRequest<ApiHostTemplateList> get();
+    @SparkUri(url = API_ROOT + "/clusters/{clusterName}/hostTemplates")
+    public interface ClusterHostTemplates<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
+
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/hostTemplates/{hostTemplateName}/commands/applyHostTemplate")
+        interface CommandsApplyHostTemplate<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            DefaultResponseConfigure<T> post();
+        }
     }
 
-    public interface ClusterServiceRoles {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/services/:serviceName/roles")
-        AnswerWithoutRequest<ApiRoleList> get();
+    public interface ClusterServiceRoles<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/services/{serviceName}/roles")
+        DefaultResponseConfigure<T> get();
 
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/services/:serviceName/roles/:roleName")
-        AnswerWithoutRequest<ApiRole> delete();
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/services/{serviceName}/roles/{roleName}")
+        DefaultResponseConfigure<T> delete();
     }
 
-    //API_ROOT + "/clusters/:clusterName/parcels"
-    public interface ClusterParcel {
-        @SparkUri(url = API_ROOT + "/clusters/:clusterName/parcels")
-        AnswerWithoutRequest<ApiParcelList> get();
+    //API_ROOT + "/clusters/{clusterName}/parcels"
+    public interface ClusterParcel<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        @SparkUri(url = API_ROOT + "/clusters/{clusterName}/parcels")
+        DefaultResponseConfigure<T> get();
     }
 }

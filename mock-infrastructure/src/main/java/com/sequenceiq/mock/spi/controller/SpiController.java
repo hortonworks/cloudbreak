@@ -29,7 +29,7 @@ import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 
 @RestController
-@RequestMapping("{mock_uuid}/spi")
+@RequestMapping("/{mock_uuid}/spi")
 public class SpiController {
 
     @Inject

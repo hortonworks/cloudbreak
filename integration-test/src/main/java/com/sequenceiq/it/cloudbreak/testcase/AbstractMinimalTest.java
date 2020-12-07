@@ -4,8 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.MeasuredTestContext.createMea
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -94,8 +92,6 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
         if (purge) {
             String testClassName = getClass().getSimpleName();
             MDC.put("testlabel", "Purge: " + testClassName);
-            // TODO: refactor this mechanism
-            testProfiles().forEach(ThreadLocalProfiles::setProfile);
             applicationContext.getBean(PurgeGarbageService.class).purge();
         } else {
             LOGGER.info("Purge disabled for {}", getClass().getSimpleName());
@@ -203,9 +199,5 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {
         return commonClusterManagerProperties;
-    }
-
-    protected List<String> testProfiles() {
-        return Collections.emptyList();
     }
 }

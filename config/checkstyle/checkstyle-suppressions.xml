@@ -13,6 +13,9 @@
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
     <suppress checks="IllegalCatch" files="ImageCatalogService.java"/>
     <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
+    <suppress checks="IllegalThrow" files="ResponseModifierAspect.java"/>
+    <suppress checks="IllegalThrow" files="ResponseModifierService.java"/>
+    <suppress checks="IllegalThrow" files="ResponseModifierServiceTest.java"/>
     <suppress checks="IllegalThrow" files="HasPermissionAspects.java"/>
     <suppress checks="IllegalThrow" files="HasPermissionService.java"/>
     <suppress checks="IllegalThrow" files="MeasureAspects.java|FlowParametersAspects.java"/>

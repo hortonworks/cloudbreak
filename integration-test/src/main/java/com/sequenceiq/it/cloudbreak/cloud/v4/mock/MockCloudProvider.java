@@ -37,7 +37,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ImageCatalogEndpoint;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -174,8 +173,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         if (imageCatalog.getTestContext() instanceof MockedTestContext) {
             imageCatalog.withUrl(imageCatalogMockServerSetup.getPreWarmedImageCatalogUrl());
         } else {
-            imageCatalog.withUrl(
-                    httpMock -> httpMock.whenRequested(ImageCatalogEndpoint.Base.class).getCatalog().getFullUrl());
+            imageCatalog.withUrl(String.format("https://%s:%d", mockInfrastructureHost, 10090));
         }
         return imageCatalog;
     }

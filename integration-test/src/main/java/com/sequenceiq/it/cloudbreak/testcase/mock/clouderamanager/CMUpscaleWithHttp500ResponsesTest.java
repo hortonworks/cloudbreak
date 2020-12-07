@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -24,7 +23,8 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 
-public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
+public class
+CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
     public static final String PROFILE_RETURN_HTTP_500 = "cmHttp500";
 
@@ -44,7 +44,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
     @Inject
     private StackTestClient stackTestClient;
 
-//    private Integer originalWorkerCount;
+    private Integer originalWorkerCount;
 
     private Integer desiredWorkerCount;
 
@@ -60,7 +60,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
 
     @BeforeMethod
     public void setUp() {
-//        originalWorkerCount = 3;
+        originalWorkerCount = 3;
         desiredWorkerCount = 15;
     }
 
@@ -73,7 +73,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
         String blueprintName = testContext.get(BlueprintTestDto.class).getRequest().getName();
         String clusterName = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
-
+        int addedNodes = desiredWorkerCount - originalWorkerCount;
         testContext
                 .given(CLOUDERA_MANAGER_KEY, ClouderaManagerTestDto.class)
                 .given(CLUSTER_KEY, ClusterTestDto.class)
@@ -87,46 +87,24 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .await(STACK_AVAILABLE, key(stack))
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE), key(stack))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL)
-                // TODO Please don't remove, depends on CB-9111
-//                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_instance_statuses").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.MOCK_ROOT + "/cloud_metadata_statuses")
-//                        .bodyContains("CREATE_REQUESTED", addedNodes).exactTimes(1), key(stack))
-//                .then(MockVerification.verify(GET, ITResponse.SALT_BOOT_ROOT + "/health").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_BOOT_ROOT + "/salt/action/distribute").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=network.ipaddrs").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=saltutil.sync_all").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=mine.update").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=state.highstate").atLeast(1), key(stack))
-//                .then(MockVerification.verify(POST, ITResponse.SALT_API_ROOT + "/run").bodyContains("fun=grains.remove").atLeast(1), key(stack))
-//                .then(MockVerification.verify(GET,
-//                        new ClouderaManagerPathResolver(LIST_HOSTS)
-//                                .pathVariableMapping(":clusterName", clusterName)
-//                                .resolve())
-//                        .exactTimes(1), key(stack))
-//                .then(MockVerification.verify(GET, READ_HOSTS).atLeast(4), key(stack))
-//                .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(ADD_HOSTS)
-//                        .pathVariableMapping(":clusterName", clusterName)
-//                        .resolve())
-//                        .exactTimes(1), key(stack))
-//                .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(DEPLOY_CLIENT_CONFIG)
-//                        .pathVariableMapping(":clusterName", clusterName)
-//                        .resolve())
-//                        .exactTimes(1), key(stack))
-//                .then(MockVerification.verify(POST, new ClouderaManagerPathResolver(APPLY_HOST_TEMPLATE)
-//                        .pathVariableMapping(":clusterName", clusterName)
-//                        .pathVariableMapping(":hostTemplateName", "worker")
-//                        .resolve())
-//                        .exactTimes(1), key(stack))
-//                .then(MockVerification.verify(GET, new ClouderaManagerPathResolver(READ_COMMAND)
-//                        .pathVariableMapping(":commandId", APPLY_HOST_TEMPLATE_COMMAND_ID.toString())
-//                        .resolve())
-//                        .exactTimes(1), key(stack))
-                .validate();
-    }
+                .mockSpi().cloudInstanceStatuses().post().atLeast(1).verify()
+                .mockSpi().cloudMetadataStatuses().post().bodyContains("CREATE_REQUESTED", addedNodes).times(1).verify()
+                .mockSalt().health().get().atLeast(1).verify()
+                .mockSalt().saltActionDistribute().post().atLeast(1).verify()
+                .mockSalt().run().post().bodyContains("fun=network.ipaddrs", 1).atLeast(1).verify()
+                .mockSalt().run().post().bodyContains("fun=saltutil.sync_all", 1).atLeast(1).verify()
+                .mockSalt().run().post().bodyContains("fun=mine.update", 1).atLeast(1).verify()
+                .mockSalt().run().post().bodyContains("fun=state.highstate", 1).atLeast(1).verify()
+                .mockSalt().run().post().bodyContains("fun=grains.remove", 1).atLeast(1).verify()
 
-    @Override
-    protected List<String> testProfiles() {
-        return List.of(PROFILE_RETURN_HTTP_500);
+                .mockCm().clusterHosts().get().pathVariable("clusterName", clusterName).times(1).verify()
+                .mockCm().clouderaManagerHosts().get().atLeast(4).verify()
+                .mockCm().clusterHosts().post().pathVariable("clusterName", clusterName).times(1).verify()
+                .mockCm().clusterCommandsDeployConfig().post().times(1).verify()
+                .mockCm()
+                .commandsApplyHostTemplate().post().pathVariable("clusterName", clusterName).pathVariable("hostTemplateName", "worker").times(1).verify()
+                .mockCm().commands().getById().pathVariable("commandId", APPLY_HOST_TEMPLATE_COMMAND_ID.toString()).times(1).verify()
+                .validate();
     }
 
     @Override

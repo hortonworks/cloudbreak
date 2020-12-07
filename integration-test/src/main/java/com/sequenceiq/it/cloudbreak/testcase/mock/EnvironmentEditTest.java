@@ -2,6 +2,9 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.Map;
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
@@ -15,9 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
 import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SpiEndpoints;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class EnvironmentEditTest extends AbstractMockTest {
@@ -50,22 +51,20 @@ public class EnvironmentEditTest extends AbstractMockTest {
             when = "change managed ssh key to existing one",
             then = "delete managed ssh key but not create new one")
     public void authenticationEditWhenSetExistingKeyAndDeleteManagedSuccessfully(MockedTestContext testContext) {
+        String randomPublicKeyId = UUID.randomUUID().toString();
         testContext
-                .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
-                .thenReturn((s, uriParameters) -> "")
-                .whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, uriParameters) -> true)
+                .given(HttpMock.class)
+                .mockSpi().getPublicKey().get()
+                .pathVariable("publicKeyId", randomPublicKeyId)
+                .thenReturn(Map.of("publicKeyId", randomPublicKeyId, "publicKey", "asd"))
+
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
-//                .given(HttpMock.class).whenRequested(SpiEndpoints.UnregisterPublicKey.class).post().clearCalls()
-//                .whenRequested(SpiEndpoints.UnregisterPublicKey.class).post()
-//                .thenReturn((s, model, uriParameters) -> false)
                 .given(EnvironmentAuthenticationTestDto.class)
-                .withPublicKeyId("existing-public-key")
+                .withPublicKeyId(randomPublicKeyId)
                 .withPublicKey(null)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication())
@@ -73,7 +72,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .then((tc, t, c) -> {
                     String publicKeyId = t.getResponse().getAuthentication().getPublicKeyId();
                     String publicKey = t.getResponse().getAuthentication().getPublicKey();
-                    if (!"existing-public-key".equals(publicKeyId)) {
+                    if (!randomPublicKeyId.equals(publicKeyId)) {
                         throw new TestFailException("The auth public key id was not changed, but it should be changed");
                     }
                     if (publicKey != null) {
@@ -81,8 +80,8 @@ public class EnvironmentEditTest extends AbstractMockTest {
                     }
                     return t;
                 })
-                .given(HttpMock.class).whenRequested(SpiEndpoints.UnregisterPublicKey.class).post().verify(CheckCount.times(1))
-                .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post().verify(CheckCount.times(0))
+                .mockSpi().unregisterPublicKey().post().times(1).verify()
+                .mockSpi().unregisterPublicKey().post().times(0).verify()
                 .validate();
     }
 
@@ -92,22 +91,16 @@ public class EnvironmentEditTest extends AbstractMockTest {
             when = "change existing ssh key to managed one",
             then = "delete managed ssh key but not create new one")
     public void authenticationEditWhenSetManagedKeyAndNotDeleteExisted(MockedTestContext testContext) {
+        String randomPublicKeyId = UUID.randomUUID().toString();
         testContext
-                .given(HttpMock.class)
-                .whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, uriParameters) -> true)
                 .given(EnvironmentAuthenticationTestDto.class)
-                .withPublicKeyId("existing-public-key")
+                .withPublicKeyId(randomPublicKeyId)
                 .withPublicKey(null)
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
-//                .given(HttpMock.class)
-//                .whenRequested(SpiEndpoints.RegisterPublicKey.class).post()
-//                .thenReturn((s, uriParameters) -> "")
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(null)
@@ -117,7 +110,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .then((tc, t, c) -> {
                     String publicKeyId = t.getResponse().getAuthentication().getPublicKeyId();
                     String publicKey = t.getResponse().getAuthentication().getPublicKey();
-                    if ("existing-public-key".equals(publicKeyId)) {
+                    if (randomPublicKeyId.equals(publicKeyId)) {
                         throw new TestFailException("The auth public key id was not changed, but it should be changed");
                     }
                     if (publicKey == null) {
@@ -125,8 +118,8 @@ public class EnvironmentEditTest extends AbstractMockTest {
                     }
                     return t;
                 })
-                .given(HttpMock.class).whenRequested(SpiEndpoints.UnregisterPublicKey.class).post().verify(CheckCount.times(0))
-                .given(HttpMock.class).whenRequested(SpiEndpoints.RegisterPublicKey.class).post().verify(CheckCount.times(1))
+                .mockSpi().unregisterPublicKey().post().times(0).verify()
+                .mockSpi().registerPublicKey().post().times(1).verify()
                 .validate();
     }
 
@@ -136,19 +129,22 @@ public class EnvironmentEditTest extends AbstractMockTest {
             when = "change authentication",
             then = "get validation errors")
     public void authenticationEditValidationErrors(MockedTestContext testContext) {
-        String errorPattern = ".*'non-existing-public-key'.*\\s.*The uploaded SSH Public Key is invalid.*"
-                + "\\s.*ecdsa-sha2-nistp384.*\\s.*either publicKey or publicKeyId.*";
+        String value = UUID.randomUUID().toString();
+        String errorPattern = String.format(".*'%s'.*\\s.*The uploaded SSH Public Key is invalid.*"
+                + "\\s.*ecdsa-sha2-nistp384.*\\s.*either publicKey or publicKeyId.*", value);
         testContext
-                .given(HttpMock.class).whenRequested(SpiEndpoints.GetPublicKey.class).get()
-                .pathVariable("publicKeyId", "id")
-                .thenReturn((s, uriParameters) -> false)
+                .given(HttpMock.class)
+                .mockSpi().getPublicKey().get()
+                .pathVariable("publicKeyId", value)
+                .thenReturn(null)
+
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
                 .given(EnvironmentAuthenticationTestDto.class)
-                .withPublicKeyId("non-existing-public-key")
+                .withPublicKeyId(value)
                 .withPublicKey(INVALID_PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.changeAuthentication(), key("all-defined"))

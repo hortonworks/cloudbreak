@@ -313,7 +313,7 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
-    protected TestContext getTestContext() {
+    public TestContext getTestContext() {
         if (testContext == null) {
             return this;
         } else {

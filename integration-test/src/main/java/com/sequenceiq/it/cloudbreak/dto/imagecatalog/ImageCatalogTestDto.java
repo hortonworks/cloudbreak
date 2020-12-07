@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.dto.imagecatalog;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -14,10 +13,8 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.HttpMock;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 
 @Prototype
@@ -69,18 +66,6 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     public ImageCatalogTestDto withoutCleanup() {
         setSkipCleanup(Boolean.TRUE);
         return this;
-    }
-
-    public ImageCatalogTestDto withUrl(RunningParameter urlKey) {
-        return withUrl(getTestContext().get(HttpMock.class).getUrl(urlKey.getUrlClass(), urlKey.getUrlMethod()));
-    }
-
-    public ImageCatalogTestDto withUrl(Function<HttpMock, String> urlProvider) {
-        if (getTestContext().get(HttpMock.class) == null) {
-            throw new IllegalArgumentException("TestContext should have HttpMock entity.");
-        }
-        String url = urlProvider.apply(getTestContext().get(HttpMock.class));
-        return withUrl(url);
     }
 
     public ImageCatalogTestDto valid() {

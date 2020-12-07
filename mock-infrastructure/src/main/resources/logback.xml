@@ -21,19 +21,19 @@
             </layout>
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>cloudbreak-log/cloudbreak-%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>mock-infrastructure-log/mock-infrastructure-log-%d{yyyy-MM-dd}.log</FileNamePattern>
         </rollingPolicy>
         <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
             <MaxFileSize>1024MB</MaxFileSize>
         </triggeringPolicy>
     </appender>
 
-    <root level="${CB_ROOT_LOG_LEVEL:-INFO}">
+    <root level="INFO">
         <appender-ref ref="MOCK_INFRASTRUCTURE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="com.sequenceiq" level="${CB_LOG_LEVEL:-DEBUG}" additivity="false">
+    <logger name="com.sequenceiq" level="DEBUG" additivity="false">
         <appender-ref ref="MOCK_INFRASTRUCTURE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
