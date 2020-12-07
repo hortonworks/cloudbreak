@@ -11,17 +11,21 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
 
     @Value("${info.app.version:}")
-    private String cbVersion;
+    private String appVersion;
 
     public UsageProto.CDPOperationDetails convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
+        if (cdpStructuredFlowEvent == null) {
+            return null;
+        }
         UsageProto.CDPOperationDetails.Builder cdpOperationDetails = UsageProto.CDPOperationDetails.newBuilder();
         CDPOperationDetails structuredOperationDetails = cdpStructuredFlowEvent.getOperation();
-
-        cdpOperationDetails.setAccountId(structuredOperationDetails.getAccountId());
-        cdpOperationDetails.setResourceCrn(structuredOperationDetails.getResourceCrn());
-        cdpOperationDetails.setResourceName(structuredOperationDetails.getResourceName());
-        cdpOperationDetails.setInitiatorCrn(structuredOperationDetails.getUserCrn());
-        cdpOperationDetails.setApplicationVersion(cbVersion);
+        if (structuredOperationDetails != null) {
+            cdpOperationDetails.setAccountId(structuredOperationDetails.getAccountId());
+            cdpOperationDetails.setResourceCrn(structuredOperationDetails.getResourceCrn());
+            cdpOperationDetails.setResourceName(structuredOperationDetails.getResourceName());
+            cdpOperationDetails.setInitiatorCrn(structuredOperationDetails.getUserCrn());
+        }
+        cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails.build();
     }

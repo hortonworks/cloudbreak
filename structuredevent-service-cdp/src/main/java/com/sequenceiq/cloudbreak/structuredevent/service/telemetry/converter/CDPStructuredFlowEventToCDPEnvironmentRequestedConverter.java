@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -28,8 +27,10 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
     private CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     public UsageProto.CDPEnvironmentRequested convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
+        if (cdpStructuredFlowEvent == null) {
+            return null;
+        }
         UsageProto.CDPEnvironmentRequested.Builder cdpEnvironmentRequestedBuilder = UsageProto.CDPEnvironmentRequested.newBuilder();
-
         cdpEnvironmentRequestedBuilder.setOperationDetails(operationDetailsConverter.convert(cdpStructuredFlowEvent));
 
         EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
@@ -41,26 +42,28 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
         return ret;
     }
 
-    private UsageProto.CDPEnvironmentDetails convertEnvironmentDetails(EnvironmentDetails environmentDetails) {
+    private UsageProto.CDPEnvironmentDetails convertEnvironmentDetails(EnvironmentDetails srcEnvironmentDetails) {
         UsageProto.CDPEnvironmentDetails.Builder cdpEnvironmentDetails = UsageProto.CDPEnvironmentDetails.newBuilder();
+        if (srcEnvironmentDetails != null) {
+            if (srcEnvironmentDetails.getRegions() != null) {
+                cdpEnvironmentDetails.setRegion(srcEnvironmentDetails.getRegions().stream()
+                        .map(Region::getName).filter(Objects::nonNull).sorted().distinct()
+                        .collect(Collectors.joining(",")));
+            }
 
-        if (environmentDetails.getRegions() != null) {
-            cdpEnvironmentDetails.setRegion(environmentDetails.getRegions().stream()
-                    .map(Region::getName).filter(Objects::nonNull).sorted().distinct()
-                    .collect(Collectors.joining(",")));
+            if (srcEnvironmentDetails.getCloudPlatform() != null) {
+                cdpEnvironmentDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
+                        .Value.valueOf(srcEnvironmentDetails.getCloudPlatform()));
+            }
+            NetworkDto network = srcEnvironmentDetails.getNetwork();
+            if (network != null && network.getSubnetMetas() != null) {
+                List<String> availabilityZones = network.getSubnetMetas().values().stream().map(CloudSubnet::getAvailabilityZone)
+                        .filter(Objects::nonNull).sorted().distinct().collect(Collectors.toUnmodifiableList());
+
+                cdpEnvironmentDetails.setNumberOfAvailabilityZones(availabilityZones.size());
+                cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
+            }
         }
-
-        cdpEnvironmentDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(environmentDetails.getCloudPlatform()));
-
-        NetworkDto network = environmentDetails.getNetwork();
-        if (network != null && network.getSubnetMetas() != null) {
-            List<String> availabilityZones = network.getSubnetMetas().values().stream().map(CloudSubnet::getAvailabilityZone)
-                    .filter(Objects::nonNull).sorted().distinct().collect(Collectors.toUnmodifiableList());
-
-            cdpEnvironmentDetails.setNumberOfAvailabilityZones(availabilityZones.size());
-            cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
-        }
-
         return cdpEnvironmentDetails.build();
     }
 
@@ -70,13 +73,11 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
         if (environmentDetails != null && environmentDetails.getEnvironmentTelemetryFeatures() != null) {
             EnvironmentFeatures environmentFeatures = environmentDetails.getEnvironmentTelemetryFeatures();
-            if (environmentFeatures.getWorkloadAnalytics() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(
-                        Optional.ofNullable(environmentFeatures.getWorkloadAnalytics().isEnabled()).toString());
+            if (environmentFeatures.getWorkloadAnalytics() != null && environmentFeatures.getWorkloadAnalytics().isEnabled() != null) {
+                cdpTelemetryFeatureDetailsBuilder.setWorkloadAnalytics(environmentFeatures.getWorkloadAnalytics().isEnabled().toString());
             }
-            if (environmentFeatures.getClusterLogsCollection() != null) {
-                cdpTelemetryFeatureDetailsBuilder.setClusterLogsCollection(
-                        Optional.ofNullable(environmentFeatures.getClusterLogsCollection().isEnabled()).toString());
+            if (environmentFeatures.getClusterLogsCollection() != null && environmentFeatures.getClusterLogsCollection().isEnabled() != null) {
+                cdpTelemetryFeatureDetailsBuilder.setClusterLogsCollection(environmentFeatures.getClusterLogsCollection().isEnabled().toString());
             }
         }
 
