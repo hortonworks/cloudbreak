@@ -23,7 +23,7 @@
 {% set uuid = salt['pillar.get']('filecollector:uuid') %}
 {% set dbus_url = salt['pillar.get']('filecollector:dbusUrl') %}
 {% if salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
-  {% set support_bundle_dbus_headers = '@support-bundle-app:' + salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
+  {% set support_bundle_dbus_headers = '--header unifieddiagnostics-app:' + salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
 {% else %}
   {% set support_bundle_dbus_headers = '' %}
 {% endif %}

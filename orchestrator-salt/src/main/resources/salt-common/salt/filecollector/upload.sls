@@ -26,7 +26,7 @@ filecollector_upload_to_cloud_storage:
 
 filecollector_upload_to_support:
   cmd.run:
-    - name: "cdp-telemetry databus upload -p {{ filecollector.compressedFilePattern }} -c /opt/cdp-telemetry/conf/support_bundle_databus.conf --stream {{ filecollector.supportBundleDbusStreamName }} --url {{ filecollector.dbusUrl }}"
+    - name: "cdp-telemetry databus upload -p {{ filecollector.compressedFilePattern }} -c /opt/cdp-telemetry/conf/support_bundle_databus.conf --stream {{ filecollector.supportBundleDbusStreamName }} --url {{ filecollector.dbusUrl }} {{ filecollector.supportBundleDbusHeaders}}"
     - failhard: True
     - env:
         - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"{% if filecollector.proxyUrl %}{% if filecollector.proxyProtocol == "https" %}
