@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 
-public enum BlackListedUpScaleRole {
+public enum BlackListedUpScaleRole implements EntitledForServiceScale {
     KAFKA_BROKER(Entitlement.DATAHUB_STREAMING_SCALING),
     NIFI_NODE(Entitlement.DATAHUB_FLOW_SCALING),
     ZEPPELIN_SERVER(Entitlement.DATAHUB_DEFAULT_SCALING),
@@ -16,6 +16,7 @@ public enum BlackListedUpScaleRole {
         this.entitledFor = Objects.requireNonNull(entitledFor);
     }
 
+    @Override
     public Entitlement getEntitledFor() {
         return entitledFor;
     }

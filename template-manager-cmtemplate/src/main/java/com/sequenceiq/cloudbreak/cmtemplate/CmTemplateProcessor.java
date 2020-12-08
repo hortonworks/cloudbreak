@@ -49,6 +49,7 @@ import com.cloudera.api.swagger.model.ApiProductVersion;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Enums;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.GatewayRecommendation;
@@ -253,12 +254,14 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     @Override
     public AutoscaleRecommendation recommendAutoscale() {
-        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true);
-        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true);
+        Set<String> time = getRecommendationByBlacklist(BlackListedTimeBasedAutoscaleRole.class, true, List.of());
+        Set<String> load = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class, true, List.of());
         return new AutoscaleRecommendation(time, load);
     }
 
-    private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted) {
+    private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
+        List<String> entitlements) {
+        LOGGER.info("Get recommendation by blacklisted {} with entitlements {}.", enumClass, entitlements);
         Map<String, Set<String>> componentsByHostGroup = getNonGatewayComponentsByHostGroup();
         Set<String> recos = new HashSet<>();
         for (Entry<String, Set<String>> hostGroupServices : componentsByHostGroup.entrySet()) {
@@ -267,9 +270,18 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
             }
             boolean foundBlackListItem = false;
             for (String service : hostGroupServices.getValue()) {
-                if (Enums.getIfPresent(enumClass, service).isPresent()) {
-                    foundBlackListItem = true;
-                    break;
+                com.google.common.base.Optional<T> enumValue = Enums.getIfPresent(enumClass, service);
+                if (enumValue.isPresent()) {
+                    if (EntitledForServiceScale.class.isAssignableFrom(enumClass)) {
+                        Entitlement entitledFor = ((EntitledForServiceScale) enumValue.get()).getEntitledFor();
+                        if (!entitlements.contains(entitledFor.name())) {
+                            foundBlackListItem = true;
+                            break;
+                        }
+                    } else {
+                        foundBlackListItem = true;
+                        break;
+                    }
                 }
             }
             if (!foundBlackListItem) {
@@ -280,9 +292,9 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     @Override
-    public ResizeRecommendation recommendResize() {
-        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false);
-        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false);
+    public ResizeRecommendation recommendResize(List<String> entitlements) {
+        Set<String> upRecos = getRecommendationByBlacklist(BlackListedUpScaleRole.class, false, entitlements);
+        Set<String> downRecos = getRecommendationByBlacklist(BlackListedDownScaleRole.class, false, entitlements);
         return new ResizeRecommendation(upRecos, downRecos);
     }
 
