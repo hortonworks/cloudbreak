@@ -38,8 +38,9 @@ doLog() {
   set +x
   type_of_msg=$(echo "$@" | cut -d" " -f1)
   msg=$(echo "$*" | cut -d" " -f2-)
-  [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
-  [[ $type_of_msg == WARN ]] && type_of_msg="WARN " # as well
+  [[ $type_of_msg == INFO ]] && type_of_msg="INFO   " # three space for aligning
+  [[ $type_of_msg == WARN ]] && type_of_msg="WARN   " # three space for aligning
+  [[ $type_of_msg == ERROR ]] && type_of_msg="ERROR " # one space for aligning
 
   # print to the terminal if we have one
   test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg"
@@ -105,6 +106,15 @@ restore_db_from_local() {
 run_restore() {
   mkdir -p "$BACKUPS_DIR"
   run_kinit
+
+  if [[ $BACKUP_LOCATION == s3a://* ]] ;
+  then
+    STRIPPED_S3_URL=$(echo "$BACKUP_LOCATION" | sed -e 's/[a-fA-F0-9]\{8\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{12\}_database_backup\/*\*\?$//g')
+    doLog "Begining to perform s3guard import for ${STRIPPED_S3_URL}"
+    hadoop s3guard import "$STRIPPED_S3_URL" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || doLog "ERROR Unable to import S3Guard metadata."
+    doLog "s3guard import is complete"
+  fi
+
   hdfs dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
   restore_db_from_local "hive"
