@@ -56,7 +56,7 @@
             "size": 50
           }
         },
-        "nodeCount": 1,
+        "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
