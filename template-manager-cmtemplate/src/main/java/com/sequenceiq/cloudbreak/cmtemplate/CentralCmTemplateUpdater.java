@@ -67,7 +67,12 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
 
     @Override
     public String getBlueprintText(TemplatePreparationObject source) {
-        ApiClusterTemplate template = getCmTemplate(source, Map.of(), null, null, null);
+        return getBlueprintText(source, Map.of());
+    }
+
+    @Override
+    public String getBlueprintText(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings) {
+        ApiClusterTemplate template = getCmTemplate(source, hostGroupMappings, null, null, null);
         return JsonUtil.writeValueAsStringSilent(template);
     }
 

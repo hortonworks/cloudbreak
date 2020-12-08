@@ -213,6 +213,14 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
+    public void getCmTemplateWithHosts() {
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
+        String generated = generator.getBlueprintText(templatePreparationObject, getHostgroupMappings());
+        String actual = new CmTemplateProcessor(generated).getTemplate().toString();
+        Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/de-ha.bp")).getTemplate().toString(), actual);
+    }
+
+    @Test
     public void getKafkaPropertiesWhenNoHdfsInClusterShouldPresentCoreSettings() {
         CoreConfigProvider coreConfigProvider = new CoreConfigProvider();
         ReflectionTestUtils.setField(coreConfigProvider, "s3GuardConfigProvider", s3GuardConfigProvider);

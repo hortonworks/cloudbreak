@@ -73,6 +73,11 @@
                 "value": false
               }
             ]
+          },
+          {
+            "refName": "hdfs-HTTPFS-BASE",
+            "roleType": "HTTPFS",
+            "base": true
           }
         ]
       },
@@ -145,6 +150,10 @@
           {
             "name": "hue_service_safety_valve",
             "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
+          },
+          {
+            "name": "hue_webhdfs",
+            "ref": "hdfs-HTTPFS-BASE"
           }
         ],
         "roleConfigGroups": [
@@ -385,6 +394,7 @@
           "hdfs-FAILOVERCONTROLLER-BASE",
           "hdfs-NAMENODE-BASE",
           "hdfs-GATEWAY-BASE",
+          "hdfs-HTTPFS-BASE",
           "hive-GATEWAY-BASE",
           "hive-HIVESERVER2-BASE",
           "hms-GATEWAY-BASE",
@@ -454,5 +464,15 @@
           "yarn-GATEWAY-BASE"
         ]
       }
-    ]
+    ],
+    "instantiator": {
+        "hosts": [
+            {
+                "hostTemplateRefName": "master",
+                "roleRefNames": [
+                    "hdfs-HTTPFS-BASE"
+                ]
+            }
+        ]
+    }
 }

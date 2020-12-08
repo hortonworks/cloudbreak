@@ -468,9 +468,27 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     public void addHosts(Map<String, List<Map<String, String>>> hostGroupMappings) {
-        hostGroupMappings.forEach((hostGroup, hostAttributes) -> hostAttributes.forEach(
-                attr -> cmTemplate.getInstantiator().addHostsItem(new ApiClusterTemplateHostInfo().hostName(attr.get("fqdn")).hostTemplateRefName(hostGroup))
-        ));
+        ApiClusterTemplateInstantiator instantiator = cmTemplate.getInstantiator();
+        Map<String, List<String>> roleRefNameMap = null;
+        List<ApiClusterTemplateHostInfo> hosts = instantiator.getHosts();
+        if (hosts != null && !hosts.isEmpty()) {
+            roleRefNameMap = fetchExistingRoleRefNames(hosts);
+            hosts.clear();
+        }
+        Map<String, List<String>> finalRoleRefNameMap = roleRefNameMap;
+        hostGroupMappings.forEach((hostGroup, hostAttributes) -> {
+            for (Map<String, String> attr : hostAttributes) {
+                ApiClusterTemplateHostInfo hostsItem = new ApiClusterTemplateHostInfo().hostName(attr.get("fqdn")).hostTemplateRefName(hostGroup);
+                if (finalRoleRefNameMap != null && finalRoleRefNameMap.containsKey(hostGroup)) {
+                    hostsItem.setRoleRefNames(finalRoleRefNameMap.get(hostGroup));
+                }
+                instantiator.addHostsItem(hostsItem);
+            }
+        });
+    }
+
+    private Map<String, List<String>> fetchExistingRoleRefNames(List<ApiClusterTemplateHostInfo> hosts) {
+        return hosts.stream().collect(toMap(ApiClusterTemplateHostInfo::getHostTemplateRefName, ApiClusterTemplateHostInfo::getRoleRefNames));
     }
 
     public void resetProducts() {
