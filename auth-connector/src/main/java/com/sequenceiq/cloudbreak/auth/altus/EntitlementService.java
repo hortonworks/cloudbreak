@@ -19,7 +19,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HEALTH_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LIST_FILTERING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
@@ -83,10 +82,6 @@ public class EntitlementService {
 
     public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
         return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA_REPAIR);
-    }
-
-    public boolean freeIpaHealthCheckEnabled(String actorCrn, String accountID) {
-        return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HEALTH_CHECK);
     }
 
     public boolean internalTenant(String actorCrn, String accountId) {
