@@ -42,6 +42,12 @@ public abstract class EnvironmentNetworkBase {
     @ApiModelProperty(EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
     private ServiceEndpointCreation serviceEndpointCreation = ServiceEndpointCreation.DISABLED;
 
+    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
+    private Boolean usePublicEndpointAccessGateway;
+
+    @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
+    private Set<String> endpointAccessGatewaySubnetIds;
+
     @ApiModelProperty(EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
     private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
 
@@ -92,6 +98,22 @@ public abstract class EnvironmentNetworkBase {
         this.serviceEndpointCreation = serviceEndpointCreation;
     }
 
+    public Boolean getUsePublicEndpointAccessGateway() {
+        return usePublicEndpointAccessGateway;
+    }
+
+    public void setUsePublicEndpointAccessGateway(Boolean usePublicEndpointAccessGateway) {
+        this.usePublicEndpointAccessGateway = usePublicEndpointAccessGateway;
+    }
+
+    public Set<String> getEndpointAccessGatewaySubnetIds() {
+        return endpointAccessGatewaySubnetIds;
+    }
+
+    public void setEndpointAccessGatewaySubnetIds(Set<String> endpointAccessGatewaySubnetIds) {
+        this.endpointAccessGatewaySubnetIds = endpointAccessGatewaySubnetIds;
+    }
+
     public OutboundInternetTraffic getOutboundInternetTraffic() {
         return outboundInternetTraffic;
     }
@@ -139,6 +161,8 @@ public abstract class EnvironmentNetworkBase {
                 ", networkCidr='" + networkCidr + '\'' +
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
+                ", usePublicEndpointAccessGateway=" + usePublicEndpointAccessGateway +
+                ", endpointAccessGatewaySubnetIds=" + endpointAccessGatewaySubnetIds +
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", aws=" + aws +
                 ", gcp=" + gcp +
