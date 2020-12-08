@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public class FreeIpaChecks {
-    /* Users in this list should not be added/deleted. */
+    /* Users in this list should not be added to or deleted from FreeIPA. */
     public static final List<String> IPA_PROTECTED_USERS = List.of("admin");
 
-    /* Groups in this list should not be added/deleted. These groups are considered to be reserved in CDP-UMS.
-    Therefore,
+    /* Groups in this list should not be added to or deleted from FreeIPA.
+    These groups are considered to be reserved in CDP-UMS. Therefore,
     https://github.infra.cloudera.com/thunderhead/thunderhead/blob/master/services/usermanagement/src/main/resources/com/cloudera/thunderhead/service/usermanagement/server/ipa_protected_groups.txt needs to be updated when the following list is updated. */
     public static final List<String> IPA_PROTECTED_GROUPS = List.of("admins", "editors", "ipausers", "trust admins");
 
-    /* Group membership in these groups should not be changed. */
+    /* Group membership in these groups should not be explicitly changed in FreeIPA. */
     public static final List<String> IPA_UNMANAGED_GROUPS = List.of("editors", "ipausers", "trust admins");
 
     private FreeIpaChecks() {
