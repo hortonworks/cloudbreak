@@ -28,12 +28,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -41,16 +41,21 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class ClusterUpgradeAvailabilityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeAvailabilityService.class);
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -142,7 +147,7 @@ public class ClusterUpgradeAvailabilityService {
         try {
             LOGGER.info(String.format("Retrieving images for upgrading stack %s", stack.getName()));
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
-            CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(currentImage.getImageCatalogUrl());
+            CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
             ImageFilterParams imageFilterParams = new ImageFilterParams(image, lockComponents, getActivatedParcels(stack), stack.isDatalake());
             ImageFilterResult filteredImages = filterImages(imageCatalog, stack.cloudPlatform(), imageFilterParams);
@@ -180,7 +185,17 @@ public class ClusterUpgradeAvailabilityService {
         return imageService.getImage(stack.getId());
     }
 
-    private CloudbreakImageCatalogV3 getImagesFromCatalog(String imageCatalogUrl) throws CloudbreakImageCatalogException {
+    private CloudbreakImageCatalogV3 getImagesFromCatalog(Workspace workspace,
+            com.sequenceiq.cloudbreak.cloud.model.Image image) throws CloudbreakImageCatalogException {
+        String imageCatalogName = image.getImageCatalogName();
+        String imageCatalogUrl = image.getImageCatalogUrl();
+        try {
+            imageCatalogUrl = imageCatalogService.get(workspace.getId(), imageCatalogName).getImageCatalogUrl();
+            LOGGER.info("Image catalog with name {} and url {} is used for image filtering.", imageCatalogName, imageCatalogUrl);
+        } catch (NotFoundException ex) {
+            LOGGER.info("Image catalog with name {} not found. The following image catalog url will be used for image filtering: {}.",
+                    imageCatalogName, imageCatalogUrl);
+        }
         return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
     }
 
