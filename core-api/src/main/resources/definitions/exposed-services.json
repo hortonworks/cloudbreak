@@ -241,7 +241,7 @@
     {
       "name": "LIVY_FOR_SPARK3",
       "displayName": "Livy Server 3",
-      "serviceName": "LIVY_FOR_SPARK3",
+      "serviceName": "LIVY_SERVER_FOR_SPARK3",
       "knoxService": "LIVY_FOR_SPARK3",
       "knoxUrl": "/livy_for_spark3/ui/",
       "ssoSupported": true,
@@ -255,7 +255,7 @@
     {
       "name": "LIVY_FOR_SPARK3_API",
       "displayName": "Livy Server 3",
-      "serviceName": "LIVY_FOR_SPARK3",
+      "serviceName": "LIVY_SERVER_FOR_SPARK3",
       "knoxService": "LIVY_FOR_SPARK3_API",
       "knoxUrl": "/livy_for_spark3/",
       "ssoSupported": true,

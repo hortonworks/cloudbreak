@@ -71,7 +71,7 @@
       "dependencies": ["SPARK_ON_YARN"]
     },
     {
-      "name": "LIVY_FOR_SPARK3",
+      "name": "LIVY_SERVER_FOR_SPARK3",
       "displayName": "Livy for Spark 3",
       "componentNameInParcel": "spark3",
       "components": [

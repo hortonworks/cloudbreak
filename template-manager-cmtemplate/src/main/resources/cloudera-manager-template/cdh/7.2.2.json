@@ -61,7 +61,7 @@
       "version": "2.4.0"
     },
     {
-      "name": "LIVY_FOR_SPARK3",
+      "name": "LIVY_SERVER_FOR_SPARK3",
       "version": "0.6.0"
     },
     {
@@ -133,7 +133,7 @@
       "version": "3.0.0"
     },
     {
-      "name": "LIVY_FOR_SPARK3",
+      "name": "LIVY_SERVER_FOR_SPARK3",
       "version": "0.6.0"
     },
     {
