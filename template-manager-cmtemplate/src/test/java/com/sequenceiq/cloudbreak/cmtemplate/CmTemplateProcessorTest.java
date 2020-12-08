@@ -498,18 +498,18 @@ public class CmTemplateProcessorTest {
     @Test
     public void recommendResize() {
         underTest = new CmTemplateProcessor(getBlueprintText("input/kafka.bp"));
-        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize());
+        assertEquals(new ResizeRecommendation(Set.of("quorum"), Set.of("quorum")), underTest.recommendResize(List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
         Set<String> hostGroups = Set.of("gateway", "compute", "worker");
-        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize());
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/cb5660.bp"));
         hostGroups = Set.of("gateway", "quorum", "worker", "compute");
-        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize());
+        assertEquals(new ResizeRecommendation(hostGroups, hostGroups), underTest.recommendResize(List.of()));
 
         underTest = new CmTemplateProcessor(getBlueprintText("input/nifi.bp"));
-        assertEquals(new ResizeRecommendation(Set.of(), Set.of()), underTest.recommendResize());
+        assertEquals(new ResizeRecommendation(Set.of(), Set.of()), underTest.recommendResize(List.of()));
     }
 
     @Test

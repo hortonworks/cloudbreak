@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -71,6 +73,9 @@ public class CloudResourceAdvisor {
     private CredentialClientService credentialClientService;
 
     @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
@@ -92,7 +97,7 @@ public class CloudResourceAdvisor {
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
-
+        List<String> entitlements = entitlementService.getEntitlements(credential.getCreator(), credential.getAccount());
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
@@ -156,16 +161,18 @@ public class CloudResourceAdvisor {
 
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
 
-        ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
+        ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
         return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes, instanceCounts, gateway, autoscale, resize);
     }
 
     public ScaleRecommendation createForBlueprint(Long workspaceId, String blueprintName) {
         LOGGER.debug("Scale advice for blueprintName: {}.", blueprintName);
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
-        ResizeRecommendation resize = recommendResize(blueprintTextProcessor);
+        List<String> entitlements = entitlementService.getEntitlements(blueprint.getCreator(), blueprint.getWorkspace().getTenant().getName());
+        ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
         return new ScaleRecommendation(autoscale, resize);
     }
@@ -176,10 +183,14 @@ public class CloudResourceAdvisor {
         return recommendAutoscale(blueprintTextProcessor);
     }
 
-    private BlueprintTextProcessor getBlueprintTextProcessor(Long workspaceId, String blueprintName) {
-        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+    private BlueprintTextProcessor getBlueprintTextProcessor(Blueprint blueprint) {
         String blueprintText = blueprint.getBlueprintText();
         return blueprintTextProcessorFactory.createBlueprintTextProcessor(blueprintText);
+    }
+
+    private BlueprintTextProcessor getBlueprintTextProcessor(Long workspaceId, String blueprintName) {
+        Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
+        return getBlueprintTextProcessor(blueprint);
     }
 
     private GatewayRecommendation recommendGateway(BlueprintTextProcessor blueprintTextProcessor) {
@@ -211,8 +222,8 @@ public class CloudResourceAdvisor {
                 || lowerName.contains("manager");
     }
 
-    private ResizeRecommendation recommendResize(BlueprintTextProcessor blueprintTextProcessor) {
-        ResizeRecommendation resizeRecommendation = blueprintTextProcessor.recommendResize();
+    private ResizeRecommendation recommendResize(BlueprintTextProcessor blueprintTextProcessor, List<String> entitlements) {
+        ResizeRecommendation resizeRecommendation = blueprintTextProcessor.recommendResize(entitlements);
 
         if (resizeRecommendation.getScaleUpHostGroups().isEmpty()) {
             Set<String> scaleUpHostGroups = filterHostGroupByPredicate(blueprintTextProcessor, this::fallbackScaleUpFilter);

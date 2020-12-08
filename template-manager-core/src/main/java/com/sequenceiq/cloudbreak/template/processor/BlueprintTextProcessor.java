@@ -59,7 +59,7 @@ public interface BlueprintTextProcessor {
 
     AutoscaleRecommendation recommendAutoscale();
 
-    ResizeRecommendation recommendResize();
+    ResizeRecommendation recommendResize(List<String> entitlements);
 
     String getStackVersion();
 
