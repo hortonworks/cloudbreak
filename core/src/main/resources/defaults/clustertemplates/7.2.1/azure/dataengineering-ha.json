@@ -42,7 +42,7 @@
         "cloudPlatform": "AZURE"
       },
       {
-        "nodeCount": 1,
+        "nodeCount": 0,
         "name": "compute",
         "type": "CORE",
         "recoveryMode": "MANUAL",
