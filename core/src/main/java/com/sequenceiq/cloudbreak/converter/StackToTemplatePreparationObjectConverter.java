@@ -248,6 +248,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 StackTags stackTag = source.getTags().get(StackTags.class);
                 Map<String, String> userDefined = stackTag.getUserDefinedTags();
                 Map<String, String> defaultTags = stackTag.getDefaultTags();
+                Map<String, String> applicationTags = stackTag.getApplicationTags();
+                if (applicationTags != null) {
+                    userDefinedTags.putAll(applicationTags);
+                }
                 if (userDefined != null) {
                     userDefinedTags.putAll(userDefined);
                 }
