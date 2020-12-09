@@ -39,7 +39,7 @@ public class UmsAccountAuthorizationService {
     }
 
     private void checkRightOfUser(String userCrn, AuthorizationResourceAction action, String unauthorizedMessage) {
-        if (entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
             if (!umsClient.checkAccountRight(userCrn, userCrn, action.getRight(), getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);

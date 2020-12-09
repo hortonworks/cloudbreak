@@ -135,7 +135,6 @@ public class ClusterCommonService {
             String userCrn = creator.getUserCrn();
             String accountId = Crn.safeFromString(userCrn).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
-                    userCrn,
                     accountId,
                     blueprint,
                     hostGroup.get(),

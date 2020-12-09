@@ -184,7 +184,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     }
 
     private Json getTags(DBStack dbStack, String clusterCrn, DetailedEnvironmentResponse environment) {
-        boolean internalTenant = entitlementService.internalTenant(dbStack.getOwnerCrn().toString(), dbStack.getAccountId());
+        boolean internalTenant = entitlementService.internalTenant(dbStack.getAccountId());
 
         Map<String, String> resultTags = getUserTagsForCluster(clusterCrn);
 

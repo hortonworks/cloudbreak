@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
@@ -56,24 +55,24 @@ public class CredentialValidator {
     }
 
     public void validateCredentialCloudPlatform(String cloudPlatform, String userCrn) {
-        validateCredentialCloudPlatformInternal(cloudPlatform, userCrn, Crn.safeFromString(userCrn).getAccountId());
+        validateCredentialCloudPlatformInternal(cloudPlatform, Crn.safeFromString(userCrn).getAccountId());
     }
 
-    private void validateCredentialCloudPlatformInternal(String cloudPlatform, String userCrn, String accountId) {
+    private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId) {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
         }
-        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, accountId)) {
+        if (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(accountId)) {
             throw new BadRequestException("Provisioning in Microsoft Azure is not enabled for this account.");
         }
-        if (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(userCrn, accountId)) {
+        if (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(accountId)) {
             throw new BadRequestException("Provisioning in Google Cloud is not enabled for this account.");
         }
     }
 
     public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId) {
         try {
-            validateCredentialCloudPlatformInternal(cloudPlatform, INTERNAL_ACTOR_CRN, accountId);
+            validateCredentialCloudPlatformInternal(cloudPlatform, accountId);
             return true;
         } catch (BadRequestException e) {
             return false;

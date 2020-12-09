@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -15,6 +13,6 @@ class UserSyncPollerEntitlementChecker {
     private EntitlementService entitlementService;
 
     public boolean isAccountEntitled(String accountId) {
-        return entitlementService.automaticUsersyncPollerEnabled(INTERNAL_ACTOR_CRN, accountId);
+        return entitlementService.automaticUsersyncPollerEnabled(accountId);
     }
 }

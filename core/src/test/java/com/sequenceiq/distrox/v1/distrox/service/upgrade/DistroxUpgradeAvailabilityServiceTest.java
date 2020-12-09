@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,7 +48,7 @@ class DistroxUpgradeAvailabilityServiceTest {
 
     @BeforeEach
     public void init() {
-        lenient().when(entitlementService.datahubRuntimeUpgradeEnabled(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
+        lenient().when(entitlementService.datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -67,12 +66,12 @@ class DistroxUpgradeAvailabilityServiceTest {
         boolean result = underTest.isRuntimeUpgradeEnabled(USER_CRN);
 
         assertTrue(result);
-        verify(entitlementService).datahubRuntimeUpgradeEnabled(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d");
+        verify(entitlementService).datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d");
     }
 
     @Test
     public void testVerifyRuntimeUpgradeEntitlement() {
-        when(entitlementService.datahubRuntimeUpgradeEnabled(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
         UpgradeV4Request request = new UpgradeV4Request();
 
         assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN),

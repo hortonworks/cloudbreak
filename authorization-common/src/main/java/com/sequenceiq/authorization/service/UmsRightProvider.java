@@ -37,8 +37,8 @@ public class UmsRightProvider {
         return action.getAuthorizationResourceType();
     }
 
-    public String getRight(AuthorizationResourceAction action, String actorCrn, String accountId) {
-        if (entitlementService.isAuthorizationEntitlementRegistered(actorCrn, accountId)) {
+    public String getRight(AuthorizationResourceAction action, String accountId) {
+        if (entitlementService.isAuthorizationEntitlementRegistered(accountId)) {
             return getNewRight(action);
         }
         return getLegacyRight(action);
@@ -52,7 +52,7 @@ public class UmsRightProvider {
     }
 
     public String getRight(AuthorizationResourceAction action) {
-        return getRight(action, ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId());
+        return getRight(action, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public String getLegacyRight(AuthorizationResourceAction action) {

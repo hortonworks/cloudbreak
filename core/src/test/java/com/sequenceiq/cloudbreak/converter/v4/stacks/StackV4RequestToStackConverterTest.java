@@ -182,7 +182,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
-        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
@@ -323,7 +323,7 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
         StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
 
-        when(entitlementService.datalakeLoadBalancerEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(credentialClientService.getByName(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());

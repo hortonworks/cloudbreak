@@ -115,12 +115,12 @@ public class SdxRuntimeUpgradeService {
 
     public boolean isRuntimeUpgradeEnabled(String userCrn) {
         String accountId = sdxService.getAccountIdFromCrn(userCrn);
-        return entitlementService.runtimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId);
+        return entitlementService.runtimeUpgradeEnabled(accountId);
     }
 
     private boolean isInternalRepoAllowedForUpgrade(String userCrn) {
         String accountId = sdxService.getAccountIdFromCrn(userCrn);
-        return entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, accountId);
+        return entitlementService.isInternalRepositoryForUpgradeAllowed(accountId);
     }
 
     private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest,

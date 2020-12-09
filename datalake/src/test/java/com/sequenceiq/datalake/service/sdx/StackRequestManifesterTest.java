@@ -285,7 +285,7 @@ public class StackRequestManifesterTest {
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndNotEntitled() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(false);
 
         underTest.setupInstanceVolumeEncryption(stackV4Request, CLOUD_PLATFORM_AWS, ACCOUNT_ID);
 
@@ -294,7 +294,7 @@ public class StackRequestManifesterTest {
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoInstanceGroups() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
         when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
@@ -306,7 +306,7 @@ public class StackRequestManifesterTest {
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoInstanceTemplateParameters() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
@@ -318,7 +318,7 @@ public class StackRequestManifesterTest {
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndNoEncryptionParameters() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
@@ -344,7 +344,7 @@ public class StackRequestManifesterTest {
     @MethodSource("encryptionTypeDataProvider")
     void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndEncryptionParameters(String testCaseName, EncryptionType encryptionType, String encryptionKey,
             EncryptionType encryptionTypeExpected, String encryptionKeyExpected) {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
@@ -366,7 +366,7 @@ public class StackRequestManifesterTest {
 
     @Test
     void setupInstanceVolumeEncryptionTestWhenAwsAndEntitledAndTwoInstanceGroupsAndEncryptionTypesNoneCustom() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
         InstanceTemplateV4Request instanceTemplateV4Request1 = instanceGroupV4Request1.getTemplate();

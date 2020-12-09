@@ -10,7 +10,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -142,8 +141,8 @@ public class UpgradeServiceTest {
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verifyNoMoreInteractions(distroXV1Endpoint);
-        verifyZeroInteractions(componentConfigProviderService);
-        verifyZeroInteractions(imageService);
+        verifyNoMoreInteractions(componentConfigProviderService);
+        verifyNoMoreInteractions(imageService);
         assertThat(result.getUpgrade()).isEqualTo(null);
         assertThat(result.getReason()).isEqualTo("According to the image catalog, the current image id-1 is already the latest version.");
     }
@@ -167,8 +166,8 @@ public class UpgradeServiceTest {
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verifyNoMoreInteractions(distroXV1Endpoint);
-        verifyZeroInteractions(componentConfigProviderService);
-        verifyZeroInteractions(imageService);
+        verifyNoMoreInteractions(componentConfigProviderService);
+        verifyNoMoreInteractions(imageService);
         assertThat(result.getUpgrade()).isEqualTo(null);
         assertThat(result.getReason()).isEqualTo("Repair cannot be performed because there is an active flow running.; No external Database");
     }

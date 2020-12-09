@@ -107,7 +107,7 @@ public class CredentialAuthorizationIntegrationTest {
             return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
         });
         lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(Boolean.TRUE);
         mockPermissions();
     }
 

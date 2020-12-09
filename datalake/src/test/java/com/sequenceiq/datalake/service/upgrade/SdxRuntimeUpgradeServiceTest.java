@@ -130,7 +130,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
 
         response.setUpgradeCandidates(new ArrayList<>());
         sdxUpgradeResponse.setUpgradeCandidates(new ArrayList<>());
@@ -147,8 +147,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(ANOTHER_IMAGE_ID);
@@ -168,7 +168,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -191,8 +191,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -218,8 +218,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(true);
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
@@ -300,8 +300,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(true);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(true);
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -413,8 +413,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
         when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
@@ -447,8 +447,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
         when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
@@ -491,8 +491,8 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString())).thenReturn(response);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(true);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
         when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
 
         Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
@@ -531,7 +531,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     public void testCheckForRuntimeUpgradeByNameWhenNotEnabled() {
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.checkForUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
@@ -542,7 +542,7 @@ public class SdxRuntimeUpgradeServiceTest {
     @Test
     public void testCheckForRuntimeUpgradeByCrnWhenNotEnabled() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
@@ -553,7 +553,7 @@ public class SdxRuntimeUpgradeServiceTest {
     @Test
     public void testTriggerRuntimeUpgradeByCrnWhenNotEnabled() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(
                 BadRequestException.class,
@@ -565,7 +565,7 @@ public class SdxRuntimeUpgradeServiceTest {
     @Test
     public void testTriggerRuntimeUpgradeByNameWhenNotEnabled() {
         when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
-        when(entitlementService.runtimeUpgradeEnabled(any(), any())).thenReturn(false);
+        when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
         BadRequestException exception = Assertions.assertThrows(
                 BadRequestException.class,

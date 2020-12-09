@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.credential.validation;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -82,7 +81,7 @@ class CredentialValidatorTest {
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testValidateCredentialCloudPlatform(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            when(entitlementService.azureEnabled(USER_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+            when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         if (validExpected) {
             underTest.validateCredentialCloudPlatform(cloudPlatform, USER_CRN);
@@ -95,7 +94,7 @@ class CredentialValidatorTest {
     @MethodSource("validateCredentialCloudPlatformDataProvider")
     void testIsCredentialCloudPlatformValid(String testCaseName, String cloudPlatform, boolean azureEnabled, boolean validExpected) {
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
-            when(entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
+            when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
         }
         assertThat(underTest.isCredentialCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }

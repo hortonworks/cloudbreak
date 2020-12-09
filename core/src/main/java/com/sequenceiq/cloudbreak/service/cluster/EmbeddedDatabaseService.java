@@ -25,7 +25,7 @@ public class EmbeddedDatabaseService {
         DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
         String databaseCrn = cluster == null ? "" : cluster.getDatabaseServerCrn();
         if (DatabaseAvailabilityType.NONE == externalDatabase && StringUtils.isEmpty(databaseCrn)
-                && entitlementService.embeddedDatabaseOnAttachedDiskEnabled(actorCrn, accountId)) {
+                && entitlementService.embeddedDatabaseOnAttachedDiskEnabled(accountId)) {
             int volumeCount = calculateVolumeCountOnGatewayGroup(stack);
             return new EmbeddedDatabaseInfo(volumeCount);
         } else {

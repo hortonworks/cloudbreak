@@ -48,7 +48,7 @@ public class HbaseCloudStorageServiceConfigProviderTest {
         if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
             ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
         }
-        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
     }
 
     @Test

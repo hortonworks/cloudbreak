@@ -24,14 +24,14 @@ class UserSyncPollerEntitlementCheckerTest {
 
     @Test
     void accountIsNotEntitled() {
-        when(entitlementService.automaticUsersyncPollerEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.automaticUsersyncPollerEnabled(anyString())).thenReturn(false);
 
         assertFalse(underTest.isAccountEntitled(UserSyncTestUtils.ACCOUNT_ID));
     }
 
     @Test
     void accountIsEntitled() {
-        when(entitlementService.automaticUsersyncPollerEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.automaticUsersyncPollerEnabled(anyString())).thenReturn(true);
 
         assertTrue(underTest.isAccountEntitled(UserSyncTestUtils.ACCOUNT_ID));
     }

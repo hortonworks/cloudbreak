@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -54,7 +52,7 @@ public class CloudStorageValidator {
         }
 
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (!entitlementService.cloudStorageValidationEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+        if (!entitlementService.cloudStorageValidationEnabled(accountId)) {
             LOGGER.info("Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
                     JsonUtil.writeValueAsStringSilent(cloudStorageRequest));
             return;

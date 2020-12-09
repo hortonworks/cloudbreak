@@ -65,7 +65,7 @@ public class CloudStorageValidatorTest {
     public void validateEnvironmentRequestCloudStorageValidationNoEntitlement() {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
         when(environment.getCloudStorageValidation()).thenReturn(CloudStorageValidation.ENABLED);
-        when(entitlementService.cloudStorageValidationEnabled(any(), any())).thenReturn(false);
+        when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(false);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(cloudStorageRequest, environment, validationResultBuilder);
         assertFalse(validationResultBuilder.build().hasError());

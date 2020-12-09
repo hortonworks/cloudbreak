@@ -54,12 +54,12 @@ public class UmsAccountAuthorizationServiceTest {
 
     @Test
     public void testHasRightOfUserWithValidResourceTypeAndAction() {
-        when(entitlementService.isAuthorizationEntitlementRegistered(any(), any())).thenReturn(false);
+        when(entitlementService.isAuthorizationEntitlementRegistered(any())).thenReturn(false);
         when(umsClient.checkAccountRightLegacy(anyString(), anyString(), anyString(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ));
 
-        when(entitlementService.isAuthorizationEntitlementRegistered(any(), any())).thenReturn(true);
+        when(entitlementService.isAuthorizationEntitlementRegistered(any())).thenReturn(true);
         when(umsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         assertThrows(AccessDeniedException.class,

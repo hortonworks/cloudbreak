@@ -41,7 +41,7 @@ public class ListPermissionChecker {
             commonPermissionCheckingUtils.checkPermissionForUser(action, userCrn);
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
-        if (entitlementService.listFilteringEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId())) {
+        if (entitlementService.listFilteringEnabled(Crn.safeFromString(userCrn).getAccountId())) {
             List<String> allResourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action).getResourceCrnsInAccount();
             Set<String> filteredResourceCrns = commonPermissionCheckingUtils.getPermissionsForUserOnResources(action, userCrn, allResourceCrns)
                     .entrySet()

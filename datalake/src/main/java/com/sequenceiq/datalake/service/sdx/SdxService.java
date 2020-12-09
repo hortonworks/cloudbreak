@@ -478,7 +478,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     private void validateRazEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (sdxClusterRequest.isEnableRangerRaz()) {
-            boolean razEntitlementEnabled = entitlementService.razEnabled(environment.getCreator(), Crn.safeFromString(environment.getCreator()).getAccountId());
+            boolean razEntitlementEnabled = entitlementService.razEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
             if (!razEntitlementEnabled) {
                 validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
             }
@@ -501,8 +501,7 @@ public class SdxService implements ResourceIdProvider, ResourceBasedCrnProvider 
     private void validateMediumDutySdxEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
-            boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(environment.getCreator(),
-                    Crn.safeFromString(environment.getCreator()).getAccountId());
+            boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
             if (!mediumDutySdxEntitlementEnabled) {
                 validationBuilder.error("Provisioning a medium duty data lake cluster is not enabled for this account. " +
                         "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.");

@@ -52,7 +52,7 @@ public class KerberosMgmtRoleComponentV1Test {
         host.setFqdn(HOST);
         RoleRequest roleRequest = null;
         new KerberosMgmtRoleComponent().addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
-        Mockito.verifyZeroInteractions(mockIpaClient);
+        Mockito.verifyNoInteractions(mockIpaClient);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class KerberosMgmtRoleComponentV1Test {
         service.setKrbprincipalname(List.of(SERVICE));
         RoleRequest roleRequest = null;
         new KerberosMgmtRoleComponent().addRoleAndPrivileges(Optional.of(service), Optional.empty(), roleRequest, mockIpaClient);
-        Mockito.verifyZeroInteractions(mockIpaClient);
+        Mockito.verifyNoInteractions(mockIpaClient);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class KerberosMgmtRoleComponentV1Test {
     @Test
     public void testDeleteRoleIfNoLongerUsedWhenRoleIsNull() throws Exception {
         new KerberosMgmtRoleComponent().deleteRoleIfItIsNoLongerUsed(null, mockIpaClient);
-        Mockito.verifyZeroInteractions(mockIpaClient);
+        Mockito.verifyNoInteractions(mockIpaClient);
     }
 
     @Test

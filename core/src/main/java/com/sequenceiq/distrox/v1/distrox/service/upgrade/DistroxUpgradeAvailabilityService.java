@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.common.model.UpgradeShowAvailableImages.LATEST_ONLY;
 
 import java.util.List;
@@ -40,7 +39,7 @@ public class DistroxUpgradeAvailabilityService {
     public boolean isRuntimeUpgradeEnabled(String userCrn) {
         try {
             String accountId = Crn.safeFromString(userCrn).getAccountId();
-            return entitlementService.datahubRuntimeUpgradeEnabled(INTERNAL_ACTOR_CRN, accountId);
+            return entitlementService.datahubRuntimeUpgradeEnabled(accountId);
         } catch (NullPointerException | CrnParseException e) {
             LOGGER.warn("Can not parse CRN to find account ID: {}", userCrn, e);
             throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);

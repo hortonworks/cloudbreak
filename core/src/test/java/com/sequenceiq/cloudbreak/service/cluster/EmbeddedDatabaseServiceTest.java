@@ -40,7 +40,7 @@ public class EmbeddedDatabaseServiceTest {
     public void testGetEmbeddedDatabaseInfoWithAttachmentEnabled() {
         // GIVEN
         Stack stack = createStack(5);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
@@ -53,7 +53,7 @@ public class EmbeddedDatabaseServiceTest {
     public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsEnabledButNoDisksAttached() {
         // GIVEN
         Stack stack = createStack(0);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
@@ -66,7 +66,7 @@ public class EmbeddedDatabaseServiceTest {
     public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsEnabledButNoTemplateProvided() {
         // GIVEN
         Stack stack = createStackWithoutTemplate();
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
@@ -79,7 +79,7 @@ public class EmbeddedDatabaseServiceTest {
     public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsDisabled() {
         // GIVEN
         Stack stack = createStack(5);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
+        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(false);
         // WHEN
         EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));

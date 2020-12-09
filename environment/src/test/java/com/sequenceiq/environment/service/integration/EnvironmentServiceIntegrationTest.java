@@ -158,7 +158,7 @@ public class EnvironmentServiceIntegrationTest {
         credential.setType(ENVIRONMENT);
         credentialRequest = new CredentialRequest();
 
-        when(entitlementService.azureEnabled(any(), any())).thenReturn(true);
+        when(entitlementService.azureEnabled(any())).thenReturn(true);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
         lenient().when(grpcUmsClient.hasRights(anyString(), anyString(), anyList(), any())).then(i -> {
             List<RightCheck> rightChecks = i.getArgument(2);

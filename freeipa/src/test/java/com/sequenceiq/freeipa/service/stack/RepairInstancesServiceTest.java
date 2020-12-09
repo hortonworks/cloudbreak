@@ -132,7 +132,7 @@ class RepairInstancesServiceTest {
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
@@ -157,7 +157,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.CREATED));
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(false);
@@ -175,7 +175,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
@@ -203,7 +203,7 @@ class RepairInstancesServiceTest {
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
@@ -271,7 +271,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(stackUpdater.updateStackStatus(anyLong(), any(), any())).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
@@ -417,7 +417,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
 
@@ -437,7 +437,7 @@ class RepairInstancesServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
-        when(entitlementService.freeIpaHaRepairEnabled(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
 

@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_EVENT;
 import static java.util.function.Predicate.not;
 
@@ -80,7 +79,7 @@ public class RepairInstancesService {
             Collection<InstanceMetaData> instancesToRepair) {
         LOGGER.debug("Validating repair for account {} and stack ID {}. Remaining good instances [{}]. Remaining bad instances [{}]. Instances to repair [{}].",
                 accountId, stack.getId(), remainingGoodInstances, remainingBadInstances, instancesToRepair);
-        if (!entitlementService.freeIpaHaRepairEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+        if (!entitlementService.freeIpaHaRepairEnabled(accountId)) {
             throw new BadRequestException("The FreeIPA HA Repair capability is disabled.");
         }
         if (instancesToRepair.isEmpty()) {

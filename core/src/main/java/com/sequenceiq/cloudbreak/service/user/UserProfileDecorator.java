@@ -15,7 +15,7 @@ public class UserProfileDecorator {
     private EntitlementService entitlementService;
 
     public UserProfileV4Response decorate(UserProfileV4Response userProfileV4Response, String userCrn) {
-        userProfileV4Response.setEntitlements(entitlementService.getEntitlements(userCrn, Crn.safeFromString(userCrn).getAccountId()));
+        userProfileV4Response.setEntitlements(entitlementService.getEntitlements(Crn.safeFromString(userCrn).getAccountId()));
         return userProfileV4Response;
     }
 }

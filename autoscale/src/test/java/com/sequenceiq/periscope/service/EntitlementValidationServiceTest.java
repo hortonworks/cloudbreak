@@ -36,51 +36,51 @@ public class EntitlementValidationServiceTest {
     @Test
     public void testWhenEntitlementCheckDisabledThenEntitled() {
         Whitebox.setInternalState(underTest, "entitlementCheckEnabled", false);
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AWS");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
         assertTrue("entitled should be true when entitlementCheckDisabled", entitled);
     }
 
     @Test
     public void testWhenAWSAndEntitled() {
-        when(entitlementService.awsAutoScalingEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
 
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AWS");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
         assertTrue("isEntitled should be true when entitlement found", entitled);
     }
 
     @Test
     public void testWhenAWSAndNotEntitled() {
-        when(entitlementService.awsAutoScalingEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
 
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AWS");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
         assertFalse("isEntitled should be false when entitlement is not found", entitled);
     }
 
     @Test
     public void testWhenAzureAndEntitled() {
-        when(entitlementService.azureAutoScalingEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(true);
 
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AZURE");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
         assertTrue("isEntitled should be true when entitlement found", entitled);
     }
 
     @Test
     public void testWhenAzureAndNotEntitled() {
-        when(entitlementService.azureAutoScalingEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(false);
 
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "AZURE");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
         assertFalse("isEntitled should be false when entitlement is not found", entitled);
     }
 
     @Test
     public void testWhenYarnAndAlwaysAllowed() {
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "YARN");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "YARN");
         assertTrue("isEntitled should be true when entitlement always allowed", entitled);
     }
 
     @Test
     public void testWhenGCPAndNotEntitled() {
-        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_USER_CRN, TEST_ACCOUNT_ID, "GCP");
+        boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "GCP");
         assertFalse("isEntitled should be false when entitlement is not defined", entitled);
     }
 }

@@ -54,7 +54,7 @@ public class AzureParameterValidatorTest {
     @BeforeEach
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -228,14 +228,14 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
         verify(azureClientService, never()).getClient(any());
-        verify(entitlementService, times(0)).azureSingleResourceGroupDeploymentEnabled(anyString(), anyString());
+        verify(entitlementService, times(0)).azureSingleResourceGroupDeploymentEnabled(anyString());
     }
 
     @Test
@@ -252,7 +252,7 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
@@ -275,8 +275,8 @@ public class AzureParameterValidatorTest {
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
-        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString(), anyString())).thenReturn(true);
-        when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
+        when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString())).thenReturn(false);
 
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 

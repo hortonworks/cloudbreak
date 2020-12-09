@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
@@ -52,139 +53,139 @@ public class EntitlementService {
     @Inject
     private GrpcUmsClient umsClient;
 
-    public boolean isEntitledFor(String actorCrn, String accountId, Entitlement entitledFor) {
-        return isEntitlementRegistered(actorCrn, accountId, entitledFor);
+    public boolean isEntitledFor(String accountId, Entitlement entitledFor) {
+        return isEntitlementRegistered(accountId, entitledFor);
     }
 
-    public boolean listFilteringEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_LIST_FILTERING);
+    public boolean listFilteringEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_LIST_FILTERING);
     }
 
-    public boolean azureEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE);
+    public boolean azureEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE);
     }
 
-    public boolean gcpEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_GCP);
+    public boolean gcpEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_GCP);
     }
 
-    public boolean baseImageEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_BASE_IMAGE);
+    public boolean baseImageEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_BASE_IMAGE);
     }
 
-    public boolean automaticUsersyncPollerEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_AUTOMATIC_USERSYNC_POLLER);
+    public boolean automaticUsersyncPollerEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AUTOMATIC_USERSYNC_POLLER);
     }
 
-    public boolean enableDistroxInstanceTypesEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
+    public boolean enableDistroxInstanceTypesEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
     }
 
-    public boolean freeIpaHaRepairEnabled(String actorCrn, String accountID) {
-        return isEntitlementRegistered(actorCrn, accountID, CDP_FREEIPA_HA_REPAIR);
+    public boolean freeIpaHaRepairEnabled(String accountID) {
+        return isEntitlementRegistered(accountID, CDP_FREEIPA_HA_REPAIR);
     }
 
-    public boolean internalTenant(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CLOUDERA_INTERNAL_ACCOUNT);
+    public boolean internalTenant(String accountId) {
+        return isEntitlementRegistered(accountId, CLOUDERA_INTERNAL_ACCOUNT);
     }
 
-    public boolean localDevelopment(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, LOCAL_DEV);
+    public boolean localDevelopment(String accountId) {
+        return isEntitlementRegistered(accountId, LOCAL_DEV);
     }
 
-    public boolean fmsClusterProxyEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_FMS_CLUSTER_PROXY);
+    public boolean fmsClusterProxyEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FMS_CLUSTER_PROXY);
     }
 
-    public boolean cloudStorageValidationEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_CLOUD_STORAGE_VALIDATION);
+    public boolean cloudStorageValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION);
     }
 
-    public boolean razEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_RAZ);
+    public boolean razEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_RAZ);
     }
 
-    public boolean mediumDutySdxEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_MEDIUM_DUTY_SDX);
+    public boolean mediumDutySdxEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_MEDIUM_DUTY_SDX);
     }
 
-    public boolean runtimeUpgradeEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_RUNTIME_UPGRADE);
+    public boolean runtimeUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE);
     }
 
-    public boolean datahubRuntimeUpgradeEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_RUNTIME_UPGRADE_DATAHUB);
+    public boolean datahubRuntimeUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE_DATAHUB);
     }
 
-    public boolean freeIpaDlEbsEncryptionEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_FREEIPA_DL_EBS_ENCRYPTION);
+    public boolean freeIpaDlEbsEncryptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FREEIPA_DL_EBS_ENCRYPTION);
     }
 
-    public boolean azureSingleResourceGroupDeploymentEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
+    public boolean azureSingleResourceGroupDeploymentEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
 
-    public boolean azureSingleResourceGroupDedicatedStorageAccountEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT);
+    public boolean azureSingleResourceGroupDedicatedStorageAccountEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT);
     }
 
-    public boolean fastEbsEncryptionEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_CB_FAST_EBS_ENCRYPTION);
+    public boolean fastEbsEncryptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_FAST_EBS_ENCRYPTION);
     }
 
-    public boolean cloudIdentityMappingEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_CLOUD_IDENTITY_MAPPING);
+    public boolean cloudIdentityMappingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_IDENTITY_MAPPING);
     }
 
-    public boolean isInternalRepositoryForUpgradeAllowed(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
+    public boolean isInternalRepositoryForUpgradeAllowed(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
     }
 
-    public boolean isDifferentDataHubAndDataLakeVersionAllowed(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE);
+    public boolean isDifferentDataHubAndDataLakeVersionAllowed(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE);
     }
 
-    public boolean sdxHbaseCloudStorageEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
+    public boolean sdxHbaseCloudStorageEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_SDX_HBASE_CLOUD_STORAGE);
     }
 
-    public boolean awsAutoScalingEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, DATAHUB_AWS_AUTOSCALING);
+    public boolean awsAutoScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AWS_AUTOSCALING);
     }
 
-    public boolean azureAutoScalingEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, DATAHUB_AZURE_AUTOSCALING);
+    public boolean azureAutoScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AZURE_AUTOSCALING);
     }
 
-    public boolean isAuthorizationEntitlementRegistered(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CB_AUTHZ_POWER_USERS);
+    public boolean isAuthorizationEntitlementRegistered(String accountId) {
+        return isEntitlementRegistered(accountId, CB_AUTHZ_POWER_USERS);
     }
 
-    public boolean databaseWireEncryptionEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
+    public boolean databaseWireEncryptionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_DATABASE_WIRE_ENCRYPTION);
     }
 
-    public boolean embeddedDatabaseOnAttachedDiskEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
+    public boolean embeddedDatabaseOnAttachedDiskEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
     }
 
-    public boolean datalakeLoadBalancerEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_DATA_LAKE_LOAD_BALANCER);
+    public boolean datalakeLoadBalancerEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_LOAD_BALANCER);
     }
 
-    public boolean isExperienceDeletionEnabled(String actorCrn, String accountId) {
-        return isEntitlementRegistered(actorCrn, accountId, CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT);
+    public boolean isExperienceDeletionEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT);
     }
 
-    public List<String> getEntitlements(String actorCrn, String accountId) {
-        return getAccount(actorCrn, accountId).getEntitlementsList()
+    public List<String> getEntitlements(String accountId) {
+        return getAccount(accountId).getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase())
                 .collect(Collectors.toList());
     }
 
-    private boolean isEntitlementRegistered(String actorCrn, String accountId, Entitlement entitlement) {
-        Account accountDetails = umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
+    private boolean isEntitlementRegistered(String accountId, Entitlement entitlement) {
+        Account accountDetails = umsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
         boolean entitled = accountDetails
                 .getEntitlementsList()
                 .stream()
@@ -194,7 +195,7 @@ public class EntitlementService {
         return entitled;
     }
 
-    private Account getAccount(String actorCrn, String accountId) {
-        return umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId());
+    private Account getAccount(String accountId) {
+        return umsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
     }
 }

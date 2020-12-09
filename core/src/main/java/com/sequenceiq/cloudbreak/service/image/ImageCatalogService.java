@@ -520,7 +520,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         User loggedInUser = getLoggedInUser();
         String userCrn = loggedInUser.getUserCrn();
         String accountId = Crn.safeFromString(userCrn).getAccountId();
-        boolean baseImageEnabled = entitlementService.baseImageEnabled(userCrn, accountId);
+        boolean baseImageEnabled = entitlementService.baseImageEnabled(accountId);
         LOGGER.info("The usage of base images is {}", baseImageEnabled ? "enabled" : "disabled");
         return baseImageEnabled;
     }

@@ -174,7 +174,7 @@ public class ImageCatalogServiceTest {
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
-        when(entitlementService.baseImageEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
 
         constants.addAll(Collections.singletonList(new AwsCloudConstant()));
 
@@ -446,8 +446,8 @@ public class ImageCatalogServiceTest {
         when(imageCatalogProvider.getImageCatalogV3("")).thenReturn(null);
         underTest.getImages(ORG_ID, "name", "aws");
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
         verify(imageCatalogProvider, times(1)).getImageCatalogV3("");
 
     }
@@ -461,8 +461,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImages(ORG_ID, "verycool", "aws").getImages();
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
         verify(imageCatalogProvider, times(0)).getImageCatalogV3("");
     }
 
@@ -524,8 +524,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesFromDefault(ORG_ID, null, null, Collections.emptySet());
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
 
         thrown.expectMessage("Either platform or stackName should be filled in request");
     }
@@ -536,8 +536,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesFromDefault(ORG_ID, "stack", "AWS", Collections.emptySet());
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -560,8 +560,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesFromDefault(ORG_ID, null, "AWS", Collections.emptySet());
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }
@@ -572,8 +572,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, null);
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
 
         thrown.expectMessage("Either platform or stackName should be filled in request");
     }
@@ -584,8 +584,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", "AWS");
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
 
         thrown.expectMessage("Platform or stackName cannot be filled in the same request");
     }
@@ -609,8 +609,8 @@ public class ImageCatalogServiceTest {
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
 
-        verify(entitlementService, times(1)).baseImageEnabled(user.getUserCrn(), Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
-        verify(entitlementService, never()).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId(), user.getUserCrn());
+        verify(entitlementService, times(1)).baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
+        verify(entitlementService, never()).baseImageEnabled(user.getUserCrn());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
     }

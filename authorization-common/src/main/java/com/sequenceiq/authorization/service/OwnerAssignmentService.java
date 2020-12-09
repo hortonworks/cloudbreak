@@ -29,7 +29,7 @@ public class OwnerAssignmentService {
 
     public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
         try {
-            if (entitlementService.isAuthorizationEntitlementRegistered(userCrn, accountId)) {
+            if (entitlementService.isAuthorizationEntitlementRegistered(accountId)) {
                 umsClient.assignResourceRole(userCrn, resourceCrn, RoleCrnGenerator.getBuiltInOwnerResourceRoleCrn(), MDCUtils.getRequestId());
                 LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
             }

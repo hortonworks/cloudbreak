@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -56,10 +55,9 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
                 .orElse(false);
         String cdhVersion = getCdhVersion(source);
         boolean is722OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_2);
-        String actorCrn = INTERNAL_ACTOR_CRN;
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean sdxHbaseCloudStorageEnabled =
-                entitlementService.sdxHbaseCloudStorageEnabled(actorCrn, accountId);
+                entitlementService.sdxHbaseCloudStorageEnabled(accountId);
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
                 && (!datalakeCluster || (is722OrNewer && sdxHbaseCloudStorageEnabled));

@@ -111,7 +111,7 @@ public class DistroxUpgradeService {
 
     private boolean isInternalRepoAllowedForUpgrade(String userCrn) {
         String accountId = Crn.safeFromString(userCrn).getAccountId();
-        return entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, accountId);
+        return entitlementService.isInternalRepositoryForUpgradeAllowed(accountId);
     }
 
     private void verifyCMLicenseValidity(String userCrn) {

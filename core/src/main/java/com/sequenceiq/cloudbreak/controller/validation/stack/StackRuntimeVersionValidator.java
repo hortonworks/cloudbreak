@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -138,6 +136,6 @@ public class StackRuntimeVersionValidator {
     }
 
     private boolean isDifferentDataHubAndDataLakeVersionAllowed() {
-        return entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId());
+        return entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(ThreadBasedUserCrnProvider.getAccountId());
     }
 }

@@ -563,7 +563,7 @@ public class StackService implements ResourceIdProvider {
             StackTags stackTag = stack.getTags().get(StackTags.class);
             Map<String, String> userDefinedTags = stackTag.getUserDefinedTags();
 
-            boolean internalTenant = entitlementService.internalTenant(stack.getCreator().getUserCrn(), stack.getCreator().getTenant().getName());
+            boolean internalTenant = entitlementService.internalTenant(stack.getCreator().getTenant().getName());
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(stack.getCreator().getUserCrn())
                     .withEnvironmentCrn(stack.getEnvironmentCrn())
