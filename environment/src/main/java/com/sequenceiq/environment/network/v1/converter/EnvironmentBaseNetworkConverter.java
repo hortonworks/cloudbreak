@@ -28,7 +28,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
     }
 
     @Override
-    public BaseNetwork convert(Environment environment, NetworkDto creationDto, Map<String, CloudSubnet> subnetMetas) {
+    public BaseNetwork convert(Environment environment, NetworkDto creationDto, Map<String, CloudSubnet> subnetMetas,
+            Map<String, CloudSubnet> gatewayEndpointSubnetMetas) {
         BaseNetwork result = createProviderSpecificNetwork(creationDto);
         result.setName(creationDto.getNetworkName() != null ? creationDto.getNetworkName() : environment.getName());
         result.setNetworkCidr(creationDto.getNetworkCidr());
@@ -39,6 +40,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setOutboundInternetTraffic(creationDto.getOutboundInternetTraffic());
         setRegistrationType(result, creationDto);
         result.setSubnetMetas(subnetMetas);
+        result.setPublicEndpointAccessGateway(creationDto.getPublicEndpointAccessGateway());
+        result.setEndpointGatewaySubnetMetas(gatewayEndpointSubnetMetas);
         return result;
     }
 
@@ -55,7 +58,9 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withServiceEndpointCreation(source.getServiceEndpointCreation())
                 .withOutboundInternetTraffic(source.getOutboundInternetTraffic())
                 .withRegistrationType(source.getRegistrationType())
-                .withNetworkId(source.getNetworkId());
+                .withNetworkId(source.getNetworkId())
+                .withUsePublicEndpointAccessGateway(source.getPublicEndpointAccessGateway())
+                .withEndpointGatewaySubnetMetas(source.getEndpointGatewaySubnetMetas());
 
         convertSubnets(source, builder);
 

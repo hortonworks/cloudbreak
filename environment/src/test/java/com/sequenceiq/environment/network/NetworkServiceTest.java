@@ -71,10 +71,10 @@ public class NetworkServiceTest {
         environment.setCredential(credential);
 
         when(environmentNetworkConverterMap.get(any(CloudPlatform.class))).thenReturn(environmentNetworkConverter);
-        when(environmentNetworkConverter.convert(environment, networkDto, Collections.emptyMap())).thenReturn(baseNetwork);
+        when(environmentNetworkConverter.convert(environment, networkDto, Map.of(), Map.of())).thenReturn(baseNetwork);
         when(networkRepository.save(baseNetwork)).thenReturn(baseNetwork);
 
-        BaseNetwork result = underTest.saveNetwork(environment, networkDto, "accountId", Collections.emptyMap());
+        BaseNetwork result = underTest.saveNetwork(environment, networkDto, "accountId", Map.of(), Map.of());
 
         Assertions.assertNull(result.getNetworkCidr());
         verify(environmentNetworkService, times(0)).getNetworkCidr(eq(network), anyString(), eq(credential));
