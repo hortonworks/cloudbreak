@@ -275,6 +275,28 @@ public class Flow2HandlerTest {
     }
 
     @Test
+    public void testFinalizedFlow() {
+        FlowLog lastFlowLog = new FlowLog();
+        lastFlowLog.setFinalized(true);
+        Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(runningFlows.get(anyString())).willReturn(flow);
+        given(flow.getCurrentState()).willReturn(flowState);
+        given(flow.getFlowId()).willReturn(FLOW_ID);
+        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+
+        dummyEvent.setKey("KEY");
+        ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
+        underTest.accept(dummyEvent);
+        verify(flowLogService, times(1))
+                .save(flowParamsCaptor.capture(), nullable(String.class), eq("KEY"), any(Payload.class), anyMap(), nullable(Class.class), eq(flowState));
+        verify(flow, times(1)).sendEvent(eq("KEY"), isNull(), any(), any());
+        FlowParameters flowParameters = flowParamsCaptor.getValue();
+        assertEquals(FLOW_ID, flowParameters.getFlowId());
+        assertNull(flowParameters.getFlowTriggerUserCrn());
+    }
+
+    @Test
     public void testChangedNodeId() {
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setNextEvent("KEY");
