@@ -21,6 +21,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -85,7 +86,7 @@ public class PasswordService {
             String password, Set<String> environmentCrnFilter, AuthorizationResourceAction action) {
         List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
         List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
-        commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns);
+        CustomCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
         return setPasswordForStacks(accountId, actorCrn, userCrn, password, environmentCrnFilter, stacks);
     }
 

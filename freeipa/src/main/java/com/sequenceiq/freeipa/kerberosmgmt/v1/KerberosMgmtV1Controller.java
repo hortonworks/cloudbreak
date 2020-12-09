@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -129,7 +130,8 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);
-        umsAccountAuthorizationService.checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceAction.GET_KEYTAB);
+        CustomCheckUtil.run(() -> umsAccountAuthorizationService.
+                checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceAction.GET_KEYTAB));
         return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
     }
 
