@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -8,7 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -42,13 +46,21 @@ public class DiagnosticsTriggerService {
     @Inject
     private DiagnosticsDataToParameterConverter diagnosticsDataToParameterConverter;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         diagnosticsCollectionValidator.validate(request, stack.getTelemetry(), stack.getResourceCrn(), stack.getAppVersion());
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
+        boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(INTERNAL_ACTOR_CRN, stack.getAccountId());
+        String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(stack.getTelemetry().getDatabusEndpoint(), useDbusCnameEndpoint);
         DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, stack.getTelemetry(), FREEIPA_CLUSTER_TYPE,
-                stack.getAppVersion(), stack.getAccountId(), stack.getRegion());
+                stack.getAppVersion(), stack.getAccountId(), stack.getRegion(), databusEndpoint);
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

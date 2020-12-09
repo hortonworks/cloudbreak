@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
@@ -25,12 +26,15 @@ import com.cloudera.api.swagger.client.ApiResponse;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -54,6 +58,12 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     @Mock
     private ClouderaManagerResourceApi cmResourceApi;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -64,12 +74,17 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // GIVEN
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
+        User user = new User();
+        user.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
+        stack.setCreator(user);
         WorkloadAnalytics wa = new WorkloadAnalytics();
         Telemetry telemetry = new Telemetry();
         telemetry.setWorkloadAnalytics(wa);
         ApiConfigList apiConfigList = new ApiConfigList();
         ApiResponse response = new ApiResponse<>(0, null, apiConfigList);
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString(), anyString())).thenReturn(false);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         when(apiClient.execute(any(), any())).thenReturn(response);
         when(clouderaManagerDatabusService.getAltusCredential(stack)).thenReturn(credential);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(cmResourceApi);
@@ -101,6 +116,8 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         WorkloadAnalytics wa = new WorkloadAnalytics();
         Telemetry telemetry = new Telemetry();
         telemetry.setWorkloadAnalytics(wa);
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString(), anyString())).thenReturn(false);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         // WHEN
         underTest.setupTelemetryRole(stack, null, null, null, telemetry);
         // THEN
@@ -112,7 +129,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // GIVEN
         // WHEN
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
-        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics);
+        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics, null);
         // THEN
         assertEquals(4, result.getItems().size());
         assertTrue(containsConfigWithValue(result, "telemetry_wa", "true"));
@@ -126,7 +143,9 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // WHEN
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint("customEndpoint");
-        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics);
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString(), anyString())).thenReturn(false);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
+        ApiConfigList result = underTest.buildTelemetryCMConfigList(workloadAnalytics, "customEndpoint");
         // THEN
         assertEquals(5, result.getItems().size());
         assertTrue(containsConfigWithValue(result, "telemetry_altus_url", "customEndpoint"));
