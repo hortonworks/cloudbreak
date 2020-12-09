@@ -162,6 +162,10 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return getEdgeConfig();
     }
 
+    public FlowName getFlowName() {
+        return null;
+    }
+
     public E getFailHandledEvent() {
         return getEdgeConfig().failureHandled;
     }
