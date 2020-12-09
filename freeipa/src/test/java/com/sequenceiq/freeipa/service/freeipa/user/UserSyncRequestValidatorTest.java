@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,55 +38,23 @@ class UserSyncRequestValidatorTest {
 
     @Test
     void testValidateParameters() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(MACHINE_USER_CRN), Optional.empty());
-        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(ENV_CRN), filter);
+        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(ENV_CRN));
     }
 
     @Test
     void testValidateParametersBadEnv() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(OTHER_CRN), filter);
-        });
-    }
-
-    @Test
-    void testValidateParametersBadUser() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(OTHER_CRN), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
-        });
-    }
-
-    @Test
-    void testValidateParametersBadMachineUser() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(OTHER_CRN), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(OTHER_CRN)));
     }
 
     @Test
     void testValidateParametersWrongAccount() {
         String differentAccount = UUID.randomUUID().toString();
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN), filter);
-        });
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN)));
     }
 
     @Test
     void testValidateDeleteUsersRequest() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(), Optional.of(WORKLOAD_USER));
-        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
-    }
-
-    @Test
-    void testValidateParametersInvalidDeleteUsersRequest() {
-        UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(MACHINE_USER_CRN), Optional.of(WORKLOAD_USER));
-        Assertions.assertThrows(BadRequestException.class, () -> {
-            underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
-        });
+        underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of());
     }
 
     @Test

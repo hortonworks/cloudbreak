@@ -50,6 +50,7 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
 
     @Test
     void getUmsUsersStateMapBulk() {
+        // TODO completely rewrite setup and verify phase
         setupMocksForBulk();
 
         Map<String, UmsUsersState> umsUsersStateMap = underTest.get(

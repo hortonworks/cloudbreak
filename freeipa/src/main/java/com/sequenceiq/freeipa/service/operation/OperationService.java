@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -107,7 +108,9 @@ public class OperationService {
         operation.setAccountId(accountId);
         operation.setOperationType(operationType);
         operation.setEnvironmentList(List.copyOf(environmentCrns));
-        operation.setUserList(List.copyOf(userCrns));
+        if (userCrns.size() > 0) {
+            operation.setUserList(Lists.newArrayList(userCrns));
+        }
         LOGGER.info("Operation requested: {}", operation);
         return operationRepository.save(operation);
     }

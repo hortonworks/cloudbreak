@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.cleanup;
 import static org.apache.commons.lang3.StringUtils.removeStart;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -106,7 +105,7 @@ public class CleanupService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         Operation operation =
-                operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
+                operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), List.of());
         Set<String> statesToSkip = cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip());
         CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_EVENT.event(), stack.getId(), request.getUsers(),
                 request.getHosts(), request.getRoles(), request.getIps(), statesToSkip, accountId, operation.getOperationId(),

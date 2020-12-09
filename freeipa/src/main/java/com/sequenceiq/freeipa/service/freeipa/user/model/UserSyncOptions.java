@@ -6,22 +6,15 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdat
 
 public class UserSyncOptions {
 
-    private final boolean fullSync;
-
     private final boolean fmsToFreeIpaBatchCallEnabled;
 
     private final WorkloadCredentialsUpdateType workloadCredentialsUpdateType;
 
-    public UserSyncOptions(boolean fullSync, boolean fmsToFreeIpaBatchCallEnabled, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
+    public UserSyncOptions(boolean fmsToFreeIpaBatchCallEnabled, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
         checkArgument(workloadCredentialsUpdateType == WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED ||
                 workloadCredentialsUpdateType == WorkloadCredentialsUpdateType.FORCE_UPDATE);
-        this.fullSync = fullSync;
         this.fmsToFreeIpaBatchCallEnabled = fmsToFreeIpaBatchCallEnabled;
         this.workloadCredentialsUpdateType = workloadCredentialsUpdateType;
-    }
-
-    public boolean isFullSync() {
-        return fullSync;
     }
 
     public boolean isFmsToFreeIpaBatchCallEnabled() {
