@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
 import static java.util.stream.Collectors.joining;
 
@@ -26,10 +27,12 @@ import com.cloudera.api.swagger.model.ApiRoleList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -92,12 +95,22 @@ public class ClouderaManagerMgmtTelemetryService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     public void setupTelemetryRole(final Stack stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
+            Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
+            boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(INTERNAL_ACTOR_CRN, userCrn.getAccountId());
+            String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(workloadAnalytics.getDatabusEndpoint(), useDbusCnameEndpoint);
+
             ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-            ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics);
+            ApiConfigList apiConfigList = buildTelemetryCMConfigList(workloadAnalytics, databusEndpoint);
             cmResourceApi.updateConfig("Adding telemetry settings.", apiConfigList);
 
             AltusCredential credentials = clouderaManagerDatabusService.getAltusCredential(stack);
@@ -153,14 +166,14 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics) {
+    ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics, String databusUrl) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         configsToUpdate.put(TELEMETRY_MASTER, "true");
         configsToUpdate.put(TELEMETRY_WA, "true");
         configsToUpdate.put(TELEMETRY_COLLECT_JOB_LOGS, "true");
         configsToUpdate.put(TELEMETRY_ALTUS_ACCOUNT, ALTUS_CREDENTIAL_NAME);
-        if (StringUtils.isNotEmpty(workloadAnalytics.getDatabusEndpoint())) {
-            configsToUpdate.put(TELEMETRY_ALTUS_URL, workloadAnalytics.getDatabusEndpoint());
+        if (StringUtils.isNotEmpty(databusUrl)) {
+            configsToUpdate.put(TELEMETRY_ALTUS_URL, databusUrl);
         }
         return makeApiConfigList(configsToUpdate);
     }

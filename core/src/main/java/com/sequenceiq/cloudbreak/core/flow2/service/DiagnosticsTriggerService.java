@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.controller.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors;
@@ -20,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.converter.CmDiagnosticsDataToParameterConverter;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
 import com.sequenceiq.common.api.diagnostics.BaseCmDiagnosticsCollectionRequest;
@@ -59,6 +63,12 @@ public class DiagnosticsTriggerService {
     @Inject
     private DiagnosticsCollectionValidator diagnosticsCollectionValidator;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn,
             String userCrn) {
         Stack stack = stackService.getByCrn(stackCrn);
@@ -71,9 +81,12 @@ public class DiagnosticsTriggerService {
                 && StringUtils.isNotBlank(stack.getCluster().getBlueprint().getStackVersion())) {
             clusterVersion = stack.getCluster().getBlueprint().getStackVersion();
         }
+        String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+        boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(INTERNAL_ACTOR_CRN, accountId);
+        String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
         DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry,
                 StringUtils.upperCase(stack.getType().getResourceType()), clusterVersion,
-                Crn.fromString(stack.getResourceCrn()).getAccountId(), stack.getRegion());
+                accountId, stack.getRegion(), databusEndpoint);
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())

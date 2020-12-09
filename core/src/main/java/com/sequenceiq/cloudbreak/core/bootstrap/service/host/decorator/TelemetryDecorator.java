@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
 import static java.util.Collections.singletonMap;
 
@@ -15,12 +16,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
@@ -93,6 +97,10 @@ public class TelemetryDecorator {
 
     private final VmLogsService vmLogsService;
 
+    private final EntitlementService entitlementService;
+
+    private final DataBusEndpointProvider dataBusEndpointProvider;
+
     public TelemetryDecorator(DatabusConfigService databusConfigService,
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
@@ -100,6 +108,8 @@ public class TelemetryDecorator {
             TelemetryCommonConfigService telemetryCommonConfigService,
             AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
+            EntitlementService entitlementService,
+            DataBusEndpointProvider dataBusEndpointProvider,
             @Value("${info.app.version:}") String version) {
         this.databusConfigService = databusConfigService;
         this.fluentConfigService = fluentConfigService;
@@ -108,6 +118,8 @@ public class TelemetryDecorator {
         this.telemetryCommonConfigService = telemetryCommonConfigService;
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
+        this.entitlementService = entitlementService;
+        this.dataBusEndpointProvider = dataBusEndpointProvider;
         this.version = version;
     }
 
@@ -123,8 +135,12 @@ public class TelemetryDecorator {
                 ? FluentClusterType.DATALAKE.value() : FluentClusterType.DATAHUB.value();
         String serviceType = StackType.WORKLOAD.equals(stack.getType()) ? FluentClusterType.DATAHUB.value() : "";
 
+        Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
+        boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(INTERNAL_ACTOR_CRN, userCrn.getAccountId());
+        String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
+
         DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(
-                dbusCredential.getAccessKey(), dbusCredential.getPrivateKey(), null, telemetry.getDatabusEndpoint());
+                dbusCredential.getAccessKey(), dbusCredential.getPrivateKey(), null, databusEndpoint);
         if (databusConfigView.isEnabled()) {
             Map<String, Object> databusConfig = databusConfigView.toMap();
             servicePillar.put("databus",
@@ -152,6 +168,7 @@ public class TelemetryDecorator {
         FluentConfigView fluentConfigView = fluentConfigService.createFluentConfigs(clusterDetails,
                 databusConfigView.isEnabled(), meteringEnabled, telemetry);
         if (fluentConfigView.isEnabled()) {
+
             Map<String, Object> fluentConfig = fluentConfigView.toMap();
             servicePillar.put("fluent",
                     new SaltPillarProperties("/fluent/init.sls", singletonMap("fluent", fluentConfig)));

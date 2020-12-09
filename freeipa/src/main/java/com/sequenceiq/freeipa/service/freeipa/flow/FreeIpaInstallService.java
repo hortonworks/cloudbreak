@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
@@ -89,6 +92,12 @@ public class FreeIpaInstallService {
 
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
 
     public void installFreeIpa(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -165,8 +174,10 @@ public class FreeIpaInstallService {
                     DataBusCredential dbusCredential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack);
                     String accessKey = dbusCredential.getAccessKey();
                     char[] privateKey = dbusCredential.getPrivateKey().toCharArray();
+                    boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(INTERNAL_ACTOR_CRN, stack.getAccountId());
+                    String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
                     DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
-                            null, telemetry.getDatabusEndpoint());
+                            null, databusEndpoint);
                     servicePillarConfig.put("databus", new SaltPillarProperties("/databus/init.sls",
                             Collections.singletonMap("databus", databusConfigView.toMap())));
                 } catch (IOException e) {
