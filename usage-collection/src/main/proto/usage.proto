@@ -892,6 +892,18 @@ message CDPCMLWorkspaceStatusChanged {
 }
 
 // The status of a CDP environment
+message CDPRequestProcessingStep {
+  enum Value {
+      // A value indicating the enum is unset.
+      UNSET = 0;
+      // First step of the request processing
+      INIT = 1;
+      // Last step of the request processing
+      FINAL = 2;
+  }
+}
+
+// The status of a CDP environment
 message CDPEnvironmentStatus {
   enum Value {
     // A value indicating the enum is unset.
@@ -937,6 +949,8 @@ message CDPOperationDetails {
     string initiatorCrn = 4;
     // Version of the application that created this event
     string applicationVersion = 5;
+    // Request processing type
+    CDPRequestProcessingStep.Value cdpRequestProcessingStep = 6;
 }
 
 message CDPEnvironmentDetails {

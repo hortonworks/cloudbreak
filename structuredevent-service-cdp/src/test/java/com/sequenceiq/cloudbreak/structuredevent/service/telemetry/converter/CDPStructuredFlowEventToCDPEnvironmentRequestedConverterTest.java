@@ -13,6 +13,7 @@ import org.powermock.reflect.Whitebox;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 
@@ -32,6 +33,7 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         underTest = new CDPStructuredFlowEventToCDPEnvironmentRequestedConverter();
         CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
+        Whitebox.setInternalState(operationDetailsConverter, "requestProcessingStepMapper", new RequestProcessingStepMapper());
         Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
     }
 

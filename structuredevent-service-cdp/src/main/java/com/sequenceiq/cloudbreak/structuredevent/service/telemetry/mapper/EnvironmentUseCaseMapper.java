@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -12,13 +14,16 @@ public class EnvironmentUseCaseMapper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUseCaseMapper.class);
 
+    @Inject
+    private RequestProcessingStepMapper requestProcessingStepMapper;
+
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPEnvironmentStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        if (isFirstStep(flow)) {
+        if (requestProcessingStepMapper.isFirstStep(flow)) {
             String flowEvent = flow.getFlowEvent();
             useCase = firstStepToUseCaseMapping(flowEvent);
-        } else if (isLastStep(flow)) {
+        } else if (requestProcessingStepMapper.isLastStep(flow)) {
             String flowState = flow.getFlowState();
             useCase = lastStepToUseCaseMapping(flowState);
         }
@@ -59,13 +64,4 @@ public class EnvironmentUseCaseMapper {
         LOGGER.debug("Mapping last flow state to use-case: {}, {}", flowState, useCase);
         return useCase;
     }
-
-    private boolean isFirstStep(FlowDetails flow) {
-        return "INIT_STATE".equals(flow.getFlowState());
-    }
-
-    private boolean isLastStep(FlowDetails flow) {
-        return "FINAL_STATE".equals(flow.getNextFlowState());
-    }
-
 }
