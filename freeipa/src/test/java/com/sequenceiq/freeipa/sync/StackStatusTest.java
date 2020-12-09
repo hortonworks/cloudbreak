@@ -77,6 +77,9 @@ class StackStatusTest {
     private StackUpdater stackUpdater;
 
     @MockBean
+    private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
+
+    @MockBean
     private Tracer tracer;
 
     @Mock

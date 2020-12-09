@@ -25,6 +25,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -53,6 +54,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private AutoSyncConfig autoSyncConfig;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
 
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
@@ -123,6 +130,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                                 DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
                         updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
                     }
+                    freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
                 });
                 return null;
             }, LOGGER, ":::Auto sync::: freeipa stack sync in {}ms");
