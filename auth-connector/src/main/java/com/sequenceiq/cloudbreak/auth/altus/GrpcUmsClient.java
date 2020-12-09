@@ -868,6 +868,12 @@ public class GrpcUmsClient {
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks);
     }
 
+    @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")
+    public List<UserManagementProto.ResourceAssignee> listAssigneesOfResource(String resourceCrn, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel());
+        return client.listResourceAssigneesForResource(RequestIdUtil.getOrGenerate(requestId), resourceCrn);
+    }
+
     protected boolean isReadRight(String action) {
         if (action == null) {
             return false;

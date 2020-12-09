@@ -1,25 +1,24 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
+import static java.util.Objects.requireNonNull;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Supplier;
-
-import static java.util.Objects.requireNonNull;
 
 public class ActorHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActorHandler.class);
@@ -32,23 +31,19 @@ public class ActorHandler {
 
     private Map<String, FmsGroup> crnToFmsGroup;
 
-    private Set<String> wagNamesForOtherEnvironments;
-
     private ActorHandler(
             FmsGroupConverter fmsGroupConverter,
             UmsUsersState.Builder umsUsersStateBuilder,
             UsersState.Builder usersStateBuilder,
-            Map<String, FmsGroup> crnToFmsGroup,
-            Set<String> wagNamesForOtherEnvironments) {
+            Map<String, FmsGroup> crnToFmsGroup) {
         this.fmsGroupConverter = requireNonNull(fmsGroupConverter);
         this.umsUsersStateBuilder = requireNonNull(umsUsersStateBuilder);
         this.usersStateBuilder = requireNonNull(usersStateBuilder);
         this.crnToFmsGroup = requireNonNull(crnToFmsGroup);
-        this.wagNamesForOtherEnvironments = requireNonNull(wagNamesForOtherEnvironments);
     }
 
     public void handleActor(
-            EnvironmentAccessRights environmentAccessRights,
+            UserManagementProto.RightsCheckResult rightsCheckResult,
             FmsUser fmsUser,
             String actorCrn,
             Supplier<Collection<String>> groupCrnMembershipSupplier,
@@ -56,7 +51,9 @@ public class ActorHandler {
             Supplier<WorkloadCredential> workloadCredentialSupplier,
             List<UserManagementProto.CloudIdentity> cloudIdentityList) {
 
-        if (environmentAccessRights.hasEnvironmentAccessRight()) {
+        boolean hasEnvironmentAccess = rightsCheckResult.getHasRight(1);
+        boolean freeipaAdmin = rightsCheckResult.getHasRight(0);
+        if (hasEnvironmentAccess) {
             String workloadUsername = fmsUser.getName();
 
             // Retrieve all information from UMS before modifying to the UmsUsersState or UsersState. This is so that
@@ -77,14 +74,13 @@ public class ActorHandler {
                 }
             });
             workloadAdministrationGroupsForMember.stream()
-                    .filter(wagName -> !wagNamesForOtherEnvironments.contains(wagName))
                     .forEach(wagName -> {
                         usersStateBuilder.addGroup(fmsGroupConverter.nameToGroup(wagName));
                         usersStateBuilder.addMemberToGroup(wagName, workloadUsername);
                     });
 
             addMemberToInternalTrackingGroup(usersStateBuilder, workloadUsername);
-            if (environmentAccessRights.hasAdminFreeIpaRight()) {
+            if (freeipaAdmin) {
                 usersStateBuilder.addMemberToGroup(UserSyncConstants.ADMINS_GROUP, workloadUsername);
             }
 
@@ -112,8 +108,6 @@ public class ActorHandler {
 
         private Map<String, FmsGroup> crnToFmsGroup;
 
-        private Set<String> wagNamesForOtherEnvironments;
-
         public Builder withFmsGroupConverter(FmsGroupConverter fmsGroupConverter) {
             this.fmsGroupConverter = requireNonNull(fmsGroupConverter);
             return this;
@@ -134,18 +128,12 @@ public class ActorHandler {
             return this;
         }
 
-        public Builder withWagNamesForOtherEnvironments(Set<String> wagNamesForOtherEnvironments) {
-            this.wagNamesForOtherEnvironments = requireNonNull(wagNamesForOtherEnvironments);
-            return this;
-        }
-
         public ActorHandler build() {
             return new ActorHandler(
                     fmsGroupConverter,
                     umsUsersStateBuilder,
                     usersStateBuilder,
-                    crnToFmsGroup,
-                    wagNamesForOtherEnvironments);
+                    crnToFmsGroup);
         }
     }
 }

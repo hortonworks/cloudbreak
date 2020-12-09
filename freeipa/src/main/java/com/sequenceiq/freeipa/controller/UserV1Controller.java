@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.controller;
 
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
-import com.google.common.collect.Iterables;
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -39,7 +37,6 @@ import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationSta
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.service.freeipa.user.EnvironmentUserSyncStateCalculator;
 import com.sequenceiq.freeipa.service.freeipa.user.PasswordService;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -68,24 +65,10 @@ public class UserV1Controller implements UserV1Endpoint {
     public SyncOperationStatus synchronizeUser(SynchronizeUserRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        LOGGER.debug("synchronizeUser() requested for user {} in account {}", userCrn, accountId);
+        LOGGER.debug("synchronizeUser() is deprecated, sync is possible only for environments.");
         Set<String> environmentCrnFilter = request == null ? Set.of() : nullToEmpty(request.getEnvironments());
-        Set<String> userCrnFilter = Set.of();
-        Set<String> machineUserCrnFilter = Set.of();
-        Crn crn = Crn.safeFromString(userCrn);
-        switch (crn.getResourceType()) {
-            case USER:
-                userCrnFilter = Set.of(userCrn);
-                break;
-            case MACHINE_USER:
-                machineUserCrnFilter = Set.of(userCrn);
-                break;
-            default:
-                throw new BadRequestException(String.format("UserCrn %s is not of resoure type USER or MACHINE_USER", userCrn));
-        }
-        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
-        Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
-                userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+        Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
+                environmentCrnFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
@@ -95,26 +78,11 @@ public class UserV1Controller implements UserV1Endpoint {
     public SyncOperationStatus synchronizeAllUsers(SynchronizeAllUsersRequest request) {
         String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
-
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
-
-        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(nullToEmpty(request.getUsers()),
-                nullToEmpty(request.getMachineUsers()),
-                getOptionalDeletedWorkloadUser(request.getDeletedWorkloadUsers()));
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
-                nullToEmpty(request.getEnvironments()), userSyncFilter, request.getWorkloadCredentialsUpdateType(),
+                nullToEmpty(request.getEnvironments()), request.getWorkloadCredentialsUpdateType(),
                 AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
-    }
-
-    private Optional<String> getOptionalDeletedWorkloadUser(Set<String> deletedWorkloadUsers) {
-        if (deletedWorkloadUsers == null || deletedWorkloadUsers.isEmpty()) {
-            return Optional.empty();
-        } else if (deletedWorkloadUsers.size() == 1) {
-            return Optional.of(Iterables.getOnlyElement(deletedWorkloadUsers));
-        } else {
-            throw new BadRequestException("Only 1 deleted workload user is supported");
-        }
     }
 
     @Override

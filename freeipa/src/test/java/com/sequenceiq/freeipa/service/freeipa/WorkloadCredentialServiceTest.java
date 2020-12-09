@@ -218,7 +218,7 @@ class WorkloadCredentialServiceTest {
                 .collect(ImmutableSet.toImmutableSet());
         WorkloadCredentialsUpdateType credentialsUpdateType = updateOptimizationEnabled ?
                 WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED : WorkloadCredentialsUpdateType.FORCE_UPDATE;
-        underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, credentialsUpdateType), ipaClient, credentialUpdates,
+        underTest.setWorkloadCredentials(new UserSyncOptions(batchCallEnabled, credentialsUpdateType), ipaClient, credentialUpdates,
                 warnings);
     }
 }

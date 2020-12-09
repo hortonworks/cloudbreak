@@ -85,12 +85,6 @@ class BaseUmsUsersStateProviderTest {
                         .map(FmsGroup::getName)
                         .collect(Collectors.toSet()));
 
-        assertEquals(Stream.concat(testData.users.stream().map(UserManagementProto.User::getWorkloadUsername),
-                testData.machineUsers.stream()
-                        .map(UserManagementProto.MachineUser::getWorkloadUsername))
-                        .collect(Collectors.toSet()),
-                state.getRequestedWorkloadUsernames());
-
         // users including rights, group membership, wags
         // machine users including rights, group membership, wags
         UsersState usersState = state.getUsersState();
