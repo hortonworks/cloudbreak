@@ -133,7 +133,7 @@ public class ImageCatalogServiceDefaultTest {
         when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogFile);
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
-        when(entitlementService.baseImageEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
     }
 
     @Test

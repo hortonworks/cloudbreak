@@ -77,7 +77,7 @@ public class AlertValidatorTest {
     public void setup() {
         underTest.setDateService(dateService);
         aCluster = getACluster();
-        when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString(), anyString())).thenReturn(true);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString())).thenReturn(true);
     }
 
     @Test
@@ -85,8 +85,7 @@ public class AlertValidatorTest {
         aCluster.setCloudPlatform("Yarn");
         aCluster.setAutoscalingEnabled(false);
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getUserCrn(),
-                ThreadBasedUserCrnProvider.getAccountId(), "Yarn")).thenReturn(false);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "Yarn")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
@@ -101,8 +100,7 @@ public class AlertValidatorTest {
     public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledThenDisableAutoscaling() {
         aCluster.setCloudPlatform("AWS");
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getUserCrn(),
-                ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(false);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
@@ -117,8 +115,7 @@ public class AlertValidatorTest {
     public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountEntitledThenValidationSuccess() {
         aCluster.setCloudPlatform("AWS");
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getUserCrn(),
-                ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(true);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(true);
 
         underTest.validateEntitlementAndDisableIfNotEntitled(aCluster);
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);

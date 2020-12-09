@@ -303,8 +303,7 @@ public class CloudParameterService {
     public CloudVmTypes getVmTypesV2(ExtendedCloudCredential cloudCredential, String region, String variant,
             CdpResourceType stackType, Map<String, String> filters) {
         LOGGER.debug("Get platform vmtypes");
-        boolean hasEnableDistroxInstanceTypesEnabled = entitlementService
-                .enableDistroxInstanceTypesEnabled(cloudCredential.getUserCrn(), cloudCredential.getAccountId());
+        boolean hasEnableDistroxInstanceTypesEnabled = entitlementService.enableDistroxInstanceTypesEnabled(cloudCredential.getAccountId());
         GetPlatformVmTypesRequest getPlatformVmTypesRequest =
                 new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType,
                         hasEnableDistroxInstanceTypesEnabled, filters);

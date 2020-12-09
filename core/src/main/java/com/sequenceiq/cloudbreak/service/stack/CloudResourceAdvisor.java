@@ -97,7 +97,7 @@ public class CloudResourceAdvisor {
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
         LOGGER.debug("Advising resources for blueprintName: {}, provider: {} and region: {}.",
                 blueprintName, cloudPlatform, region);
-        List<String> entitlements = entitlementService.getEntitlements(credential.getCreator(), credential.getAccount());
+        List<String> entitlements = entitlementService.getEntitlements(credential.getAccount());
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Map<String, Set<String>> componentsByHostGroup = blueprintTextProcessor.getComponentsByHostGroup();
         componentsByHostGroup.forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName,
@@ -171,7 +171,7 @@ public class CloudResourceAdvisor {
         Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
-        List<String> entitlements = entitlementService.getEntitlements(blueprint.getCreator(), blueprint.getWorkspace().getTenant().getName());
+        List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
         return new ScaleRecommendation(autoscale, resize);

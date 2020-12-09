@@ -33,8 +33,6 @@ public class CmTemplateValidatorTest {
 
     private static final String ACCOUNT_ID = "1";
 
-    private static final String USER_CRN = "user";
-
     @Mock
     private EntitlementService entitlementService;
 
@@ -98,9 +96,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(false);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, -1));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1));
     }
 
     @Test
@@ -111,9 +109,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(true);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, -1));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1));
     }
 
     @Test
@@ -124,9 +122,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(false);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
     }
 
     @Test
@@ -137,9 +135,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("broker");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(true);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
     }
 
     @Test
@@ -150,9 +148,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(false);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
     }
 
     @Test
@@ -163,9 +161,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(true);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
     }
 
     @Test
@@ -176,9 +174,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(false);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
     }
 
     @Test
@@ -189,9 +187,9 @@ public class CmTemplateValidatorTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("master");
 
-        when(entitlementService.isEntitledFor(anyString(), anyString(), any())).thenReturn(true);
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(USER_CRN, ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
     }
 
 }

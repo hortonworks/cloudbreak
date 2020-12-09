@@ -44,12 +44,12 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     @Override
-    public void validateHostGroupScalingRequest(String userCrn, String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
+    public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
-                if (!entitlementService.isEntitledFor(userCrn, accountId, role.getEntitledFor())) {
+                if (!entitlementService.isEntitledFor(accountId, role.getEntitledFor())) {
                     throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                             role.name()));
                 } else {
@@ -59,7 +59,7 @@ public class CmTemplateValidator implements BlueprintValidator {
         }
         for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
             if (services.contains(role.name()) && adjustment > 0) {
-                if (!entitlementService.isEntitledFor(userCrn, accountId, role.getEntitledFor())) {
+                if (!entitlementService.isEntitledFor(accountId, role.getEntitledFor())) {
                     throw new BadRequestException(String.format("'%s' service is not enabled to scale",
                             role.name()));
                 } else {

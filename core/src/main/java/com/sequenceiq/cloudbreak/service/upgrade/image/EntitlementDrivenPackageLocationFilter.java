@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -29,7 +27,7 @@ public class EntitlementDrivenPackageLocationFilter {
 
     public Predicate<Image> filterImage(Image currentImage) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, accountId)) {
+        if (entitlementService.isInternalRepositoryForUpgradeAllowed(accountId)) {
             LOGGER.debug("Skipping image filtering based on repository url");
             return image -> true;
         } else {

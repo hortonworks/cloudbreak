@@ -52,7 +52,7 @@ public class UmsResourceAuthorizationService {
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
-        if (!entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (!entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
             checkRightOfUserOnResource(userCrn, action, null);
             return;
         }
@@ -75,7 +75,7 @@ public class UmsResourceAuthorizationService {
     }
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
-        if (entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId())) {
+        if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
             if (!umsClient.checkResourceRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);

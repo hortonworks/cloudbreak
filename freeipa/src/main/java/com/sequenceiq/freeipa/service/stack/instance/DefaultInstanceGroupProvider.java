@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static java.util.Map.entry;
 
 import java.util.Map;
@@ -50,11 +49,11 @@ public class DefaultInstanceGroupProvider {
         template.setVolumeSize(0);
         template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
         template.setAccountId(accountId);
-        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
                     entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),
-                    entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)),
+                    entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(accountId)),
                     entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
         }
         return template;

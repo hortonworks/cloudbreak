@@ -76,7 +76,7 @@ public class ResourceAuthorizationServiceTest {
 
     @BeforeEach
     public void setUp() {
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(true);
         authorizationFactories.add(authorizationFactory1);
         authorizationFactories.add(authorizationFactory2);
         when(authorizationFactory1.supportedAnnotation()).thenReturn(CheckPermissionByResourceCrn.class);
@@ -145,7 +145,7 @@ public class ResourceAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn1")));
         when(authorizationFactory2.getAuthorization(any(), any(), any(), any()))
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(false);
         when(umsRightProvider.getRightMapper(false)).thenReturn(a -> {
             if (a.equals(AuthorizationResourceAction.EDIT_ENVIRONMENT)) {
                 return "environments/write";
@@ -174,7 +174,7 @@ public class ResourceAuthorizationServiceTest {
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.EDIT_ENVIRONMENT, "crn1")));
         when(authorizationFactory2.getAuthorization(any(), any(), any(), any()))
                 .thenReturn(Optional.of(new HasRight(AuthorizationResourceAction.DESCRIBE_CREDENTIAL, "crn2")));
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(false);
         when(umsRightProvider.getRightMapper(false)).thenReturn(a -> {
             if (a.equals(AuthorizationResourceAction.EDIT_ENVIRONMENT)) {
                 return "environments/write";

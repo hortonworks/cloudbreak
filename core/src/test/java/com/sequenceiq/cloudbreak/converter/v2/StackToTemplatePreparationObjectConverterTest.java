@@ -273,7 +273,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(stackMock.getResourceCrn()).thenReturn("crn");
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
-        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))

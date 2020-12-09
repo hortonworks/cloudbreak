@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,18 +32,18 @@ class EntitlementDrivenPackageLocationFilterTest {
 
     @BeforeEach
     public void init() {
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(anyString(), anyString())).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(anyString())).thenReturn(Boolean.FALSE);
     }
 
     @AfterEach
     public void postCheck() {
-        verify(entitlementService).isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, "123");
+        verify(entitlementService).isInternalRepositoryForUpgradeAllowed("123");
     }
 
     @Test
     public void testEnitlementEnabled() {
         PackageLocationFilter filter = mock(PackageLocationFilter.class);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(anyString())).thenReturn(Boolean.TRUE);
         EntitlementDrivenPackageLocationFilter underTest = new EntitlementDrivenPackageLocationFilter(entitlementService, Set.of(filter));
         Predicate<Image> imagePredicate = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filterImage(mock(Image.class)));
 

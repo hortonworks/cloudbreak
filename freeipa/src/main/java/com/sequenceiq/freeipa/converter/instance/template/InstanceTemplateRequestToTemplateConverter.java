@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -51,10 +49,10 @@ public class InstanceTemplateRequestToTemplateConverter {
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));
         Map<String, Object> attributes = new HashMap<>();
-        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
-            attributes.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, accountId));
+            attributes.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(accountId));
             attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         }
         Optional.ofNullable(source.getAws())

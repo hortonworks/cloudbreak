@@ -45,11 +45,7 @@ public class AlertValidator {
     private AutoScaleClusterCommonService asClusterCommonService;
 
     public void validateEntitlementAndDisableIfNotEntitled(Cluster cluster) {
-        if (!entitlementValidationService.autoscalingEntitlementEnabled(
-                ThreadBasedUserCrnProvider.getUserCrn(),
-                ThreadBasedUserCrnProvider.getAccountId(),
-                cluster.getCloudPlatform())) {
-
+        if (!entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
             if (cluster.getAutoscalingEnabled()) {
                 asClusterCommonService.setAutoscaleState(cluster.getId(), false);
             }

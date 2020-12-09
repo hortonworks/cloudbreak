@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +58,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAwsAndNotEntitled() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(false);
 
         Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
 
@@ -69,7 +68,7 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndEntitled() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
 
@@ -83,8 +82,8 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndEntitledAndFastEncryption() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
-        when(entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
 

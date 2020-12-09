@@ -150,7 +150,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
         when(environmentService.save(any())).thenReturn(environment);
-        when(entitlementService.azureEnabled(eq(CRN), eq(ACCOUNT_ID))).thenReturn(false);
+        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 

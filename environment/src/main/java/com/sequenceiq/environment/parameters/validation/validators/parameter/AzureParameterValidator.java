@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.parameters.validation.validators.parameter;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation.USE_EXISTING;
 import static com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern.USE_MULTIPLE;
 
@@ -110,7 +109,7 @@ public class AzureParameterValidator implements ParameterValidator {
         if (Objects.nonNull(resourceGroupUsagePattern)) {
             switch (resourceGroupUsagePattern) {
                 case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
-                    if (!entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+                    if (!entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(accountId)) {
                         LOGGER.info("Invalid request, singleResourceGroupDedicatedStorageAccountEnabled entitlement turned off for account {}", accountId);
                         return validationResultBuilder.error(
                                 "You specified to use a single resource group with dedicated storage account for the images, "
@@ -118,7 +117,7 @@ public class AzureParameterValidator implements ParameterValidator {
                                 build();
                     }
                 case USE_SINGLE:
-                    if (!entitlementService.azureSingleResourceGroupDeploymentEnabled(INTERNAL_ACTOR_CRN, accountId)) {
+                    if (!entitlementService.azureSingleResourceGroupDeploymentEnabled(accountId)) {
                         LOGGER.info("Invalid request, singleResourceGroupDeploymentEnabled entitlement turned off for account {}", accountId);
                         return validationResultBuilder.error(
                                 "You specified to use a single resource group for all of your resources, "

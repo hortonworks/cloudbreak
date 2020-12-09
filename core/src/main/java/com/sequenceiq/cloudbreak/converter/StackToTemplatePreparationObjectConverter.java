@@ -379,7 +379,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         if (StackType.DATALAKE.equals(source.getType())
                 && AZURE.equals(source.cloudPlatform())
                 && source.getCluster().isRangerRazEnabled()
-                && entitlementService.cloudIdentityMappingEnabled(source.getCreator().getUserCrn(), source.getCreator().getTenant().getName())) {
+                && entitlementService.cloudIdentityMappingEnabled(source.getCreator().getTenant().getName())) {
 
             ImmutableMap.Builder<String, String> azureObjectIdMap = ImmutableMap.builder();
             servicePrincipalCloudIdentities.forEach(spCloudId -> {

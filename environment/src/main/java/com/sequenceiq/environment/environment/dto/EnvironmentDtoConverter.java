@@ -184,7 +184,7 @@ public class EnvironmentDtoConverter {
     }
 
     private Json getTags(EnvironmentCreationDto creationDto) {
-        boolean internalTenant = entitlementService.internalTenant(creationDto.getCreator(), creationDto.getAccountId());
+        boolean internalTenant = entitlementService.internalTenant(creationDto.getAccountId());
         Map<String, String> userDefinedTags = creationDto.getTags();
         Set<AccountTag> accountTags = accountTagService.get(creationDto.getAccountId());
         List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);

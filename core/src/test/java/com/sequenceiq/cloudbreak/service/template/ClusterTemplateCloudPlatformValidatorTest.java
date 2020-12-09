@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 
@@ -100,8 +99,8 @@ class ClusterTemplateCloudPlatformValidatorTest {
     void testIsClusterTemplateCloudPlatformValid(Set<String> enabledPlatforms, String cloudPlatform, boolean azureEnabled,
         boolean gcpEnabled, boolean validExpected) {
         setUpUnderTest(enabledPlatforms);
-        lenient().when(entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(azureEnabled);
-        lenient().when(entitlementService.gcpEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(gcpEnabled);
+        lenient().when(entitlementService.azureEnabled(ACCOUNT_ID)).thenReturn(azureEnabled);
+        lenient().when(entitlementService.gcpEnabled(ACCOUNT_ID)).thenReturn(gcpEnabled);
 
         assertThat(underTest.isClusterTemplateCloudPlatformValid(cloudPlatform, ACCOUNT_ID)).isEqualTo(validExpected);
     }

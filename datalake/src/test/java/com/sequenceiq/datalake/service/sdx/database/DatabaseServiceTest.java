@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
@@ -133,7 +132,7 @@ public class DatabaseServiceTest {
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
         when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
         if (entitled != null) {
-            when(entitlementService.databaseWireEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(entitled);
+            when(entitlementService.databaseWireEncryptionEnabled(ACCOUNT_ID)).thenReturn(entitled);
         }
 
         SdxStatusEntity status = new SdxStatusEntity();

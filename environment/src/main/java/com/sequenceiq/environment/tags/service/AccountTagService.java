@@ -63,7 +63,7 @@ public class AccountTagService {
             Map<String, String> accountTagsMap = accountTagRepository.findAllInAccount(accountId)
                     .stream()
                     .collect(Collectors.toMap(AccountTag::getTagKey, AccountTag::getTagValue));
-            boolean internalTenant = entitlementService.internalTenant(environmentDto.getCreator(), accountId);
+            boolean internalTenant = entitlementService.internalTenant(accountId);
 
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(environmentDto.getCreator())

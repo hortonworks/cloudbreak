@@ -4,7 +4,7 @@ import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -20,12 +20,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -63,7 +63,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
         when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stackId)).thenReturn(Collections.emptySet());
 
         unhealthyInstancesDetectionHandler.accept(event);
-        verifyZeroInteractions(unhealthyInstancesFinalizer);
+        verifyNoInteractions(unhealthyInstancesFinalizer);
 
         verify(eventBus).notify(eq(EventSelectorUtil.selector(UnhealthyInstancesDetectionResult.class)),
                 argThat(new UnhealthyInstancesResultMatcher(Collections.emptySet())));

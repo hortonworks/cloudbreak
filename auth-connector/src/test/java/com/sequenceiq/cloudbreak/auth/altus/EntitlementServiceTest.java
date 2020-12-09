@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Entitlement;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @ExtendWith(MockitoExtension.class)
 class EntitlementServiceTest {
@@ -26,8 +27,6 @@ class EntitlementServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
-
-    private static final Account ACCOUNT_NO_ENTITLEMENTS = Account.newBuilder().build();
 
     private static final String ENTITLEMENT_FOO = "FOO";
 
@@ -127,13 +126,14 @@ class EntitlementServiceTest {
     @MethodSource("entitlementCheckDataProvider")
     void entitlementEnabledTestWhenNoOtherEntitlementsAreGranted(String entitlementName, EntitlementCheckFunction function, boolean enabled) {
         setUpUmsClient(entitlementName, enabled);
-        assertThat(function.entitlementEnabled(underTest, ACTOR_CRN, ACCOUNT_ID)).isEqualTo(enabled);
+        assertThat(function.entitlementEnabled(underTest, ACCOUNT_ID)).isEqualTo(enabled);
     }
 
     @Test
     void getEntitlementsTest() {
-        when(umsClient.getAccountDetails(eq(ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class))).thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
-        assertThat(underTest.getEntitlements(ACTOR_CRN, ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
+        when(umsClient.getAccountDetails(eq(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
+                .thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
+        assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
 
     @SuppressWarnings("unchecked")
@@ -145,7 +145,7 @@ class EntitlementServiceTest {
                                 .setEntitlementName(entitlement)
                                 .build());
         }
-        when(umsClient.getAccountDetails(eq(ACTOR_CRN), eq(ACCOUNT_ID), any()))
+        when(umsClient.getAccountDetails(eq(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any()))
                 .thenReturn(builder.build());
     }
 
@@ -162,7 +162,7 @@ class EntitlementServiceTest {
 
     @FunctionalInterface
     private interface EntitlementCheckFunction {
-        boolean entitlementEnabled(EntitlementService service, String actorCrn, String accountId);
+        boolean entitlementEnabled(EntitlementService service, String accountId);
     }
 
 }

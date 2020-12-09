@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +23,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
-import org.apache.commons.io.FileUtils;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -225,7 +225,7 @@ public class ImageCatalogProviderTest {
         when(builderMock.get()).thenReturn(responseMock);
         when(responseMock.getStatusInfo()).thenReturn(statusTypeMock);
         when(statusTypeMock.getFamily()).thenReturn(Family.SUCCESSFUL);
-        when(responseMock.readEntity(String.class)).thenReturn(FileUtils.readFileToString(Paths.get(path, CB_IMAGE_CATALOG_V2_JSON).toFile()));
+        when(responseMock.readEntity(String.class)).thenReturn(Files.readString(Paths.get(path, CB_IMAGE_CATALOG_V2_JSON)));
 
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());

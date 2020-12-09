@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -38,7 +39,8 @@ class ClusterPublicEndpointManagementServiceTest {
 
         underTest.start(stack);
 
-        verifyZeroInteractions(gatewayPublicEndpointManagementService, dnsEntryServices);
+        verify(gatewayPublicEndpointManagementService, never()).updateDnsEntry(stack, null);
+        verifyNoInteractions(dnsEntryServices);
     }
 
     @Test

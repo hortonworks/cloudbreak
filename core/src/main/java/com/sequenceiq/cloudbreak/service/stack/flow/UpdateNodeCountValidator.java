@@ -80,7 +80,6 @@ public class UpdateNodeCountValidator {
             String userCrn = creator.getUserCrn();
             String accountId = Crn.safeFromString(userCrn).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
-                    userCrn,
                     accountId,
                     stack.getCluster().getBlueprint(),
                     hostGroup.get(),

@@ -18,14 +18,14 @@ public class EntitlementValidationService {
     private EntitlementService entitlementService;
 
     @Cacheable(cacheNames = "accountEntitlementCache", key = "{#accountId,#cloudPlatform}")
-    public boolean autoscalingEntitlementEnabled(String userCrn, String accountId, String cloudPlatform) {
+    public boolean autoscalingEntitlementEnabled(String accountId, String cloudPlatform) {
         boolean entitled = false;
         if (Boolean.FALSE.equals(entitlementCheckEnabled) || "YARN".equalsIgnoreCase(cloudPlatform)) {
             entitled = true;
         } else if ("AWS".equalsIgnoreCase(cloudPlatform)) {
-            entitled = entitlementService.awsAutoScalingEnabled(userCrn, accountId);
+            entitled = entitlementService.awsAutoScalingEnabled(accountId);
         } else if ("AZURE".equalsIgnoreCase(cloudPlatform)) {
-            entitled = entitlementService.azureAutoScalingEnabled(userCrn, accountId);
+            entitled = entitlementService.azureAutoScalingEnabled(accountId);
         }
         return entitled;
     }

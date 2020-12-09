@@ -600,7 +600,7 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
@@ -612,37 +612,37 @@ class SdxServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("razCloudPlatformAndRuntimeDataProvider")
-    void testSdxCreateRazEnabledNoEntitlement(String testCaseName, CloudPlatform cloudPlatform, String runtime) throws IOException {
+    void testSdxCreateRazEnabledNoEntitlement(String testCaseName, CloudPlatform cloudPlatform, String runtime) {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         long id = 10L;
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.razEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
     }
 
     @Test
-    void testSdxCreateRazEnabledNotAwsOrAzure() throws IOException {
+    void testSdxCreateRazEnabledNotAwsOrAzure() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
 
     @Test
-    void testSdxCreateRazEnabledNoEntitlementAndNotAwsOrAzure() throws IOException {
+    void testSdxCreateRazEnabledNoEntitlementAndNotAwsOrAzure() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.razEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
@@ -666,7 +666,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
@@ -689,7 +689,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
@@ -713,7 +713,7 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
@@ -729,7 +729,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(false);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning a medium duty data lake cluster is not enabled for this account. " +
@@ -742,7 +742,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not "
@@ -755,7 +755,7 @@ class SdxServiceTest {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not "

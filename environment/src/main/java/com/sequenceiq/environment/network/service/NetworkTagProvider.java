@@ -73,7 +73,7 @@ public class NetworkTagProvider {
     }
 
     private Map<String, String> getDefaultTags(EnvironmentDto environmentDto, Map<String, String> userDefinedTags, Map<String, String> accountTagsMap) {
-        boolean internalTenant = entitlementService.internalTenant(environmentDto.getCreator(), environmentDto.getAccountId());
+        boolean internalTenant = entitlementService.internalTenant(environmentDto.getAccountId());
         CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                 .withCreatorCrn(environmentDto.getCreator())
                 .withEnvironmentCrn(environmentDto.getResourceCrn())

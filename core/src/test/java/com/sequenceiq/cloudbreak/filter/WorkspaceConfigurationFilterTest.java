@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.CachedWorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -80,7 +80,7 @@ public class WorkspaceConfigurationFilterTest {
         underTest.doFilterInternal(request, response, filterChain);
 
         verify(authenticatedUserService, times(1)).getCbUser();
-        verifyZeroInteractions(userService, workspaceService);
+        verifyNoInteractions(userService, workspaceService);
         verify(cloudbreakRestRequestThreadLocalService, times(1)).removeRequestedWorkspaceId();
         verify(filterChain, times(1)).doFilter(any(), any());
     }
@@ -120,10 +120,6 @@ public class WorkspaceConfigurationFilterTest {
                 .setResource("1")
                 .build().toString();
         return new CloudbreakUser("userId", userCrn, "username", "email", "tenant");
-    }
-
-    private CloudbreakUser createCbUserWithoutCrn() {
-        return new CloudbreakUser("userId", null, "username", "email", "tenant");
     }
 
     private Workspace createWorkspace() {

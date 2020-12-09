@@ -352,7 +352,7 @@ public class UserSyncService {
             }
 
             // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
-            if (fullSync && entitlementService.cloudIdentityMappingEnabled(INTERNAL_ACTOR_CRN, stack.getAccountId())) {
+            if (fullSync && entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
                 LOGGER.debug("Starting {} ...", LogEvent.SYNC_CLOUD_IDENTITIES);
                 cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
                 LOGGER.debug("Finished {}.", LogEvent.SYNC_CLOUD_IDENTITIES);

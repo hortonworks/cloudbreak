@@ -67,7 +67,7 @@ public class ListPermissionCheckerTest {
         rightCheckResult.put(RESOURCE_CRN3, Boolean.FALSE);
         when(commonPermissionCheckingUtils.getPermissionsForUserOnResources(any(), any(), anyList())).thenReturn(rightCheckResult);
         when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
-        lenient().when(entitlementService.listFilteringEnabled(anyString(), anyString())).thenReturn(true);
+        lenient().when(entitlementService.listFilteringEnabled(anyString())).thenReturn(true);
     }
 
     @Test

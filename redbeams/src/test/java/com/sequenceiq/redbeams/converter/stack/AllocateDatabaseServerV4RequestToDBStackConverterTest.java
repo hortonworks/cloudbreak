@@ -193,7 +193,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
-        when(entitlementService.internalTenant(anyString(), anyString())).thenReturn(true);
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(databaseServerSSlCertificateConfig.getCertsByPlatform(any())).thenReturn(Set.of("super-cert"));
 
         when(clock.getCurrentInstant()).thenReturn(NOW);

@@ -103,7 +103,7 @@ class DistroxUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
         when(umsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq("9d74eee4-1cad-45d7-b645-7ccf9edbb73d"), any()))
                 .thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.empty());
@@ -118,7 +118,7 @@ class DistroxUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
         when(umsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq("9d74eee4-1cad-45d7-b645-7ccf9edbb73d"), any()))
                 .thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
@@ -150,7 +150,7 @@ class DistroxUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed(INTERNAL_ACTOR_CRN, "9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
         imageInfoV4Response.setImageCatalogName("catalogName");

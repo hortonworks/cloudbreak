@@ -55,7 +55,7 @@ public class CommonPermissionCheckingUtils {
     private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
 
     public boolean legacyAuthorizationNeeded() {
-        return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId());
+        return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public ResourceBasedCrnProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {

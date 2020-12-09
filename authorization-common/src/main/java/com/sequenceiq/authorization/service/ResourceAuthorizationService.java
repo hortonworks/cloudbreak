@@ -53,7 +53,7 @@ public class ResourceAuthorizationService {
     private List<AuthorizationFactory<? extends Annotation>> authorizationFactories;
 
     public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Optional<String> requestId) {
-        boolean authzEntitled = isAuthorizationEntitlementRegistered(userCrn);
+        boolean authzEntitled = isAuthorizationEntitlementRegistered();
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper(authzEntitled);
         getAuthorization(userCrn, proceedingJoinPoint, methodSignature).ifPresent(authorization -> {
             if (LOGGER.isDebugEnabled()) {
@@ -75,9 +75,9 @@ public class ResourceAuthorizationService {
         });
     }
 
-    private boolean isAuthorizationEntitlementRegistered(String userCrn) {
+    private boolean isAuthorizationEntitlementRegistered() {
         try {
-            return entitlementService.isAuthorizationEntitlementRegistered(userCrn, ThreadBasedUserCrnProvider.getAccountId());
+            return entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId());
         } catch (StatusRuntimeException e) {
             throw new BadRequestException(e.getMessage(), e);
         }

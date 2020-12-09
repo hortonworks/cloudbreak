@@ -225,7 +225,7 @@ public class CreateFreeIpaRequestToStackConverter {
     private Map<String, String> getDefaultTags(Stack stack, String userCrn, String userName) {
         Map<String, String> result = new HashMap<>();
         try {
-            boolean internalTenant = entitlementService.internalTenant(userCrn, stack.getAccountId());
+            boolean internalTenant = entitlementService.internalTenant(stack.getAccountId());
             Map<String, String> accountTags = accountTagService.list();
             CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                     .withCreatorCrn(userCrn)

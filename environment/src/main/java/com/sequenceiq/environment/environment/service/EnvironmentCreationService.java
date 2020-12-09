@@ -143,7 +143,7 @@ public class EnvironmentCreationService {
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {
-        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()))
-                || (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(userCrn, Crn.safeFromString(userCrn).getAccountId()));
+        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(Crn.safeFromString(userCrn).getAccountId()))
+                || (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(Crn.safeFromString(userCrn).getAccountId()));
     }
 }

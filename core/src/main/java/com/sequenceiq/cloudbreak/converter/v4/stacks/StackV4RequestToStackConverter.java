@@ -354,7 +354,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         Set<TargetGroup> targetGroups = new HashSet<>();
         // TODO expand this to data hubs
         if (StackType.DATALAKE.equals(source.getType()) &&
-            entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getUserCrn(), ThreadBasedUserCrnProvider.getAccountId())) {
+            entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             LOGGER.info("Setting up load balancers for stack {}", source.getName());
             Set<String> knoxGatewayGroupNames = loadBalancerConfigService.getKnoxGatewayGroups(stack);
             Set<InstanceGroup> knoxGatewayGroups = stack.getInstanceGroups().stream()

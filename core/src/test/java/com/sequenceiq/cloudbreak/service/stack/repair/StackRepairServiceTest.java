@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_COMPLET
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -57,7 +57,7 @@ public class StackRepairServiceTest {
     public void shouldIgnoreIfNoInstancesToRepair() {
         underTest.add(stack, Collections.emptySet());
 
-        verifyZeroInteractions(executorService);
+        verifyNoInteractions(executorService);
         verify(flowMessageService).fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), STACK_REPAIR_COMPLETE_CLEAN);
     }
 

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 
@@ -38,8 +37,8 @@ public class ClusterTemplateCloudPlatformValidator {
     }
 
     private boolean isCloudEntitlementEnabeledForTheAccount(String cloudPlatform, String accountId) {
-        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && entitlementService.azureEnabled(INTERNAL_ACTOR_CRN, accountId))
-                || (GCP.name().equalsIgnoreCase(cloudPlatform) && entitlementService.gcpEnabled(INTERNAL_ACTOR_CRN, accountId));
+        return (AZURE.name().equalsIgnoreCase(cloudPlatform) && entitlementService.azureEnabled(accountId))
+                || (GCP.name().equalsIgnoreCase(cloudPlatform) && entitlementService.gcpEnabled(accountId));
     }
 
 }

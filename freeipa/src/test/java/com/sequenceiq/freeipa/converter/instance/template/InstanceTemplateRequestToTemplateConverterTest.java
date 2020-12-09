@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -106,7 +105,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(false);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 
@@ -121,7 +120,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 
@@ -137,8 +136,8 @@ class InstanceTemplateRequestToTemplateConverterTest {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
-        when(entitlementService.fastEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 
@@ -155,7 +154,7 @@ class InstanceTemplateRequestToTemplateConverterTest {
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
 
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(INTERNAL_ACTOR_CRN, ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 

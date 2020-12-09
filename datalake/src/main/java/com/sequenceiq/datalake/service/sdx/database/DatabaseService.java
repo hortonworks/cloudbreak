@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
@@ -153,7 +151,7 @@ public class DatabaseService {
 
         String runtime = sdxCluster.getRuntime();
         if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
-                && entitlementService.databaseWireEncryptionEnabled(INTERNAL_ACTOR_CRN, Crn.safeFromString(environmentCrn).getAccountId())) {
+                && entitlementService.databaseWireEncryptionEnabled(Crn.safeFromString(environmentCrn).getAccountId())) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
             sslConfigV4Request.setSslMode(SslMode.ENABLED);

@@ -90,7 +90,7 @@ public class AuditCredentialAuthorizationIntegrationTest {
         firstUserClient = getClient(FIRST_USER_CRN);
         secondUserClient = getClient(SECOND_USER_CRN);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
-        when(entitlementService.isAuthorizationEntitlementRegistered(anyString(), anyString())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(Boolean.TRUE);
         mockPermissions();
     }
 
