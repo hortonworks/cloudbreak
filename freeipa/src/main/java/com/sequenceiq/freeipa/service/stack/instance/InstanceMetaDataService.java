@@ -69,6 +69,10 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.findAllByInstanceIdIn(Set.of(instanceId));
     }
 
+    public Set<InstanceMetaData> getByInstanceIds(Iterable<String>  instanceIds) {
+        return instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds);
+    }
+
     public Optional<InstanceMetaData> getById(Long id) {
         return instanceMetaDataRepository.findById(id);
     }
