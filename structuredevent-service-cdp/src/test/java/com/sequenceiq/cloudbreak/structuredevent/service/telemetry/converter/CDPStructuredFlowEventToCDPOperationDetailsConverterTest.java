@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
 
 class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
@@ -15,6 +17,8 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     @BeforeEach()
     public void setUp() {
         underTest = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
+        Whitebox.setInternalState(underTest, "appVersion", "version-1234");
+        Whitebox.setInternalState(underTest, "requestProcessingStepMapper", new RequestProcessingStepMapper());
     }
 
     @Test
@@ -25,7 +29,6 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     @Test
     public void testConversionWithNullOperation() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        Whitebox.setInternalState(underTest, "appVersion", "version-1234");
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
 
@@ -35,6 +38,42 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals("", details.getInitiatorCrn());
 
         Assert.assertEquals("version-1234", details.getApplicationVersion());
+    }
+
+    @Test
+    public void testInitProcessingType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowState("INIT_STATE");
+        cdpStructuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.INIT, details.getCdpRequestProcessingStep());
+    }
+
+    @Test
+    public void testFinalProcessingType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setNextFlowState("FINAL_STATE");
+        cdpStructuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+    }
+
+    @Test
+    public void testSomethingElseProcessingType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowState("SOMETHING_ELSE");
+        cdpStructuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
     }
 
 }
