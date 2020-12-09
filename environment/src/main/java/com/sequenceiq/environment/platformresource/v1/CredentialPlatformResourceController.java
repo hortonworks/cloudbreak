@@ -20,6 +20,7 @@ import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -80,7 +81,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String platformVariant,
             String availabilityZone,
             CdpResourceType cdpResourceType) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -107,7 +108,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String platformVariant,
             String availabilityZone,
             boolean availabilityZonesNeeded) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -141,7 +142,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -166,7 +167,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -190,7 +191,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -215,7 +216,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -239,7 +240,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -263,7 +264,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -288,7 +289,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String platformVariant,
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -323,7 +324,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -347,7 +348,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone) {
-        customPermissionCheckByCredential(credentialName, credentialCrn);
+        CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
@@ -370,7 +371,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         return ThreadBasedUserCrnProvider.getAccountId();
     }
 
-    private void customPermissionCheckByCredential(String credentialName, String credentialCrn) {
+    private void permissionCheckByCredential(String credentialName, String credentialCrn) {
         if (!Strings.isNullOrEmpty(credentialName)) {
             commonPermissionCheckingUtils.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_CREDENTIAL,
                     ThreadBasedUserCrnProvider.getUserCrn(), platformParameterService.getCredentialCrnByName(credentialName));
