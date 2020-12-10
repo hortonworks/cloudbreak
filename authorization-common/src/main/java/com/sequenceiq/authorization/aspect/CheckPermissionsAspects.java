@@ -21,11 +21,15 @@ public class CheckPermissionsAspects {
     @Inject
     private PermissionCheckService permissionCheckerService;
 
-    @Pointcut("within(@org.springframework.stereotype.Controller *)")
-    public void allEndpoints() {
+    @Pointcut("execution(* com.sequenceiq..*.*(..))")
+    public void onlyCloudbreakControllers() {
     }
 
-    @Around("allEndpoints()")
+    @Pointcut("within(@org.springframework.stereotype.Controller *)")
+    public void controllerClass() {
+    }
+
+    @Around("controllerClass() && onlyCloudbreakControllers()")
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         return permissionCheckerService.hasPermission(proceedingJoinPoint);
     }
