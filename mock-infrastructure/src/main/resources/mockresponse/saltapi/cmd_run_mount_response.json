@@ -1,7 +1,0 @@
-{
-  "return": [
-    {
-      "%s": "UUID=a750be52-fc65-11e8-8eb2-f2801f1b9fd1 /hadoopfs/fs1        ext4          noatime          0      2"
-    }
-  ]
-}

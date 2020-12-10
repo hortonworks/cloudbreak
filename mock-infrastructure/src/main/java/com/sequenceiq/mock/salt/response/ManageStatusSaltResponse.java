@@ -2,6 +2,7 @@ package com.sequenceiq.mock.salt.response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -21,7 +22,7 @@ public class ManageStatusSaltResponse implements SaltResponse {
     private SpiStoreService spiStoreService;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();

@@ -2,6 +2,7 @@ package com.sequenceiq.mock.salt;
 
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -14,19 +15,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Multimap;
-
 @Component
 public class SaltApiRunComponent {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltApiRunComponent.class);
 
-    private final Map<String, Multimap<String, String>> grains = new HashMap<>();
-
     @Inject
     private List<SaltResponse> saltResponses;
 
-    private Map<String, SaltResponse> saltResponsesMap = new HashMap<>();
+    @Inject
+    private SaltStoreService saltStoreService;
+
+    private final Map<String, SaltResponse> saltResponsesMap = new HashMap<>();
 
     @PostConstruct
     public void setup() {
@@ -34,20 +34,26 @@ public class SaltApiRunComponent {
     }
 
     public Object createSaltApiResponse(String mockUuid, String body) throws Exception {
-        String fun = getParams(body).get("fun");
-        if (fun != null) {
-            SaltResponse saltResponse = saltResponsesMap.get(fun);
+        Map<String, List<String>> params = getParams(body);
+        List<String> fun = params.get("fun");
+        if (!fun.isEmpty()) {
+            SaltResponse saltResponse = saltResponsesMap.get(fun.get(0));
             if (saltResponse != null) {
-                return saltResponse.run(mockUuid, body);
+                Object response = saltResponse.run(mockUuid, params);
+                RunResponseDto runResponseDto = new RunResponseDto(mockUuid);
+                runResponseDto.setParams(params);
+                runResponseDto.setResponse(response);
+                saltStoreService.addRunResponse(mockUuid, runResponseDto);
+                return response;
             }
         }
         LOGGER.error("no response for this SALT RUN request: " + body);
         throw new IllegalStateException("no response for this SALT RUN request: " + body);
     }
 
-    public Map<String, String> getParams(String body) {
+    public Map<String, List<String>> getParams(String body) {
         String[] split = body.split("&");
-        Map<String, String> params = new HashMap<>();
+        Map<String, List<String>> params = new HashMap<>();
         Arrays.stream(split).forEach(s -> {
             String decoded = URLDecoder.decode(s, Charset.defaultCharset());
             String[] split1 = decoded.split("=");
@@ -55,7 +61,13 @@ public class SaltApiRunComponent {
             if (split1.length == 2) {
                 value = split1[1];
             }
-            params.put(split1[0], value);
+            if (split1[0].equals("tgt")) {
+                List<String> values = Arrays.asList(value.split(","));
+                params.put(split1[0], values);
+            } else {
+                List<String> values = params.computeIfAbsent(split1[0], key -> new ArrayList<>());
+                values.add(value);
+            }
         });
         return params;
     }

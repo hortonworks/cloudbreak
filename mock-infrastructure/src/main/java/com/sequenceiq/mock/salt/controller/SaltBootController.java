@@ -14,10 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintRequest;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.mock.HostNameUtil;
 import com.sequenceiq.mock.salt.SaltStoreService;
@@ -29,17 +33,9 @@ public class SaltBootController {
     @Inject
     private SaltStoreService saltStoreService;
 
-    @PostMapping(value = "file")
-    public GenericResponses file(@PathVariable("mock_uuid") String mockUuid) {
-        GenericResponses genericResponses = new GenericResponses();
-        GenericResponse genericResponse = new GenericResponse();
-        genericResponse.setStatusCode(HttpStatus.CREATED.value());
-        genericResponses.setResponses(Collections.singletonList(genericResponse));
-        return genericResponses;
-    }
-
     @PostMapping(value = "file/distribute", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public GenericResponses fileDistribute(@PathVariable("mock_uuid") String mockUuid) {
+    public GenericResponses fileDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestParam("file") MultipartFile body) {
+        saltStoreService.saltbootFileDistribute(mockUuid, body);
         GenericResponses genericResponses = new GenericResponses();
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setStatusCode(HttpStatus.CREATED.value());
@@ -48,14 +44,15 @@ public class SaltBootController {
     }
 
     @PostMapping(value = "salt/server/pillar")
-    public GenericResponse saltServerPillar(@PathVariable("mock_uuid") String mockUuid) {
+    public GenericResponse saltServerPillar(@PathVariable("mock_uuid") String mockUuid, @RequestBody Pillar pillar) {
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setStatusCode(HttpStatus.OK.value());
         return genericResponse;
     }
 
     @PostMapping(value = "salt/server/pillar/distribute")
-    public GenericResponses saltServerPillarDistribute(@PathVariable("mock_uuid") String mockUuid) {
+    public GenericResponses saltServerPillarDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestBody Pillar pillar) {
+        saltStoreService.addPillar(mockUuid, pillar);
         GenericResponses genericResponses = new GenericResponses();
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setStatusCode(HttpStatus.OK.value());
@@ -65,6 +62,7 @@ public class SaltBootController {
 
     @GetMapping(value = "health")
     public GenericResponse health(@PathVariable("mock_uuid") String mockUuid) {
+        saltStoreService.read(mockUuid);
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setStatusCode(HttpStatus.OK.value());
         return genericResponse;
@@ -72,7 +70,7 @@ public class SaltBootController {
 
     @PostMapping(value = "salt/action/distribute")
     public GenericResponses saltActionDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestBody SaltAction saltAction) {
-        saltStoreService.setMinions(mockUuid, saltAction.getMinions());
+        saltStoreService.setSaltAction(mockUuid, saltAction);
         GenericResponses genericResponses = new GenericResponses();
         genericResponses.setResponses(new ArrayList<>());
         return genericResponses;
@@ -97,7 +95,7 @@ public class SaltBootController {
     }
 
     @PostMapping(value = "salt/minion/fingerprint/distribute")
-    public GenericResponses saltMinionDistributeDistribute(@PathVariable("mock_uuid") String mockUuid) {
+    public GenericResponses saltMinionDistributeDistribute(@PathVariable("mock_uuid") String mockUuid, @RequestBody FingerprintRequest request) {
         GenericResponses genericResponses = new GenericResponses();
         GenericResponse genericResponse = new GenericResponse();
         genericResponse.setStatusCode(HttpStatus.CREATED.value());

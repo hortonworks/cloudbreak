@@ -49,7 +49,12 @@ public class SpiController {
 
     @PostMapping("/launch")
     public List<CloudVmInstanceStatus> launch(@PathVariable("mock_uuid") String mockuuid, @RequestBody CloudStack cloudStack) {
-        return spiStoreService.store(mockuuid, cloudStack).stream().map(CloudVmMetaDataStatus::getCloudVmInstanceStatus).collect(Collectors.toList());
+        List<CloudVmInstanceStatus> vms = spiStoreService.store(mockuuid, cloudStack)
+                .stream()
+                .map(CloudVmMetaDataStatus::getCloudVmInstanceStatus)
+                .collect(Collectors.toList());
+        saltStoreService.create(mockuuid);
+        return vms;
     }
 
     @DeleteMapping("/terminate")

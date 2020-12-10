@@ -1,10 +1,11 @@
 package com.sequenceiq.mock.salt.response;
 
-import static com.sequenceiq.mock.HostNameUtil.responseFromJsonFile;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.mock.salt.SaltResponse;
 
@@ -12,9 +13,10 @@ import com.sequenceiq.mock.salt.SaltResponse;
 public class JobsLookupJidSaltResponse implements SaltResponse {
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
-        String jsonFile = responseFromJsonFile("saltapi/lookup_jid_response.json");
-        return JsonUtil.readValue(jsonFile, ApplyResponse.class);
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
+        ApplyResponse applyResponse = new ApplyResponse();
+        applyResponse.setResult(List.of(Map.of("data", new ObjectMapper().createObjectNode())));
+        return applyResponse;
     }
 
     @Override

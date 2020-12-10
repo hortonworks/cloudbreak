@@ -1,5 +1,8 @@
 package com.sequenceiq.mock.salt.response;
 
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.mock.salt.SaltResponse;
@@ -8,7 +11,7 @@ import com.sequenceiq.mock.salt.SaltResponse;
 public class KeyDeleteSaltResponse implements SaltResponse {
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         return "";
     }
 

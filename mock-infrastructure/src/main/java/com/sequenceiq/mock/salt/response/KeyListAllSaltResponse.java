@@ -23,7 +23,7 @@ public class KeyListAllSaltResponse implements SaltResponse {
     private SaltStoreService saltStoreService;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         MinionKeysOnMasterResponse response = new MinionKeysOnMasterResponse();
         Map<String, JsonNode> result = new HashMap<>();
         ObjectNode data = JsonNodeFactory.instance.objectNode().putObject("data");
