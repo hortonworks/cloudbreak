@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import java.util.StringJoiner;
+
 public class ImageChangeDto {
 
     private final Long stackId;
@@ -35,5 +37,15 @@ public class ImageChangeDto {
 
     public String getImageCatalogUrl() {
         return imageCatalogUrl;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ImageChangeDto.class.getSimpleName() + "[", "]")
+                .add("stackId=" + stackId)
+                .add("imageId='" + imageId + "'")
+                .add("imageCatalogName='" + imageCatalogName + "'")
+                .add("imageCatalogUrl='" + imageCatalogUrl + "'")
+                .toString();
     }
 }

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -132,7 +133,7 @@ class DistroxUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getIdByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(STACK_ID);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroxUpgrade(STACK_ID, imageChangeDto, false)).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroxUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -161,7 +162,7 @@ class DistroxUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getIdByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(STACK_ID);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroxUpgrade(STACK_ID, imageChangeDto, false)).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroxUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 

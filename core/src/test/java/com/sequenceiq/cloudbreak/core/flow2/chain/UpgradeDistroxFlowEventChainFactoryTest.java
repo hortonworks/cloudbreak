@@ -1,29 +1,51 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroxUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
+import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
+import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
+@ExtendWith(MockitoExtension.class)
 class UpgradeDistroxFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
-    private final UpgradeDistroxFlowEventChainFactory underTest = new UpgradeDistroxFlowEventChainFactory();
+    @InjectMocks
+    private UpgradeDistroxFlowEventChainFactory underTest;
 
     private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageId", "imageCatalogName", "imageCatUrl");
+
+    @Mock
+    private ClusterRepairService clusterRepairService;
 
     @Test
     public void testInitEvent() {
@@ -31,7 +53,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    public void testChainQueue() {
+    public void testChainQueueForNonReplaceVms() {
         DistroxUpgradeTriggerEvent event = new DistroxUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false);
         Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
@@ -39,6 +61,22 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
+    }
+
+    @Test
+    public void testChainQueueForReplaceVms() {
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
+                Result.success(new HashMap<>());
+        when(clusterRepairService.validateRepair(any(), any(), any(), eq(false))).thenReturn(repairStartResult);
+
+        DistroxUpgradeTriggerEvent event = new DistroxUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+                imageChangeDto, true);
+        Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(4, flowChainQueue.size());
+        assertSaltUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
+        assertRepairEvent(flowChainQueue);
     }
 
     private void assertImageUpdateEvent(Queue<Selectable> flowChainQueue) {
@@ -65,5 +103,12 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(SALT_UPDATE_EVENT.event(), saltUpdateEvent.selector());
         assertEquals(STACK_ID, saltUpdateEvent.getResourceId());
         assertTrue(saltUpdateEvent instanceof StackEvent);
+    }
+
+    private void assertRepairEvent(Queue<Selectable> flowChainQueue) {
+        Selectable repairEvent = flowChainQueue.remove();
+        assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
+        assertEquals(STACK_ID, repairEvent.getResourceId());
+        assertTrue(repairEvent instanceof ClusterRepairTriggerEvent);
     }
 }
