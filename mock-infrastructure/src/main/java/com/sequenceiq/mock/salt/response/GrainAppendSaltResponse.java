@@ -4,13 +4,13 @@ import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,8 +23,6 @@ import com.sequenceiq.mock.salt.SaltStoreService;
 @Component
 public class GrainAppendSaltResponse implements SaltResponse {
 
-    public static final int GRAIN_VALUE_GROUP = 4;
-
     @Inject
     private SaltStoreService saltStoreService;
 
@@ -32,16 +30,15 @@ public class GrainAppendSaltResponse implements SaltResponse {
     private ObjectMapper objectMapper;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
-        Matcher targetMatcher = Pattern.compile(".*(tgt=([^&]+)).*").matcher(body);
-        Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*(arg=([^&]+)).*").matcher(body);
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
+        List<String> args = params.get("arg");
+        List<String> targets = params.get("tgt");
         Map<String, JsonNode> hostMap = new HashMap<>();
-        if (targetMatcher.matches() && argMatcher.matches()) {
+        if (!CollectionUtils.isEmpty(targets) && !CollectionUtils.isEmpty(args)) {
             Map<String, Multimap<String, String>> grains = saltStoreService.getGrains(mockUuid);
-            String[] targets = targetMatcher.group(2).split("%2C");
-            String key = argMatcher.group(2);
-            String decoded = argMatcher.group(GRAIN_VALUE_GROUP);
-            String value = URLDecoder.decode(decoded, Charset.defaultCharset());
+            String key = args.get(0);
+            String encoded = args.get(1);
+            String value = URLDecoder.decode(encoded, Charset.defaultCharset());
             for (String target : targets) {
                 if (!grains.containsKey(target)) {
                     Multimap<String, String> grainsForTarget = ArrayListMultimap.create();

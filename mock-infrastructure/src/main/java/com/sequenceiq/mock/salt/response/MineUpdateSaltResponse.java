@@ -24,7 +24,7 @@ public class MineUpdateSaltResponse implements SaltResponse {
     private SpiStoreService spiStoreService;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         ApplyResponse applyResponse = new ApplyResponse();
         List<Map<String, JsonNode>> responseList = new ArrayList<>();
 

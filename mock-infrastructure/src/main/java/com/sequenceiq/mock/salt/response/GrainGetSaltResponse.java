@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +33,7 @@ public class GrainGetSaltResponse implements SaltResponse {
     private ObjectMapper objectMapper;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         ApplyResponse applyResponse = new ApplyResponse();
         List<Map<String, JsonNode>> responseList = new ArrayList<>();
 
@@ -46,9 +45,9 @@ public class GrainGetSaltResponse implements SaltResponse {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 String hostname = "host-" + privateIp.replace(".", "-") + ".example.com";
                 if (grains.containsKey(hostname)) {
-                    Matcher argMatcher = Pattern.compile(".*(arg=([^&]+)).*").matcher(body);
-                    if (argMatcher.matches()) {
-                        hostMap.put(hostname, objectMapper.valueToTree(grains.get(hostname).get(argMatcher.group(2))));
+                    List<String> arg = params.get("arg");
+                    if (!CollectionUtils.isEmpty(arg)) {
+                        hostMap.put(hostname, objectMapper.valueToTree(grains.get(hostname).get(arg.get(0))));
                     }
                 }
             }

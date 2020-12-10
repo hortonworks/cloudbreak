@@ -25,7 +25,7 @@ public class NetworkIpAddrsSaltResponse implements SaltResponse {
     private SpiStoreService spiStoreService;
 
     @Override
-    public Object run(String mockUuid, String body) throws Exception {
+    public Object run(String mockUuid, Map<String, List<String>> params) throws Exception {
         MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
         List<Map<String, JsonNode>> result = new ArrayList<>();
 
