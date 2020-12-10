@@ -292,7 +292,9 @@ cb:
         Standard_D32as_v4,
         Standard_E8a_v4,
         Standard_E16a_v4,
-        Standard_E32a_v4
+        Standard_E32a_v4,
+        Standard_E64a_v4,
+        Standard_E64as_v4
 
   os:
     enable.autoimport: true
