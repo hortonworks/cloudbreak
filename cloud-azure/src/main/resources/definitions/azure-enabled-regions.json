@@ -2,128 +2,128 @@
   "items": [
     {
       "name": "Japan West",
-      "latitude": "34.75003522",
-      "longitude": "135.4601448"
+      "latitude": "34.6939",
+      "longitude": "135.5022"
     },
     {
       "name": "East Asia",
-      "latitude": "22.3049809",
-      "longitude": "114.1850093"
+      "latitude": "22.267",
+      "longitude": "114.188"
     },
     {
       "name": "South East Asia",
-      "latitude": "1.293033466",
-      "longitude": "103.8558207"
+      "latitude": "1.283",
+      "longitude": "103.833"
     },
     {
       "name": "South Central US",
-      "latitude": "29.48733319",
-      "longitude": "-98.50730534"
+      "latitude": "29.4167",
+      "longitude": "-98.5"
     },
     {
       "name": "West US",
-      "latitude": "36.7477169",
-      "longitude": "-119.7729841"
+      "latitude": "37.783",
+      "longitude": "-122.417"
     },
     {
       "name": "East US",
-      "latitude": "37.55001935",
-      "longitude": "-77.449986"
+      "latitude": "37.3719",
+      "longitude": "-79.8164"
     },
     {
       "name": "North Central US",
-      "latitude": "41.82999066",
-      "longitude": "-87.75005497"
+      "latitude": "41.8819",
+      "longitude": "-87.6278"
     },
     {
       "name": "North Europe",
-      "latitude": "53.33306114",
-      "longitude": "-6.248905682"
+      "latitude": "53.3478",
+      "longitude": "-6.2597"
     },
     {
       "name": "Australia Southeast",
-      "latitude": "-37.82003131",
-      "longitude": "144.9750162"
+      "latitude": "-37.8136",
+      "longitude": "144.9631"
     },
     {
       "name": "Australia East",
-      "latitude": "-33.92001097",
-      "longitude": "151.1851798"
+      "latitude": "-33.86",
+      "longitude": "151.2094"
     },
     {
       "name": "Japan East",
-      "latitude": "35.91769004",
-      "longitude": "139.4910616"
+      "latitude": "35.68",
+      "longitude": "139.77"
     },
     {
       "name": "Brazil South",
-      "latitude": "-23.55867959",
-      "longitude": "-46.62501998"
+      "latitude": "-23.55",
+      "longitude": "-46.633"
     },
     {
       "name": "East US 2",
-      "latitude": "31.21645245",
-      "longitude": "121.4365047"
+      "latitude": "36.6681",
+      "longitude": "-78.3889"
     },
     {
       "name": "West Europe",
-      "latitude": "52.34996869",
-      "longitude": "4.916640176"
+      "latitude": "52.3667",
+      "longitude": "4.9"
     },
     {
       "name": "West Central US",
-      "latitude": "44.75867495",
-      "longitude": "-108.7584367"
+      "latitude": "40.890",
+      "longitude": "-110.234"
     },
     {
       "name": "Central India",
-      "latitude": "18.53001752",
-      "longitude": "73.85000362"
+      "latitude": "18.5822",
+      "longitude": "73.9197"
     },
     {
       "name": "UK West",
-      "latitude": "51.49999473",
-      "longitude": "-3.22500757"
+      "latitude": "53.427",
+      "longitude": "-3.084"
     },
     {
       "name": "West US 2",
-      "latitude": "47.6076",
-      "longitude": "-122.3420"
+      "latitude": "47.233",
+      "longitude": "-119.852"
     },
     {
       "name": "West India",
-      "latitude": "19.01699038",
-      "longitude": "72.8569893"
+      "latitude": "19.088",
+      "longitude": "72.868"
     },
     {
       "name": "South India",
-      "latitude": "13.08998781",
-      "longitude": "80.27999874"
+      "latitude": "12.9822",
+      "longitude": "80.1636"
     },
     {
       "name": "Canada East",
-      "latitude": "46.83996909",
-      "longitude": "-71.24561019"
+      "latitude": "46.817",
+      "longitude": "-71.217"
     },
     {
       "name": "Korea Central",
-      "latitude": "37.5663491",
-      "longitude": "126.999731"
+      "latitude": "37.5665",
+      "longitude": "126.9780"
     },
     {
       "name": "Korea South",
-      "latitude": "35.09505292",
-      "longitude": "129.0100476"
+      "latitude": "35.1796",
+      "longitude": "129.0756"
     },
     {
       "name": "Central US",
-      "latitude": "41.66108624",
-      "longitude": "-91.52997929"
+      "latitude": "41.5908",
+      "longitude": "-93.6208"
     },
     {
       "name": "UK South",
-      "latitude": "51.49999473",
-      "longitude": "-0.116721844"
+      "latitude": "50.941",
+      "longitude": "-0.799"
     },
     {
       "name": "Canada Central",
