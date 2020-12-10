@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
@@ -316,12 +317,16 @@ public class SdxController implements SdxEndpoint {
 
     private SdxCluster getSdxClusterByName(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.getByNameInAccount(userCrn, name);
+        SdxCluster sdxCluster = sdxService.getByNameInAccount(userCrn, name);
+        MDCBuilder.buildMdcContext(sdxCluster);
+        return sdxCluster;
     }
 
     private SdxCluster getSdxClusterByCrn(String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.getByCrn(userCrn, crn);
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, crn);
+        MDCBuilder.buildMdcContext(sdxCluster);
+        return sdxCluster;
     }
 
 }
