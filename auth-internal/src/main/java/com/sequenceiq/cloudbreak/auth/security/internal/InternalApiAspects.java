@@ -17,11 +17,15 @@ public class InternalApiAspects {
     @Inject
     private InternalCrnModifier internalCrnModifier;
 
-    @Pointcut("within(@org.springframework.stereotype.Controller *)")
-    public void allEndpoints() {
+    @Pointcut("execution(* com.sequenceiq..*.*(..))")
+    public void onlyCloudbreakControllers() {
     }
 
-    @Around("allEndpoints()")
+    @Pointcut("within(@org.springframework.stereotype.Controller *)")
+    public void controllerClass() {
+    }
+
+    @Around("controllerClass() && onlyCloudbreakControllers()")
     public Object changeInternalCrn(ProceedingJoinPoint proceedingJoinPoint) {
         return internalCrnModifier.changeInternalCrn(proceedingJoinPoint);
     }
