@@ -79,7 +79,7 @@ public class DistroxUpgradeService {
         ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeCandidates);
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(cluster, workspaceId);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroxUpgrade(stackId, imageChangeDto, false);
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroxUpgrade(stackId, imageChangeDto, request.getReplaceVms());
         return new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
     }
 

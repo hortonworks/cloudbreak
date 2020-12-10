@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -22,8 +23,16 @@ public class UpgradeConverter {
         request.setLockComponents(source.getLockComponents());
         Optional.ofNullable(source.getShowAvailableImages())
                 .ifPresent(value -> request.setShowAvailableImages(UpgradeShowAvailableImages.valueOf(value.name())));
-        request.setReplaceVms(DistroxUpgradeReplaceVms.ENABLED == source.getReplaceVms());
+        request.setReplaceVms(convertReplaceVms(source));
         return request;
+    }
+
+    private boolean convertReplaceVms(DistroxUpgradeV1Request source) {
+        if (Objects.nonNull(source.getReplaceVms())) {
+            return DistroxUpgradeReplaceVms.ENABLED == source.getReplaceVms();
+        } else {
+            return Boolean.TRUE.equals(source.getLockComponents());
+        }
     }
 
     public DistroxUpgradeV1Response convert(UpgradeV4Response source) {

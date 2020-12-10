@@ -138,7 +138,7 @@ public class ClusterRepairService {
         return repairStart;
     }
 
-    private Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, Long stackId,
+    public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, Long stackId,
             Set<String> selectedParts, boolean deleteVolumes) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         boolean reattach = !deleteVolumes;

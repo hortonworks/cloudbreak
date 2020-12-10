@@ -23,6 +23,14 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.restartServices = restartServices;
     }
 
+    public ClusterRepairTriggerEvent(String event, Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly, boolean restartServices) {
+        super(event, stackId);
+        this.failedNodesMap = failedNodesMap;
+        this.removeOnly = removeOnly;
+        this.stackId = stackId;
+        this.restartServices = restartServices;
+    }
+
     public Map<String, List<String>> getFailedNodesMap() {
         return failedNodesMap;
     }
