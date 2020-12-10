@@ -44,7 +44,7 @@ public class DiagnosticsDataToParameterConverter {
     private GcsConfigGenerator gcsConfigGenerator;
 
     public DiagnosticParameters convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry,
-            String clusterType, String clusterVersion, String accountId, String region) {
+            String clusterType, String clusterVersion, String accountId, String region, String databusEndpoint) {
         Logging logging = telemetry.getLogging();
         DiagnosticParametersBuilder builder = DiagnosticParameters.builder();
         if (logging.getS3() != null) {
@@ -85,7 +85,7 @@ public class DiagnosticsDataToParameterConverter {
         builder.withSkipValidation(request.getSkipValidation());
         builder.withAdditionalLogs(request.getAdditionalLogs());
         if (supportBundleConfiguration.isEnabled()) {
-            builder.withDbusUrl(telemetry.getDatabusEndpoint());
+            builder.withDbusUrl(databusEndpoint);
             builder.withSupportBundleDbusStreamName(supportBundleConfiguration.getDbusStreamName());
             builder.withSupportBundleDbusAppName(supportBundleConfiguration.getDbusAppName());
         }

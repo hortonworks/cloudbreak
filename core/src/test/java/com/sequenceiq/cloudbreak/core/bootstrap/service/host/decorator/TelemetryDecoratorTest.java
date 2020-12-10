@@ -23,12 +23,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
@@ -70,6 +72,12 @@ public class TelemetryDecoratorTest {
     @Mock
     private VmLogsService vmLogsService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -85,7 +93,8 @@ public class TelemetryDecoratorTest {
                 .willReturn(Optional.of(altusCredential));
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, vmLogsService, "1.0.0");
+                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, vmLogsService,
+                entitlementService, dataBusEndpointProvider, "1.0.0");
     }
 
     @Test
@@ -262,7 +271,7 @@ public class TelemetryDecoratorTest {
         cluster.setCloudbreakClusterManagerMonitoringPassword("myPass");
         stack.setCluster(cluster);
         User creator = new User();
-        creator.setUserCrn("userCrn");
+        creator.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
         stack.setCreator(creator);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         return stack;
@@ -289,6 +298,8 @@ public class TelemetryDecoratorTest {
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
                 anyString(), anyString(), anyString()))
                 .willReturn(telemetryCommonConfigView);
+        given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
     }
 
 }
