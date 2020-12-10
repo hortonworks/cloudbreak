@@ -28,6 +28,7 @@ import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.CachingTypes;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
@@ -95,6 +96,8 @@ import rx.Observable;
 public class AzureClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
+
+    private static final int MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE = 4095;
 
     private final Azure azure;
 
@@ -295,7 +298,14 @@ public class AzureClient {
 
     public void attachDiskToVm(Disk disk, VirtualMachine vm) {
         LOGGER.debug("attach managed disk {} to VM {}", disk, vm);
-        vm.update().withExistingDataDisk(disk).apply();
+        CachingTypes cachingTypes = CachingTypes.READ_WRITE;
+        if (disk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
+            cachingTypes = CachingTypes.NONE;
+        }
+        vm.update()
+                .withExistingDataDisk(disk)
+                .withDataDiskDefaultCachingType(cachingTypes)
+                .apply();
     }
 
     public void detachDiskFromVm(String id, VirtualMachine vm) {

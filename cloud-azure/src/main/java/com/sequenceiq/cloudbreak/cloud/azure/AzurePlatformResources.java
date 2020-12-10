@@ -68,6 +68,9 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final float NO_MB_PER_GB = 1024.0f;
 
+    @Value("${cb.azure.default.max.disk.size:32767}")
+    private int maxDiskSize;
+
     @Value("${cb.azure.default.vmtype:Standard_D16_v3}")
     private String armVmDefault;
 
@@ -229,7 +232,7 @@ public class AzurePlatformResources implements PlatformResources {
 
             for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
                 if (volumeParameterType.in(MAGNETIC, SSD)) {
-                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount());
+                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
                 }
             }
 
