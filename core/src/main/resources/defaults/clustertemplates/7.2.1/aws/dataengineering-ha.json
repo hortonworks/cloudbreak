@@ -32,7 +32,7 @@
       "recipeNames": []
     },
       {
-        "nodeCount": 0,
+        "nodeCount": 1,
         "name": "compute",
         "type": "CORE",
         "recoveryMode": "MANUAL",
