@@ -5,6 +5,7 @@ import java.util.Set;
 import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.BaseFileSystem;
+import com.sequenceiq.common.api.filesystem.EfsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
@@ -26,7 +27,9 @@ public enum FileSystemType {
 
     ADLS_GEN_2(AdlsGen2FileSystem.class, "abfs", Set.of("abfs", "abfss"), "{{{ storageName }}}.dfs.core.windows.net", ".dfs.core.windows.net"),
 
-    S3(S3FileSystem.class, "s3a", Set.of("s3", "s3a", "s3n"), "{{{ storageName }}}", "");
+    S3(S3FileSystem.class, "s3a", Set.of("s3", "s3a", "s3n"), "{{{ storageName }}}", ""),
+
+    EFS(EfsFileSystem.class, "efs", Set.of("efs"), "{{{ storageName }}}", "");
 
     private final Class<? extends BaseFileSystem> clazz;
 
@@ -89,6 +92,10 @@ public enum FileSystemType {
 
     public boolean isS3() {
         return S3.equals(this);
+    }
+
+    public boolean isEfs() {
+        return EFS.equals(this);
     }
 
     public boolean isAdls() {

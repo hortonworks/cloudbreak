@@ -143,6 +143,7 @@ public class StackToCloudStackConverter {
         StackTemplate stackTemplate = componentConfigProviderService.getStackTemplate(stack.getId());
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         SpiFileSystem cloudFileSystem = buildSpiFileSystem(stack);
+        SpiFileSystem additionalCloudFileSystem = buildAdditionalSpiFileSystem(stack);
         String template = null;
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
@@ -152,7 +153,7 @@ public class StackToCloudStackConverter {
 
         return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack), template,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
-                cloudFileSystem, cloudLoadBalancers);
+                cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem);
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
@@ -347,6 +348,17 @@ public class StackToCloudStackConverter {
         SpiFileSystem spiFileSystem = null;
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getFileSystem();
+            if (fileSystem != null) {
+                spiFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);
+            }
+        }
+        return spiFileSystem;
+    }
+
+    private SpiFileSystem buildAdditionalSpiFileSystem(Stack stack) {
+        SpiFileSystem spiFileSystem = null;
+        if (stack.getCluster() != null) {
+            FileSystem fileSystem = stack.getCluster().getAdditionalFileSystem();
             if (fileSystem != null) {
                 spiFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);
             }

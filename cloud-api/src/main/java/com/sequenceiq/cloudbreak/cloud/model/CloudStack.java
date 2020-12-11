@@ -34,6 +34,8 @@ public class CloudStack {
 
     private final Optional<SpiFileSystem> fileSystem;
 
+    private final Optional<SpiFileSystem> additionalFileSystem;
+
     private final List<CloudLoadBalancer> loadBalancers;
 
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
@@ -44,6 +46,13 @@ public class CloudStack {
     public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
             String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
             List<CloudLoadBalancer> loadBalancers) {
+        this(groups, network, image, parameters, tags, template, instanceAuthentication, loginUserName, publicKey, fileSystem, loadBalancers,
+                null);
+    }
+
+    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
+            String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
+            List<CloudLoadBalancer> loadBalancers, SpiFileSystem additionalFileSystem) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
@@ -55,6 +64,7 @@ public class CloudStack {
         this.publicKey = publicKey;
         this.fileSystem = Optional.ofNullable(fileSystem);
         this.loadBalancers = loadBalancers;
+        this.additionalFileSystem = Optional.ofNullable(additionalFileSystem);
     }
 
     public List<Group> getGroups() {
@@ -89,6 +99,10 @@ public class CloudStack {
         return fileSystem;
     }
 
+    public Optional<SpiFileSystem> getAdditionalFileSystem() {
+        return additionalFileSystem;
+    }
+
     public String getTemplate() {
         return template;
     }
@@ -118,6 +132,7 @@ public class CloudStack {
                 ", tags=" + tags +
                 ", instanceAuthentication=" + instanceAuthentication +
                 ", fileSystem=" + fileSystem +
+                ", additionalFileSystem=" + additionalFileSystem +
                 '}';
     }
 }

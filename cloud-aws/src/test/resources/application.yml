@@ -66,3 +66,5 @@ cb:
     port: 443
   ssh:
     port: 22
+  nfs:
+    port: 2049

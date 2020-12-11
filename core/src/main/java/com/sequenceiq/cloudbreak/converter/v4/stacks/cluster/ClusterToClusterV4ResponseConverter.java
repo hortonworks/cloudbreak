@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.cloudstorage.AwsEfsParameters;
+import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 
 @Component
@@ -133,7 +135,21 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
 
     private CloudStorageResponse getCloudStorage(Cluster source) {
         if (source.getFileSystem() != null) {
-            return cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
+            CloudStorageResponse cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
+
+            if (source.getAdditionalFileSystem() != null) {
+                AwsEfsParameters efsParameters = cloudStorageConverter.fileSystemToEfsParameters(source.getAdditionalFileSystem());
+
+                if (efsParameters != null) {
+                    if (cloudStorageResponse.getAws() == null) {
+                        cloudStorageResponse.setAws(new AwsStorageParameters());
+                    }
+
+                    cloudStorageResponse.getAws().setEfsParameters(efsParameters);
+                }
+            }
+
+            return cloudStorageResponse;
         }
         return null;
     }

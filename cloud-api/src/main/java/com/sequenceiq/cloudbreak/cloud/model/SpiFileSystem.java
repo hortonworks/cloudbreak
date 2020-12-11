@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -16,6 +18,12 @@ public class SpiFileSystem extends DynamicModel {
     private List<CloudFileSystemView> cloudFileSystems;
 
     public SpiFileSystem(String name, FileSystemType type, List<CloudFileSystemView> cloudFileSystems) {
+        this(name, type, cloudFileSystems, new HashMap<>());
+    }
+
+    public SpiFileSystem(String name, FileSystemType type, List<CloudFileSystemView> cloudFileSystems, Map<String, Object> parameters) {
+        super(parameters);
+
         this.name = name;
         this.type = type;
         if (cloudFileSystems != null) {

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.EfsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
@@ -33,6 +34,10 @@ public abstract class CloudStorageV1Base implements Serializable {
     @Valid
     @ApiModelProperty
     private S3CloudStorageV1Parameters s3;
+
+    @Valid
+    @ApiModelProperty
+    private EfsCloudStorageV1Parameters efs;
 
     @Valid
     @ApiModelProperty
@@ -68,6 +73,14 @@ public abstract class CloudStorageV1Base implements Serializable {
 
     public void setS3(S3CloudStorageV1Parameters s3) {
         this.s3 = s3;
+    }
+
+    public EfsCloudStorageV1Parameters getEfs() {
+        return efs;
+    }
+
+    public void setEfs(EfsCloudStorageV1Parameters efs) {
+        this.efs = efs;
     }
 
     public AdlsGen2CloudStorageV1Parameters getAdlsGen2() {

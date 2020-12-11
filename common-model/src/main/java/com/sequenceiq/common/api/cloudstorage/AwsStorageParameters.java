@@ -12,11 +12,21 @@ public class AwsStorageParameters {
 
     private S3Guard s3Guard;
 
+    private AwsEfsParameters efsParameters;
+
     public S3Guard getS3Guard() {
         return s3Guard;
     }
 
     public void setS3Guard(S3Guard s3Guard) {
         this.s3Guard = s3Guard;
+    }
+
+    public AwsEfsParameters getEfsParameters() {
+        return efsParameters;
+    }
+
+    public void setEfsParameters(AwsEfsParameters efsParameters) {
+        this.efsParameters = efsParameters;
     }
 }

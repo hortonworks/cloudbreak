@@ -15,7 +15,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = CloudStorageValidator.class)
 public @interface ValidCloudStorage {
 
-    String MESSAGE = "Invalid cloud storage object. Exactly one storage parameter object has to be set.";
+    String MESSAGE = "Invalid cloud storage object. Storage parameter objects on exactly one cloud platform have to be set.";
 
     String message() default MESSAGE;
 

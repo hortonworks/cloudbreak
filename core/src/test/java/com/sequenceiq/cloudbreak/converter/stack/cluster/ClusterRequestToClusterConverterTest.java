@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,6 +20,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.converter.AbstractJsonConverterTest;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
@@ -56,6 +60,9 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     private Workspace workspace;
 
     @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
     private CloudStorageConverter cloudStorageConverter;
 
     @Spy
@@ -65,6 +72,11 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @Before
     public void setUp() {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+
+        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
+            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
+        }
+        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -80,7 +92,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
-                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
+                "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
                 "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
     }
 
@@ -99,7 +111,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(request);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
-                "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
+                "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
                 "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy"));
     }
 
@@ -114,7 +126,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         Cluster result = underTest.convert(clusterRequest);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
-                "fileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
+                "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
                 "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
         assertNull(result.getGateway());
     }

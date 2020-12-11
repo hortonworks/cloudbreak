@@ -25,6 +25,9 @@ import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.Output;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
+import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
+import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
+import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
 import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
@@ -41,6 +44,7 @@ import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescripti
 import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
@@ -250,6 +254,17 @@ public class CloudFormationStackUtil {
                 }
             }
         }
+    }
+
+    public FileSystemDescription getEfsByFileSystemId(AuthenticatedContext ac, String fileSystemId) {
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        AmazonEfsRetryClient amazonEfsClient =
+                awsClient.createEfsRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+
+        DescribeFileSystemsResult efsResult = amazonEfsClient.describeFileSystems(new DescribeFileSystemsRequest()
+                .withFileSystemId(fileSystemId));
+
+        return efsResult.getFileSystems().get(0);
     }
 
     private Set<String> getInstanceIdsForGroups(List<CloudResource> resources, Set<Group> groups) {

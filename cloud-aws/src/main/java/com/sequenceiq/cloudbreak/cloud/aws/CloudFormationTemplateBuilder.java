@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
@@ -94,6 +95,9 @@ public class CloudFormationTemplateBuilder {
         model.put("vpcCidrs", context.vpcCidrs);
         model.put("prefixListIds", context.prefixListIds);
         model.put("loadBalancers", Optional.ofNullable(context.loadBalancers).orElse(Collections.emptyList()));
+        model.put("enableEfs", context.enableEfs);
+        model.put("efsFileSystem", context.efsFileSystem);
+
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -182,6 +186,10 @@ public class CloudFormationTemplateBuilder {
 
         private List<AwsLoadBalancer> loadBalancers;
 
+        private boolean enableEfs;
+
+        private AwsEfsFileSystem efsFileSystem;
+
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
             return this;
@@ -267,6 +275,15 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
+        public ModelContext withEnableEfs(boolean enableEfs) {
+            this.enableEfs = enableEfs;
+            return this;
+        }
+
+        public ModelContext withEfsFileSystem(AwsEfsFileSystem efsFileSystem) {
+            this.efsFileSystem = efsFileSystem;
+            return this;
+        }
     }
 
     public static class RDSModelContext {

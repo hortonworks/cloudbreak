@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static javax.validation.Validation.buildDefaultValidatorFactory;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 
@@ -25,7 +25,7 @@ class StorageIdentityValidatorTest {
 
     @BeforeEach
     void setUp() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        ValidatorFactory factory = buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }
 

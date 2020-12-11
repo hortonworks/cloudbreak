@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
@@ -37,7 +38,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.repository.ClouderaManagerRepositoryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
@@ -51,7 +55,6 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -90,6 +93,9 @@ public class ClusterV4RequestToClusterConverterTest {
     @Mock
     private CloudStorageConverter cloudStorageConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
     private IdBrokerConverterUtil idBrokerConverterUtil = new IdBrokerConverterUtil();
@@ -118,6 +124,11 @@ public class ClusterV4RequestToClusterConverterTest {
     public void testConvertWhenCloudStorageConfiguredAndRdsAndLdapAndProxyExistsAnd() {
         CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
 
+
+
+
+        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
+
         String rdsConfigName = "rds-name";
         String proxyConfigCrn = "proxy-config-resource-crn";
         String ldapName = "ldap-name";
@@ -138,7 +149,7 @@ public class ClusterV4RequestToClusterConverterTest {
         when(cloudStorageConverter.requestToFileSystem(cloudStorageRequest)).thenReturn(fileSystem);
         when(rdsConfigService.findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId())).thenReturn(singleton(rdsConfig));
 
-        Cluster actual = underTest.convert(source);
+        Cluster actual = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> underTest.convert(source));
 
         assertThat(actual.getFileSystem(), is(fileSystem));
         assertThat(actual.getName(), is(source.getName()));
