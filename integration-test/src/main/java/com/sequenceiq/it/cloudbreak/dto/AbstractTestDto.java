@@ -182,23 +182,23 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
-        return testContext.given(key, clss);
+        return getTestContext().given(key, clss);
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
-        return testContext.given(key, clss, cloudPlatform);
+        return getTestContext().given(key, clss, cloudPlatform);
     }
 
     public <O extends CloudbreakTestDto> O given(Class<O> clss) {
-        return testContext.given(clss);
+        return getTestContext().given(clss);
     }
 
     public <O extends CloudbreakTestDto> O given(Class<O> clss, CloudPlatform cloudPlatform) {
-        return testContext.given(clss, cloudPlatform);
+        return getTestContext().given(clss, cloudPlatform);
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
-        return testContext.init(clss);
+        return getTestContext().init(clss);
     }
 
     public <O> T select(Attribute<T, O> attribute) {
@@ -214,7 +214,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public <O> T select(Attribute<T, O> attribute, Finder<O> finder, RunningParameter runningParameter) {
-        return testContext.select((T) this, attribute, finder, runningParameter);
+        return getTestContext().select((T) this, attribute, finder, runningParameter);
     }
 
     public <O> T capture(Attribute<T, O> attribute) {
@@ -222,7 +222,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public <O> T capture(Attribute<T, O> attribute, RunningParameter runningParameter) {
-        return testContext.capture((T) this, attribute, runningParameter);
+        return getTestContext().capture((T) this, attribute, runningParameter);
     }
 
     public <O> T verify(Attribute<T, O> attribute) {
@@ -230,7 +230,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public <O> T verify(Attribute<T, O> attribute, RunningParameter runningParameter) {
-        return testContext.verify((T) this, attribute, runningParameter);
+        return getTestContext().verify((T) this, attribute, runningParameter);
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses) {
@@ -238,15 +238,15 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
-        return testContext.await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
+        return getTestContext().await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter, Duration pollingInteval) {
-        return testContext.await(entityClass, statuses, runningParameter, pollingInteval);
+        return getTestContext().await(entityClass, statuses, runningParameter, pollingInteval);
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
-        return testContext.await(entityClass, statuses, runningParameter);
+        return getTestContext().await(entityClass, statuses, runningParameter);
     }
 
     public T await(Map<String, Status> statuses) {
@@ -254,11 +254,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
-        return testContext.await((T) this, statuses, runningParameter);
+        return getTestContext().await((T) this, statuses, runningParameter);
     }
 
     public T awaitForFlow(RunningParameter runningParameter) {
-        return testContext.awaitForFlow((T) this, runningParameter);
+        return getTestContext().awaitForFlow((T) this, runningParameter);
     }
 
     public <E extends Exception> T expect(Class<E> expectedException) {
@@ -266,15 +266,15 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public <E extends Exception> T expect(Class<E> expectedException, RunningParameter runningParameter) {
-        return testContext.expect((T) this, expectedException, runningParameter);
+        return getTestContext().expect((T) this, expectedException, runningParameter);
     }
 
     public void validate() {
-        testContext.handleExceptionsDuringTest(TestErrorLog.FAIL);
+        getTestContext().handleExceptionsDuringTest(TestErrorLog.FAIL);
     }
 
     public void skipWhenFailure() {
-        testContext.handleExceptionsDuringTest(TestErrorLog.SKIP);
+        getTestContext().handleExceptionsDuringTest(TestErrorLog.SKIP);
     }
 
     public ResourcePropertyProvider getResourcePropertyProvider() {

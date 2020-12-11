@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.instance;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
-
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -24,37 +21,23 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
 
     @Override
     public boolean checkStatus(T waitObject) {
-        InstanceStatus desiredStatus = waitObject.getDesiredStatus();
+        Map<String, String> desiredStatuses = waitObject.getDesiredStatuses();
         String hostGroup = waitObject.getHostGroup();
-        List<InstanceGroupV4Response> instanceGroups = waitObject.getInstanceGroups();
         try {
-            Optional<InstanceGroupV4Response> instanceGroup = instanceGroups
-                    .stream()
-                    .filter(ig -> ig.getName().equals(hostGroup))
-                    .findFirst();
-            if (instanceGroup.isPresent()) {
-                Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
-                        .get().getMetadata().stream().findFirst();
-                if (instanceMetaData.isPresent()) {
-                    InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
-                    InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
-                    String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
-                    String hostStatusReason = instanceMetaDataV4Response.getStatusReason();
-                    LOGGER.info("Waiting for the '{}'. Actual instance state is: '{}'", desiredStatus, instanceStatus);
-                    if (waitObject.isDeleted(instanceStatus)) {
-                        LOGGER.error("The '{}' has been terminated (status:'{}'), waiting is cancelled.", instanceGroupName, instanceStatus);
-                        throw new TestFailException(String.format("The '%s' has been terminated, waiting is cancelled." +
-                                " Status: '%s' statusReason: '%s'", instanceGroupName, instanceStatus, hostStatusReason));
-                    }
-                    if (desiredStatus.equals(instanceStatus)) {
-                        LOGGER.info("The '{}' is in desired state (status:'{}').", instanceGroupName, instanceStatus);
-                        return true;
-                    }
-                } else {
-                    LOGGER.info("'{}' instance group metadata is empty.", hostGroup);
-                }
-            } else {
-                LOGGER.info("'{}' instance group is not present.", hostGroup);
+            waitObject.fetchData();
+            InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
+            InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
+            String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
+            String hostStatusReason = instanceMetaDataV4Response.getStatusReason();
+            LOGGER.info("Waiting for the '{}'. Actual instance state is: '{}'", desiredStatuses, instanceStatus);
+            if (waitObject.isDeleted()) {
+                LOGGER.error("The '{}' has been terminated (status:'{}'), waiting is cancelled.", instanceGroupName, instanceStatus);
+                throw new TestFailException(String.format("The '%s' has been terminated, waiting is cancelled." +
+                        " Status: '%s' statusReason: '%s'", instanceGroupName, instanceStatus, hostStatusReason));
+            }
+            if (waitObject.isInDesiredStatus()) {
+                LOGGER.info("The '{}' is in desired state (status:'{}').", instanceGroupName, instanceStatus);
+                return true;
             }
         } catch (NoSuchElementException e) {
             LOGGER.warn("No instance group found with name '{}'", hostGroup, e);
@@ -67,16 +50,8 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
 
     @Override
     public void handleTimeout(T waitObject) {
-        String hostGroup = waitObject.getHostGroup();
-        List<InstanceGroupV4Response> instanceGroups = waitObject.getInstanceGroups();
         try {
-            Optional<InstanceGroupV4Response> instanceGroup = instanceGroups
-                    .stream()
-                    .filter(ig -> ig.getName().equals(hostGroup))
-                    .findFirst();
-            Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
-                    .get().getMetadata().stream().findFirst();
-            InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
+            InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
             InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
             String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
             String hostStatusReason = instanceMetaDataV4Response.getStatusReason();
@@ -91,18 +66,15 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
     @Override
     public String successMessage(T waitObject) {
         return String.format("Wait operation was successfully done. '%s' is in desired ('%s') state.", waitObject.getHostGroup(),
-                waitObject.getDesiredStatus());
+                waitObject.getDesiredStatuses());
     }
 
     @Override
     public boolean exitWaiting(T waitObject) {
         String hostGroup = waitObject.getHostGroup();
-        List<InstanceGroupV4Response> instanceGroups = waitObject.getInstanceGroups();
         try {
-            Optional<InstanceGroupV4Response> instanceGroup = instanceGroups
-                    .stream()
-                    .filter(ig -> ig.getName().equals(hostGroup))
-                    .findFirst();
+            waitObject.fetchData();
+            Optional<InstanceGroupV4Response> instanceGroup = waitObject.getInstanceGroup();
             if (instanceGroup.isEmpty()) {
                 LOGGER.info("'{}' instance group was not found. Exit waiting!", hostGroup);
                 return true;
@@ -123,25 +95,7 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        String hostGroup = waitObject.getHostGroup();
-        List<InstanceGroupV4Response> instanceGroups = waitObject.getInstanceGroups();
-        Optional<InstanceGroupV4Response> instanceGroup = instanceGroups
-                .stream()
-                .filter(ig -> ig.getName().equals(hostGroup))
-                .findFirst();
-        if (instanceGroup.isPresent()) {
-            Optional<InstanceMetaDataV4Response> instanceMetaData = instanceGroup
-                    .get().getMetadata().stream().findFirst();
-            if (instanceMetaData.isPresent()) {
-                InstanceMetaDataV4Response instanceMetaDataV4Response = instanceMetaData.get();
-                return Map.of("status", instanceMetaDataV4Response.getInstanceStatus().name());
-            } else {
-                LOGGER.error("'{}' instance metadata is empty, may instance group was deleted. ", hostGroup);
-                return Map.of("status", DELETED_ON_PROVIDER_SIDE.name());
-            }
-        } else {
-            LOGGER.error("'{}' instance group is not present, may this was deleted. ", hostGroup);
-            return Map.of("status", DELETED_ON_PROVIDER_SIDE.name());
-        }
+        waitObject.fetchData();
+        return waitObject.actualStatuses();
     }
 }

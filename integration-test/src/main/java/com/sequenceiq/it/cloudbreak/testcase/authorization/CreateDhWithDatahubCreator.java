@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.List;
 import java.util.Map;
 
@@ -120,7 +118,6 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                                 .withKey("DistroXCreateAction"))
                 .withRecipe(recipe2Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .awaitForFlow(key("DistroXCreateAction"))
                 .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .given(RenewDistroXCertificateTestDto.class)
                 .when(distroXClient.renewDistroXCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))

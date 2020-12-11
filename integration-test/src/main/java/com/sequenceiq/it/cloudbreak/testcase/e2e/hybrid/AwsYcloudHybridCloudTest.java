@@ -206,7 +206,6 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(INSTANCES_HEALTHY)
                 .then((tc, dto, client) -> {

@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -43,7 +41,6 @@ public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest 
                 .withRuntimeVersion(commonClusterManagerProperties().getRuntimeVersion())
                 .withImageCatalogNameOnly(commonCloudProperties().getImageValidation().getSourceCatalogName())
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.describeInternal())
                 .validate();
@@ -54,7 +51,6 @@ public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest 
                         .withImageCatalog(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getCatalogName())
                         .withImageId(testContext.get(SdxInternalTestDto.class).getResponse().getStackV4Response().getImage().getId()))
                 .when(distroXTestClient.create())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(STACK_AVAILABLE)
                 .then((context, distrox, client) -> {
                     distrox.getResponse();

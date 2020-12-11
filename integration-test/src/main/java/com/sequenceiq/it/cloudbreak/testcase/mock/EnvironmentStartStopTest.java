@@ -5,11 +5,14 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.audit.EnvironmentAuditGrpcServiceAssertion;
@@ -18,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -35,6 +39,12 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     private static final String DX_1 = "dx1";
 
     private static final String DX_2 = "dx2";
+
+    private static final Map<String, InstanceStatus> INSTANCES_HEALTHY = new HashMap<>() {{
+        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
+        put(HostGroupType.COMPUTE.getName(), InstanceStatus.SERVICES_HEALTHY);
+        put(HostGroupType.WORKER.getName(), InstanceStatus.SERVICES_HEALTHY);
+    }};
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -65,9 +75,9 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an attached SDX and Datahub",
-            then = "should be stopped first and started after it and validate the flow events")
-    public void testCreatetEnvironment(MockedTestContext testContext) {
+            when = "create an env with freeipa, sdx and dh",
+            then = "these should be available")
+    public void testCreateEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
@@ -78,6 +88,17 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                         .getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
+                .given(SdxInternalTestDto.class)
+                .when(sdxTestClient.createInternal())
+                .awaitForFlow(key(resourcePropertyProvider().getName()))
+                .await(SdxClusterStatusResponse.RUNNING)
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForInstance(INSTANCES_HEALTHY)
+                .await(STACK_AVAILABLE)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete())
+                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
                 .validate();
     }
 
@@ -99,7 +120,6 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .await(AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .given(DX_1, DistroXTestDto.class)
                 .when(distroXTestClient.create(), key(DX_1))

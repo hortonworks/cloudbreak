@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Cluste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -115,7 +116,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up cluster template with name: {}", getName());
         if (getResponse() != null) {
             when(clusterTemplateTestClient.deleteV4(), key("delete-clustertemplate-" + getName()).withSkipOnFail(false));

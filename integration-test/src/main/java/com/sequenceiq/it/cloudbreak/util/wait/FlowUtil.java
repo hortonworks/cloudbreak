@@ -12,16 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 @Component
@@ -46,49 +38,12 @@ public class FlowUtil {
         return maxRetry;
     }
 
-    public SdxTestDto waitBasedOnLastKnownFlow(SdxTestDto sdxTestDto, SdxClient sdxClient) {
-        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
-        waitForFlow(flowEndpoint, sdxTestDto.getResponse().getCrn(), sdxTestDto.getLastKnownFlowChainId(), sdxTestDto.getLastKnownFlowId());
-        return sdxTestDto;
-    }
-
-    public SdxInternalTestDto waitBasedOnLastKnownFlow(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
-        waitForFlow(flowEndpoint,
-                sdxInternalTestDto.getResponse().getCrn(),
-                sdxInternalTestDto.getLastKnownFlowChainId(),
-                sdxInternalTestDto.getLastKnownFlowId());
-        return sdxInternalTestDto;
-    }
-
-    public CloudbreakTestDto waitBasedOnLastKnownFlow(CloudbreakTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        FlowPublicEndpoint flowEndpoint = cloudbreakClient.getCloudbreakClient().flowPublicEndpoint();
-        waitForFlow(flowEndpoint, distroXTestDto.getCrn(), distroXTestDto.getLastKnownFlowChainId(), distroXTestDto.getLastKnownFlowId());
-        return distroXTestDto;
-    }
-
-    public EnvironmentTestDto waitBasedOnLastKnownFlow(EnvironmentTestDto environmentTestDto, EnvironmentClient environmentClient) {
-        FlowPublicEndpoint flowEndpoint = environmentClient.getEnvironmentClient().flowPublicEndpoint();
-        waitForFlow(flowEndpoint, environmentTestDto.getCrn(), environmentTestDto.getLastKnownFlowChainId(), environmentTestDto.getLastKnownFlowId());
-        return environmentTestDto;
-    }
-
-    public SdxDiagnosticsTestDto waitBasedOnLastKnownFlow(SdxDiagnosticsTestDto sdxDiagnosticsTestDto, SdxClient sdxClient) {
-        FlowPublicEndpoint flowEndpoint = sdxClient.getSdxClient().flowPublicEndpoint();
-        waitForFlow(flowEndpoint,
-                sdxDiagnosticsTestDto.getRequest().getStackCrn(),
-                sdxDiagnosticsTestDto.getLastKnownFlowChainId(),
-                sdxDiagnosticsTestDto.getLastKnownFlowId());
-        return sdxDiagnosticsTestDto;
-    }
-
-    public FreeIpaDiagnosticsTestDto waitBasedOnLastKnownFlow(FreeIpaDiagnosticsTestDto freeIpaDiagnosticsTestDto, FreeIpaClient freeIpaClient) {
-        FlowPublicEndpoint flowEndpoint = freeIpaClient.getFreeIpaClient().getFlowPublicEndpoint();
-        waitForFlow(flowEndpoint,
-                freeIpaDiagnosticsTestDto.getFreeIpaCrn(),
-                freeIpaDiagnosticsTestDto.getLastKnownFlowChainId(),
-                freeIpaDiagnosticsTestDto.getLastKnownFlowId());
-        return freeIpaDiagnosticsTestDto;
+    public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient) {
+        FlowPublicEndpoint flowEndpoint = msClient.flowPublicEndpoint();
+        if (flowEndpoint != null) {
+            waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId());
+        }
+        return testDto;
     }
 
     private void waitForFlow(FlowPublicEndpoint flowEndpoint, String crn, String flowChainId, String flowId) {

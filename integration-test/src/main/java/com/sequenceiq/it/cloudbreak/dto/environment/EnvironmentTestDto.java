@@ -31,8 +31,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
@@ -57,7 +57,7 @@ public class EnvironmentTestDto
 
     private static final String ENVIRONMENT_RESOURCE_NAME = "environmentName";
 
-    private static final int ORDER = 600;
+    private static final int ORDER = 100;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -83,11 +83,6 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto(EnvironmentRequest environmentV4Request, TestContext testContext) {
         super(environmentV4Request, testContext);
-    }
-
-    @Override
-    public String getName() {
-        return getRequest().getName();
     }
 
     public String getParentEnvironmentName() {
@@ -308,7 +303,7 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient client) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up environment with name: {}", getName());
         if (getResponse() != null) {
             when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
@@ -324,7 +319,7 @@ public class EnvironmentTestDto
         EnvironmentEndpoint credentialEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
         credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
-        await(this, ARCHIVED, emptyRunningParameter());
+        testContext.await(this, Map.of("status", ARCHIVED));
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status) {
@@ -332,15 +327,15 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus status, RunningParameter runningParameter) {
-        return getTestContext().await(entity, status, runningParameter);
+        return getTestContext().await(entity, Map.of("status", status), runningParameter);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, status, runningParameter, pollingInterval);
+        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, Duration pollingInterval) {

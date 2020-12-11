@@ -76,7 +76,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .addTags(SDX_TAGS)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
                 .given("dx1", DistroXTestDto.class)

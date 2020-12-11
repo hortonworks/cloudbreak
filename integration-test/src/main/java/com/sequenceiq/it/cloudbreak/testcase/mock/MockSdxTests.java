@@ -83,10 +83,8 @@ public class MockSdxTests extends AbstractMockTest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.DELETED, key(sdxInternal))
                 .validate();
     }
@@ -116,10 +114,8 @@ public class MockSdxTests extends AbstractMockTest {
                 .withTemplate(jsonObject)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> sdxTestClient.deleteInternal().action(tc, testDto, client))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.DELETED, key(sdxInternal))
                 .validate();
     }
@@ -163,7 +159,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> {
                     SdxClusterDetailResponse sdx = testDto.getResponse();
@@ -197,13 +192,10 @@ public class MockSdxTests extends AbstractMockTest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .when(sdxTestClient.stopInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.STOPPED, key(sdxInternal))
                 .when(sdxTestClient.startInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
     }
@@ -277,7 +269,6 @@ public class MockSdxTests extends AbstractMockTest {
                 .withCustomDomain(customDomain)
                 .withEnvironmentKey(key(envKey))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .then((tc, testDto, client) -> {
                     List<String> instancesToDelete = new ArrayList<>();
@@ -289,7 +280,6 @@ public class MockSdxTests extends AbstractMockTest {
                 })
                 .await(stateBeforeRepair)
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
     }

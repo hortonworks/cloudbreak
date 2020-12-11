@@ -46,7 +46,6 @@ public class DiagnosticsTests extends AbstractE2ETest {
                 .given(freeIpaDiagnostics, FreeIpaDiagnosticsTestDto.class)
                 .withFreeIpa()
                 .when(freeIpaTestClient.collectDiagnostics(), key(freeIpaDiagnostics))
-                .awaitForFlow(key(freeIpaDiagnostics))
                 .given(sdxDiagnostics, SdxDiagnosticsTestDto.class)
                 .withSdx()
                 .when(sdxTestClient.collectDiagnostics(), key(sdxDiagnostics))
