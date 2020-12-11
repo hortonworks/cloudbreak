@@ -65,9 +65,9 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an attached SDX and Datahub",
-            then = "should be stopped first and started after it and validate the flow events")
-    public void testCreatetEnvironment(MockedTestContext testContext) {
+            when = "create an env with freeipa, sdx and dh",
+            then = "these should be available")
+    public void testCreateEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
@@ -78,6 +78,9 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                         .getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(AVAILABLE)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete())
+                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
                 .validate();
     }
 

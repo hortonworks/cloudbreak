@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.NotFoundException;
@@ -21,8 +22,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
-public class InstanceWaitObject {
+public class InstanceWaitObject implements WaitObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceFailedChecker.class);
 
@@ -41,8 +43,63 @@ public class InstanceWaitObject {
         this.desiredStatus = desiredStatus;
     }
 
+    @Override
+    public void fetchData() {
+
+    }
+
+    @Override
+    public boolean isDeleteFailed() {
+        return false;
+    }
+
+    @Override
+    public Map<String, String> actualStatuses() {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> actualStatusReason() {
+        return null;
+    }
+
+    @Override
+    public Map<String, String> getDesiredStatuses() {
+        return null;
+    }
+
     public String getName() {
         return name;
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return false;
+    }
+
+    @Override
+    public boolean isFailed() {
+        return false;
+    }
+
+    @Override
+    public boolean isDeletionInProgress() {
+        return false;
+    }
+
+    @Override
+    public boolean isCreateFailed() {
+        return false;
+    }
+
+    @Override
+    public boolean isDeletionCheck() {
+        return false;
+    }
+
+    @Override
+    public boolean isFailedCheck() {
+        return false;
     }
 
     public String getHostGroup() {

@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service;
 
 import java.util.Map;
 
-public interface StatusChecker<T> {
+public interface StatusChecker<T extends WaitObject> {
 
     boolean checkStatus(T t);
 

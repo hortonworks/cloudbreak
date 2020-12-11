@@ -98,7 +98,7 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
     @Override
     public String successMessage(T waitObject) {
         return String.format("Wait operation was successfully done. '%s' is in desired ('%s') state.'", waitObject.getHostGroup(),
-                waitObject.getDesiredStatus());
+                waitObject.getDesiredStatuses());
     }
 
     @Override

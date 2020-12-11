@@ -280,7 +280,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public SdxInternalTestDto awaitForFlow() {
@@ -301,11 +301,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(this, statuses, runningParameter);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
@@ -352,7 +352,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         String sdxName = entity.getName();
         try {
             client.getSdxClient().sdxEndpoint().delete(getName(), false);
-            testContext.await(this, DELETED, key("wait-purge-sdx-" + getName()));
+            testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
         }

@@ -332,15 +332,15 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto await(EnvironmentTestDto entity, EnvironmentStatus status, RunningParameter runningParameter) {
-        return getTestContext().await(entity, status, runningParameter);
+        return getTestContext().await(entity, Map.of("status", status), runningParameter);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, status, runningParameter, pollingInterval);
+        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status, Duration pollingInterval) {

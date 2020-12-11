@@ -7,7 +7,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,7 +17,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,12 +28,9 @@ import org.springframework.util.StringUtils;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
@@ -54,15 +49,6 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Capture;
@@ -71,23 +57,8 @@ import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ErrorLogMessageProvider;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
-import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeInternalAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.DistroxInstanceAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.SdxInstanceAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.SdxInternalInstanceAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsAwait;
-import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObject;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.it.cloudbreak.util.wait.service.ResourceAwait;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceAwait;
 
 import io.opentracing.Tracer;
 
@@ -153,49 +124,10 @@ public abstract class TestContext implements ApplicationContextAware {
     private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
-    private EnvironmentAwait environmentAwait;
+    private ResourceAwait resourceAwait;
 
     @Inject
-    private FreeIpaAwait freeIpaAwait;
-
-    @Inject
-    private DatalakeAwait datalakeAwait;
-
-    @Inject
-    private DatalakeInternalAwait datalakeInternalAwait;
-
-    @Inject
-    private RedbeamsAwait redbeamsAwait;
-
-    @Inject
-    private CloudbreakAwait cloudbreakAwait;
-
-    @Inject
-    private WaitService<EnvironmentWaitObject> environmentWaitService;
-
-    @Inject
-    private WaitService<FreeIpaWaitObject> freeIpaWaitService;
-
-    @Inject
-    private WaitService<DatalakeWaitObject> datalakeWaitService;
-
-    @Inject
-    private WaitService<RedbeamsWaitObject> redbeamsWaitService;
-
-    @Inject
-    private WaitService<CloudbreakWaitObject> cloudbreakWaitService;
-
-    @Inject
-    private WaitService<InstanceWaitObject> instanceWaitService;
-
-    @Inject
-    private DistroxInstanceAwait distroxInstanceAwait;
-
-    @Inject
-    private SdxInstanceAwait sdxInstanceAwait;
-
-    @Inject
-    private SdxInternalInstanceAwait sdxInternalInstanceAwait;
+    private InstanceAwait instanceAwait;
 
     @Inject
     private ErrorLogMessageProvider errorLogMessageProvider;
@@ -246,28 +178,12 @@ public abstract class TestContext implements ApplicationContextAware {
         return commonClusterManagerProperties;
     }
 
-    public WaitService<EnvironmentWaitObject> getEnvironmentWaitService() {
-        return environmentWaitService;
+    public ResourceAwait getResourceAwait() {
+        return resourceAwait;
     }
 
-    public WaitService<FreeIpaWaitObject> getFreeIpaWaitService() {
-        return freeIpaWaitService;
-    }
-
-    public WaitService<DatalakeWaitObject> getDatalakeWaitService() {
-        return datalakeWaitService;
-    }
-
-    public WaitService<RedbeamsWaitObject> getRedbeamsWaitService() {
-        return redbeamsWaitService;
-    }
-
-    public WaitService<CloudbreakWaitObject> getCloudbreakWaitService() {
-        return cloudbreakWaitService;
-    }
-
-    public WaitService<InstanceWaitObject> getInstanceWaitService() {
-        return instanceWaitService;
+    public InstanceAwait getInstanceAwait() {
+        return instanceAwait;
     }
 
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -328,7 +244,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
     T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
-        return action.action(getTestContext(), entity, getMicroserviceClient(clientClass, who));
+        return action.action(getTestContext(), entity, getMicroserviceClient(entity.getClass(), who));
     }
 
     public <T extends CloudbreakTestDto> T then(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
@@ -362,9 +278,9 @@ public abstract class TestContext implements ApplicationContextAware {
         try {
             CloudbreakTestDto cloudbreakTestDto = resources.get(key);
             if (cloudbreakTestDto != null) {
-                return assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(clientClass, who.getAccessKey()));
+                return assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
             } else {
-                assertion.doAssertion(this, entity, getMicroserviceClient(clientClass, who.getAccessKey()));
+                assertion.doAssertion(this, entity, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
@@ -722,26 +638,41 @@ public abstract class TestContext implements ApplicationContextAware {
         return sdxClient;
     }
 
-    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String accountId) {
+    public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String accountId) {
         String accessKey;
         if (CloudbreakUserCache.getInstance().isInitialized()) {
             accessKey = CloudbreakUserCache.getInstance().getAdminAccessKeyByAccountId(accountId);
         } else {
             accessKey = INTERNAL_ACTOR_ACCESS_KEY;
         }
-        U microserviceClient = (U) clients.getOrDefault(accessKey, Map.of()).get(msClientClass);
+        U microserviceClient = getMicroserviceClient(testDtoClass, accessKey);
         if (microserviceClient == null) {
             throw new IllegalStateException("Should create an admin client for the acting user.");
         }
         return microserviceClient;
     }
 
-    public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends MicroserviceClient> msClientClass, String who) {
-        U microserviceClient = (U) clients.getOrDefault(who, Map.of()).get(msClientClass);
-        if (microserviceClient == null) {
+    public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String who) {
+
+        if (clients.get(who).isEmpty()) {
             throw new IllegalStateException("Should create a client for this user: " + who);
         }
-        return microserviceClient;
+
+        List<MicroserviceClient> microserviceClients = clients.get(who).values()
+                .stream()
+                .filter(client -> client.supportedTestDtos().contains(testDtoClass.getSimpleName()))
+                .collect(Collectors.toList());
+
+        if (microserviceClients.isEmpty()) {
+            throw new IllegalStateException("This Dto is not supported by any clients: " + testDtoClass.getSimpleName());
+        }
+
+        if (microserviceClients.size() > 1) {
+            throw new IllegalStateException("This Dto is supported by more than one clients: " + testDtoClass.getSimpleName() + ", clients" +
+                    microserviceClients);
+        }
+
+        return (U) microserviceClients.get(0);
     }
 
     public SdxClient getSdxClient() {
@@ -749,28 +680,66 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<U> msClientClass) {
-        return getMicroserviceClient(msClientClass, getActingUserAccessKey());
+        String who = getActingUserAccessKey();
+        U microserviceClient = (U) clients.getOrDefault(who, Map.of()).get(msClientClass);
+        if (microserviceClient == null) {
+            throw new IllegalStateException("Should create a client for this user: " + who);
+        }
+        return microserviceClient;
     }
 
-    public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses) {
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses) {
         return await(entityClass, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
     }
 
-    public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
         return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, getPollingDurationInMills());
     }
 
-    public <T extends CloudbreakTestDto> T await(Class<T> entityClass, Map<String, Status> desiredStatuses, RunningParameter runningParameter,
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses, RunningParameter runningParameter,
             Duration pollingInterval) {
         return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, pollingInterval);
     }
 
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses) {
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses) {
         return await(entity, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
     }
 
-    public <T extends CloudbreakTestDto> T await(T entity, Map<String, Status> desiredStatuses, RunningParameter runningParameter) {
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
         return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
+    }
+
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+            Duration pollingInterval) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        CloudbreakTestDto awaitEntity = get(key);
+        if (runningParameter.isWaitForFlow()) {
+            awaitForFlow(awaitEntity, emptyRunningParameter());
+        }
+        resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        return entity;
+    }
+
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
+        return awaitForInstance(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
+    }
+
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+            Duration pollingInterval) {
+        checkShutdown();
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
+            return entity;
+        }
+        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
+        CloudbreakTestDto awaitEntity = get(key);
+        instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        return entity;
     }
 
     public <T extends CloudbreakTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
@@ -786,8 +755,8 @@ public abstract class TestContext implements ApplicationContextAware {
             if (awaitEntity == null) {
                 throw new RuntimeException("Cloudbreak key provided but no result in resource map, key=" + key);
             }
-            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
+            MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Crn.fromString(awaitEntity.getCrn()).getAccountId());
+            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient);
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
@@ -796,356 +765,6 @@ public abstract class TestContext implements ApplicationContextAware {
             }
             getExceptionMap().put("Cloudbreak await for flow " + entity, e);
         }
-        return entity;
-    }
-
-    public <T extends SdxTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Sdx await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Sdx await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Sdx key provided but no result in resource map, key=" + key);
-            }
-            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
-            try {
-                awaitEntity.setResponse(
-                        sdxClient.getSdxClient().sdxEndpoint()
-                                .getDetail(awaitEntity.getName(), Collections.emptySet())
-                );
-            } catch (NotFoundException e) {
-                LOGGER.warn("Sdx '{}:{}' has been removed. So cannot refresh!", entity.getName(), entity.getCrn());
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Sdx await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Sdx await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Sdx await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends SdxInternalTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Sdx internal await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxInternalTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Sdx internal await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Sdx internal key provided but no result in resource map, key=" + key);
-            }
-            SdxClient sdxClient = getAdminMicroserviceClient(SdxClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
-            try {
-                awaitEntity.setResponse(
-                        sdxClient.getSdxClient().sdxEndpoint()
-                                .getDetail(awaitEntity.getName(), Collections.emptySet())
-                );
-            } catch (NotFoundException e) {
-                LOGGER.warn("Sdx internal '{}:{}' has been removed. So cannot refresh!", entity.getName(), entity.getCrn());
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Sdx internal await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Sdx internal await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Sdx internal await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends DistroXTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Distrox await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        DistroXTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Distrox await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Distrox key provided but no result in resource map, key=" + key);
-            }
-            CloudbreakClient cloudbreakClient = getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, cloudbreakClient);
-            try {
-                awaitEntity.setResponse(
-                        cloudbreakClient.getCloudbreakClient().distroXV1Endpoint()
-                                .getByName(awaitEntity.getName(), Collections.emptySet())
-                );
-            } catch (NotFoundException e) {
-                LOGGER.warn("Distrox '{}:{}' has been removed. So cannot refresh!", entity.getName(), entity.getCrn());
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Distrox await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Distrox await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Distrox await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends EnvironmentTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Environment await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        EnvironmentTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Environment await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Environment key provided but no result in resource map, key=" + key);
-            }
-
-            EnvironmentClient environmentClient = getAdminMicroserviceClient(EnvironmentClient.class, Crn.fromString(awaitEntity.getCrn()).getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, environmentClient);
-            try {
-                awaitEntity.setResponse(
-                        environmentClient.getEnvironmentClient().environmentV1Endpoint()
-                                .getByName(awaitEntity.getName())
-                );
-            } catch (NotFoundException e) {
-                LOGGER.warn("Environment '{}:{}' has been removed. So cannot refresh!", entity.getName(), entity.getCrn());
-            }
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Environment await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Environment await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Environment await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends FreeIpaDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "FreeIpa diagnostics await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        FreeIpaDiagnosticsTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" FreeIpa diagnostics await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("FreeIpa diagnostics key provided but no result in resource map, key=" + key);
-            }
-            FreeIpaClient freeIpaClient = getMicroserviceClient(FreeIpaClient.class, INTERNAL_ACTOR_ACCESS_KEY);
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, freeIpaClient);
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("FreeIpa diagnostics await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" FreeIpa diagnostics await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("FreeIpa diagnostics await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends SdxDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Sdx diagnostics await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxDiagnosticsTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Sdx diagnostics await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Sdx diagnostics key provided but no result in resource map, key=" + key);
-            }
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Sdx diagnostics await for flow '{}' is failed for: '{}', because of {}", entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Sdx diagnostics await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Sdx diagnostics await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends SdxCMDiagnosticsTestDto> T awaitForFlow(T entity, RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, "Sdx CM based diagnostics await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxDiagnosticsTestDto awaitEntity = get(key);
-        Log.await(LOGGER, String.format(" Sdx CM based diagnostics await for flow %s ", entity));
-        try {
-            if (awaitEntity == null) {
-                throw new RuntimeException("Sdx CM based diagnostics key provided but no result in resource map, key=" + key);
-            }
-            SdxClient sdxClient = getMicroserviceClient(SdxClient.class, INTERNAL_ACTOR_ACCESS_KEY);
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, sdxClient);
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Sdx CM based diagnostics await for flow '{}' is failed for: '{}', because of {}",
-                        entity, entity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Sdx CM based diagnostics await for flow '%s' is failed for '%s', because of %s",
-                        entity, entity.getName(), e.getMessage()));
-            }
-            getExceptionMap().put("Sdx CM based diagnostics await for flow " + entity, e);
-        }
-        return entity;
-    }
-
-    public <T extends CloudbreakTestDto, E extends Status> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        CloudbreakTestDto awaitEntity = get(key);
-        cloudbreakAwait.await(awaitEntity, (Map<String, Status>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter) {
-        return await(entity, desiredStatus, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends EnvironmentTestDto, E extends EnvironmentStatus> T await(T entity, E desiredStatus, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Environment await should be skipped because of previous error. await [%s]", desiredStatus));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        EnvironmentTestDto awaitEntity = get(key);
-        environmentAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends FreeIpaTestDto, E extends com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status> T await(T entity, E desiredStatus,
-            RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("FreeIpa await should be skipped because of previous error. await [%s]", desiredStatus));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        FreeIpaTestDto awaitEntity = get(key);
-        freeIpaAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
-            RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Datalake await should be skipped because of previous error. await [%s]", desiredStatus));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxTestDto awaitEntity = get(key);
-        datalakeAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxInternalTestDto, E extends SdxClusterStatusResponse> T await(T entity, E desiredStatus,
-            RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Datalake Internal await should be skipped because of previous error. await [%s]", desiredStatus));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxInternalTestDto awaitEntity = get(key);
-        datalakeInternalAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
-        return entity;
-    }
-
-    public <T extends RedbeamsDatabaseServerTestDto, E extends com.sequenceiq.redbeams.api.model.common.Status> T await(T entity, E desiredStatus,
-            RunningParameter runningParameter) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Redbeams await should be skipped because of previous error. await [%s]", desiredStatus));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        RedbeamsDatabaseServerTestDto awaitEntity = get(key);
-        redbeamsAwait.await(awaitEntity, desiredStatus, getTestContext(), runningParameter, getPollingDurationInMills(), maxRetry);
-        return entity;
-    }
-
-    public <T extends DistroXTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends DistroXTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Distrox Instance await should be skipped because of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        DistroXTestDto awaitEntity = get(key);
-        distroxInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends SdxTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Sdx Instance await should be skipped because of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxTestDto awaitEntity = get(key);
-        sdxInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
-        return entity;
-    }
-
-    public <T extends SdxInternalTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends SdxInternalTestDto, E extends InstanceStatus> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Sdx Instance await should be skipped because of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
-        String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        SdxInternalTestDto awaitEntity = get(key);
-        sdxInternalInstanceAwait.await(awaitEntity, (Map<String, InstanceStatus>) desiredStatuses, getTestContext(), runningParameter, pollingInterval,
-                maxRetry);
         return entity;
     }
 
@@ -1294,7 +913,7 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(testDto.getCrn()).getAccountId()));
+                testDto.cleanUp(this, getAdminMicroserviceClient(testDto.getClass(), Crn.fromString(testDto.getCrn()).getAccountId()));
             } catch (Exception e) {
                 LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }

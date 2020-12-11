@@ -25,6 +25,8 @@ public class RunningParameter {
 
     private Method urlMethod;
 
+    private boolean waitForFlow = true;
+
     public Actor getWho() {
         if (doAsAdmin) {
             if (CloudbreakUserCache.getInstance().isInitialized()) {
@@ -45,6 +47,10 @@ public class RunningParameter {
 
     public boolean isLogError() {
         return logError;
+    }
+
+    public boolean isWaitForFlow() {
+        return waitForFlow;
     }
 
     public RunningParameter withSkipOnFail(boolean skipOnFail) {
@@ -109,6 +115,16 @@ public class RunningParameter {
         return this;
     }
 
+    public RunningParameter withWaitForFlow(boolean waitForFlow) {
+        this.waitForFlow = waitForFlow;
+        return this;
+    }
+
+    public RunningParameter withWaitForFlow() {
+        this.waitForFlow = true;
+        return this;
+    }
+
     public static RunningParameter emptyRunningParameter() {
         return new RunningParameter();
     }
@@ -146,5 +162,9 @@ public class RunningParameter {
     public static RunningParameter httpMockUrl(Class url, String method) {
         return new RunningParameter()
                 .withHttpMockUrl(url, method);
+    }
+
+    public static RunningParameter waitForFlow() {
+        return new RunningParameter().withWaitForFlow(true);
     }
 }
