@@ -33,19 +33,20 @@ public class UmsAccountAuthorizationService {
     private EntitlementService entitlementService;
 
     public void checkRightOfUser(String userCrn, AuthorizationResourceAction action) {
-        String unauthorizedMessage = String.format("You have no right to perform %s in account %s", umsRightProvider.getRight(action),
+        String right = umsRightProvider.getRight(action);
+        String unauthorizedMessage = String.format("You have no right to perform %s in account %s", right,
                 Crn.fromString(userCrn).getAccountId());
-        checkRightOfUser(userCrn, action, unauthorizedMessage);
+        checkRightOfUser(userCrn, right, unauthorizedMessage);
     }
 
-    private void checkRightOfUser(String userCrn, AuthorizationResourceAction action, String unauthorizedMessage) {
+    private void checkRightOfUser(String userCrn, String right, String unauthorizedMessage) {
         if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
-            if (!umsClient.checkAccountRight(userCrn, userCrn, action.getRight(), getRequestId())) {
+            if (!umsClient.checkAccountRight(userCrn, userCrn, right, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);
             }
         } else {
-            if (!umsClient.checkAccountRightLegacy(userCrn, userCrn, action.getRight(), getRequestId())) {
+            if (!umsClient.checkAccountRightLegacy(userCrn, userCrn, right, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);
             }
