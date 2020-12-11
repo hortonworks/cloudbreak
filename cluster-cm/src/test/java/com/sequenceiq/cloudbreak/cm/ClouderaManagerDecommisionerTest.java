@@ -94,7 +94,7 @@ public class ClouderaManagerDecommisionerTest {
     }
 
     @Test
-    public void testVerifyNodesAreRemovableWithoutRepairAndNotEnoughNode() throws ApiException {
+    public void testNotAvailableNodeShouldBeDeletedWhenRunningNodesFulfillTheReplicationNo() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
         Stack stack = createTestStack(volumeSetAttributes);
@@ -102,21 +102,24 @@ public class ClouderaManagerDecommisionerTest {
         stack.setCluster(cluster);
         Set<HostGroup> hostGroups = createTestHostGroups(2, 2);
         cluster.setHostGroups(hostGroups);
-        ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
+        //ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
+        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
+
+        ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("1", true);
+        Mockito.when(clouderaManagerApiFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
+        Mockito.when(servicesResourceApi.readServiceConfig(stack.getName(), "hdfs", "full")).thenReturn(apiServiceConfig);
         Mockito.when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         Mockito.when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
         // WHEN
         HostGroup firstHostGroup = hostGroups.iterator().next();
-        Set<InstanceMetaData> removableInstances = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet();
-        InstanceMetaData additionalInstanceMetaData = new InstanceMetaData();
-        additionalInstanceMetaData.setInstanceGroup(firstHostGroup.getInstanceGroup());
-        removableInstances.add(additionalInstanceMetaData);
+        InstanceMetaData firstInstanceMetaData = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet().stream().findFirst().get();
+        firstInstanceMetaData.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
+        Set<InstanceMetaData> removableInstances = Set.of(firstInstanceMetaData);
         // WHEN
-        assertThrows(NotEnoughNodeException.class,
-                () -> underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient()));
-        // THEN the above exception should have thrown
+        underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient());
+        // THEN there is no exception
     }
 
     @Test
