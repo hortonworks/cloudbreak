@@ -97,7 +97,12 @@ public class ClouderaManagerDecomissioner {
                 if (!removableHostsInHostGroup.isEmpty()) {
                     String hostGroupName = hostGroup.getName();
                     int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroupName) ? getReplicationFactor(client, stack.getName()) : 0;
-                    verifyNodeCount(replication, removableHostsInHostGroup.size(), hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().size(),
+
+                    Set<InstanceMetaData> runningInstances = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+                    int removableSizeFromTheRunning = Math.toIntExact(removableHostsInHostGroup.stream()
+                            .filter(instance -> runningInstances.contains(instance))
+                            .count());
+                    verifyNodeCount(replication, removableSizeFromTheRunning, runningInstances.size(),
                             0, stack);
                 }
             }
