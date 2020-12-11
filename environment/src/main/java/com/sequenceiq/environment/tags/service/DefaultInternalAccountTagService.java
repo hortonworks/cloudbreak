@@ -27,7 +27,8 @@ import com.sequenceiq.environment.tags.domain.AccountTag;
 @Service
 public class DefaultInternalAccountTagService {
 
-    private static final String ACCOUNT_TAG_PATTERN = "^(?!microsoft|azure|aws|windows|\\\\s)[^,]*$";
+    @Value("${cb.account.tag.validator:^(?!microsoft|azure|aws|windows|\\s)[a-zA-Z0-9\\{\\-\\_\\}]*[^\\-\\_]$}")
+    private String accountTagPattern;
 
     @Value("${env.apply.internal.tags:true}")
     private boolean applyInternalTags;
@@ -90,16 +91,18 @@ public class DefaultInternalAccountTagService {
             }
         }
         for (AccountTag accountTag : accountTags) {
-            Pattern pattern = Pattern.compile(ACCOUNT_TAG_PATTERN);
+            Pattern pattern = Pattern.compile(accountTagPattern);
             Matcher keyMatcher = pattern.matcher(accountTag.getTagKey());
             Matcher valueMatcher = pattern.matcher(accountTag.getTagValue());
             if (!keyMatcher.matches()) {
                 throw new BadRequestException(
-                        String.format("The key '%s' can only can not start with microsoft or azure or aws or windows or space", accountTag.getTagKey()));
+                        String.format("The key '%s' can not start with microsoft or azure or aws or windows "
+                                + "or space and can contains only '-' and '_' and '{' and '}' characters.", accountTag.getTagKey()));
             }
             if (!valueMatcher.matches()) {
                 throw new BadRequestException(
-                        String.format("The value '%s' can only can not start with microsoft or azure or aws or windows or space", accountTag.getTagValue()));
+                        String.format("The value '%s' can not start with microsoft or azure or aws or windows "
+                                + "or space and can contains only '-' and '_' and '{' and '}' characters.", accountTag.getTagValue()));
             }
             if (isAccountTagContainsTemplate(accountTag.getTagKey()) && isAccountTagInvalid(accountTag.getTagKey())) {
                 throw new BadRequestException(
