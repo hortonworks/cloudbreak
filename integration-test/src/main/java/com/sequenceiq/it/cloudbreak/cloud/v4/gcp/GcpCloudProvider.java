@@ -143,9 +143,17 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         GcpNetworkV4Parameters gcpNetworkV4Parameters = new GcpNetworkV4Parameters();
         gcpNetworkV4Parameters.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
         gcpNetworkV4Parameters.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
-        gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getSharedProjectId());
-        return network.withGcp(gcpNetworkV4Parameters)
-                .withSubnetCIDR(getSubnetCIDR());
+        String subnetCIDR = null;
+        if (!StringUtils.isEmpty(gcpProperties.getSharedProjectId())) {
+            gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getSharedProjectId());
+            gcpNetworkV4Parameters.setNetworkId(gcpProperties.getNetworkId());
+            gcpNetworkV4Parameters.setSubnetId(gcpProperties.getSubnetIds().stream().findFirst().get());
+        } else {
+            subnetCIDR = getSubnetCIDR();
+        }
+        return network
+                .withGcp(gcpNetworkV4Parameters)
+                .withSubnetCIDR(subnetCIDR);
     }
 
     @Override
@@ -290,7 +298,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
-        return imageSettings.withImageCatalog(commonCloudProperties().getImageCatalogName());
+        return imageSettings
+                .withImageCatalog(commonCloudProperties().getImageCatalogName())
+                .withImageId(gcpProperties.getBaseimage().getImageId());
     }
 
     @Override

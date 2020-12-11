@@ -65,7 +65,7 @@ public class GcpProvisionSetup implements Setup {
                 Storage storage = buildStorage(credential, cloudContext.getName());
                 String accountId = authenticatedContext.getCloudContext().getAccountId();
                 Bucket bucket = new Bucket();
-                String bucketName = GcpLabelUtil.transformValue(String.format("%s-%s", accountId, projectId));
+                String bucketName = GcpLabelUtil.transformLabelKeyOrValue(String.format("%s-%s", accountId, projectId));
                 bucket.setName(bucketName);
                 bucket.setLocation(authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
                 bucket.setStorageClass("STANDARD");

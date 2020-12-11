@@ -147,6 +147,8 @@ integrationtest:
 
   # gcp parameters
   gcp:
+    baseimage:
+      imageId:
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2

@@ -26,12 +26,12 @@ public final class GcpLabelUtil {
     public static Map<String, String> createLabelsFromTagsMap(Map<String, String> tags) {
         Map<String, String> result = new HashMap<>();
         if (tags != null) {
-            tags.forEach((key, value) -> result.put(transformValue(key), transformValue(value)));
+            tags.forEach((key, value) -> result.put(transformLabelKeyOrValue(key), transformLabelKeyOrValue(value)));
         }
         return result;
     }
 
-    public static String transformValue(String value) {
+    public static String transformLabelKeyOrValue(String value) {
         // GCP labels have strict rules https://cloud.google.com/compute/docs/labeling-resources
         LOGGER.debug("Transforming tag key/value for GCP.");
         if (Crn.isCrn(value)) {

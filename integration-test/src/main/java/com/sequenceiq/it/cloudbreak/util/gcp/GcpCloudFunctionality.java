@@ -4,12 +4,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.gcp.action.GcpClientActions;
 
 @Component
 public class GcpCloudFunctionality implements CloudFunctionality {
@@ -18,6 +22,9 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     private static final String GCP_IMPLEMENTATION_MISSING = "GCP implementation missing";
 
+    @Inject
+    private GcpClientActions gcpClientActions;
+
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
@@ -25,7 +32,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        return gcpClientActions.listTagsByInstanceId(instanceIds);
     }
 
     @Override
@@ -66,5 +73,10 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
         return Collections.emptyMap();
+    }
+
+    @Override
+    public String transformTagKeyOrValue(String originalValue) {
+        return GcpLabelUtil.transformLabelKeyOrValue(originalValue);
     }
 }

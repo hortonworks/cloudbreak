@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.util.TagsUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
@@ -106,11 +107,13 @@ public class CloudProviderSideTagAssertion {
 
     private void verifyTags(List<String> instanceIds, Map<String, String> customTags, TestContext testContext, String resourceName) {
         if ((instanceIds != null && !instanceIds.isEmpty()) || !instanceIds.contains(null)) {
-            Map<String, Map<String, String>> tagsByInstanceId = cloudProviderProxy.getCloudFunctionality().listTagsByInstanceId(instanceIds);
+            CloudFunctionality cloudFunctionality = cloudProviderProxy.getCloudFunctionality();
+            Map<String, Map<String, String>> tagsByInstanceId = cloudFunctionality.listTagsByInstanceId(instanceIds);
             tagsByInstanceId.forEach((id, tags) -> {
                 LOGGER.info(" Verifying resource: {} instance ID: {} with tags: {}", resourceName, id, tags);
                 tagsUtil.verifyTags(new MapToTaggedResponseAdapter(tags), testContext);
-                customTags.forEach((key, value) -> assertThat(tags.get(key)).isEqualTo(value));
+                customTags.forEach((key, value) -> assertThat(tags.get(cloudFunctionality.transformTagKeyOrValue(key)))
+                        .isEqualTo(cloudFunctionality.transformTagKeyOrValue(value)));
             });
         } else {
             LOGGER.error("Tag validation is not possible, because of {} instance ids: {} null or contains null!", resourceName, instanceIds);
