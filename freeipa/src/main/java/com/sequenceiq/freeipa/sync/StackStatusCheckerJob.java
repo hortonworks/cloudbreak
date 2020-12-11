@@ -186,13 +186,14 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void setStatusIfNotTheSame(InstanceMetaData instanceMetaData, InstanceStatus newStatus) {
-        if (instanceMetaData.getInstanceStatus() != newStatus) {
+        InstanceStatus oldStatus = instanceMetaData.getInstanceStatus();
+        if (oldStatus != newStatus) {
             if (updateStatus) {
                 instanceMetaData.setInstanceStatus(newStatus);
-                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", instanceMetaData.getInstanceStatus(), newStatus);
+                LOGGER.info(":::Auto sync::: The instance status updated from {} to {}", oldStatus, newStatus);
             } else {
                 LOGGER.info(":::Auto sync::: The instance status would be had to update from {} to {}",
-                        instanceMetaData.getInstanceStatus(), newStatus);
+                        oldStatus, newStatus);
             }
         }
     }
