@@ -48,7 +48,6 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .validate();
@@ -90,7 +89,6 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, dto, client) -> {

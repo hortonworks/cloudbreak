@@ -27,7 +27,6 @@ import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.ProxyTestClient;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -91,13 +90,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
-        renewTestAndSetup(data, testResult);
         setupTest(testResult);
         setupTest((TestContext) data[0]);
-    }
-
-    protected void renewTestAndSetup(Object[] data, ITestResult testResult) {
-
     }
 
     protected void setupTest(ITestResult testResult) {
@@ -178,7 +172,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(RunningParameter.key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }

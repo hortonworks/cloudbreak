@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -40,8 +41,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAu
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -271,7 +272,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     public FreeIpaTestDto await(Status status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public FreeIpaTestDto withGatewayPort(Integer port) {
@@ -311,7 +312,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
         LOGGER.info("Cleaning up freeIpa with name: {}", getName());
         if (getResponse() != null) {
             when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));

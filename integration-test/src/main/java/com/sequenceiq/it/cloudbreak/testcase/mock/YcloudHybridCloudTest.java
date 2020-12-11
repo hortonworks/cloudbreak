@@ -179,7 +179,6 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
                     .withStackRequest(key(cluster), key(stack))
                     .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(this::validateRequestParameters)
                 .validate();

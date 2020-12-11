@@ -50,14 +50,14 @@ public class PurgeGarbageService {
 
     private <T> void purge(TestContext testContext) {
         orderedPurgables().forEach(purgable -> {
-            MicroserviceClient cloudbreakClient = testContext.getMicroserviceClient(purgable.client(), testContext.getActingUserAccessKey());
-            Collection<Object> all = purgable.getAll(cloudbreakClient);
+            MicroserviceClient client = testContext.getMicroserviceClient(purgable.client());
+            Collection<Object> all = purgable.getAll(client);
             all = all.stream()
                     .filter(purgable::deletable)
                     .collect(Collectors.toList());
             LOGGER.info("Purge all {}, count: {}", purgable.getClass().getSimpleName(), all.size());
             if (cleanupBeforeStart) {
-                all.forEach(e -> purgable.delete(testContext, e, cloudbreakClient));
+                all.forEach(e -> purgable.delete(testContext, e, client));
             } else {
                 all.forEach(e -> LOGGER.info("Created resource remained in the Database: {}", e));
             }

@@ -64,7 +64,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
@@ -77,7 +76,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForInstance(getSdxInstancesDeletedOnProviderSideState())
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
@@ -106,7 +104,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
         SdxTestDto sdxTestDto = testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState());
 
@@ -141,7 +138,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .awaitForInstance(Map.of(hostGroupType.getName(), InstanceStatus.STOPPED))
                 .when(sdxTestClient.repair(), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

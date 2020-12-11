@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +104,6 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .awaitForFlow(key("DistroXCreateAction"))
                 .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))

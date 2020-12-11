@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.Orderable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -29,7 +29,7 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
 
     CloudPlatform getCloudPlatform();
 
-    default void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    default void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.warn(String.format("Cleanup WARN: 'cleanUp' is not implemented for TestDto: %s with name: %s", getClass().getSimpleName(), getName()));
     }
 

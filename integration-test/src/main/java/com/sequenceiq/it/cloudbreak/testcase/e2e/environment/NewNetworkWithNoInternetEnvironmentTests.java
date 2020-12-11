@@ -93,7 +93,6 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .withExternalDatabase(database)
                 .withCloudStorage()
                 .when(sdxTestClient.create(), RunningParameter.key(sdx))
-                .awaitForFlow(RunningParameter.key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto, client, List.of(HostGroupType.MASTER.getName())))
                 .validate();

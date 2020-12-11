@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-import javax.ws.rs.NotFoundException;
 
 import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -32,6 +30,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -46,7 +45,6 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 @Prototype
 public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implements Purgable<StackV4Response, CloudbreakClient>, Investigable, Searchable {
@@ -61,9 +59,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Inject
     private DistroXTestClient distroXTestClient;
-
-    @Inject
-    private FlowUtil flowUtil;
 
     public DistroXTestDto(TestContext testContext) {
         super(new DistroXV1Request(), testContext);
@@ -80,11 +75,10 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
         LOGGER.info("Cleaning up distrox with name: {}", getName());
         if (getResponse() != null) {
             when(distroXTestClient.forceDelete(), key("delete-distrox-" + getName()).withSkipOnFail(false));
-            awaitForFlow(key("delete-distrox-" + getName()));
             await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
         } else {
             LOGGER.info("Distrox: {} response is null!", getName());
@@ -135,9 +129,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public DistroXTestDto await(Map<String, Status> statuses) {
-        super.await(statuses);
-        waitTillFlowInOperation();
-        return this;
+        return getTestContext().await(this, statuses);
     }
 
     public DistroXTestDto awaitAndIgnoreFlows(Map<String, Status> statuses) {
@@ -147,30 +139,22 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses) {
-        super.await(entityClass, statuses);
-        waitTillFlowInOperation();
-        return this;
+        return getTestContext().await(this, statuses, emptyRunningParameter());
     }
 
     @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
-        super.await(entityClass, statuses, pollingInteval);
-        waitTillFlowInOperation();
-        return this;
+        return getTestContext().await(this, statuses, emptyRunningParameter(), pollingInteval);
     }
 
     @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
-        super.await(entityClass, statuses, runningParameter);
-        waitTillFlowInOperation();
-        return this;
+        return getTestContext().await(this, statuses, runningParameter);
     }
 
     @Override
     public DistroXTestDto await(Map<String, Status> statuses, RunningParameter runningParameter) {
-        super.await(statuses, runningParameter);
-        waitTillFlowInOperation();
-        return this;
+        return getTestContext().await(this, statuses, runningParameter);
     }
 
     public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses) {
@@ -178,15 +162,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     public DistroXTestDto awaitForInstance(DistroXTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(entity, statuses, runningParameter);
+        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
     public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(this, statuses, runningParameter);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
     public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
     public DistroXTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
@@ -200,27 +184,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public DistroXTestDto awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow(this, runningParameter);
-    }
-
-    private void waitTillFlowInOperation() {
-        while (hasFlow()) {
-            try {
-                Thread.sleep(flowUtil.getPollingInterval());
-            } catch (InterruptedException e) {
-                LOGGER.warn("Exception has been occurred during wait for flow end: ", e);
-            }
-        }
-    }
-
-    private boolean hasFlow() {
-        try {
-            return ((CloudbreakClient) getTestContext().getAdminMicroserviceClient(CloudbreakClient.class, Crn.fromString(getCrn()).getAccountId()))
-                    .getCloudbreakClient()
-                    .flowPublicEndpoint()
-                    .hasFlowRunningByChainId(getLastKnownFlowChainId(), getCrn()).getHasActiveFlow();
-        } catch (NotFoundException e) {
-            return false;
-        }
     }
 
     public DistroXTestDto withGeneratedBlueprint(GeneratedBlueprintV4Response generatedBlueprint) {

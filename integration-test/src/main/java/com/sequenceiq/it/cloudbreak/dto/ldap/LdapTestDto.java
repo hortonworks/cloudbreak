@@ -8,7 +8,7 @@ import javax.ws.rs.WebApplicationException;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -28,7 +28,7 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up LDAP config with name: {}", getName());
         try {
             when(ldapTestClient.deleteV1(), key("delete-ldap-" + getName()).withSkipOnFail(false));

@@ -45,7 +45,6 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
         testContext
                 .given(sdx, SdxTestDto.class).withCloudStorage()
                 .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

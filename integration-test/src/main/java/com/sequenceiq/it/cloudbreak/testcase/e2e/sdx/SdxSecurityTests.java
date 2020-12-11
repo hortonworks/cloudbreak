@@ -63,7 +63,6 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .withCloudStorage()
                 .withExternalDatabase(noDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
@@ -75,7 +74,6 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 })
                 .when(sdxTestClient.rotateAutotlsCertificates(), key(sdx))
                 .await(SdxClusterStatusResponse.CERT_ROTATION_IN_PROGRESS, key(sdx))
-                .awaitForFlow(key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

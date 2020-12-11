@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.dto.database;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -75,7 +77,7 @@ public class RedbeamsDatabaseServerTestDto
     }
 
     public RedbeamsDatabaseServerTestDto await(Status status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     @Override
@@ -86,5 +88,10 @@ public class RedbeamsDatabaseServerTestDto
     @Override
     public String getSearchId() {
         return getName();
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getResourceCrn();
     }
 }

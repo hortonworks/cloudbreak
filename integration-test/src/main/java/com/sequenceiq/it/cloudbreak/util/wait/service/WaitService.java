@@ -5,12 +5,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-@Component
-public class WaitService<T> {
+public class WaitService<T extends WaitObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitService.class);
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval, int maxAttempts,

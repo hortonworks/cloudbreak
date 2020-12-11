@@ -77,7 +77,6 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(HEALTY_STATUSES)
                 .validate();

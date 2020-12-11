@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -48,9 +46,8 @@ public class MockSdxRetryTests extends AbstractMockTest {
                 .when(sdxTestClient.createInternal())
                 .mockSpi().launch().post()
                 .thenReturn("This is a bad request error", 400, 1)
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
+                .awaitForFlow()
                 .when(sdxTestClient.retry())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .validate();
     }

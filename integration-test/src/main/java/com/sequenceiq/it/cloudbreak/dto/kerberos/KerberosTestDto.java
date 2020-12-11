@@ -7,7 +7,7 @@ import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -31,7 +31,7 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up kerberos config with name: {}", getName());
         try {
             when(kerberosTestClient.deleteV1(), key("delete-kerberos-" + getName()).withSkipOnFail(false));

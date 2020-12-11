@@ -1,13 +1,17 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
-import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
@@ -15,9 +19,28 @@ import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.RawCloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.audit.AuditTestDto;
+import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
+import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
+import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.NotificationTestingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
+import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 
 public class CloudbreakClient extends MicroserviceClient {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -42,6 +65,19 @@ public class CloudbreakClient extends MicroserviceClient {
 
     CloudbreakClient() {
         this(CLOUDBREAK_CLIENT);
+    }
+
+    @Override
+    public FlowPublicEndpoint flowPublicEndpoint() {
+        return cloudbreakClient.flowPublicEndpoint();
+    }
+
+    @Override
+    public <E extends Enum<E>, T extends WaitObject> T waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
+            TestContext testContext) {
+        Map<String, Status> map = new HashMap<>();
+        desiredStatuses.forEach((key, v) -> map.put(key, (Status) v));
+        return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId());
     }
 
     public static synchronized com.sequenceiq.cloudbreak.client.CloudbreakClient getSingletonCloudbreakClient() {
@@ -133,6 +169,24 @@ public class CloudbreakClient extends MicroserviceClient {
 
     public WebTarget getRawClient() {
         return rawClient;
+    }
+
+    @Override
+    public Set<String> supportedTestDtos() {
+        return Set.of(DistroXTestDto.class.getSimpleName(),
+                BlueprintTestDto.class.getSimpleName(),
+                ClusterTemplateTestDto.class.getSimpleName(),
+                StackTestDto.class.getSimpleName(),
+                VersionCheckTestDto.class.getSimpleName(),
+                RecipeTestDto.class.getSimpleName(),
+                StackMatrixTestDto.class.getSimpleName(),
+                NotificationTestingTestDto.class.getSimpleName(),
+                RawCloudbreakTestDto.class.getSimpleName(),
+                CloudStorageMatrixTestDto.class.getSimpleName(),
+                DeploymentPreferencesTestDto.class.getSimpleName(),
+                SecurityRulesTestDto.class.getSimpleName(),
+                AuditTestDto.class.getSimpleName(),
+                ImageCatalogTestDto.class.getSimpleName());
     }
 }
 

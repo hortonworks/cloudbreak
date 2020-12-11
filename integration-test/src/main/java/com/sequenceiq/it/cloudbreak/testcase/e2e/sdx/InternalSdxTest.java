@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
@@ -35,7 +33,6 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
                     .withDatabase(sdxDatabaseRequest)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
-                .awaitForFlow(key(resourcePropertyProvider().getName()))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .when(sdxTestClient.describeInternal())

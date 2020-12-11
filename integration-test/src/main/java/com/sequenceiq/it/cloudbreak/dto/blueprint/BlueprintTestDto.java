@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -34,7 +34,7 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
         LOGGER.info("Cleaning up blueprint with name: {}", getName());
         if (getResponse() != null) {
             when(blueprintTestClient.deleteV4(), key("delete-blueprint-" + getName()).withSkipOnFail(false));

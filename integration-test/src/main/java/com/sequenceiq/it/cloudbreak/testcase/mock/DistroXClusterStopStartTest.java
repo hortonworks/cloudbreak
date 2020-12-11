@@ -77,20 +77,16 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(stack))
-                .awaitForFlow(key(stack))
                 .await(STACK_AVAILABLE, key(stack));
         for (int i = 0; i < params.getTimes(); i++, current += step) {
             currentContext = currentContext
                     .when(distroXClient.stop(), key(stack))
-                    .awaitForFlow(key(stack))
                     .await(STACK_STOPPED, key(stack))
                     .then(auditGrpcServiceAssertion::stop)
                     .when(distroXClient.start(), key(stack))
-                    .awaitForFlow(key(stack))
                     .await(STACK_AVAILABLE, key(stack))
                     .then(auditGrpcServiceAssertion::start)
                     .when(distroXClient.scale(params.getHostgroup(), current))
-                    .awaitForFlow(key(stack))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
         }
 

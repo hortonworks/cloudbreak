@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -280,7 +281,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public SdxInternalTestDto awaitForFlow() {
@@ -301,11 +302,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(this, statuses, runningParameter);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
     public SdxInternalTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {
@@ -319,11 +320,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up sdx internal with name: {}", getName());
         if (getResponse() != null) {
             when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
-            awaitForFlow(key("delete-sdx-" + getName()));
             await(DELETED, new RunningParameter().withSkipOnFail(true));
         } else {
             LOGGER.info("Sdx internal: {} response is null!", getName());
@@ -352,7 +352,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         String sdxName = entity.getName();
         try {
             client.getSdxClient().sdxEndpoint().delete(getName(), false);
-            testContext.await(this, DELETED, key("wait-purge-sdx-" + getName()));
+            testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
         }

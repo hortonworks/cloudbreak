@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-public abstract class ExceptionChecker<T> implements StatusChecker<T> {
+public abstract class ExceptionChecker<T extends WaitObject> implements StatusChecker<T> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionChecker.class);
 

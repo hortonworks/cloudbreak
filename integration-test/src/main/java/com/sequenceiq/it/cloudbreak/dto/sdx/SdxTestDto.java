@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -78,11 +79,10 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient client) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up sdx with name: {}", getName());
         if (getResponse() != null) {
             when(sdxTestClient.forceDelete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
-            awaitForFlow(key("delete-sdx-" + getName()));
             await(DELETED, new RunningParameter().withSkipOnFail(true));
         } else {
             LOGGER.info("Sdx: {} response is null!", getName());
@@ -111,7 +111,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         String sdxName = entity.getName();
         try {
             client.getSdxClient().sdxEndpoint().delete(sdxName, true);
-            testContext.await(this, DELETED, key("wait-purge-sdx-" + entity.getName()));
+            testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on SDX {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
         }
@@ -138,7 +138,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
-        return getTestContext().await(this, status, runningParameter);
+        return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
     public SdxTestDto awaitForFlow() {
@@ -155,15 +155,15 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto awaitForInstance(SdxTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(entity, statuses, runningParameter);
+        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
     public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(this, statuses, runningParameter);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
     public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, statuses, runningParameter, pollingInterval);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
     public SdxTestDto awaitForInstance(Map<String, InstanceStatus> statuses, Duration pollingInterval) {

@@ -78,7 +78,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))

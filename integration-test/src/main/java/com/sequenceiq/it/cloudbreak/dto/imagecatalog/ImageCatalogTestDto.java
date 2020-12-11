@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCata
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -85,7 +86,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         if (!skipCleanup) {
             LOGGER.info("Cleaning up image catalog with name: {}", getName());
             if (getResponse() != null) {

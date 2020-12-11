@@ -4,12 +4,10 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.ITestResult;
 
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -43,12 +41,6 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
                 .when(freeIpaTestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .validate();
-    }
-
-    @Override
-    protected void renewTestAndSetup(Object[] data, ITestResult testResult) {
-        Log.log(LOGGER, "New test inited: %s", testResult.getMethod().getMethodName());
-        getExecuteQueryToMockInfrastructure().call("/tests/new", w -> w);
     }
 
     public ExecuteQueryToMockInfrastructure getExecuteQueryToMockInfrastructure() {

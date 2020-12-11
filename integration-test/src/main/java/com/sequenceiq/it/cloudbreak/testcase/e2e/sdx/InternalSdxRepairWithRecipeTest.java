@@ -77,7 +77,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
@@ -93,7 +92,6 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .awaitForInstance(getSdxInstancesStoppedState())
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal))
-                .awaitForFlow(key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

@@ -73,18 +73,15 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(stack))
-                .awaitForFlow(key(stack))
                 .await(STACK_AVAILABLE, key(stack));
 
         for (int i = 0; i < 3; i++) {
             currentContext = currentContext
                     .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
-                    .awaitForFlow(key(stack))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
 
             currentContext = currentContext
                     .when(distroXClient.scale(params.getHostgroup(), LOWER_NODE_COUNT))
-                    .awaitForFlow(key(stack))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
         }
 

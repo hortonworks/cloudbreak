@@ -15,8 +15,8 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnPa
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -117,7 +117,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient client) {
         LOGGER.info("Cleaning up credential with name: {}", getName());
         if (getResponse() != null) {
             when(credentialTestClient.delete(), key("delete-credential-" + getName()).withSkipOnFail(false));

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -37,7 +38,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     }
 
     @Override
-    public void cleanUp(TestContext context, CloudbreakClient cloudbreakClient) {
+    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
         LOGGER.info("Cleaning up recipe with name: {}", getName());
         try {
             when(recipeTestClient.deleteV4(), key("delete-recipe-" + getName()).withSkipOnFail(false));

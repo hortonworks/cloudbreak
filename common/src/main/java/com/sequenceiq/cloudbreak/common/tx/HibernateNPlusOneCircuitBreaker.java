@@ -34,7 +34,7 @@ public class HibernateNPlusOneCircuitBreaker extends HibernateNPlusOneLogger {
         if (queryCount > maxStatementBreak) {
             String message = constructLogline();
             HibernateNPlusOneException e = new HibernateNPlusOneException(queryCount);
-            LOGGER.error(message, e);
+            LOGGER.error("{} Max allowed: {}", message, maxStatementBreak, e);
             throw e;
         }
     }
