@@ -33,6 +33,7 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractMockTest {
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.LEGACY_NON_POWER);
         useRealUmsUser(testContext, AuthUserKeys.LEGACY_POWER);
+        useRealUmsUser(testContext, AuthUserKeys.LEGACY_ACC_ENV_ADMIN);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -44,15 +45,15 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractMockTest {
         useRealUmsUser(testContext, AuthUserKeys.LEGACY_NON_POWER);
         testContext
                 .given(CredentialTestDto.class)
-                .when(credentialTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_POWER)))
+                .when(credentialTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_ACC_ENV_ADMIN)))
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
-                .when(environmentTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_POWER)))
+                .when(environmentTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_ACC_ENV_ADMIN)))
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
                 .given(FreeIpaTestDto.class)
                 .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
-                .when(freeIpaTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_POWER)))
+                .when(freeIpaTestClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.LEGACY_ACC_ENV_ADMIN)))
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.describe())
                 .validate();
