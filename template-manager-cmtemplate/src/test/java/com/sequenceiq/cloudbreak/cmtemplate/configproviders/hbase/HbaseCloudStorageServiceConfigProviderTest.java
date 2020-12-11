@@ -121,8 +121,18 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     @Test
-    public void testConfigurationNeededWhenDatalake722() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.2");
+    public void testConfigurationNotNeededWhenDataLake726() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.6");
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        assertFalse(configurationNeeded);
+    }
+
+    @Test
+    public void testConfigurationNeededWhenDatalake727() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.7");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
@@ -131,8 +141,8 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     @Test
-    public void testConfigurationNeededWhenDatalake723() {
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.3");
+    public void testConfigurationNeededWhenDatalake728() {
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.8");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 

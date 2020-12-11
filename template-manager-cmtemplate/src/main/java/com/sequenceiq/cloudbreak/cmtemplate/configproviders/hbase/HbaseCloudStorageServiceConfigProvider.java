@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_7;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
@@ -54,13 +54,13 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
                 .map(SharedServiceConfigsView::isDatalakeCluster)
                 .orElse(false);
         String cdhVersion = getCdhVersion(source);
-        boolean is722OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_2);
+        boolean is727OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_7);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         boolean sdxHbaseCloudStorageEnabled =
                 entitlementService.sdxHbaseCloudStorageEnabled(accountId);
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
-                && (!datalakeCluster || (is722OrNewer && sdxHbaseCloudStorageEnabled));
+                && (!datalakeCluster || (is727OrNewer && sdxHbaseCloudStorageEnabled));
     }
 
     private String getCdhVersion(TemplatePreparationObject source) {
