@@ -1,9 +1,12 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static java.util.function.Predicate.not;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -17,7 +20,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
@@ -44,8 +47,6 @@ public class FreeIpaHealthDetailsService {
     private static final String STATUS_OK = "OK";
 
     private static final int STATUS_GROUP = 2;
-
-    private static final int NODE_GROUP = 1;
 
     private static final String MESSAGE_UNAVAILABLE = "Message Unavailable";
 
@@ -81,7 +82,7 @@ public class FreeIpaHealthDetailsService {
                         parseMessages(rpcResponse, response, instance);
                     } else {
                         RPCResponse<Boolean> rpcResponse = legacyFreeIpaHealthCheck(stack, instance);
-                        legacyParseMessages(rpcResponse, response);
+                        legacyParseMessages(rpcResponse, response, instance);
                     }
                 } catch (FreeIpaClientException e) {
                     addUnreachableResponse(instance, response, e.getLocalizedMessage());
@@ -92,6 +93,7 @@ public class FreeIpaHealthDetailsService {
                 response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
                 nodeResponse.setName(instance.getDiscoveryFQDN());
                 nodeResponse.setStatus(instance.getInstanceStatus());
+                nodeResponse.setInstanceId(instance.getInstanceId());
                 nodeResponse.addIssue("Unable to check health as instance is " + instance.getInstanceStatus().name());
             }
         }
@@ -109,6 +111,7 @@ public class FreeIpaHealthDetailsService {
         response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
         nodeResponse.setName(instance.getDiscoveryFQDN());
         nodeResponse.setStatus(InstanceStatus.UNREACHABLE);
+        nodeResponse.setInstanceId(instance.getInstanceId());
         nodeResponse.addIssue(issue);
     }
 
@@ -116,10 +119,27 @@ public class FreeIpaHealthDetailsService {
         response.setEnvironmentCrn(stack.getEnvironmentCrn());
         response.setCrn(stack.getResourceCrn());
         response.setName(stack.getName());
-        if (isOverallHealthy(response)) {
-            response.setStatus(DetailedStackStatus.PROVISIONED.getStatus());
+
+        Set<String> notTermiatedStackInstanceIds = stack.getAllInstanceMetaDataList().stream()
+                .filter(not(InstanceMetaData::isTerminated))
+                .map(InstanceMetaData::getInstanceId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        List<InstanceStatus> nonTerminatedStatuses = response.getNodeHealthDetails().stream()
+                .filter(nodeHealthDetails -> notTermiatedStackInstanceIds.contains(nodeHealthDetails.getInstanceId()))
+                .map(NodeHealthDetails::getStatus)
+                .collect(Collectors.toList());
+        if (nonTerminatedStatuses.isEmpty()) {
+            LOGGER.debug("FreeIPA is unhealthy because all instances are terminated");
+            response.setStatus(Status.UNHEALTHY);
+        } else if (!areAllStatusTheSame(nonTerminatedStatuses)) {
+            LOGGER.debug("There are different health statuses for FreeIPA so the the overall health is unhealthy");
+            response.setStatus(Status.UNHEALTHY);
+        } else if (hasMissingStatus(nonTerminatedStatuses, notTermiatedStackInstanceIds)) {
+            LOGGER.debug("There are missing health checks for some instances of FreeIPA so the overall health is unhealthy");
+            response.setStatus(Status.UNHEALTHY);
         } else {
-            response.setStatus(DetailedStackStatus.UNHEALTHY.getStatus());
+            response.setStatus(toStatus(nonTerminatedStatuses.get(0)));
         }
         updateResponseWithInstanceIds(response, stack);
         return response;
@@ -178,13 +198,37 @@ public class FreeIpaHealthDetailsService {
         return response;
     }
 
-    private boolean isOverallHealthy(HealthDetailsFreeIpaResponse response) {
-        for (NodeHealthDetails node: response.getNodeHealthDetails()) {
-            if (node.getStatus().equals(InstanceStatus.CREATED)) {
-                return true;
-            }
+    private Status toStatus(InstanceStatus instanceStatus) {
+        switch (instanceStatus) {
+            case REQUESTED:
+                return Status.REQUESTED;
+            case CREATED:
+                return Status.AVAILABLE;
+            case TERMINATED:
+                return Status.DELETE_COMPLETED;
+            case DELETED_ON_PROVIDER_SIDE:
+            case DELETED_BY_PROVIDER:
+                return Status.DELETED_ON_PROVIDER_SIDE;
+            case STOPPED:
+                return Status.STOPPED;
+            case REBOOTING:
+                return Status.UPDATE_IN_PROGRESS;
+            case UNREACHABLE:
+                return Status.UNREACHABLE;
+            case DELETE_REQUESTED:
+                return Status.DELETE_IN_PROGRESS;
+            default:
+                return Status.UNHEALTHY;
         }
-        return false;
+    }
+
+    private boolean areAllStatusTheSame(List<InstanceStatus> response) {
+        InstanceStatus first = response.get(0);
+        return response.stream().allMatch(Predicate.isEqual(first));
+    }
+
+    private boolean hasMissingStatus(List<InstanceStatus> response, Set<String> notTermiatedStackInstanceIds) {
+        return response.size() != notTermiatedStackInstanceIds.size();
     }
 
     private void parseMessages(RPCResponse<CheckResult> rpcResponse, HealthDetailsFreeIpaResponse response, InstanceMetaData instanceMetaData) {
@@ -194,13 +238,13 @@ public class FreeIpaHealthDetailsService {
         if (isHealthCheckPassing(rpcResponse)) {
             nodeResponse.setStatus(InstanceStatus.CREATED);
         } else {
-            nodeResponse.setStatus(InstanceStatus.FAILED);
+            nodeResponse.setStatus(InstanceStatus.UNHEALTHY);
             nodeResponse.setIssues(rpcResponse.getMessages().stream().map(RPCMessage::getMessage).collect(Collectors.toList()));
         }
         response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
     }
 
-    private void legacyParseMessages(RPCResponse<Boolean> rpcResponse, HealthDetailsFreeIpaResponse response) {
+    private void legacyParseMessages(RPCResponse<Boolean> rpcResponse, HealthDetailsFreeIpaResponse response, InstanceMetaData instanceMetaData) {
         String precedingMessage = MESSAGE_UNAVAILABLE;
         NodeHealthDetails nodeResponse = null;
         for (RPCMessage message : rpcResponse.getMessages()) {
@@ -209,7 +253,8 @@ public class FreeIpaHealthDetailsService {
                 nodeResponse = new NodeHealthDetails();
                 response.addNodeHealthDetailsFreeIpaResponses(nodeResponse);
                 nodeResponse.setStatus(InstanceStatus.CREATED);
-                nodeResponse.setName(nodeMatcher.group(NODE_GROUP));
+                nodeResponse.setName(instanceMetaData.getDiscoveryFQDN());
+                nodeResponse.setInstanceId(instanceMetaData.getInstanceId());
             }
             if (nodeResponse == null) {
                 LOGGER.info("No node for message: {}" + message.getMessage());
@@ -220,7 +265,7 @@ public class FreeIpaHealthDetailsService {
                     Matcher matcher = RESULT_PATTERN.matcher(message.getMessage());
                     if (matcher.find()) {
                         if (!STATUS_OK.equals(matcher.group(STATUS_GROUP))) {
-                            nodeResponse.setStatus(InstanceStatus.FAILED);
+                            nodeResponse.setStatus(InstanceStatus.UNHEALTHY);
                             nodeResponse.addIssue(precedingMessage);
                         }
                     }
