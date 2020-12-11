@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault.RemoveVaultEntriesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault.RemoveVaultEntriesResponse;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -47,7 +46,7 @@ public class VaultRemoveHandler implements EventHandler<RemoveVaultEntriesReques
             eventBus.notify(response.getVaultCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveVaultEntriesResponse.class) : EventSelectorUtil.failureSelector(RemoveVaultEntriesResponse.class),
                     new Event<>(event.getHeaders(), response));
-        } catch (FreeIpaClientException e) {
+        } catch (Exception e) {
             LOGGER.error("Removing vault entries for hosts failed: [{}]", request.getHosts(), e);
             Map<String, String> failureResult = request.getHosts().stream().collect(Collectors.toMap(h -> h, h -> e.getMessage()));
             RemoveVaultEntriesResponse response = new RemoveVaultEntriesResponse(request, Collections.emptySet(), failureResult);

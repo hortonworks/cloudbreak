@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -49,7 +48,7 @@ public class ServerRemoveHandler implements EventHandler<RemoveServersRequest> {
             eventBus.notify(response.getServerCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveServersResponse.class) : EventSelectorUtil.failureSelector(RemoveServersResponse.class),
                     new Event<>(event.getHeaders(), response));
-        } catch (FreeIpaClientException e) {
+        } catch (Exception e) {
             LOGGER.error("Removing failed for servers: [{}]", request.getHosts(), e);
             Map<String, String> failureResult = request.getHosts().stream().collect(Collectors.toMap(h -> h, h -> e.getMessage()));
             RemoveServersResponse response = new RemoveServersResponse(request, Collections.emptySet(), failureResult);

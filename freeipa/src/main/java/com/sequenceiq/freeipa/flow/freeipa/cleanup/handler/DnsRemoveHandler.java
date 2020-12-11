@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
@@ -53,7 +52,7 @@ public class DnsRemoveHandler implements EventHandler<RemoveDnsRequest> {
             eventBus.notify(response.getDnsCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveDnsResponse.class) : EventSelectorUtil.failureSelector(RemoveDnsResponse.class),
                     new Event<>(event.getHeaders(), response));
-        } catch (FreeIpaClientException e) {
+        } catch (Exception e) {
             LOGGER.error("Removing DNS entries failed for hosts: [{}]", request.getHosts(), e);
             Map<String, String> failureResult = request.getHosts().stream().collect(Collectors.toMap(h -> h, h -> e.getMessage()));
             RemoveDnsResponse response = new RemoveDnsResponse(request, Collections.emptySet(), failureResult);

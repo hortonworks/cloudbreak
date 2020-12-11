@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientBuilder;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
+import com.sequenceiq.freeipa.client.InvalidFreeIpaStateException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -131,7 +132,7 @@ public class FreeIpaClientFactory {
                         client = getFreeIpaClientForDirectConnect(stack, instanceMetaData, withPing, !instanceIterator.hasNext());
                     }
                 }
-                return client.orElseThrow(() -> createFreeIpaUnableToBuildClient(new FreeIpaHostNotAvailableException("No FreeIPA client was available")));
+                return client.orElseThrow(() -> new FreeIpaHostNotAvailableException("No FreeIPA client was available"));
             } catch (RetryableFreeIpaClientException e) {
                 throw createFreeIpaUnableToBuildClient(e);
             } catch (Exception e) {
@@ -228,10 +229,10 @@ public class FreeIpaClientFactory {
         return new FreeIpaClientBuilder(ADMIN_USER, freeIpa.getAdminPassword(), httpClientConfig, gatewayPort, instanceMetaData.getDiscoveryFQDN(), tracer);
     }
 
-    private FreeIpaClientException createFreeIpaStateIsInvalidException(Status stackStatus) {
+    private InvalidFreeIpaStateException createFreeIpaStateIsInvalidException(Status stackStatus) {
         String message = String.format("Couldn't build FreeIPA client. Because FreeIPA is in invalid state: '%s'", stackStatus);
         LOGGER.warn(message);
-        return new FreeIpaClientException(message, new FreeIpaHostNotAvailableException(message));
+        return new InvalidFreeIpaStateException(message, new FreeIpaHostNotAvailableException(message));
     }
 
     private FreeIpaClientException createFreeIpaUnableToBuildClient(Exception e) {
