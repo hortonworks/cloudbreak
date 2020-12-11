@@ -230,7 +230,7 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertFalse(nodeHealth.getIssues().isEmpty());
-            Assert.assertEquals(InstanceStatus.FAILED, nodeHealth.getStatus());
+            Assert.assertEquals(InstanceStatus.UNHEALTHY, nodeHealth.getStatus());
         }
     }
 
@@ -243,7 +243,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
-        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
+        Assert.assertEquals(Status.UNREACHABLE, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 1);
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertTrue(!nodeHealth.getIssues().isEmpty());
@@ -263,7 +263,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST1))).thenReturn(getLegacyGoodPayload(HOST1));
         Mockito.when(mockIpaClient.serverConnCheck(anyString(), eq(HOST2))).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
-        Assert.assertEquals(Status.AVAILABLE, response.getStatus());
+        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 2);
     }
 
@@ -304,7 +304,7 @@ public class FreeIpaHealthServiceTest {
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertFalse(nodeHealth.getIssues().isEmpty());
-            Assert.assertEquals(InstanceStatus.FAILED, nodeHealth.getStatus());
+            Assert.assertEquals(InstanceStatus.UNHEALTHY, nodeHealth.getStatus());
         }
     }
 
@@ -316,7 +316,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
         Mockito.when(mockIpaHealthClient.nodeHealth()).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
-        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
+        Assert.assertEquals(Status.UNREACHABLE, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 1);
         for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
             Assert.assertTrue(!nodeHealth.getIssues().isEmpty());
@@ -336,7 +336,7 @@ public class FreeIpaHealthServiceTest {
         Mockito.when(mockIpaHealthClient1.nodeHealth()).thenReturn(getGoodPayload(HOST1));
         Mockito.when(mockIpaHealthClient2.nodeHealth()).thenReturn(getErrorPayload(HOST2));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
-        Assert.assertEquals(Status.AVAILABLE, response.getStatus());
+        Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 2);
     }
 
