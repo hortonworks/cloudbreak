@@ -72,7 +72,7 @@ integrationtest:
 
   spot:
     enabledCloudPlatforms:
-      - AWS
+      # disabled
     retryEnabled: false
 
   # aws parameters
