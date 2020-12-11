@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -23,67 +24,51 @@ public class DefaultInternalAccountTagServiceTest {
     @BeforeEach
     public void before() {
         ReflectionTestUtils.setField(underTest, "applyInternalTags", false);
+        ReflectionTestUtils.setField(underTest, "accountTagPattern", "^(?!microsoft|azure|aws|windows|\\s)[a-zA-Z0-9\\{\\-\\_\\}]*[^\\-\\_]$");
     }
 
-    @Test
-    public void testValidateWhenKeyAndValueIsFineShouldDoNothing() {
-        underTest.validate(accountTags("apple", "apple"));
+    @ParameterizedTest(name = "When key={0} and value={1} should be valid: {2}")
+    @MethodSource("tagValidationDataProvider")
+    public void testStackUpdateConfigPoller(String key, String value, boolean valid) {
+        List<AccountTag> accountTags = accountTags(key, value);
+        if (valid) {
+            underTest.validate(accountTags);
+        } else {
+            assertThrows(BadRequestException.class, () -> underTest.validate(accountTags));
+        }
     }
 
-    @Test
-    public void testValidateWhenKeyContainsMicrosoftShouldThrowBadRequest() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("microsoftapple", "apple")));
-    }
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] tagValidationDataProvider() {
+        return new Object[][] {
+                { "microsoftapple",         "apple",            false },
+                { "awsapple",               "apple",            false },
+                { "appleaws-",              "apple",            false },
+                { "apple",                  "microsoftapple",   false },
+                { "apple",                  "awsapple",         false },
+                { "apple",                  "{{{{pear}}}",      false },
+                { "{{{{apple}}}",           "pear",             false },
+                { "test<>'\"\n",            "pear",             false },
+                { "pear",                   "{{{creatorcrn}}}", false },
+                { "car--",                  "car",              false },
+                { "car-car_",               "car",              false },
+                { "{{{creatorcrn}}}",       "pear",             false },
+                { "{{{creatorCrn}}}_",       "pear",            false },
+                { "{{{creatorCrn}}}-",       "pear",            false },
 
-    @Test
-    public void testValidateWhenKeyContainsAwsShouldThrowBadRequest() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("awsapple", "apple")));
-    }
+                { "appleaws",               "apple",            true  },
+                { "car-car_car",            "car",              true  },
+                { "car-car",                "car",              true  },
+                { "{{{creatorCrn}}}",       "pear",             true  },
+                { "apple",                  "apple",            true  },
+                { "car-_car",               "car",              true },
 
-    @Test
-    public void testValidateWhenKeyContainsAwsButNotStartingWithShouldBeFine() {
-        underTest.validate(accountTags("appleaws", "apple"));
-    }
 
-    @Test
-    public void testValidateWhenValueContainsMicrosoftShouldThrowBadRequest() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("apple", "microsoftapple")));
+        };
     }
-
-    @Test
-    public void testValidateWhenValueContainsAwsShouldThrowBadRequest() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("apple", "awsapple")));
-    }
-
-    @Test
-    public void testInValidateWhenValueContainsTooMuchMustache() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("apple", "{{{{pear}}}")));
-    }
-
-    @Test
-    public void testInValidateWhenKeyContainsTooMuchMustache() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("{{{{apple}}}", "pear")));
-    }
-
-    @Test
-    public void testInValidateWhenValueContainsInvalidModelKey() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("pear", "{{{creatorcrn}}}")));
-    }
-
-    @Test
-    public void testInValidateWhenKeyContainsInvalidModelKey() {
-        assertThrows(BadRequestException.class, () -> underTest.validate(accountTags("{{{creatorcrn}}}", "pear")));
-    }
-
-    @Test
-    public void testValidateWhenValueContainsvalidModelKey() {
-        underTest.validate(accountTags("pear", "{{{creatorCrn}}}"));
-    }
-
-    @Test
-    public void testValidateWhenKeyContainsvalidModelKey() {
-        underTest.validate(accountTags("{{{creatorCrn}}}", "pear"));
-    }
+    // CHECKSTYLE:ON
+    // @formatter:on
 
     private List<AccountTag> accountTags(String key, String value) {
         List<AccountTag> accountTagList = new ArrayList<>();
