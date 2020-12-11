@@ -46,7 +46,7 @@ public class UmsAccountAuthorizationServiceTest {
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
-                    checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ));
+                    checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE));
         });
 
         assertEquals("You have no right to perform datalake/read in account 1234", exception.getMessage());
@@ -56,6 +56,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testHasRightOfUserWithValidResourceTypeAndAction() {
         when(entitlementService.isAuthorizationEntitlementRegistered(any())).thenReturn(false);
         when(umsClient.checkAccountRightLegacy(anyString(), anyString(), anyString(), any())).thenReturn(true);
+        when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DATALAKE_READ.getRight());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ));
 
@@ -63,7 +64,7 @@ public class UmsAccountAuthorizationServiceTest {
         when(umsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         assertThrows(AccessDeniedException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
     }
 
     @Test
