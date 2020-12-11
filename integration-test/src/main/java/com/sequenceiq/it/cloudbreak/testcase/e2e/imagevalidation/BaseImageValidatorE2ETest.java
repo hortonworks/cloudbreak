@@ -1,5 +1,17 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation;
 
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.inject.Inject;
+
+import org.testng.annotations.Test;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -14,17 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import org.testng.annotations.Test;
-
-import javax.inject.Inject;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
-import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
 
@@ -70,6 +71,7 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                 .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1)
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
+                .withEmptyNetwork()
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
