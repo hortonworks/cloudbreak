@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.users.RemoveUsersRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.users.RemoveUsersResponse;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -47,7 +46,7 @@ public class UserRemoveHandler implements EventHandler<RemoveUsersRequest> {
             eventBus.notify(response.getUserCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RemoveUsersResponse.class) : EventSelectorUtil.failureSelector(RemoveUsersResponse.class),
                     new Event<>(event.getHeaders(), response));
-        } catch (FreeIpaClientException e) {
+        } catch (Exception e) {
             LOGGER.error("Removing users failed: [{}]", request.getUsers(), e);
             Map<String, String> failureResult = request.getUsers().stream().collect(Collectors.toMap(h -> h, h -> e.getMessage()));
             RemoveUsersResponse response = new RemoveUsersResponse(request, Collections.emptySet(), failureResult);

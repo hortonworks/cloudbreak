@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException;
+import com.sequenceiq.freeipa.client.InvalidFreeIpaStateException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -75,7 +76,7 @@ class FreeIpaClientFactoryTest {
         StackStatus stackStatus = new StackStatus(stack, unreachableState, "The FreeIPA instance is unreachable.", DetailedStackStatus.UNREACHABLE);
         stack.setStackStatus(stackStatus);
 
-        Assertions.assertThrows(FreeIpaClientException.class, () -> underTest.getFreeIpaClientForStack(stack));
+        Assertions.assertThrows(InvalidFreeIpaStateException.class, () -> underTest.getFreeIpaClientForStack(stack));
     }
 
     @Test

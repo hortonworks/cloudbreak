@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsResponse;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -46,7 +45,7 @@ public class CertRevokeHandler implements EventHandler<RevokeCertsRequest> {
             eventBus.notify(response.getCertCleanupFailed().isEmpty()
                             ? EventSelectorUtil.selector(RevokeCertsResponse.class) : EventSelectorUtil.failureSelector(RevokeCertsResponse.class),
                     new Event<>(event.getHeaders(), response));
-        } catch (FreeIpaClientException e) {
+        } catch (Exception e) {
             LOGGER.error("Revoking of certificates failed for hosts: [{}]", request.getHosts(), e);
             Map<String, String> failureResult = request.getHosts().stream().collect(Collectors.toMap(h -> h, h -> e.getMessage()));
             RevokeCertsResponse response = new RevokeCertsResponse(request, Collections.emptySet(), failureResult);
