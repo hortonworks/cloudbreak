@@ -24,6 +24,8 @@ public class AuthUserKeys {
 
     public static final String LEGACY_POWER = "legacy-authz-CB-power";
 
+    public static final String LEGACY_ACC_ENV_ADMIN = "legacy-authz-CB-acc-envadmin";
+
     private AuthUserKeys() {
 
     }
