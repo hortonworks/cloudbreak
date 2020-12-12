@@ -227,6 +227,9 @@ public class MockUserManagementServiceTest {
                 {"enableHbaseCloudStorage false", "enableHbaseCloudStorage", false, "CDP_SDX_HBASE_CLOUD_STORAGE", false},
                 {"enableHbaseCloudStorage true", "enableHbaseCloudStorage", true, "CDP_SDX_HBASE_CLOUD_STORAGE", true},
 
+                {"enableDataLakeEfs false", "enableDataLakeEfs", false, "CDP_DATA_LAKE_AWS_EFS", false},
+                {"enableDataLakeEfs true", "enableDataLakeEfs", true, "CDP_DATA_LAKE_AWS_EFS", true},
+
                 {"enableDatabaseWireEncryption false", "enableDatabaseWireEncryption", false, "CDP_CB_DATABASE_WIRE_ENCRYPTION", false},
                 {"enableDatabaseWireEncryption true", "enableDatabaseWireEncryption", true, "CDP_CB_DATABASE_WIRE_ENCRYPTION", true},
 
