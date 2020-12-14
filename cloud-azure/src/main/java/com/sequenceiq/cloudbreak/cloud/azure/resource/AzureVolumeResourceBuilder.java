@@ -212,16 +212,29 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
         LOGGER.debug("Resource {} will be deleted.", resource.getName());
         AzureClient client = getAzureClient(auth);
-        List<String> managedDiskIds = cloudResourceStatuses
+        List<CloudResourceStatus> removableDisks = cloudResourceStatuses
                 .stream()
-                .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
-                .map(CloudResourceStatus::getCloudResource)
-                .map(this::getVolumeSetAttributes)
-                .map(VolumeSetAttributes::getVolumes)
-                .flatMap(List::stream)
-                .map(VolumeSetAttributes.Volume::getId)
+                .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()) ||
+                        (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()) && volumeSetAttributes.getDeleteOnTermination()))
                 .collect(Collectors.toList());
-        azureUtils.deleteManagedDisks(client, managedDiskIds);
+
+        for (CloudResourceStatus cloudResourceStatus : removableDisks) {
+            CloudResource cloudResource = cloudResourceStatus.getCloudResource();
+            String instanceName = cloudResource.getInstanceId();
+            List<String> volumeIds = getVolumeSetAttributes(cloudResource).getVolumes().stream()
+                    .map(VolumeSetAttributes.Volume::getId)
+                    .collect(Collectors.toList());
+            for (String volumeId : volumeIds) {
+                if (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus())) {
+                    CloudResource resourceGroup = context.getNetworkResources().stream()
+                            .filter(r -> r.getType().equals(ResourceType.AZURE_RESOURCE_GROUP))
+                            .findFirst()
+                            .orElseThrow(() -> new AzureResourceException("Resource group resource not found"));
+                    client.detachDiskFromVm(volumeId, client.getVirtualMachine(resourceGroup.getName(), instanceName));
+                }
+            }
+            azureUtils.deleteManagedDisks(client, volumeIds);
+        }
         return null;
     }
 

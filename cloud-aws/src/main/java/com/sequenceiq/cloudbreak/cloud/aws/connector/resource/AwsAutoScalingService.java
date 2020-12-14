@@ -153,19 +153,28 @@ public class AwsAutoScalingService {
             Date timeBeforeASUpdate, Group group) throws AmazonAutoscalingFailed {
         if (group.getInstancesSize() > 0) {
             LOGGER.debug("Check last activity after AS update. Wait for the first if it doesn't exist. [asGroup: {}]", autoScalingGroupName);
-            Optional<Activity> firstActivity;
+            Optional<Activity> firstActivity = Optional.empty();
             try {
-                Waiter<DescribeScalingActivitiesRequest> autoscalingActivitiesWaiter = customAmazonWaiterProvider
-                        .getAutoscalingActivitiesWaiter(asClient, timeBeforeASUpdate);
-                autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName)));
-                DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
-                        .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
+                AutoScalingGroup scalingGroup = asRetryClient
+                        .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(autoScalingGroupName))
+                        .getAutoScalingGroups().stream().findFirst()
+                        .orElseThrow(() -> new AmazonAutoscalingFailed("Can not find autoscaling group by name: " + autoScalingGroupName));
+                if (group.getInstancesSize() > scalingGroup.getInstances().size()) {
+                    Waiter<DescribeScalingActivitiesRequest> autoscalingActivitiesWaiter = customAmazonWaiterProvider
+                            .getAutoscalingActivitiesWaiter(asClient, timeBeforeASUpdate);
+                    autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest()
+                            .withAutoScalingGroupName(autoScalingGroupName)));
+                    DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
+                            .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
 
-                // if we run into InsufficientInstanceCapacity we can skip to waitForGroup because that method will wait for the required instance count
-                firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst()
-                        .filter(activity -> "failed".equals(activity.getStatusCode().toLowerCase()) &&
-                                !activity.getStatusMessage().contains("InsufficientInstanceCapacity"));
+                    // if we run into InsufficientInstanceCapacity we can skip to waitForGroup because that method will wait for the required instance count
+                    firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst()
+                            .filter(activity -> "failed".equals(activity.getStatusCode().toLowerCase()) &&
+                                    !activity.getStatusMessage().contains("InsufficientInstanceCapacity"));
 
+                } else {
+                    LOGGER.info("Skip checking activities because the AS group contains the desired instance count");
+                }
             } catch (Exception e) {
                 LOGGER.error("Failed to list activities: {}", e.getMessage(), e);
                 throw new AmazonAutoscalingFailed(e.getMessage(), e);

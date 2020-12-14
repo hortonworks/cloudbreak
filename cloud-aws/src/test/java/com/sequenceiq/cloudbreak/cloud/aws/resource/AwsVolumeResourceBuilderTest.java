@@ -156,7 +156,7 @@ class AwsVolumeResourceBuilderTest {
         when(region.value()).thenReturn(REGION_NAME);
         when(awsClient.createAccess(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
         when(cloudStack.getTags()).thenReturn(TAGS);
-        when(awsTaggingService.prepareEc2Tags(authenticatedContext, TAGS)).thenReturn(EC2_TAGS);
+        when(awsTaggingService.prepareEc2Tags(TAGS)).thenReturn(EC2_TAGS);
     }
 
     @Test

@@ -163,7 +163,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        LOGGER.debug("Create volumes on provider");
+        LOGGER.debug("Create volumes on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEc2RetryClient client = getAmazonEC2Client(auth);
 
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
@@ -174,7 +174,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolumeUsingFastApproach);
         TagSpecification tagSpecification = new TagSpecification()
                 .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
-                .withTags(awsTaggingService.prepareEc2Tags(auth, cloudStack.getTags()));
+                .withTags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()));
 
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
@@ -212,16 +212,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                         resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).setVolumes(volumes);
                     }
                 })
-                .map(copyResourceWithNewStatus(CommonStatus.CREATED))
+                .map(copyResourceWithCreatedStatus())
                 .collect(Collectors.toList());
     }
 
-    private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {
+    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus() {
         return resource -> new Builder()
                 .persistent(true)
                 .group(resource.getGroup())
                 .type(resource.getType())
-                .status(status)
+                .status(CommonStatus.CREATED)
                 .name(resource.getName())
                 .params(resource.getParameters())
                 .build();

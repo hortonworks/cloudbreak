@@ -37,7 +37,7 @@ public class AwsTaggingService {
         return tags;
     }
 
-    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
+    public Collection<com.amazonaws.services.ec2.model.Tag> prepareEc2Tags(Map<String, String> userDefinedTags) {
         Collection<com.amazonaws.services.ec2.model.Tag> tags = new ArrayList<>();
         tags.addAll(userDefinedTags.entrySet().stream()
                 .map(entry -> prepareEc2Tag(entry.getKey(), entry.getValue()))
@@ -70,7 +70,7 @@ public class AwsTaggingService {
         Collection<List<String>> volumeIdChunks = rootVolumeIds.stream()
                 .collect(Collectors.groupingBy(it -> counter.getAndIncrement() / MAX_RESOURCE_PER_REQUEST)).values();
 
-        Collection<Tag> tags = prepareEc2Tags(ac, userDefinedTags);
+        Collection<Tag> tags = prepareEc2Tags(userDefinedTags);
         for (List<String> volumeIds : volumeIdChunks) {
             LOGGER.debug("Tag {} root volumes for stack: {}", volumeIds.size(), stackName);
             ec2Client.createTags(new CreateTagsRequest().withResources(volumeIds).withTags(tags));

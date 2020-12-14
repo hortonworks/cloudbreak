@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperation;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureTerminationHelperService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -47,6 +50,9 @@ public class AzureUpscaleService {
     private CloudResourceHelper cloudResourceHelper;
 
     @Inject
+    private AzureTerminationHelperService azureTerminationHelperService;
+
+    @Inject
     private AzureComputeResourceService azureComputeResourceService;
 
     @Inject
@@ -67,6 +73,10 @@ public class AzureUpscaleService {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
 
+        List<CloudResource> newInstances = new ArrayList<>();
+        List<CloudResource> templateResources = new ArrayList<>();
+        List<CloudResource> osDiskResources = new ArrayList<>();
+
         try {
             List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
             CloudResource armTemplate = getArmTemplate(resources, stackName);
@@ -75,10 +85,9 @@ public class AzureUpscaleService {
                     azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE);
             LOGGER.info("Created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
 
-            List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
-            List<CloudResource> newInstances =
-                    azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName);
-            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client);
+            templateResources.addAll(azureCloudResourceService.getDeploymentCloudResources(templateDeployment));
+            newInstances.addAll(azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, scaledGroups, resourceGroupName));
+            osDiskResources.addAll(azureCloudResourceService.getAttachedOsDiskResources(newInstances, resourceGroupName, client));
 
             azureCloudResourceService.saveCloudResources(resourceNotifier, cloudContext, ListUtils.union(templateResources, osDiskResources));
 
@@ -91,7 +100,14 @@ public class AzureUpscaleService {
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
+            List<CloudInstance> newCloudInstances = newInstances.stream()
+                    .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null))
+                    .collect(Collectors.toList());
+            List<CloudResource> allRemovableResource = new ArrayList<>();
+            allRemovableResource.addAll(templateResources);
+            allRemovableResource.addAll(osDiskResources);
+            azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
+            throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure: %s, %s", stackName, e.getMessage()), e);
         }
     }
 

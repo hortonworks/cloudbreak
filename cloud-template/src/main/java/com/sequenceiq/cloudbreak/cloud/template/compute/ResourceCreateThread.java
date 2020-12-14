@@ -124,10 +124,12 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
             } catch (CancellationException e) {
                 throw e;
             } catch (Exception e) {
-                LOGGER.error(format("Failed to create resources for instance: '%s'", instance), e);
+                String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'", instance.getTemplate().getPrivateId(),
+                        e.getMessage());
+                LOGGER.error(errorMessage, e);
                 results.removeIf(crs -> crs.getPrivateId().equals(privateId));
                 for (CloudResource buildableResource : buildableResources) {
-                    results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, e.getMessage(), privateId));
+                    results.add(new CloudResourceStatus(buildableResource, ResourceStatus.FAILED, errorMessage, privateId));
                 }
             }
             LOGGER.debug("Finished creating all compute resources for instance: '{}' stack: '{}'", instance, stackName);

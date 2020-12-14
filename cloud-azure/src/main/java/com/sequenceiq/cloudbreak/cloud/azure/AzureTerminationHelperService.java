@@ -107,7 +107,6 @@ public class AzureTerminationHelperService {
         azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
 
-
         List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
         azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
