@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.withoutLogError;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -119,8 +118,10 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(STACK_AVAILABLE)
                 .then(DistroXClusterCreationTest::distroxServiceTypeTagExists)
                 .then(auditGrpcServiceAssertion::create)
-                .when(distroXClient.forceDelete(), withoutLogError())
-                .await(STACK_DELETED)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.delete())
+                .await(EnvironmentStatus.ARCHIVED)
+                .given(DistroXTestDto.class)
                 .then(auditGrpcServiceAssertion::delete)
                 .validate();
     }
