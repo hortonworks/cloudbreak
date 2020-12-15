@@ -1,11 +1,9 @@
 package com.sequenceiq.it.cloudbreak.assertion.environment;
 
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
@@ -106,27 +104,5 @@ public class EnvironmentNetworkTestAssertion {
                 .filter(e -> e.getType().equals(type))
                 .collect(Collectors.toList())
                 .size();
-    }
-
-    public static Assertion<EnvironmentTestDto, EnvironmentClient> environmentWithEndpointGatewayContainsNeccessaryConfigs(Set<String> subnetIds) {
-        return (testContext, testDto, environmentClient) -> {
-            DetailedEnvironmentResponse environment = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(testDto.getName());
-            isPublicEndpointAccessGatewayEnabled(environment);
-            subnetIdsWerePropagatedCorrectly(environment, subnetIds);
-            return testDto;
-        };
-    }
-
-    private static void isPublicEndpointAccessGatewayEnabled(DetailedEnvironmentResponse environment) {
-        if (environment.getNetwork() == null ||
-                environment.getNetwork().getPublicEndpointAccessGateway() != PublicEndpointAccessGateway.ENABLED) {
-            throw new IllegalArgumentException("Public endpoint access gateway should be enabled!");
-        }
-    }
-
-    private static void subnetIdsWerePropagatedCorrectly(DetailedEnvironmentResponse environment, Set<String> expectedSubnetIds) {
-        if (!expectedSubnetIds.equals(environment.getNetwork().getEndpointGatewaySubnetIds())) {
-            throw new IllegalArgumentException(String.format("Public endpoint access gateway subnet ids should be set to %s!", expectedSubnetIds));
-        }
     }
 }

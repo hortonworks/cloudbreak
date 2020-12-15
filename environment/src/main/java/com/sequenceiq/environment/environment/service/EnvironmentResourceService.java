@@ -147,9 +147,8 @@ public class EnvironmentResourceService {
                 .build();
     }
 
-    public BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas,
-            Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        BaseNetwork network = networkService.saveNetwork(environment, networkDto, accountId, subnetMetas, endpointGatewaySubnetMetas);
+    public BaseNetwork createAndSetNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas) {
+        BaseNetwork network = networkService.saveNetwork(environment, networkDto, accountId, subnetMetas);
         if (network != null) {
             environment.setNetwork(network);
         }

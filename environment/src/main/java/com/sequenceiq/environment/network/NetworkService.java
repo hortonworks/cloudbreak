@@ -53,13 +53,12 @@ public class NetworkService {
         this.networkCreationValidator = networkCreationValidator;
     }
 
-    public BaseNetwork saveNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas,
-            Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+    public BaseNetwork saveNetwork(Environment environment, NetworkDto networkDto, String accountId, Map<String, CloudSubnet> subnetMetas) {
         BaseNetwork baseNetwork = null;
         if (networkDto != null) {
             EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(getCloudPlatform(environment));
             if (environmentNetworkConverter != null) {
-                baseNetwork = environmentNetworkConverter.convert(environment, networkDto, subnetMetas, endpointGatewaySubnetMetas);
+                baseNetwork = environmentNetworkConverter.convert(environment, networkDto, subnetMetas);
                 baseNetwork.setId(getIfNotNull(networkDto, NetworkDto::getId));
                 baseNetwork.setResourceCrn(createCRN(accountId));
                 baseNetwork.setAccountId(accountId);
@@ -101,10 +100,6 @@ public class NetworkService {
         try {
             Map<String, CloudSubnet> subnetMetadatas = cloudNetworkService.retrieveSubnetMetadata(environment, cloneNetworkDto);
             originalNetwork.setSubnetMetas(subnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
-
-            Map<String, CloudSubnet> endpointGatewaySubnetMetadatas =
-                cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(environment, cloneNetworkDto);
-            originalNetwork.setEndpointGatewaySubnetMetas(endpointGatewaySubnetMetadatas.values().stream().collect(toMap(CloudSubnet::getId, c -> c)));
 
             Network network = environmentNetworkConverter.convertToNetwork(originalNetwork);
             NetworkCidr networkCidr = environmentNetworkService.getNetworkCidr(network, environment.getCloudPlatform(), environment.getCredential());

@@ -103,8 +103,8 @@ class EnvironmentResourceServiceTest {
         Environment environment = new Environment();
         NetworkDto networkDto = null;
         BaseNetwork network = new AwsNetwork();
-        when(networkService.saveNetwork(eq(environment), eq(networkDto), eq(ACCOUNT_ID), any(), any())).thenReturn(network);
-        assertEquals(network, environmentResourceServiceUnderTest.createAndSetNetwork(environment, networkDto, ACCOUNT_ID, Map.of(), Map.of()));
+        when(networkService.saveNetwork(eq(environment), eq(networkDto), eq(ACCOUNT_ID), any())).thenReturn(network);
+        assertEquals(network, environmentResourceServiceUnderTest.createAndSetNetwork(environment, networkDto, ACCOUNT_ID, Map.of()));
     }
 
     @Test

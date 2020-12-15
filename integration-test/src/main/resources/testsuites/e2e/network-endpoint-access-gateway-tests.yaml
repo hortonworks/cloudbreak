@@ -1,5 +1,0 @@
-name: "network-endpoint-access-gateway-tests"
-tests:
-  - name: "network_endpoint_access_gateway_tests"
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentWithPublicEndpointAccessGatewayTests

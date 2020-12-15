@@ -40,9 +40,6 @@ public class NetworkDtoToResponseConverter {
                 .withServiceEndpointCreation(network.getServiceEndpointCreation())
                 .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
                 .withExistingNetwork(RegistrationType.EXISTING == network.getRegistrationType())
-                .withUsePublicEndpointAccessGateway(network.getPublicEndpointAccessGateway())
-                .withEndpointGatewaySubnetMetas(network.getEndpointGatewaySubnetMetas())
-                .withEndpointGatewaySubnetIds(network.getEndpointGatewaySubnetIds())
                 .withAws(getIfNotNull(network.getAws(), p -> EnvironmentNetworkAwsParams.EnvironmentNetworkAwsParamsBuilder
                         .anEnvironmentNetworkAwsParams()
                         .withVpcId(p.getVpcId())

@@ -28,11 +28,9 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
-import com.sequenceiq.cloudbreak.converter.PublicEndpointAccessGatewayConverter;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentAwareResource;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.network.dao.domain.converter.ServiceEndpointCreationConverter;
@@ -80,13 +78,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
     @Column(nullable = false)
     @Convert(converter = ServiceEndpointCreationConverter.class)
     private ServiceEndpointCreation serviceEndpointCreation;
-
-    @Convert(converter = PublicEndpointAccessGatewayConverter.class)
-    private PublicEndpointAccessGateway publicEndpointAccessGateway;
-
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json endpointGatewaySubnetMetas = new Json(Map.of());
 
     @Column(nullable = false)
     @Convert(converter = OutboundInternetTrafficConverter.class)
@@ -175,23 +166,6 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     public Map<String, CloudSubnet> getSubnetMetas() {
         return JsonUtil.jsonToType(subnetMetas.getValue(), new TypeReference<>() {
-        });
-    }
-
-    public PublicEndpointAccessGateway getPublicEndpointAccessGateway() {
-        return publicEndpointAccessGateway;
-    }
-
-    public void setPublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
-        this.publicEndpointAccessGateway = publicEndpointAccessGateway;
-    }
-
-    public void setEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        this.endpointGatewaySubnetMetas = new Json(endpointGatewaySubnetMetas);
-    }
-
-    public Map<String, CloudSubnet> getEndpointGatewaySubnetMetas() {
-        return JsonUtil.jsonToType(endpointGatewaySubnetMetas.getValue(), new TypeReference<>() {
         });
     }
 

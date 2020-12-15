@@ -80,10 +80,8 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
                             LOGGER.debug("Environment ({}) dto has network, hence we're filling it's related subnet fields", environment.getName());
                             environmentDto.getNetwork().setSubnetMetas(cloudNetworkService.retrieveSubnetMetadata(environmentDto,
                                     environmentDto.getNetwork()));
-                            environmentDto.getNetwork().setEndpointGatewaySubnetMetas(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
-                                environmentDto, environmentDto.getNetwork()));
                             environmentResourceService.createAndSetNetwork(environment, environmentDto.getNetwork(), environment.getAccountId(),
-                                    environmentDto.getNetwork().getSubnetMetas(), environmentDto.getNetwork().getEndpointGatewaySubnetMetas());
+                                    environmentDto.getNetwork().getSubnetMetas());
                         } else {
                             LOGGER.debug("Environment ({}) dto has no network!", environment.getName());
                         }

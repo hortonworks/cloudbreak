@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.PrivateEndpointTest.PRIVATE_ENDPOINT_
 import java.util.Set;
 
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
@@ -101,16 +100,6 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto withMock(EnvironmentNetworkMockParams mock) {
         getRequest().setMock(mock);
-        return this;
-    }
-
-    public EnvironmentNetworkTestDto withPublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
-        getRequest().setPublicEndpointAccessGateway(publicEndpointAccessGateway);
-        return this;
-    }
-
-    public EnvironmentNetworkTestDto withEndpointGatewaySubnetIds(Set<String> endpointGatewaySubnetIds) {
-        getRequest().setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
         return this;
     }
 

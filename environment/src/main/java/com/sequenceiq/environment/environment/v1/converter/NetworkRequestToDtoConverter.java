@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -87,17 +86,12 @@ public class NetworkRequestToDtoConverter {
             builder.withSubnetMetas(network.getSubnetIds().stream()
                     .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
         }
-        if (network.getEndpointGatewaySubnetIds() != null) {
-            builder.withEndpointGatewaySubnetMetas(network.getEndpointGatewaySubnetIds().stream()
-                .collect(Collectors.toMap(id -> id, id -> new CloudSubnet(id, id))));
-        }
         return builder
                 .withNetworkCidr(network.getNetworkCidr())
                 .withNetworkCidrs(getNetworkCidrs(network))
                 .withPrivateSubnetCreation(getPrivateSubnetCreation(network))
                 .withServiceEndpointCreation(getServiceEndpointCreation(network))
                 .withOutboundInternetTraffic(getOutboundInternetTraffic(network))
-                .withUsePublicEndpointAccessGateway(getUsePublicEndpointAccessGateway(network))
                 .build();
     }
 
@@ -115,9 +109,5 @@ public class NetworkRequestToDtoConverter {
 
     private OutboundInternetTraffic getOutboundInternetTraffic(EnvironmentNetworkRequest network) {
         return Optional.ofNullable(network.getOutboundInternetTraffic()).orElse(OutboundInternetTraffic.ENABLED);
-    }
-
-    private PublicEndpointAccessGateway getUsePublicEndpointAccessGateway(EnvironmentNetworkRequest network) {
-        return Optional.ofNullable(network.getPublicEndpointAccessGateway()).orElse(PublicEndpointAccessGateway.DISABLED);
     }
 }

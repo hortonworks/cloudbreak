@@ -14,14 +14,6 @@ public class EnvironmentModelDescription {
     public static final String NETWORKCIDRS = "The network cidrs for the configured vpc";
     public static final String PRIVATE_SUBNET_CREATION = "A flag to enable or disable the private subnet creation.";
     public static final String SERVICE_ENDPOINT_CREATION = "A flag to enable or disable the service endpoint creation.";
-    public static final String PUBLIC_ENDPOINT_ACCESS_GATEWAY = "A flag to enable the Public Endpoint Access Gateway, which provides public UI/API " +
-        "access to private data lakes and data hubs.";
-    public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS = "Subnet ids for the Public Endpoint Access Gateway. If provided, these " +
-        "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
-        "selected from the subnet list provided for environment creation. (Optional)";
-    public static final String ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS = "Subnet metadata for the Public Endpoint Access Gateway. If provided, these " +
-        "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
-        "selected from the subnet list provided for environment creation. (Optional)";
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
     public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";

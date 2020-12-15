@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -53,9 +52,6 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.NETWORKCIDRS)
     private Set<String> networkCidrs = new HashSet<>();
-
-    @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS)
-    private Map<String, CloudSubnet> gatewayEndpointSubnetMetas;
 
     public String getCrn() {
         return crn;
@@ -137,14 +133,6 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         this.networkCidrs = networkCidrs;
     }
 
-    public Map<String, CloudSubnet> getGatewayEndpointSubnetMetas() {
-        return gatewayEndpointSubnetMetas;
-    }
-
-    public void setGatewayEndpointSubnetMetas(Map<String, CloudSubnet> gatewayEndpointSubnetMetas) {
-        this.gatewayEndpointSubnetMetas = gatewayEndpointSubnetMetas;
-    }
-
     public static final class EnvironmentNetworkResponseBuilder {
         private String crn;
 
@@ -185,12 +173,6 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
         private EnvironmentNetworkMockParams mock;
 
         private EnvironmentNetworkGcpParams gcp;
-
-        private PublicEndpointAccessGateway publicEndpointAccessGateway;
-
-        private Map<String, CloudSubnet> endpointGatewaySubnetMetas;
-
-        private Set<String> endpointGatewaySubnetIds;
 
         private EnvironmentNetworkResponseBuilder() {
         }
@@ -299,21 +281,6 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
-        public EnvironmentNetworkResponseBuilder withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
-            this.publicEndpointAccessGateway = publicEndpointAccessGateway;
-            return this;
-        }
-
-        public EnvironmentNetworkResponseBuilder withEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-            this.endpointGatewaySubnetMetas = endpointGatewaySubnetMetas;
-            return this;
-        }
-
-        public EnvironmentNetworkResponseBuilder withEndpointGatewaySubnetIds(Set<String> endpointGatewaySubnetIds) {
-            this.endpointGatewaySubnetIds = endpointGatewaySubnetIds;
-            return this;
-        }
-
         public EnvironmentNetworkResponse build() {
             EnvironmentNetworkResponse environmentNetworkResponse = new EnvironmentNetworkResponse();
             environmentNetworkResponse.setCrn(crn);
@@ -336,9 +303,6 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setMlxSubnets(mlxSubnets);
             environmentNetworkResponse.setDwxSubnets(dwxSubnets);
             environmentNetworkResponse.setLiftieSubnets(liftieSubnets);
-            environmentNetworkResponse.setPublicEndpointAccessGateway(publicEndpointAccessGateway);
-            environmentNetworkResponse.setGatewayEndpointSubnetMetas(endpointGatewaySubnetMetas);
-            environmentNetworkResponse.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);
             return environmentNetworkResponse;
         }
     }

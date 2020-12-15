@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
@@ -42,12 +41,6 @@ public abstract class EnvironmentNetworkBase {
 
     @ApiModelProperty(EnvironmentModelDescription.SERVICE_ENDPOINT_CREATION)
     private ServiceEndpointCreation serviceEndpointCreation = ServiceEndpointCreation.DISABLED;
-
-    @ApiModelProperty(EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)
-    private PublicEndpointAccessGateway publicEndpointAccessGateway = PublicEndpointAccessGateway.DISABLED;
-
-    @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_IDS)
-    private Set<String> endpointGatewaySubnetIds = Set.of();
 
     @ApiModelProperty(EnvironmentModelDescription.OUTBOUND_INTERNET_TRAFFIC)
     private OutboundInternetTraffic outboundInternetTraffic = OutboundInternetTraffic.ENABLED;
@@ -99,22 +92,6 @@ public abstract class EnvironmentNetworkBase {
         this.serviceEndpointCreation = serviceEndpointCreation;
     }
 
-    public PublicEndpointAccessGateway getPublicEndpointAccessGateway() {
-        return publicEndpointAccessGateway;
-    }
-
-    public void setPublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
-        this.publicEndpointAccessGateway = publicEndpointAccessGateway;
-    }
-
-    public Set<String> getEndpointGatewaySubnetIds() {
-        return endpointGatewaySubnetIds;
-    }
-
-    public void setEndpointGatewaySubnetIds(Set<String> endpointGatewaySubnetIds) {
-        this.endpointGatewaySubnetIds = endpointGatewaySubnetIds;
-    }
-
     public OutboundInternetTraffic getOutboundInternetTraffic() {
         return outboundInternetTraffic;
     }
@@ -162,8 +139,6 @@ public abstract class EnvironmentNetworkBase {
                 ", networkCidr='" + networkCidr + '\'' +
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
-                ", publicEndpointAccessGateway=" + publicEndpointAccessGateway +
-                ", endpointGatewaySubnetIds=" + endpointGatewaySubnetIds +
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", aws=" + aws +
                 ", gcp=" + gcp +
