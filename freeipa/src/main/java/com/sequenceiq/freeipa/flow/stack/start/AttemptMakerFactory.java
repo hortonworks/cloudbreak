@@ -6,20 +6,20 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 
 @Service
 public class AttemptMakerFactory {
-    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
+    private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
-    public AttemptMakerFactory(FreeIpaHealthDetailsService freeIpaHealthDetailsService) {
-        this.freeIpaHealthDetailsService = freeIpaHealthDetailsService;
+    public AttemptMakerFactory(FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService) {
+        this.freeIpaInstanceHealthDetailsService = freeIpaInstanceHealthDetailsService;
     }
 
     public OneFreeIpaReachableAttempt create(Stack stack, Set<InstanceMetaData> instanceMetaDataSet) {
         if (stack == null || instanceMetaDataSet == null || instanceMetaDataSet.isEmpty()) {
             throw new IllegalArgumentException("Stack and instanceMetaDataSet should not been empty");
         }
-        return new OneFreeIpaReachableAttempt(freeIpaHealthDetailsService, stack, instanceMetaDataSet);
+        return new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceMetaDataSet);
     }
 }
