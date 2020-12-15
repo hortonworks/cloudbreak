@@ -15,9 +15,9 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public abstract class ClusterTemplateV4Base implements JsonEntity {
 
-    @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
+    @Size(max = 40, min = 5, message = "The length of name has to be in range of 5 to 40")
     @Pattern(regexp = "^[^;\\/%]*$",
-            message = "The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon")
+            message = "Name should not contain semicolon, forward slash or percentage characters")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;

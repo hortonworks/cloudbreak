@@ -251,7 +251,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .withName(ILLEGAL_CT_NAME)
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
                 .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("The length of the cluster template's name has to be in range of 1 to 100 and should not contain semicolon"))
+                        .withExpectedMessage("Name should not contain semicolon, forward slash or percentage characters"))
                 .validate();
     }
 
@@ -291,7 +291,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .withName(getLongNameGenerator().stringGenerator(2))
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
                 .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("The length of the cluster's name has to be in range of 5 to 40")
+                        .withExpectedMessage("The length of name has to be in range of 5 to 40")
                 )
                 .validate();
     }
@@ -433,7 +433,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                         .withSkipOnFail(false))
                 .expect(BadRequestException.class, RunningParameter.key(generatedKey1).withExpectedMessage("must not be null"))
                 .expect(BadRequestException.class, RunningParameter.key(generatedKey2)
-                        .withExpectedMessage("The length of the cluster's name has to be in range of 5 to 40"))
+                        .withExpectedMessage("The length of name has to be in range of 5 to 40"))
                 .validate();
     }
 
