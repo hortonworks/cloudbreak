@@ -43,7 +43,7 @@ public class GatewayV4Response implements JsonEntity {
     @ApiModelProperty(value = GatewayModelDescription.KNOX_GATEWAY_TYPE, allowableValues = "CENTRAL,INDIVIDUAL")
     private GatewayType gatewayType;
 
-    @ApiModelProperty(value = GatewayModelDescription.KNOX_SSO_TYPE, allowableValues = "SSO_PROVIDER,NONE")
+    @ApiModelProperty(value = GatewayModelDescription.KNOX_SSO_TYPE, allowableValues = "SSO_PROVIDER,SSO_PROVIDER_FROM_UMS,NONE,PAM")
     private SSOType ssoType;
 
     public String getPath() {
