@@ -48,11 +48,14 @@ import com.google.api.services.compute.model.NetworkList;
 import com.google.api.services.compute.model.RegionList;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
+import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
@@ -409,7 +412,25 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudAccessConfigs(new HashSet<>());
+        Iam iam = GcpStackUtil.buildIam(cloudCredential);
+        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        Set<CloudAccessConfig> collect = new HashSet<>();
+        try {
+            ListServiceAccountsResponse listServiceAccountsResponse = iam
+                    .projects()
+                    .serviceAccounts()
+                    .list("projects/" + projectId)
+                    .execute();
+
+            collect = listServiceAccountsResponse
+                    .getAccounts()
+                    .stream()
+                    .map(e -> new CloudAccessConfig(e.getName(), e.getEmail(), new HashMap<>()))
+                    .collect(Collectors.toSet());
+            return new CloudAccessConfigs(collect);
+        } catch (Exception ex) {
+            return new CloudAccessConfigs(collect);
+        }
     }
 
     @Override
