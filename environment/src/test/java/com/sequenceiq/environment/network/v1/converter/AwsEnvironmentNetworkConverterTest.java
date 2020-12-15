@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +50,15 @@ class AwsEnvironmentNetworkConverterTest {
 
     private static final String SUBNET_3 = "subnet-3";
 
+    private static final String PUBLIC_SUBNET_1 = "public-subnet-1";
+
+    private static final String PUBLIC_SUBNET_2 = "public-subnet-2";
+
+    private static final String PUBLIC_SUBNET_3 = "public-subnet-3";
+
     private static final Set<String> SUBNET_IDS = Set.of(SUBNET_1, SUBNET_2, SUBNET_3);
+
+    private static final Set<String> PUBLIC_SUBNET_IDS = Set.of(PUBLIC_SUBNET_1, PUBLIC_SUBNET_2, PUBLIC_SUBNET_3);
 
     private static final String ENV_NAME = "testEnv";
 
@@ -81,7 +90,7 @@ class AwsEnvironmentNetworkConverterTest {
                 .withSubnetMetas(createSubnetMetas())
                 .build();
 
-        AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of());
+        AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of(), Map.of());
 
         assertEquals(NETWORK_NAME, actual.getName());
         assertEquals(VPC_ID, actual.getVpcId());
@@ -99,7 +108,7 @@ class AwsEnvironmentNetworkConverterTest {
                 .withSubnetMetas(createSubnetMetas())
                 .build();
 
-        AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of());
+        AwsNetwork actual = (AwsNetwork) underTest.convert(environment, networkDto, Map.of(), Map.of());
 
         assertEquals(environment.getName(), actual.getName());
         assertNull(actual.getVpcId());
@@ -121,6 +130,32 @@ class AwsEnvironmentNetworkConverterTest {
         assertTrue(actual.getSubnetMetas().containsKey(SUBNET_1));
         assertTrue(actual.getSubnetMetas().containsKey(SUBNET_2));
         assertTrue(actual.getSubnetMetas().containsKey(SUBNET_3));
+        assertNull(actual.getPublicEndpointAccessGateway());
+        assertEquals(0, actual.getEndpointGatewaySubnetIds().size());
+        assertEquals(awsNetwork.getNetworkCidr(), actual.getNetworkCidr());
+        assertEquals(awsNetwork.getResourceCrn(), actual.getResourceCrn());
+        assertEquals(awsNetwork.getVpcId(), actual.getAws().getVpcId());
+    }
+
+    @Test
+    void testConvertToDtoShouldConvertABaseNetworkWithEndpointSubnetsIntoANetworkDto() {
+        AwsNetwork awsNetwork = createAwsNetwork();
+        awsNetwork.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
+        awsNetwork.setEndpointGatewaySubnetMetas(createEndpointSubnetMetas());
+
+        NetworkDto actual = underTest.convertToDto(awsNetwork);
+
+        assertEquals(awsNetwork.getId(), actual.getId());
+        assertEquals(awsNetwork.getName(), actual.getNetworkName());
+        assertEquals(SUBNET_IDS, actual.getSubnetIds());
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_1));
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_2));
+        assertTrue(actual.getSubnetMetas().containsKey(SUBNET_3));
+        assertEquals(PublicEndpointAccessGateway.ENABLED, actual.getPublicEndpointAccessGateway());
+        assertEquals(PUBLIC_SUBNET_IDS, actual.getEndpointGatewaySubnetIds());
+        assertTrue(actual.getEndpointGatewaySubnetMetas().containsKey(PUBLIC_SUBNET_1));
+        assertTrue(actual.getEndpointGatewaySubnetMetas().containsKey(PUBLIC_SUBNET_2));
+        assertTrue(actual.getEndpointGatewaySubnetMetas().containsKey(PUBLIC_SUBNET_3));
         assertEquals(awsNetwork.getNetworkCidr(), actual.getNetworkCidr());
         assertEquals(awsNetwork.getResourceCrn(), actual.getResourceCrn());
         assertEquals(awsNetwork.getVpcId(), actual.getAws().getVpcId());
@@ -204,6 +239,10 @@ class AwsEnvironmentNetworkConverterTest {
 
     private Map<String, CloudSubnet> createSubnetMetas() {
         return Map.of(SUBNET_1, new CloudSubnet(), SUBNET_2, new CloudSubnet(), SUBNET_3, new CloudSubnet());
+    }
+
+    private Map<String, CloudSubnet> createEndpointSubnetMetas() {
+        return Map.of(PUBLIC_SUBNET_1, new CloudSubnet(), PUBLIC_SUBNET_2, new CloudSubnet(), PUBLIC_SUBNET_3, new CloudSubnet());
     }
 
     private Environment createEnvironment() {

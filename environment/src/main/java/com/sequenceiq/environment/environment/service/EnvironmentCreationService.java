@@ -95,7 +95,8 @@ public class EnvironmentCreationService {
         try {
             environment = environmentService.save(environment);
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
-                    getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas));
+                    getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas),
+                    getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.saveWithOwnerRoleAssignment(environment);
             reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());

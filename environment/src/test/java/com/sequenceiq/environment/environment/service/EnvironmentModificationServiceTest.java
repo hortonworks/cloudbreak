@@ -135,7 +135,7 @@ class EnvironmentModificationServiceTest {
         when(environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(value));
         when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
-        when(networkService.saveNetwork(any(), any(), anyString(), any())).thenReturn(new AwsNetwork());
+        when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
 
         environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
 
