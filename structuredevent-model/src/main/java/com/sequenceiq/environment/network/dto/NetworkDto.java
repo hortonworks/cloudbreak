@@ -12,6 +12,7 @@ import org.apache.commons.collections4.MapUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -42,6 +43,10 @@ public class NetworkDto {
 
     private Map<String, CloudSubnet> subnetMetas;
 
+    private PublicEndpointAccessGateway publicEndpointAccessGateway;
+
+    private Map<String, CloudSubnet> endpointGatewaySubnetMetas;
+
     private final Map<String, CloudSubnet> cbSubnets;
 
     private final Map<String, CloudSubnet> dwxSubnets;
@@ -69,6 +74,9 @@ public class NetworkDto {
         yarn = builder.yarn;
         mock = builder.mock;
         subnetMetas = MapUtils.isEmpty(builder.subnetMetas) ? new HashMap<>() : builder.subnetMetas;
+        publicEndpointAccessGateway = builder.publicEndpointAccessGateway;
+        endpointGatewaySubnetMetas = MapUtils.isEmpty(builder.endpointGatewaySubnetMetas) ?
+            new HashMap<>() : builder.endpointGatewaySubnetMetas;
         cbSubnets = builder.cbSubnets;
         dwxSubnets = builder.dwxSubnets;
         mlxSubnets = builder.mlxSubnets;
@@ -132,6 +140,10 @@ public class NetworkDto {
         return subnetMetas != null ? subnetMetas.keySet() : new HashSet<>();
     }
 
+    public Set<String> getEndpointGatewaySubnetIds() {
+        return endpointGatewaySubnetMetas != null ? endpointGatewaySubnetMetas.keySet() : new HashSet<>();
+    }
+
     public String getNetworkCidr() {
         return networkCidr;
     }
@@ -146,6 +158,22 @@ public class NetworkDto {
 
     public void setSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
         this.subnetMetas = subnetMetas;
+    }
+
+    public PublicEndpointAccessGateway getPublicEndpointAccessGateway() {
+        return publicEndpointAccessGateway;
+    }
+
+    public void setPublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
+        this.publicEndpointAccessGateway = publicEndpointAccessGateway;
+    }
+
+    public Map<String, CloudSubnet> getEndpointGatewaySubnetMetas() {
+        return endpointGatewaySubnetMetas;
+    }
+
+    public void setEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+        this.endpointGatewaySubnetMetas = endpointGatewaySubnetMetas;
     }
 
     public Map<String, CloudSubnet> getCbSubnets() {
@@ -211,6 +239,8 @@ public class NetworkDto {
                 ", networkCidr='" + networkCidr + '\'' +
                 ", networkCidrs='" + networkCidrs + '\'' +
                 ", subnetMetas=" + subnetMetas +
+                ", publicEndpointAccessGateway=" + publicEndpointAccessGateway +
+                ", endpointGatewaySubnetMetas=" + endpointGatewaySubnetMetas +
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
@@ -240,6 +270,10 @@ public class NetworkDto {
         private MockParams mock;
 
         private Map<String, CloudSubnet> subnetMetas;
+
+        private PublicEndpointAccessGateway publicEndpointAccessGateway;
+
+        private Map<String, CloudSubnet> endpointGatewaySubnetMetas;
 
         private Map<String, CloudSubnet> cbSubnets;
 
@@ -276,6 +310,8 @@ public class NetworkDto {
             yarn = networkDto.yarn;
             mock = networkDto.mock;
             subnetMetas = networkDto.subnetMetas;
+            publicEndpointAccessGateway = networkDto.publicEndpointAccessGateway;
+            endpointGatewaySubnetMetas = networkDto.endpointGatewaySubnetMetas;
             networkCidr = networkDto.networkCidr;
             privateSubnetCreation = networkDto.privateSubnetCreation;
             serviceEndpointCreation = networkDto.serviceEndpointCreation;
@@ -332,6 +368,16 @@ public class NetworkDto {
 
         public Builder withSubnetMetas(Map<String, CloudSubnet> subnetMetas) {
             this.subnetMetas = subnetMetas;
+            return this;
+        }
+
+        public Builder withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway publicEndpointAccessGateway) {
+            this.publicEndpointAccessGateway = publicEndpointAccessGateway;
+            return this;
+        }
+
+        public Builder withEndpointGatewaySubnetMetas(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
+            this.endpointGatewaySubnetMetas = endpointGatewaySubnetMetas;
             return this;
         }
 
