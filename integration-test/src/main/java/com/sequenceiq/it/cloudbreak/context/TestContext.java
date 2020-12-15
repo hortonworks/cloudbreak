@@ -654,7 +654,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <U extends MicroserviceClient> U getMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String who) {
 
-        if (clients.get(who).isEmpty()) {
+        if (clients.get(who) == null || clients.get(who).isEmpty()) {
             throw new IllegalStateException("Should create a client for this user: " + who);
         }
 

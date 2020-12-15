@@ -124,8 +124,8 @@ public class InstanceWaitObject implements WaitObject {
 
     @Override
     public boolean isDeletionCheck() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED);
-        return failedStatuses.contains(desiredStatus);
+        Set<InstanceStatus> deletedStatuses = Set.of(DELETED_ON_PROVIDER_SIDE, DELETED_BY_PROVIDER, DECOMMISSIONED, TERMINATED);
+        return deletedStatuses.contains(desiredStatus);
     }
 
     @Override
