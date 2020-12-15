@@ -73,7 +73,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .when(sdxTestClient.rotateAutotlsCertificates(), key(sdx))
-                .await(SdxClusterStatusResponse.CERT_ROTATION_IN_PROGRESS, key(sdx))
+                .await(SdxClusterStatusResponse.CERT_ROTATION_IN_PROGRESS, key(sdx).withWaitForFlow(false))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {

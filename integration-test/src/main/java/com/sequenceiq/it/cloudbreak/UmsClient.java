@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -10,6 +11,7 @@ import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
@@ -60,5 +62,10 @@ public class UmsClient extends MicroserviceClient {
 
     public GrpcUmsClient getUmsClient() {
         return umsClient;
+    }
+
+    @Override
+    public Set<String> supportedTestDtos() {
+        return Set.of(UmsTestDto.class.getSimpleName());
     }
 }
