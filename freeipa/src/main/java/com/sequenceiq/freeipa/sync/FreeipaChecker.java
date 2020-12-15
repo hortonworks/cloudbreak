@@ -22,7 +22,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 
 @Component
 public class FreeipaChecker {
@@ -30,7 +30,7 @@ public class FreeipaChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaChecker.class);
 
     @Inject
-    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
+    private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
     private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
@@ -38,7 +38,7 @@ public class FreeipaChecker {
             List<RPCResponse<Boolean>> responses = new LinkedList<>();
             for (InstanceMetaData instanceMetaData : checkableInstances) {
                 try {
-                    RPCResponse<Boolean> response = checkedMeasure(() -> freeIpaHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
+                    RPCResponse<Boolean> response = checkedMeasure(() -> freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
                             ":::Auto sync::: FreeIPA health check ran in {}ms");
                     responses.add(response);
                     if (response.getResult()) {

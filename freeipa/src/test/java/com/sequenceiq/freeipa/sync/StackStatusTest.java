@@ -36,7 +36,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -65,7 +65,7 @@ class StackStatusTest {
     private FlowLogService flowLogService;
 
     @MockBean
-    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
+    private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
     @MockBean
     private StackInstanceProviderChecker stackInstanceProviderChecker;
@@ -123,7 +123,7 @@ class StackStatusTest {
         when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(notTerminatedInstances);
 
         rpcResponse = new RPCResponse<>();
-        when(freeIpaHealthDetailsService.checkFreeIpaHealth(eq(stack), any())).thenReturn(rpcResponse);
+        when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(eq(stack), any())).thenReturn(rpcResponse);
     }
 
     private InstanceMetaData createInstance(String instanceName) {

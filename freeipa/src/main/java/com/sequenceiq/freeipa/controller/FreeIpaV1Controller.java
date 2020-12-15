@@ -12,8 +12,6 @@ import javax.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
@@ -41,7 +39,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesR
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -52,7 +49,7 @@ import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
-import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
@@ -81,7 +78,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     private FreeIpaListService freeIpaListService;
 
     @Inject
-    private FreeIpaHealthDetailsService freeIpaHealthDetailsService;
+    private FreeIpaStackHealthDetailsService freeIpaStackHealthDetailsService;
 
     @Inject
     private FreeIpaRootCertificateService freeIpaRootCertificateService;
@@ -159,13 +156,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public HealthDetailsFreeIpaResponse healthDetails(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return freeIpaHealthDetailsService.getHealthDetails(environmentCrn, accountId);
+        return freeIpaStackHealthDetailsService.getHealthDetails(environmentCrn, accountId);
     }
 
     @Override

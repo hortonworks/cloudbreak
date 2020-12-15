@@ -176,7 +176,9 @@ public class FreeIpaClientBuilder {
                 }
                 LOGGER.debug("Freeipa is reachable");
             } catch (Exception e) {
-                throw new FreeIpaHostNotAvailableException("Ping failed", e);
+                String msg = "Ping failed";
+                LOGGER.debug(msg, e);
+                throw new RetryableFreeIpaClientException(msg, new FreeIpaHostNotAvailableException(msg, e));
             }
         }
         CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyIdHeader, stickyId);

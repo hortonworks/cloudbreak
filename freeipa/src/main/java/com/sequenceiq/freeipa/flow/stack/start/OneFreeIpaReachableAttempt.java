@@ -16,19 +16,20 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.FreeIpaHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 
 public class OneFreeIpaReachableAttempt implements AttemptMaker<Void> {
     private static final Logger LOGGER = LoggerFactory.getLogger(OneFreeIpaReachableAttempt.class);
 
-    private final FreeIpaHealthDetailsService freeIpaHealthDetailsService;
+    private final FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
 
     private final Stack stack;
 
     private final Set<InstanceMetaData> instanceMetaDataSet;
 
-    public OneFreeIpaReachableAttempt(FreeIpaHealthDetailsService freeIpaHealthDetailsService, Stack stack, Set<InstanceMetaData> instanceMetaDataSet) {
-        this.freeIpaHealthDetailsService = freeIpaHealthDetailsService;
+    public OneFreeIpaReachableAttempt(FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService, Stack stack,
+            Set<InstanceMetaData> instanceMetaDataSet) {
+        this.freeIpaInstanceHealthDetailsService = freeIpaInstanceHealthDetailsService;
         this.stack = stack;
         this.instanceMetaDataSet = instanceMetaDataSet;
     }
@@ -42,7 +43,7 @@ public class OneFreeIpaReachableAttempt implements AttemptMaker<Void> {
         }
         for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
             try {
-                RPCResponse<Boolean> result = checkedMeasure(() -> freeIpaHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
+                RPCResponse<Boolean> result = checkedMeasure(() -> freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
                         ":::Freeipa start::: FreeIPA health check ran in {}ms");
                 if (result.getResult()) {
                     LOGGER.debug("Freeipa services are available and freeipa is working (on instance: {})", instanceMetaData.getInstanceId());

@@ -75,7 +75,7 @@ class RepairInstancesServiceTest {
     private FreeIpaFlowManager flowManager;
 
     @Mock
-    private FreeIpaHealthDetailsService healthDetailsService;
+    private FreeIpaStackHealthDetailsService healthDetailsService;
 
     @Mock
     private OperationService operationService;

@@ -61,7 +61,7 @@ public class RepairInstancesService {
     private FreeIpaFlowManager flowManager;
 
     @Inject
-    private FreeIpaHealthDetailsService healthDetailsService;
+    private FreeIpaStackHealthDetailsService healthDetailsService;
 
     @Inject
     private OperationService operationService;
