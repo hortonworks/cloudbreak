@@ -134,7 +134,16 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, stackStatus.getStatusReason(), "clusterStatusReason", stackStatus.getClusterStatusReason());
+        Map<String, String> ret = new HashMap<>();
+        String statusReason = stackStatus.getStatusReason();
+        if (statusReason != null) {
+            ret.put(STATUS_REASON, statusReason);
+        }
+        String clusterStatusReason = stackStatus.getClusterStatusReason();
+        if (clusterStatusReason != null) {
+            ret.put("clusterStatusReason", clusterStatusReason);
+        }
+        return ret;
     }
 
     @Override

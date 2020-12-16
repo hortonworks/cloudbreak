@@ -61,7 +61,11 @@ public class RedbeamsWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, redbeams.getStatusReason());
+        String statusReason = redbeams.getStatusReason();
+        if (statusReason != null) {
+            return Map.of(STATUS_REASON, statusReason);
+        }
+        return Map.of();
     }
 
     @Override

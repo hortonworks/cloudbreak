@@ -88,7 +88,11 @@ public class InstanceWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, getInstanceMetadata().getStatusReason());
+        String statusReason = getInstanceMetadata().getStatusReason();
+        if (statusReason != null) {
+            return Map.of(STATUS_REASON, statusReason);
+        }
+        return Map.of();
     }
 
     @Override

@@ -60,7 +60,11 @@ public class FreeIpaWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, freeIpa.getStatusReason());
+        String statusReason = freeIpa.getStatusReason();
+        if (statusReason != null) {
+            return Map.of(STATUS_REASON, statusReason);
+        }
+        return Map.of();
     }
 
     @Override

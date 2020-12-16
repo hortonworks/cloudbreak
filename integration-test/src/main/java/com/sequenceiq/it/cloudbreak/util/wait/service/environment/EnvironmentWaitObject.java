@@ -60,7 +60,11 @@ public class EnvironmentWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, environment.getStatusReason());
+        String statusReason = environment.getStatusReason();
+        if (statusReason != null) {
+            return Map.of(STATUS_REASON, statusReason);
+        }
+        return Map.of();
     }
 
     @Override
