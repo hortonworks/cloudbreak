@@ -70,7 +70,8 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("sharedProjectId") String sharedProjectId);
 
     @GET
     @Path("ip_pools")
@@ -114,7 +115,8 @@ public interface EnvironmentPlatformResourceEndpoint {
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
-            @QueryParam("availabilityZone") String availabilityZone);
+            @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("sharedProjectId") String sharedProjectId);
 
     @GET
     @Path("ssh_keys")

@@ -56,7 +56,8 @@ public class PlatformParameterService {
             String credentialCrn,
             String region,
             String platformVariant,
-            String availabilityZone) {
+            String availabilityZone,
+            String sharedProjectId) {
         return getPlatformResourceRequest(
                 accountId,
                 credentialName,
@@ -65,7 +66,8 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 null,
-                CdpResourceType.DEFAULT);
+                CdpResourceType.DEFAULT,
+                sharedProjectId);
     }
 
     public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
@@ -73,7 +75,8 @@ public class PlatformParameterService {
             String environmentCrn,
             String region,
             String platformVariant,
-            String availabilityZone) {
+            String availabilityZone,
+            String sharedProjectId) {
         return getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -81,7 +84,8 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 null,
-                CdpResourceType.DEFAULT);
+                CdpResourceType.DEFAULT,
+                sharedProjectId);
     }
 
     public PlatformResourceRequest getPlatformResourceRequest(
@@ -91,7 +95,8 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
-            AccessConfigTypeQueryParam accessConfigType) {
+            AccessConfigTypeQueryParam accessConfigType,
+            String sharedProjectId) {
         return getPlatformResourceRequest(
                 accountId,
                 credentialName,
@@ -100,7 +105,8 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 accessConfigType,
-                CdpResourceType.DEFAULT);
+                CdpResourceType.DEFAULT,
+                sharedProjectId);
     }
 
     public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
@@ -109,7 +115,8 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
-            AccessConfigTypeQueryParam accessConfigType) {
+            AccessConfigTypeQueryParam accessConfigType,
+            String sharedProjectId) {
         return getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -117,7 +124,8 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 accessConfigType,
-                CdpResourceType.DEFAULT);
+                CdpResourceType.DEFAULT,
+                sharedProjectId);
     }
 
     //CHECKSTYLE:OFF
@@ -128,7 +136,8 @@ public class PlatformParameterService {
             String platformVariant,
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType,
-            CdpResourceType cdpResourceType) {
+            CdpResourceType cdpResourceType,
+            String sharedProjectId) {
         //CHECKSTYLE:ON
         String credentialCrn = credentialService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId, ENVIRONMENT).getResourceCrn();
         return getPlatformResourceRequest(
@@ -139,7 +148,8 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 accessConfigType,
-                cdpResourceType);
+                cdpResourceType,
+                sharedProjectId);
     }
 
     //CHECKSTYLE:OFF
@@ -151,7 +161,8 @@ public class PlatformParameterService {
             String platformVariant,
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType,
-            CdpResourceType cdpResourceType) {
+            CdpResourceType cdpResourceType,
+            String sharedProjectId) {
     //CHECKSTYLE:ON
         PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
 
@@ -186,6 +197,9 @@ public class PlatformParameterService {
         String accessConfigTypeString = NullUtil.getIfNotNull(accessConfigType, Enum::name);
         if (accessConfigTypeString != null) {
             platformResourceRequest.setFilters(Map.of(ACCESS_CONFIG_TYPE, accessConfigTypeString));
+        }
+        if (!Strings.isNullOrEmpty(sharedProjectId)) {
+            platformResourceRequest.setFilters(Map.of("sharedProjectId", sharedProjectId));
         }
         return platformResourceRequest;
     }

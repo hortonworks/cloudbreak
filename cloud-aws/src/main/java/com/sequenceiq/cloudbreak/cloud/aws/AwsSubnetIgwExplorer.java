@@ -34,7 +34,7 @@ public class AwsSubnetIgwExplorer {
             LOGGER.info("Searching the routeTable where routeTable is {} and the subnet is :{}", rt, subnetId);
             for (RouteTableAssociation association : rt.getAssociations()) {
                 LOGGER.info("Searching the association where association is {} and the subnet is :{}", association, subnetId);
-                if (subnetId.equalsIgnoreCase(association.getSubnetId())) {
+                if (StringUtils.isNotBlank(association.getSubnetId()) && association.getSubnetId().toLowerCase().startsWith(subnetId)) {
                     LOGGER.info("Found the routeTable which is {} and the subnet is :{}", rt, subnetId);
                     routeTable = Optional.ofNullable(rt);
                     break;
