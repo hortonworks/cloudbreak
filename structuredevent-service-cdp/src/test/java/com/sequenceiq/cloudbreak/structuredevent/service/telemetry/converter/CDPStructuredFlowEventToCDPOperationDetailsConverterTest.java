@@ -76,4 +76,20 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
     }
 
+    @Test
+    public void testFlowAndFlowChainType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowId("flowId");
+        flowDetails.setFlowChainId("flowChainId");
+        flowDetails.setNextFlowState("FINAL_STATE");
+        cdpStructuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("flowId", details.getFlowId());
+        Assert.assertEquals("flowChainId", details.getFlowChainId());
+    }
+
 }

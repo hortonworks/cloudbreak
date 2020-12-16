@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
@@ -31,6 +32,13 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
             cdpOperationDetails.setResourceName(structuredOperationDetails.getResourceName());
             cdpOperationDetails.setInitiatorCrn(structuredOperationDetails.getUserCrn());
         }
+
+        FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
+        if (flowDetails != null) {
+            cdpOperationDetails.setFlowId(flowDetails.getFlowId() != null ? flowDetails.getFlowId() : "");
+            cdpOperationDetails.setFlowChainId(flowDetails.getFlowChainId() != null ? flowDetails.getFlowChainId() : "");
+        }
+
         cdpOperationDetails.setCdpRequestProcessingStep(requestProcessingStepMapper.mapIt(cdpStructuredFlowEvent.getFlow()));
         cdpOperationDetails.setApplicationVersion(appVersion);
 
