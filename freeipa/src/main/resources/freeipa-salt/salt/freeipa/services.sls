@@ -1,3 +1,31 @@
+ipadnskeysyncdRestart:
+   file.replace:
+    - name: /usr/lib/systemd/system/ipa-dnskeysyncd.service
+    - pattern: '^Restart=.*'
+    - repl: 'Restart=always'
+    - backup: False
+
+ipadnskeysyncdRestartSec:
+   file.replace:
+     - name: /usr/lib/systemd/system/ipa-dnskeysyncd.service
+     - pattern: '^RestartSec=.*'
+     - repl: 'RestartSec=3'
+     - backup: False
+
+ipacustodiaRestart:
+   file.replace:
+    - name: /usr/lib/systemd/system/ipa-custodia.service
+    - pattern: '^Restart=.*'
+    - repl: 'Restart=always'
+    - backup: False
+
+ipacustodiaRestartSec:
+   file.replace:
+     - name: /usr/lib/systemd/system/ipa-custodia.service
+     - pattern: '^RestartSec=.*'
+     - repl: 'RestartSec=3'
+     - backup: False
+
 {%- if grains['init'] == 'systemd' %}
 {%- for service in pillar['freeipa']['services'] %}
 {%- set command = 'systemctl show -p FragmentPath ' + service %}
