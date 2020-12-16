@@ -25,7 +25,7 @@ public class SaltApiController {
     @PostMapping(value = "run", produces = MediaType.APPLICATION_JSON)
     public Object saltRun(@PathVariable("mock_uuid") String mockUuid, @RequestBody String body) throws Exception {
         Object saltApiResponse = saltApiRunComponent.createSaltApiResponse(mockUuid, body);
-        LOGGER.debug("{} body with result: {}", body, saltApiResponse);
+        LOGGER.trace("{} body with result: {}", body, saltApiResponse);
         return saltApiResponse;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.sequenceiq.mock.clouderamanager.ProfileAwareComponent;
+import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
 import com.sequenceiq.mock.swagger.model.ApiRemoteDataContext;
 
 @Controller
@@ -18,14 +18,14 @@ import com.sequenceiq.mock.swagger.model.ApiRemoteDataContext;
 public class CustomCmController {
 
     @Inject
-    private ProfileAwareComponent profileAwareComponent;
+    private ResponseCreatorComponent responseCreatorComponent;
 
     @RequestMapping(value = "/cdp/remoteContext/byCluster/{clusterName}",
             produces = { "application/json" },
             method = RequestMethod.GET)
     public ResponseEntity<ApiRemoteDataContext> getRemoteContextByCluster(@PathVariable("mockUuid") String mockUuid,
             @PathVariable("clusterName") String clusterName) {
-        return profileAwareComponent.exec(new ApiRemoteDataContext());
+        return responseCreatorComponent.exec(new ApiRemoteDataContext());
     }
 
     @RequestMapping(value = "/cdp/remoteContext",
@@ -33,6 +33,6 @@ public class CustomCmController {
             consumes = { "application/json" },
             method = RequestMethod.POST)
     public ResponseEntity<ApiRemoteDataContext> postRemoteContext(@PathVariable("mockUuid") String mockUuid, @Valid @RequestBody ApiRemoteDataContext body) {
-        return profileAwareComponent.exec(new ApiRemoteDataContext());
+        return responseCreatorComponent.exec(new ApiRemoteDataContext());
     }
 }

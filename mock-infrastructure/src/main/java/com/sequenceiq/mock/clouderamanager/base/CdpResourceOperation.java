@@ -1,4 +1,4 @@
-package com.sequenceiq.mock.clouderamanager.v40.controller;
+package com.sequenceiq.mock.clouderamanager.base;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
@@ -6,23 +6,20 @@ import javax.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.mock.clouderamanager.base.CdpResourceOperation;
+import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
 import com.sequenceiq.mock.swagger.model.ApiRemoteDataContext;
-import com.sequenceiq.mock.swagger.v40.api.CdpResourceApi;
 
 @Controller
-public class CdpResourceV40Controller implements CdpResourceApi {
+public class CdpResourceOperation {
 
     @Inject
-    private CdpResourceOperation cdpResourceOperation;
+    private ResponseCreatorComponent responseCreatorComponent;
 
-    @Override
     public ResponseEntity<ApiRemoteDataContext> getRemoteContextByCluster(String mockUuid, String clusterName) {
-        return cdpResourceOperation.getRemoteContextByCluster(mockUuid, clusterName);
+        return responseCreatorComponent.exec(new ApiRemoteDataContext());
     }
 
-    @Override
     public ResponseEntity<ApiRemoteDataContext> postRemoteContext(String mockUuid, @Valid ApiRemoteDataContext body) {
-        return cdpResourceOperation.postRemoteContext(mockUuid, body);
+        return responseCreatorComponent.exec(new ApiRemoteDataContext());
     }
 }
