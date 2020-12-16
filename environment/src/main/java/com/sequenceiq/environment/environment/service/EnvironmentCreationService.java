@@ -93,6 +93,7 @@ public class EnvironmentCreationService {
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         validateCreation(creationDto, environment);
         try {
+            LOGGER.debug("This is a test");
             environment = environmentService.save(environment);
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas),
