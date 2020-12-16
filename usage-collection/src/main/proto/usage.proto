@@ -951,6 +951,10 @@ message CDPOperationDetails {
     string applicationVersion = 5;
     // Request processing type
     CDPRequestProcessingStep.Value cdpRequestProcessingStep = 6;
+    // Flow UUID, to make it easy to identify which flow has triggered this event
+    string flowId = 7;
+    // Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
+    string flowChainId = 8;
 }
 
 message CDPEnvironmentDetails {

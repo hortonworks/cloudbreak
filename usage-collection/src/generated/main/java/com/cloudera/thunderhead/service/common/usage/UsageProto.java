@@ -58565,6 +58565,42 @@ public final class UsageProto {
      * <code>.usage.CDPRequestProcessingStep.Value cdpRequestProcessingStep = 6;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRequestProcessingStep.Value getCdpRequestProcessingStep();
+
+    /**
+     * <pre>
+     * Flow ID, to make it easier to identify which flow has triggered this event
+     * </pre>
+     *
+     * <code>string flowId = 7;</code>
+     */
+    java.lang.String getFlowId();
+    /**
+     * <pre>
+     * Flow ID, to make it easier to identify which flow has triggered this event
+     * </pre>
+     *
+     * <code>string flowId = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getFlowIdBytes();
+
+    /**
+     * <pre>
+     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * </pre>
+     *
+     * <code>string flowChainId = 8;</code>
+     */
+    java.lang.String getFlowChainId();
+    /**
+     * <pre>
+     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * </pre>
+     *
+     * <code>string flowChainId = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getFlowChainIdBytes();
   }
   /**
    * Protobuf type {@code usage.CDPOperationDetails}
@@ -58585,6 +58621,8 @@ public final class UsageProto {
       initiatorCrn_ = "";
       applicationVersion_ = "";
       cdpRequestProcessingStep_ = 0;
+      flowId_ = "";
+      flowChainId_ = "";
     }
 
     @java.lang.Override
@@ -58645,6 +58683,18 @@ public final class UsageProto {
               int rawValue = input.readEnum();
 
               cdpRequestProcessingStep_ = rawValue;
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              flowId_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              flowChainId_ = s;
               break;
             }
             default: {
@@ -58914,6 +58964,90 @@ public final class UsageProto {
       return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRequestProcessingStep.Value.UNRECOGNIZED : result;
     }
 
+    public static final int FLOWID_FIELD_NUMBER = 7;
+    private volatile java.lang.Object flowId_;
+    /**
+     * <pre>
+     * Flow ID, to make it easier to identify which flow has triggered this event
+     * </pre>
+     *
+     * <code>string flowId = 7;</code>
+     */
+    public java.lang.String getFlowId() {
+      java.lang.Object ref = flowId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        flowId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Flow ID, to make it easier to identify which flow has triggered this event
+     * </pre>
+     *
+     * <code>string flowId = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFlowIdBytes() {
+      java.lang.Object ref = flowId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        flowId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FLOWCHAINID_FIELD_NUMBER = 8;
+    private volatile java.lang.Object flowChainId_;
+    /**
+     * <pre>
+     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * </pre>
+     *
+     * <code>string flowChainId = 8;</code>
+     */
+    public java.lang.String getFlowChainId() {
+      java.lang.Object ref = flowChainId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        flowChainId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * </pre>
+     *
+     * <code>string flowChainId = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFlowChainIdBytes() {
+      java.lang.Object ref = flowChainId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        flowChainId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -58946,6 +59080,12 @@ public final class UsageProto {
       if (cdpRequestProcessingStep_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRequestProcessingStep.Value.UNSET.getNumber()) {
         output.writeEnum(6, cdpRequestProcessingStep_);
       }
+      if (!getFlowIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, flowId_);
+      }
+      if (!getFlowChainIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, flowChainId_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -58974,6 +59114,12 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(6, cdpRequestProcessingStep_);
       }
+      if (!getFlowIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, flowId_);
+      }
+      if (!getFlowChainIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, flowChainId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -59001,6 +59147,10 @@ public final class UsageProto {
       result = result && getApplicationVersion()
           .equals(other.getApplicationVersion());
       result = result && cdpRequestProcessingStep_ == other.cdpRequestProcessingStep_;
+      result = result && getFlowId()
+          .equals(other.getFlowId());
+      result = result && getFlowChainId()
+          .equals(other.getFlowChainId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -59024,6 +59174,10 @@ public final class UsageProto {
       hash = (53 * hash) + getApplicationVersion().hashCode();
       hash = (37 * hash) + CDPREQUESTPROCESSINGSTEP_FIELD_NUMBER;
       hash = (53 * hash) + cdpRequestProcessingStep_;
+      hash = (37 * hash) + FLOWID_FIELD_NUMBER;
+      hash = (53 * hash) + getFlowId().hashCode();
+      hash = (37 * hash) + FLOWCHAINID_FIELD_NUMBER;
+      hash = (53 * hash) + getFlowChainId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -59169,6 +59323,10 @@ public final class UsageProto {
 
         cdpRequestProcessingStep_ = 0;
 
+        flowId_ = "";
+
+        flowChainId_ = "";
+
         return this;
       }
 
@@ -59201,6 +59359,8 @@ public final class UsageProto {
         result.initiatorCrn_ = initiatorCrn_;
         result.applicationVersion_ = applicationVersion_;
         result.cdpRequestProcessingStep_ = cdpRequestProcessingStep_;
+        result.flowId_ = flowId_;
+        result.flowChainId_ = flowChainId_;
         onBuilt();
         return result;
       }
@@ -59271,6 +59431,14 @@ public final class UsageProto {
         }
         if (other.cdpRequestProcessingStep_ != 0) {
           setCdpRequestProcessingStepValue(other.getCdpRequestProcessingStepValue());
+        }
+        if (!other.getFlowId().isEmpty()) {
+          flowId_ = other.flowId_;
+          onChanged();
+        }
+        if (!other.getFlowChainId().isEmpty()) {
+          flowChainId_ = other.flowChainId_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -59807,6 +59975,184 @@ public final class UsageProto {
       public Builder clearCdpRequestProcessingStep() {
         
         cdpRequestProcessingStep_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object flowId_ = "";
+      /**
+       * <pre>
+       * Flow ID, to make it easier to identify which flow has triggered this event
+       * </pre>
+       *
+       * <code>string flowId = 7;</code>
+       */
+      public java.lang.String getFlowId() {
+        java.lang.Object ref = flowId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          flowId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow ID, to make it easier to identify which flow has triggered this event
+       * </pre>
+       *
+       * <code>string flowId = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFlowIdBytes() {
+        java.lang.Object ref = flowId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          flowId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow ID, to make it easier to identify which flow has triggered this event
+       * </pre>
+       *
+       * <code>string flowId = 7;</code>
+       */
+      public Builder setFlowId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        flowId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow ID, to make it easier to identify which flow has triggered this event
+       * </pre>
+       *
+       * <code>string flowId = 7;</code>
+       */
+      public Builder clearFlowId() {
+        
+        flowId_ = getDefaultInstance().getFlowId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow ID, to make it easier to identify which flow has triggered this event
+       * </pre>
+       *
+       * <code>string flowId = 7;</code>
+       */
+      public Builder setFlowIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        flowId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object flowChainId_ = "";
+      /**
+       * <pre>
+       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * </pre>
+       *
+       * <code>string flowChainId = 8;</code>
+       */
+      public java.lang.String getFlowChainId() {
+        java.lang.Object ref = flowChainId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          flowChainId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * </pre>
+       *
+       * <code>string flowChainId = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFlowChainIdBytes() {
+        java.lang.Object ref = flowChainId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          flowChainId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * </pre>
+       *
+       * <code>string flowChainId = 8;</code>
+       */
+      public Builder setFlowChainId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        flowChainId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * </pre>
+       *
+       * <code>string flowChainId = 8;</code>
+       */
+      public Builder clearFlowChainId() {
+        
+        flowChainId_ = getDefaultInstance().getFlowChainId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * </pre>
+       *
+       * <code>string flowChainId = 8;</code>
+       */
+      public Builder setFlowChainIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        flowChainId_ = value;
         onChanged();
         return this;
       }
@@ -66546,39 +66892,40 @@ public final class UsageProto {
       "ILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_F" +
       "INISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_" +
       "STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUME" +
-      "_FAILED\020\014\"\316\001\n\023CDPOperationDetails\022\021\n\tacc" +
+      "_FAILED\020\014\"\363\001\n\023CDPOperationDetails\022\021\n\tacc" +
       "ountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014res" +
       "ourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n" +
       "\022applicationVersion\030\005 \001(\t\022G\n\030cdpRequestP" +
       "rocessingStep\030\006 \001(\0162%.usage.CDPRequestPr" +
-      "ocessingStep.Value\"\253\001\n\025CDPEnvironmentDet" +
-      "ails\022D\n\017environmentType\030\001 \001(\0162+.usage.CD" +
-      "PEnvironmentsEnvironmentType.Value\022\016\n\006re" +
-      "gion\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030" +
-      "\003 \001(\005\022\031\n\021availabilityZones\030\004 \001(\t\"a\n%CDPE" +
-      "nvironmentTelemetryFeatureDetails\022\031\n\021wor" +
-      "kloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsColle" +
-      "ction\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030" +
-      "\001 \001(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networkTy" +
-      "pe\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023number" +
-      "PublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateSubn" +
-      "ets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030\005 \001" +
-      "(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPProx" +
-      "yDetails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020" +
-      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
-      "ionDetails\0228\n\022environmentDetails\030\002 \001(\0132\034" +
-      ".usage.CDPEnvironmentDetails\0220\n\016networkD" +
-      "etails\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M" +
-      "\n\027telemetryFeatureDetails\030\004 \001(\0132,.usage." +
-      "CDPEnvironmentTelemetryFeatureDetails\"\326\001" +
-      "\n\033CDPEnvironmentStatusChanged\0224\n\020operati" +
-      "onDetails\030\001 \001(\0132\032.usage.CDPOperationDeta" +
-      "ils\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnviro" +
-      "nmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.u" +
-      "sage.CDPEnvironmentStatus.Value\022\025\n\rfailu" +
-      "reReason\030\004 \001(\tBV\n-com.cloudera.thunderhe" +
-      "ad.service.common.usageB\nUsageProtoZ\031com" +
-      "/cloudera/cdp/protobufb\006proto3"
+      "ocessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013fl" +
+      "owChainId\030\010 \001(\t\"\253\001\n\025CDPEnvironmentDetail" +
+      "s\022D\n\017environmentType\030\001 \001(\0162+.usage.CDPEn" +
+      "vironmentsEnvironmentType.Value\022\016\n\006regio" +
+      "n\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001" +
+      "(\005\022\031\n\021availabilityZones\030\004 \001(\t\"a\n%CDPEnvi" +
+      "ronmentTelemetryFeatureDetails\022\031\n\021worklo" +
+      "adAnalytics\030\001 \001(\t\022\035\n\025clusterLogsCollecti" +
+      "on\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001" +
+      "(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networkType\030" +
+      "\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPub" +
+      "licSubnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets" +
+      "\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022" +
+      ",\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDe" +
+      "tails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020ope" +
+      "rationDetails\030\001 \001(\0132\032.usage.CDPOperation" +
+      "Details\0228\n\022environmentDetails\030\002 \001(\0132\034.us" +
+      "age.CDPEnvironmentDetails\0220\n\016networkDeta" +
+      "ils\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M\n\027t" +
+      "elemetryFeatureDetails\030\004 \001(\0132,.usage.CDP" +
+      "EnvironmentTelemetryFeatureDetails\"\326\001\n\033C" +
+      "DPEnvironmentStatusChanged\0224\n\020operationD" +
+      "etails\030\001 \001(\0132\032.usage.CDPOperationDetails" +
+      "\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvironme" +
+      "ntStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usag" +
+      "e.CDPEnvironmentStatus.Value\022\025\n\rfailureR" +
+      "eason\030\004 \001(\tBV\n-com.cloudera.thunderhead." +
+      "service.common.usageB\nUsageProtoZ\031com/cl" +
+      "oudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -66891,7 +67238,7 @@ public final class UsageProto {
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
-        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", });
+        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
       getDescriptor().getMessageTypes().get(50);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
