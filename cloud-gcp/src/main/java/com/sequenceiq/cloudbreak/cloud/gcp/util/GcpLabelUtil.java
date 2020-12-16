@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public final class GcpLabelUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpLabelUtil.class);
+    static final int GCP_MAX_TAG_LEN = 63;
 
-    private static final int GCP_MAX_TAG_LEN = 63;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpLabelUtil.class);
 
     private GcpLabelUtil() {
     }
@@ -26,12 +26,12 @@ public final class GcpLabelUtil {
     public static Map<String, String> createLabelsFromTagsMap(Map<String, String> tags) {
         Map<String, String> result = new HashMap<>();
         if (tags != null) {
-            tags.forEach((key, value) -> result.put(transform(key), transform(value)));
+            tags.forEach((key, value) -> result.put(transformValue(key), transformValue(value)));
         }
         return result;
     }
 
-    private static String transform(String value) {
+    public static String transformValue(String value) {
         // GCP labels have strict rules https://cloud.google.com/compute/docs/labeling-resources
         LOGGER.debug("Transforming tag key/value for GCP.");
         if (Crn.isCrn(value)) {
