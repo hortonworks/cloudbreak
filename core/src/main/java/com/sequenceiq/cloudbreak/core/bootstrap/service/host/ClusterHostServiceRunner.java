@@ -601,7 +601,8 @@ public class ClusterHostServiceRunner {
         ExposedService rangerService = exposedServiceCollector.getRangerService();
         List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
         if (!CollectionUtils.isEmpty(rangerLocations)) {
-            serviceLocations.put(rangerService.getServiceName(), getSingleRangerFqdn(gatewayConfig.getHostname(), rangerLocations));
+            List<String> rangerGatewayHosts = getRangerFqdn(cluster, gatewayConfig.getHostname(), rangerLocations);
+            serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
         }
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
@@ -654,7 +655,14 @@ public class ClusterHostServiceRunner {
         return componentLocation;
     }
 
-    private List<String> getSingleRangerFqdn(String primaryGatewayFqdn, List<String> rangerLocations) {
+    private List<String> getRangerFqdn(Cluster cluster, String primaryGatewayFqdn, List<String> rangerLocations) {
+        if (rangerLocations.size() > 1) {
+            String gatewayGroupName = cluster.getStack().getPrimaryGatewayInstance().getInstanceGroup().getGroupName();
+            List<String> hosts = rangerLocations.stream()
+                    .filter(s -> s.contains(gatewayGroupName))
+                    .collect(Collectors.toList());
+            return hosts;
+        }
         return rangerLocations.contains(primaryGatewayFqdn) ? asList(primaryGatewayFqdn) : asList(rangerLocations.iterator().next());
     }
 
