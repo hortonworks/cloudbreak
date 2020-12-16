@@ -87,7 +87,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
     private RPCResponse<Boolean> getLegacyErrorPayload(String host) {
         RPCResponse<Boolean> errorResponse;
         errorResponse = new RPCResponse<>();
-        errorResponse.setResult(Boolean.TRUE);
+        errorResponse.setResult(Boolean.FALSE);
         errorResponse.setValue(host);
         errorResponse.setMessages(getLegacyBaseMessages(host));
         errorResponse.getMessages().add(newLegacyRPCMessage("Failed to connect to port 464 tcp on 10.1.1.1"));
@@ -248,6 +248,91 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         Assert.assertThrows(FreeIpaClientException.class, () -> underTest.getInstanceHealthDetails(stack, instanceMetaData));
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthLegacyHealthyNode() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
+        Mockito.when(mockIpaClient.getHostname()).thenReturn("test.host");
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyGoodPayload(HOST));
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
+        Assert.assertTrue(response.getResult());
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthLegacyUnhealthyNode() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
+        Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyErrorPayload(HOST));
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
+        Assert.assertFalse(response.getResult());
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthLegacyUnresponsiveNodeThrows() throws Exception {
+        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
+        Mockito.when(mockIpaClient.getHostname()).thenReturn(HOST);
+        Mockito.when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
+        Mockito.when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenThrow(ipaClientException);
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        Assert.assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthHealthyNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getGoodPayload(HOST));
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
+        Assert.assertTrue(response.getResult());
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthUnhealthyNode() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayload(HOST));
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
+        Assert.assertFalse(response.getResult());
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthUnresponsiveNodeThrows() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenThrow(ipaClientException);
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        Assert.assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
 }

@@ -124,14 +124,13 @@ public class FreeIpaInstanceHealthDetailsService {
     private NodeHealthDetails legacyParseMessages(RPCResponse<Boolean> rpcResponse, InstanceMetaData instanceMetaData) {
         String precedingMessage = MESSAGE_UNAVAILABLE;
         NodeHealthDetails nodeResponse = new NodeHealthDetails();
-        nodeResponse.setStatus(InstanceStatus.UNREACHABLE);
+        nodeResponse.setStatus(rpcResponse.getResult() ? InstanceStatus.CREATED : InstanceStatus.UNHEALTHY);
         nodeResponse.setName(instanceMetaData.getDiscoveryFQDN());
         nodeResponse.setInstanceId(instanceMetaData.getInstanceId());
         boolean found = false;
         for (RPCMessage message : rpcResponse.getMessages()) {
             Matcher nodeMatcher = NEW_NODE_PATTERN.matcher(message.getMessage());
             if (nodeMatcher.find()) {
-                nodeResponse.setStatus(InstanceStatus.CREATED);
                 found = true;
             }
             if (!found) {
@@ -143,7 +142,6 @@ public class FreeIpaInstanceHealthDetailsService {
                     Matcher matcher = RESULT_PATTERN.matcher(message.getMessage());
                     if (matcher.find()) {
                         if (!STATUS_OK.equals(matcher.group(STATUS_GROUP))) {
-                            nodeResponse.setStatus(InstanceStatus.UNHEALTHY);
                             nodeResponse.addIssue(precedingMessage);
                         }
                     }
