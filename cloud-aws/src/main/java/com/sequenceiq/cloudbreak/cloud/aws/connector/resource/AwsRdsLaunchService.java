@@ -72,8 +72,7 @@ public class AwsRdsLaunchService {
     @Inject
     private AwsStackRequestHelper awsStackRequestHelper;
 
-    public List<CloudResourceStatus> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier)
-            throws Exception {
+    public List<CloudResourceStatus> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -85,11 +84,12 @@ public class AwsRdsLaunchService {
         try {
             cfRetryClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
-        } catch (AmazonServiceException ignored) {
+        } catch (AmazonServiceException exception) {
             // all subnets desired for DB subnet group are in the stack
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
+            LOGGER.warn("API call failed with this error:", exception);
             if (!existingSubnet) {
-                throw new CloudConnectorException("Can only create RDS instance with existing subnets");
+                throw new CloudConnectorException("Can only create RDS instance with existing subnets", exception);
             }
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
