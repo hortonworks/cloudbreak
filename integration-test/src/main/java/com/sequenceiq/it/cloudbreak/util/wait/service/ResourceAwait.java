@@ -21,7 +21,6 @@ public class ResourceAwait {
 
     public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses, TestContext testContext,
             RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
-        runningParameter.switchToAdmin();
         try {
             if (entity == null) {
                 throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
@@ -47,8 +46,6 @@ public class ResourceAwait {
                         entity, desiredStatuses, ResponseUtil.getErrorMessage(e), entity.getName()));
             }
             testContext.getExceptionMap().put("await " + entity + " for desired statuses " + desiredStatuses, e);
-        } finally {
-            runningParameter.swithcToActor();
         }
         return entity;
     }
