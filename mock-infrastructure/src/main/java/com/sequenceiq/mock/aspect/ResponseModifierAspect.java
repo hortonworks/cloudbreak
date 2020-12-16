@@ -10,6 +10,8 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +26,8 @@ import com.sequenceiq.mock.service.ResponseModifierService;
 @Component
 @Aspect
 public class ResponseModifierAspect {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseModifierAspect.class);
 
     @Inject
     private ResponseModifierService responseModifierService;
@@ -43,6 +47,7 @@ public class ResponseModifierAspect {
         appendValueOrPathIfNotBlank(method.getAnnotation(PostMapping.class), sb);
         appendValueOrPathIfNotBlank(method.getAnnotation(PutMapping.class), sb);
         appendValueOrPathIfNotBlank(method.getAnnotation(DeleteMapping.class), sb);
+        LOGGER.debug("Called method: {}", method);
         String resolvedPath = resolvePath(method, proceedingJoinPoint.getArgs(), sb.toString());
         return responseModifierService.evaluateResponse(resolvedPath, method.getReturnType(), proceedingJoinPoint::proceed);
     }

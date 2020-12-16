@@ -1,20 +1,12 @@
 package com.sequenceiq.mock.clouderamanager.v40.controller;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.inject.Inject;
 import javax.validation.Valid;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
-import com.sequenceiq.mock.clouderamanager.DataProviderService;
-import com.sequenceiq.mock.clouderamanager.ProfileAwareComponent;
+import com.sequenceiq.mock.clouderamanager.base.ClouderaManagerResourceOperation;
 import com.sequenceiq.mock.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiCommandList;
@@ -26,68 +18,56 @@ import com.sequenceiq.mock.swagger.v40.api.ClouderaManagerResourceApi;
 @Controller
 public class ClouderaManagerResourceV40Controller implements ClouderaManagerResourceApi {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerResourceV40Controller.class);
-
     @Inject
-    private DataProviderService dataProviderService;
-
-    @Inject
-    private ProfileAwareComponent profileAwareComponent;
-
-    @Inject
-    private ClouderaManagerStoreService clouderaManagerStoreService;
+    private ClouderaManagerResourceOperation clouderaManagerResourceOperation;
 
     @Override
     public ResponseEntity<Void> beginTrial(String mockUuid) {
-        return profileAwareComponent.exec();
+        return clouderaManagerResourceOperation.beginTrial(mockUuid);
     }
 
     @Override
     public ResponseEntity<ApiCommand> deleteCredentialsCommand(String mockUuid, @Valid String deleteCredentialsMode) {
-        return profileAwareComponent.exec(dataProviderService.getSuccessfulApiCommand());
+        return clouderaManagerResourceOperation.deleteCredentialsCommand(mockUuid, deleteCredentialsMode);
     }
 
     @Override
     public ResponseEntity<ApiConfigList> getConfig(String mockUuid, @Valid String view) {
-        return profileAwareComponent.exec(new ApiConfigList().items(new ArrayList<>()));
+        return clouderaManagerResourceOperation.getConfig(mockUuid, view);
     }
 
     @Override
     public ResponseEntity<ApiVersionInfo> getVersion(String mockUuid) {
-        return profileAwareComponent.exec(new ApiVersionInfo().version("7.0.1"));
+        return clouderaManagerResourceOperation.getVersion(mockUuid);
     }
 
     @Override
     public ResponseEntity<ApiCommand> hostsDecommissionCommand(String mockUuid, @Valid ApiHostNameList body) {
-        return profileAwareComponent.exec(dataProviderService.getSuccessfulApiCommand());
+        return clouderaManagerResourceOperation.hostsDecommissionCommand(mockUuid, body);
     }
 
     @Override
     public ResponseEntity<ApiCommand> importAdminCredentials(String mockUuid, @Valid String password, @Valid String username) {
-        return profileAwareComponent.exec(new ApiCommand().id(new BigDecimal(1)));
+        return clouderaManagerResourceOperation.importAdminCredentials(mockUuid, password, username);
     }
 
     @Override
     public ResponseEntity<ApiCommand> importClusterTemplate(String mockUuid, @Valid Boolean addRepositories, @Valid ApiClusterTemplate body) {
-        clouderaManagerStoreService.setClouderaManagerProducts(mockUuid, body.getProducts());
-        ApiCommand response = new ApiCommand().id(BigDecimal.ONE).name("Import ClusterTemplate").active(Boolean.TRUE);
-        return ResponseEntity.ok(response);
+        return clouderaManagerResourceOperation.importClusterTemplate(mockUuid, addRepositories, body);
     }
 
     @Override
     public ResponseEntity<ApiCommandList> listActiveCommands(String mockUuid, @Valid String view) {
-        ApiCommandList items = new ApiCommandList().items(
-                List.of(new ApiCommand().id(new BigDecimal(1)).active(Boolean.FALSE).success(Boolean.TRUE)));
-        return profileAwareComponent.exec(items);
+        return clouderaManagerResourceOperation.listActiveCommands(mockUuid, view);
     }
 
     @Override
     public ResponseEntity<ApiCommand> refreshParcelRepos(String mockUuid) {
-        return profileAwareComponent.exec(dataProviderService.getSuccessfulApiCommand());
+        return clouderaManagerResourceOperation.refreshParcelRepos(mockUuid);
     }
 
     @Override
     public ResponseEntity<ApiConfigList> updateConfig(String mockUuid, @Valid String message, @Valid ApiConfigList body) {
-        return profileAwareComponent.exec(new ApiConfigList().items(new ArrayList<>()));
+        return clouderaManagerResourceOperation.updateConfig(mockUuid, message, body);
     }
 }
