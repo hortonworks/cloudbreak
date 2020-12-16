@@ -58,7 +58,11 @@ public class DatalakeWaitObject implements WaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return Map.of(STATUS_REASON, sdxResponse.getStatusReason());
+        String statusReason = sdxResponse.getStatusReason();
+        if (statusReason != null) {
+            return Map.of(STATUS_REASON, statusReason);
+        }
+        return Map.of();
     }
 
     @Override
