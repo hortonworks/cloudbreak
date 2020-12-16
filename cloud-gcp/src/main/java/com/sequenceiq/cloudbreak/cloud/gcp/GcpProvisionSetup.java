@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -61,14 +62,19 @@ public class GcpProvisionSetup implements Setup {
             if (!containsSpecificImage(list, imageName)) {
                 Storage storage = buildStorage(credential, cloudContext.getName());
                 Bucket bucket = new Bucket();
-                bucket.setName(String.format("%s-%s-%d", projectId, cloudContext.getName(), cloudContext.getId()));
+                String bucketName = GcpLabelUtil.transformValue(String.format("%s-%s-%d", projectId, cloudContext.getName(), cloudContext.getId()));
+                bucket.setName(bucketName);
                 bucket.setStorageClass("STANDARD");
                 try {
                     Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
                     ins.execute();
                 } catch (GoogleJsonResponseException ex) {
                     if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
+                        String msg = String.format("Failed to create bucket with name '%s':", bucketName);
+                        LOGGER.warn(msg, ex);
                         throw ex;
+                    } else {
+                        LOGGER.info("No need to create bucket as it exists already with name: {}", bucketName);
                     }
                 }
                 String tarName = getTarName(imageName);
