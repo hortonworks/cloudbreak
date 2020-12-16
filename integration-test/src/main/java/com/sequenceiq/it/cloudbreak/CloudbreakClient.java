@@ -34,9 +34,12 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.CheckResourceRightTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.CheckRightTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.NotificationTestingTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
@@ -186,6 +189,9 @@ public class CloudbreakClient extends MicroserviceClient {
                 DeploymentPreferencesTestDto.class.getSimpleName(),
                 SecurityRulesTestDto.class.getSimpleName(),
                 AuditTestDto.class.getSimpleName(),
+                CheckRightTestDto.class.getSimpleName(),
+                CheckResourceRightTestDto.class.getSimpleName(),
+                RenewDistroXCertificateTestDto.class.getSimpleName(),
                 ImageCatalogTestDto.class.getSimpleName());
     }
 }
