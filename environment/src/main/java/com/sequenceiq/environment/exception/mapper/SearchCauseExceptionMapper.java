@@ -11,9 +11,13 @@ public abstract class SearchCauseExceptionMapper<T extends Throwable> extends Ba
 
     @Override
     Response.Status getResponseStatus(T exception) {
+        Response.Status defaultResponse = Response.Status.BAD_REQUEST;
+        if (exception.getCause() != null && Exception.class == exception.getCause().getClass()) {
+            return defaultResponse;
+        }
         BaseExceptionMapper exceptionMapper = (BaseExceptionMapper<? extends Throwable>) providers.getExceptionMapper(exception.getCause().getClass());
         if (exceptionMapper == null) {
-            return Response.Status.BAD_REQUEST;
+            return defaultResponse;
         }
         return exceptionMapper.getResponseStatus(exception.getCause());
     }
