@@ -100,7 +100,7 @@ public class AltusMachineUserService {
     public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Long stackId) throws IOException {
         LOGGER.debug("Get or create databus credential for stack");
         Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.getById(stack.getId());
+        Cluster cluster = clusterService.getCluster(stack);
         cluster.getDatabusCredential();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         if (cluster.getDatabusCredential() != null) {
