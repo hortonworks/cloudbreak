@@ -12,25 +12,15 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'org.ajoberstar:grgit:2.1.0'
-    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
-    classpath 'org.ajoberstar.reckon:reckon-gradle:0.8.0'
+    classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.0'
     classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
 
 plugins {
-  id 'org.ajoberstar.grgit' version '2.1.0'
-  id "com.github.spotbugs" version "2.0.0"
-  id "com.adarshr.test-logger" version "2.0.0"
-}
-
-if (project.hasProperty("reckon.scope")) {
-  apply plugin: "org.ajoberstar.reckon"
-  reckon {
-    scopeFromProp()
-    stageFromProp('dev', 'rc', 'final')
-  }
+  id 'org.ajoberstar.grgit' version '4.1.0'
+  id "com.github.spotbugs" version "4.6.0"
+  id "com.adarshr.test-logger" version "2.1.1"
 }
 
 def cmPrivateRepoUser = System.getenv("CM_PRIVATE_REPO_USER") ?: "$defaultCmPrivateRepoUser"
@@ -48,7 +38,7 @@ allprojects {
 
   repositories {
     mavenLocal()
-    maven {url = "$cdpRepoUrl"}
+    maven { url = "$cdpRepoUrl" }
     maven { url = "$repoUrl" }
   }
   apply plugin: 'idea'
@@ -70,22 +60,22 @@ allprojects {
   ext['netty.version'] = "4.1.42.Final"
 
   configurations {
-      all {
-          resolutionStrategy {
-              force 'commons-collections:commons-collections:3.2.2'
-              force 'xerces:xercesImpl:2.12.0'
-              force 'commons-beanutils:commons-beanutils:1.9.4'
-              force "commons-codec:commons-codec:$commonsCodecVersion"
-              force "commons-codec:commons-codec:$commonsCodecVersion"
-              force "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
-              force "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-              force "org.codehaus.jackson:jackson-jaxrs:1.9.13"
-              force "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
-              force "org.codehaus.jackson:jackson-core-asl:1.9.13"
-              force "org.codehaus.jackson:jackson-xc:1.9.13"
-              force "org.testng:testng:$testNgVersion"
-          }
+    all {
+      resolutionStrategy {
+        force 'commons-collections:commons-collections:3.2.2'
+        force 'xerces:xercesImpl:2.12.0'
+        force 'commons-beanutils:commons-beanutils:1.9.4'
+        force "commons-codec:commons-codec:$commonsCodecVersion"
+        force "commons-codec:commons-codec:$commonsCodecVersion"
+        force "com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:$jacksonVersion"
+        force "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+        force "org.codehaus.jackson:jackson-jaxrs:1.9.13"
+        force "org.codehaus.jackson:jackson-mapper-asl:1.9.13"
+        force "org.codehaus.jackson:jackson-core-asl:1.9.13"
+        force "org.codehaus.jackson:jackson-xc:1.9.13"
+        force "org.testng:testng:$testNgVersion"
       }
+    }
   }
 }
 
@@ -108,7 +98,7 @@ subprojects {
   }
 
   dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:8.11')
+    checkstyle('com.puppycrawl.tools:checkstyle:8.38')
     deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.0.0.RELEASE")
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
@@ -125,7 +115,7 @@ subprojects {
   }
 
   jacoco {
-    toolVersion = "0.8.4"
+    toolVersion = "0.8.6"
     reportsDir = file("$buildDir/reports/jacoco")
   }
 
@@ -135,24 +125,24 @@ subprojects {
       csv.enabled true
       html.enabled true
     }
-      afterEvaluate {
-          classDirectories.from = files(classDirectories.files.collect {
-              fileTree(
-                      dir: it,
-                      exclude: [
-                              '**/converter/mapper/**',
-                              '**/sequenceiq/it/**',
-                              '**/cloudbreak/api/endpoint/**',
-                              '**/cloudbreak/domain/**'
-                      ]
-              )
-          })
-      }
+    afterEvaluate {
+      classDirectories.from = files(classDirectories.files.collect {
+        fileTree(
+                dir: it,
+                exclude: [
+                        '**/converter/mapper/**',
+                        '**/sequenceiq/it/**',
+                        '**/cloudbreak/api/endpoint/**',
+                        '**/cloudbreak/domain/**'
+                ]
+        )
+      })
+    }
   }
 
   test {
-    useJUnitPlatform ()
-    testlogger{
+    useJUnitPlatform()
+    testlogger {
       showSummary true
       showStandardStreams true
     }
@@ -162,16 +152,15 @@ subprojects {
     }
   }
 
-  tasks.withType(com.github.spotbugs.SpotBugsTask) {
+  tasks.withType(com.github.spotbugs.snom.SpotBugsTask) {
     reports {
       xml.enabled false
       html.enabled true
     }
-
   }
 
   checkstyle {
-    toolVersion = "8.11"
+    toolVersion = "8.38"
   }
 
   checkstyleMain {
@@ -230,10 +219,10 @@ subprojects {
     }
   }
 
-  task ('buildInfo', type: BuildInfoTask, dependsOn: processResources)
+  task('buildInfo', type: BuildInfoTask, dependsOn: processResources)
 
   afterEvaluate { Project project ->
-    if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test'] && project.plugins.hasPlugin('org.springframework.boot') ) {
+    if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test'] && project.plugins.hasPlugin('org.springframework.boot')) {
       buildInfo.configure {
         destination = file("$project.buildDir")
         basename = project.bootJar.baseName
@@ -268,7 +257,7 @@ class BuildInfoTask extends DefaultTask {
       // if using dev environment this condition is true
       if (buildVersion.contains("+") || buildVersion == "unspecified") {
         def grgit = Grgit.open(currentDir: project.projectDir)
-        buildVersion = grgit.describe()
+        buildVersion = grgit.describe(tags: true)
         println "buildVersion from git: " + buildVersion
       }
       String activeProfile = determineActiveProfile()
@@ -315,7 +304,7 @@ class BuildInfoTask extends DefaultTask {
     String activeProfile = "dev"
     try {
       def masterReleaseVersionResp = new URL('http://release.infra.cloudera.com/hwre-api/getreleaseversion?stack=CB&releaseline=master')
-              .getText('utf-8', connectTimeout: 5000, readTimeout:5000)
+              .getText('utf-8', connectTimeout: 5000, readTimeout: 5000)
       def json = new JsonSlurper().parseText(masterReleaseVersionResp)
       println "determine GBN version on master branch:" + json.version
       String latestVersionOnMaster = json.version
@@ -324,7 +313,7 @@ class BuildInfoTask extends DefaultTask {
       } else {
         activeProfile = "rc"
       }
-    } catch(Exception ex) {
+    } catch (Exception ex) {
       println "Could not query version of master branch from http://release.infra.cloudera.com, falling back to 'dev' profile!"
     }
     return activeProfile

@@ -129,7 +129,8 @@ dependencies {
   compile ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"
   }
-  compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+  compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
+  compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
   compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
     transitive = false
   }

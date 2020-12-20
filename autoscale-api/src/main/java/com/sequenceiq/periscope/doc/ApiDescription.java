@@ -8,6 +8,9 @@ public class ApiDescription {
     public static final String CLUSTERS_DESCRIPTION = "Operations on clusters";
     public static final String POLICIES_DESCRIPTION = "Operations on policies";
 
+    private ApiDescription() {
+    }
+
     public static class AlertOpDescription {
         public static final String METRIC_BASED_POST = "create alert which metric based";
         public static final String METRIC_BASED_PUT = "modify alert which metric based";
@@ -177,6 +180,4 @@ public class ApiDescription {
         public static final String PROPERTIES = "Additional properties";
     }
 
-    private ApiDescription() {
-    }
 }

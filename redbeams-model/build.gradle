@@ -17,7 +17,8 @@ dependencies {
     compile project(':secret-engine')
     compile group: 'org.hibernate.javax.persistence',   name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
     compile group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
-    compile group: 'com.google.code.findbugs',          name: 'annotations',            version: '3.0.1'
+    compile group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
+    compile group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.2.0'
     testCompile group: 'junit',                         name: 'junit',                  version: junitVersion
 }
 

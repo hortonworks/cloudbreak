@@ -31,7 +31,8 @@ dependencies {
   compile group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
   compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
   compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
-  compile group: 'com.google.code.findbugs',              name: 'annotations',                    version: '3.0.1'
+  compile group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
+  compile group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.2.0'
   compile group: 'org.reflections',                       name: 'reflections',                    version: '0.9.11'
 
   compile group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion

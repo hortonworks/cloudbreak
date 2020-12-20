@@ -33,8 +33,8 @@ public class CompletableWaitUtil {
     /**
      * Will check the completable regularly if it has finished. At the end a result check is performed.
      *
-     * @throws Exception:        any exception that occurs during the completable is working
-     * @throws RuntimeException: if after timeout of the completable returns the resultChecker fails
+     * @throws Exception        any exception that occurs during the completable is working
+     * @throws RuntimeException if after timeout of the completable returns the resultChecker fails
      */
     public void doWait() {
         int counter = 0;

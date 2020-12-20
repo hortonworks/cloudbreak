@@ -17,6 +17,9 @@ public class PlatformResourceModelDescription {
     public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
     public static final String CONNECTOR_ENV_V1_DESCRIPTION = "Returns cloud provider specific resource types by environment";
 
+    private PlatformResourceModelDescription() {
+    }
+
     public static class OpDescription {
         public static final String GET_DISK_TYPES = "retrieve available disk types";
         public static final String GET_REGION_R_BY_TYPE = "retrieve regions by type";
@@ -51,6 +54,4 @@ public class PlatformResourceModelDescription {
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups by environment";
     }
 
-    private PlatformResourceModelDescription() {
-    }
 }

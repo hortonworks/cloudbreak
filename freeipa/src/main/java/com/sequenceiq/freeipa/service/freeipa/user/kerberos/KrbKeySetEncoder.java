@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.kerberos;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
@@ -14,6 +12,7 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 
 /**
  * Kerberos key set encoder - This class is responsible for encoding kerberos key sets using ASN.1 encoding based on UTF-8 character set.

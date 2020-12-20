@@ -2,6 +2,9 @@ package com.sequenceiq.redbeams.doc;
 
 public final class Notes {
 
+    private Notes() {
+    }
+
     public static final class DatabaseNotes {
 
         public static final String TEST_CONNECTION =
@@ -70,6 +73,4 @@ public final class Notes {
         }
     }
 
-    private Notes() {
-    }
 }

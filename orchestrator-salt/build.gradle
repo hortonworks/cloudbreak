@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'info.solidsoft.pitest'
 
 repositories {
     mavenLocal()
@@ -25,7 +24,8 @@ dependencies {
     compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-multipart',         version: jerseyCoreVersion
     compile group: 'org.glassfish.jersey.core',     name: 'jersey-common',                  version: jerseyCoreVersion
     compile group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
-    compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+    compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
+    compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
 
     testCompile group: 'org.hamcrest',              name: 'java-hamcrest',                   version: hamcrestVersion
 
