@@ -2,6 +2,9 @@ package com.sequenceiq.redbeams.doc;
 
 public final class OperationDescriptions {
 
+    private OperationDescriptions() {
+    }
+
     public static final class DatabaseOpDescription {
         public static final String TEST_CONNECTION = "test database connectivity";
         public static final String LIST = "list database configs";
@@ -36,6 +39,4 @@ public final class OperationDescriptions {
         }
     }
 
-    private OperationDescriptions() {
-    }
 }

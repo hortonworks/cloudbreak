@@ -16,6 +16,9 @@ public class PlatformResourceModelDescription {
     public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
     public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types";
 
+    private PlatformResourceModelDescription() {
+    }
+
     public static class OpDescription {
         public static final String GET_DISK_TYPES = "retrieve available disk types";
         public static final String GET_REGIONS_BY_CREDENTIAL = "retrieve regions by credential";
@@ -50,6 +53,4 @@ public class PlatformResourceModelDescription {
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups by environment";
     }
 
-    private PlatformResourceModelDescription() {
-    }
 }

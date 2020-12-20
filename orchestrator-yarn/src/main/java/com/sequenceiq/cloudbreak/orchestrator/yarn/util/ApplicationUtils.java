@@ -29,9 +29,9 @@ public class ApplicationUtils {
      *
      * This is less than ideal as each containerName follows a different pattern.
      *
-     * ambari_db-<cluster name> -> return <cluster name>-ambaridb
-     * ambari-server-<cluster name> -> return <cluster name>-ambariserver
-     * ambari-agent%<cluster name>%<host group> -> return <cluster name>-<host group>-<componentNumber>
+     * {@literal ambari_db-<cluster name> -> return <cluster name>-ambaridb}
+     * {@literal ambari-server-<cluster name> -> return <cluster name>-ambariserver}
+     * {@literal ambari-agent%<cluster name>%<host group> -> return <cluster name>-<host group>-<componentNumber>}
      *
      * @param constraint - ContainerConstraint used to create the application.
      * @param componentNumber - This number uniquely identifies the component with the application.
@@ -58,9 +58,9 @@ public class ApplicationUtils {
      *
      * This is less than ideal as each containerName follows a different pattern.
      *
-     * ambari_db-<cluster name> -> return ambaridb
-     * ambari-server-<cluster name> -> return ambariserver
-     * ambari-agent%<cluster name>%<host group> -> return <host group>-<componentNumber>
+     * {@literal ambari_db-<cluster name> -> return ambaridb}
+     * {@literal ambari-server-<cluster name> -> return ambariserver}
+     * {@literal ambari-agent%<cluster name>%<host group> -> return <host group>-<componentNumber>}
      *
      * Because Ambari Blueprints allow for hyphens,
      *

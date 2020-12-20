@@ -21,6 +21,9 @@ public final class ModelDescriptions {
     public static final String DATABASE_TEST_REQUEST = "Request for testing connectivity to a database";
     public static final String DATABASE_TEST_RESPONSE = "Response for testing connectivity to a database";
 
+    private ModelDescriptions() {
+    }
+
     public static class Database {
         public static final String CRN = "CRN of the database";
         public static final String DESCRIPTION = "Description of the database";
@@ -148,6 +151,4 @@ public final class ModelDescriptions {
         public static final String SECURITY_GROUP_IDS = "Exisiting security group ID(s) for the database server";
     }
 
-    private ModelDescriptions() {
-    }
 }

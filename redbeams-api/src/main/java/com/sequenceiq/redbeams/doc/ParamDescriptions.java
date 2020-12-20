@@ -2,6 +2,9 @@ package com.sequenceiq.redbeams.doc;
 
 public final class ParamDescriptions {
 
+    private ParamDescriptions() {
+    }
+
     public static final class DatabaseParamDescriptions {
 
         public static final String CRN = "CRN of the database";
@@ -32,6 +35,4 @@ public final class ParamDescriptions {
         }
     }
 
-    private ParamDescriptions() {
-    }
 }

@@ -32,7 +32,8 @@ dependencies {
     force = true
   }
   compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
-  compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+  compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
+  compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
 
 }
 

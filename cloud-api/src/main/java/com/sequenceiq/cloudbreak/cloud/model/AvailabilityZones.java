@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 /**
  * Availability zones of {@link Region} of a {@link Platform}
  *
- * @see Region,Platform,AvailabilityZone
+ * @see AvailabilityZone
  */
 public class AvailabilityZones {
 

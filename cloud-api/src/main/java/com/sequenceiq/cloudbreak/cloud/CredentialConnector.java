@@ -27,7 +27,6 @@ public interface CredentialConnector {
      */
     CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext);
 
-
     /**
      * Create the credential (e.g public key) associated with a stack (cluster) on Cloud provider.
      *
@@ -35,7 +34,6 @@ public interface CredentialConnector {
      * @return the status respone of method call
      */
     CloudCredentialStatus create(@Nonnull AuthenticatedContext authenticatedContext);
-
 
     /**
      * Interactive login for credential creation.
