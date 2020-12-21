@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -51,6 +51,9 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private AwsLifeCycleMapper awsLifeCycleMapper;
+
+    @Inject
+    private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -184,7 +187,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
         try {
             for (LoadBalancerType type : loadBalancerTypes) {
-                String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.valueOf(type.name()));
+                String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(loadBalancerTypeConverter.convert(type));
                 LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
                 cloudLoadBalancerMetadata.add(new CloudLoadBalancerMetadata(
                     type,

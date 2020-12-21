@@ -25,6 +25,8 @@ public class AwsNetworkView {
     @VisibleForTesting
     static final String SUBNET_ID = "subnetId";
 
+    static final String ENDPOINT_GATEWAY_SUBNET_ID = "endpointGatewaySubnetId";
+
     private final Network network;
 
     public AwsNetworkView(Network network) {
@@ -53,6 +55,23 @@ public class AwsNetworkView {
 
     public List<String> getSubnetList() {
         return isSubnetList() ? List.of(getExistingSubnet().split(",")) : (isExistingSubnet() ? List.of(getExistingSubnet()) : List.of());
+    }
+
+    private String getEndpointGatewaySubnet() {
+        return network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID);
+    }
+
+    public boolean containsEndpointGatewaySubnet() {
+        return isNotEmpty(network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID));
+    }
+
+    public boolean isEndpointGatewaySubnetList() {
+        return getEndpointGatewaySubnet() != null && getEndpointGatewaySubnet().contains(",");
+    }
+
+    public List<String> getEndpointGatewaySubnetList() {
+        return isEndpointGatewaySubnetList() ? List.of(getEndpointGatewaySubnet().split(",")) :
+            (containsEndpointGatewaySubnet() ?  List.of(getEndpointGatewaySubnet()) : List.of());
     }
 
     public String getExistingIgw() {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -72,10 +74,13 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 
 public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<StackV4Request> {
@@ -334,8 +339,8 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         Stack stack = underTest.convert(request);
         // THEN
         assertEquals(1, stack.getLoadBalancers().size());
-        assertEquals(1, stack.getLoadBalancers().iterator().next().getTargetGroups().size());
-        assertEquals(TargetGroupType.KNOX, stack.getLoadBalancers().iterator().next().getTargetGroups().iterator().next().getType());
+        assertEquals(1, stack.getLoadBalancers().iterator().next().getTargetGroupSet().size());
+        assertEquals(TargetGroupType.KNOX, stack.getLoadBalancers().iterator().next().getTargetGroupSet().iterator().next().getType());
     }
 
     @Test
@@ -354,6 +359,44 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
         Stack stack = underTest.convert(request);
         // THEN
         assertEquals(0, stack.getLoadBalancers().size());
+    }
+
+    @Test
+    public void testConvertWithPublicEndpointAccessGateway() {
+        StackV4Request request = setupForEndpointGateway(true);
+        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        assertEquals(2, stack.getLoadBalancers().size());
+        Optional<LoadBalancer> internalLoadBalancer = stack.getLoadBalancers().stream()
+            .filter(lb -> lb.getType() == LoadBalancerType.PRIVATE)
+            .findFirst();
+        assertTrue(internalLoadBalancer.isPresent());
+        Optional<LoadBalancer> externalLoadBalancer = stack.getLoadBalancers().stream()
+            .filter(lb -> lb.getType() == LoadBalancerType.PUBLIC)
+            .findFirst();
+        assertTrue(externalLoadBalancer.isPresent());
+    }
+
+    @Test
+    public void testNoEndpointGatewayLoadBalancerWhenEntitlementIsDisabled() {
+        StackV4Request request = setupForEndpointGateway(true);
+        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        assertTrue(stack.getLoadBalancers().isEmpty());
+    }
+
+    @Test
+    public void testNoEndpointGatewayLoadBalancerWhenFlagIsDisabled() {
+        StackV4Request request = setupForEndpointGateway(false);
+        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
+        // WHEN
+        Stack stack = underTest.convert(request);
+        // THEN
+        assertTrue(stack.getLoadBalancers().isEmpty());
     }
 
     @Override
@@ -375,5 +418,31 @@ public class StackV4RequestToStackConverterTest extends AbstractJsonConverterTes
 
         given(conversionService.convert(any(StackAuthenticationV4Request.class), eq(StackAuthentication.class))).willReturn(new StackAuthentication());
         given(conversionService.convert(any(InstanceGroupV4Request.class), eq(InstanceGroup.class))).willReturn(instanceGroup);
+    }
+
+    private StackV4Request setupForEndpointGateway(boolean enabled) {
+        initMocks();
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        StackV4Request request = getRequest("stack-datalake-with-instancegroups.json");
+
+        EnvironmentNetworkResponse networkResponse = new EnvironmentNetworkResponse();
+        networkResponse.setPublicEndpointAccessGateway(enabled ? PublicEndpointAccessGateway.ENABLED : PublicEndpointAccessGateway.DISABLED);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCredential(credentialResponse);
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setTunnel(Tunnel.DIRECT);
+        environmentResponse.setTags(new TagResponse());
+        environmentResponse.setNetwork(networkResponse);
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        given(credentialClientService.getByCrn(anyString())).willReturn(credential);
+        given(credentialClientService.getByName(anyString())).willReturn(credential);
+        given(providerParameterCalculator.get(request)).willReturn(getMappable());
+        given(conversionService.convert(any(ClusterV4Request.class), eq(Cluster.class))).willReturn(new Cluster());
+        given(telemetryConverter.convert(null, StackType.DATALAKE)).willReturn(new Telemetry());
+        given(loadBalancerConfigService.getKnoxGatewayGroups(any(Stack.class))).willReturn(Set.of("master"));
+
+        return request;
     }
 }

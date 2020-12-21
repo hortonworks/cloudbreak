@@ -6,9 +6,11 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
@@ -39,8 +41,15 @@ public class LoadBalancer implements ProvisionEntity  {
 
     private String endpoint;
 
+    /**
+     * @deprecated Use {@link #targetGroupSet} instead.
+     */
+    @Deprecated
     @OneToMany(mappedBy = "loadBalancer", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<TargetGroup> targetGroups = new HashSet<>();
+
+    @ManyToMany(mappedBy = "loadBalancerSet", fetch = FetchType.LAZY)
+    private Set<TargetGroup> targetGroupSet = new HashSet<>();
 
     private String fqdn;
 
@@ -96,12 +105,37 @@ public class LoadBalancer implements ProvisionEntity  {
         this.endpoint = endpoint;
     }
 
+    /**
+     * @deprecated Use {@link #getTargetGroupSet()} instead.
+     */
+    @Deprecated
     public Set<TargetGroup> getTargetGroups() {
         return targetGroups;
     }
 
+    /**
+     * @deprecated Use {@link #setTargetGroupSet()} instead.
+     */
+    @Deprecated
     public void setTargetGroups(Set<TargetGroup> targetGroups) {
         this.targetGroups = targetGroups;
+    }
+
+    public Set<TargetGroup> getTargetGroupSet() {
+        if (targetGroupSet != null) {
+            return targetGroupSet;
+        } else {
+            return targetGroups;
+        }
+    }
+
+    public void setTargetGroupSet(Set<TargetGroup> targetGroups) {
+        this.targetGroupSet = targetGroups;
+        this.targetGroups = targetGroups;
+    }
+
+    public void addTargetGroup(TargetGroup targetGroup) {
+        targetGroupSet.add(targetGroup);
     }
 
     public String getFqdn() {

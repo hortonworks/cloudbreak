@@ -834,7 +834,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public List<TargetGroup> getTargetGroupAsList() {
         return loadBalancers.stream()
-            .flatMap(loadBalancer -> loadBalancer.getTargetGroups().stream())
+            .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
             .collect(Collectors.toList());
     }
 

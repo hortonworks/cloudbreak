@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.IGW;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
@@ -21,6 +22,16 @@ import org.mockito.Mock;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkViewTest {
+
+    private static final String SUBNET_1 = "subnet-123";
+
+    private static final String SUBNET_2 = "subnet-456";
+
+    private static final String SUBNET_3 = "subnet-789";
+
+    private static final List<String> SUBNET_LIST = List.of(SUBNET_1, SUBNET_2, SUBNET_3);
+
+    private static final String MULTI_SUBNET_STRING = String.join(",", SUBNET_LIST);
 
     @Mock
     private Network network;
@@ -119,6 +130,22 @@ public class AwsNetworkViewTest {
         when(network.getParameter(VPC_CIDRS, List.class)).thenReturn(List.of());
         when(network.getStringParameter(VPC_CIDR)).thenReturn("1.1.1.1");
         assertTrue(underTest.getExistingVpcCidrs().contains("1.1.1.1"));
+    }
+
+    @Test
+    public void testSingleEndpointGatewaySubnet() {
+        when(network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID)).thenReturn(SUBNET_1);
+        assertTrue(underTest.containsEndpointGatewaySubnet());
+        assertFalse(underTest.isEndpointGatewaySubnetList());
+        assertEquals(List.of(SUBNET_1), underTest.getEndpointGatewaySubnetList());
+    }
+
+    @Test
+    public void testMultipleEndpointGatewaySubnets() {
+        when(network.getStringParameter(ENDPOINT_GATEWAY_SUBNET_ID)).thenReturn(MULTI_SUBNET_STRING);
+        assertTrue(underTest.containsEndpointGatewaySubnet());
+        assertTrue(underTest.isEndpointGatewaySubnetList());
+        assertEquals(SUBNET_LIST, underTest.getEndpointGatewaySubnetList());
     }
 
 }

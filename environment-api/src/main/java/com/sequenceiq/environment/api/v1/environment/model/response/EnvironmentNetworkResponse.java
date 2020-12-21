@@ -55,7 +55,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
     private Set<String> networkCidrs = new HashSet<>();
 
     @ApiModelProperty(value = EnvironmentModelDescription.ENDPOINT_ACCESS_GATEWAY_SUBNET_METAS)
-    private Map<String, CloudSubnet> gatewayEndpointSubnetMetas;
+    private Map<String, CloudSubnet> gatewayEndpointSubnetMetas = Map.of();
 
     public String getCrn() {
         return crn;

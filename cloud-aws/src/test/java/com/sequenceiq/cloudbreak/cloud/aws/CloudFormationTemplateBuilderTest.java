@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
-import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -1375,7 +1375,7 @@ public class CloudFormationTemplateBuilderTest {
     @Test
     public void buildTestWithSingleLoadBalancerBeforeUpdate() {
         //GIVEN
-        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, false);
+        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, false);
 
         //WHEN
         modelContext = new ModelContext()
@@ -1395,17 +1395,18 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
-            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
-            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
-            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
-            .doesNotContain("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+            .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .doesNotContain("\"ListenerPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+        assert templateString.contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}") ||
+            templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-443\" },{ \"Id\" : \"instance1-443\" }]}}");
     }
 
     @Test
     public void buildTestWithSingleLoadBalancerAfterUpdate() {
         //GIVEN
-        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, true);
+        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true);
 
         //WHEN
         modelContext = new ModelContext()
@@ -1425,19 +1426,20 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
-            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
-            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
-            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
-            .contains("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+            .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"ListenerPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+        assert templateString.contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}") ||
+            templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-443\" },{ \"Id\" : \"instance1-443\" }]}}");
     }
 
     @Test
     public void buildTestWithMultipleLoadBalancers() {
         //GIVEN
         List<AwsLoadBalancer> awsLoadBalancers = List.of(
-            setupLoadBalancer(AwsLoadBalancerScheme.PRIVATE, 443, true),
-            setupLoadBalancer(AwsLoadBalancerScheme.PUBLIC, 888, true)
+            setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true),
+            setupLoadBalancer(AwsLoadBalancerScheme.INTERNET_FACING, 888, true)
         );
 
         //WHEN
@@ -1458,24 +1460,28 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
-            .contains("\"LoadBalancerPrivate\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
-            .contains("\"TargetGroupPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
-            .contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}")
-            .contains("\"ListenerPort443Private\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"")
-            .contains("\"LoadBalancerPublic\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
+            .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"ListenerPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"")
+            .contains("\"LoadBalancerExternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internet-facing\"")
-            .contains("\"TargetGroupPort888Public\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
-            .contains("\"Targets\" : [{ \"Id\" : \"instance1-888\" },{ \"Id\" : \"instance2-888\" }]}}")
-            .contains("\"ListenerPort888Public\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+            .contains("\"TargetGroupPort888External\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
+            .contains("\"ListenerPort888External\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::Listener\"");
+        assert templateString.contains("\"Targets\" : [{ \"Id\" : \"instance1-443\" },{ \"Id\" : \"instance2-443\" }]}}") ||
+            templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-443\" },{ \"Id\" : \"instance1-443\" }]}}");
+        assert templateString.contains("\"Targets\" : [{ \"Id\" : \"instance1-888\" },{ \"Id\" : \"instance2-888\" }]}}") ||
+            templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-888\" },{ \"Id\" : \"instance1-888\" }]}}");
     }
 
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
-        AwsTargetGroup targetGroup = new AwsTargetGroup(port, scheme, 1, List.of("instance1-" + port, "instance2-" + port));
-        AwsListener listener = new AwsListener(port, List.of(targetGroup), scheme);
-        AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme, List.of(listener));
+        AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme);
+        loadBalancer.addSubnets(Set.of("subnet1"));
+        AwsListener listener = loadBalancer.getOrCreateListener(port);
+        listener.addInstancesToTargetGroup(Set.of("instance1-" + port, "instance2-" + port));
+
         if (setArn) {
-            targetGroup.setArn("arn://targetgroup");
+            listener.getTargetGroup().setArn("arn://targetgroup");
             loadBalancer.setArn("arn://loadbalancer");
             loadBalancer.validateListenerConfigIsSet();
         }

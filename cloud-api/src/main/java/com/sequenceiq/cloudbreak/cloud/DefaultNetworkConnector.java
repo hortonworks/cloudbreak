@@ -24,20 +24,41 @@ public interface DefaultNetworkConnector extends NetworkConnector {
 
     String NOT_ENOUGH_AZ = "Acceptable subnets are in %d different AZs, but subnets in %d different AZs required.";
 
+    String NO_SUBNETS_FOR_REQUESTED_AZS = "There were no subnets provided in the required AZs: %s";
+
     @Override
     default SubnetSelectionResult chooseSubnets(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
         LOGGER.debug("Trying to choose subnets from: {}.", subnetMetas);
-        SubnetSelectionResult subnetSelectionResult = filterSubnets(subnetMetas, subnetSelectionParameters);
-        if (subnetSelectionResult.hasResult()) {
-            LOGGER.debug("There are subnets in the subnet selection: {}.", subnetSelectionResult);
-            if (subnetSelectionParameters.isHa()) {
-                subnetSelectionResult = selectForHAScenario(subnetSelectionResult.getResult());
-            } else {
-                subnetSelectionResult = selectForNonHAScenario(subnetSelectionResult.getResult());
+        SubnetSelectionResult subnetSelectionResult;
+        List<CloudSubnet> subnetsFilteredByRequestedAZ = filterSubnetsByRequiredAZs(subnetMetas, subnetSelectionParameters);
+        if (subnetsFilteredByRequestedAZ.isEmpty()) {
+            LOGGER.debug("Couldn't find subnets in the requested availability zones.");
+            subnetSelectionResult = new SubnetSelectionResult(String.format(NO_SUBNETS_FOR_REQUESTED_AZS,
+                subnetSelectionParameters.getAvailabilityZones()));
+        } else {
+            subnetSelectionResult = filterSubnets(subnetsFilteredByRequestedAZ, subnetSelectionParameters);
+            if (subnetSelectionResult.hasResult()) {
+                LOGGER.debug("There are subnets in the subnet selection: {}.", subnetSelectionResult);
+                if (subnetSelectionParameters.isHa()) {
+                    subnetSelectionResult = selectForHAScenario(subnetSelectionResult.getResult());
+                } else {
+                    subnetSelectionResult = selectForNonHAScenario(subnetSelectionResult.getResult());
+                }
             }
+            LOGGER.info("The subnet selection is: {}.", subnetSelectionResult);
         }
-        LOGGER.info("The subnet selection is: {}.", subnetSelectionResult);
         return subnetSelectionResult;
+    }
+
+    private List<CloudSubnet> filterSubnetsByRequiredAZs(Collection<CloudSubnet> subnetMetas, SubnetSelectionParameters subnetSelectionParameters) {
+        if (subnetMetas == null) {
+            return List.of();
+        }
+        return subnetMetas.stream()
+            .filter(subnetMeta -> subnetSelectionParameters.getAvailabilityZones() == null ||
+                subnetSelectionParameters.getAvailabilityZones().isEmpty() ||
+                subnetSelectionParameters.getAvailabilityZones().contains(subnetMeta.getAvailabilityZone()))
+            .collect(Collectors.toList());
     }
 
     @Override
