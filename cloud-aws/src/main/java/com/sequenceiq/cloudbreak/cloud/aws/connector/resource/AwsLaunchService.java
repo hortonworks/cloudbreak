@@ -27,7 +27,9 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
+import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
+import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.waiters.Waiter;
@@ -256,8 +258,11 @@ public class AwsLaunchService {
 
     private AwsLoadBalancerScheme determinePublicVsPrivateSchema(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
         String subnetId = awsNetworkView.getExistingSubnet();
-        DescribeRouteTablesResult describeRouteTablesResult = amazonEC2Client.describeRouteTables();
-        return awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnetId)
+        String vpcId = awsNetworkView.getExistingVpc();
+        DescribeRouteTablesRequest describeRouteTablesRequest = new DescribeRouteTablesRequest()
+                .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
+        DescribeRouteTablesResult describeRouteTablesResult = amazonEC2Client.describeRouteTables(describeRouteTablesRequest);
+        return awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnetId, vpcId)
                 ? AwsLoadBalancerScheme.PUBLIC : AwsLoadBalancerScheme.PRIVATE;
     }
 

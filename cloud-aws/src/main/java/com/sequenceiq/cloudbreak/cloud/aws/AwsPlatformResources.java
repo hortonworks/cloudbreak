@@ -432,7 +432,7 @@ public class AwsPlatformResources implements PlatformResources {
     private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(DescribeRouteTablesResult describeRouteTablesResult, List<Subnet> awsSubnets) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
-            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId());
+            boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId(), subnet.getVpcId());
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
             Optional<String> subnetName = getName(subnet.getTags());
             subnets.add(
