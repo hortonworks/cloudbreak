@@ -32,6 +32,9 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 @Service
 public class StackUtil {
 
@@ -164,7 +167,7 @@ public class StackUtil {
     }
 
     public String extractClusterManagerIp(Stack stack) {
-        if (!StringUtils.isEmpty(stack.getClusterManagerIp())) {
+        if (!isEmpty(stack.getClusterManagerIp())) {
             return stack.getClusterManagerIp();
         }
         return extractClusterManagerIp(stack.getId());
@@ -177,14 +180,19 @@ public class StackUtil {
     }
 
     public String extractClusterManagerAddress(Stack stack) {
-        String fqdn = stack.getFqdn();
-        if (fqdn != null) {
+        String fqdn = stack.getLoadBalancerUserFacingFQDN();
+        fqdn = isEmpty(fqdn) ? stack.getFqdn() : fqdn;
+
+        if (isNotEmpty(fqdn)) {
             return fqdn;
         }
+
         String clusterManagerIp = stack.getClusterManagerIp();
-        if (clusterManagerIp != null) {
+
+        if (isNotEmpty(clusterManagerIp)) {
             return clusterManagerIp;
         }
+
         return extractClusterManagerIp(stack.getId());
     }
 

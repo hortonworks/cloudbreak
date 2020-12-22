@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -331,7 +332,7 @@ public class ClusterHostServiceRunner {
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
         if (isKerberosNeeded(kerberosConfig)) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
-            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
+            if (isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
@@ -629,7 +630,10 @@ public class ClusterHostServiceRunner {
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
         }
-        String fqdn = cluster.getFqdn();
+
+        String fqdn = cluster.getStack().getLoadBalancerUserFacingFQDN();
+        fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
+
         if (isNotEmpty(fqdn)) {
             gateway.put("userfacingfqdn", fqdn);
             String[] fqdnParts = fqdn.split("\\.", 2);
