@@ -149,15 +149,15 @@ remove_local_backups() {
 upload_aws_backup() {
     echo "try to upload with AES256 encryption"
     # shellcheck disable=SC2086
-    /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse AES256 --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1
-    ret_code=$?
+    /usr/bin/aws ${REGION_OPTION} s3 cp --debug --recursive --sse AES256 --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" 2>&1 | /usr/local/bin/backup-log-filter.sh | tee -a "${LOGFILE}"
+    ret_code=${PIPESTATUS[0]}
 
     if [[ "$ret_code" -ne "0" ]]
     then
         echo "try to upload with aws:kms encryption"
         # shellcheck disable=SC2086
-        /usr/bin/aws ${REGION_OPTION} s3 cp --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" >> "${LOGFILE}" 2>&1
-        ret_code=$?
+        /usr/bin/aws ${REGION_OPTION} s3 cp --debug --recursive --sse aws:kms --no-progress "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}/${BACKUPDIR}" 2>&1 | /usr/local/bin/backup-log-filter.sh | tee -a "${LOGFILE}"
+        ret_code=${PIPESTATUS[0]}
     fi
 
     if [[ "$ret_code" -ne "0" ]]

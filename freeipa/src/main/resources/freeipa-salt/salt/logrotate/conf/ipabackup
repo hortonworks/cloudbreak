@@ -1,0 +1,6 @@
+/var/log/ipabackup.log {
+    missingok
+    notifempty
+    size 128M
+    rotate 6
+}
