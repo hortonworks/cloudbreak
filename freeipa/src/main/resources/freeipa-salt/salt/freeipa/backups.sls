@@ -13,6 +13,14 @@
     - group: root
     - mode: 640
 
+/usr/local/bin/backup-log-filter.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://freeipa/scripts/backup-log-filter.sh
+
 {% if salt['pillar.get']('freeipa:backup:enabled') %}
 {% if salt['pillar.get']('freeipa:backup:initial_full_enabled') %}
 freeipa_initial_full_backup:
@@ -21,6 +29,7 @@ freeipa_initial_full_backup:
     - unless: test -f /var/log/freeipa_initial_backup-executed
     - require:
         - file: /usr/local/bin/freeipa_backup
+        - file: /usr/local/bin/backup-log-filter.sh
         - file: /etc/freeipa_backup.conf
 {% endif %}
 

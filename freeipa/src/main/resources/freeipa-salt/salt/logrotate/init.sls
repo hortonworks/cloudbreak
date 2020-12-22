@@ -5,3 +5,11 @@ logrotate-krb5kdc:
     - user: root
     - group: root
     - mode: 644
+
+logrotate-ipabackup:
+  file.managed:
+    - name: /etc/logrotate.d/ipabackup
+    - source: salt://logrotate/conf/ipabackup
+    - user: root
+    - group: root
+    - mode: 644
