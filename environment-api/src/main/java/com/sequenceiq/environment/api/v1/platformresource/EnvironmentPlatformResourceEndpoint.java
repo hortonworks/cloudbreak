@@ -52,7 +52,7 @@ public interface EnvironmentPlatformResourceEndpoint {
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpEnvDescription.GET_REGION_R_BY_TYPE, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+    @ApiOperation(value = OpEnvDescription.GET_REGIONS_BY_ENVIRONMENT, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
             nickname = "getRegionsByEnv")
     RegionResponse getRegionsByCredential(
             @QueryParam("environmentCrn") @NotEmpty String environmentCrn,

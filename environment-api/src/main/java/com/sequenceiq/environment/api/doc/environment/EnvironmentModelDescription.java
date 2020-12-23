@@ -23,24 +23,24 @@ public class EnvironmentModelDescription {
         "are the subnets that will be used to create a public Knox endpoint for out-of-network UI/API access. If not provided, public subnets will be " +
         "selected from the subnet list provided for environment creation. (Optional)";
     public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
-    public static final String AWS_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
-    public static final String AZURE_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
-    public static final String GCP_SPECIFIC_PARAMETERS = "Subnet ids of the specified networks";
-    public static final String YARN_SPECIFIC_PARAMETERS = "Yarn parameters";
-    public static final String MOCK_PARAMETERS = "Mock parameters";
-    public static final String AWS_VPC_ID = "Subnet ids of the specified networks";
+    public static final String AWS_SPECIFIC_PARAMETERS = "AWS-specific properties of the network";
+    public static final String AZURE_SPECIFIC_PARAMETERS = "Azure-specific properties of the network";
+    public static final String GCP_SPECIFIC_PARAMETERS = "GCP-specific properties of the network";
+    public static final String YARN_SPECIFIC_PARAMETERS = "Yarn-specific properties of the network";
+    public static final String MOCK_PARAMETERS = "Mock-specific properties of the network";
+    public static final String AWS_VPC_ID = "AWS VPC id of the specified networks";
     public static final String GCP_NETWORK_ID = "Gcp network id";
     public static final String GCP_SHARED_PROJECT_ID = "Gcp shared project id";
     public static final String GCP_NO_PUBLIC_IP = "Gcp no public ip";
     public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
 
-    public static final String AZURE_RESOURCE_GROUP_NAME = "Subnet ids of the specified networks";
-    public static final String AZURE_NETWORK_ID = "Subnet ids of the specified networks";
-    public static final String AZURE_NO_PUBLIC_IP = "Subnet ids of the specified networks";
+    public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
+    public static final String AZURE_NETWORK_ID = "Azure Network ID of the specified network";
+    public static final String AZURE_NO_PUBLIC_IP = "Azure Network is private if this flag is true";
 
     public static final String CREATE_FREEIPA = "Create freeipa in environment";
     public static final String FREEIPA = "The FreeIPA paramaters";
-    public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating freeipa in environment";
+    public static final String FREEIPA_INSTANCE_COUNT_BY_GROUP = "The number of FreeIPA instances to create per group when creating FreeIPA in environment";
     public static final String YARN_QUEUE = "Queue for Yarn deployments";
     public static final String YARN_LIFETIME = "Lifetime for Yarn deployments in seconds";
 
@@ -48,7 +48,7 @@ public class EnvironmentModelDescription {
             + "the detailed credential is ignored in the request.";
     public static final String CREDENTIAL_REQUEST = "If credentialName is not specified, the credential is used to create the new credential for "
             + "the environment.";
-    public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user have to use the given user code "
+    public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user has to use the given user code "
             + "to sign in";
     public static final String INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE = "The user code what has to be used for the sign-in process on the Azure portal";
     public static final String REGIONS = "Regions of the environment.";
@@ -97,7 +97,7 @@ public class EnvironmentModelDescription {
 
     public static final String RESOURCE_GROUP_PARAMETERS = "Azure resource group parameters.";
     public static final String EXISTING_RESOURCE_GROUP_NAME = "Name of an existing azure resource group.";
-    public static final String RESOURCE_GROUP_NAME = "Name of the azure resource group.";
+    public static final String RESOURCE_GROUP_NAME = "Name of the Azure resource group.";
     public static final String RESOURCE_GROUP_USAGE = "Resource group usage: single resource group for all resources where possible "
             + "or use multiple resource groups.";
 

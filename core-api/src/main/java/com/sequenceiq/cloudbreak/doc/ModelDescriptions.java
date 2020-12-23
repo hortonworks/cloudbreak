@@ -105,7 +105,7 @@ public class ModelDescriptions {
         public static final String OPERATION = "Basic details about the Audit event";
         public static final String EVENT_JSON = "Raw StructuredEvent content";
         public static final String STATUS = "Summary status of the Audit event";
-        public static final String DURATION = "Timespan of the event in miliseconds";
+        public static final String DURATION = "Timespan of the event in milliseconds";
     }
 
     public static class CloudbreakDetailsModelDescription {

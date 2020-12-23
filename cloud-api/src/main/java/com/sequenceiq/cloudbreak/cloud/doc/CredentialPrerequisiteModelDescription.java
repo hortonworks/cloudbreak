@@ -10,7 +10,7 @@ public class CredentialPrerequisiteModelDescription {
             + "External id for 'Another AWS account' typed roles.";
     public static final String AWS_POLICY_JSON = "AWS specific JSON file that is base64 encoded and "
             + "describes the necessary AWS policies for cloud resource provisioning.";
-    public static final String AZURE_APP_CREATION_COMMAND = "Azure CLI command to create Azure AD Application as prerequisite for credential creation."
+    public static final String AZURE_APP_CREATION_COMMAND = "Azure CLI command to create Azure AD Application as prerequisite for credential creation. "
             + "The field is base64 encoded.";
     public static final String AZURE_ROLE_DEF_JSON = "Azure specific JSON file that is base64 encoded and "
             + "describes the necessary Azure role for cloud resource provisioning.";

@@ -7,7 +7,7 @@ public class DiagnosticsModelDescription {
     public static final String START_TIME = "Start time for the time interval of the diagnostic collection request.";
     public static final String END_TIME = "END time for the time interval of the diagnostic collection request.";
     public static final String DESTINATION = "Destination for the diagnostic collection request.";
-    public static final String DESCRIPTION = "description of the diagnostics collection";
+    public static final String DESCRIPTION = "Description of the diagnostics collection";
     public static final String HOSTS = "Host (fqdn) filter, use it to run diagnostics collection on only specific hosts";
     public static final String HOST_GROUPS = "Host groups (instance groups), used it to run diagnostics collection only those " +
             "hosts that are included the specific host groups";
@@ -17,10 +17,10 @@ public class DiagnosticsModelDescription {
     public static final String SKIP_VALIDATION = "Skip cloud storage write operation testing or databus connection " +
             "check (depends on the destination) during init stage.";
     public static final String ROLES = "List of roles for which to get logs and metrics. If set, this restricts the roles for log and metrics collection " +
-            "to the list specified. If empty, the default is to get logs for all roles ";
+            "to the list specified. If empty, the default is to get logs for all roles.";
     public static final String BUNDLE_SIZE_BYTES = "The maximum approximate bundle size of the output file for CM based diagnostics collection.";
     public static final String COMMENTS = "Comments to include with this CM based data collection.";
-    public static final String ENABLE_MONITOR_METRICS_COLLECTION = "Flag to enable collection of metrics for chart display in CM based diagnostics collection..";
+    public static final String ENABLE_MONITOR_METRICS_COLLECTION = "Flag to enable collection of metrics for chart display in CM based diagnostics collection.";
 
     private DiagnosticsModelDescription() {
     }
