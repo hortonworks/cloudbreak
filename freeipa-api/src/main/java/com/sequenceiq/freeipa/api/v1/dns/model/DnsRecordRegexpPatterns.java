@@ -14,7 +14,7 @@ public final class DnsRecordRegexpPatterns {
 
     public static final String DNS_HOSTNAME_MSG = "Hostname must be valid. Can contain alphanumeric characters, dash and dot.";
 
-    public static final String CNAME_TARGET_REGEXP = "^[a-zA-Z0-9]+[a-zA-Z0-9-\\.]*[a-zA-Z0-9]+$";
+    public static final String CNAME_TARGET_REGEXP = "^[a-zA-Z0-9]+[a-zA-Z0-9-\\.]*[a-zA-Z0-9]+[.]?$";
 
     private DnsRecordRegexpPatterns() {
     }

@@ -170,10 +170,11 @@ public class DnsRecordService {
         FreeIpaAndClient freeIpaAndClient = createFreeIpaAndClient(request.getEnvironmentCrn(), accountId);
         String zone = calculateZone(request.getDnsZone(), freeIpaAndClient);
         Optional<DnsRecord> dnsRecord = ignoreNotFoundExceptionWithValue(() -> freeIpaAndClient.getClient().showDnsRecord(zone, request.getCname()), null);
+        String targetFqdn = StringUtils.appendIfMissing(request.getTargetFqdn(), ".");
         if (dnsRecord.isEmpty()) {
-            createDnsCnameRecord(freeIpaAndClient.getClient(), zone, request.getCname(), request.getTargetFqdn());
+            createDnsCnameRecord(freeIpaAndClient.getClient(), zone, request.getCname(), targetFqdn);
         } else {
-            validateExistingCnameRecordMatches(dnsRecord.get(), request.getTargetFqdn());
+            validateExistingCnameRecordMatches(dnsRecord.get(), targetFqdn);
         }
     }
 
