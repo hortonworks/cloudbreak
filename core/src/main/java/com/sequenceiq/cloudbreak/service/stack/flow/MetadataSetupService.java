@@ -191,7 +191,7 @@ public class MetadataSetupService {
                 loadBalancerEntry.setHostedZoneId(cloudLoadBalancerMetadata.getHostedZoneId());
                 loadBalancerEntry.setIp(cloudLoadBalancerMetadata.getIp());
                 loadBalancerEntry.setType(cloudLoadBalancerMetadata.getType());
-                String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack, cloudLoadBalancerMetadata.getType());
+                String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack);
                 LOGGER.info("Saving load balancer endpoint as: {}", endpoint);
                 loadBalancerEntry.setEndpoint(endpoint);
 

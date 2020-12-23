@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -29,8 +31,6 @@ public class LoadBalancerConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadBalancerConfigService.class);
 
     private static final String ENDPOINT_SUFFIX = "gateway";
-
-    private static final String PUBLIC_SUFFIX = "external";
 
     private static final Set<Integer> DEFAULT_KNOX_PORTS = Set.of(443);
 
@@ -66,14 +66,11 @@ public class LoadBalancerConfigService {
             .anyMatch(serviceComponent -> KnoxRoles.KNOX_GATEWAY.equals(serviceComponent.getComponent()));
     }
 
-    public String generateLoadBalancerEndpoint(Stack stack, LoadBalancerType type) {
+    public String generateLoadBalancerEndpoint(Stack stack) {
         StringBuilder name = new StringBuilder()
             .append(stack.getName())
             .append('-')
             .append(ENDPOINT_SUFFIX);
-        if (LoadBalancerType.PUBLIC.equals(type)) {
-            name.append('-').append(PUBLIC_SUFFIX);
-        }
         return name.toString();
     }
 
@@ -89,11 +86,33 @@ public class LoadBalancerConfigService {
     public String getLoadBalancerUserFacingFQDN(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
         if (!loadBalancers.isEmpty()) {
-            LoadBalancer preferredLB =  loadBalancers.stream().filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType())).findAny()
+            LoadBalancer preferredLB = loadBalancers.stream().filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType())).findAny()
                 .orElse(loadBalancers.iterator().next());
             return preferredLB.getFqdn();
         }
 
         return null;
+    }
+
+    public Optional<LoadBalancer> selectLoadBalancer(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
+        Preconditions.checkNotNull(preferredType);
+        Optional<LoadBalancer> loadBalancerOptional = loadBalancers.stream()
+            .filter(lb -> preferredType.equals(lb.getType()))
+            .findFirst();
+        if (loadBalancerOptional.isPresent()) {
+            LOGGER.debug("Found load balancer of type {}", preferredType);
+        } else {
+            loadBalancerOptional = loadBalancers.stream()
+                .filter(lb -> lb.getType() != null && !preferredType.equals(lb.getType()))
+                .findFirst();
+            if (loadBalancerOptional.isPresent()) {
+                LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancerOptional.get().getType());
+            }
+        }
+
+        if (loadBalancerOptional.isEmpty()) {
+            LOGGER.debug("Unable to find load balancer");
+        }
+        return loadBalancerOptional;
     }
 }

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -22,10 +23,12 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
@@ -44,6 +47,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     public boolean isCertRenewalTriggerable(Stack stack) {
         return manageCertificateAndDnsInPem()
@@ -102,44 +108,45 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public void updateDnsEntryForLoadBalancers(Stack stack) {
-        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
-        if (loadBalancers.isEmpty()) {
-            LOGGER.info("No load balancers in stack {}", stack.getId());
-            return;
-        }
+        Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
 
-        LOGGER.info("Update load balancer DNS entries");
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+        if (loadBalancerOptional.isEmpty()) {
+            LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
+        } else {
+            LOGGER.info("Updating load balancer DNS entries");
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
 
-        for (LoadBalancer loadBalancer : loadBalancers) {
-            Optional<String> endpoint = Optional.ofNullable(loadBalancer.getEndpoint());
-            if (endpoint.isEmpty()) {
-                LOGGER.error("No endpoint set for load balancer. Can't register domain.");
+            LoadBalancer loadBalancer = loadBalancerOptional.get();
+            String endpoint = loadBalancer.getEndpoint();
+            boolean dnsRegistered = false;
+            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                    endpoint, environment.getName(), loadBalancer.getDns());
+                dnsRegistered = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint,
+                    environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+            } else if (loadBalancer.getIp() != null) {
+                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                    endpoint, environment.getName(), loadBalancer.getIp());
+                dnsRegistered = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint,
+                    environment.getName(), false, List.of(loadBalancer.getIp()));
             } else {
-                if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
-                    LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                        endpoint.get(), environment.getName(), loadBalancer.getDns());
-                    getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint.get(),
-                        environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
-                } else if (loadBalancer.getIp() != null) {
-                    LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                        endpoint.get(), environment.getName(), loadBalancer.getIp());
-                    getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint.get(),
-                        environment.getName(), false, List.of(loadBalancer.getIp()));
-                } else {
-                    LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
-                        "DNS registration will be skipped.", loadBalancer.getEndpoint());
-                    continue;
-                }
+                LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
+                    "DNS registration will be skipped.", loadBalancer.getEndpoint());
+            }
 
-                loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
-                        endpoint.get(), environment.getName(), getWorkloadSubdomain(userCrn)));
-                loadBalancerPersistenceService.save(loadBalancer);
-                LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
+            if (dnsRegistered) {
+                setLoadBalancerFqdn(loadBalancer, endpoint, environment.getName(), userCrn);
             }
         }
+    }
+
+    private void setLoadBalancerFqdn(LoadBalancer loadBalancer, String endpoint, String envName, String userCrn) {
+        loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
+            endpoint, envName, getWorkloadSubdomain(userCrn)));
+        loadBalancerPersistenceService.save(loadBalancer);
+        LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
 
     public String deleteDnsEntry(Stack stack, String environmentName) {
@@ -165,35 +172,30 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public void deleteLoadBalancerDnsEntry(Stack stack, String environmentName) {
-        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
-        if (loadBalancers.isEmpty()) {
-            LOGGER.info("No load balancers in stack {}", stack.getId());
-            return;
-        }
+        Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
 
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (StringUtils.isEmpty(environmentName)) {
-            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            environmentName = environment.getName();
-        }
+        if (loadBalancerOptional.isEmpty()) {
+            LOGGER.error("Unable to find appropriate load balancer in stack. Load balancer public domain name will not be deleted.");
+        } else {
+            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            if (StringUtils.isEmpty(environmentName)) {
+                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+                environmentName = environment.getName();
+            }
 
-        for (LoadBalancer loadBalancer : loadBalancers) {
-            Optional<String> endpoint = Optional.ofNullable(loadBalancer.getEndpoint());
-            if (endpoint.isEmpty()) {
-                LOGGER.debug("No endpoint set for load balancer. Skipping DNS entry deletion.");
-            } else {
-                if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
-                    LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                        endpoint.get(), environmentName, loadBalancer.getDns());
-                    getDnsManagementService().deleteDnsEntryWithCloudDns(userCrn, accountId, endpoint.get(),
-                        environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
-                } else if (loadBalancer.getIp() != null) {
-                    LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                        endpoint.get(), environmentName, loadBalancer.getIp());
-                    getDnsManagementService().deleteDnsEntryWithIp(userCrn, accountId, endpoint.get(),
-                        environmentName, false, List.of(loadBalancer.getIp()));
-                }
+            LoadBalancer loadBalancer = loadBalancerOptional.get();
+            String endpoint = loadBalancer.getEndpoint();
+            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+                LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                    endpoint, environmentName, loadBalancer.getDns());
+                getDnsManagementService().deleteDnsEntryWithCloudDns(userCrn, accountId, endpoint,
+                    environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+            } else if (loadBalancer.getIp() != null) {
+                LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                    endpoint, environmentName, loadBalancer.getIp());
+                getDnsManagementService().deleteDnsEntryWithIp(userCrn, accountId, endpoint,
+                    environmentName, false, List.of(loadBalancer.getIp()));
             }
         }
     }
@@ -281,5 +283,27 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private Set<String> getLoadBalancerNamesForStack(Stack stack) {
         return loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
             .map(LoadBalancer::getEndpoint).collect(Collectors.toSet());
+    }
+
+    private Optional<LoadBalancer> getLoadBalancerWithEndpoint(Stack stack) {
+        Optional<LoadBalancer> loadBalancerOptional;
+        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
+        if (loadBalancers.isEmpty()) {
+            LOGGER.info("No load balancers in stack {}", stack.getId());
+            loadBalancerOptional = Optional.empty();
+        } else {
+            loadBalancerOptional = loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC);
+
+            if (loadBalancerOptional.isEmpty()) {
+                LOGGER.error("Unable to determine load balancer type. Load balancer public domain name will not be registered.");
+            } else if (Strings.isNullOrEmpty(loadBalancerOptional.get().getEndpoint())) {
+                LOGGER.error("No endpoint set for load balancer. Can't register domain.");
+                loadBalancerOptional = Optional.empty();
+            } else {
+                LOGGER.debug("Found load balancer {}", loadBalancerOptional.get().getEndpoint());
+            }
+        }
+
+        return loadBalancerOptional;
     }
 }
