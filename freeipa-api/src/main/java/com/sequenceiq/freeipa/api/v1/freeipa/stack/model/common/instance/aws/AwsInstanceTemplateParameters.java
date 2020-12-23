@@ -21,4 +21,11 @@ public class AwsInstanceTemplateParameters {
     public void setSpot(AwsInstanceTemplateSpotParameters spot) {
         this.spot = spot;
     }
+
+    @Override
+    public String toString() {
+        return "AwsInstanceTemplateParameters{" +
+                "spot=" + spot +
+                '}';
+    }
 }

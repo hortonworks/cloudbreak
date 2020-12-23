@@ -40,4 +40,12 @@ public class AwsInstanceTemplateSpotParameters {
     public void setMaxPrice(Double maxPrice) {
         this.maxPrice = maxPrice;
     }
+
+    @Override
+    public String toString() {
+        return "AwsInstanceTemplateSpotParameters{" +
+                "percentage=" + percentage +
+                ", maxPrice=" + maxPrice +
+                '}';
+    }
 }
