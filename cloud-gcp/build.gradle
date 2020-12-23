@@ -28,7 +28,6 @@ dependencies {
     compile group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2beta1-rev99-1.25.0'
     compile group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev108-1.25.0'
     compile group: 'com.google.apis',               name: 'google-api-services-sqladmin',               version: 'v1beta4-rev76-1.25.0'
-    compile group: 'junit',                         name: 'junit',                                      version: junitVersion
 
     testCompile project(path: ':core-model', configuration: 'tests')
     testCompile project(':cloud-reactor')

@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -269,7 +270,7 @@ public class SaltOrchestratorTest {
             saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertTrue(e.getCause() instanceof NullPointerException);
+            assertThat(e.getCause(), IsInstanceOf.instanceOf(NullPointerException.class));
         }
     }
 

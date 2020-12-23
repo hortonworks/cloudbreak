@@ -35,12 +35,11 @@ dependencies {
     implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
     implementation     group: "com.cloudera.cdp",              name: "cdp-sdk-java",                   version: cdpSdkVersion
 
-    testImplementation group: "junit",                         name: "junit",                          version: junitVersion
     testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
     testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
     testImplementation group: "org.ow2.asm",                   name: "asm",                            version: asmVersion
     testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion
-    testImplementation group: "org.hamcrest",                  name: "hamcrest",                       version: "2.2"
+    testImplementation group: "org.hamcrest",                  name: "hamcrest",                       version: hamcrestVersion
 
     testImplementation group: 'org.mockito',                   name: 'mockito-core',                   version: mockitoVersion
 }

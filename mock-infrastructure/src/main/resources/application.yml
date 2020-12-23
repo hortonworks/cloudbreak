@@ -1,16 +1,15 @@
-server.ssl:
-  enabled: true
-  key-store-type: PKCS12
-  key-store: classpath:keystore/infrastructure-mock.p12
-  key-store-password: password
-  key-alias: mock-service
 server:
+  ssl:
+    enabled: true
+    key-store-type: PKCS12
+    key-store: classpath:keystore/infrastructure-mock.p12
+    key-store-password: password
+    key-alias: mock-service
   port: 10090
 spring:
   mvc:
     throw-exception-if-no-handler-found: true
-  resources:
-      add-mappings: false
-  http:
     converters:
       preferred-json-mapper: gson
+  resources:
+      add-mappings: false

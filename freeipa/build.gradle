@@ -76,7 +76,6 @@ dependencies {
   
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.5.3'
 
-  testImplementation group: "junit",                      name: "junit",                               version: junitVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }

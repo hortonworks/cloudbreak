@@ -13,7 +13,7 @@ buildscript {
 dependencies {
   compile project(':auth-internal-api')
 
-  compile             group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: '2.0.3.RELEASE'
+  compile             group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey', version: springBootVersion
 
   testCompile         group: 'org.mockito',               name: 'mockito-core',               version: mockitoVersion
   testImplementation  group: 'org.assertj',               name: 'assertj-core',               version: assertjVersion

@@ -20,10 +20,7 @@ dependencies {
     exclude group: 'org.mockito'
   }
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
-}
-
-dependencies {
-  testCompile group: 'junit', name: 'junit', version: junitVersion
+  testImplementation group: 'org.hamcrest',             name: 'hamcrest',     version: hamcrestVersion
 }
 
 checkstyle {

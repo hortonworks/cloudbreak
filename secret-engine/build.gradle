@@ -31,7 +31,6 @@ dependencies {
     force = true
   }
 
-  testCompile group: 'junit', name: 'junit', version: junitVersion
   testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
 }
 

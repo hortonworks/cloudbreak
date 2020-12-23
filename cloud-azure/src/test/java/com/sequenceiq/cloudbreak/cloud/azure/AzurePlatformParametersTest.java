@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -7,6 +8,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import java.util.Map;
 import java.util.Random;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -50,7 +52,7 @@ public class AzurePlatformParametersTest {
                 underTest.collectInstanceGroupParameters(Sets.newHashSet(getRequestWithAs(WORKER_GROUP_NAME), getRequestWithoutAs(COMPUTE_GROUP_NAME)));
 
         assertTrue(instanceGroupParameterResponseMap.get(WORKER_GROUP_NAME).getParameters().containsKey(AS_KEY));
-        assertTrue(instanceGroupParameterResponseMap.get(WORKER_GROUP_NAME).getParameters().get(AS_KEY) instanceof Map);
+        assertThat(instanceGroupParameterResponseMap.get(WORKER_GROUP_NAME).getParameters().get(AS_KEY), IsInstanceOf.instanceOf(Map.class));
 
         Map<Object, Object> workerAsMap = (Map<Object, Object>) instanceGroupParameterResponseMap.get(WORKER_GROUP_NAME).getParameters().get(AS_KEY);
         assertEquals(workerAsMap.get(AS_NAME_KEY), STACK_NAME + "-" + WORKER_GROUP_NAME + "-customPostFix");
@@ -58,7 +60,7 @@ public class AzurePlatformParametersTest {
         assertEquals(workerAsMap.get(AS_UPDATE_DOMAIN_COUNTER_KEY), 50);
 
         assertTrue(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().containsKey(AS_KEY));
-        assertTrue(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().get(AS_KEY) instanceof Map);
+        assertThat(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().get(AS_KEY), IsInstanceOf.instanceOf(Map.class));
 
         Map<Object, Object> computeAsMap = (Map<Object, Object>) instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().get(AS_KEY);
         assertEquals(computeAsMap.get(AS_NAME_KEY), STACK_NAME + "-" + COMPUTE_GROUP_NAME + "-as");

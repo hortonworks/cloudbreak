@@ -19,8 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -82,7 +82,7 @@ class SdxControllerTest {
         sdxStatusEntity.setStatusReason("statusreason");
         sdxStatusEntity.setCreated(1L);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-        FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
         SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> sdxController.create("test-sdx-cluster", createSdxClusterRequest));
         verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
@@ -104,7 +104,7 @@ class SdxControllerTest {
         sdxStatusEntity.setStatusReason("statusreason");
         sdxStatusEntity.setCreated(1L);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
-        FieldSetter.setField(sdxClusterConverter, SdxClusterConverter.class.getDeclaredField("sdxStatusService"), sdxStatusService);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
 
         SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.get("test-sdx-cluster"));
         assertEquals("test-sdx-cluster", sdxClusterResponse.getName());

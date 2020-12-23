@@ -25,5 +25,4 @@ dependencies {
 
     testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-test',        version: springBootVersion
     testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
-    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
 }

@@ -27,7 +27,7 @@ dependencies {
     compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
     compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
 
-    testCompile group: 'org.hamcrest',              name: 'java-hamcrest',                   version: hamcrestVersion
+    testCompile group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
 
     testCompile (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
     testCompile (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
@@ -35,9 +35,6 @@ dependencies {
     }
     testCompile (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
       exclude group: 'org.hamcrest'
-    }
-    testCompile (group: 'junit',                    name: 'junit',                          version: junitVersion) {
-        exclude group: 'org.hamcrest'
     }
     testImplementation group: 'org.junit.jupiter',  name: 'junit-jupiter',                  version: junitJupiterVersion
 

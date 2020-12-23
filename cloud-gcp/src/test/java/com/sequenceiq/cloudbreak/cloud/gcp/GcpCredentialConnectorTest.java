@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -100,7 +102,7 @@ public class GcpCredentialConnectorTest {
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
-        Assert.assertTrue("Not the specified exception has come with the status", status.getException() instanceof BadRequestException);
+        assertThat("Not the specified exception has come with the status", status.getException(), IsInstanceOf.instanceOf(BadRequestException.class));
         Assert.assertEquals("Not the expected exception message has come with the status", expectionReasonMessage, status.getException().getMessage());
     }
 

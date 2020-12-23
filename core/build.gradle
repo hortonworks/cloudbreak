@@ -289,7 +289,7 @@ dependencies {
   testCompile group: 'com.h2database',           name: 'h2'
   testImplementation group: 'org.assertj',       name: 'assertj-core',        version: assertjVersion
   testImplementation group: "org.yaml",          name: "snakeyaml"
-  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
+  testImplementation group: 'org.hamcrest',      name: 'hamcrest',            version: hamcrestVersion
 
 }
 

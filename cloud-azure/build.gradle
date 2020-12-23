@@ -41,13 +41,10 @@ dependencies {
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'org.springframework.boot',  name:'spring-boot-starter-freemarker',  version: springBootVersion
-  testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-    exclude group: 'org.hamcrest'
-  }
   testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
+  testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
   testCompile project(path: ':cloud-common', configuration: 'tests')
 
   compile (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')

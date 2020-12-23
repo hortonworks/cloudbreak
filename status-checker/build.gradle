@@ -21,6 +21,5 @@ dependencies {
 
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',               version: springBootVersion
 
-  testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
   testCompile group: 'org.mockito',               name: 'mockito-core',                   version: mockitoVersion
 }

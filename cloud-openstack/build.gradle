@@ -32,12 +32,9 @@ dependencies {
 
     testCompile group: 'org.springframework.boot',       name: 'spring-boot-starter-test',       version: springBootVersion
     testCompile group: 'org.springframework.boot',       name:'spring-boot-starter-freemarker',  version:springBootVersion
-    testCompile (group: 'junit', name: 'junit', version: junitVersion) {
-      exclude group: 'org.hamcrest'
-    }
     testCompile (group: 'org.mockito',             name: 'mockito-core',          version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
-    testCompile 'org.hamcrest:java-hamcrest:2.0.0.0'
+    testCompile group: 'org.hamcrest',                    name: 'hamcrest',                      version: hamcrestVersion
 }
 
