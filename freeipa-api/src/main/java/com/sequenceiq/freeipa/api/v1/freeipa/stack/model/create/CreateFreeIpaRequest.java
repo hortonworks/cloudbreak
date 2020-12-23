@@ -207,6 +207,9 @@ public class CreateFreeIpaRequest implements TaggableRequest {
                 + ", network=" + network
                 + ", image=" + image
                 + ", freeIpa=" + freeIpa
+                + ", gatewayPort=" + gatewayPort
+                + ", telemetry=" + telemetry
+                + ", tags=" + tags
                 + ", tunnel=" + tunnel
                 + '}';
     }

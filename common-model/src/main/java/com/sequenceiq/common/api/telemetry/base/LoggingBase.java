@@ -82,6 +82,7 @@ public abstract class LoggingBase implements Serializable {
                 "storageLocation='" + storageLocation + '\'' +
                 ", s3=" + s3 +
                 ", adlsGen2=" + adlsGen2 +
+                ", gcs=" + gcs +
                 ", cloudwatch=" + cloudwatch +
                 '}';
     }
