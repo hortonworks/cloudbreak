@@ -46,6 +46,8 @@ public class DnsRecordServiceTest {
 
     private static final String DOMAIN2 = "example.org";
 
+    private static final String TARGET_FQDN = "example2.com.";
+
     private static final List<String> SRV_RECORDS = List.of("1 2 foo.example.com.");
 
     @Mock
@@ -280,7 +282,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
 
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -294,11 +296,29 @@ public class DnsRecordServiceTest {
     }
 
     @Test
+    public void testCnameRecordAddWithoutTrailingDot() throws FreeIpaClientException {
+        AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setCname("Asdf");
+        request.setTargetFqdn("example2.com");
+
+        Stack stack = createStack();
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FreeIpa freeIpa = createFreeIpa();
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+
+        underTest.addDnsCnameRecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).addDnsCnameRecord(DOMAIN, request.getCname(), TARGET_FQDN);
+    }
+
+    @Test
     public void testCnameRecordAddNotFound() throws FreeIpaClientException {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
 
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -318,7 +338,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
         request.setDnsZone(DOMAIN);
 
         Stack stack = createStack();
@@ -337,7 +357,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
         request.setDnsZone(DOMAIN2);
 
         Stack stack = createStack();
@@ -357,7 +377,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
         request.setDnsZone(DOMAIN2);
 
         Stack stack = createStack();
@@ -376,7 +396,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
 
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -398,7 +418,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
 
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
@@ -418,7 +438,7 @@ public class DnsRecordServiceTest {
         AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
         request.setCname("Asdf");
-        request.setTargetFqdn("target");
+        request.setTargetFqdn(TARGET_FQDN);
 
         Stack stack = createStack();
         when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
