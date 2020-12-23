@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -68,7 +69,7 @@ public class StateRunnerTest {
         PowerMockito.verifyStatic(SaltStates.class);
         ArgumentCaptor acHostList = ArgumentCaptor.forClass(HostList.class);
         SaltStates.applyState(eq(saltConnector), eq("example_state"), (Target<String>) acHostList.capture());
-        assertTrue(acHostList.getValue() instanceof HostList);
+        assertThat(acHostList.getValue(), IsInstanceOf.instanceOf(HostList.class));
         HostList hostList = (HostList) acHostList.getValue();
         assertEquals("10-0-0-1.example.com", hostList.getTarget());
     }

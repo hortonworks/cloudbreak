@@ -18,7 +18,7 @@ dependencies {
     compile project(':structuredevent-model')
     compile project(':flow')
 
-    implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: '2.0.3.RELEASE'
+    implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
     implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'
 
     implementation ("io.grpc:grpc-all:1.22.0") {

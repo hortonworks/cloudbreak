@@ -23,7 +23,7 @@ dependencies {
     implementation project(':usage-collection')
     implementation project(':secret-engine')
 
-    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
+    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
     implementation group: 'com.google.protobuf',                name: 'protobuf-java-util',          version: '3.10.0'
 
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion

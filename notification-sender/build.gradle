@@ -7,8 +7,6 @@ repositories {
 }
 
 dependencies {
-  testCompile group: 'junit', name: 'junit', version: junitVersion
-
   compile project(":common")
   compile project(":structuredevent-model")
 

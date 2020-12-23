@@ -73,7 +73,6 @@ dependencies {
   runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
   runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
 
-  testImplementation group: "junit",                     name: "junit",                                version: junitVersion
   testImplementation ('org.springframework.boot:spring-boot-starter-test') {
     exclude group: 'junit'
   }

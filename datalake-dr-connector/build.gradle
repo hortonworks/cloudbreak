@@ -20,6 +20,7 @@ dependencies {
         exclude group: 'org.mockito'
     }
     testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
+    testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                       version: hamcrestVersion
 }
 
 checkstyle {

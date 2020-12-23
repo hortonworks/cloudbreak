@@ -5,6 +5,7 @@ spring:
 # The logfiles will be created in this directory, LOG_PATH system property will be set and can be used in logback.xml
 # http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-logging.html#boot-features-logging-file-output
 logging:
+  file:
     path: ${integrationtest.outputdir}
 
 mock:

@@ -16,7 +16,7 @@ buildscript {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.ow2.asm:asm:7.1'
+        force 'org.ow2.asm:asm:9.0'
         force 'net.bytebuddy:byte-buddy:1.9.13'
     }
 }
@@ -61,7 +61,6 @@ dependencies {
     compile group: 'org.apache.commons',                    name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
 
-    testCompile group: 'junit',                             name: 'junit',                          version: junitVersion
     testCompile group: 'org.mockito',                       name: 'mockito-core',                   version: mockitoVersion
     testCompile group: 'org.springframework.boot',          name: 'spring-boot-starter-test',       version: springBootVersion
     testCompile group: 'org.awaitility',                    name: 'awaitility',                     version: '3.1.6'

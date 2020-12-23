@@ -125,6 +125,9 @@ dependencies {
   compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
     exclude group: 'ch.qos.logback'
   }
+  compile(group: "org.junit.vintage",             name: "junit-vintage-engine",           version: junitJupiterVersion) {
+    exclude group: "org.hamcrest", module: "hamcrest-core"
+  }
 
   compile ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"
@@ -137,7 +140,8 @@ dependencies {
   compile (group: 'com.hierynomus',                name: 'sshj',                           version: '0.27.0') {
     exclude group: "net.i2p.crypto"
   }
-  runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
+  compile group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
+
   runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 

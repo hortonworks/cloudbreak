@@ -23,10 +23,6 @@ dependencies {
   testCompile group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
 }
 
-dependencies {
-  testCompile group: 'junit', name: 'junit', version: junitVersion
-}
-
 checkstyle {
   checkstyleMain.exclude '**/generated/**'
 }

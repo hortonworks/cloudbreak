@@ -73,5 +73,4 @@ dependencies {
 
 dependencies {
     testImplementation group: 'org.junit.jupiter',name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
-    testCompile group: 'junit',                   name: 'junit',                          version: junitVersion
 }

@@ -15,7 +15,7 @@ jar {
 }
 
 dependencies {
-    compile group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.2.9.RELEASE'
+    compile group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
 
     compile project(':structuredevent-model')
     compile project(':workspace')

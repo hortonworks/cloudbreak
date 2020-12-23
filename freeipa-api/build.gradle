@@ -36,4 +36,6 @@ dependencies {
     implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',   version: jerseyCoreVersion
     implementation group: 'io.swagger',               name: 'swagger-jersey2-jaxrs', version: '1.5.21'
   }
+
+  testImplementation group: 'org.hamcrest',           name: 'hamcrest',              version: hamcrestVersion
 }

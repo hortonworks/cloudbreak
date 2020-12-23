@@ -17,5 +17,5 @@ dependencies {
   implementation project(":environment-api")
   implementation project(":secret-engine")
 
-  testImplementation group: "junit",                         name: "junit",                          version: junitVersion
+  testImplementation group: 'org.hamcrest',                     name: 'hamcrest',                    version: hamcrestVersion
 }

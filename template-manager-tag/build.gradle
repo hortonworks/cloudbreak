@@ -16,7 +16,7 @@ dependencies {
 
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
-    testCompile (group: 'org.hamcrest', name: 'java-hamcrest', version: hamcrestVersion)
+    testCompile group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
     testCompile 'net.javacrumbs.json-unit:json-unit:1.28.2'
 }
 

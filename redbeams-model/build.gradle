@@ -19,7 +19,6 @@ dependencies {
     compile group: 'org.apache.commons',                name: 'commons-lang3',          version: apacheCommonsLangVersion
     compile group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
     compile group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.2.0'
-    testCompile group: 'junit',                         name: 'junit',                  version: junitVersion
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.aspect;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -115,7 +117,7 @@ public class SecretAspectsTest {
 
         verify(secretService, times(1)).put(anyString(), eq("raw"));
 
-        Assert.assertTrue(dummyEntity.secret instanceof SecretProxy);
+        assertThat(dummyEntity.secret, IsInstanceOf.instanceOf(SecretProxy.class));
     }
 
     @Test
@@ -128,7 +130,7 @@ public class SecretAspectsTest {
 
         verify(secretService, times(1)).put(anyString(), eq("raw"));
 
-        Assert.assertTrue(dummyEntity.secret instanceof SecretProxy);
+        assertThat(dummyEntity.secret, IsInstanceOf.instanceOf(SecretProxy.class));
     }
 
     @Test
