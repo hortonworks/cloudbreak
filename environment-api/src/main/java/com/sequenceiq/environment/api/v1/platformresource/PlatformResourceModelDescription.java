@@ -14,12 +14,11 @@ public class PlatformResourceModelDescription {
     public static final String TAG_SPECIFICATIONS = "tag specifications";
     public static final String VIRTUAL_MACHNES = "virtual machines";
     public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
-    public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types by workspace";
-    public static final String CONNECTOR_ENV_V1_DESCRIPTION = "Returns cloud provider specific resource types by environment";
+    public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types";
 
     public static class OpDescription {
         public static final String GET_DISK_TYPES = "retrieve available disk types";
-        public static final String GET_REGION_R_BY_TYPE = "retrieve regions by type";
+        public static final String GET_REGIONS_BY_CREDENTIAL = "retrieve regions by credential";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
         public static final String GET_TAG_SPECIFICATIONS = "retrieve tag specifications";
         public static final String GET_NETWORKS = "retrieve network properties";
@@ -36,7 +35,7 @@ public class PlatformResourceModelDescription {
 
     public static class OpEnvDescription {
         public static final String GET_DISK_TYPES = "retrieve available disk types by environment";
-        public static final String GET_REGION_R_BY_TYPE = "retrieve regions by type by environment";
+        public static final String GET_REGIONS_BY_ENVIRONMENT = "retrieve regions by environment";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint by environment";
         public static final String GET_TAG_SPECIFICATIONS = "retrieve tag specifications by environment";
         public static final String GET_NETWORKS = "retrieve network properties by environment";

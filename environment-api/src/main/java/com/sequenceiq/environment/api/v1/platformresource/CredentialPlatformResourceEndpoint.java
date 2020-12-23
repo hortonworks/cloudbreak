@@ -55,7 +55,7 @@ public interface CredentialPlatformResourceEndpoint {
     @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OpDescription.GET_REGION_R_BY_TYPE, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+    @ApiOperation(value = OpDescription.GET_REGIONS_BY_CREDENTIAL, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
             nickname = "getRegionsByCredential")
     RegionResponse getRegionsByCredential(
             @QueryParam("credentialName") String credentialName,
