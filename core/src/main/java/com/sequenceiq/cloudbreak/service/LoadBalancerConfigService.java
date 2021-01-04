@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -29,6 +33,9 @@ public class LoadBalancerConfigService {
     private static final String PUBLIC_SUFFIX = "external";
 
     private static final Set<Integer> DEFAULT_KNOX_PORTS = Set.of(443);
+
+    @Inject
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
         LOGGER.info("Fetching list of instance groups with Knox gateway installed");
@@ -77,5 +84,16 @@ public class LoadBalancerConfigService {
             default:
                 return Collections.emptySet();
         }
+    }
+
+    public String getLoadBalancerUserFacingFQDN(Long stackId) {
+        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
+        if (!loadBalancers.isEmpty()) {
+            LoadBalancer preferredLB =  loadBalancers.stream().filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType())).findAny()
+                .orElse(loadBalancers.iterator().next());
+            return preferredLB.getFqdn();
+        }
+
+        return null;
     }
 }

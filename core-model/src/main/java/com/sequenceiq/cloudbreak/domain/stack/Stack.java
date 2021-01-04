@@ -74,7 +74,6 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 
@@ -829,15 +828,5 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return loadBalancers.stream()
             .flatMap(loadBalancer -> loadBalancer.getTargetGroups().stream())
             .collect(Collectors.toList());
-    }
-
-    public String getLoadBalancerUserFacingFQDN() {
-        if (loadBalancers != null && loadBalancers.size() != 0) {
-            LoadBalancer preferredLB =  loadBalancers.stream().filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType())).findAny()
-                    .orElse(loadBalancers.iterator().next());
-            return preferredLB.getFqdn();
-        }
-
-        return null;
     }
 }

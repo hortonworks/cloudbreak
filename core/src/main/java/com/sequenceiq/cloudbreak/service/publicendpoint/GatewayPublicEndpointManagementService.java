@@ -136,6 +136,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
                 loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
                         endpoint.get(), environment.getName(), getWorkloadSubdomain(userCrn)));
+                loadBalancerPersistenceService.save(loadBalancer);
                 LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
             }
         }
