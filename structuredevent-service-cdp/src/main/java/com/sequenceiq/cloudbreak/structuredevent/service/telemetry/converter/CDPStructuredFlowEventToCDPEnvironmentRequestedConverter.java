@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -56,21 +57,58 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
                 cdpEnvironmentDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
                         .Value.valueOf(srcEnvironmentDetails.getCloudPlatform()));
             }
-            Tunnel tunnel = srcEnvironmentDetails.getTunnel();
-            if (tunnel != null) {
-                cdpEnvironmentDetails.setTunnelType(UsageProto.CDPEnvironmentsEnvironmentTunnel
-                        .Value.valueOf(tunnel.name()));
-            }
+
             NetworkDto network = srcEnvironmentDetails.getNetwork();
             if (network != null && network.getSubnetMetas() != null) {
-                List<String> availabilityZones = network.getSubnetMetas().values().stream().map(CloudSubnet::getAvailabilityZone)
-                        .filter(Objects::nonNull).sorted().distinct().collect(Collectors.toUnmodifiableList());
+                List<String> availabilityZones = network.getSubnetMetas().values()
+                        .stream()
+                        .map(CloudSubnet::getAvailabilityZone)
+                        .filter(Objects::nonNull)
+                        .sorted()
+                        .distinct()
+                        .collect(Collectors.toUnmodifiableList());
 
                 cdpEnvironmentDetails.setNumberOfAvailabilityZones(availabilityZones.size());
                 cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
             }
+            cdpEnvironmentDetails.setNetworkDetails(convertNetworkDetails(srcEnvironmentDetails));
         }
         return cdpEnvironmentDetails.build();
+    }
+
+    private UsageProto.CDPNetworkDetails convertNetworkDetails(EnvironmentDetails environmentDetails) {
+        UsageProto.CDPNetworkDetails.Builder cdpNetworkDetails = UsageProto.CDPNetworkDetails.newBuilder();
+
+        Tunnel tunnel = environmentDetails.getTunnel();
+        if (tunnel != null) {
+            cdpNetworkDetails.setConnectivity(environmentDetails.getTunnel().name());
+        }
+
+        NetworkDto network = environmentDetails.getNetwork();
+        if (network != null) {
+            cdpNetworkDetails.setNetworkType(network.getRegistrationType().name());
+            cdpNetworkDetails.setServiceEndpointCreation(network.getServiceEndpointCreation().name());
+            if (network.getSubnetMetas() != null) {
+                List<SubnetType> types = network.getSubnetMetas().values().stream().map(CloudSubnet::getType)
+                        .filter(Objects::nonNull).sorted().distinct().collect(Collectors.toUnmodifiableList());
+                cdpNetworkDetails.setNumberPrivateSubnets(
+                        types.stream()
+                                .filter(e -> e.equals(SubnetType.PRIVATE) || e.equals(SubnetType.MLX) || e.equals(SubnetType.DWX))
+                                .collect(Collectors.toList())
+                                .size());
+                cdpNetworkDetails.setNumberPublicSubnets(
+                        types.stream()
+                                .filter(e -> e.equals(SubnetType.PUBLIC))
+                                .collect(Collectors.toList())
+                                .size());
+            }
+        }
+
+        UsageProto.CDPProxyDetails.Builder cdpProxyDetails = UsageProto.CDPProxyDetails.newBuilder();
+        cdpProxyDetails.setProxy(environmentDetails.getProxyConfigConfigured());
+        cdpNetworkDetails.setProxyDetails(cdpProxyDetails.build());
+
+        return cdpNetworkDetails.build();
     }
 
     private UsageProto.CDPEnvironmentTelemetryFeatureDetails convertTelemetryFeatureDetails(EnvironmentDetails environmentDetails) {

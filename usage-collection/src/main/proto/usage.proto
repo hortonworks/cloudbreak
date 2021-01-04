@@ -980,8 +980,8 @@ message CDPEnvironmentDetails {
     int32 numberOfAvailabilityZones = 3;
     // Number of availability zones used in the environment
     string availabilityZones = 4;
-    // Tunnel type of the environment
-    CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;
+    // Network metadata
+    CDPNetworkDetails networkDetails = 5;
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {

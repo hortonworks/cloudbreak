@@ -288,6 +288,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.parameters = parameters;
     }
 
+    @Override
     public Tunnel getTunnel() {
         return experimentalFeatures == null ? null : experimentalFeatures.getTunnel();
     }
@@ -330,6 +331,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
 
     public void setParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
         this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
+    }
+
+    @Override
+    public boolean getProxyConfigConfigured() {
+        return proxyConfig == null ? false : true;
     }
 
     public ProxyConfig getProxyConfig() {
