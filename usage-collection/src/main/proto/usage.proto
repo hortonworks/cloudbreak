@@ -633,6 +633,20 @@ message CDPEnvironmentsEnvironmentType {
   }
 }
 
+// The tunnel type of a CDP environment.
+message CDPEnvironmentsEnvironmentTunnel {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // DIRECT
+    DIRECT = 1;
+    // CCM
+    CCM = 2;
+    // Cluster Proxy
+    CLUSTER_PROXY = 3;
+  }
+}
+
 // The status of a CDP Cloudbreak cluster.
 message CDPCloudbreakClusterStatus {
   enum Value {
@@ -966,6 +980,8 @@ message CDPEnvironmentDetails {
     int32 numberOfAvailabilityZones = 3;
     // Number of availability zones used in the environment
     string availabilityZones = 4;
+    // Tunnel type of the environment
+    CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {

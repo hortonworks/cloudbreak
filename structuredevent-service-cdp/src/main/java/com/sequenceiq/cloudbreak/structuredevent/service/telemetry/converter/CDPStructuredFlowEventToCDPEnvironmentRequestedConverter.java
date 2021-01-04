@@ -14,6 +14,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -54,6 +55,11 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
             if (srcEnvironmentDetails.getCloudPlatform() != null) {
                 cdpEnvironmentDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
                         .Value.valueOf(srcEnvironmentDetails.getCloudPlatform()));
+            }
+            Tunnel tunnel = srcEnvironmentDetails.getTunnel();
+            if (tunnel != null) {
+                cdpEnvironmentDetails.setTunnelType(UsageProto.CDPEnvironmentsEnvironmentTunnel
+                        .Value.valueOf(tunnel.name()));
             }
             NetworkDto network = srcEnvironmentDetails.getNetwork();
             if (network != null && network.getSubnetMetas() != null) {

@@ -43396,6 +43396,574 @@ public final class UsageProto {
 
   }
 
+  public interface CDPEnvironmentsEnvironmentTunnelOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPEnvironmentsEnvironmentTunnel)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * The tunnel type of a CDP environment.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPEnvironmentsEnvironmentTunnel}
+   */
+  public  static final class CDPEnvironmentsEnvironmentTunnel extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPEnvironmentsEnvironmentTunnel)
+      CDPEnvironmentsEnvironmentTunnelOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPEnvironmentsEnvironmentTunnel.newBuilder() to construct.
+    private CDPEnvironmentsEnvironmentTunnel(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPEnvironmentsEnvironmentTunnel() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPEnvironmentsEnvironmentTunnel(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentsEnvironmentTunnel_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code usage.CDPEnvironmentsEnvironmentTunnel.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * DIRECT
+       * </pre>
+       *
+       * <code>DIRECT = 1;</code>
+       */
+      DIRECT(1),
+      /**
+       * <pre>
+       * CCM
+       * </pre>
+       *
+       * <code>CCM = 2;</code>
+       */
+      CCM(2),
+      /**
+       * <pre>
+       * Cluster Proxy
+       * </pre>
+       *
+       * <code>CLUSTER_PROXY = 3;</code>
+       */
+      CLUSTER_PROXY(3),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * DIRECT
+       * </pre>
+       *
+       * <code>DIRECT = 1;</code>
+       */
+      public static final int DIRECT_VALUE = 1;
+      /**
+       * <pre>
+       * CCM
+       * </pre>
+       *
+       * <code>CCM = 2;</code>
+       */
+      public static final int CCM_VALUE = 2;
+      /**
+       * <pre>
+       * Cluster Proxy
+       * </pre>
+       *
+       * <code>CLUSTER_PROXY = 3;</code>
+       */
+      public static final int CLUSTER_PROXY_VALUE = 3;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return DIRECT;
+          case 2: return CCM;
+          case 3: return CLUSTER_PROXY;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:usage.CDPEnvironmentsEnvironmentTunnel.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The tunnel type of a CDP environment.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPEnvironmentsEnvironmentTunnel}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPEnvironmentsEnvironmentTunnel)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnelOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentsEnvironmentTunnel_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPEnvironmentsEnvironmentTunnel)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPEnvironmentsEnvironmentTunnel)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPEnvironmentsEnvironmentTunnel>
+        PARSER = new com.google.protobuf.AbstractParser<CDPEnvironmentsEnvironmentTunnel>() {
+      @java.lang.Override
+      public CDPEnvironmentsEnvironmentTunnel parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPEnvironmentsEnvironmentTunnel(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPEnvironmentsEnvironmentTunnel> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPEnvironmentsEnvironmentTunnel> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CDPCloudbreakClusterStatusOrBuilder extends
       // @@protoc_insertion_point(interface_extends:usage.CDPCloudbreakClusterStatus)
       com.google.protobuf.MessageOrBuilder {
@@ -58568,7 +59136,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Flow ID, to make it easier to identify which flow has triggered this event
+     * Flow UUID, to make it easy to identify which flow has triggered this event
      * </pre>
      *
      * <code>string flowId = 7;</code>
@@ -58576,7 +59144,7 @@ public final class UsageProto {
     java.lang.String getFlowId();
     /**
      * <pre>
-     * Flow ID, to make it easier to identify which flow has triggered this event
+     * Flow UUID, to make it easy to identify which flow has triggered this event
      * </pre>
      *
      * <code>string flowId = 7;</code>
@@ -58586,7 +59154,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
      * </pre>
      *
      * <code>string flowChainId = 8;</code>
@@ -58594,7 +59162,7 @@ public final class UsageProto {
     java.lang.String getFlowChainId();
     /**
      * <pre>
-     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
      * </pre>
      *
      * <code>string flowChainId = 8;</code>
@@ -58968,7 +59536,7 @@ public final class UsageProto {
     private volatile java.lang.Object flowId_;
     /**
      * <pre>
-     * Flow ID, to make it easier to identify which flow has triggered this event
+     * Flow UUID, to make it easy to identify which flow has triggered this event
      * </pre>
      *
      * <code>string flowId = 7;</code>
@@ -58987,7 +59555,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Flow ID, to make it easier to identify which flow has triggered this event
+     * Flow UUID, to make it easy to identify which flow has triggered this event
      * </pre>
      *
      * <code>string flowId = 7;</code>
@@ -59010,7 +59578,7 @@ public final class UsageProto {
     private volatile java.lang.Object flowChainId_;
     /**
      * <pre>
-     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
      * </pre>
      *
      * <code>string flowChainId = 8;</code>
@@ -59029,7 +59597,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+     * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
      * </pre>
      *
      * <code>string flowChainId = 8;</code>
@@ -59982,7 +60550,7 @@ public final class UsageProto {
       private java.lang.Object flowId_ = "";
       /**
        * <pre>
-       * Flow ID, to make it easier to identify which flow has triggered this event
+       * Flow UUID, to make it easy to identify which flow has triggered this event
        * </pre>
        *
        * <code>string flowId = 7;</code>
@@ -60001,7 +60569,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Flow ID, to make it easier to identify which flow has triggered this event
+       * Flow UUID, to make it easy to identify which flow has triggered this event
        * </pre>
        *
        * <code>string flowId = 7;</code>
@@ -60021,7 +60589,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Flow ID, to make it easier to identify which flow has triggered this event
+       * Flow UUID, to make it easy to identify which flow has triggered this event
        * </pre>
        *
        * <code>string flowId = 7;</code>
@@ -60038,7 +60606,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Flow ID, to make it easier to identify which flow has triggered this event
+       * Flow UUID, to make it easy to identify which flow has triggered this event
        * </pre>
        *
        * <code>string flowId = 7;</code>
@@ -60051,7 +60619,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Flow ID, to make it easier to identify which flow has triggered this event
+       * Flow UUID, to make it easy to identify which flow has triggered this event
        * </pre>
        *
        * <code>string flowId = 7;</code>
@@ -60071,7 +60639,7 @@ public final class UsageProto {
       private java.lang.Object flowChainId_ = "";
       /**
        * <pre>
-       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
        * </pre>
        *
        * <code>string flowChainId = 8;</code>
@@ -60090,7 +60658,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
        * </pre>
        *
        * <code>string flowChainId = 8;</code>
@@ -60110,7 +60678,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
        * </pre>
        *
        * <code>string flowChainId = 8;</code>
@@ -60127,7 +60695,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
        * </pre>
        *
        * <code>string flowChainId = 8;</code>
@@ -60140,7 +60708,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * // Flow Chain ID, to make it easier to identify which flowchain has triggered this event
+       * Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
        * </pre>
        *
        * <code>string flowChainId = 8;</code>
@@ -60274,6 +60842,23 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getAvailabilityZonesBytes();
+
+    /**
+     * <pre>
+     * Tunnel type of the environment
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     */
+    int getTunnelTypeValue();
+    /**
+     * <pre>
+     * Tunnel type of the environment
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType();
   }
   /**
    * Protobuf type {@code usage.CDPEnvironmentDetails}
@@ -60292,6 +60877,7 @@ public final class UsageProto {
       region_ = "";
       numberOfAvailabilityZones_ = 0;
       availabilityZones_ = "";
+      tunnelType_ = 0;
     }
 
     @java.lang.Override
@@ -60339,6 +60925,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               availabilityZones_ = s;
+              break;
+            }
+            case 40: {
+              int rawValue = input.readEnum();
+
+              tunnelType_ = rawValue;
               break;
             }
             default: {
@@ -60495,6 +61087,31 @@ public final class UsageProto {
       }
     }
 
+    public static final int TUNNELTYPE_FIELD_NUMBER = 5;
+    private int tunnelType_;
+    /**
+     * <pre>
+     * Tunnel type of the environment
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     */
+    public int getTunnelTypeValue() {
+      return tunnelType_;
+    }
+    /**
+     * <pre>
+     * Tunnel type of the environment
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.valueOf(tunnelType_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -60521,6 +61138,9 @@ public final class UsageProto {
       if (!getAvailabilityZonesBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, availabilityZones_);
       }
+      if (tunnelType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNSET.getNumber()) {
+        output.writeEnum(5, tunnelType_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -60543,6 +61163,10 @@ public final class UsageProto {
       }
       if (!getAvailabilityZonesBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, availabilityZones_);
+      }
+      if (tunnelType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(5, tunnelType_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -60567,6 +61191,7 @@ public final class UsageProto {
           == other.getNumberOfAvailabilityZones());
       result = result && getAvailabilityZones()
           .equals(other.getAvailabilityZones());
+      result = result && tunnelType_ == other.tunnelType_;
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -60586,6 +61211,8 @@ public final class UsageProto {
       hash = (53 * hash) + getNumberOfAvailabilityZones();
       hash = (37 * hash) + AVAILABILITYZONES_FIELD_NUMBER;
       hash = (53 * hash) + getAvailabilityZones().hashCode();
+      hash = (37 * hash) + TUNNELTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + tunnelType_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -60727,6 +61354,8 @@ public final class UsageProto {
 
         availabilityZones_ = "";
 
+        tunnelType_ = 0;
+
         return this;
       }
 
@@ -60757,6 +61386,7 @@ public final class UsageProto {
         result.region_ = region_;
         result.numberOfAvailabilityZones_ = numberOfAvailabilityZones_;
         result.availabilityZones_ = availabilityZones_;
+        result.tunnelType_ = tunnelType_;
         onBuilt();
         return result;
       }
@@ -60818,6 +61448,9 @@ public final class UsageProto {
         if (!other.getAvailabilityZones().isEmpty()) {
           availabilityZones_ = other.availabilityZones_;
           onChanged();
+        }
+        if (other.tunnelType_ != 0) {
+          setTunnelTypeValue(other.getTunnelTypeValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -61125,6 +61758,71 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         availabilityZones_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int tunnelType_ = 0;
+      /**
+       * <pre>
+       * Tunnel type of the environment
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       */
+      public int getTunnelTypeValue() {
+        return tunnelType_;
+      }
+      /**
+       * <pre>
+       * Tunnel type of the environment
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       */
+      public Builder setTunnelTypeValue(int value) {
+        tunnelType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Tunnel type of the environment
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.valueOf(tunnelType_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Tunnel type of the environment
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       */
+      public Builder setTunnelType(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        tunnelType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Tunnel type of the environment
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       */
+      public Builder clearTunnelType() {
+        
+        tunnelType_ = 0;
         onChanged();
         return this;
       }
@@ -66512,6 +67210,11 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPEnvironmentsEnvironmentType_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPEnvironmentsEnvironmentTunnel_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_CDPCloudbreakClusterStatus_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -66810,122 +67513,126 @@ public final class UsageProto {
       "dxNamespaceStatus.Value\"e\n\036CDPEnvironmen" +
       "tsEnvironmentType\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n" +
       "\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004" +
-      "MOCK\020\005\"\353\003\n\032CDPCloudbreakClusterStatus\"\314\003" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CRE" +
-      "ATE_IN_PROGRESS\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDA" +
-      "TE_IN_PROGRESS\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021" +
-      "\n\rUPDATE_FAILED\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026" +
-      "ENABLE_SECURITY_FAILED\020\010\022\032\n\026PRE_DELETE_I" +
-      "N_PROGRESS\020\t\022\026\n\022DELETE_IN_PROGRESS\020\n\022\021\n\r" +
-      "DELETE_FAILED\020\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n" +
-      "\007STOPPED\020\r\022\022\n\016STOP_REQUESTED\020\016\022\023\n\017START_" +
-      "REQUESTED\020\017\022\024\n\020STOP_IN_PROGRESS\020\020\022\025\n\021STA" +
-      "RT_IN_PROGRESS\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013ST" +
-      "OP_FAILED\020\023\022\021\n\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTE" +
-      "NANCE_MODE_ENABLED\020\025\"\215\002\n\033CDPDatalakeClus" +
-      "terRequested\022\022\n\ndatalakeId\030\001 \001(\t\022\021\n\tacco" +
-      "untId\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(\t\022D\n\017env" +
-      "ironmentType\030\004 \001(\0162+.usage.CDPEnvironmen" +
-      "tsEnvironmentType.Value\022\026\n\016environmentCr" +
-      "n\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(" +
-      "\t\022\022\n\ncreatorCrn\030\010 \001(\t\022\035\n\025clusterDefiniti" +
-      "onName\030\t \001(\t\"\304\001\n\037CDPDatalakeClusterStatu" +
-      "sChanged\022\022\n\ndatalakeId\030\001 \001(\t\022:\n\toldStatu" +
-      "s\030\002 \001(\0162\'.usage.CDPCloudbreakClusterStat" +
-      "us.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPC" +
-      "loudbreakClusterStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\t\"\237\002\n\032CDPDatahubClusterRequest" +
-      "ed\022\021\n\tclusterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t" +
-      "\022\023\n\013clusterName\030\003 \001(\t\022D\n\017environmentType" +
-      "\030\004 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
-      "tType.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013c" +
-      "dpdVersion\030\006 \001(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n" +
-      "\003crn\030\010 \001(\t\022\022\n\ncreatorCrn\030\t \001(\t\022\035\n\025cluste" +
-      "rDefinitionName\030\n \001(\t\"\302\001\n\036CDPDatahubClus" +
-      "terStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022:\n\to" +
-      "ldStatus\030\002 \001(\0162\'.usage.CDPCloudbreakClus" +
-      "terStatus.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usa" +
-      "ge.CDPCloudbreakClusterStatus.Value\022\025\n\rf" +
-      "ailureReason\030\004 \001(\t\"\222\004\n\025CDPCMLWorkspaceSt" +
-      "atus\"\370\003\n\005Value\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_S" +
-      "TARTED\020\001\022\026\n\022PROVISION_FINISHED\020\002\022\024\n\020PROV" +
-      "ISION_FAILED\020\003\022\030\n\024INSTALLATION_STARTED\020\004" +
-      "\022\031\n\025INSTALLATION_FINISHED\020\005\022\027\n\023INSTALLAT" +
-      "ION_FAILED\020\006\022\027\n\023DEPROVISION_STARTED\020\007\022\030\n" +
-      "\024DEPROVISION_FINISHED\020\010\022\026\n\022DEPROVISION_F" +
-      "AILED\020\t\022\021\n\rRENEW_STARTED\020\n\022\022\n\016RENEW_FINI" +
-      "SHED\020\013\022\021\n\rRENEW_WARNING\020\014\022\023\n\017SUSPEND_STA" +
-      "RTED\020\r\022\024\n\020SUSPEND_FINISHED\020\016\022\022\n\016SUSPEND_" +
-      "FAILED\020\017\022\022\n\016RESUME_STARTED\020\020\022\023\n\017RESUME_F" +
-      "INISHED\020\021\022\021\n\rRESUME_FAILED\020\022\022\022\n\016RESUME_W" +
-      "ARNING\020\023\022\023\n\017UPGRADE_STARTED\020\024\022\024\n\020UPGRADE" +
-      "_FINISHED\020\025\022\022\n\016UPGRADE_FAILED\020\026\"\231\001\n\032CDPC" +
-      "MLAWSWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001" +
-      "(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016" +
-      "\n\006maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001" +
-      "(\t\022\027\n\017gpuInstanceType\030\006 \001(\t\"\233\001\n\034CDPCMLAz" +
-      "ureWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001(\005" +
-      "\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006" +
-      "maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001(\t" +
-      "\022\027\n\017gpuInstanceType\030\006 \001(\t\"\224\003\n\030CDPCMLWork" +
-      "spaceRequested\022\013\n\003crn\030\001 \001(\t\022\021\n\taccountId" +
-      "\030\002 \001(\t\022\025\n\rworkspaceName\030\003 \001(\t\022D\n\017environ" +
-      "mentType\030\004 \001(\0162+.usage.CDPEnvironmentsEn" +
-      "vironmentType.Value\022\026\n\016environmentCrn\030\005 " +
-      "\001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\022\n\ncreatorCrn\030\007" +
-      " \001(\t\022G\n\032cdpCMLAWSWorkspaceMetadata\030\010 \001(\013" +
-      "2!.usage.CDPCMLAWSWorkspaceMetadataH\000\022K\n" +
-      "\034cdpCMLAzureWorkspaceMetadata\030\t \001(\0132#.us" +
-      "age.CDPCMLAzureWorkspaceMetadataH\000\022\030\n\020wo" +
-      "rkspaceVersion\030\n \001(\tB\n\n\010metadata\"\330\001\n\034CDP" +
-      "CMLWorkspaceStatusChanged\022\013\n\003crn\030\001 \001(\t\0225" +
-      "\n\toldStatus\030\002 \001(\0162\".usage.CDPCMLWorkspac" +
-      "eStatus.Value\0225\n\tnewStatus\030\003 \001(\0162\".usage" +
-      ".CDPCMLWorkspaceStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\t\022\023\n\013fromVersion\030\005 \001(\t\022\021\n\ttoVe" +
-      "rsion\030\006 \001(\t\"C\n\030CDPRequestProcessingStep\"" +
-      "\'\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002" +
-      "\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005Value\022\t\n\005U" +
-      "NSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FIN" +
-      "ISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_STA" +
-      "RTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_FA" +
-      "ILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_F" +
-      "INISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_" +
-      "STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUME" +
-      "_FAILED\020\014\"\363\001\n\023CDPOperationDetails\022\021\n\tacc" +
-      "ountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014res" +
-      "ourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n" +
-      "\022applicationVersion\030\005 \001(\t\022G\n\030cdpRequestP" +
-      "rocessingStep\030\006 \001(\0162%.usage.CDPRequestPr" +
-      "ocessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013fl" +
-      "owChainId\030\010 \001(\t\"\253\001\n\025CDPEnvironmentDetail" +
-      "s\022D\n\017environmentType\030\001 \001(\0162+.usage.CDPEn" +
-      "vironmentsEnvironmentType.Value\022\016\n\006regio" +
-      "n\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001" +
-      "(\005\022\031\n\021availabilityZones\030\004 \001(\t\"a\n%CDPEnvi" +
-      "ronmentTelemetryFeatureDetails\022\031\n\021worklo" +
-      "adAnalytics\030\001 \001(\t\022\035\n\025clusterLogsCollecti" +
-      "on\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001" +
-      "(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networkType\030" +
-      "\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPub" +
-      "licSubnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets" +
-      "\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022" +
-      ",\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDe" +
-      "tails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020ope" +
-      "rationDetails\030\001 \001(\0132\032.usage.CDPOperation" +
-      "Details\0228\n\022environmentDetails\030\002 \001(\0132\034.us" +
-      "age.CDPEnvironmentDetails\0220\n\016networkDeta" +
-      "ils\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M\n\027t" +
-      "elemetryFeatureDetails\030\004 \001(\0132,.usage.CDP" +
-      "EnvironmentTelemetryFeatureDetails\"\326\001\n\033C" +
-      "DPEnvironmentStatusChanged\0224\n\020operationD" +
-      "etails\030\001 \001(\0132\032.usage.CDPOperationDetails" +
-      "\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvironme" +
-      "ntStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usag" +
-      "e.CDPEnvironmentStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\tBV\n-com.cloudera.thunderhead." +
-      "service.common.usageB\nUsageProtoZ\031com/cl" +
-      "oudera/cdp/protobufb\006proto3"
+      "MOCK\020\005\"^\n CDPEnvironmentsEnvironmentTunn" +
+      "el\":\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006DIRECT\020\001\022\007\n\003CC" +
+      "M\020\002\022\021\n\rCLUSTER_PROXY\020\003\"\353\003\n\032CDPCloudbreak" +
+      "ClusterStatus\"\314\003\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tRE" +
+      "QUESTED\020\001\022\026\n\022CREATE_IN_PROGRESS\020\002\022\r\n\tAVA" +
+      "ILABLE\020\003\022\026\n\022UPDATE_IN_PROGRESS\020\004\022\024\n\020UPDA" +
+      "TE_REQUESTED\020\005\022\021\n\rUPDATE_FAILED\020\006\022\021\n\rCRE" +
+      "ATE_FAILED\020\007\022\032\n\026ENABLE_SECURITY_FAILED\020\010" +
+      "\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t\022\026\n\022DELETE_I" +
+      "N_PROGRESS\020\n\022\021\n\rDELETE_FAILED\020\013\022\024\n\020DELET" +
+      "E_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022\n\016STOP_REQUE" +
+      "STED\020\016\022\023\n\017START_REQUESTED\020\017\022\024\n\020STOP_IN_P" +
+      "ROGRESS\020\020\022\025\n\021START_IN_PROGRESS\020\021\022\020\n\014STAR" +
+      "T_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022\021\n\rWAIT_FOR_" +
+      "SYNC\020\024\022\034\n\030MAINTENANCE_MODE_ENABLED\020\025\"\215\002\n" +
+      "\033CDPDatalakeClusterRequested\022\022\n\ndatalake" +
+      "Id\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n\014datalakeN" +
+      "ame\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usa" +
+      "ge.CDPEnvironmentsEnvironmentType.Value\022" +
+      "\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006" +
+      " \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreatorCrn\030\010 \001(\t\022\035\n" +
+      "\025clusterDefinitionName\030\t \001(\t\"\304\001\n\037CDPData" +
+      "lakeClusterStatusChanged\022\022\n\ndatalakeId\030\001" +
+      " \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usage.CDPCloud" +
+      "breakClusterStatus.Value\022:\n\tnewStatus\030\003 " +
+      "\001(\0162\'.usage.CDPCloudbreakClusterStatus.V" +
+      "alue\022\025\n\rfailureReason\030\004 \001(\t\"\237\002\n\032CDPDatah" +
+      "ubClusterRequested\022\021\n\tclusterId\030\001 \001(\t\022\021\n" +
+      "\taccountId\030\002 \001(\t\022\023\n\013clusterName\030\003 \001(\t\022D\n" +
+      "\017environmentType\030\004 \001(\0162+.usage.CDPEnviro" +
+      "nmentsEnvironmentType.Value\022\026\n\016environme" +
+      "ntCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\023\n\013data" +
+      "lakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(\t\022\022\n\ncreatorCrn" +
+      "\030\t \001(\t\022\035\n\025clusterDefinitionName\030\n \001(\t\"\302\001" +
+      "\n\036CDPDatahubClusterStatusChanged\022\021\n\tclus" +
+      "terId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usage.C" +
+      "DPCloudbreakClusterStatus.Value\022:\n\tnewSt" +
+      "atus\030\003 \001(\0162\'.usage.CDPCloudbreakClusterS" +
+      "tatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"\222\004\n\025C" +
+      "DPCMLWorkspaceStatus\"\370\003\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\025\n\021PROVISION_STARTED\020\001\022\026\n\022PROVISION_FI" +
+      "NISHED\020\002\022\024\n\020PROVISION_FAILED\020\003\022\030\n\024INSTAL" +
+      "LATION_STARTED\020\004\022\031\n\025INSTALLATION_FINISHE" +
+      "D\020\005\022\027\n\023INSTALLATION_FAILED\020\006\022\027\n\023DEPROVIS" +
+      "ION_STARTED\020\007\022\030\n\024DEPROVISION_FINISHED\020\010\022" +
+      "\026\n\022DEPROVISION_FAILED\020\t\022\021\n\rRENEW_STARTED" +
+      "\020\n\022\022\n\016RENEW_FINISHED\020\013\022\021\n\rRENEW_WARNING\020" +
+      "\014\022\023\n\017SUSPEND_STARTED\020\r\022\024\n\020SUSPEND_FINISH" +
+      "ED\020\016\022\022\n\016SUSPEND_FAILED\020\017\022\022\n\016RESUME_START" +
+      "ED\020\020\022\023\n\017RESUME_FINISHED\020\021\022\021\n\rRESUME_FAIL" +
+      "ED\020\022\022\022\n\016RESUME_WARNING\020\023\022\023\n\017UPGRADE_STAR" +
+      "TED\020\024\022\024\n\020UPGRADE_FINISHED\020\025\022\022\n\016UPGRADE_F" +
+      "AILED\020\026\"\231\001\n\032CDPCMLAWSWorkspaceMetadata\022\022" +
+      "\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016" +
+      "\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022worker" +
+      "InstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030\006 " +
+      "\001(\t\"\233\001\n\034CDPCMLAzureWorkspaceMetadata\022\022\n\n" +
+      "minWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006" +
+      "minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022workerIn" +
+      "stanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030\006 \001(" +
+      "\t\"\224\003\n\030CDPCMLWorkspaceRequested\022\013\n\003crn\030\001 " +
+      "\001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rworkspaceName\030" +
+      "\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usage.C" +
+      "DPEnvironmentsEnvironmentType.Value\022\026\n\016e" +
+      "nvironmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t" +
+      "\022\022\n\ncreatorCrn\030\007 \001(\t\022G\n\032cdpCMLAWSWorkspa" +
+      "ceMetadata\030\010 \001(\0132!.usage.CDPCMLAWSWorksp" +
+      "aceMetadataH\000\022K\n\034cdpCMLAzureWorkspaceMet" +
+      "adata\030\t \001(\0132#.usage.CDPCMLAzureWorkspace" +
+      "MetadataH\000\022\030\n\020workspaceVersion\030\n \001(\tB\n\n\010" +
+      "metadata\"\330\001\n\034CDPCMLWorkspaceStatusChange" +
+      "d\022\013\n\003crn\030\001 \001(\t\0225\n\toldStatus\030\002 \001(\0162\".usag" +
+      "e.CDPCMLWorkspaceStatus.Value\0225\n\tnewStat" +
+      "us\030\003 \001(\0162\".usage.CDPCMLWorkspaceStatus.V" +
+      "alue\022\025\n\rfailureReason\030\004 \001(\t\022\023\n\013fromVersi" +
+      "on\030\005 \001(\t\022\021\n\ttoVersion\030\006 \001(\t\"C\n\030CDPReques" +
+      "tProcessingStep\"\'\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004I" +
+      "NIT\020\001\022\t\n\005FINAL\020\002\"\236\002\n\024CDPEnvironmentStatu" +
+      "s\"\205\002\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED" +
+      "\020\001\022\023\n\017CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED" +
+      "\020\003\022\022\n\016DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHE" +
+      "D\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTE" +
+      "D\020\007\022\024\n\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAI" +
+      "LED\020\t\022\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINI" +
+      "SHED\020\013\022\021\n\rRESUME_FAILED\020\014\"\363\001\n\023CDPOperati" +
+      "onDetails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resource" +
+      "Crn\030\002 \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initi" +
+      "atorCrn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(" +
+      "\t\022G\n\030cdpRequestProcessingStep\030\006 \001(\0162%.us" +
+      "age.CDPRequestProcessingStep.Value\022\016\n\006fl" +
+      "owId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\"\356\001\n\025CDPE" +
+      "nvironmentDetails\022D\n\017environmentType\030\001 \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
+      "e.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAvail" +
+      "abilityZones\030\003 \001(\005\022\031\n\021availabilityZones\030" +
+      "\004 \001(\t\022A\n\ntunnelType\030\005 \001(\0162-.usage.CDPEnv" +
+      "ironmentsEnvironmentTunnel.Value\"a\n%CDPE" +
+      "nvironmentTelemetryFeatureDetails\022\031\n\021wor" +
+      "kloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsColle" +
+      "ction\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030" +
+      "\001 \001(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networkTy" +
+      "pe\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023number" +
+      "PublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateSubn" +
+      "ets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030\005 \001" +
+      "(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPProx" +
+      "yDetails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020" +
+      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
+      "ionDetails\0228\n\022environmentDetails\030\002 \001(\0132\034" +
+      ".usage.CDPEnvironmentDetails\0220\n\016networkD" +
+      "etails\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M" +
+      "\n\027telemetryFeatureDetails\030\004 \001(\0132,.usage." +
+      "CDPEnvironmentTelemetryFeatureDetails\"\326\001" +
+      "\n\033CDPEnvironmentStatusChanged\0224\n\020operati" +
+      "onDetails\030\001 \001(\0132\032.usage.CDPOperationDeta" +
+      "ils\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnviro" +
+      "nmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.u" +
+      "sage.CDPEnvironmentStatus.Value\022\025\n\rfailu" +
+      "reReason\030\004 \001(\tBV\n-com.cloudera.thunderhe" +
+      "ad.service.common.usageB\nUsageProtoZ\031com" +
+      "/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -67161,116 +67868,122 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor,
         new java.lang.String[] { });
-    internal_static_usage_CDPCloudbreakClusterStatus_descriptor =
+    internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor =
       getDescriptor().getMessageTypes().get(37);
+    internal_static_usage_CDPEnvironmentsEnvironmentTunnel_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPEnvironmentsEnvironmentTunnel_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPCloudbreakClusterStatus_descriptor =
+      getDescriptor().getMessageTypes().get(38);
     internal_static_usage_CDPCloudbreakClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCloudbreakClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPDatalakeClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(38);
+      getDescriptor().getMessageTypes().get(39);
     internal_static_usage_CDPDatalakeClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterRequested_descriptor,
         new java.lang.String[] { "DatalakeId", "AccountId", "DatalakeName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(39);
+      getDescriptor().getMessageTypes().get(40);
     internal_static_usage_CDPDatalakeClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor,
         new java.lang.String[] { "DatalakeId", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPDatahubClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(40);
+      getDescriptor().getMessageTypes().get(41);
     internal_static_usage_CDPDatahubClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterRequested_descriptor,
         new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "DatalakeCrn", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatahubClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(41);
+      getDescriptor().getMessageTypes().get(42);
     internal_static_usage_CDPDatahubClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterStatusChanged_descriptor,
         new java.lang.String[] { "ClusterId", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPCMLWorkspaceStatus_descriptor =
-      getDescriptor().getMessageTypes().get(42);
+      getDescriptor().getMessageTypes().get(43);
     internal_static_usage_CDPCMLWorkspaceStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPCMLAWSWorkspaceMetadata_descriptor =
-      getDescriptor().getMessageTypes().get(43);
+      getDescriptor().getMessageTypes().get(44);
     internal_static_usage_CDPCMLAWSWorkspaceMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLAWSWorkspaceMetadata_descriptor,
         new java.lang.String[] { "MinWorkers", "MaxWorkers", "MinGpu", "MaxGpu", "WorkerInstanceType", "GpuInstanceType", });
     internal_static_usage_CDPCMLAzureWorkspaceMetadata_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(45);
     internal_static_usage_CDPCMLAzureWorkspaceMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLAzureWorkspaceMetadata_descriptor,
         new java.lang.String[] { "MinWorkers", "MaxWorkers", "MinGpu", "MaxGpu", "WorkerInstanceType", "GpuInstanceType", });
     internal_static_usage_CDPCMLWorkspaceRequested_descriptor =
-      getDescriptor().getMessageTypes().get(45);
+      getDescriptor().getMessageTypes().get(46);
     internal_static_usage_CDPCMLWorkspaceRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceRequested_descriptor,
         new java.lang.String[] { "Crn", "AccountId", "WorkspaceName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "CreatorCrn", "CdpCMLAWSWorkspaceMetadata", "CdpCMLAzureWorkspaceMetadata", "WorkspaceVersion", "Metadata", });
     internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(46);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_usage_CDPCMLWorkspaceStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor,
         new java.lang.String[] { "Crn", "OldStatus", "NewStatus", "FailureReason", "FromVersion", "ToVersion", });
     internal_static_usage_CDPRequestProcessingStep_descriptor =
-      getDescriptor().getMessageTypes().get(47);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_usage_CDPRequestProcessingStep_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPRequestProcessingStep_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPEnvironmentStatus_descriptor =
-      getDescriptor().getMessageTypes().get(48);
+      getDescriptor().getMessageTypes().get(49);
     internal_static_usage_CDPEnvironmentStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPOperationDetails_descriptor =
-      getDescriptor().getMessageTypes().get(49);
+      getDescriptor().getMessageTypes().get(50);
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
         new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
-      getDescriptor().getMessageTypes().get(50);
+      getDescriptor().getMessageTypes().get(51);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
-        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", });
+        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "TunnelType", });
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
-      getDescriptor().getMessageTypes().get(51);
+      getDescriptor().getMessageTypes().get(52);
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor,
         new java.lang.String[] { "WorkloadAnalytics", "ClusterLogsCollection", });
     internal_static_usage_CDPProxyDetails_descriptor =
-      getDescriptor().getMessageTypes().get(52);
+      getDescriptor().getMessageTypes().get(53);
     internal_static_usage_CDPProxyDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPProxyDetails_descriptor,
         new java.lang.String[] { "Proxy", });
     internal_static_usage_CDPNetworkDetails_descriptor =
-      getDescriptor().getMessageTypes().get(53);
+      getDescriptor().getMessageTypes().get(54);
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
         new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
-      getDescriptor().getMessageTypes().get(54);
+      getDescriptor().getMessageTypes().get(55);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentDetails", "NetworkDetails", "TelemetryFeatureDetails", });
     internal_static_usage_CDPEnvironmentStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(55);
+      getDescriptor().getMessageTypes().get(56);
     internal_static_usage_CDPEnvironmentStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatusChanged_descriptor,

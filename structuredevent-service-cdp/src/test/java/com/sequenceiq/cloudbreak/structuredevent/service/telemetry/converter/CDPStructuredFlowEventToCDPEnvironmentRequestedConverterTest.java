@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,5 +72,55 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
 
         Assert.assertEquals("true", environmentRequested.getTelemetryFeatureDetails().getClusterLogsCollection());
         Assert.assertEquals("false", environmentRequested.getTelemetryFeatureDetails().getWorkloadAnalytics());
+    }
+
+    @Test
+    public void testConversionWithoutTunnelShouldUNSETTunnelType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("UNSET", environmentRequested.getEnvironmentDetails().getTunnelType().name());
+    }
+
+    @Test
+    public void testConversionTunnelCCMShouldReturnCCMTunnelType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        Tunnel ccmTunnel = Tunnel.CCM;
+
+        when(environmentDetails.getTunnel()).thenReturn(ccmTunnel);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("CCM", environmentRequested.getEnvironmentDetails().getTunnelType().name());
+    }
+
+    @Test
+    public void testConversionTunnelDIRECTShouldReturnDIRECTTunnelType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        Tunnel ccmTunnel = Tunnel.DIRECT;
+
+        when(environmentDetails.getTunnel()).thenReturn(ccmTunnel);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("DIRECT", environmentRequested.getEnvironmentDetails().getTunnelType().name());
+    }
+
+    @Test
+    public void testConversionTunnelCLUSTERPROXYShouldReturnCLUSTERPROXYTunnelType() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        Tunnel ccmTunnel = Tunnel.CLUSTER_PROXY;
+
+        when(environmentDetails.getTunnel()).thenReturn(ccmTunnel);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("CLUSTER_PROXY", environmentRequested.getEnvironmentDetails().getTunnelType().name());
     }
 }
