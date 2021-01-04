@@ -22,6 +22,12 @@ public class Benchmark {
         return resp;
     }
 
+    public static <E extends Exception> void checkedMeasure(SingleCheckedRunnable<E> runnable, Logger logger, String message, Object... params) throws E {
+        long start = System.currentTimeMillis();
+        runnable.run();
+        logDuration(logger, "[MEASURE] " + message, start, params);
+    }
+
     public static <T, E extends Exception> T checkedMeasure(SingleCheckedSupplier<T, E> callback, Logger logger, String message, Object... params) throws E {
         long start = System.currentTimeMillis();
         T resp = callback.get();
@@ -45,6 +51,11 @@ public class Benchmark {
     @FunctionalInterface
     public interface SingleCheckedSupplier<T, E extends Exception> {
         T get() throws E;
+    }
+
+    @FunctionalInterface
+    public interface SingleCheckedRunnable<E extends Exception> {
+        void run() throws E;
     }
 
     @FunctionalInterface
