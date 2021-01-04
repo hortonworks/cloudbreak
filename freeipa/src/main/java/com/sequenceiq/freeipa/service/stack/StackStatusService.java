@@ -6,7 +6,7 @@ import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.repository.StackStatusRepository;
 import org.springframework.stereotype.Service;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 @Service
 public class StackStatusService {

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFoundException;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 
 import java.util.Set;
 

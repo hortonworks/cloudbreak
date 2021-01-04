@@ -114,9 +114,9 @@ class ProvisionerServiceTest {
     @Test
     void startProvisioningSdxNotFound() {
         long clusterId = CLUSTER_ID.incrementAndGet();
-        when(sdxService.getById(clusterId)).thenThrow(new com.sequenceiq.cloudbreak.exception.NotFoundException("not found"));
+        when(sdxService.getById(clusterId)).thenThrow(new com.sequenceiq.cloudbreak.common.exception.NotFoundException("not found"));
 
-        Assertions.assertThrows(com.sequenceiq.cloudbreak.exception.NotFoundException.class,
+        Assertions.assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
                 () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
 
         verifyNoInteractions(cloudbreakFlowService);
