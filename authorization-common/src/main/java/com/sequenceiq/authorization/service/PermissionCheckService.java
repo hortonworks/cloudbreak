@@ -1,5 +1,7 @@
 package com.sequenceiq.authorization.service;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,22 +62,21 @@ public class PermissionCheckService {
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         LOGGER.debug("Permission check started at {} (method: {})", startTime,
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
-        Optional<Object> initiatorUserCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, InitiatorUserCrn.class);
-        if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())
-                && initiatorUserCrn.isPresent()
-                && initiatorUserCrn.get() instanceof String && Crn.isCrn((String) initiatorUserCrn.get())) {
-            String newUserCrn = (String) initiatorUserCrn.get();
-            internalUserModifier.persistModifiedInternalUser(crnUserDetailsService.loadUserByUsername(newUserCrn));
-            return ThreadBasedUserCrnProvider.doAs(newUserCrn, () -> commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        boolean internalUser = userCrn != null && InternalCrnBuilder.isInternalCrn(userCrn);
+        Optional<String> initiatorUserCrnParameter = persistInitiatorUserIfParameterPresent(proceedingJoinPoint, methodSignature);
+        if (internalUser && initiatorUserCrnParameter.isPresent()) {
+            return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
+                    commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         }
 
-        if (commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint)
-                || hasAnyAnnotation(methodSignature, DisableCheckPermissions.class, CustomPermissionCheck.class)
-                || InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+        if (internalUser || commonPermissionCheckingUtils.isAuthorizationDisabled(proceedingJoinPoint)
+                || hasAnyAnnotation(methodSignature, DisableCheckPermissions.class, CustomPermissionCheck.class)) {
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
 
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        // at this point user CRN should be present
+        checkNotNull(userCrn);
         validateNotInternalOnly(proceedingJoinPoint, methodSignature);
 
         if (hasAnnotation(methodSignature, CheckPermissionByAccount.class)) {
@@ -89,6 +90,16 @@ public class PermissionCheckService {
 
         resourceAuthorizationService.authorize(userCrn, proceedingJoinPoint, methodSignature, getRequestId());
         return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
+    }
+
+    private Optional<String> persistInitiatorUserIfParameterPresent(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
+        Optional<Object> initiatorUserCrn = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, InitiatorUserCrn.class);
+        if (initiatorUserCrn.isPresent() && initiatorUserCrn.get() instanceof String && Crn.isCrn((String) initiatorUserCrn.get())) {
+            String newUserCrn = (String) initiatorUserCrn.get();
+            internalUserModifier.persistModifiedInternalUser(crnUserDetailsService.loadUserByUsername(newUserCrn));
+            return Optional.of(newUserCrn);
+        }
+        return Optional.empty();
     }
 
     private void validateNotInternalOnly(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
