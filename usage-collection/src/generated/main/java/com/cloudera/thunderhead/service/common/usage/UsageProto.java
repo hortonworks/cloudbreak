@@ -60845,20 +60845,28 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Tunnel type of the environment
+     * Network metadata
      * </pre>
      *
-     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
      */
-    int getTunnelTypeValue();
+    boolean hasNetworkDetails();
     /**
      * <pre>
-     * Tunnel type of the environment
+     * Network metadata
      * </pre>
      *
-     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
      */
-    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType();
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails();
+    /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder();
   }
   /**
    * Protobuf type {@code usage.CDPEnvironmentDetails}
@@ -60877,7 +60885,6 @@ public final class UsageProto {
       region_ = "";
       numberOfAvailabilityZones_ = 0;
       availabilityZones_ = "";
-      tunnelType_ = 0;
     }
 
     @java.lang.Override
@@ -60927,10 +60934,17 @@ public final class UsageProto {
               availabilityZones_ = s;
               break;
             }
-            case 40: {
-              int rawValue = input.readEnum();
+            case 42: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder subBuilder = null;
+              if (networkDetails_ != null) {
+                subBuilder = networkDetails_.toBuilder();
+              }
+              networkDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(networkDetails_);
+                networkDetails_ = subBuilder.buildPartial();
+              }
 
-              tunnelType_ = rawValue;
               break;
             }
             default: {
@@ -61087,29 +61101,37 @@ public final class UsageProto {
       }
     }
 
-    public static final int TUNNELTYPE_FIELD_NUMBER = 5;
-    private int tunnelType_;
+    public static final int NETWORKDETAILS_FIELD_NUMBER = 5;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails networkDetails_;
     /**
      * <pre>
-     * Tunnel type of the environment
+     * Network metadata
      * </pre>
      *
-     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
      */
-    public int getTunnelTypeValue() {
-      return tunnelType_;
+    public boolean hasNetworkDetails() {
+      return networkDetails_ != null;
     }
     /**
      * <pre>
-     * Tunnel type of the environment
+     * Network metadata
      * </pre>
      *
-     * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
      */
-    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType() {
-      @SuppressWarnings("deprecation")
-      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.valueOf(tunnelType_);
-      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNRECOGNIZED : result;
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails() {
+      return networkDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.getDefaultInstance() : networkDetails_;
+    }
+    /**
+     * <pre>
+     * Network metadata
+     * </pre>
+     *
+     * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder() {
+      return getNetworkDetails();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -61138,8 +61160,8 @@ public final class UsageProto {
       if (!getAvailabilityZonesBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, availabilityZones_);
       }
-      if (tunnelType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNSET.getNumber()) {
-        output.writeEnum(5, tunnelType_);
+      if (networkDetails_ != null) {
+        output.writeMessage(5, getNetworkDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -61164,9 +61186,9 @@ public final class UsageProto {
       if (!getAvailabilityZonesBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, availabilityZones_);
       }
-      if (tunnelType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNSET.getNumber()) {
+      if (networkDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeEnumSize(5, tunnelType_);
+          .computeMessageSize(5, getNetworkDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -61191,7 +61213,11 @@ public final class UsageProto {
           == other.getNumberOfAvailabilityZones());
       result = result && getAvailabilityZones()
           .equals(other.getAvailabilityZones());
-      result = result && tunnelType_ == other.tunnelType_;
+      result = result && (hasNetworkDetails() == other.hasNetworkDetails());
+      if (hasNetworkDetails()) {
+        result = result && getNetworkDetails()
+            .equals(other.getNetworkDetails());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61211,8 +61237,10 @@ public final class UsageProto {
       hash = (53 * hash) + getNumberOfAvailabilityZones();
       hash = (37 * hash) + AVAILABILITYZONES_FIELD_NUMBER;
       hash = (53 * hash) + getAvailabilityZones().hashCode();
-      hash = (37 * hash) + TUNNELTYPE_FIELD_NUMBER;
-      hash = (53 * hash) + tunnelType_;
+      if (hasNetworkDetails()) {
+        hash = (37 * hash) + NETWORKDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getNetworkDetails().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -61354,8 +61382,12 @@ public final class UsageProto {
 
         availabilityZones_ = "";
 
-        tunnelType_ = 0;
-
+        if (networkDetailsBuilder_ == null) {
+          networkDetails_ = null;
+        } else {
+          networkDetails_ = null;
+          networkDetailsBuilder_ = null;
+        }
         return this;
       }
 
@@ -61386,7 +61418,11 @@ public final class UsageProto {
         result.region_ = region_;
         result.numberOfAvailabilityZones_ = numberOfAvailabilityZones_;
         result.availabilityZones_ = availabilityZones_;
-        result.tunnelType_ = tunnelType_;
+        if (networkDetailsBuilder_ == null) {
+          result.networkDetails_ = networkDetails_;
+        } else {
+          result.networkDetails_ = networkDetailsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -61449,8 +61485,8 @@ public final class UsageProto {
           availabilityZones_ = other.availabilityZones_;
           onChanged();
         }
-        if (other.tunnelType_ != 0) {
-          setTunnelTypeValue(other.getTunnelTypeValue());
+        if (other.hasNetworkDetails()) {
+          mergeNetworkDetails(other.getNetworkDetails());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -61762,69 +61798,157 @@ public final class UsageProto {
         return this;
       }
 
-      private int tunnelType_ = 0;
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails networkDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder> networkDetailsBuilder_;
       /**
        * <pre>
-       * Tunnel type of the environment
+       * Network metadata
        * </pre>
        *
-       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
        */
-      public int getTunnelTypeValue() {
-        return tunnelType_;
+      public boolean hasNetworkDetails() {
+        return networkDetailsBuilder_ != null || networkDetails_ != null;
       }
       /**
        * <pre>
-       * Tunnel type of the environment
+       * Network metadata
        * </pre>
        *
-       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
        */
-      public Builder setTunnelTypeValue(int value) {
-        tunnelType_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Tunnel type of the environment
-       * </pre>
-       *
-       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
-       */
-      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value getTunnelType() {
-        @SuppressWarnings("deprecation")
-        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.valueOf(tunnelType_);
-        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value.UNRECOGNIZED : result;
-      }
-      /**
-       * <pre>
-       * Tunnel type of the environment
-       * </pre>
-       *
-       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
-       */
-      public Builder setTunnelType(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentTunnel.Value value) {
-        if (value == null) {
-          throw new NullPointerException();
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails getNetworkDetails() {
+        if (networkDetailsBuilder_ == null) {
+          return networkDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.getDefaultInstance() : networkDetails_;
+        } else {
+          return networkDetailsBuilder_.getMessage();
         }
-        
-        tunnelType_ = value.getNumber();
-        onChanged();
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      public Builder setNetworkDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails value) {
+        if (networkDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          networkDetails_ = value;
+          onChanged();
+        } else {
+          networkDetailsBuilder_.setMessage(value);
+        }
+
         return this;
       }
       /**
        * <pre>
-       * Tunnel type of the environment
+       * Network metadata
        * </pre>
        *
-       * <code>.usage.CDPEnvironmentsEnvironmentTunnel.Value tunnelType = 5;</code>
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
        */
-      public Builder clearTunnelType() {
-        
-        tunnelType_ = 0;
-        onChanged();
+      public Builder setNetworkDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder builderForValue) {
+        if (networkDetailsBuilder_ == null) {
+          networkDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          networkDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
         return this;
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      public Builder mergeNetworkDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails value) {
+        if (networkDetailsBuilder_ == null) {
+          if (networkDetails_ != null) {
+            networkDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.newBuilder(networkDetails_).mergeFrom(value).buildPartial();
+          } else {
+            networkDetails_ = value;
+          }
+          onChanged();
+        } else {
+          networkDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      public Builder clearNetworkDetails() {
+        if (networkDetailsBuilder_ == null) {
+          networkDetails_ = null;
+          onChanged();
+        } else {
+          networkDetails_ = null;
+          networkDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder getNetworkDetailsBuilder() {
+        
+        onChanged();
+        return getNetworkDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder() {
+        if (networkDetailsBuilder_ != null) {
+          return networkDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return networkDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.getDefaultInstance() : networkDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Network metadata
+       * </pre>
+       *
+       * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder> 
+          getNetworkDetailsFieldBuilder() {
+        if (networkDetailsBuilder_ == null) {
+          networkDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder>(
+                  getNetworkDetails(),
+                  getParentForChildren(),
+                  isClean());
+          networkDetails_ = null;
+        }
+        return networkDetailsBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -67603,36 +67727,36 @@ public final class UsageProto {
       "atorCrn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(" +
       "\t\022G\n\030cdpRequestProcessingStep\030\006 \001(\0162%.us" +
       "age.CDPRequestProcessingStep.Value\022\016\n\006fl" +
-      "owId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\"\356\001\n\025CDPE" +
+      "owId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\"\335\001\n\025CDPE" +
       "nvironmentDetails\022D\n\017environmentType\030\001 \001" +
       "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
       "e.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAvail" +
       "abilityZones\030\003 \001(\005\022\031\n\021availabilityZones\030" +
-      "\004 \001(\t\022A\n\ntunnelType\030\005 \001(\0162-.usage.CDPEnv" +
-      "ironmentsEnvironmentTunnel.Value\"a\n%CDPE" +
-      "nvironmentTelemetryFeatureDetails\022\031\n\021wor" +
-      "kloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsColle" +
-      "ction\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030" +
-      "\001 \001(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networkTy" +
-      "pe\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023number" +
-      "PublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateSubn" +
-      "ets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030\005 \001" +
-      "(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPProx" +
-      "yDetails\"\212\002\n\027CDPEnvironmentRequested\0224\n\020" +
-      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
-      "ionDetails\0228\n\022environmentDetails\030\002 \001(\0132\034" +
-      ".usage.CDPEnvironmentDetails\0220\n\016networkD" +
-      "etails\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M" +
-      "\n\027telemetryFeatureDetails\030\004 \001(\0132,.usage." +
-      "CDPEnvironmentTelemetryFeatureDetails\"\326\001" +
-      "\n\033CDPEnvironmentStatusChanged\0224\n\020operati" +
-      "onDetails\030\001 \001(\0132\032.usage.CDPOperationDeta" +
-      "ils\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnviro" +
-      "nmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.u" +
-      "sage.CDPEnvironmentStatus.Value\022\025\n\rfailu" +
-      "reReason\030\004 \001(\tBV\n-com.cloudera.thunderhe" +
-      "ad.service.common.usageB\nUsageProtoZ\031com" +
-      "/cloudera/cdp/protobufb\006proto3"
+      "\004 \001(\t\0220\n\016networkDetails\030\005 \001(\0132\030.usage.CD" +
+      "PNetworkDetails\"a\n%CDPEnvironmentTelemet" +
+      "ryFeatureDetails\022\031\n\021workloadAnalytics\030\001 " +
+      "\001(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CD" +
+      "PProxyDetails\022\r\n\005proxy\030\001 \001(\010\"\310\001\n\021CDPNetw" +
+      "orkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014conne" +
+      "ctivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001" +
+      "(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serv" +
+      "iceEndpointCreation\030\005 \001(\t\022,\n\014proxyDetail" +
+      "s\030\006 \001(\0132\026.usage.CDPProxyDetails\"\212\002\n\027CDPE" +
+      "nvironmentRequested\0224\n\020operationDetails\030" +
+      "\001 \001(\0132\032.usage.CDPOperationDetails\0228\n\022env" +
+      "ironmentDetails\030\002 \001(\0132\034.usage.CDPEnviron" +
+      "mentDetails\0220\n\016networkDetails\030\003 \001(\0132\030.us" +
+      "age.CDPNetworkDetails\022M\n\027telemetryFeatur" +
+      "eDetails\030\004 \001(\0132,.usage.CDPEnvironmentTel" +
+      "emetryFeatureDetails\"\326\001\n\033CDPEnvironmentS" +
+      "tatusChanged\0224\n\020operationDetails\030\001 \001(\0132\032" +
+      ".usage.CDPOperationDetails\0224\n\toldStatus\030" +
+      "\002 \001(\0162!.usage.CDPEnvironmentStatus.Value" +
+      "\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPEnvironme" +
+      "ntStatus.Value\022\025\n\rfailureReason\030\004 \001(\tBV\n" +
+      "-com.cloudera.thunderhead.service.common" +
+      ".usageB\nUsageProtoZ\031com/cloudera/cdp/pro" +
+      "tobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -67957,7 +68081,7 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
-        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "TunnelType", });
+        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", });
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
       getDescriptor().getMessageTypes().get(52);
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_fieldAccessorTable = new

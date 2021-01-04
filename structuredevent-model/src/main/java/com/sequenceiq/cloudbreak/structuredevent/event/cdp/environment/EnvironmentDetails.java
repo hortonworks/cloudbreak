@@ -21,5 +21,7 @@ public interface EnvironmentDetails {
 
     Tunnel getTunnel();
 
+    boolean getProxyConfigConfigured();
+
     EnvironmentFeatures getEnvironmentTelemetryFeatures();
 }
