@@ -322,7 +322,7 @@ class BuildInfoTask extends DefaultTask {
       if (buildVersion.startsWith(latestVersionOnMaster)) {
         activeProfile = "dev"
       } else {
-        activeProfile = "rc"
+        activeProfile = "dev"
       }
     } catch(Exception ex) {
       println "Could not query version of master branch from http://release.infra.cloudera.com, falling back to 'dev' profile!"

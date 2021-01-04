@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -373,7 +374,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
-        decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo);
+        decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
     }
 
     private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -493,15 +494,19 @@ public class ClusterHostServiceRunner {
                         singletonMap("csd-urls", csdUrls))));
     }
 
-    public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo) {
+    public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
+            Stack stack) {
+        ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stack.getCluster()).getServiceLocations();
         String cmVersion = clouderaManagerRepo.getVersion();
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
-                singletonMap("cloudera-manager", singletonMap("settings", Map.of(
-                        "heartbeat_interval", cmHeartbeatInterval,
-                        "missed_heartbeat_interval", cmMissedHeartbeatInterval,
-                        "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
-                        "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
-                        "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo))))));
+                singletonMap("cloudera-manager", Map.of(
+                        "settings", Map.of(
+                                "heartbeat_interval", cmHeartbeatInterval,
+                                "missed_heartbeat_interval", cmMissedHeartbeatInterval,
+                                "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
+                                "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
+                                "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo)),
+                        "mgmt_service_directories", serviceLocations.getAllVolumePath()))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
@@ -546,13 +551,13 @@ public class ClusterHostServiceRunner {
 
     @SuppressWarnings("ParameterNumber")
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster,
-        Map<String, SaltPillarProperties> servicePillar,
-        VirtualGroupRequest virtualGroupRequest,
-        ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
-        Map<String, List<String>> serviceLocations,
-        ClouderaManagerRepo clouderaManagerRepo) throws IOException {
+            Map<String, SaltPillarProperties> servicePillar,
+            VirtualGroupRequest virtualGroupRequest,
+            ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
+            Map<String, List<String>> serviceLocations,
+            ClouderaManagerRepo clouderaManagerRepo) throws IOException {
         final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
-            clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+                clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
 
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());

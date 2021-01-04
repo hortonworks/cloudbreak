@@ -87,7 +87,7 @@ public class ClusterManagerUpgradeService {
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        SaltConfig pillar = createSaltConfig(stack.getId(), stack.getType(), cluster);
+        SaltConfig pillar = createSaltConfig(stack, stack.getType(), cluster);
         hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), pillar, exitCriteriaModel);
     }
 
@@ -99,12 +99,12 @@ public class ClusterManagerUpgradeService {
         clusterApiConnectors.getConnector(stack).startCluster();
     }
 
-    private SaltConfig createSaltConfig(Long stackId, StackType stackType, Cluster cluster) {
+    private SaltConfig createSaltConfig(Stack stack, StackType stackType, Cluster cluster) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
-        Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(stackId, servicePillar);
+        Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, license);
-        clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo);
+        clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
         decorateWorkloadClusterPillarWithCsdDownloader(stackType, cluster, servicePillar);
         return new SaltConfig(servicePillar);
     }

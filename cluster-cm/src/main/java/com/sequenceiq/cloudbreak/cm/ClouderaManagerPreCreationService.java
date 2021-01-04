@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
+import com.sequenceiq.cloudbreak.cm.config.CmMgmtVolumePathBuilder;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
@@ -21,6 +23,9 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
 
     @Inject
     private ClouderaManagerBlueprintPortConfigCollector clouderaManagerBlueprintPortConfigCollector;
+
+    @Inject
+    private CmMgmtVolumePathBuilder volumePathBuilder;
 
     @Override
     public String getCloudbreakClusterUserName(Cluster cluster) {
@@ -70,5 +75,10 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
     @Override
     public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls) {
         return clouderaManagerBlueprintPortConfigCollector.getServicePorts(blueprint, tls);
+    }
+
+    @Override
+    public ServiceLocationMap getServiceLocations() {
+        return volumePathBuilder.buildServiceLocationMap();
     }
 }
