@@ -111,6 +111,15 @@ public class PermissionCheckServiceTest {
     }
 
     @Test
+    public void testUserValidation() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethod"));
+
+        thrown.expect(NullPointerException.class);
+
+        ThreadBasedUserCrnProvider.doAs(null, () -> underTest.hasPermission(proceedingJoinPoint));
+    }
+
+    @Test
     public void testAccountAuthorization() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethod"));
 
