@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 

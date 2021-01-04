@@ -66,7 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;

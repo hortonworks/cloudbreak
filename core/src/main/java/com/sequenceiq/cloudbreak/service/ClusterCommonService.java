@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;

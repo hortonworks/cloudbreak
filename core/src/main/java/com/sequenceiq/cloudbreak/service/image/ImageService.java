@@ -45,7 +45,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.workspace.model.User;

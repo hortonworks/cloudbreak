@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;

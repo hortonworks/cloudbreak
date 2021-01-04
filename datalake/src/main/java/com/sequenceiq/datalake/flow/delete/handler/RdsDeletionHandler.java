@@ -14,7 +14,7 @@ import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;

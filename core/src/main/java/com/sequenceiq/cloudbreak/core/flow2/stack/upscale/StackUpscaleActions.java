@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;

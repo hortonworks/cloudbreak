@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;

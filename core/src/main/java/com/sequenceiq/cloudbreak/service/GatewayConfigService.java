@@ -10,7 +10,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;

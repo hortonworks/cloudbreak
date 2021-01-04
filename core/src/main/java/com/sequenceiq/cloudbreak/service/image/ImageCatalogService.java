@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.service.image.StatedImage.statedImage;
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;

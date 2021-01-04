@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;

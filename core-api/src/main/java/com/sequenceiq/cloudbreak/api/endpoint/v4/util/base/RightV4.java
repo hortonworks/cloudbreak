@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 public enum RightV4 {
     // account level

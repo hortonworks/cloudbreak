@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;

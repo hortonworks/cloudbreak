@@ -10,7 +10,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_HOST_STATUS_UPDATED;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
@@ -63,7 +63,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;

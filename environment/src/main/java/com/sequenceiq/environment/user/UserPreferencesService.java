@@ -11,7 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Service
 public class UserPreferencesService {

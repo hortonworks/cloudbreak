@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState.RUNNING;
 

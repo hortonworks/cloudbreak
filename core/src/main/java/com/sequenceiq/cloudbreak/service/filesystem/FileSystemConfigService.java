@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.filesystem;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import javax.inject.Inject;
 

@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;

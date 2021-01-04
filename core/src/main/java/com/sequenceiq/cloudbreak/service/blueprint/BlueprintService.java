@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT_DELETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.domain.projection.BlueprintStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;

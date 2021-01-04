@@ -66,7 +66,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;

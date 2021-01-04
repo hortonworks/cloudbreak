@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 

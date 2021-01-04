@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;

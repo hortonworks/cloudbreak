@@ -15,7 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceAwareResourceService;

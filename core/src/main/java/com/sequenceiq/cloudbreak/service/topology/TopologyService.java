@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.topology;
 
-import static com.sequenceiq.cloudbreak.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
 
 import javax.inject.Inject;

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
