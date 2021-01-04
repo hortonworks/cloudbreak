@@ -63,7 +63,7 @@ public class CustomAmazonWaiterProvider {
                 })
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
-                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonASInstanceInServiceWaiters")).build();
     }
 
     public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitiesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {

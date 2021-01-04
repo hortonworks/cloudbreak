@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
@@ -16,6 +21,8 @@ import reactor.bus.EventBus;
 @Component
 public class UpscaleClusterManagerHandler implements EventHandler<UpscaleClusterManagerRequest> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleClusterManagerHandler.class);
+
     @Inject
     private EventBus eventBus;
 
@@ -29,6 +36,8 @@ public class UpscaleClusterManagerHandler implements EventHandler<UpscaleCluster
 
     @Override
     public void accept(Event<UpscaleClusterManagerRequest> event) {
+        LOGGER.debug("UpscaleClusterManagerHandler for {}", event.getData().getResourceId());
+        Instant start = Instant.now();
         UpscaleClusterManagerRequest request = event.getData();
         UpscaleClusterManagerResult result;
         try {
@@ -37,6 +46,8 @@ public class UpscaleClusterManagerHandler implements EventHandler<UpscaleCluster
             result = new UpscaleClusterManagerResult(request);
         } catch (Exception e) {
             result = new UpscaleClusterManagerResult(e.getMessage(), e, request);
+        } finally {
+            LOGGER.debug("UpscaleClusterManagerHandler finished for {} in {}ms", request.getResourceId(), Duration.between(start, Instant.now()).toMillis());
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }

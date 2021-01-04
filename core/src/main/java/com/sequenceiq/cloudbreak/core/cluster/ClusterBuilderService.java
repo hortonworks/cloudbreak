@@ -173,7 +173,7 @@ public class ClusterBuilderService {
                 proxyConfig.orElse(null),
                 template);
         clusterService.save(cluster);
-        recipeEngine.executePostInstallRecipes(stack);
+        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         clusterCreationSuccessHandler.handleClusterCreationSuccess(instanceMetaDatas, stack.getCluster());
         if (StackType.DATALAKE == stack.getType()) {

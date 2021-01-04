@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -37,6 +40,8 @@ public class InstallClusterHandler implements EventHandler<InstallClusterRequest
 
     @Override
     public void accept(Event<InstallClusterRequest> event) {
+        LOGGER.debug("InstallClusterHandler for {}", event.getData().getResourceId());
+        Instant start = Instant.now();
         Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
@@ -45,6 +50,8 @@ public class InstallClusterHandler implements EventHandler<InstallClusterRequest
         } catch (RuntimeException | ClusterClientInitException | CloudbreakException e) {
             LOGGER.error("Build cluster failed", e);
             response = new InstallClusterFailed(stackId, e);
+        } finally {
+            LOGGER.debug("InstallClusterHandler for {} finished in {}ms", event.getData().getResourceId(), Duration.between(start, Instant.now()).toMillis());
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));
     }

@@ -1,9 +1,11 @@
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 haveged:
   pkg.installed:
     - unless:
       - rpm -q haveged
   service.running:
     - enable: True
+{% endif %}
 
 {% if grains['os_family'] == 'Suse' %}
 install_kerberos:
@@ -17,6 +19,7 @@ install_kerberos:
       - krb5-kdc
       - krb5-admin-server
 {% else %}
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 install_kerberos:
   pkg.installed:
     - pkgs:
@@ -25,6 +28,7 @@ install_kerberos:
       - krb5-workstation
     - unless:
       - rpm -q krb5-server krb5-libs krb5-workstation
+{% endif %}
 {% endif %}
 
 {% if grains['os_family'] == 'Suse' %}

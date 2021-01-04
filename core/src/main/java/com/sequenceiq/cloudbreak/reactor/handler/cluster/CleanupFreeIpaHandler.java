@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLEANUP_FREEIPA_FINISHED_EVENT;
 
+import java.time.Duration;
+import java.time.Instant;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -40,6 +43,7 @@ public class CleanupFreeIpaHandler implements EventHandler<CleanupFreeIpaEvent> 
 
     @Override
     public void accept(Event<CleanupFreeIpaEvent> cleanupFreeIpaEvent) {
+        Instant start = Instant.now();
         CleanupFreeIpaEvent event = cleanupFreeIpaEvent.getData();
         try {
             LOGGER.debug("Handle cleanup request for hosts: {} and IPs: {}", event.getHostNames(), event.getIps());
@@ -59,6 +63,8 @@ public class CleanupFreeIpaHandler implements EventHandler<CleanupFreeIpaEvent> 
                     event.getIps(), event.isRecover());
             Event<StackEvent> responseEvent = new Event<>(cleanupFreeIpaEvent.getHeaders(), response);
             eventBus.notify(CLEANUP_FREEIPA_FINISHED_EVENT.event(), responseEvent);
+            LOGGER.debug("CleanupFreeIPA for #hosts={} finished in {}ms", event.getHostNames() == null ? "NA" : event.getHostNames().size(),
+                    Duration.between(start, Instant.now()).toMillis());
         }
     }
 }

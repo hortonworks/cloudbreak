@@ -1,6 +1,7 @@
 {%- from 'sssd/settings.sls' import ipa with context %}
 {%- from 'metadata/settings.sls' import metadata with context %}
 
+{%- if not "prewarmed_v1" in grains.get('roles', []) -%}
 ipa_packages_install:
   pkg.installed:
     - refresh: False
@@ -11,6 +12,7 @@ ipa_packages_install:
         - openldap-clients
     - unless:
       - rpm -q ipa-client openldap openldap-clients
+{% endif %}
 
 /opt/salt/scripts/join_ipa.sh:
   file.managed:
