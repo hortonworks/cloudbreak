@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.net.ssl.HostnameVerifier;
@@ -75,8 +74,6 @@ public class FreeIpaClientBuilder {
     private static final int READ_TIMEOUT_MILLIS = 60 * 1000 * 5;
 
     private static final int TEST_CONNECTION_READ_TIMEOUT_MILLIS = 5 * 1000;
-
-    private static final Set<Integer> UNAVIALLBE_PING_HTTP_RESPONSES = Set.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.SERVICE_UNAVAILABLE.value());
 
     private final PoolingHttpClientConnectionManager connectionManager;
 
@@ -169,7 +166,7 @@ public class FreeIpaClientBuilder {
                 additionalHeaders.forEach(request::addHeader);
                 additionalHeadersStickySessionFirstRpc.forEach(request::addHeader);
                 try (CloseableHttpResponse response = client.execute(request)) {
-                    if (UNAVIALLBE_PING_HTTP_RESPONSES.contains(response.getStatusLine().getStatusCode())) {
+                    if (isUnreachableHttpStatus(response.getStatusLine().getStatusCode())) {
                         throw new HttpException("Ping failed with http status code " + response.getStatusLine().getStatusCode());
                     }
                     stickyId = getStickIdFromHeaders(response);
@@ -352,5 +349,14 @@ public class FreeIpaClientBuilder {
 
     private Optional<String> getStickIdFromHeaders(CloseableHttpResponse response) {
         return stickyIdHeader.flatMap(s -> Optional.ofNullable(response.getLastHeader(s)).map(NameValuePair::getValue));
+    }
+
+    private boolean isUnreachableHttpStatus(int code) {
+        try {
+            return HttpStatus.valueOf(code).is5xxServerError();
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("Unknown HTTP status code {}", code, e);
+            return true;
+        }
     }
 }
