@@ -26,7 +26,6 @@ apply plugin: org.sonarqube.gradle.SonarQubePlugin
 
 configurations.all {
     resolutionStrategy {
-        force "org.ow2.asm:asm:9.0"
         force "net.bytebuddy:byte-buddy:1.9.13"
     }
 }
@@ -114,7 +113,6 @@ dependencies {
     }
 
     testImplementation group: "com.openpojo",              name: "openpojo",                                 version: openPojoVersion
-    testImplementation group: "org.ow2.asm",               name: "asm",                                      version: asmVersion
     testImplementation group: "com.h2database",            name: "h2",                                       version: h2databaseVersion
     testImplementation group: "org.mockito",               name: "mockito-core",                             version: mockitoVersion
     testImplementation group: "com.google.guava",          name: "guava",                                    version: guavaVersion

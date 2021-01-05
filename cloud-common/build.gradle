@@ -16,7 +16,6 @@ buildscript {
 
 configurations.all {
     resolutionStrategy {
-        force 'org.ow2.asm:asm:9.0'
         force 'net.bytebuddy:byte-buddy:1.9.13'
     }
 }

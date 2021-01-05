@@ -74,11 +74,6 @@ allprojects {
         force "org.codehaus.jackson:jackson-core-asl:1.9.13"
         force "org.codehaus.jackson:jackson-xc:1.9.13"
         force "org.testng:testng:$testNgVersion"
-        force "org.ow2.asm:asm:9.0"
-        force "org.ow2.asm:asm-analysis:9.0"
-        force "org.ow2.asm:asm-commons:9.0"
-        force "org.ow2.asm:asm-tree:9.0"
-        force "org.ow2.asm:asm-util:9.0"
       }
     }
   }
