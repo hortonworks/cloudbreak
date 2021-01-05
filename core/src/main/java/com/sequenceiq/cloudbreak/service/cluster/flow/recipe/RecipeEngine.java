@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_TERMINATION;
+import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +37,7 @@ public class RecipeEngine {
     public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         boolean recipesFound = recipesFound(hostGroups);
         if (recipesFound) {
-            orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+            checkedMeasure(() -> orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups), LOGGER, "Upload recipes took {} ms");
         }
     }
 
