@@ -15,7 +15,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,6 +55,8 @@ public class ReactorFlowManagerTest {
     private static final Long STACK_ID = 1L;
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:tenantName:user:userName";
+
+    private static final String BACKUP_LOCATION = "/path/to/backup";
 
     @Mock
     private ReactorNotifier reactorNotifier;
@@ -220,6 +224,20 @@ public class ReactorFlowManagerTest {
         MaintenanceModeValidationTriggerEvent event = (MaintenanceModeValidationTriggerEvent) captor.getValue();
         assertEquals(stack.getId(), event.getResourceId());
         assertEquals(FlowChainTriggers.CLUSTER_MAINTENANCE_MODE_VALIDATION_TRIGGER_EVENT, event.selector());
+    }
+
+    @Test
+    public void testTriggerDatabaseBackupFlowchain() {
+        long stackId = 1L;
+        String backupId = UUID.randomUUID().toString();
+        underTest.triggerDatalakeDatabaseBackup(stackId, BACKUP_LOCATION, backupId);
+        ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
+        verify(reactorNotifier).notify(eq(stackId), eq(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT), captor.capture());
+        DatabaseBackupTriggerEvent event = (DatabaseBackupTriggerEvent) captor.getValue();
+        assertEquals(stack.getId(), event.getResourceId());
+        assertEquals(backupId, event.getBackupId());
+        assertEquals(BACKUP_LOCATION, event.getBackupLocation());
+        assertEquals(FlowChainTriggers.DATALAKE_DATABASE_BACKUP_CHAIN_TRIGGER_EVENT, event.selector());
     }
 
     private static class TestAcceptable implements Acceptable {
