@@ -6,12 +6,6 @@ repositories {
   mavenCentral()
 }
 
-configurations.all {
-  resolutionStrategy {
-    force group: "org.ow2.asm", name: "asm", version: asmVersion
-  }
-}
-
 dependencies {
   implementation project(":authorization-common")
   implementation project(":environment-api")
