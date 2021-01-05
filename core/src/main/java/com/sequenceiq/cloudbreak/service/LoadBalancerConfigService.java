@@ -38,7 +38,7 @@ public class LoadBalancerConfigService {
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
-        LOGGER.info("Fetching list of instance groups with Knox gateway installed");
+        LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
         Set<String> groupNames = new HashSet<>();
         Cluster cluster = stack.getCluster();
         if (cluster != null) {
@@ -48,7 +48,7 @@ public class LoadBalancerConfigService {
         }
 
         if (groupNames.isEmpty()) {
-            LOGGER.info("Knox gateway is not explicitly defined; searching for CM gateway hosts");
+            LOGGER.debug("Knox gateway is not explicitly defined; searching for CM gateway hosts");
             groupNames = stack.getInstanceGroups().stream()
                 .filter(i -> InstanceGroupType.isGateway(i.getInstanceGroupType()))
                 .map(InstanceGroup::getGroupName)
