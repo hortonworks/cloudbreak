@@ -2,6 +2,38 @@ package com.sequenceiq.thunderhead.grpc.service.auth;
 
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FAST_EBS_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLOW_SCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -152,8 +184,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUserManagementService.class);
 
-    private static final String ENV_ACCESS_RIGHT = "environments/accessEnvironment";
-
     private static final MacSigner SIGNATURE_VERIFIER = new MacSigner("titok");
 
     private static final String ALTUS_ACCESS_KEY_ID = "altus_access_key_id";
@@ -164,7 +194,7 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
-    private static final int MOCK_USER_COUNT = 10;
+    private static final int MOCK_USER_COUNT = 100;
 
     private static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
 
@@ -173,73 +203,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     private static final long CREATION_DATE_MS = 1483228800000L;
 
     private static final String ALL_RIGHTS_AND_RESOURCES = "*";
-
-    private static final String CDP_AZURE = "CDP_AZURE";
-
-    private static final String CDP_GCP = "CDP_GCP";
-
-    private static final String CDP_AUTOMATIC_USERSYNC_POLLER = "CDP_AUTOMATIC_USERSYNC_POLLER";
-
-    private static final String CLOUDERA_INTERNAL_ACCOUNT = "CLOUDERA_INTERNAL_ACCOUNT";
-
-    private static final String CDP_BASE_IMAGE = "CDP_BASE_IMAGE";
-
-    private static final String LOCAL_DEV = "LOCAL_DEV";
-
-    private static final String CDP_FREEIPA_HA = "CDP_FREEIPA_HA";
-
-    private static final String CDP_FREEIPA_HA_REPAIR = "CDP_FREEIPA_HA_REPAIR";
-
-    private static final String CDP_CLOUD_STORAGE_VALIDATION = "CDP_CLOUD_STORAGE_VALIDATION";
-
-    private static final String CDP_RUNTIME_UPGRADE = "CDP_RUNTIME_UPGRADE";
-
-    private static final String CDP_RUNTIME_UPGRADE_DATAHUB = "CDP_RUNTIME_UPGRADE_DATAHUB";
-
-    private static final String CDP_RAZ_ENABLEMENT = "CDP_RAZ";
-
-    private static final String CDP_CCM_V2 = "CDP_CCM_V2";
-
-    private static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
-
-    private static final String DATAHUB_AWS_AUTOSCALING = "DATAHUB_AWS_AUTOSCALING";
-
-    private static final String DATAHUB_AZURE_AUTOSCALING = "DATAHUB_AZURE_AUTOSCALING";
-
-    private static final String DATAHUB_FLOW_SCALING = "DATAHUB_FLOW_SCALING";
-
-    private static final String DATAHUB_STREAMING_SCALING = "DATAHUB_STREAMING_SCALING";
-
-    private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP = "CDP_AZURE_SINGLE_RESOURCE_GROUP";
-
-    private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
-
-    private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
-
-    private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
-
-    private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
-
-    private static final String CDP_SDX_HBASE_CLOUD_STORAGE = "CDP_SDX_HBASE_CLOUD_STORAGE";
-
-    private static final String CDP_DATA_LAKE_AWS_EFS = "CDP_DATA_LAKE_AWS_EFS";
-
-    private static final String CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE = "CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE";
-
-    // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
-    private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
-
-    private static final String CDP_CB_DATABASE_WIRE_ENCRYPTION = "CDP_CB_DATABASE_WIRE_ENCRYPTION";
-
-    private static final String CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK = "CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK";
-
-    private static final String CDP_SHOW_CLI = "CDP_SHOW_CLI";
-
-    private static final String CDP_LOAD_BALANCER_ENABLEMENT = "CDP_DATA_LAKE_LOAD_BALANCER";
-
-    private static final String CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT = "CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT";
-
-    private static final String CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT = "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY";
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
@@ -598,7 +561,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
         }
         if (enableFreeIpaHa) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA));
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
         }
         if (enableFreeIpaHaRepair) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
@@ -613,7 +576,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE_DATAHUB));
         }
         if (razEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_RAZ_ENABLEMENT));
+            builder.addEntitlements(createEntitlement(CDP_RAZ));
         }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));
@@ -652,13 +615,13 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK));
         }
         if (datalakeLoadBalancerEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_LOAD_BALANCER_ENABLEMENT));
+            builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
         }
         if (enableExperienceDeletionByEnvironment) {
             builder.addEntitlements(createEntitlement(CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT));
         }
         if (publicEndpointAccessGatewayEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT));
+            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
@@ -675,7 +638,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_FLOW_SCALING))
                                 .addEntitlements(createEntitlement(CDP_SHOW_CLI))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
-                                .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
+                                .addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())
                                 .setExternalAccountId("external-" + request.getAccountId())
@@ -684,9 +647,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onCompleted();
     }
 
-    private Entitlement createEntitlement(String entitlementName) {
+    private Entitlement createEntitlement(com.sequenceiq.cloudbreak.auth.altus.model.Entitlement entitlement) {
         return Entitlement.newBuilder()
-                .setEntitlementName(entitlementName)
+                .setEntitlementName(entitlement.name())
                 .build();
     }
 

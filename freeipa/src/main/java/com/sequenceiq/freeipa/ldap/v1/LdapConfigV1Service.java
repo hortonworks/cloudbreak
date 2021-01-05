@@ -224,12 +224,10 @@ public class LdapConfigV1Service {
     private User createBindUser(String clusterName, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         String bindUser = "ldapbind-" + clusterName;
         try {
-            User user = freeIpaClient.userAdd(bindUser, "service", "account");
-            LOGGER.debug("LDAP bind user [{}] created", bindUser);
-            return user;
+            return freeIpaClient.userAdd(bindUser, "service", "account");
         } catch (FreeIpaClientException e) {
-            LOGGER.warn("Failed to create bind user: [{}]", bindUser, e);
-            throw new RetryableFreeIpaClientException("Failed to create bind user", e);
+            LOGGER.warn("Failed to create LDAP bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to create LDAP bind user", e);
         }
     }
 }

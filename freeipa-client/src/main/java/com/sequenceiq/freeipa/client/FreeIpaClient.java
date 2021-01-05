@@ -6,8 +6,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,14 +13,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
@@ -45,6 +44,10 @@ import com.sequenceiq.freeipa.client.model.Service;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.client.operation.BatchOperation;
+import com.sequenceiq.freeipa.client.operation.UserAddOperation;
+import com.sequenceiq.freeipa.client.operation.UserModOperation;
+import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -53,6 +56,8 @@ import io.opentracing.Tracer;
 public class FreeIpaClient {
 
     public static final String MAX_PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
+
+    public static final Integer DEFAULT_BATCH_CALL_PARTITION_SIZE = 100;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssVV");
 
@@ -187,10 +192,8 @@ public class FreeIpaClient {
     }
 
     public User deleteUser(String userUid) throws FreeIpaClientException {
-        FreeIpaChecks.checkUserNotProtected(userUid, () -> String.format("User '%s' is protected and cannot be deleted from FreeIPA", userUid));
-        List<Object> flags = List.of(userUid);
-        Map<String, Object> params = Map.of();
-        return (User) invoke("user_del", flags, params, User.class).getResult();
+        return UserRemoveOperation.create(userUid).invoke(this).orElseThrow(() ->
+                new FreeIpaClientException(String.format("User deletion failed for user %s", userUid)));
     }
 
     public Role deleteRole(String roleName) throws FreeIpaClientException {
@@ -200,16 +203,8 @@ public class FreeIpaClient {
     }
 
     public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
-        FreeIpaChecks.checkUserNotProtected(user, () -> String.format("User '%s' is protected and cannot be added to FreeIPA", user));
-        List<Object> flags = List.of(user);
-        Map<String, Object> params = Map.of(
-                "givenname", firstName,
-                "sn", lastName,
-                "loginshell", "/bin/bash",
-                "random", true,
-                "setattr", "krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME
-        );
-        return (User) invoke("user_add", flags, params, User.class).getResult();
+        return UserAddOperation.create(user, firstName, lastName).invoke(this).orElseThrow(() ->
+                new FreeIpaClientException(String.format("User addition failed for user %s", user)));
     }
 
     /**
@@ -222,87 +217,25 @@ public class FreeIpaClient {
     public void userSetPasswordWithExpiration(String user, String password, Optional<Instant> expiration) throws FreeIpaClientException {
         // FreeIPA expires any password that is set by another user. Work around this by
         // performing a separate API call to set the password expiration into the future
-        userMod(user, "userpassword", password);
+        UserModOperation.create("userpassword", password, user).invoke(this);
         updateUserPasswordExpiration(user, expiration);
     }
 
     public void updateUserPasswordExpiration(String user, Optional<Instant> expiration) throws FreeIpaClientException {
         String passwordExpirationDate = formatDate(expiration);
-        userMod(user, "setattr", "krbPasswordExpiration=" + passwordExpirationDate);
+        UserModOperation.create("setattr", "krbPasswordExpiration=" + passwordExpirationDate, user).invoke(this);
     }
 
     public void updateUserPasswordMaxExpiration(String user) throws FreeIpaClientException {
         updateUserPasswordExpiration(user, Optional.empty());
     }
 
-    public User userSetWorkloadCredentials(String user, String hashedPassword,
-            String unencryptedKrbPrincipalKey, Optional<Instant> expiration,
-            List<String> sshPublicKeys) throws FreeIpaClientException {
-        Map<String, Object> params = new HashMap<>();
-        List<String> attributes = new ArrayList<>();
-
-        if (StringUtils.isNotBlank(hashedPassword)) {
-            attributes.add("cdpHashedPassword=" + hashedPassword);
-            attributes.add("cdpUnencryptedKrbPrincipalKey=" + unencryptedKrbPrincipalKey);
-            attributes.add("krbPasswordExpiration=" + formatDate(expiration));
-            params.put("setattr", attributes);
-        }
-
-        params.put("ipasshpubkey", sshPublicKeys);
-
-        return userMod(user, params);
-    }
-
-    String formatDate(Optional<Instant> instant) {
+    public String formatDate(Optional<Instant> instant) {
         if (instant.isPresent()) {
             return DATE_TIME_FORMATTER.format(ZonedDateTime.ofInstant(instant.get(), ZoneOffset.UTC));
         } else {
             return MAX_PASSWORD_EXPIRATION_DATETIME;
         }
-    }
-
-    public User userMod(String user, String key, Object value) throws FreeIpaClientException {
-        Map<String, Object> params = Map.of(
-                key, value
-        );
-        return userMod(user, params);
-    }
-
-    public User userMod(String user, Map<String, Object> params) throws FreeIpaClientException {
-        List<Object> flags = List.of(user);
-        return (User) invoke("user_mod", flags, params, User.class).getResult();
-    }
-
-    public Group groupAdd(String group) throws FreeIpaClientException {
-        FreeIpaChecks.checkGroupNotProtected(group, () -> String.format("Group '%s' is protected and cannot be added to FreeIPA", group));
-        List<Object> flags = List.of(group);
-        Map<String, Object> params = Map.of();
-        return (Group) invoke("group_add", flags, params, Group.class).getResult();
-    }
-
-    public void deleteGroup(String group) throws FreeIpaClientException {
-        FreeIpaChecks.checkGroupNotProtected(group, () -> String.format("Group '%s' is protected and cannot be deleted from FreeIPA", group));
-        List<Object> flags = List.of(group);
-        Map<String, Object> params = Map.of();
-        invoke("group_del", flags, params, Object.class);
-    }
-
-    public RPCResponse<Group> groupAddMembers(String group, Collection<String> users) throws FreeIpaClientException {
-        FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
-        List<Object> flags = List.of(group);
-        Map<String, Object> params = Map.of(
-                "user", users
-        );
-        return invoke("group_add_member", flags, params, Group.class);
-    }
-
-    public RPCResponse<Group> groupRemoveMembers(String group, Collection<String> users) throws FreeIpaClientException {
-        FreeIpaChecks.checkGroupNotUnmanaged(group, () -> String.format("Group '%s' is not managed and membership cannot be changed", group));
-        List<Object> flags = List.of(group);
-        Map<String, Object> params = Map.of(
-                "user", users
-        );
-        return invoke("group_remove_member", flags, params, Group.class);
     }
 
     public Set<Group> groupFindAll() throws FreeIpaClientException {
@@ -702,6 +635,21 @@ public class FreeIpaClient {
         List<Object> flags = List.of(topologySuffixCn, topologySegment.getCn());
         Map<String, Object> params = Map.of();
         return (TopologySegment) invoke("topologysegment_del", flags, params, TopologySegment.class).getResult();
+    }
+
+    public void callBatch(BiConsumer<String, String> warnings, List<Object> operations, Integer partitionSize,
+            Set<FreeIpaErrorCodes> acceptableErrorCodes) throws FreeIpaClientException {
+        List<List<Object>> partitions = Lists.partition(operations, partitionSize);
+        for (List<Object> operationsPartition : partitions) {
+            BatchOperation.create(operationsPartition, warnings, acceptableErrorCodes).invoke(this);
+        }
+    }
+
+    public void checkIfClientStillUsable(FreeIpaClientException e) throws FreeIpaClientException {
+        if (e.isClientUnusable()) {
+            LOGGER.warn("Client is not usable anymore");
+            throw e;
+        }
     }
 
     private static Map<String, String> createDnsName(String name) {

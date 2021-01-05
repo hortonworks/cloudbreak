@@ -109,6 +109,12 @@ freeipa:
   healthcheck:
     connectionTimeoutMs: 5000
     readTimeoutMs: 5000
+  batch:
+    partitionsize:
+      defaultSize: 100
+      operations:
+        group_add_member: 50
+        group_remove_member: 50
 
 info:
   app:

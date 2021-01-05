@@ -148,12 +148,10 @@ public class KerberosConfigV1Service {
     private User createBindUser(FreeIpaClient freeIpaClient, String clusterName) throws RetryableFreeIpaClientException {
         String bindUser = "kerberosbind-" + clusterName;
         try {
-            User user = freeIpaClient.userAdd(bindUser, "service", "account");
-            LOGGER.debug("Kerberos bind user [{}] created", bindUser);
-            return user;
+            return freeIpaClient.userAdd(bindUser, "service", "account");
         } catch (FreeIpaClientException e) {
-            LOGGER.warn("Failed to create bind user: [{}]", bindUser, e);
-            throw new RetryableFreeIpaClientException("Failed to create bind user", e);
+            LOGGER.warn("Failed to create kerberos bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to create kerberos bind user", e);
         }
     }
 }
