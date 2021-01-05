@@ -12,6 +12,8 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class AwsCredentialVerifier {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCredentialVerifier.class);
 
     @Inject
     private AwsPlatformParameters awsPlatformParameters;
@@ -57,7 +61,9 @@ public class AwsCredentialVerifier {
                 simulatePrincipalPolicyRequest.setPolicySourceArn(arn);
                 simulatePrincipalPolicyRequest.setActionNames(resourceAndAction.getValue());
                 simulatePrincipalPolicyRequest.setResourceArns(Collections.singleton(resourceAndAction.getKey()));
+                LOGGER.debug("Simulate policy request: {}", simulatePrincipalPolicyRequest);
                 SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = amazonIdentityManagement.simulatePrincipalPolicy(simulatePrincipalPolicyRequest);
+                LOGGER.debug("Simulate policy result: {}", simulatePrincipalPolicyResult);
                 simulatePrincipalPolicyResult.getEvaluationResults().stream()
                         .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
                         .map(evaluationResult -> evaluationResult.getEvalActionName() + ":" + evaluationResult.getEvalResourceName())

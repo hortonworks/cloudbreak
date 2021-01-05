@@ -709,6 +709,7 @@ SaltOrchestrator implements HostOrchestrator {
 
             for (List<RecipeModel> recipeList : recipes.values()) {
                 for (RecipeModel model : recipeList) {
+                    LOGGER.info("Uploading recipe with name [{}] and size: {} characters.", model.getName(), model.getGeneratedScript().length());
                     uploadRecipe(sc, gatewayTargets, exitModel, model.getName(), model.getGeneratedScript(), convert(model.getRecipeType()));
                 }
             }
