@@ -88,10 +88,6 @@ public class MockUmsService {
         httpServletResponse.setStatus(SC_FOUND);
     }
 
-    private String generateDeterministicUserId(String tenantUser) {
-        return UUID.nameUUIDFromBytes(tenantUser.getBytes()).toString();
-    }
-
     private String getAltusToken(String tenant, String user) {
         AltusToken altusToken = new AltusToken();
         altusToken.setIss(ISS_ALTUS);

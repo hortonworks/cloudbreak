@@ -242,7 +242,6 @@ public class CleanupService {
         Set<String> usersUid = client.userFindAll().stream().map(User::getUid).collect(Collectors.toSet());
         users.stream().filter(usersUid::contains).forEach(userUid -> {
             try {
-                LOGGER.debug("Delete user: {}", userUid);
                 client.deleteUser(userUid);
                 userCleanupSuccess.add(userUid);
             } catch (FreeIpaClientException e) {

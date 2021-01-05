@@ -36,9 +36,7 @@ class MockGroupManagementService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockGroupManagementService.class);
 
-    private static final String CM_ADMIN_RIGHT = "environments/adminClouderaManager";
-
-    private static final int NUM_USER_GROUPS = 5;
+    private static final int NUM_USER_GROUPS = 15;
 
     @Inject
     private MockCrnService mockCrnService;

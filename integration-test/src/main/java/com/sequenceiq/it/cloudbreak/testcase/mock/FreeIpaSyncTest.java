@@ -40,7 +40,7 @@ public class FreeIpaSyncTest extends AbstractMockTest {
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)
-                .await(UserSyncState.SYNC_FAILED);
+                .await(UserSyncState.UP_TO_DATE);
         Actor internalActor = Actor.create(testContext.getActingUserCrn().getAccountId(), "__internal__actor__");
         testContext
                 .as(internalActor)

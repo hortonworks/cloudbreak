@@ -32,6 +32,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 
 import java.util.List;
@@ -58,6 +59,10 @@ public class EntitlementService {
 
     public boolean isEntitledFor(String accountId, Entitlement entitledFor) {
         return isEntitlementRegistered(accountId, entitledFor);
+    }
+
+    public boolean isFmsToFreeipaBatchCallEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, FMS_FREEIPA_BATCH_CALL);
     }
 
     public boolean listFilteringEnabled(String accountId) {
