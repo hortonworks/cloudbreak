@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 
 @Component
 public class ClouderaManagerPackageLocationFilter implements PackageLocationFilter {
@@ -13,7 +14,7 @@ public class ClouderaManagerPackageLocationFilter implements PackageLocationFilt
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerPackageLocationFilter.class);
 
     @Override
-    public boolean filterImage(Image image, Image currentImage) {
+    public boolean filterImage(Image image, Image currentImage, StackType stackType) {
         if (image == null || image.getRepo() == null || currentImage == null || StringUtils.isBlank(currentImage.getOsType())) {
             LOGGER.debug("Image or repo is null: {}", image);
             return false;

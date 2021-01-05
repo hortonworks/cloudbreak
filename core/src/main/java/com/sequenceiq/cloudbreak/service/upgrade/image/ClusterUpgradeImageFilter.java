@@ -66,7 +66,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(cmAndStackVersionFilter.filterCmAndStackVersion(imageFilterParams, reason))
                 .filter(validateCloudPlatform(cloudPlatform, reason))
                 .filter(validateOsVersion(currentImage, reason))
-                .filter(packageLocationFilter.filterImage(currentImage))
+                .filter(packageLocationFilter.filterImage(currentImage, imageFilterParams.getStackType()))
                 .collect(Collectors.toList());
 
         return new ImageFilterResult(new Images(null, images, null), getReason(images, reason));

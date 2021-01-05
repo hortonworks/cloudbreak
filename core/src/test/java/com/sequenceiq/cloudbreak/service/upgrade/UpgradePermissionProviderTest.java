@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.matrix.UpgradeMatrixService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpgradePermissionProviderTest {
+
+    private static final StackType DATALAKE_STACK_TYPE = StackType.DATALAKE;
 
     @InjectMocks
     private UpgradePermissionProvider underTest;
@@ -41,7 +44,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         Image currentImage = createImage(componentVersion, "2000");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(true);
 
@@ -57,7 +60,7 @@ public class UpgradePermissionProviderTest {
         String componentVersion = "7.2.1";
         Image currentImage = createImage(componentVersion, "2002");
         Image candidateImage = createImage(componentVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
 
@@ -74,7 +77,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(true);
@@ -93,7 +96,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.1.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(false);
 
@@ -110,7 +113,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
         when(upgradeMatrixService.permitByUpgradeMatrix(currentVersion, targetVersion)).thenReturn(false);
@@ -129,7 +132,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), false);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), StackType.WORKLOAD);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
 
@@ -147,7 +150,7 @@ public class UpgradePermissionProviderTest {
         String targetVersion = "7.2.2";
         Image currentImage = createImage(currentVersion, "2002");
         Image candidateImage = createImage(targetVersion, "2001");
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentVersionComparator.permitCmAndStackUpgradeByComponentVersion(currentVersion, targetVersion)).thenReturn(true);
 
@@ -163,7 +166,7 @@ public class UpgradePermissionProviderTest {
     public void testPermitStackUpgradeShouldReturnFalseWhenTheCmBuildNumberIsNotAvailable() {
         Image currentImage = createImage("7.2.1", "2002");
         Image candidateImage = createImage("7.2.1", null);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), true);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(), DATALAKE_STACK_TYPE);
 
         when(componentBuildNumberComparator.compare(currentImage, candidateImage, ImagePackageVersion.CDH_BUILD_NUMBER.getKey())).thenReturn(false);
 
