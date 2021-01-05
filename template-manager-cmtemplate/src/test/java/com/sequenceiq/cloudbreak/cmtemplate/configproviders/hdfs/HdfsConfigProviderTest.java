@@ -73,23 +73,6 @@ public class HdfsConfigProviderTest {
         assertEquals(0, serviceConfigs.size());
     }
 
-    @Test
-    public void testGetHdsfServiceConfigsFor720() {
-        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
-
-        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, false);
-        ClouderaManagerRepo cmRepo = new ClouderaManagerRepo();
-        cmRepo.setVersion("7.2.0");
-        preparationObject.getProductDetailsView().setCm(cmRepo);
-        String inputJson = getBlueprintText("input/clouderamanager.bp");
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
-
-        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, preparationObject);
-        assertEquals(2, serviceConfigs.size());
-        assertEquals("dfs_replication", serviceConfigs.get(0).getName());
-        assertEquals("service_health_suppression_hdfs_verify_ec_with_topology", serviceConfigs.get(1).getName());
-    }
-
     private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean fillDynamoTableName, boolean includeLocations) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);

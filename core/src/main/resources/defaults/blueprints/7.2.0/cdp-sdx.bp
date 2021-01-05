@@ -224,6 +224,14 @@
             {
                 "name": "enable_ranger_authorization",
                 "value": "true"
+            },
+            {
+                "name": "dfs_replication",
+                "value": "1"
+            },
+            {
+                "name": "service_health_suppression_hdfs_verify_ec_with_topology",
+                "value": "true"
             }
         ],
         "serviceType": "HDFS"

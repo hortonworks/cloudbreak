@@ -278,6 +278,10 @@
               "value": "true"
             },
             {
+              "name": "dfs_replication",
+              "value": "1"
+            },
+            {
               "name": "service_config_suppression_datanode_count_validator",
               "value": "true"
             }
