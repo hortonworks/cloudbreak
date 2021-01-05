@@ -380,15 +380,22 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     }
 
     private boolean shouldCreateInternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
-        // TODO expand this to data hubs
+        return shouldCreateInternalKnoxLoadBalancerForDatalake(type, network) ||
+            shouldCreateInternalKnoxLoadBalancerForDatahub(type, network);
+    }
+
+    private boolean shouldCreateInternalKnoxLoadBalancerForDatalake(StackType type, EnvironmentNetworkResponse network) {
         return StackType.DATALAKE.equals(type) &&
             (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId())
             || isEndpointGatewayEnabled(network));
     }
 
+    private boolean shouldCreateInternalKnoxLoadBalancerForDatahub(StackType type, EnvironmentNetworkResponse network) {
+        return  StackType.WORKLOAD.equals(type) && isEndpointGatewayEnabled(network);
+    }
+
     private boolean shouldCreateExternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
-        // TODO expand this to data hubs
-        return StackType.DATALAKE.equals(type) && isEndpointGatewayEnabled(network);
+        return (StackType.DATALAKE.equals(type) || StackType.WORKLOAD.equals(type)) && isEndpointGatewayEnabled(network);
     }
 
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
