@@ -4,21 +4,23 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 
 public class ImageFilterParams {
+
     private final Image currentImage;
 
     private final boolean lockComponents;
 
     private final Map<String, String> activatedParcels;
 
-    private final boolean checkUpgradeMatrix;
+    private final StackType stackType;
 
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, boolean checkUpgradeMatrix) {
+    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, StackType stackType) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.activatedParcels = activatedParcels;
-        this.checkUpgradeMatrix = checkUpgradeMatrix;
+        this.stackType = stackType;
     }
 
     public Image getCurrentImage() {
@@ -33,8 +35,8 @@ public class ImageFilterParams {
         return activatedParcels;
     }
 
-    public boolean isCheckUpgradeMatrix() {
-        return checkUpgradeMatrix;
+    public StackType getStackType() {
+        return stackType;
     }
 
     @Override
@@ -47,13 +49,13 @@ public class ImageFilterParams {
         }
         ImageFilterParams that = (ImageFilterParams) o;
         return lockComponents == that.lockComponents &&
-                checkUpgradeMatrix == that.checkUpgradeMatrix &&
                 Objects.equals(currentImage, that.currentImage) &&
+                Objects.equals(stackType, that.stackType) &&
                 Objects.equals(activatedParcels, that.activatedParcels);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, activatedParcels, checkUpgradeMatrix);
+        return Objects.hash(currentImage, lockComponents, activatedParcels, stackType);
     }
 }

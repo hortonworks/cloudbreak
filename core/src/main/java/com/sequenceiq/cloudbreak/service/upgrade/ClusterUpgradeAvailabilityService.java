@@ -149,7 +149,7 @@ public class ClusterUpgradeAvailabilityService {
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            ImageFilterParams imageFilterParams = new ImageFilterParams(image, lockComponents, getActivatedParcels(stack), stack.isDatalake());
+            ImageFilterParams imageFilterParams = new ImageFilterParams(image, lockComponents, getActivatedParcels(stack), stack.getType());
             ImageFilterResult filteredImages = filterImages(imageCatalog, stack.cloudPlatform(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());

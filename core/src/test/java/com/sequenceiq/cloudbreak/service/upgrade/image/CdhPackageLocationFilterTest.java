@@ -9,24 +9,27 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 
 class CdhPackageLocationFilterTest {
 
-    private CdhPackageLocationFilter underTest = new CdhPackageLocationFilter();
+    private static final StackType DATALAKE_STACK_TYPE = StackType.DATALAKE;
+
+    private final CdhPackageLocationFilter underTest = new CdhPackageLocationFilter();
 
     @Test
     public void testImageNull() {
-        boolean result = underTest.filterImage(null, mock(Image.class));
+        boolean result = underTest.filterImage(null, mock(Image.class), DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
 
     @Test
     public void testStackDetailIsNull() {
-        boolean result = underTest.filterImage(mock(Image.class), mock(Image.class));
+        boolean result = underTest.filterImage(mock(Image.class), mock(Image.class), DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -36,7 +39,7 @@ class CdhPackageLocationFilterTest {
         Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new StackDetails("1", null, "1"));
 
-        boolean result = underTest.filterImage(image, mock(Image.class));
+        boolean result = underTest.filterImage(image, mock(Image.class), DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -46,7 +49,7 @@ class CdhPackageLocationFilterTest {
         Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(null, null), "1"));
 
-        boolean result = underTest.filterImage(image, mock(Image.class));
+        boolean result = underTest.filterImage(image, mock(Image.class), DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -56,7 +59,7 @@ class CdhPackageLocationFilterTest {
         Image image = mock(Image.class);
         when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
 
-        boolean result = underTest.filterImage(image, null);
+        boolean result = underTest.filterImage(image, null, DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -68,7 +71,7 @@ class CdhPackageLocationFilterTest {
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn(" ");
 
-        boolean result = underTest.filterImage(image, currentImage);
+        boolean result = underTest.filterImage(image, currentImage, DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -80,7 +83,7 @@ class CdhPackageLocationFilterTest {
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");
 
-        boolean result = underTest.filterImage(image, currentImage);
+        boolean result = underTest.filterImage(image, currentImage, DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -92,7 +95,7 @@ class CdhPackageLocationFilterTest {
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");
 
-        boolean result = underTest.filterImage(image, currentImage);
+        boolean result = underTest.filterImage(image, currentImage, DATALAKE_STACK_TYPE);
 
         assertFalse(result);
     }
@@ -105,7 +108,7 @@ class CdhPackageLocationFilterTest {
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");
 
-        boolean result = underTest.filterImage(image, currentImage);
+        boolean result = underTest.filterImage(image, currentImage, DATALAKE_STACK_TYPE);
 
         assertTrue(result);
     }

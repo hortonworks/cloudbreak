@@ -20,12 +20,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
 @ExtendWith(MockitoExtension.class)
 class CmAndStackVersionFilterTest {
+
     private static final String V_7_0_3 = "7.0.3";
 
     @Mock
@@ -52,7 +54,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndStackPermitcheckIsFalse() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false);
         when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
@@ -67,7 +69,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMPermitcheckIsFalse() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false);
         lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
@@ -82,7 +84,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseWhenNotLockedAndCMAndStackPermitcheckIsFalse() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false);
         lenient().when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.FALSE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
@@ -97,7 +99,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnTrueWhenNotLockedAndCMAndStackPermitcheckIsTrue() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(false, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(false);
         when(upgradePermissionProvider.permitStackUpgrade(imageFilterParams, candidateImage))
                 .thenReturn(Boolean.TRUE);
         when(upgradePermissionProvider.permitCmUpgrade(imageFilterParams, candidateImage))
@@ -112,7 +114,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnFalseIfLockedAndCheckerReturnsFalse() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(true, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(true);
         when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.FALSE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
@@ -124,7 +126,7 @@ class CmAndStackVersionFilterTest {
 
     @Test
     public void testFilterShouldReturnTrueIfLockedAndCheckerReturnsTrue() {
-        ImageFilterParams imageFilterParams = createImageFilterParams(true, true);
+        ImageFilterParams imageFilterParams = createImageFilterParams(true);
         when(lockedComponentChecker.isUpgradePermitted(currentImage, candidateImage, activatedParcels)).thenReturn(Boolean.TRUE);
 
         Predicate<Image> predicate = underTest.filterCmAndStackVersion(imageFilterParams, reason);
@@ -134,8 +136,8 @@ class CmAndStackVersionFilterTest {
         assertLockedCommon();
     }
 
-    private ImageFilterParams createImageFilterParams(boolean lockComponents, boolean checkUpgradeMatrix) {
-        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, checkUpgradeMatrix);
+    private ImageFilterParams createImageFilterParams(boolean lockComponents) {
+        return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE);
     }
 
     private void assertLockedCommon() {

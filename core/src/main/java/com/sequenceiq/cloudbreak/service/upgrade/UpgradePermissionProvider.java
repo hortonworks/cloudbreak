@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -26,8 +27,11 @@ public class UpgradePermissionProvider {
     }
 
     public boolean permitStackUpgrade(ImageFilterParams imageFilterParams, Image image) {
-        return permitUpgrade(imageFilterParams, image, ImagePackageVersion.STACK, ImagePackageVersion.CDH_BUILD_NUMBER,
-                imageFilterParams.isCheckUpgradeMatrix());
+        return permitUpgrade(imageFilterParams, image, ImagePackageVersion.STACK, ImagePackageVersion.CDH_BUILD_NUMBER, checkUpgradeMatrix(imageFilterParams));
+    }
+
+    private boolean checkUpgradeMatrix(ImageFilterParams imageFilterParams) {
+        return StackType.DATALAKE.equals(imageFilterParams.getStackType());
     }
 
     private boolean permitUpgrade(ImageFilterParams imageFilterParams, Image image, ImagePackageVersion version, ImagePackageVersion buildNumber,
