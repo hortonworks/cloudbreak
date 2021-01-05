@@ -35,6 +35,18 @@ public class CloudStorageFolderResolverServiceTest {
     }
 
     @Test
+    public void testUpdateStorageLocationS3WithPrefix() {
+        // GIVEN
+        Telemetry telemetry = createTelemetry();
+        telemetry.getLogging().setStorageLocation("s3://mybucket/prefix");
+        // WHEN
+        underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        // THEN
+        assertEquals("s3://mybucket/prefix/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
+    }
+
+    @Test
     public void testUpdateStorageLocationAdlsGen2() {
         // GIVEN
         Telemetry telemetry = createTelemetry();
@@ -46,6 +58,20 @@ public class CloudStorageFolderResolverServiceTest {
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("abfs://mycontainer@null.dfs.core.windows.net/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
+    }
+
+    @Test
+    public void testUpdateStorageLocationAdlsGen2WithPrefix() {
+        // GIVEN
+        Telemetry telemetry = createTelemetry();
+        telemetry.getLogging().setS3(null);
+        telemetry.getLogging().setAdlsGen2(new AdlsGen2CloudStorageV1Parameters());
+        telemetry.getLogging().setStorageLocation("abfs://mycontainer/prefix");
+        // WHEN
+        underTest.updateStorageLocation(telemetry, FluentClusterType.DATAHUB.value(), "mycluster",
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        // THEN
+        assertEquals("abfs://mycontainer@null.dfs.core.windows.net/prefix/cluster-logs/datahub/mycluster_12345", telemetry.getLogging().getStorageLocation());
     }
 
     @Test

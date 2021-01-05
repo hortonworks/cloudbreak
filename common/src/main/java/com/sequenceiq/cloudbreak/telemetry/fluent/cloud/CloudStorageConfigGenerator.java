@@ -28,7 +28,8 @@ public abstract class CloudStorageConfigGenerator<T extends CloudStorageConfig> 
     String resolveLogFolder(CloudStorageConfig cloudStorageConfig, String clusterType,
             String clusterName, String clusterId) {
         String folderPrefix = StringUtils.isNotEmpty(cloudStorageConfig.getFolderPrefix())
-                ? cloudStorageConfig.getFolderPrefix() : CLUSTER_LOG_PREFIX;
+                ? Paths.get(cloudStorageConfig.getFolderPrefix(), CLUSTER_LOG_PREFIX).toString()
+                : CLUSTER_LOG_PREFIX;
         return Paths.get(folderPrefix, clusterType, String.format("%s_%s", clusterName, clusterId)).toString();
     }
 }
