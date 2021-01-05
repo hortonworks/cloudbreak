@@ -29,42 +29,42 @@ class FreeIpaClientTest {
     @Test
     void deleteUserThrowsOnProtectedUser() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.deleteUser(FreeIpaChecks.IPA_PROTECTED_USERS.get(0))
+                underTest.getDeleteUserFlagsAndParams(FreeIpaChecks.IPA_PROTECTED_USERS.get(0))
         );
     }
 
     @Test
     void addUserThrowsOnProtectedUser() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.userAdd(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), "first", "last")
+                underTest.getUserAddFlagsAndParams(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), "first", "last")
         );
     }
 
     @Test
     void groupAddThrowsOnProtectedGroup() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.groupAdd(FreeIpaChecks.IPA_PROTECTED_GROUPS.get(0))
+                underTest.getGroupAddFlagsAndParams(FreeIpaChecks.IPA_PROTECTED_GROUPS.get(0))
         );
     }
 
     @Test
     void deleteGroupThrowsOnProtectedGroup() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.deleteGroup(FreeIpaChecks.IPA_PROTECTED_GROUPS.get(0))
+                underTest.getDeleteGroupFlagsAndParams(FreeIpaChecks.IPA_PROTECTED_GROUPS.get(0))
         );
     }
 
     @Test
     void groupAddMembersThrowsOnUnmanagedGroup() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.groupAddMembers(FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0), List.of("harry", "sally"))
+                underTest.getGroupAddMembersFlagsAndParams(FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0), List.of("harry", "sally"))
         );
     }
 
     @Test
     void groupRemoveMembersThrowsOnUnmanagedGroup() {
         assertThrows(FreeIpaClientException.class, () ->
-                underTest.groupAddMembers(FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0), List.of("harry", "sally"))
+                underTest.getGroupAddMembersFlagsAndParams(FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0), List.of("harry", "sally"))
         );
     }
 }

@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -20,9 +22,14 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.ImmutableList;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.Tracer;
 
 class WorkloadCredentialServiceTest {
 
@@ -52,12 +59,15 @@ class WorkloadCredentialServiceTest {
 
     @Test
     void setWorkloadCredentials() throws Exception {
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
+        FreeIpaClient freeIpaClient = spy(new FreeIpaClient(null, null, null, getMockTracer()));
+        doNothing().when(freeIpaClient).callBatch(any(), any());
+        WorkloadCredential mockCredential = mock(WorkloadCredential.class);
+        doReturn(ImmutableList.of()).when(mockCredential).getSshPublicKeys();
         Map<String, WorkloadCredential> workloadCredentialMap = Map.of(
-                "user1", mock(WorkloadCredential.class),
-                "user2", mock(WorkloadCredential.class),
-                "user3", mock(WorkloadCredential.class),
-                "user4", mock(WorkloadCredential.class));
+                "user1", mockCredential,
+                "user2", mockCredential,
+                "user3", mockCredential,
+                "user4", mockCredential);
 
         WorkloadCredentialService spyUnderTest = spy(underTest);
         doNothing().when(spyUnderTest).setWorkloadCredential(any(FreeIpaClient.class), anyString(), any(WorkloadCredential.class));
@@ -67,9 +77,19 @@ class WorkloadCredentialServiceTest {
 
 
         verify(spyUnderTest).setWorkloadCredentials(freeIpaClient, workloadCredentialMap, warnings);
-        for (Map.Entry<String, WorkloadCredential> entry : workloadCredentialMap.entrySet()) {
-            verify(spyUnderTest).setWorkloadCredential(freeIpaClient, entry.getKey(), entry.getValue());
-        }
         verifyNoMoreInteractions(spyUnderTest);
+    }
+
+    private Tracer getMockTracer() {
+        Tracer tracer = mock(Tracer.class);
+        Span span = mock(Span.class);
+        Tracer.SpanBuilder spanBuilder = mock(Tracer.SpanBuilder.class);
+        SpanContext context = mock(SpanContext.class);
+        lenient().when(span.context()).thenReturn(context);
+        lenient().when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
+        lenient().when(spanBuilder.addReference(anyString(), any())).thenReturn(spanBuilder);
+        lenient().when(spanBuilder.start()).thenReturn(span);
+        lenient().when(tracer.activeSpan()).thenReturn(span);
+        return tracer;
     }
 }

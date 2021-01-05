@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -28,6 +27,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
@@ -45,9 +45,6 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
-import com.sequenceiq.freeipa.client.model.Group;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
 import com.sequenceiq.freeipa.configuration.UsersyncConfig;
 import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -151,7 +148,7 @@ public class UserSyncService {
         return performSyncForStacks(accountId, actorCrn, userSyncFilter, stacks);
     }
 
-    private Operation performSyncForStacks(String accountId, String actorCrn,  UserSyncRequestFilter userSyncFilter, List<Stack> stacks) {
+    private Operation performSyncForStacks(String accountId, String actorCrn, UserSyncRequestFilter userSyncFilter, List<Stack> stacks) {
         logAffectedStacks(stacks);
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationService
@@ -183,8 +180,8 @@ public class UserSyncService {
     private void logAffectedStacks(List<Stack> stacks) {
         String stacksAffected = stacks.stream().map(stack ->
                 "environment crn: [" + stack.getEnvironmentCrn() + ']'
-                + " resource crn: [" + stack.getResourceCrn() + ']'
-                + " resource name: [" + stack.getName() + ']')
+                        + " resource crn: [" + stack.getResourceCrn() + ']'
+                        + " resource name: [" + stack.getName() + ']')
                 .collect(Collectors.joining("; "));
         LOGGER.info("Affected stacks: {}", stacksAffected);
     }
@@ -204,7 +201,7 @@ public class UserSyncService {
 
     @VisibleForTesting
     void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-        boolean fullSync) {
+            boolean fullSync) {
         try {
             MDCBuilder.addOperationId(operationId);
             asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, fullSync));
@@ -232,7 +229,7 @@ public class UserSyncService {
     }
 
     private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-        boolean fullSync) {
+            boolean fullSync) {
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
@@ -413,178 +410,84 @@ public class UserSyncService {
 
     @VisibleForTesting
     UsersState getIpaStateForUser(FreeIpaClient freeIpaClient, String workloadUserName) throws FreeIpaClientException {
-                return freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, Set.of(workloadUserName));
+        return freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, Set.of(workloadUserName));
     }
 
     @VisibleForTesting
     void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
-                    BiConsumer<String, String> warnings) throws FreeIpaClientException {
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
         LOGGER.info("Applying state difference to environment {}.", environmentCrn);
 
-        LOGGER.debug("Starting {} for {} groups ...", LogEvent.ADD_GROUPS,
-                stateDifference.getGroupsToAdd().size());
         addGroups(freeIpaClient, stateDifference.getGroupsToAdd(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.ADD_GROUPS);
-
-        LOGGER.debug("Starting {} for {} users ...", LogEvent.ADD_USERS,
-                stateDifference.getUsersToAdd().size());
         addUsers(freeIpaClient, stateDifference.getUsersToAdd(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.ADD_USERS);
-
-        LOGGER.debug("Starting {} for {} group memberships ...", LogEvent.ADD_USERS_TO_GROUPS,
-                stateDifference.getGroupMembershipToAdd().size());
         addUsersToGroups(freeIpaClient, stateDifference.getGroupMembershipToAdd(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.ADD_USERS_TO_GROUPS);
-
-        LOGGER.debug("Starting {} for {} group memberships ...", LogEvent.REMOVE_USERS_FROM_GROUPS,
-                stateDifference.getGroupMembershipToRemove().size());
         removeUsersFromGroups(freeIpaClient, stateDifference.getGroupMembershipToRemove(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.REMOVE_USERS_FROM_GROUPS);
-
-        LOGGER.debug("Starting {} for {} users ...", LogEvent.REMOVE_USERS,
-                stateDifference.getUsersToRemove().size());
         removeUsers(freeIpaClient, stateDifference.getUsersToRemove(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.REMOVE_USERS);
-
-        LOGGER.debug("Starting {} for {} groups ...", LogEvent.REMOVE_GROUPS,
-                stateDifference.getGroupsToRemove().size());
         removeGroups(freeIpaClient, stateDifference.getGroupsToRemove(), warnings);
-        LOGGER.debug("Finished {}.", LogEvent.REMOVE_GROUPS);
     }
 
-    private void addGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings) throws FreeIpaClientException {
+    void addGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
+        List<Object> operations = Lists.newArrayList();
         for (FmsGroup fmsGroup : fmsGroups) {
-            LOGGER.debug("adding group {}", fmsGroup.getName());
-            try {
-                com.sequenceiq.freeipa.client.model.Group groupAdd = freeIpaClient.groupAdd(fmsGroup.getName());
-                LOGGER.debug("Success: {}", groupAdd);
-            } catch (FreeIpaClientException e) {
-                if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                    LOGGER.debug("group '{}' already exists", fmsGroup.getName());
-                } else {
-                    LOGGER.warn("Failed to add group {}", fmsGroup.getName(), e);
-                    warnings.accept(fmsGroup.getName(), "Failed to add group:" + e.getMessage());
-                    checkIfClientStillUsable(e);
-                }
-            }
+            FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_GROUP_ADD, () ->
+                    freeIpaClient.getGroupAddFlagsAndParams(fmsGroup.getName()));
         }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
-    private void addUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers, BiConsumer<String, String> warnings) throws FreeIpaClientException {
+    void addUsers(FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
+        List<Object> operations = Lists.newArrayList();
         for (FmsUser fmsUser : fmsUsers) {
-            String username = fmsUser.getName();
-            LOGGER.debug("adding user {}", username);
-            try {
-                com.sequenceiq.freeipa.client.model.User userAdd = freeIpaClient.userAdd(
-                        username, fmsUser.getFirstName(), fmsUser.getLastName());
-                LOGGER.debug("Success: {}", userAdd);
-            } catch (FreeIpaClientException e) {
-                if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                    LOGGER.debug("user '{}' already exists", fmsUser.getName());
-                } else {
-                    LOGGER.error("Failed to add {}", username, e);
-                    warnings.accept(fmsUser.getName(), "Failed to add user:" + e.getMessage());
-                    checkIfClientStillUsable(e);
-                }
-            }
+            FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_USER_ADD, () ->
+                    freeIpaClient.getUserAddFlagsAndParams(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName()));
         }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
-    private void removeUsers(FreeIpaClient freeIpaClient, Set<String> fmsUsers, BiConsumer<String, String> warnings) throws FreeIpaClientException {
-        for (String username : fmsUsers) {
-            LOGGER.debug("Removing user {}", username);
-            try {
-                com.sequenceiq.freeipa.client.model.User userRemove = freeIpaClient.deleteUser(username);
-                LOGGER.debug("Success: {}", userRemove);
-            } catch (FreeIpaClientException e) {
-                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                    LOGGER.debug("user '{}' already does not exists", username);
-                } else {
-                    LOGGER.error("Failed to delete {}", username, e);
-                    warnings.accept(username, "Failed to remove user:" + e.getMessage());
-                    checkIfClientStillUsable(e);
-                }
-            }
+    void removeUsers(FreeIpaClient freeIpaClient, Set<String> fmsUsers, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
+        List<Object> operations = Lists.newArrayList();
+        for (String user : fmsUsers) {
+            FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_USER_DEL, () -> freeIpaClient.getDeleteUserFlagsAndParams(user));
         }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
-    private void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings) throws FreeIpaClientException {
+    void removeGroups(FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
+        List<Object> operations = Lists.newArrayList();
         for (FmsGroup fmsGroup : fmsGroups) {
             String groupname = fmsGroup.getName();
-
-            LOGGER.debug("Removing group {}", groupname);
-
-            try {
-                freeIpaClient.deleteGroup(groupname);
-                LOGGER.debug("Success: {}", groupname);
-            } catch (FreeIpaClientException e) {
-                if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                    LOGGER.debug("group '{}' already does not exists", groupname);
-                } else {
-                    LOGGER.error("Failed to delete {}", groupname, e);
-                    warnings.accept(groupname, "Failed to remove group: " + e.getMessage());
-                    checkIfClientStillUsable(e);
-                }
-            }
+            FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_GROUP_DEL, () ->
+                    freeIpaClient.getDeleteGroupFlagsAndParams(groupname));
         }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
-    @VisibleForTesting
     void addUsersToGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping, BiConsumer<String, String> warnings)
             throws FreeIpaClientException {
-        LOGGER.debug("adding users to groups: [{}]", groupMapping);
+        List<Object> operations = Lists.newArrayList();
         for (String group : groupMapping.keySet()) {
             for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
-                LOGGER.debug("adding users [{}] to group [{}]", users, group);
-                try {
-                    RPCResponse<Group> groupAddMemberResponse = freeIpaClient.groupAddMembers(group, users);
-                    List<String> members = Optional.ofNullable(groupAddMemberResponse.getResult().getMemberUser()).orElse(List.of());
-                    if (members.containsAll(users)) {
-                        LOGGER.debug("Successfully added users {} to {}", users, groupAddMemberResponse.getResult());
-                    } else {
-                        // TODO specialize RPCResponse completed/failed objects
-                        LOGGER.error("Failed to add {} to group '{}': {}", users, group, groupAddMemberResponse.getFailed());
-                        warnings.accept(group, String.format("Failed to add users to group: %s", groupAddMemberResponse.getFailed()));
-                    }
-                } catch (FreeIpaClientException e) {
-                    LOGGER.error("Failed to add {} to group '{}'", users, group, e);
-                    warnings.accept(group, String.format("Failed to add users %s to group: %s", users, e.getMessage()));
-                    checkIfClientStillUsable(e);
-                }
+                FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_GROUP_ADD_MEMBER, () ->
+                        freeIpaClient.getGroupAddMembersFlagsAndParams(group, users));
             }
         }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
-    @VisibleForTesting
     void removeUsersFromGroups(FreeIpaClient freeIpaClient, Multimap<String, String> groupMapping, BiConsumer<String, String> warnings)
             throws FreeIpaClientException {
+        List<Object> operations = Lists.newArrayList();
         for (String group : groupMapping.keySet()) {
             for (List<String> users : Iterables.partition(groupMapping.get(group), maxSubjectsPerRequest)) {
-                LOGGER.debug("removing users {} from group {}", users, group);
-                try {
-                    RPCResponse<Group> groupRemoveMembersResponse = freeIpaClient.groupRemoveMembers(group, users);
-                    List<String> members = Optional.ofNullable(groupRemoveMembersResponse.getResult().getMemberUser()).orElse(List.of());
-                    if (Collections.disjoint(members, users)) {
-                        LOGGER.debug("Successfully removed users {} from {}", users, groupRemoveMembersResponse.getResult());
-                    } else {
-                        // TODO specialize RPCResponse completed/failed objects
-                        LOGGER.error("Failed to remove {} from group '{}': {}", users, group, groupRemoveMembersResponse.getFailed());
-                        warnings.accept(group, String.format("Failed to remove users from group: %s", groupRemoveMembersResponse.getFailed()));
-                    }
-                } catch (FreeIpaClientException e) {
-                    LOGGER.error("Failed to remove {} from group '{}'", users, group, e);
-                    warnings.accept(group, String.format("Failed to remove users %s from group: %s", users, e.getMessage()));
-                    checkIfClientStillUsable(e);
-                }
+                FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_GROUP_REMOVE_MEMBER, () ->
+                        freeIpaClient.getGroupRemoveMembersFlagsAndParams(group, users));
             }
         }
-    }
-
-    private void checkIfClientStillUsable(FreeIpaClientException e) throws FreeIpaClientException {
-        if (e.isClientUnusable()) {
-            LOGGER.warn("Client is not usable for further usage");
-            throw e;
-        }
+        freeIpaClient.callBatch(warnings, operations);
     }
 
     private Set<String> union(Collection<String> collection1, Collection<String> collection2) {
