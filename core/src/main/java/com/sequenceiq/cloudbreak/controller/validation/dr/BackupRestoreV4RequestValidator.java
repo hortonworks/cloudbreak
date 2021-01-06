@@ -39,6 +39,10 @@ public class BackupRestoreV4RequestValidator {
     private void validateCloudLocationScheme(String cloudPlatform, String location, ValidationResult.ValidationResultBuilder resultBuilder) {
         try {
             URI uri = new URI(location);
+            if (!Strings.isNullOrEmpty(uri.getScheme()) &&
+                    uri.getScheme().equalsIgnoreCase("hdfs")) {
+                return;
+            }
             if (AWS.equalsIgnoreCase(cloudPlatform)) {
                 if (uri.getScheme() != null) {
                     Matcher matcher = AWS_PATTERN.matcher(uri.getScheme());

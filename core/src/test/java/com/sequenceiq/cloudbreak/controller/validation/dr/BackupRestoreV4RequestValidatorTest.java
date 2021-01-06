@@ -58,6 +58,9 @@ public class BackupRestoreV4RequestValidatorTest {
 
         validationResult = requestValidator.validate(stack, LOCATION, BACKUP_ID);
         assertFalse(validationResult.hasError());
+
+        validationResult = requestValidator.validate(stack, "hdfs://" + LOCATION, BACKUP_ID);
+        assertFalse(validationResult.hasError());
     }
 
     @Test
@@ -81,6 +84,9 @@ public class BackupRestoreV4RequestValidatorTest {
         assertFalse(validationResult.hasError());
 
         validationResult = requestValidator.validate(stack, LOCATION, BACKUP_ID);
+        assertFalse(validationResult.hasError());
+
+        validationResult = requestValidator.validate(stack, "hdfs://" + LOCATION, BACKUP_ID);
         assertFalse(validationResult.hasError());
     }
 
