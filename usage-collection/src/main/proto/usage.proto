@@ -982,6 +982,20 @@ message CDPEnvironmentDetails {
     string availabilityZones = 4;
     // Network metadata
     CDPNetworkDetails networkDetails = 5;
+    // Cloud provider specific details of the environment.
+    oneof environmentCloudProviderDetails {
+      CDPEnvironmentAwsDetails awsDetails = 6;
+      CDPEnvironmentAzureDetails azureDetails = 7;
+    }
+}
+
+// Azure-specific environment details.
+message CDPEnvironmentAzureDetails {
+    bool singleResourceGroup = 1;
+}
+
+// Azure-specific environment details.
+message CDPEnvironmentAwsDetails {
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {

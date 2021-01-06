@@ -50,10 +50,10 @@ import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.AwsEnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.v1.converter.AzureEnvironmentNetworkConverter;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
-import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
-import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentNetworkServiceTest {

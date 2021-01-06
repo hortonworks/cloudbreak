@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupCreationConverter;
 import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupUsagePatternConverter;
 

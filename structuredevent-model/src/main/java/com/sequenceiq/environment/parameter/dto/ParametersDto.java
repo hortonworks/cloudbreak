@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.parameters.dto;
+package com.sequenceiq.environment.parameter.dto;
 
 public class ParametersDto {
 

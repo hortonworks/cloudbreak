@@ -5,8 +5,8 @@ import javax.inject.Inject;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto.Builder;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto.Builder;
 
 public abstract class BaseEnvironmentParametersConverter implements EnvironmentParametersConverter {
 

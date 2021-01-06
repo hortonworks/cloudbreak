@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dao.converter.S3GuardTableCreationConverter;
 
 import java.util.Objects;

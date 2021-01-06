@@ -20,7 +20,7 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
-import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
 @ExtendWith(MockitoExtension.class)
 class NoSqlTableCreationModeDeterminerServiceTest {

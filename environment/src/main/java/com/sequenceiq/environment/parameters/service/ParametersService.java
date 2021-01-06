@@ -16,7 +16,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.BaseParametersRepository;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 
 @Service

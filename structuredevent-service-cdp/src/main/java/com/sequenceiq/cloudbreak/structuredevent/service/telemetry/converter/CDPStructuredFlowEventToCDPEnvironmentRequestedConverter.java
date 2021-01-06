@@ -19,6 +19,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @Component
 public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
@@ -72,8 +74,30 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
                 cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
             }
             cdpEnvironmentDetails.setNetworkDetails(convertNetworkDetails(srcEnvironmentDetails));
+
+            ParametersDto parametersDto = srcEnvironmentDetails.getParameters();
+            if (parametersDto != null) {
+                cdpEnvironmentDetails.setAwsDetails(convertAwsDetails(parametersDto));
+                cdpEnvironmentDetails.setAzureDetails(convertAzureDetails(parametersDto));
+            }
+
         }
         return cdpEnvironmentDetails.build();
+    }
+
+    private UsageProto.CDPEnvironmentAwsDetails convertAwsDetails(ParametersDto parametersDto) {
+        UsageProto.CDPEnvironmentAwsDetails.Builder builder = UsageProto.CDPEnvironmentAwsDetails.newBuilder();
+        return builder.build();
+    }
+
+    private UsageProto.CDPEnvironmentAzureDetails convertAzureDetails(ParametersDto parametersDto) {
+        UsageProto.CDPEnvironmentAzureDetails.Builder builder = UsageProto.CDPEnvironmentAzureDetails.newBuilder();
+        AzureParametersDto azureParametersDto = parametersDto.getAzureParametersDto();
+        if (azureParametersDto != null) {
+            builder.setSingleResourceGroup(
+                    azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern().isSingleResourceGroup());
+        }
+        return builder.build();
     }
 
     private UsageProto.CDPNetworkDetails convertNetworkDetails(EnvironmentDetails environmentDetails) {

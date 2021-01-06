@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.parameters.dao.converter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 import javax.persistence.AttributeConverter;
 

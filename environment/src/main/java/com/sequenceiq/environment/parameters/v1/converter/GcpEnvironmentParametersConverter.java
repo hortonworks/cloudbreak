@@ -6,9 +6,9 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.domain.YarnParameters;
-import com.sequenceiq.environment.parameters.dto.GcpParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto.Builder;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto.Builder;
 
 @Component
 public class GcpEnvironmentParametersConverter extends BaseEnvironmentParametersConverter {

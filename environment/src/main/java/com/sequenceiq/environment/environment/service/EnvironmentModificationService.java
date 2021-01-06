@@ -36,7 +36,7 @@ import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Service

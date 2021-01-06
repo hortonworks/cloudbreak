@@ -1,7 +1,4 @@
-package com.sequenceiq.environment.parameters.dto;
-
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
+package com.sequenceiq.environment.parameter.dto;
 
 public class AzureResourceGroupDto {
 

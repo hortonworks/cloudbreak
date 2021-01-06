@@ -51,8 +51,8 @@ import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
-import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)

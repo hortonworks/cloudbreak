@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.parameters.dao.domain;
+package com.sequenceiq.environment.parameter.dto;
 
 public enum ResourceGroupUsagePattern {
     USE_MULTIPLE,

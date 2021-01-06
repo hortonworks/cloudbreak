@@ -28,7 +28,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 

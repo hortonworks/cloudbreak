@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.validation.validators.parameter.ParameterValidator;
 
 @Component

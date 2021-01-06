@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.parameters.dao.domain;
+package com.sequenceiq.environment.parameter.dto.s3guard;
 
 public enum S3GuardTableCreation {
     CREATE_NEW,

@@ -56,8 +56,8 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 

@@ -50,12 +50,12 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
-import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
-import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
 @Component

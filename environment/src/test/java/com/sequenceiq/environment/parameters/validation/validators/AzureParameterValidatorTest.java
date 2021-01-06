@@ -26,12 +26,12 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupUsagePattern;
-import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
-import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto.Builder;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto.Builder;
 import com.sequenceiq.environment.parameters.validation.validators.parameter.AzureParameterValidator;
 
 public class AzureParameterValidatorTest {

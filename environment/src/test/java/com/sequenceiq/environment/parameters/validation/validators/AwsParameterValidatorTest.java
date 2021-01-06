@@ -27,9 +27,9 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
-import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
-import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.parameters.validation.validators.parameter.AwsParameterValidator;
 
