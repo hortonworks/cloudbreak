@@ -12,7 +12,7 @@ start_agent:
   service.running:
     - enable: True
     - name: cloudera-scm-agent
-{% if cloudera_manager.communication.autotls_enabled == True %}
+  {% if cloudera_manager.communication.autotls_enabled == True %}
     - require:
-        - file: check_token
+      - file: check_token
 {% endif %}
