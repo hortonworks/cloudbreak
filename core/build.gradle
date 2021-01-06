@@ -224,6 +224,10 @@ dependencies {
 
   compile group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 
+  compile (group: 'com.nimbusds',                      name: 'oauth2-oidc-sdk',                  version: '6.5') {
+    force = true
+  }
+
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'
   }

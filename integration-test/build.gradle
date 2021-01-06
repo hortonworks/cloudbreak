@@ -142,6 +142,10 @@ dependencies {
   }
   compile group: 'org.jetbrains',                 name: 'annotations',                    version: '20.1.0'
 
+  compile (group: 'com.nimbusds',                 name: 'oauth2-oidc-sdk',                version: '6.5') {
+    force = true
+  }
+
   runtime group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
 
