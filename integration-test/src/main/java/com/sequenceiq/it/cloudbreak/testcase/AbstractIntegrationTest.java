@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -114,32 +113,26 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(imageCatalogTestClient.createIfNotExistV4());
     }
 
-    protected void validateDefaultPrewarmedImage(TestContext testContext, String imageUuid) {
+    protected void validatePrewarmedImage(TestContext testContext, String imageUuid) {
         testContext.given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.getV4(true))
                 .valid();
         ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        ImageV4Response image = dto.getResponse().getImages().getCdhImages().stream()
+        dto.getResponse().getImages().getCdhImages().stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " cdh image is missing from the catalog."));
-        if (!image.isDefaultImage()) {
-            throw new RuntimeException(imageUuid + " image is not a default image. Validation picks up the default one so it does not make sense to run it.");
-        }
+                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the '" + dto.getName() + "' catalog."));
     }
 
-    protected void validateDefaultBaseImage(TestContext testContext, String imageUuid) {
+    protected void validateBaseImage(TestContext testContext, String imageUuid) {
         testContext.given(ImageCatalogTestDto.class)
                 .when(imageCatalogTestClient.getV4(true))
                 .valid();
         ImageCatalogTestDto dto = testContext.get(ImageCatalogTestDto.class);
-        ImageV4Response image = dto.getResponse().getImages().getBaseImages().stream()
+        dto.getResponse().getImages().getBaseImages().stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the catalog."));
-        if (!image.isDefaultImage()) {
-            throw new RuntimeException(imageUuid + " image is not a default image. Validation picks up the default one so it does not make sense to run it.");
-        }
+                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the '" + dto.getName() + "' catalog."));
     }
 
     protected void createDefaultEnvironment(TestContext testContext) {

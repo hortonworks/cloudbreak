@@ -276,6 +276,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
+    public SdxInternalTestDto withImageCatalogNameAndImageId(String imageCatalogName, String imageId) {
+        ImageSettingsV4Request image = new ImageSettingsV4Request();
+        image.setCatalog(imageCatalogName);
+        image.setId(imageId);
+        getRequest().getStackV4Request().setImage(image);
+        return this;
+    }
+
     public SdxInternalTestDto await(SdxClusterStatusResponse status) {
         return await(status, emptyRunningParameter());
     }
