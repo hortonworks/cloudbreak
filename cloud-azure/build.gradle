@@ -20,7 +20,7 @@ dependencies {
 
   compile (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
 
-  compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication', version: '1.6.14') {
+  compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
     exclude group: 'org.slf4j'
   }
   compile (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
@@ -30,7 +30,6 @@ dependencies {
   compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
   compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
-  compile group: 'com.microsoft.azure',         name: 'adal4j',                     version: '1.6.4'
   compile group: 'org.apache.commons',                 name: 'commons-collections4', version: commonsCollections4Version
   compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
