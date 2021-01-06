@@ -10,13 +10,13 @@ import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 public class BlueprintAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<BlueprintTestDto, CloudbreakClient> {
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateBlueprint";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder().withEventName("CreateBlueprint").build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteBlueprint";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteBlueprint").build();
     }
 
     @Override

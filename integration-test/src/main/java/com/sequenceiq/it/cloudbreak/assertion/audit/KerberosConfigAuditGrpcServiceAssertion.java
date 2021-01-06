@@ -12,8 +12,8 @@ public class KerberosConfigAuditGrpcServiceAssertion extends AuditGrpcServiceAss
 
     @NotNull
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteKerberosConfig";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteKerberosConfig").build();
     }
 
     @Override

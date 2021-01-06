@@ -11,6 +11,6 @@ public class Base64Deserializer extends JsonDeserializer<String> {
     @Override
     public String deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         String str = p.getText();
-        return str != null ? new String(Base64.getDecoder().decode(p.getText())) : null;
+        return str != null ? new String(Base64.getDecoder().decode(str)) : null;
     }
 }

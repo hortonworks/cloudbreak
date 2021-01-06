@@ -50,7 +50,7 @@ public class FlowLegacyEventDataExtractor implements LegacyEventDataExtractor<St
 
     private String getFlowState(StructuredFlowEvent structuredEvent) {
         String flowState = structuredEvent.getFlow().getFlowState();
-        return "INIT_STATE".equals(flowState) ? flowState : structuredEvent.getFlow().getNextFlowState();
+        return "INIT_STATE".equals(flowState) ? structuredEvent.getFlow().getNextFlowState() : flowState;
     }
 
     @Override

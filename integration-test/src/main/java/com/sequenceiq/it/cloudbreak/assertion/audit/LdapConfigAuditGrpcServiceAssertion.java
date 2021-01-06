@@ -12,14 +12,14 @@ public class LdapConfigAuditGrpcServiceAssertion extends AuditGrpcServiceAsserti
 
     @NotNull
     @Override
-    protected String getCreateEventName() {
-        return "CreateLdapConfig";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder().withEventName("CreateLdapConfig").build();
     }
 
     @NotNull
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteLdapConfig";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteLdapConfig").build();
     }
 
     @Override

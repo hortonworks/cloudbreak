@@ -10,23 +10,39 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 public class EnvironmentAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<EnvironmentTestDto, EnvironmentClient> {
 
     @Override
-    protected String getStopEventName() {
-        return "StopEnvironment";
+    protected OperationInfo getStopOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StopEnvironment")
+                .withFirstState("STOP_DATAHUB_STATE")
+                .withLastState("ENV_STOP_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteEnvironment";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("DeleteEnvironment")
+                .withFirstState("FREEIPA_DELETE_STARTED_STATE")
+                .withLastState("ENV_DELETE_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getStartEventName() {
-        return "StartEnvironment";
+    protected OperationInfo getStartOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StartEnvironment")
+                .withFirstState("START_FREEIPA_STATE")
+                .withLastState("ENV_START_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateEnvironment";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("CreateEnvironment")
+                .withFirstState("ENVIRONMENT_INITIALIZATION_STATE")
+                .withLastState("ENV_CREATION_FINISHED_STATE")
+                .build();
     }
 
     @Override

@@ -12,26 +12,42 @@ public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<
 
     @NotNull
     @Override
-    protected String getStopEventName() {
-        return "StopFreeipa";
+    protected OperationInfo getStopOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StopFreeipa")
+                .withFirstState("STOP_STATE")
+                .withLastState("STOP_FINISHED_STATE")
+                .build();
     }
 
     @NotNull
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteFreeipa";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("DeleteFreeipa")
+                .withFirstState("STOP_TELEMETRY_AGENT_STATE")
+                .withLastState("TERMINATION_FINISHED_STATE")
+                .build();
     }
 
     @NotNull
     @Override
-    protected String getStartEventName() {
-        return "StartFreeipa";
+    protected OperationInfo getStartOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StartFreeipa")
+                .withFirstState("START_STATE")
+                .withLastState("START_FINISHED_STATE")
+                .build();
     }
 
     @NotNull
     @Override
-    protected String getCreateEventName() {
-        return "CreateFreeipa";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("CreateFreeipa")
+                .withFirstState("BOOTSTRAPPING_MACHINES_STATE")
+                .withLastState("FREEIPA_PROVISION_FINISHED_STATE")
+                .build();
     }
 
     @Override
