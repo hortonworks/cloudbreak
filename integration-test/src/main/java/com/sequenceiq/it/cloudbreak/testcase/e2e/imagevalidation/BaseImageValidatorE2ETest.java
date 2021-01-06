@@ -63,6 +63,8 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                     return dto;
                 })
                 .given(imageSettings, ImageSettingsTestDto.class)
+                    .withImageCatalog(commonCloudProperties().getImageValidation().getSourceCatalogName())
+                    .withImageId(commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid())
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withBlueprintName(commonClusterManagerProperties().getInternalSdxBlueprintName())

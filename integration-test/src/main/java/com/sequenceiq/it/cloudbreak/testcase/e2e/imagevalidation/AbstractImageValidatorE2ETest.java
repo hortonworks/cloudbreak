@@ -55,9 +55,9 @@ public abstract class AbstractImageValidatorE2ETest extends AbstractE2ETest {
         String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
         if (Strings.isNotNullAndNotEmpty(imageUuid)) {
             if (isPrewarmedImageTest()) {
-                validateDefaultPrewarmedImage(testContext, imageUuid);
+                validatePrewarmedImage(testContext, imageUuid);
             } else {
-                validateDefaultBaseImage(testContext, imageUuid);
+                validateBaseImage(testContext, imageUuid);
             }
         }
     }
