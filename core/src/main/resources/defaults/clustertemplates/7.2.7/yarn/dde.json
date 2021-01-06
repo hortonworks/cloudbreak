@@ -37,7 +37,7 @@
             "memory": 8192
           }
         },
-        "type": "GATEWAY"
+        "type": "CORE"
       },
       {
         "name": "leader",
@@ -52,7 +52,7 @@
             "memory": 8192
           }
         },
-        "type": "CORE"
+        "type": "GATEWAY"
       },
       {
         "name": "worker",
