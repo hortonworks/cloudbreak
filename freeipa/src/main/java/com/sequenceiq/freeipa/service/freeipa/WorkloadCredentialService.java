@@ -29,9 +29,9 @@ public class WorkloadCredentialService {
         LOGGER.debug("Setting workload credentials for user '{}'", username);
 
         try {
-            String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
+            String asnEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
             freeIpaClient.userSetWorkloadCredentials(username,
-                    workloadCredential.getHashedPassword(), ansEncodedKrbPrincipalKey, workloadCredential.getExpirationDate(),
+                    workloadCredential.getHashedPassword(), asnEncodedKrbPrincipalKey, workloadCredential.getExpirationDate(),
                     workloadCredential.getSshPublicKeys().stream().map(UserManagementProto.SshPublicKey::getPublicKey).collect(Collectors.toList()));
         } catch (FreeIpaClientException e) {
             if (FreeIpaClientExceptionUtil.isEmptyModlistException(e)) {
@@ -48,10 +48,10 @@ public class WorkloadCredentialService {
         for (Map.Entry<String, WorkloadCredential> entry : workloadCredentials.entrySet()) {
             String username = entry.getKey();
             WorkloadCredential workloadCredential = entry.getValue();
-            String ansEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
+            String asnEncodedKrbPrincipalKey = KrbKeySetEncoder.getASNEncodedKrbPrincipalKey(workloadCredential.getKeys());
             CheckedSupplier<Pair<List<Object>, Map<String, Object>>, FreeIpaClientException> flagsAndParams = () ->
                     freeIpaClient.getSetWlCredentialsFlagsAndParams(username,
-                            workloadCredential.getHashedPassword(), ansEncodedKrbPrincipalKey, workloadCredential.getExpirationDate(),
+                            workloadCredential.getHashedPassword(), asnEncodedKrbPrincipalKey, workloadCredential.getExpirationDate(),
                             workloadCredential.getSshPublicKeys().stream().map(UserManagementProto.SshPublicKey::getPublicKey).collect(Collectors.toList()));
             FreeIpaClient.fillInOperations(operations, FreeIpaClient.METHOD_NAME_USER_MOD, flagsAndParams);
         }
