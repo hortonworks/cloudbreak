@@ -47,6 +47,35 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
+    public void testCreateSaltConfigWithHdfsLocation() throws URISyntaxException {
+        // AWS platform
+        String cloudPlatform = "aws";
+        String location = "hdfs://test/backups";
+        Stack placeholderStack = new Stack();
+        placeholderStack.setCloudPlatform(cloudPlatform);
+
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, placeholderStack);
+
+        Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
+        Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
+
+        assertEquals("hdfs://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+        assertEquals(RANGER_ADMIN_GROUP, disasterRecoveryKeyValuePairs.get(RANGER_ADMIN_GROUP_KEY));
+
+        // Azure platform
+        cloudPlatform = "azure";
+        placeholderStack = new Stack();
+        placeholderStack.setCloudPlatform(cloudPlatform);
+
+        saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, placeholderStack);
+
+        disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
+        disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
+
+        assertEquals("hdfs://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+    }
+
+    @Test
     public void testObjectStorageUrlIsPrefixedWithS3aForAwsCloudplatform() throws URISyntaxException {
         String cloudPlatform = "aws";
         String location = "/test/backups";

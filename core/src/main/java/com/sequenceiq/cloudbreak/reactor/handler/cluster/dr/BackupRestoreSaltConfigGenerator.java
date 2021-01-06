@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.base.Strings;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -47,7 +48,10 @@ public class BackupRestoreSaltConfigGenerator {
         URI uri = new URI(location);
         String suffix = '/' + backupId + DATABASE_BACKUP_POSTFIX;
         String fullLocation;
-        if (AWS.equalsIgnoreCase(cloudPlatform)) {
+        if (!Strings.isNullOrEmpty(uri.getScheme()) &&
+                uri.getScheme().equalsIgnoreCase("hdfs")) {
+            fullLocation = uri.toString();
+        } else if (AWS.equalsIgnoreCase(cloudPlatform)) {
             fullLocation = "s3a://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
         } else if (AZURE.equalsIgnoreCase(cloudPlatform)) {
             fullLocation = "abfs://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
