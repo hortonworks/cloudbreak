@@ -60867,6 +60867,34 @@ public final class UsageProto {
      * <code>.usage.CDPNetworkDetails networkDetails = 5;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetworkDetailsOrBuilder getNetworkDetailsOrBuilder();
+
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    boolean hasAwsDetails();
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getAwsDetails();
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder getAwsDetailsOrBuilder();
+
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    boolean hasAzureDetails();
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getAzureDetails();
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder getAzureDetailsOrBuilder();
+
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.EnvironmentCloudProviderDetailsCase getEnvironmentCloudProviderDetailsCase();
   }
   /**
    * Protobuf type {@code usage.CDPEnvironmentDetails}
@@ -60947,6 +60975,34 @@ public final class UsageProto {
 
               break;
             }
+            case 50: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder subBuilder = null;
+              if (environmentCloudProviderDetailsCase_ == 6) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_).toBuilder();
+              }
+              environmentCloudProviderDetails_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_);
+                environmentCloudProviderDetails_ = subBuilder.buildPartial();
+              }
+              environmentCloudProviderDetailsCase_ = 6;
+              break;
+            }
+            case 58: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder subBuilder = null;
+              if (environmentCloudProviderDetailsCase_ == 7) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_).toBuilder();
+              }
+              environmentCloudProviderDetails_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_);
+                environmentCloudProviderDetails_ = subBuilder.buildPartial();
+              }
+              environmentCloudProviderDetailsCase_ = 7;
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -60977,6 +61033,44 @@ public final class UsageProto {
       return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder.class);
+    }
+
+    private int environmentCloudProviderDetailsCase_ = 0;
+    private java.lang.Object environmentCloudProviderDetails_;
+    public enum EnvironmentCloudProviderDetailsCase
+        implements com.google.protobuf.Internal.EnumLite {
+      AWSDETAILS(6),
+      AZUREDETAILS(7),
+      ENVIRONMENTCLOUDPROVIDERDETAILS_NOT_SET(0);
+      private final int value;
+      private EnvironmentCloudProviderDetailsCase(int value) {
+        this.value = value;
+      }
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static EnvironmentCloudProviderDetailsCase valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static EnvironmentCloudProviderDetailsCase forNumber(int value) {
+        switch (value) {
+          case 6: return AWSDETAILS;
+          case 7: return AZUREDETAILS;
+          case 0: return ENVIRONMENTCLOUDPROVIDERDETAILS_NOT_SET;
+          default: return null;
+        }
+      }
+      public int getNumber() {
+        return this.value;
+      }
+    };
+
+    public EnvironmentCloudProviderDetailsCase
+    getEnvironmentCloudProviderDetailsCase() {
+      return EnvironmentCloudProviderDetailsCase.forNumber(
+          environmentCloudProviderDetailsCase_);
     }
 
     public static final int ENVIRONMENTTYPE_FIELD_NUMBER = 1;
@@ -61134,6 +61228,58 @@ public final class UsageProto {
       return getNetworkDetails();
     }
 
+    public static final int AWSDETAILS_FIELD_NUMBER = 6;
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    public boolean hasAwsDetails() {
+      return environmentCloudProviderDetailsCase_ == 6;
+    }
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getAwsDetails() {
+      if (environmentCloudProviderDetailsCase_ == 6) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+    }
+    /**
+     * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder getAwsDetailsOrBuilder() {
+      if (environmentCloudProviderDetailsCase_ == 6) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+    }
+
+    public static final int AZUREDETAILS_FIELD_NUMBER = 7;
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    public boolean hasAzureDetails() {
+      return environmentCloudProviderDetailsCase_ == 7;
+    }
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getAzureDetails() {
+      if (environmentCloudProviderDetailsCase_ == 7) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+    }
+    /**
+     * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder getAzureDetailsOrBuilder() {
+      if (environmentCloudProviderDetailsCase_ == 7) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -61163,6 +61309,12 @@ public final class UsageProto {
       if (networkDetails_ != null) {
         output.writeMessage(5, getNetworkDetails());
       }
+      if (environmentCloudProviderDetailsCase_ == 6) {
+        output.writeMessage(6, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_);
+      }
+      if (environmentCloudProviderDetailsCase_ == 7) {
+        output.writeMessage(7, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -61189,6 +61341,14 @@ public final class UsageProto {
       if (networkDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(5, getNetworkDetails());
+      }
+      if (environmentCloudProviderDetailsCase_ == 6) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_);
+      }
+      if (environmentCloudProviderDetailsCase_ == 7) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -61218,6 +61378,21 @@ public final class UsageProto {
         result = result && getNetworkDetails()
             .equals(other.getNetworkDetails());
       }
+      result = result && getEnvironmentCloudProviderDetailsCase().equals(
+          other.getEnvironmentCloudProviderDetailsCase());
+      if (!result) return false;
+      switch (environmentCloudProviderDetailsCase_) {
+        case 6:
+          result = result && getAwsDetails()
+              .equals(other.getAwsDetails());
+          break;
+        case 7:
+          result = result && getAzureDetails()
+              .equals(other.getAzureDetails());
+          break;
+        case 0:
+        default:
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61240,6 +61415,18 @@ public final class UsageProto {
       if (hasNetworkDetails()) {
         hash = (37 * hash) + NETWORKDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getNetworkDetails().hashCode();
+      }
+      switch (environmentCloudProviderDetailsCase_) {
+        case 6:
+          hash = (37 * hash) + AWSDETAILS_FIELD_NUMBER;
+          hash = (53 * hash) + getAwsDetails().hashCode();
+          break;
+        case 7:
+          hash = (37 * hash) + AZUREDETAILS_FIELD_NUMBER;
+          hash = (53 * hash) + getAzureDetails().hashCode();
+          break;
+        case 0:
+        default:
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -61388,6 +61575,8 @@ public final class UsageProto {
           networkDetails_ = null;
           networkDetailsBuilder_ = null;
         }
+        environmentCloudProviderDetailsCase_ = 0;
+        environmentCloudProviderDetails_ = null;
         return this;
       }
 
@@ -61423,6 +61612,21 @@ public final class UsageProto {
         } else {
           result.networkDetails_ = networkDetailsBuilder_.build();
         }
+        if (environmentCloudProviderDetailsCase_ == 6) {
+          if (awsDetailsBuilder_ == null) {
+            result.environmentCloudProviderDetails_ = environmentCloudProviderDetails_;
+          } else {
+            result.environmentCloudProviderDetails_ = awsDetailsBuilder_.build();
+          }
+        }
+        if (environmentCloudProviderDetailsCase_ == 7) {
+          if (azureDetailsBuilder_ == null) {
+            result.environmentCloudProviderDetails_ = environmentCloudProviderDetails_;
+          } else {
+            result.environmentCloudProviderDetails_ = azureDetailsBuilder_.build();
+          }
+        }
+        result.environmentCloudProviderDetailsCase_ = environmentCloudProviderDetailsCase_;
         onBuilt();
         return result;
       }
@@ -61488,6 +61692,19 @@ public final class UsageProto {
         if (other.hasNetworkDetails()) {
           mergeNetworkDetails(other.getNetworkDetails());
         }
+        switch (other.getEnvironmentCloudProviderDetailsCase()) {
+          case AWSDETAILS: {
+            mergeAwsDetails(other.getAwsDetails());
+            break;
+          }
+          case AZUREDETAILS: {
+            mergeAzureDetails(other.getAzureDetails());
+            break;
+          }
+          case ENVIRONMENTCLOUDPROVIDERDETAILS_NOT_SET: {
+            break;
+          }
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -61516,6 +61733,21 @@ public final class UsageProto {
         }
         return this;
       }
+      private int environmentCloudProviderDetailsCase_ = 0;
+      private java.lang.Object environmentCloudProviderDetails_;
+      public EnvironmentCloudProviderDetailsCase
+          getEnvironmentCloudProviderDetailsCase() {
+        return EnvironmentCloudProviderDetailsCase.forNumber(
+            environmentCloudProviderDetailsCase_);
+      }
+
+      public Builder clearEnvironmentCloudProviderDetails() {
+        environmentCloudProviderDetailsCase_ = 0;
+        environmentCloudProviderDetails_ = null;
+        onChanged();
+        return this;
+      }
+
 
       private int environmentType_ = 0;
       /**
@@ -61950,6 +62182,278 @@ public final class UsageProto {
         }
         return networkDetailsBuilder_;
       }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder> awsDetailsBuilder_;
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public boolean hasAwsDetails() {
+        return environmentCloudProviderDetailsCase_ == 6;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getAwsDetails() {
+        if (awsDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            return awsDetailsBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public Builder setAwsDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails value) {
+        if (awsDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          environmentCloudProviderDetails_ = value;
+          onChanged();
+        } else {
+          awsDetailsBuilder_.setMessage(value);
+        }
+        environmentCloudProviderDetailsCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public Builder setAwsDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder builderForValue) {
+        if (awsDetailsBuilder_ == null) {
+          environmentCloudProviderDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          awsDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        environmentCloudProviderDetailsCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public Builder mergeAwsDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails value) {
+        if (awsDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 6 &&
+              environmentCloudProviderDetails_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance()) {
+            environmentCloudProviderDetails_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            environmentCloudProviderDetails_ = value;
+          }
+          onChanged();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            awsDetailsBuilder_.mergeFrom(value);
+          }
+          awsDetailsBuilder_.setMessage(value);
+        }
+        environmentCloudProviderDetailsCase_ = 6;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public Builder clearAwsDetails() {
+        if (awsDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            environmentCloudProviderDetailsCase_ = 0;
+            environmentCloudProviderDetails_ = null;
+            onChanged();
+          }
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            environmentCloudProviderDetailsCase_ = 0;
+            environmentCloudProviderDetails_ = null;
+          }
+          awsDetailsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder getAwsDetailsBuilder() {
+        return getAwsDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder getAwsDetailsOrBuilder() {
+        if ((environmentCloudProviderDetailsCase_ == 6) && (awsDetailsBuilder_ != null)) {
+          return awsDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 6) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAwsDetails awsDetails = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder> 
+          getAwsDetailsFieldBuilder() {
+        if (awsDetailsBuilder_ == null) {
+          if (!(environmentCloudProviderDetailsCase_ == 6)) {
+            environmentCloudProviderDetails_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+          }
+          awsDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) environmentCloudProviderDetails_,
+                  getParentForChildren(),
+                  isClean());
+          environmentCloudProviderDetails_ = null;
+        }
+        environmentCloudProviderDetailsCase_ = 6;
+        onChanged();;
+        return awsDetailsBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder> azureDetailsBuilder_;
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public boolean hasAzureDetails() {
+        return environmentCloudProviderDetailsCase_ == 7;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getAzureDetails() {
+        if (azureDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            return azureDetailsBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public Builder setAzureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails value) {
+        if (azureDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          environmentCloudProviderDetails_ = value;
+          onChanged();
+        } else {
+          azureDetailsBuilder_.setMessage(value);
+        }
+        environmentCloudProviderDetailsCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public Builder setAzureDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder builderForValue) {
+        if (azureDetailsBuilder_ == null) {
+          environmentCloudProviderDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          azureDetailsBuilder_.setMessage(builderForValue.build());
+        }
+        environmentCloudProviderDetailsCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public Builder mergeAzureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails value) {
+        if (azureDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 7 &&
+              environmentCloudProviderDetails_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance()) {
+            environmentCloudProviderDetails_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            environmentCloudProviderDetails_ = value;
+          }
+          onChanged();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            azureDetailsBuilder_.mergeFrom(value);
+          }
+          azureDetailsBuilder_.setMessage(value);
+        }
+        environmentCloudProviderDetailsCase_ = 7;
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public Builder clearAzureDetails() {
+        if (azureDetailsBuilder_ == null) {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            environmentCloudProviderDetailsCase_ = 0;
+            environmentCloudProviderDetails_ = null;
+            onChanged();
+          }
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            environmentCloudProviderDetailsCase_ = 0;
+            environmentCloudProviderDetails_ = null;
+          }
+          azureDetailsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder getAzureDetailsBuilder() {
+        return getAzureDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder getAzureDetailsOrBuilder() {
+        if ((environmentCloudProviderDetailsCase_ == 7) && (azureDetailsBuilder_ != null)) {
+          return azureDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          if (environmentCloudProviderDetailsCase_ == 7) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+        }
+      }
+      /**
+       * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder> 
+          getAzureDetailsFieldBuilder() {
+        if (azureDetailsBuilder_ == null) {
+          if (!(environmentCloudProviderDetailsCase_ == 7)) {
+            environmentCloudProviderDetails_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+          }
+          azureDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) environmentCloudProviderDetails_,
+                  getParentForChildren(),
+                  isClean());
+          environmentCloudProviderDetails_ = null;
+        }
+        environmentCloudProviderDetailsCase_ = 7;
+        onChanged();;
+        return azureDetailsBuilder_;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -61998,6 +62502,911 @@ public final class UsageProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPEnvironmentAzureDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPEnvironmentAzureDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>bool singleResourceGroup = 1;</code>
+     */
+    boolean getSingleResourceGroup();
+  }
+  /**
+   * <pre>
+   * Azure-specific environment details.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPEnvironmentAzureDetails}
+   */
+  public  static final class CDPEnvironmentAzureDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPEnvironmentAzureDetails)
+      CDPEnvironmentAzureDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPEnvironmentAzureDetails.newBuilder() to construct.
+    private CDPEnvironmentAzureDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPEnvironmentAzureDetails() {
+      singleResourceGroup_ = false;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPEnvironmentAzureDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 8: {
+
+              singleResourceGroup_ = input.readBool();
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAzureDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder.class);
+    }
+
+    public static final int SINGLERESOURCEGROUP_FIELD_NUMBER = 1;
+    private boolean singleResourceGroup_;
+    /**
+     * <code>bool singleResourceGroup = 1;</code>
+     */
+    public boolean getSingleResourceGroup() {
+      return singleResourceGroup_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (singleResourceGroup_ != false) {
+        output.writeBool(1, singleResourceGroup_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (singleResourceGroup_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, singleResourceGroup_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) obj;
+
+      boolean result = true;
+      result = result && (getSingleResourceGroup()
+          == other.getSingleResourceGroup());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SINGLERESOURCEGROUP_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getSingleResourceGroup());
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Azure-specific environment details.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPEnvironmentAzureDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPEnvironmentAzureDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAzureDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        singleResourceGroup_ = false;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAzureDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails(this);
+        result.singleResourceGroup_ = singleResourceGroup_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails.getDefaultInstance()) return this;
+        if (other.getSingleResourceGroup() != false) {
+          setSingleResourceGroup(other.getSingleResourceGroup());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private boolean singleResourceGroup_ ;
+      /**
+       * <code>bool singleResourceGroup = 1;</code>
+       */
+      public boolean getSingleResourceGroup() {
+        return singleResourceGroup_;
+      }
+      /**
+       * <code>bool singleResourceGroup = 1;</code>
+       */
+      public Builder setSingleResourceGroup(boolean value) {
+        
+        singleResourceGroup_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>bool singleResourceGroup = 1;</code>
+       */
+      public Builder clearSingleResourceGroup() {
+        
+        singleResourceGroup_ = false;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPEnvironmentAzureDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPEnvironmentAzureDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPEnvironmentAzureDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPEnvironmentAzureDetails>() {
+      @java.lang.Override
+      public CDPEnvironmentAzureDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPEnvironmentAzureDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPEnvironmentAzureDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPEnvironmentAzureDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPEnvironmentAwsDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPEnvironmentAwsDetails)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Azure-specific environment details.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPEnvironmentAwsDetails}
+   */
+  public  static final class CDPEnvironmentAwsDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPEnvironmentAwsDetails)
+      CDPEnvironmentAwsDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPEnvironmentAwsDetails.newBuilder() to construct.
+    private CDPEnvironmentAwsDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPEnvironmentAwsDetails() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPEnvironmentAwsDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAwsDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder.class);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Azure-specific environment details.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPEnvironmentAwsDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPEnvironmentAwsDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAwsDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPEnvironmentAwsDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPEnvironmentAwsDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPEnvironmentAwsDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPEnvironmentAwsDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPEnvironmentAwsDetails>() {
+      @java.lang.Override
+      public CDPEnvironmentAwsDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPEnvironmentAwsDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPEnvironmentAwsDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPEnvironmentAwsDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAwsDetails getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -67409,6 +68818,16 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPEnvironmentAzureDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPEnvironmentAwsDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -67727,36 +69146,42 @@ public final class UsageProto {
       "atorCrn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(" +
       "\t\022G\n\030cdpRequestProcessingStep\030\006 \001(\0162%.us" +
       "age.CDPRequestProcessingStep.Value\022\016\n\006fl" +
-      "owId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\"\335\001\n\025CDPE" +
+      "owId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\"\362\002\n\025CDPE" +
       "nvironmentDetails\022D\n\017environmentType\030\001 \001" +
       "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
       "e.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAvail" +
       "abilityZones\030\003 \001(\005\022\031\n\021availabilityZones\030" +
       "\004 \001(\t\0220\n\016networkDetails\030\005 \001(\0132\030.usage.CD" +
-      "PNetworkDetails\"a\n%CDPEnvironmentTelemet" +
-      "ryFeatureDetails\022\031\n\021workloadAnalytics\030\001 " +
-      "\001(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CD" +
-      "PProxyDetails\022\r\n\005proxy\030\001 \001(\010\"\310\001\n\021CDPNetw" +
-      "orkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014conne" +
-      "ctivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001" +
-      "(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serv" +
-      "iceEndpointCreation\030\005 \001(\t\022,\n\014proxyDetail" +
-      "s\030\006 \001(\0132\026.usage.CDPProxyDetails\"\212\002\n\027CDPE" +
-      "nvironmentRequested\0224\n\020operationDetails\030" +
-      "\001 \001(\0132\032.usage.CDPOperationDetails\0228\n\022env" +
-      "ironmentDetails\030\002 \001(\0132\034.usage.CDPEnviron" +
-      "mentDetails\0220\n\016networkDetails\030\003 \001(\0132\030.us" +
-      "age.CDPNetworkDetails\022M\n\027telemetryFeatur" +
-      "eDetails\030\004 \001(\0132,.usage.CDPEnvironmentTel" +
-      "emetryFeatureDetails\"\326\001\n\033CDPEnvironmentS" +
-      "tatusChanged\0224\n\020operationDetails\030\001 \001(\0132\032" +
-      ".usage.CDPOperationDetails\0224\n\toldStatus\030" +
-      "\002 \001(\0162!.usage.CDPEnvironmentStatus.Value" +
-      "\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPEnvironme" +
-      "ntStatus.Value\022\025\n\rfailureReason\030\004 \001(\tBV\n" +
-      "-com.cloudera.thunderhead.service.common" +
-      ".usageB\nUsageProtoZ\031com/cloudera/cdp/pro" +
-      "tobufb\006proto3"
+      "PNetworkDetails\0225\n\nawsDetails\030\006 \001(\0132\037.us" +
+      "age.CDPEnvironmentAwsDetailsH\000\0229\n\014azureD" +
+      "etails\030\007 \001(\0132!.usage.CDPEnvironmentAzure" +
+      "DetailsH\000B!\n\037environmentCloudProviderDet" +
+      "ails\"9\n\032CDPEnvironmentAzureDetails\022\033\n\023si" +
+      "ngleResourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmen" +
+      "tAwsDetails\"a\n%CDPEnvironmentTelemetryFe" +
+      "atureDetails\022\031\n\021workloadAnalytics\030\001 \001(\t\022" +
+      "\035\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CDPPro" +
+      "xyDetails\022\r\n\005proxy\030\001 \001(\010\"\310\001\n\021CDPNetworkD" +
+      "etails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectiv" +
+      "ity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034" +
+      "\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serviceE" +
+      "ndpointCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 " +
+      "\001(\0132\026.usage.CDPProxyDetails\"\212\002\n\027CDPEnvir" +
+      "onmentRequested\0224\n\020operationDetails\030\001 \001(" +
+      "\0132\032.usage.CDPOperationDetails\0228\n\022environ" +
+      "mentDetails\030\002 \001(\0132\034.usage.CDPEnvironment" +
+      "Details\0220\n\016networkDetails\030\003 \001(\0132\030.usage." +
+      "CDPNetworkDetails\022M\n\027telemetryFeatureDet" +
+      "ails\030\004 \001(\0132,.usage.CDPEnvironmentTelemet" +
+      "ryFeatureDetails\"\326\001\n\033CDPEnvironmentStatu" +
+      "sChanged\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
+      "ge.CDPOperationDetails\0224\n\toldStatus\030\002 \001(" +
+      "\0162!.usage.CDPEnvironmentStatus.Value\0224\n\t" +
+      "newStatus\030\003 \001(\0162!.usage.CDPEnvironmentSt" +
+      "atus.Value\022\025\n\rfailureReason\030\004 \001(\tBV\n-com" +
+      ".cloudera.thunderhead.service.common.usa" +
+      "geB\nUsageProtoZ\031com/cloudera/cdp/protobu" +
+      "fb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -68081,33 +69506,45 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
-        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", });
-    internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
+        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", "AwsDetails", "AzureDetails", "EnvironmentCloudProviderDetails", });
+    internal_static_usage_CDPEnvironmentAzureDetails_descriptor =
       getDescriptor().getMessageTypes().get(52);
+    internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPEnvironmentAzureDetails_descriptor,
+        new java.lang.String[] { "SingleResourceGroup", });
+    internal_static_usage_CDPEnvironmentAwsDetails_descriptor =
+      getDescriptor().getMessageTypes().get(53);
+    internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPEnvironmentAwsDetails_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
+      getDescriptor().getMessageTypes().get(54);
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor,
         new java.lang.String[] { "WorkloadAnalytics", "ClusterLogsCollection", });
     internal_static_usage_CDPProxyDetails_descriptor =
-      getDescriptor().getMessageTypes().get(53);
+      getDescriptor().getMessageTypes().get(55);
     internal_static_usage_CDPProxyDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPProxyDetails_descriptor,
         new java.lang.String[] { "Proxy", });
     internal_static_usage_CDPNetworkDetails_descriptor =
-      getDescriptor().getMessageTypes().get(54);
+      getDescriptor().getMessageTypes().get(56);
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
         new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
-      getDescriptor().getMessageTypes().get(55);
+      getDescriptor().getMessageTypes().get(57);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentDetails", "NetworkDetails", "TelemetryFeatureDetails", });
     internal_static_usage_CDPEnvironmentStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(56);
+      getDescriptor().getMessageTypes().get(58);
     internal_static_usage_CDPEnvironmentStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatusChanged_descriptor,

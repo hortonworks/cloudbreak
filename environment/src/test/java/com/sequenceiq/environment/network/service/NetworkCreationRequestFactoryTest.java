@@ -37,9 +37,9 @@ import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.AzureParametersDto;
-import com.sequenceiq.environment.parameters.dto.AzureResourceGroupDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @ExtendWith(MockitoExtension.class)
 class NetworkCreationRequestFactoryTest {

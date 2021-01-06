@@ -3,7 +3,7 @@ package com.sequenceiq.environment.parameters.dao.converter;
 import javax.persistence.AttributeConverter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-import com.sequenceiq.environment.parameters.dao.domain.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 
 public class ResourceGroupCreationConverterTest extends DefaultEnumConverterBaseTest<ResourceGroupCreation> {
 

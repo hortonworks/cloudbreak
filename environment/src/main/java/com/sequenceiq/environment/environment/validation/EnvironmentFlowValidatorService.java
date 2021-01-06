@@ -15,7 +15,7 @@ import com.sequenceiq.environment.environment.validation.validators.EnvironmentA
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentNetworkProviderValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentParameterValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentRegionValidator;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 @Service
 public class EnvironmentFlowValidatorService {

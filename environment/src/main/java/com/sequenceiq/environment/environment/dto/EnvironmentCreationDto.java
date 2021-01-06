@@ -11,7 +11,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwa
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 public class EnvironmentCreationDto {
 

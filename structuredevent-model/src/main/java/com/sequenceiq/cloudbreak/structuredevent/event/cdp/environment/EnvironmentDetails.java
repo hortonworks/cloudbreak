@@ -6,6 +6,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 
 public interface EnvironmentDetails {
 
@@ -18,6 +19,8 @@ public interface EnvironmentDetails {
     String getStatusReason();
 
     NetworkDto getNetwork();
+
+    ParametersDto getParameters();
 
     Tunnel getTunnel();
 

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.parameters.dao.converter;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverterBaseTest;
-import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
 import javax.persistence.AttributeConverter;
 

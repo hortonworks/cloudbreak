@@ -19,7 +19,7 @@ import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 public class EnvironmentDto implements Payload, AccountAwareResource, EnvironmentDetails {
@@ -280,6 +280,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.adminGroupName = adminGroupName;
     }
 
+    @Override
     public ParametersDto getParameters() {
         return parameters;
     }

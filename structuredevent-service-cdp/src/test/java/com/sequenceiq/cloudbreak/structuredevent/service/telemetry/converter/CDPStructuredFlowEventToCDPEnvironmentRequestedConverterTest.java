@@ -24,6 +24,11 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @ExtendWith(MockitoExtension.class)
 class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
@@ -140,7 +145,6 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         cdpStructuredFlowEvent.setPayload(environmentDetails);
 
-
         CloudSubnet privateSubnet = new CloudSubnet();
         privateSubnet.setType(SubnetType.PRIVATE);
 
@@ -186,7 +190,6 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         cdpStructuredFlowEvent.setPayload(environmentDetails);
 
-
         when(environmentDetails.getProxyConfigConfigured()).thenReturn(true);
 
         UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
@@ -200,12 +203,71 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         cdpStructuredFlowEvent.setPayload(environmentDetails);
 
-
         when(environmentDetails.getProxyConfigConfigured()).thenReturn(false);
 
         UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
 
         Assert.assertEquals(false,
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getProxyDetails().getProxy());
+    }
+
+    @Test
+    public void testConversionSingleResourceGroupWhenAzureUsingSingleResourceGroupShouldReturnSingleResourceGroupTrue() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(true,
+                environmentRequested.getEnvironmentDetails().getAzureDetails().getSingleResourceGroup());
+    }
+
+    @Test
+    public void testConversionSingleResourceGroupWhenAzureNOTUsingSingleResourceGroupShouldReturnSingleResourceGroupFalse() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(false,
+                environmentRequested.getEnvironmentDetails().getAzureDetails().getSingleResourceGroup());
+    }
+
+    @Test
+    public void testConversionSingleResourceGroupWhenAwsShouldReturnSingleResourceGroupFalse() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(AwsParametersDto.builder()
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(false,
+                environmentRequested.getEnvironmentDetails().getAzureDetails().getSingleResourceGroup());
     }
 }

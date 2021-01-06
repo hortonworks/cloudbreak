@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+
 public class ResourceGroupUsagePatternTest {
 
     @ParameterizedTest

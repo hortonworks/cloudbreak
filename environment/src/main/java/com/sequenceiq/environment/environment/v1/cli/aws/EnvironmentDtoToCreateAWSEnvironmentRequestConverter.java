@@ -19,7 +19,7 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry
 import com.sequenceiq.environment.environment.v1.cli.EnvironmentDtoToCliRequestConverter;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameters.dto.AwsParametersDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 
 @Component
 public class EnvironmentDtoToCreateAWSEnvironmentRequestConverter implements EnvironmentDtoToCliRequestConverter {

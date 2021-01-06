@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.NoSqlTableMetadataResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
-import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
 @Service
 public class NoSqlTableCreationModeDeterminerService {

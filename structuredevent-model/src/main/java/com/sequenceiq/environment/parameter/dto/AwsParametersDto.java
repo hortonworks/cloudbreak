@@ -1,7 +1,7 @@
-package com.sequenceiq.environment.parameters.dto;
+package com.sequenceiq.environment.parameter.dto;
 
-import com.sequenceiq.environment.parameters.dao.domain.S3GuardTableCreation;
-import com.sequenceiq.environment.parameters.dto.s3guard.S3GuardParameters;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardParameters;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 
 public class AwsParametersDto implements S3GuardParameters {
 
