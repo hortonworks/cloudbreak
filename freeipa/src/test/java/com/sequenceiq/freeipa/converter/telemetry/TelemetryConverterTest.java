@@ -58,6 +58,7 @@ public class TelemetryConverterTest {
         // THEN
         assertThat(result.getFeatures().getWorkloadAnalytics(), nullValue());
         assertThat(result.getFeatures().getClusterLogsCollection().isEnabled(), is(false));
+        assertThat(result.getFeatures().getCloudStorageLogging().isEnabled(), is(true));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
     }
 

@@ -19,6 +19,8 @@ public class EnvironmentFeatures implements Serializable {
 
     private FeatureSetting monitoring;
 
+    private FeatureSetting cloudStorageLogging;
+
     public FeatureSetting getClusterLogsCollection() {
         return clusterLogsCollection;
     }
@@ -51,6 +53,14 @@ public class EnvironmentFeatures implements Serializable {
         this.monitoring = monitoring;
     }
 
+    public FeatureSetting getCloudStorageLogging() {
+        return cloudStorageLogging;
+    }
+
+    public void setCloudStorageLogging(FeatureSetting cloudStorageLogging) {
+        this.cloudStorageLogging = cloudStorageLogging;
+    }
+
     @JsonIgnore
     public void addWorkloadAnalytics(boolean enabled) {
         workloadAnalytics = new FeatureSetting();
@@ -73,5 +83,11 @@ public class EnvironmentFeatures implements Serializable {
     public void addUseSharedAltusredential(boolean enabled) {
         useSharedAltusCredential = new FeatureSetting();
         useSharedAltusCredential.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addCloudStorageLogging(boolean enabled) {
+        cloudStorageLogging = new FeatureSetting();
+        cloudStorageLogging.setEnabled(enabled);
     }
 }

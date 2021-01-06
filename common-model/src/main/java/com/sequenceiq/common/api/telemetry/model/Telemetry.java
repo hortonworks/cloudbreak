@@ -109,4 +109,10 @@ public class Telemetry implements Serializable {
                 && features.getUseSharedAltusCredential().isEnabled();
     }
 
+    @JsonIgnore
+    public boolean isCloudStorageLoggingEnabled() {
+        return features == null || (features.getCloudStorageLogging() != null
+                && features.getCloudStorageLogging().isEnabled());
+    }
+
 }

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
+import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
@@ -93,6 +94,7 @@ public class TelemetryConverter {
             setClusterLogsCollection(request, features);
             setMonitoring(request, features);
             setUseSharedAltusCredential(features);
+            setCloudStorageLogging(request, features);
             telemetry.setFluentAttributes(request.getFluentAttributes());
         }
         if (monitoringEnabled) {
@@ -119,12 +121,16 @@ public class TelemetryConverter {
             telemetryRequest.setLogging(loggingRequest);
             FeaturesResponse featuresResponse = response.getFeatures();
             if (featuresResponse != null) {
-                LOGGER.debug("Setting cluster logs collection response (telemetry) based on environment response.");
+                LOGGER.debug("Setting cluster logs collection request (telemetry) based on environment response.");
                 featuresRequest.setClusterLogsCollection(featuresResponse.getClusterLogsCollection());
-            }
-            if (featuresResponse != null) {
-                LOGGER.debug("Setting cluster monitoring response (telemetry) based on environment response.");
+                LOGGER.debug("Setting cluster monitoring request (telemetry) based on environment response.");
                 featuresRequest.setMonitoring(featuresResponse.getMonitoring());
+                LOGGER.debug("Setting cloud storage logging request (telemetry) based on environment response.");
+                if (featuresResponse.getCloudStorageLogging() != null) {
+                    featuresRequest.setCloudStorageLogging(featuresResponse.getCloudStorageLogging());
+                } else {
+                    featuresRequest.addCloudStorageLogging(true);
+                }
             }
             telemetryRequest.setFluentAttributes(response.getFluentAttributes());
         }
@@ -218,6 +224,7 @@ public class TelemetryConverter {
             featuresRequest.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
+            setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
         }
         return featuresRequest;
     }
@@ -326,6 +333,7 @@ public class TelemetryConverter {
             featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setMetering(features.getMetering());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
+            setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
             response.setFeatures(featuresResponse);
         }
     }
@@ -394,6 +402,24 @@ public class TelemetryConverter {
         if (useSharedAltusCredential) {
             LOGGER.debug("Fill shared altus credential setting as that is enabled globally");
             features.addUseSharedAltusCredential(true);
+        }
+    }
+
+    private void setCloudStorageLogging(TelemetryRequest request, Features features) {
+        if (request.getFeatures() != null && request.getFeatures().getCloudStorageLogging() != null) {
+            LOGGER.debug("Fill cloud storage logging setting from feature request");
+            features.setCloudStorageLogging(request.getFeatures().getCloudStorageLogging());
+        } else {
+            LOGGER.debug("Fill cloud storage logging setting with default value (enabled)");
+            features.addCloudStorageLogging(true);
+        }
+    }
+
+    private void setCloudStorageLoggingOnFeaturesModel(Features features, FeaturesBase featureModel) {
+        if (features.getCloudStorageLogging() != null) {
+            featureModel.setCloudStorageLogging(features.getCloudStorageLogging());
+        } else {
+            featureModel.addCloudStorageLogging(true);
         }
     }
 }

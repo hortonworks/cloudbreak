@@ -125,6 +125,10 @@ public class FluentConfigService {
                 cloudLogServiceLoggingEnabled = true;
             }
         }
+        if (!telemetry.isCloudStorageLoggingEnabled()) {
+            LOGGER.debug("Disable (override) cloud storage logging as feature setting is disabled.");
+            cloudStorageLoggingEnabled = false;
+        }
         builder.withCloudStorageLoggingEnabled(cloudStorageLoggingEnabled)
                 .withCloudLoggingServiceEnabled(cloudLogServiceLoggingEnabled);
         boolean databusLogEnabled = fillDiagnosticsConfigs(telemetry, databusEnabled, meteringEnabled, builder);

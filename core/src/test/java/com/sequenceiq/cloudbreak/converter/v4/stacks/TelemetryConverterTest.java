@@ -76,6 +76,7 @@ public class TelemetryConverterTest {
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addClusterLogsCollection(false);
         featuresRequest.addMonitoring(true);
+        featuresRequest.addCloudStorageLogging(false);
         telemetryRequest.setLogging(logging);
         telemetryRequest.setFeatures(featuresRequest);
         telemetryRequest.setWorkloadAnalytics(workloadAnalyticsRequest);
@@ -84,6 +85,7 @@ public class TelemetryConverterTest {
         // THEN
         assertNotNull(result.getFeatures().getWorkloadAnalytics());
         assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
+        assertFalse(result.getFeatures().getCloudStorageLogging().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
         assertTrue(result.getFeatures().getMonitoring().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
@@ -136,6 +138,7 @@ public class TelemetryConverterTest {
         // THEN
         assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getMetering().isEnabled());
+        assertTrue(result.getFeatures().getCloudStorageLogging().isEnabled());
     }
 
     @Test

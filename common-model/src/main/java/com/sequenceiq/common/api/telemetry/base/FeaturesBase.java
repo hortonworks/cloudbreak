@@ -23,6 +23,10 @@ public abstract class FeaturesBase implements Serializable {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLUSTER_MONITORING_ENABLED)
     private FeatureSetting monitoring;
 
+    @JsonProperty("cloudStorageLogging")
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED)
+    private FeatureSetting cloudStorageLogging;
+
     public FeatureSetting getWorkloadAnalytics() {
         return workloadAnalytics;
     }
@@ -47,6 +51,14 @@ public abstract class FeaturesBase implements Serializable {
         this.monitoring = monitoring;
     }
 
+    public FeatureSetting getCloudStorageLogging() {
+        return cloudStorageLogging;
+    }
+
+    public void setCloudStorageLogging(FeatureSetting cloudStorageLogging) {
+        this.cloudStorageLogging = cloudStorageLogging;
+    }
+
     @JsonIgnore
     public void addWorkloadAnalytics(boolean enabled) {
         workloadAnalytics = new FeatureSetting();
@@ -63,5 +75,11 @@ public abstract class FeaturesBase implements Serializable {
     public void addMonitoring(boolean enabled) {
         monitoring = new FeatureSetting();
         monitoring.setEnabled(enabled);
+    }
+
+    @JsonIgnore
+    public void addCloudStorageLogging(boolean enabled) {
+        cloudStorageLogging = new FeatureSetting();
+        cloudStorageLogging.setEnabled(enabled);
     }
 }
