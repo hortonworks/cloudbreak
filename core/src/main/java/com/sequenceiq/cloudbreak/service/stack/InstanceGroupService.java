@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -88,5 +90,9 @@ public class InstanceGroupService {
 
     public Set<InstanceGroup> findByTargetGroupId(Long targetGroupId) {
         return repository.findByTargetGroupId(targetGroupId);
+    }
+
+    public InstanceGroup getPrimaryGatewayInstanceGroupByStackId(Long stackId) {
+        return repository.getPrimaryGatewayInstanceGroupByStackId(stackId).orElseThrow(notFound("Gateway Instance Group for Stack", stackId));
     }
 }

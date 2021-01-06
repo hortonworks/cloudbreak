@@ -35,4 +35,8 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     @Query("SELECT i FROM InstanceGroup i INNER JOIN i.targetGroups tg LEFT JOIN FETCH i.targetGroups WHERE tg.id= :targetGroupId")
     Set<InstanceGroup> findByTargetGroupId(@Param("targetGroupId") Long targetGroupId);
+
+    @Query("SELECT i.instanceGroup FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
+            + "AND i.instanceGroup.stack.id= :stackId")
+    Optional<InstanceGroup> getPrimaryGatewayInstanceGroupByStackId(@Param("stackId") Long stackId);
 }
