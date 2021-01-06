@@ -134,6 +134,11 @@ public class TelemetryConverter {
         if (useSharedAltusCredential) {
             features.addUseSharedAltusCredential(true);
         }
+        if (featuresRequest != null && featuresRequest.getCloudStorageLogging() != null) {
+            features.setCloudStorageLogging(featuresRequest.getCloudStorageLogging());
+        } else {
+            features.addCloudStorageLogging(true);
+        }
         return features;
     }
 
@@ -143,6 +148,11 @@ public class TelemetryConverter {
             featuresResponse = new FeaturesResponse();
             featuresResponse.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
+            if (features.getCloudStorageLogging() != null) {
+                featuresResponse.setCloudStorageLogging(features.getCloudStorageLogging());
+            } else {
+                featuresResponse.addCloudStorageLogging(true);
+            }
         }
         return featuresResponse;
     }

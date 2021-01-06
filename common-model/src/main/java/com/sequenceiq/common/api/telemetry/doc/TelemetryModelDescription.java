@@ -16,6 +16,8 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_LOGGING_STORAGE_LOCATION = "telemetry - logging storage location / container";
     public static final String TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED = "enable cluster logs collection";
     public static final String TELEMETRY_CLUSTER_MONITORING_ENABLED = "enable monitoring for cluster services";
+    public static final String TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED = "enable uploading daemon service logs to cloud storage from the cluster nodes. " +
+            "(default: enabled)";
     public static final String TELEMETRY_CLOUDWATCH_PARAMS = "telemetry - CloudWatch releated parameters";
     public static final String TELEMETRY_CLOUDWATCH_PARAMS_REGION = "telemetry - CloudWatch related AWS region (should be used only outside of AWS platform)";
     public static final String TELEMETRY_USE_SHARED_ALTUS_CREDENTIAL_ENABLED = "enable shared Altus credential usage";

@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -94,6 +95,7 @@ public class TelemetryApiConverter {
             featuresRequest = new FeaturesRequest();
             featuresRequest.setClusterLogsCollection(features.getClusterLogsCollection());
             featuresRequest.setMonitoring(features.getMonitoring());
+            setCloudStorageLoggingOnFeaturesModel(features, featuresRequest);
         }
         return featuresRequest;
     }
@@ -106,6 +108,7 @@ public class TelemetryApiConverter {
             featuresResponse.setMonitoring(features.getMonitoring());
             featuresResponse.setWorkloadAnalytics(features.getWorkloadAnalytics());
             featuresResponse.setUseSharedAltusCredential(features.getUseSharedAltusCredential());
+            setCloudStorageLoggingOnFeaturesModel(features, featuresResponse);
         }
         return featuresResponse;
     }
@@ -132,6 +135,7 @@ public class TelemetryApiConverter {
             }
             setClusterLogsCollectionFromAccountAndRequest(featuresRequest, accountFeatures, features);
             setMonitoringFromAccountAndRequest(featuresRequest, accountFeatures, features);
+            setCloudStorageLoggingFromAccountAndRequest(featuresRequest, accountFeatures, features);
             if (accountFeatures.getWorkloadAnalytics() != null) {
                 features.setWorkloadAnalytics(accountFeatures.getWorkloadAnalytics());
             }
@@ -140,6 +144,17 @@ public class TelemetryApiConverter {
             }
         }
         return features;
+    }
+
+    private void setCloudStorageLoggingFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features) {
+        if (accountFeatures.getCloudStorageLogging() != null) {
+            features.setCloudStorageLogging(accountFeatures.getCloudStorageLogging());
+        }
+        if (featuresRequest.getCloudStorageLogging() != null) {
+            features.setCloudStorageLogging(featuresRequest.getCloudStorageLogging());
+        } else {
+            features.addCloudStorageLogging(true);
+        }
     }
 
     private void setClusterLogsCollectionFromAccountAndRequest(FeaturesRequest featuresRequest, Features accountFeatures, EnvironmentFeatures features) {
@@ -165,6 +180,14 @@ public class TelemetryApiConverter {
             } else {
                 features.addMonitoring(false);
             }
+        }
+    }
+
+    private void setCloudStorageLoggingOnFeaturesModel(EnvironmentFeatures features, FeaturesBase featureModel) {
+        if (features.getCloudStorageLogging() != null) {
+            featureModel.setCloudStorageLogging(features.getCloudStorageLogging());
+        } else {
+            featureModel.addCloudStorageLogging(true);
         }
     }
 

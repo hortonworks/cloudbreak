@@ -39,6 +39,11 @@ public class AccountTelemetryConverter {
             response.setClusterLogsCollection(source.getClusterLogsCollection());
             response.setMonitoring(source.getMonitoring());
             response.setWorkloadAnalytics(source.getWorkloadAnalytics());
+            if (source.getCloudStorageLogging() != null) {
+                response.setCloudStorageLogging(source.getCloudStorageLogging());
+            } else {
+                response.addCloudStorageLogging(true);
+            }
         }
         return response;
     }

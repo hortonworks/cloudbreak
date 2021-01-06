@@ -68,6 +68,7 @@ public class TelemetryApiConverterTest {
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
         assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertTrue(result.getFeatures().getCloudStorageLogging().isEnabled());
     }
 
     @Test
