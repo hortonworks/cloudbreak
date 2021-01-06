@@ -6,7 +6,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
@@ -17,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.common.api.type.ResourceType;
 
+@ExtendWith(MockitoExtension.class)
 public class CmMgmtServiceConfigLocationServiceTest {
 
     private static final String VOLUME_PREFIX = "/hadoopfs/fs1/";
@@ -35,7 +40,11 @@ public class CmMgmtServiceConfigLocationServiceTest {
 
     private static final String TEST_CONFIG_VALUE = "test_config_value";
 
-    private CmMgmtServiceConfigLocationService underTest = new CmMgmtServiceConfigLocationService();
+    @Spy
+    private CmMgmtVolumePathBuilder volumePathBuilder;
+
+    @InjectMocks
+    private CmMgmtServiceConfigLocationService underTest;
 
     @Test
     public void testSetConfigLocationsShouldSetLocationsWhenThereAreNoExistingConfig() {

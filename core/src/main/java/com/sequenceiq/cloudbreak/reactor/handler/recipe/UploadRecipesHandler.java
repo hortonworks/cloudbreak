@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.recipe;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -55,10 +57,15 @@ public class UploadRecipesHandler implements EventHandler<UploadRecipesRequest> 
         Selectable result;
         Long stackId = request.getResourceId();
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            stack.setResources(resourceService.getNotInstanceRelatedByStackId(stackId));
-            Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
+            LOGGER.info("Upload recipes started for {} stack", stackId);
+            Stack stack = measure(() -> stackService.getByIdWithListsInTransaction(stackId), LOGGER,
+                    "stackService.getByIdWithListsInTransaction() took {} ms in UploadRecipesHandler");
+            stack.setResources(measure(() -> resourceService.getNotInstanceRelatedByStackId(stackId), LOGGER,
+                    "resourceService.getNotInstanceRelatedByStackId() took {} ms in UploadRecipesHandler"));
+            Set<HostGroup> hostGroups = measure(() -> hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()), LOGGER,
+                    "hostGroupService.getByClusterWithRecipes() took {} ms in UploadRecipesHandler");
             recipeEngine.uploadRecipes(stack, hostGroups);
+            LOGGER.info("Upload recipes finished successfully for {} stack", stackId);
             result = new UploadRecipesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Failed to upload recipes", e);
