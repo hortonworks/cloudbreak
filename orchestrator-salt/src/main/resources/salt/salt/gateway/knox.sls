@@ -67,13 +67,25 @@
   file.managed:
     - contents_pillar: gateway:signkey
     - makedirs: True
+{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
+    - user: knox
+    - group: knox
+    - mode: 640
+{% else %}
     - mode: 644
+{% endif %}
 
 {{ gateway.knox_data_root }}/security/keystores/signcert.pem:
   file.managed:
     - contents_pillar: gateway:signcert
     - makedirs: True
+{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
+    - user: knox
+    - group: knox
+    - mode: 640
+{% else %}
     - mode: 644
+{% endif %}
 
   # openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
   # keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
@@ -86,7 +98,13 @@ knox-create-sign-pkcs12:
 
 {{ gateway.knox_data_root }}/security/keystores/signing.p12:
   file.managed:
+{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
+    - user: knox
+    - group: knox
+    - mode: 640
+{% else %}
     - mode: 644
+{% endif %}
     - replace: False
 
 knox-create-sign-jks:
@@ -97,7 +115,13 @@ knox-create-sign-jks:
 
 {{ gateway.knox_data_root }}/security/keystores/signing.jks:
   file.managed:
+{% if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True %}
+    - user: knox
+    - group: knox
+    - mode: 640
+{% else %}
     - mode: 644
+{% endif %}
     - replace: False
 
 {% if salt['pillar.get']('gateway:saml') %}
