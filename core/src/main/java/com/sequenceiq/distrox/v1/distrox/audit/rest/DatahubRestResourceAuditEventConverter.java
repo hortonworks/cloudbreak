@@ -75,6 +75,8 @@ public class DatahubRestResourceAuditEventConverter implements RestResourceAudit
             return AuditEventName.MANUAL_REPAIR_DATAHUB_CLUSTER;
         } else if ("rotate_autotls_certificates".equals(resourceEvent)) {
             return AuditEventName.ROTATE_DATAHUB_CLUSTER_CERTIFICATES;
+        } else if ("cluster_upgrade".equals(resourceEvent)) {
+            return AuditEventName.UPGRADE_DATAHUB_CLUSTER;
         }
         return null;
     }
