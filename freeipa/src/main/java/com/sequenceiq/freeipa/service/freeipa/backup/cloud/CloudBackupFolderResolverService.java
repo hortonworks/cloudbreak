@@ -15,12 +15,16 @@ public class CloudBackupFolderResolverService {
 
     private final S3BackupConfigGenerator s3BackupConfigGenerator;
 
+    private final GCSBackupConfigGenerator gcsBackupConfigGenerator;
+
     private final AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator;
 
     public CloudBackupFolderResolverService(S3BackupConfigGenerator s3BackupConfigGenerator,
-            AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator) {
+            AdlsGen2BackupConfigGenerator adlsGen2BackupConfigGenerator,
+            GCSBackupConfigGenerator gcsBackupConfigGenerator) {
         this.s3BackupConfigGenerator = s3BackupConfigGenerator;
         this.adlsGen2BackupConfigGenerator = adlsGen2BackupConfigGenerator;
+        this.gcsBackupConfigGenerator = gcsBackupConfigGenerator;
     }
 
     public Backup updateStorageLocation(Backup backup, String clusterType,
@@ -33,6 +37,9 @@ public class CloudBackupFolderResolverService {
                         clusterType, clusterName, clusterCrn);
             } else if (backup.getAdlsGen2() != null) {
                 storageLocation = resolveAdlsGen2Location(storageLocation,
+                        clusterType, clusterName, clusterCrn);
+            } else if (backup.getGcs() != null) {
+                storageLocation = resolveGcsLocation(storageLocation,
                         clusterType, clusterName, clusterCrn);
             } else {
                 LOGGER.warn("None of the backup storage location was resolved, "
@@ -49,6 +56,13 @@ public class CloudBackupFolderResolverService {
             String clusterName, String clusterCrn) {
         LOGGER.debug("Start to resolve S3 storage location for telemetry (logging).");
         return s3BackupConfigGenerator.generateBackupLocation(location,
+                clusterType, clusterName, Crn.fromString(clusterCrn).getResource());
+    }
+
+    public String resolveGcsLocation(String location, String clusterType,
+            String clusterName, String clusterCrn) {
+        LOGGER.debug("Start to resolve GCS storage location for telemetry (logging).");
+        return gcsBackupConfigGenerator.generateBackupLocation(location,
                 clusterType, clusterName, Crn.fromString(clusterCrn).getResource());
     }
 
