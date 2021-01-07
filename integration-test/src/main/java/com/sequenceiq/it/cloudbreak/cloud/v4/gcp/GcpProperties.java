@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
-import java.util.Set;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,12 +13,6 @@ public class GcpProperties {
 
     private String location;
 
-    private String sharedProjectId;
-
-    private String networkId;
-
-    private Set<String> subnetIds;
-
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -33,32 +25,8 @@ public class GcpProperties {
 
     private final Network network = new Network();
 
-    public String getSharedProjectId() {
-        return sharedProjectId;
-    }
-
-    public void setSharedProjectId(String sharedProjectId) {
-        this.sharedProjectId = sharedProjectId;
-    }
-
-    public String getNetworkId() {
-        return networkId;
-    }
-
-    public void setNetworkId(String networkId) {
-        this.networkId = networkId;
-    }
-
-    public Set<String> getSubnetIds() {
-        return subnetIds;
-    }
-
     public Baseimage getBaseimage() {
         return baseimage;
-    }
-
-    public void setSubnetIds(Set<String> subnets) {
-        this.subnetIds = subnets;
     }
 
     public String getAvailabilityZone() {
@@ -106,6 +74,7 @@ public class GcpProperties {
     }
 
     public static class Baseimage {
+
         private String imageId;
 
         public String getImageId() {
@@ -142,9 +111,40 @@ public class GcpProperties {
     }
 
     public static class Network {
+
         private Boolean noPublicIp;
 
         private Boolean noFirewallRules;
+
+        private String sharedProjectId;
+
+        private String networkId;
+
+        private String subnetId;
+
+        public String getSharedProjectId() {
+            return sharedProjectId;
+        }
+
+        public void setSharedProjectId(String sharedProjectId) {
+            this.sharedProjectId = sharedProjectId;
+        }
+
+        public String getNetworkId() {
+            return networkId;
+        }
+
+        public void setNetworkId(String networkId) {
+            this.networkId = networkId;
+        }
+
+        public String getSubnetId() {
+            return subnetId;
+        }
+
+        public void setSubnetId(String subnetId) {
+            this.subnetId = subnetId;
+        }
 
         public Boolean getNoPublicIp() {
             return noPublicIp;
@@ -167,13 +167,17 @@ public class GcpProperties {
 
         private String type;
 
-        private String json;
+        private final Json json = new Json();
 
-        private String p12;
+        private final P12 p12 = new P12();
 
-        private String serviceAccountId;
+        public Json getJson() {
+            return json;
+        }
 
-        private String projectId;
+        public P12 getP12() {
+            return p12;
+        }
 
         public String getType() {
             return type;
@@ -183,38 +187,59 @@ public class GcpProperties {
             this.type = type;
         }
 
-        public String getJson() {
-            return json;
+        public static class Json {
+            private String base64;
+
+            public String getBase64() {
+                return base64;
+            }
+
+            public void setBase64(String base64) {
+                this.base64 = base64;
+            }
         }
 
-        public void setJson(String json) {
-            this.json = json;
-        }
+        public static class P12 {
+            private String base64;
 
-        public String getP12() {
-            return p12;
-        }
+            private String serviceAccountId;
 
-        public void setP12(String p12) {
-            this.p12 = p12;
-        }
+            private String serviceAccountPrivateKey;
 
-        public String getServiceAccountId() {
-            return serviceAccountId;
-        }
+            private String projectId;
 
-        public void setServiceAccountId(String serviceAccountId) {
-            this.serviceAccountId = serviceAccountId;
-        }
+            public String getBase64() {
+                return base64;
+            }
 
-        public String getProjectId() {
-            return projectId;
-        }
+            public void setBase64(String base64) {
+                this.base64 = base64;
+            }
 
-        public void setProjectId(String projectId) {
-            this.projectId = projectId;
-        }
+            public String getServiceAccountId() {
+                return serviceAccountId;
+            }
 
+            public void setServiceAccountId(String serviceAccountId) {
+                this.serviceAccountId = serviceAccountId;
+            }
+
+            public String getServiceAccountPrivateKey() {
+                return serviceAccountPrivateKey;
+            }
+
+            public void setServiceAccountPrivateKey(String serviceAccountPrivateKey) {
+                this.serviceAccountPrivateKey = serviceAccountPrivateKey;
+            }
+
+            public String getProjectId() {
+                return projectId;
+            }
+
+            public void setProjectId(String projectId) {
+                this.projectId = projectId;
+            }
+        }
     }
 
     public static class Instance {
@@ -258,13 +283,15 @@ public class GcpProperties {
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
         }
-
     }
 
     public static class CloudStorage {
+
         private final Gcs gcs = new Gcs();
 
         private String baseLocation;
+
+        private String fileSystemType;
 
         public Gcs getGcs() {
             return gcs;
@@ -278,15 +305,23 @@ public class GcpProperties {
             this.baseLocation = baseLocation;
         }
 
-        public static class Gcs {
-            private String serviceAccount;
+        public String getFileSystemType() {
+            return fileSystemType;
+        }
 
-            public String getServiceAccount() {
-                return serviceAccount;
+        public void setFileSystemType(String fileSystemType) {
+            this.fileSystemType = fileSystemType;
+        }
+
+        public static class Gcs {
+            private String serviceAccountEmail;
+
+            public String getServiceAccountEmail() {
+                return serviceAccountEmail;
             }
 
-            public void setServiceAccount(String serviceAccount) {
-                this.serviceAccount = serviceAccount;
+            public void setServiceAccountEmail(String serviceAccountEmail) {
+                this.serviceAccountEmail = serviceAccountEmail;
             }
         }
     }

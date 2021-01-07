@@ -38,7 +38,7 @@ public class GcpClient {
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
     @Inject
-    protected GcpProperties gcpProperties;
+    private GcpProperties gcpProperties;
 
     public Compute buildCompute() {
         try {
@@ -55,7 +55,7 @@ public class GcpClient {
     }
 
     public GoogleCredential buildCredential(HttpTransport httpTransport) throws IOException, GeneralSecurityException {
-        String credentialJson = gcpProperties.getCredential().getJson();
+        String credentialJson = gcpProperties.getCredential().getJson().getBase64();
         if (isNotEmpty(credentialJson)) {
             return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
                     .createScoped(SCOPES);
@@ -63,10 +63,11 @@ public class GcpClient {
             try {
                 GcpProperties.Credential credential = gcpProperties.getCredential();
                 PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                        new ByteArrayInputStream(Base64.decodeBase64(credential.getP12())), "notasecret", "privatekey", "notasecret");
+                        new ByteArrayInputStream(Base64.decodeBase64(credential.getP12().getBase64())), "notasecret", "privatekey",
+                        "notasecret");
                 return new GoogleCredential.Builder().setTransport(httpTransport)
                         .setJsonFactory(JSON_FACTORY)
-                        .setServiceAccountId(credential.getServiceAccountId())
+                        .setServiceAccountId(credential.getP12().getServiceAccountId())
                         .setServiceAccountScopes(SCOPES)
                         .setServiceAccountPrivateKey(pk)
                         .build();
@@ -88,4 +89,14 @@ public class GcpClient {
         }
         throw new IllegalArgumentException("Could not extract project id from credential JSON");
     }
+
+    public String getProjectId() {
+        if (gcpProperties.getCredential().getP12().getProjectId() == null || gcpProperties.getCredential().getP12().getProjectId().isEmpty()) {
+            GcpProperties.Credential credential = gcpProperties.getCredential();
+            return getProjectIdFromCredentialJson(credential.getJson().getBase64());
+        } else {
+            return gcpProperties.getCredential().getP12().getProjectId();
+        }
+    }
+
 }

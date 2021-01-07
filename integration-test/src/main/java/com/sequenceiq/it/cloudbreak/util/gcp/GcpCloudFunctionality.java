@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
-import com.sequenceiq.it.cloudbreak.util.gcp.action.GcpClientActions;
 
 @Component
 public class GcpCloudFunctionality implements CloudFunctionality {
@@ -23,26 +22,26 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     private static final String GCP_IMPLEMENTATION_MISSING = "GCP implementation missing";
 
     @Inject
-    private GcpClientActions gcpClientActions;
+    private GcpUtil gcpUtil;
 
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        return gcpUtil.listInstanceDiskNames(instanceIds);
     }
 
     @Override
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
-        return gcpClientActions.listTagsByInstanceId(instanceIds);
+        return gcpUtil.listTagsByInstanceId(instanceIds);
     }
 
     @Override
     public void deleteInstances(List<String> instanceIds) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.deleteHostGroupInstances(instanceIds);
     }
 
     @Override
     public void stopInstances(List<String> instanceIds) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.stopHostGroupInstances(instanceIds);
     }
 
     @Override

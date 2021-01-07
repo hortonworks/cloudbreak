@@ -1,13 +1,19 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.mock;
 
+import static java.lang.String.format;
+
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -40,6 +46,8 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -53,6 +61,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
     public static final String LONDON = "London";
 
     private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockCloudProvider.class);
 
     @Value("${mock.infrastructure.host:localhost}")
     private String mockInfrastructureHost;
@@ -105,11 +115,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public CloudFunctionality getCloudFunctionality() {
         return throwNotImplementedException();
-    }
-
-    @Override
-    public void setImageId(String id) {
-        throwNotImplementedException();
     }
 
     @Override
@@ -180,20 +185,50 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
+        LOGGER.info("Image Catalog Name: {} || Base image UUID: {}", commonCloudProperties().getImageCatalogName(),
+                mockProperties.getBaseimage().getRedhat7().getImageId());
         return imageSettings
-                .withImageId("f6e778fc-7f17-4535-9021-515351df3691")
+                .withImageId(mockProperties.getBaseimage().getRedhat7().getImageId())
                 .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
     public DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings) {
-        return imageSettings.withImageId("f6e778fc-7f17-4535-9021-515351df3691")
+        LOGGER.info("Image Catalog Name: {} || Base image UUID: {}", imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName(),
+                mockProperties.getBaseimage().getRedhat7().getImageId());
+        return imageSettings
+                .withImageId(mockProperties.getBaseimage().getRedhat7().getImageId())
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
     @Override
     public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return throwNotImplementedException();
+        if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
+            try {
+                List<ImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.MOCK.name()).getCdhImages();
+
+                ImageV4Response olderImage = images.get(images.size() - 2);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+                Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
+                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
+                mockProperties.getBaseimage().getRedhat7().setImageId(olderImage.getUuid());
+
+                return olderImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
+                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
+            }
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
+            return mockProperties.getBaseimage().getRedhat7().getImageId();
+        }
     }
 
     private <T> T throwNotImplementedException() {
@@ -203,7 +238,26 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return throwNotImplementedException();
+        if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name());
+            mockProperties.getBaseimage().getRedhat7().setImageId(imageId);
+            return imageId;
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
+            return mockProperties.getBaseimage().getRedhat7().getImageId();
+        }
+    }
+
+    public String getImageCatalogUrl() {
+        return commonCloudProperties().getImageCatalogUrl();
+    }
+
+    @Override
+    public void setImageId(String id) {
+        LOGGER.info("New base image UUID: {}", id);
+        mockProperties.getBaseimage().getRedhat7().setImageId(id);
     }
 
     @Override

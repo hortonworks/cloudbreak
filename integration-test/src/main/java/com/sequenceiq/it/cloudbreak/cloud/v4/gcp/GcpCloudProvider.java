@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.gcp;
 
 import static java.lang.String.format;
 
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -12,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.GcpStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -46,6 +49,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.gcp.GcpCloudFunctionality;
@@ -144,10 +148,10 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         gcpNetworkV4Parameters.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
         gcpNetworkV4Parameters.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
         String subnetCIDR = null;
-        if (!StringUtils.isEmpty(gcpProperties.getSharedProjectId())) {
-            gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getSharedProjectId());
-            gcpNetworkV4Parameters.setNetworkId(gcpProperties.getNetworkId());
-            gcpNetworkV4Parameters.setSubnetId(gcpProperties.getSubnetIds().stream().findFirst().get());
+        if (!StringUtils.isEmpty(gcpProperties.getNetwork().getSharedProjectId())) {
+            gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getNetwork().getSharedProjectId());
+            gcpNetworkV4Parameters.setNetworkId(gcpProperties.getNetwork().getNetworkId());
+            gcpNetworkV4Parameters.setSubnetId(gcpProperties.getNetwork().getSubnetId());
         } else {
             subnetCIDR = getSubnetCIDR();
         }
@@ -163,14 +167,15 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentNetworkTestDto network(EnvironmentNetworkTestDto network) {
-        return network.withSubnetIDs(gcpProperties.getSubnetIds())
+        return network
+                .withSubnetIDs(Set.of(gcpProperties.getNetwork().getSubnetId()))
                 .withGcp(environmentNetworkParameters());
     }
 
     private EnvironmentNetworkGcpParams environmentNetworkParameters() {
         EnvironmentNetworkGcpParams params = new EnvironmentNetworkGcpParams();
-        params.setSharedProjectId(gcpProperties.getSharedProjectId());
-        params.setNetworkId(gcpProperties.getNetworkId());
+        params.setSharedProjectId(gcpProperties.getNetwork().getSharedProjectId());
+        params.setNetworkId(gcpProperties.getNetwork().getNetworkId());
         params.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
         params.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
         return params;
@@ -209,11 +214,6 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public void setImageId(String id) {
-        notImplementedException();
-    }
-
-    @Override
     public void setInstanceTemplateV1Parameters(InstanceTemplateV1Request instanceTemplateV1Request) {
     }
 
@@ -229,22 +229,38 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public CredentialTestDto credential(CredentialTestDto credential) {
-        GcpCredentialParameters parameters = new GcpCredentialParameters();
+        GcpCredentialParameters parameters;
         String credentialType = gcpProperties.getCredential().getType();
         if (JSON_CREDENTIAL_TYPE.equalsIgnoreCase(credentialType)) {
-            JsonParameters jsonParameters = new JsonParameters();
-            jsonParameters.setCredentialJson(gcpProperties.getCredential().getJson());
-            parameters.setJson(jsonParameters);
+            parameters = gcpCredentialParametersJson();
         } else {
-            P12Parameters p12Parameters = new P12Parameters();
-            p12Parameters.setProjectId(gcpProperties.getCredential().getProjectId());
-            p12Parameters.setServiceAccountId(gcpProperties.getCredential().getServiceAccountId());
-            p12Parameters.setServiceAccountPrivateKey(gcpProperties.getCredential().getP12());
-            parameters.setP12(p12Parameters);
+            parameters = gcpCredentialParametersP12();
         }
         return credential.withGcpParameters(parameters)
                 .withCloudPlatform(CloudPlatform.GCP.name())
                 .withDescription(commonCloudProperties().getDefaultCredentialDescription());
+    }
+
+    public GcpCredentialParameters gcpCredentialParametersJson() {
+        GcpCredentialParameters parameters = new GcpCredentialParameters();
+        JsonParameters jsonCredentialParameters = new JsonParameters();
+        String json = gcpProperties.getCredential().getJson().getBase64();
+        jsonCredentialParameters.setCredentialJson(json);
+        parameters.setJson(jsonCredentialParameters);
+        return parameters;
+    }
+
+    public GcpCredentialParameters gcpCredentialParametersP12() {
+        GcpCredentialParameters parameters = new GcpCredentialParameters();
+        P12Parameters p12CredentialParameters = new P12Parameters();
+        String serviceAccountId = gcpProperties.getCredential().getP12().getServiceAccountId();
+        String projectId = gcpProperties.getCredential().getP12().getProjectId();
+        String serviceAccountPrivateKey = gcpProperties.getCredential().getP12().getServiceAccountPrivateKey();
+        p12CredentialParameters.setServiceAccountId(serviceAccountId);
+        p12CredentialParameters.setProjectId(projectId);
+        p12CredentialParameters.setServiceAccountPrivateKey(serviceAccountPrivateKey);
+        parameters.setP12(p12CredentialParameters);
+        return parameters;
     }
 
     @Override
@@ -265,20 +281,16 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
-        return isStorageParametersPresent() ? cloudStorage
+        return cloudStorage
                 .withFileSystemType(getFileSystemType())
                 .withBaseLocation(getBaseLocation())
-                .withGcs(getGcs()) : cloudStorage;
+                .withGcs(gcsCloudStorageParameters());
     }
 
-    private GcsCloudStorageV1Parameters getGcs() {
-        GcsCloudStorageV1Parameters alma = new GcsCloudStorageV1Parameters();
-        alma.setServiceAccountEmail(gcpProperties.getCloudStorage().getGcs().getServiceAccount());
-        return alma;
-    }
-
-    private Boolean isStorageParametersPresent() {
-        return !StringUtils.isEmpty(gcpProperties.getCloudStorage().getBaseLocation());
+    public GcsCloudStorageV1Parameters gcsCloudStorageParameters() {
+        GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+        gcsCloudStorageV1Parameters.setServiceAccountEmail(gcpProperties.getCloudStorage().getGcs().getServiceAccountEmail());
+        return gcsCloudStorageV1Parameters;
     }
 
     @Override
@@ -289,23 +301,48 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), "test");
+        return String.join("/", gcpProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
-    public String getInstanceProfile() {
-        return null;
+    public String getServiceAccountEmail() {
+        return gcpProperties.getCloudStorage().getGcs().getServiceAccountEmail();
     }
 
     @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings
-                .withImageCatalog(commonCloudProperties().getImageCatalogName())
-                .withImageId(gcpProperties.getBaseimage().getImageId());
+                .withImageId(gcpProperties.getBaseimage().getImageId())
+                .withImageCatalog(commonCloudProperties().getImageCatalogName());
     }
 
     @Override
     public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return notImplementedException();
+        if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
+            try {
+                List<ImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.GCP.name()).getCdhImages();
+
+                ImageV4Response olderImage = images.get(images.size() - 2);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+                Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
+                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
+                gcpProperties.getBaseimage().setImageId(olderImage.getUuid());
+
+                return olderImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
+                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
+            }
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", gcpProperties.getBaseimage().getImageId()));
+            return gcpProperties.getBaseimage().getImageId();
+        }
     }
 
     @Override
@@ -320,6 +357,15 @@ public class GcpCloudProvider extends AbstractCloudProvider {
             Log.log(LOGGER, format(" Image ID for SDX create: %s ", gcpProperties.getBaseimage().getImageId()));
             return gcpProperties.getBaseimage().getImageId();
         }
+    }
+
+    public String getImageCatalogUrl() {
+        return commonCloudProperties().getImageCatalogUrl();
+    }
+
+    @Override
+    public void setImageId(String id) {
+        gcpProperties.getBaseimage().setImageId(id);
     }
 
     private <T> T notImplementedException() {

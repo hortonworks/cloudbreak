@@ -152,18 +152,21 @@ integrationtest:
     availabilityZone: europe-west2-a
     region: europe-west2
     location: europe-west2
-    sharedProjectId:
-    networkId:
     network:
+      sharedProjectId:
+      networkId:
       noPublicIp:
       noFirewallRules:
-    subnetIds:
+      subnetId:
     credential:
       type: json
       json:
+        base64:
       p12:
-      serviceAccountId:
-      projectId:
+        base64:
+        serviceAccountId:
+        serviceAccountPrivateKey:
+        projectId:
     instance:
       type: n1-standard-8
       volumeSize: 100
@@ -174,8 +177,9 @@ integrationtest:
       defaultSecurityGroup:
     cloudstorage:
       baseLocation:
+      fileSystemType: GCS
       gcs:
-        serviceAccount:
+        serviceAccountEmail:
 
   # openstack parameters
   openstack:
@@ -236,7 +240,7 @@ integrationtest:
       volumeType: gp2
     baseimage:
       redhat7:
-        imageId: ee68297d-59b3-4cb0-419a-f9e00763bdb4
+        imageId: f6e778fc-7f17-4535-9021-515351df3691
         blueprints:
           - "%s - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
