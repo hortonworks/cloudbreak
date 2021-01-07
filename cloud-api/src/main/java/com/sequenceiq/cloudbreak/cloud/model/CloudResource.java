@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -29,10 +30,12 @@ public class CloudResource extends DynamicModel {
 
     private final boolean persistent;
 
+    private final boolean stackAware;
+
     private String instanceId;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params,
-            String instanceId) {
+            String instanceId, boolean stackAware) {
         super(params);
         this.type = type;
         this.status = status;
@@ -41,6 +44,7 @@ public class CloudResource extends DynamicModel {
         this.group = group;
         this.persistent = persistent;
         this.instanceId = instanceId;
+        this.stackAware = stackAware;
     }
 
     public ResourceType getType() {
@@ -65,6 +69,10 @@ public class CloudResource extends DynamicModel {
 
     public boolean isPersistent() {
         return persistent;
+    }
+
+    public boolean isStackAware() {
+        return stackAware;
     }
 
     @Override
@@ -113,6 +121,8 @@ public class CloudResource extends DynamicModel {
 
         private Map<String, Object> parameters = new HashMap<>();
 
+        private Boolean stackAware;
+
         public Builder cloudResource(CloudResource cloudResource) {
             type = cloudResource.getType();
             status = cloudResource.getStatus();
@@ -121,6 +131,7 @@ public class CloudResource extends DynamicModel {
             persistent = cloudResource.isPersistent();
             group = cloudResource.getGroup();
             instanceId = cloudResource.getInstanceId();
+            stackAware = cloudResource.isStackAware();
             return this;
         }
 
@@ -164,12 +175,21 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
+        public Builder stackAware(boolean stackAware) {
+            this.stackAware = stackAware;
+            return this;
+        }
+
         public CloudResource build() {
             Preconditions.checkNotNull(type);
             Preconditions.checkNotNull(status);
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(parameters);
-            return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId);
+            if (Objects.isNull(stackAware)) {
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, true);
+            } else {
+                return new CloudResource(type, status, name, reference, group, persistent, parameters, instanceId, stackAware);
+            }
         }
     }
 }

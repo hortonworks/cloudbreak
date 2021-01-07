@@ -39,8 +39,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         CloudResource cloudResource = notification.getCloudResource();
         Resource resource = conversionService.convert(cloudResource, Resource.class);
         Optional<Resource> persistedResource =
-                resourceService.findByResourceReferencAndType(cloudResource.getReference(),
-                        ResourceType.valueOf(cloudResource.getType().name()));
+                resourceService.findByResourceReferenceAndType(cloudResource.getReference(), cloudResource.getType());
         if (persistedResource.isPresent()) {
             LOGGER.debug("Trying to persist a resource (name: {}, type: {}, environmentId: {}) that is already persisted, skipping..",
                     cloudResource.getName(), cloudResource.getType().name(), envId);
@@ -56,7 +55,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         LOGGER.debug("Resource update notification received: {}", notification);
         Long envId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
-        Resource persistedResource = resourceService.findByResourceReferencAndType(cloudResource.getReference(),
+        Resource persistedResource = resourceService.findByResourceReferenceAndType(cloudResource.getReference(),
                 ResourceType.valueOf(cloudResource.getType().name())).orElseThrow(NotFoundException.notFound("resource", cloudResource.getName()));
         Resource resource = conversionService.convert(cloudResource, Resource.class);
         updateWithPersistedFields(resource, persistedResource);
@@ -69,7 +68,7 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification delete(ResourceNotification notification) {
         LOGGER.debug("Resource deletion notification received: {}", notification);
         CloudResource cloudResource = notification.getCloudResource();
-        resourceService.findByResourceReferencAndType(cloudResource.getReference(),
+        resourceService.findByResourceReferenceAndType(cloudResource.getReference(),
                 ResourceType.valueOf(cloudResource.getType().name())).ifPresent(value -> resourceService.delete(value));
         return notification;
     }

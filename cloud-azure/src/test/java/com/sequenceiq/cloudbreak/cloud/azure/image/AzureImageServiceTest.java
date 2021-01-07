@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceRetriever;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -165,6 +167,30 @@ public class AzureImageServiceTest {
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
         verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.CREATED);
         verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+    }
+
+    @Test
+    public void testCreateCustomImageWhenDataIntegrityViolationException() {
+        imagePresent(true);
+
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(virtualMachineCustomImage);
+        when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
+        when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
+        when(persistenceNotifier.notifyAllocation(any(), any()))
+                .thenReturn(new ResourcePersisted())
+                .thenThrow(new DataIntegrityViolationException("Unique constraint violated"));
+
+        try {
+            underTest.createImage(azureImageInfo, FROM_VHD_URI, azureClient, authenticatedContext);
+            underTest.createImage(azureImageInfo, FROM_VHD_URI, azureClient, authenticatedContext);
+
+        } catch (DataIntegrityViolationException e) {
+            verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
+            verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
+            verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+            assertEquals("Unique constraint violated", e.getMessage());
+            throw e;
+        }
     }
 
     private void setupAuthenticatedContext() {

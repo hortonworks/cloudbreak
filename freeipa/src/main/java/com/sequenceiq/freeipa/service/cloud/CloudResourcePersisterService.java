@@ -41,13 +41,13 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
         Resource resource = conversionService.convert(cloudResource, Resource.class);
-        Optional<Resource> persistedResource = resourceService.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+        Optional<Resource> persistedResource = getPersistedResource(stackId, cloudResource);
         if (persistedResource.isPresent()) {
             LOGGER.debug("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
                     cloudResource.getName(), cloudResource.getType().name(), stackId);
             return notification;
         }
-        resource.setStack(findStackById(stackId));
+        setStack(stackId, cloudResource, resource);
         resourceService.save(resource);
         return notification;
     }
@@ -57,11 +57,11 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         LOGGER.debug("Resource update notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
-        Resource persistedResource = resourceService.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType())
+        Resource persistedResource = getPersistedResource(stackId, cloudResource)
                 .orElseThrow(notFound("resource", cloudResource.getName()));
         Resource resource = conversionService.convert(cloudResource, Resource.class);
         updateWithPersistedFields(resource, persistedResource);
-        resource.setStack(findStackById(stackId));
+        setStack(stackId, cloudResource, resource);
         resourceService.save(resource);
         return notification;
     }
@@ -71,8 +71,8 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         LOGGER.debug("Resource deletion notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
-        resourceService.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType())
-                .ifPresent(value -> resourceService.delete(value));
+        Optional<Resource> persistedResource = getPersistedResource(stackId, cloudResource);
+        persistedResource.ifPresent(value -> resourceService.delete(value));
         return notification;
     }
 
@@ -84,6 +84,21 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         if (persistedResource != null) {
             resource.setId(persistedResource.getId());
             resource.setInstanceGroup(persistedResource.getInstanceGroup());
+        }
+    }
+
+    private Optional<Resource> getPersistedResource(Long stackId, CloudResource cloudResource) {
+        if (cloudResource.isStackAware()) {
+            return resourceService.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+        } else {
+            return resourceService.findByResourceReferenceAndType(cloudResource.getReference(), cloudResource.getType());
+        }
+    }
+
+    private void setStack(Long stackId, CloudResource cloudResource, Resource resource) {
+        if (cloudResource.isStackAware()) {
+            LOGGER.debug("Setting stack {} for cloud resource {} and type {}", stackId, cloudResource.getName(), cloudResource.getType());
+            resource.setStack(findStackById(stackId));
         }
     }
 
