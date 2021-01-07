@@ -44,17 +44,18 @@ restart_cm_after_fronted_url_change:
 {% endif %}
 
 {% if salt['pillar.get']('cloudera-manager:mgmt_service_directories') is defined and salt['pillar.get']('cloudera-manager:mgmt_service_directories')|length > 0 %}
-ensure_owners:
-  file.directory:
-    - names:
 {%- for dir in salt['pillar.get']('cloudera-manager:mgmt_service_directories') %}
-        - {{ dir }}
-{%- endfor %}
+ensure_owners_{{ dir }}:
+  file.directory:
+    - name: {{ dir }}
     - user: cloudera-scm
     - group: cloudera-scm
     - recurse:
-        - user
-        - group
+      - user
+      - group
+    - onlyif: test -d {{ dir }}
+
+{%- endfor %}
 {% endif %}
 
 start_server:
