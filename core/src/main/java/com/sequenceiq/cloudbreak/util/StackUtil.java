@@ -29,8 +29,12 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 public class StackUtil {
@@ -46,6 +50,9 @@ public class StackUtil {
 
     @Inject
     private CredentialClientService credentialClientService;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -164,7 +171,7 @@ public class StackUtil {
     }
 
     public String extractClusterManagerIp(Stack stack) {
-        if (!StringUtils.isEmpty(stack.getClusterManagerIp())) {
+        if (!isEmpty(stack.getClusterManagerIp())) {
             return stack.getClusterManagerIp();
         }
         return extractClusterManagerIp(stack.getId());
@@ -177,14 +184,19 @@ public class StackUtil {
     }
 
     public String extractClusterManagerAddress(Stack stack) {
-        String fqdn = stack.getFqdn();
-        if (fqdn != null) {
+        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
+        fqdn = isEmpty(fqdn) ? stack.getFqdn() : fqdn;
+
+        if (isNotEmpty(fqdn)) {
             return fqdn;
         }
+
         String clusterManagerIp = stack.getClusterManagerIp();
-        if (clusterManagerIp != null) {
+
+        if (isNotEmpty(clusterManagerIp)) {
             return clusterManagerIp;
         }
+
         return extractClusterManagerIp(stack.getId());
     }
 

@@ -42,6 +42,8 @@ public class LoadBalancer implements ProvisionEntity  {
     @OneToMany(mappedBy = "loadBalancer", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<TargetGroup> targetGroups = new HashSet<>();
 
+    private String fqdn;
+
     public Long getId() {
         return id;
     }
@@ -102,6 +104,14 @@ public class LoadBalancer implements ProvisionEntity  {
         this.targetGroups = targetGroups;
     }
 
+    public String getFqdn() {
+        return fqdn;
+    }
+
+    public void setFqdn(String fqdn) {
+        this.fqdn = fqdn;
+    }
+
     @Override
     public String toString() {
         return "LoadBalancer{" +
@@ -110,6 +120,7 @@ public class LoadBalancer implements ProvisionEntity  {
             ", hostedZoneId='" + hostedZoneId + '\'' +
             ", type='" + type + '\'' +
             ", endpoint='" + endpoint + '\'' +
+            ", fqdn='" + fqdn + '\'' +
             '}';
     }
 }

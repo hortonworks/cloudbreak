@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -89,6 +90,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -209,6 +211,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private HostAttributeDecorator hostAttributeDecorator;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
@@ -332,7 +337,7 @@ public class ClusterHostServiceRunner {
     private void addKerberosConfig(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) throws IOException {
         if (isKerberosNeeded(kerberosConfig)) {
             Map<String, String> kerberosPillarConf = new HashMap<>();
-            if (StringUtils.isEmpty(kerberosConfig.getDescriptor())) {
+            if (isEmpty(kerberosConfig.getDescriptor())) {
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getUrl(), "url");
                 putIfNotNull(kerberosPillarConf, kerberosDetailService.resolveHostForKdcAdmin(kerberosConfig, kerberosConfig.getUrl()), "adminUrl");
                 putIfNotNull(kerberosPillarConf, kerberosConfig.getRealm(), "realm");
@@ -635,7 +640,10 @@ public class ClusterHostServiceRunner {
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
             gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
         }
-        String fqdn = cluster.getFqdn();
+
+        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(cluster.getStack().getId());
+        fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
+
         if (isNotEmpty(fqdn)) {
             gateway.put("userfacingfqdn", fqdn);
             String[] fqdnParts = fqdn.split("\\.", 2);

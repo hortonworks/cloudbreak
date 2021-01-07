@@ -131,7 +131,13 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 } else {
                     LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
                         "DNS registration will be skipped.", loadBalancer.getEndpoint());
+                    continue;
                 }
+
+                loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
+                        endpoint.get(), environment.getName(), getWorkloadSubdomain(userCrn)));
+                loadBalancerPersistenceService.save(loadBalancer);
+                LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
             }
         }
     }

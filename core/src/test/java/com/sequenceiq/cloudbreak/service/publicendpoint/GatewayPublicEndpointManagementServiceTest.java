@@ -686,7 +686,7 @@ class GatewayPublicEndpointManagementServiceTest {
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
         verify(environmentClientService, times(3)).getByCrn(anyString());
-        verify(grpcUmsClient, times(2)).getAccountDetails(USER_CRN, "123", Optional.empty());
+        verify(grpcUmsClient, times(3)).getAccountDetails(USER_CRN, "123", Optional.empty());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain);
         verify(certificateCreationService, times(1))
@@ -746,7 +746,7 @@ class GatewayPublicEndpointManagementServiceTest {
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
         verify(environmentClientService, times(3)).getByCrn(anyString());
-        verify(grpcUmsClient, times(2)).getAccountDetails(USER_CRN, "123", Optional.empty());
+        verify(grpcUmsClient, times(3)).getAccountDetails(USER_CRN, "123", Optional.empty());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(endpointName, envName, accountWorkloadSubdomain);
         verify(certificateCreationService, times(1))
