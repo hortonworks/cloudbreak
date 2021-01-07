@@ -36,4 +36,8 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     Optional<Resource> findByResourceReferenceAndStatusAndType(@Param("resourceReference") String resourceReference, @Param("status") CommonStatus status,
             @Param("type") ResourceType type);
 
+    @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
+    Optional<Resource> findByResourceReferenceAndType(@Param("resourceReference") String resourceReference,
+            @Param("type") ResourceType type);
+
 }
