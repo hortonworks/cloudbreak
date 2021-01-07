@@ -87,6 +87,10 @@ message Event {
     CDPEnvironmentRequested cdpEnvironmentRequested = 30;
     // A CDP Environment was requested to create
     CDPEnvironmentStatusChanged cdpEnvironmentStatusChanged = 31;
+    // A CDP Environment was requested to create
+    CDPDatalakeRequested cdpDatalakeRequested = 32;
+    // A CDP Environment was requested to create
+    CDPDatalakeStatusChanged cdpDatalakeStatusChanged = 33;
   }
 }
 
@@ -952,6 +956,55 @@ message CDPEnvironmentStatus {
   }
 }
 
+// The status of a CDP Cluster
+message CDPClusterStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status when CDP CP is trying to create an environment.
+    CREATE_STARTED = 1;
+    // The status when CDP CP is done creating an environment.
+    CREATE_FINISHED = 2;
+    // The status when CDP CP failed to provision an environment.
+    CREATE_FAILED = 3;
+
+    // The status when CDP CP is trying to delete an environment.
+    DELETE_STARTED = 4;
+    // The status when CDP CP is done deleting an environment.
+    DELETE_FINISHED = 5;
+    //  The status when CDP CP failed to delete an environment.
+    DELETE_FAILED = 6;
+
+    // The status when an environment is trying to suspend.
+    SUSPEND_STARTED = 7;
+    // The status when an environment is suspended.
+    SUSPEND_FINISHED = 8;
+    // The status when an environment failed to suspend.
+    SUSPEND_FAILED = 9;
+
+    // The status when an environment is trying to resume.
+    RESUME_STARTED = 10;
+    // The status when an environment completed resuming.
+    RESUME_FINISHED = 11;
+    // The status when an environment failed to resume.
+    RESUME_FAILED = 12;
+
+    // The status when an environment is trying to resume.
+    UPGRADE_STARTED = 13;
+    // The status when an environment completed resuming.
+    UPGRADE_FINISHED = 14;
+    // The status when an environment failed to resume.
+    UPGRADE_FAILED = 15;
+
+    // The status when an environment is trying to resume.
+    REPAIR_STARTED = 16;
+    // The status when an environment completed resuming.
+    REPAIR_FINISHED = 17;
+    // The status when an environment failed to resume.
+    REPAIR_FAILED = 18;
+  }
+}
+
 message CDPOperationDetails {
     // The CDP account id of the event
     string accountId = 1;
@@ -1025,6 +1078,7 @@ message CDPNetworkDetails {
     CDPProxyDetails proxyDetails = 6;
 }
 
+// Generated when Environment creation has been requested or finished
 message CDPEnvironmentRequested {
     // Operation metadata
     CDPOperationDetails operationDetails = 1;
@@ -1044,6 +1098,24 @@ message CDPEnvironmentStatusChanged {
   CDPEnvironmentStatus.Value oldStatus = 2;
   // The environment's status after the change.
   CDPEnvironmentStatus.Value newStatus = 3;
+  // Describe the reason of the failure if any
+  string failureReason = 4;
+}
+
+// Generated when Datalake creation has been requested or finished
+message CDPDatalakeRequested {
+    // Operation metadata
+    CDPOperationDetails operationDetails = 1;
+}
+
+// Generated when Datalake status has changed
+message CDPDatalakeStatusChanged {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // The datalake's status before the change.
+  CDPClusterStatus.Value oldStatus = 2;
+  // The datalake's status after the change.
+  CDPClusterStatus.Value newStatus = 3;
   // Describe the reason of the failure if any
   string failureReason = 4;
 }

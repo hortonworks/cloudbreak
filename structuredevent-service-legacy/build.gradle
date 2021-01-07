@@ -21,4 +21,9 @@ dependencies {
     compile project(':workspace')
     compile project(':cloud-reactor')
     compile project(':audit-connector')
+    compile project(':usage-collection')
+
+    testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
+      exclude group: 'org.hamcrest'
+    }
 }
