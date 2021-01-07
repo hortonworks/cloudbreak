@@ -1,11 +1,11 @@
-SERVICE_ACCOUNT_NAME=cloudbreak
+SERVICE_ACCOUNT_NAME=cdp-credential
 PROJECT_ID=$(gcloud config get-value project)
 
 echo "Enabling Compute and Runtimeconfig APIs"
 gcloud services enable compute.googleapis.com runtimeconfig.googleapis.com
 
-echo "Creating service account for Cloudbreak"
-gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A Cloudbreak Service Account" --quiet
+echo "Creating service account for CDP"
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A CDP Service Account" --quiet
 
 
 echo "Binding Instance Admin role to the service account"
