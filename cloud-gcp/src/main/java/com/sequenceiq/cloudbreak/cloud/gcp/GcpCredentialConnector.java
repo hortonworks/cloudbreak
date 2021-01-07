@@ -69,7 +69,7 @@ public class GcpCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
-        String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand();
+        String prerequisitesCreationCommand = gcpPlatformParameters.getPrerequisitesCreationCommand(type);
         GcpCredentialPrerequisites gcpPrereqs = new GcpCredentialPrerequisites(Base64.encodeBase64String(prerequisitesCreationCommand.getBytes()));
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), gcpPrereqs);
     }

@@ -1,0 +1,16 @@
+SERVICE_ACCOUNT_NAME=cdp-audit-credential
+PROJECT_ID=$(gcloud config get-value project)
+
+echo "Enabling Compute and Runtimeconfig APIs"
+gcloud services enable compute.googleapis.com runtimeconfig.googleapis.com
+
+echo "Creating service account for CDP Audit"
+gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A CDP Audit Service Account" --quiet
+
+echo "Binding Storage Admin role to the service account"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.storageAdmin --quiet --no-user-output-enabled
+
+if cloudshell --help > /dev/null 2>&1; then
+  cloudshell download-file $SERVICE_ACCOUNT_NAME-gcp-cred.json
+fi
+

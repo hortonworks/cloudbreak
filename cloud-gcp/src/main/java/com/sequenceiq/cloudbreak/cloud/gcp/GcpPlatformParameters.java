@@ -34,9 +34,10 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.common.model.CredentialType;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
@@ -61,10 +62,13 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private String prerequisitesCreationCommand;
 
+    private String prerequisitesAuditCreationCommand;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
         prerequisitesCreationCommand = resourceDefinition("prerequisites-creation-command");
+        prerequisitesAuditCreationCommand = resourceDefinition("audit-prerequisites-creation-command");
     }
 
     @Override
@@ -142,8 +146,12 @@ public class GcpPlatformParameters implements PlatformParameters {
         return vmRecommendations;
     }
 
-    public String getPrerequisitesCreationCommand() {
-        return prerequisitesCreationCommand;
+    public String getPrerequisitesCreationCommand(CredentialType type) {
+        if (CredentialType.AUDIT.equals(type)) {
+            return prerequisitesAuditCreationCommand;
+        } else {
+            return prerequisitesCreationCommand;
+        }
     }
 
     public enum GcpDiskType {
