@@ -3,7 +3,12 @@
 set -e
 
 FQDN=$(hostname -f)
-IPADDR=$(hostname -i)
+# Get the ipaddresses of the host
+IPADDRS=$(hostname -i)
+echo "The ipaddresses of the host are $IPADDRS"
+# Get the first ipaddress. %% removes longest matching pattern in the end. ' *' pattern matches all but the first ipaddress.
+IPADDR="${IPADDRS%% *}"
+echo "The first ipaddress of the host is $IPADDR"
 
 if [ ! -f /etc/resolv.conf.orig ]; then
   cp /etc/resolv.conf /etc/resolv.conf.orig
