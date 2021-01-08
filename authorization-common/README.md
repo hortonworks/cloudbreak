@@ -76,6 +76,16 @@ MethodArgAnnotation
     = [@ResourceCrn], [@ResourceName], [@ResourceCrnList], [@ResourceNameList], [@RequestObject], [@TenantAwareParam], [@AccountId], [@InitiatorUserCrn];
 ```
 
+### How to make an API internally callable
+
+Lower layers often use the account id, but the internal crn doesn't contain that. There are three possible annotations to help the framework in figuring out the account id, and you must use one of them on one of the API method's argument.
+
+You should use one of the following annotations to make an API internally callable:
+
+- `@TenantAwareParam` - on resource crn parameter,
+- `@AccountId` - on an account id,
+- `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
+
 ### Rules for annotation usage
 
 #### DisableCheckPermissions
@@ -86,17 +96,7 @@ Disables all authorization on class level or on method level.
 
 #### InternalOnly
 
-Makes API endpoints internal only on class level or on method level. No additional authorization will happen, but the API must be interrnally callable (see below the details).
-
-##### How to make an API internally callable
-
-Lower layers often use the account id, but the internal crn doesn't contain that. There are three possible annotations to help the framework in figuring out the account id, and you must use one of them on one of the API method's argument. 
-
-You should use one of the following annotations to make an API internally callable:
-
-- `@TenantAwareParam` - on resource crn parameter,
-- `@AccountId` - on an account id,
-- `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
+Makes API endpoints internal only on class level or on method level. No additional authorization will happen, but the API must be internally callable (see details above).
 
 #### CustomPermissionCheck
 
