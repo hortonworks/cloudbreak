@@ -23,6 +23,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.dns.doc.DnsOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
@@ -93,6 +94,13 @@ public interface DnsV1Endpoint {
             nickname = "addDnsARecordV1")
     void addDnsARecord(@Valid @NotNull AddDnsARecordRequest request);
 
+    @POST
+    @Path("record/a/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_A_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "addDnsARecordV1Internal")
+    void addDnsARecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request);
+
     @DELETE
     @Path("record/a")
     @Produces(MediaType.APPLICATION_JSON)
@@ -108,6 +116,13 @@ public interface DnsV1Endpoint {
     @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "addDnsCnameRecordV1")
     void addDnsCnameRecord(@Valid @NotNull AddDnsCnameRecordRequest request);
+
+    @POST
+    @Path("record/cname/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DnsOperationDescriptions.ADD_DNS_CNAME_RECORD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "addDnsCnameRecordV1Internal")
+    void addDnsCnameRecordInternal(@AccountId @QueryParam("accountId") @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request);
 
     @DELETE
     @Path("record/cname")
