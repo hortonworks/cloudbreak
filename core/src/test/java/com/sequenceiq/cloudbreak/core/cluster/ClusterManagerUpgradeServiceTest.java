@@ -6,6 +6,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import java.util.Collections;
+import java.util.Set;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -16,15 +19,18 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -55,6 +61,12 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Mock
     private ClusterHostServiceRunner clusterHostServiceRunner;
+
+    @Mock
+    private ParcelService parcelService;
+
+    @Mock
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     @InjectMocks
     private ClusterManagerUpgradeService underTest;
@@ -122,6 +134,9 @@ public class ClusterManagerUpgradeServiceTest {
     public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         stack.setType(StackType.WORKLOAD);
+        Set<ClusterComponent> clusterComponents = Collections.emptySet();
+        when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
+        when(clouderaManagerProductsProvider.getProducts(clusterComponents)).thenReturn(Collections.emptySet());
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
@@ -132,6 +147,6 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
-        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerCsds(any(), any());
+        verify(clusterHostServiceRunner, times(1)).addClouderaManagerCsdsToServicePillar(any(), any());
     }
 }

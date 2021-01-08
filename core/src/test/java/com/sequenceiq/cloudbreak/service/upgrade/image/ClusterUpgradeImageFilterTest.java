@@ -97,7 +97,7 @@ public class ClusterUpgradeImageFilterTest {
         activatedParcels = Map.of("stack", V_7_0_3);
         Predicate<Image> predicate = mock(Predicate.class);
         when(predicate.test(any())).thenReturn(Boolean.TRUE);
-        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), any(StackType.class))).thenReturn(predicate);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), any(ImageFilterParams.class))).thenReturn(predicate);
         when(imageCreationBasedFilter.filterPreviousImages(any(Image.class), any())).thenReturn(predicate);
         when(cmAndStackVersionFilter.filterCmAndStackVersion(any(ImageFilterParams.class), any())).thenReturn(predicate);
     }
@@ -123,7 +123,7 @@ public class ClusterUpgradeImageFilterTest {
 
         Predicate<Image> predicate = mock(Predicate.class);
         when(predicate.test(any())).thenReturn(Boolean.FALSE);
-        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), eq(imageFilterParams.getStackType()))).thenReturn(predicate);
+        when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), eq(imageFilterParams))).thenReturn(predicate);
         when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
 
         ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);

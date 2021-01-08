@@ -15,7 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -63,6 +65,9 @@ public class ClusterManagerUpgradeService {
     @Inject
     private ParcelService parcelService;
 
+    @Inject
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
     public void removeUnusedComponents(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<ClusterComponent> blueprintProducts = parcelService.getParcelComponentsByBlueprint(stack);
@@ -87,7 +92,7 @@ public class ClusterManagerUpgradeService {
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        SaltConfig pillar = createSaltConfig(stack, stack.getType(), cluster);
+        SaltConfig pillar = createSaltConfig(stack, stack.getType(), cluster.getId());
         hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), pillar, exitCriteriaModel);
     }
 
@@ -99,19 +104,21 @@ public class ClusterManagerUpgradeService {
         clusterApiConnectors.getConnector(stack).startCluster();
     }
 
-    private SaltConfig createSaltConfig(Stack stack, StackType stackType, Cluster cluster) {
+    private SaltConfig createSaltConfig(Stack stack, StackType stackType, Long clusterId) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
         Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, license);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
-        decorateWorkloadClusterPillarWithCsdDownloader(stackType, cluster, servicePillar);
+        decorateWorkloadClusterPillarWithCsdDownloader(stack, stackType, servicePillar);
         return new SaltConfig(servicePillar);
     }
 
-    private void decorateWorkloadClusterPillarWithCsdDownloader(StackType stackType, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+    private void decorateWorkloadClusterPillarWithCsdDownloader(Stack stack, StackType stackType, Map<String, SaltPillarProperties> servicePillar) {
         if (StackType.WORKLOAD.equals(stackType)) {
-            clusterHostServiceRunner.decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
+            Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
+            Set<ClouderaManagerProduct> products = clouderaManagerProductsProvider.getProducts(componentsByBlueprint);
+            clusterHostServiceRunner.addClouderaManagerCsdsToServicePillar(products, servicePillar);
         } else {
             LOGGER.debug("Skipping the CSD downloading because the stack type is {}", stackType);
         }

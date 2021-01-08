@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
 
 class ImageCreationBasedFilterTest {
 
-    private ImageCreationBasedFilter underTest = new ImageCreationBasedFilter();
+    private final ImageCreationBasedFilter underTest = new ImageCreationBasedFilter();
 
     @Test
     public void testImageIsNewer() {

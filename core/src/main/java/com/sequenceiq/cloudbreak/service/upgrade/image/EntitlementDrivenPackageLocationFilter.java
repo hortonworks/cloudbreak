@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -26,13 +25,13 @@ public class EntitlementDrivenPackageLocationFilter {
         this.filters = filters;
     }
 
-    public Predicate<Image> filterImage(Image currentImage, StackType stackType) {
+    public Predicate<Image> filterImage(Image currentImage, ImageFilterParams imageFilterParams) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (entitlementService.isInternalRepositoryForUpgradeAllowed(accountId)) {
             LOGGER.debug("Skipping image filtering based on repository url");
             return image -> true;
         } else {
-            return image -> filters.stream().allMatch(filter -> filter.filterImage(image, currentImage, stackType));
+            return image -> filters.stream().allMatch(filter -> filter.filterImage(image, currentImage, imageFilterParams));
         }
     }
 }

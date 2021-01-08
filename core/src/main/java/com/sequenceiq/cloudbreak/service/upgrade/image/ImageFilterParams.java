@@ -12,14 +12,14 @@ public class ImageFilterParams {
 
     private final boolean lockComponents;
 
-    private final Map<String, String> activatedParcels;
+    private final Map<String, String> stackRelatedParcels;
 
     private final StackType stackType;
 
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> activatedParcels, StackType stackType) {
+    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
-        this.activatedParcels = activatedParcels;
+        this.stackRelatedParcels = stackRelatedParcels;
         this.stackType = stackType;
     }
 
@@ -31,8 +31,8 @@ public class ImageFilterParams {
         return lockComponents;
     }
 
-    public Map<String, String> getActivatedParcels() {
-        return activatedParcels;
+    public Map<String, String> getStackRelatedParcels() {
+        return stackRelatedParcels;
     }
 
     public StackType getStackType() {
@@ -51,11 +51,11 @@ public class ImageFilterParams {
         return lockComponents == that.lockComponents &&
                 Objects.equals(currentImage, that.currentImage) &&
                 Objects.equals(stackType, that.stackType) &&
-                Objects.equals(activatedParcels, that.activatedParcels);
+                Objects.equals(stackRelatedParcels, that.stackRelatedParcels);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, activatedParcels, stackType);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType);
     }
 }
