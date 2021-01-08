@@ -109,7 +109,7 @@ public class CommonCloudProperties {
 
         private String sourceCatalogUrl;
 
-        private String expectedDefaultImageUuid;
+        private String imageUuid;
 
         public String getSourceCatalogName() {
             return sourceCatalogName;
@@ -127,12 +127,12 @@ public class CommonCloudProperties {
             this.sourceCatalogUrl = sourceCatalogUrl;
         }
 
-        public String getExpectedDefaultImageUuid() {
-            return expectedDefaultImageUuid;
+        public String getImageUuid() {
+            return imageUuid;
         }
 
-        public void setExpectedDefaultImageUuid(String expectedDefaultImageUuid) {
-            this.expectedDefaultImageUuid = expectedDefaultImageUuid;
+        public void setImageUuid(String imageUuid) {
+            this.imageUuid = imageUuid;
         }
     }
 }

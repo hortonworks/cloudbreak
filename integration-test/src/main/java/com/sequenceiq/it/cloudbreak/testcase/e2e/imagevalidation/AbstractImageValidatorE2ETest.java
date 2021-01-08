@@ -32,7 +32,7 @@ public abstract class AbstractImageValidatorE2ETest extends AbstractE2ETest {
     public void validateImageIdAndWriteToFile(Object[] data, ITestResult result) {
         TestContext testContext = (TestContext) data[0];
         if (result.getStatus() == ITestResult.SUCCESS) {
-            String expectedImageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
+            String expectedImageUuid = commonCloudProperties().getImageValidation().getImageUuid();
             String actualImageUuid = getImageId(testContext);
             if (Strings.isNotNullAndNotEmpty(expectedImageUuid) && !expectedImageUuid.equalsIgnoreCase(actualImageUuid)) {
                 throw new RuntimeException("The test was successful but the image is not the expected one. Actual: " + actualImageUuid
@@ -52,7 +52,7 @@ public abstract class AbstractImageValidatorE2ETest extends AbstractE2ETest {
                 commonCloudProperties().getImageValidation().getSourceCatalogUrl(),
                 commonCloudProperties().getImageValidation().getSourceCatalogName());
 
-        String imageUuid = commonCloudProperties().getImageValidation().getExpectedDefaultImageUuid();
+        String imageUuid = commonCloudProperties().getImageValidation().getImageUuid();
         if (Strings.isNotNullAndNotEmpty(imageUuid)) {
             if (isPrewarmedImageTest()) {
                 validatePrewarmedImage(testContext, imageUuid);
