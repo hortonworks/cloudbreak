@@ -10,13 +10,13 @@ import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 public class ClusterTemplateAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<ClusterTemplateTestDto, CloudbreakClient> {
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateClusterTemplate";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder().withEventName("CreateClusterTemplate").build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteClusterTemplate";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteClusterTemplate").build();
     }
 
     @Override

@@ -10,18 +10,18 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 public class CredentialAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<CredentialTestDto, EnvironmentClient> {
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateCredential";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder().withEventName("CreateCredential").build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteCredential";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteCredential").build();
     }
 
     @Override
-    protected String getModifyEventName() {
-        return "ModifyCredential";
+    protected OperationInfo getModifyOperationInfo() {
+        return OperationInfo.builder().withEventName("ModifyCredential").build();
     }
 
     @Override

@@ -59,7 +59,7 @@ public class FlowCDPEventDataExtractor implements CDPEventDataExtractor<CDPStruc
 
     private String getFlowState(CDPStructuredFlowEvent structuredEvent) {
         String flowState = structuredEvent.getFlow().getFlowState();
-        return "INIT_STATE".equals(flowState) ? flowState : structuredEvent.getFlow().getNextFlowState();
+        return "INIT_STATE".equals(flowState) ? structuredEvent.getFlow().getNextFlowState() : flowState;
     }
 
     @Override

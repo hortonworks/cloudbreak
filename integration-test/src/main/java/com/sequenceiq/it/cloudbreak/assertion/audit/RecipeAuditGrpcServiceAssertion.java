@@ -10,13 +10,13 @@ import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 public class RecipeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<RecipeTestDto, CloudbreakClient> {
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateRecipe";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder().withEventName("CreateRecipe").build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteRecipe";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder().withEventName("DeleteRecipe").build();
     }
 
     @Override

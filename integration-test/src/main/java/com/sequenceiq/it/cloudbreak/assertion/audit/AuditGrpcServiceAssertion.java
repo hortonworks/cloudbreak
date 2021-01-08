@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.assertion.audit;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -27,7 +28,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getCreateEventName());
+        validateEventList(cdpAuditEvents, testDto, getCreateOperationInfo());
         return testDto;
     }
 
@@ -35,7 +36,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getStartEventName());
+        validateEventList(cdpAuditEvents, testDto, getStartOperationInfo());
         return testDto;
     }
 
@@ -43,7 +44,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getStopEventName());
+        validateEventList(cdpAuditEvents, testDto, getStopOperationInfo());
         return testDto;
     }
 
@@ -51,7 +52,7 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getDeleteEventName());
+        validateEventList(cdpAuditEvents, testDto, getDeleteOperationInfo());
         return testDto;
     }
 
@@ -59,18 +60,19 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getModifyEventName());
+        validateEventList(cdpAuditEvents, testDto, getModifyOperationInfo());
         return testDto;
     }
 
-    protected void validateEventList(List<AuditProto.CdpAuditEvent> cdpAuditEvents, T testDto, String eventName) {
+    protected void validateEventList(List<AuditProto.CdpAuditEvent> cdpAuditEvents, T testDto, OperationInfo operationInfo) {
+        String eventName = operationInfo.getEventName();
         if (shouldCheckRestEvents()) {
             List<AuditProto.CdpAuditEvent> restEvents = filterRestEvents(cdpAuditEvents, testDto, eventName);
             checkRestEvents(restEvents, eventName);
         }
         if (shouldCheckFlowEvents()) {
             List<AuditProto.CdpAuditEvent> flowEvents = filterFlowEvents(cdpAuditEvents, testDto, eventName);
-            checkFlowEvents(flowEvents, testDto, eventName);
+            checkFlowEvents(flowEvents, testDto, operationInfo);
         }
     }
 
@@ -78,15 +80,18 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         return auditClient;
     }
 
-    private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, String eventName) {
+    private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, OperationInfo operationInfo) {
+        String eventName = operationInfo.getEventName();
+        String firstState = Objects.requireNonNull(operationInfo.getFirstState(), "First state is null for this flow audit log check");
+        String lastState = Objects.requireNonNull(operationInfo.getLastState(), "Last state is null for this flow audit log check");
         if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
-            throw new TestFailException(eventName + " flow audit log must contains minimum 2 items but has " + flowEvents.size());
+            throw new TestFailException(eventName + " flow audit log must contain minimum 2 items but has " + flowEvents.size());
         }
-        if (flowEvents.stream().noneMatch(e -> "INIT_STATE".equals(getFlowState(e)))) {
-            throw new TestFailException(eventName + " flow audit log must contains INIT_STATE");
+        if (flowEvents.stream().noneMatch(e -> firstState.equals(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contain " + firstState);
         }
-        if (flowEvents.stream().noneMatch(e -> "FINAL_STATE".equals(getFlowState(e)))) {
-            throw new TestFailException(eventName + " flow audit log must contains FINAL_STATE");
+        if (flowEvents.stream().noneMatch(e -> lastState.equals(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contain " + lastState);
         }
         if (!flowEvents.stream().allMatch(e -> testDto.getCrn().equals(getCrn(e)))) {
             throw new TestFailException(eventName + " flow audit log must match with all crns");
@@ -143,23 +148,23 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
         }).collect(Collectors.toList());
     }
 
-    protected String getStopEventName() {
+    protected OperationInfo getStopOperationInfo() {
         throw new UnsupportedOperationException("Cannot check stop event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    protected String getDeleteEventName() {
+    protected OperationInfo getDeleteOperationInfo() {
         throw new UnsupportedOperationException("Cannot check delete event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    protected String getStartEventName() {
+    protected OperationInfo getStartOperationInfo() {
         throw new UnsupportedOperationException("Cannot check start event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    protected String getCreateEventName() {
+    protected OperationInfo getCreateOperationInfo() {
         throw new UnsupportedOperationException("Cannot check create event for " + getClass().getSimpleName() + " because it is not supported");
     }
 
-    protected String getModifyEventName() {
+    protected OperationInfo getModifyOperationInfo() {
         throw new UnsupportedOperationException("Cannot check modify event for " + getClass().getSimpleName() + " because it is not supported");
     }
 

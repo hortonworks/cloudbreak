@@ -16,30 +16,51 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 public class DatahubAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<DistroXTestDto, CloudbreakClient> {
 
     @Override
-    protected String getStopEventName() {
-        return "StopDatahubCluster";
+    protected OperationInfo getStopOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StopDatahubCluster")
+                .withFirstState("CLUSTER_STOPPING_STATE")
+                .withLastState("STOP_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getDeleteEventName() {
-        return "DeleteDatahubCluster";
+    protected OperationInfo getDeleteOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("DeleteDatahubCluster")
+                .withFirstState("CLUSTER_TERMINATING_STATE")
+                .withLastState("TERMINATION_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getStartEventName() {
-        return "StartDatahubCluster";
+    protected OperationInfo getStartOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("StartDatahubCluster")
+                .withFirstState("START_STATE")
+                .withLastState("CLUSTER_START_FINISHED_STATE")
+                .build();
     }
 
     @Override
-    protected String getCreateEventName() {
-        return "CreateDatahubCluster";
+    protected OperationInfo getCreateOperationInfo() {
+        return OperationInfo.builder()
+                .withEventName("CreateDatahubCluster")
+                .withFirstState("VALIDATION_STATE")
+                .withLastState("CLUSTER_CREATION_FINISHED_STATE")
+                .build();
     }
 
     public DistroXTestDto upgradeClusterByNameInternal(TestContext testContext, DistroXTestDto testDto) {
+        OperationInfo operationInfo = OperationInfo.builder()
+                .withEventName("UpgradeDatahubCluster")
+                .withFirstState("UPDATE_SALT_STATE_FILES_STATE")
+                .withLastState("STACK_IMAGE_UPDATE_FINISHED")
+                .build();
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = getAuditClient().listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
                 .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, "UpgradeDatahubCluster");
+        validateEventList(cdpAuditEvents, testDto, operationInfo);
         return testDto;
     }
 
