@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+
 import static java.util.Collections.singletonMap;
+
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -328,7 +330,7 @@ public class ClusterHostServiceRunner {
         }
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
-        saveSssdAdPillar(cluster, servicePillar, kerberosConfig);
+        saveSssdAdPillar(servicePillar, kerberosConfig);
         saveSssdIpaPillar(servicePillar, kerberosConfig, serviceLocations);
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
@@ -387,7 +389,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
     }
 
-    private void saveSssdAdPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
+    private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
         if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
             Map<String, Object> sssdConnfig = new HashMap<>();
             sssdConnfig.put("username", kerberosConfig.getPrincipal());
@@ -498,7 +500,12 @@ public class ClusterHostServiceRunner {
     }
 
     public void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        List<String> csdUrls = getCsdUrlList(cluster);
+        List<ClouderaManagerProduct> product = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
+        addClouderaManagerCsdsToServicePillar(product, servicePillar);
+    }
+
+    public void addClouderaManagerCsdsToServicePillar(Collection<ClouderaManagerProduct> product, Map<String, SaltPillarProperties> servicePillar) {
+        List<String> csdUrls = getCsdUrlList(product);
         servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
                 singletonMap("cloudera-manager",
                         singletonMap("csd-urls", csdUrls))));
@@ -768,8 +775,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private List<String> getCsdUrlList(Cluster cluster) {
-        List<ClouderaManagerProduct> product = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
+    private List<String> getCsdUrlList(Collection<ClouderaManagerProduct> product) {
         return product
                 .stream()
                 .map(ClouderaManagerProduct::getCsd)

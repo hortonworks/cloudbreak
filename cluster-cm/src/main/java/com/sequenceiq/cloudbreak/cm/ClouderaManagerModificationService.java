@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_S
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
@@ -58,14 +58,13 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -114,6 +113,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private PollingResultErrorHandler pollingResultErrorHandler;
+
+    @Inject
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     private final Stack stack;
 
@@ -214,10 +216,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private Set<ClouderaManagerProduct> getProducts(Set<ClusterComponent> components) {
-        return components.stream()
-                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType()))
-                .map(this::getClouderaManagerProduct)
-                .collect(Collectors.toSet());
+        return clouderaManagerProductsProvider.getProducts(components);
     }
 
     private void upgradeNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhServiceName, ParcelResourceApi parcelResourceApi)
@@ -250,15 +249,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return products.stream()
                 .filter(product -> !product.getName().equals(cdhProductName))
                 .collect(Collectors.toSet());
-    }
-
-    private ClouderaManagerProduct getClouderaManagerProduct(ClusterComponent clusterComponent) {
-        try {
-            return clusterComponent.getAttributes().get(ClouderaManagerProduct.class);
-        } catch (IOException e) {
-            LOGGER.info("Could not upgrade Cloudera Runtime services", e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
     }
 
     private void checkParcelApiAvailability() throws CloudbreakException {

@@ -66,7 +66,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(cmAndStackVersionFilter.filterCmAndStackVersion(imageFilterParams, reason))
                 .filter(validateCloudPlatform(cloudPlatform, reason))
                 .filter(validateOsVersion(currentImage, reason))
-                .filter(packageLocationFilter.filterImage(currentImage, imageFilterParams.getStackType()))
+                .filter(validatePackageLocation(imageFilterParams, currentImage, reason))
                 .collect(Collectors.toList());
 
         return new ImageFilterResult(new Images(null, images, null), getReason(images, reason));
@@ -109,6 +109,11 @@ public class ClusterUpgradeImageFilter {
             reason.setValue("There are no eligible images to upgrade with the same OS version.");
             return isOsVersionsMatch(currentImage, image);
         };
+    }
+
+    private Predicate<Image> validatePackageLocation(ImageFilterParams imageFilterParams, Image currentImage, Mutable<String> reason) {
+        reason.setValue("There are no eligible images to upgrade because the location of the packages are not appropriate.");
+        return packageLocationFilter.filterImage(currentImage, imageFilterParams);
     }
 
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {

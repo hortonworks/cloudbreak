@@ -22,20 +22,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -76,10 +70,7 @@ public class ClusterUpgradeAvailabilityService {
     private ClusterRepairService clusterRepairService;
 
     @Inject
-    private ClusterApiConnectors clusterApiConnectors;
-
-    @Inject
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private ImageFilterParamsFactory imageFilterParamsFactory;
 
     public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, Boolean replaceVms) {
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
@@ -149,7 +140,7 @@ public class ClusterUpgradeAvailabilityService {
             com.sequenceiq.cloudbreak.cloud.model.Image currentImage = getImage(stack);
             CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-            ImageFilterParams imageFilterParams = new ImageFilterParams(image, lockComponents, getActivatedParcels(stack), stack.getType());
+            ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack);
             ImageFilterResult filteredImages = filterImages(imageCatalog, stack.cloudPlatform(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
@@ -158,23 +149,6 @@ public class ClusterUpgradeAvailabilityService {
             upgradeOptions.setReason(String.format("Failed to retrieve imaged due to %s", e.getMessage()));
         }
         return upgradeOptions;
-    }
-
-    private Map<String, String> getActivatedParcels(Stack stack) {
-        if (stack.isDatalake()) {
-            Set<ClusterComponent> components = clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId());
-            ClusterComponent stackComponent = components.stream()
-                    .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
-                    .findFirst().orElseThrow(() -> new NotFoundException("Runtime component not found!"));
-            ClouderaManagerProduct stackProduct = stackComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
-            LOGGER.debug("For datalake clusters only the CDH parcel is activated in CM: {}", stackProduct);
-            return Map.of(stackProduct.getName(), stackProduct.getVersion());
-        } else {
-            ClusterApi connector = clusterApiConnectors.getConnector(stack);
-            Map<String, String> installedParcels = connector.gatherInstalledParcels(stack.getName());
-            LOGGER.debug("The activated parcels for the datahub cluster: {}", installedParcels);
-            return installedParcels;
-        }
     }
 
     private Image getCurrentImageFromCatalog(String currentImageId, CloudbreakImageCatalogV3 imageCatalog) throws CloudbreakImageNotFoundException {
@@ -215,8 +189,8 @@ public class ClusterUpgradeAvailabilityService {
     private List<ImageInfoV4Response> validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
         Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream().filter(
                 imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
-        boolean hasCompatbileImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
-        if (!hasCompatbileImageWithRuntime) {
+        boolean hasCompatibleImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
+        if (!hasCompatibleImageWithRuntime) {
             String availableRuntimes = upgradeCandidates
                     .stream()
                     .map(ImageInfoV4Response::getComponentVersions)

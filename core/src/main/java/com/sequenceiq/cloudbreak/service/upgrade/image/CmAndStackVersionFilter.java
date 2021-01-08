@@ -23,7 +23,7 @@ public class CmAndStackVersionFilter {
 
     public Predicate<Image> filterCmAndStackVersion(ImageFilterParams imageFilterParams, Mutable<String> reason) {
         return candidateImage -> {
-            updateReason(imageFilterParams.isLockComponents(), imageFilterParams.getActivatedParcels(), reason);
+            updateReason(imageFilterParams.isLockComponents(), imageFilterParams.getStackRelatedParcels(), reason);
             return isUpgradePermitted(imageFilterParams, candidateImage);
         };
     }
@@ -39,7 +39,7 @@ public class CmAndStackVersionFilter {
 
     private boolean isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
         return imageFilterParams.isLockComponents()
-                ? lockedComponentChecker.isUpgradePermitted(imageFilterParams.getCurrentImage(), candidateImage, imageFilterParams.getActivatedParcels())
+                ? lockedComponentChecker.isUpgradePermitted(imageFilterParams.getCurrentImage(), candidateImage, imageFilterParams.getStackRelatedParcels())
                 : isUnlockedCmAndStackUpgradePermitted(imageFilterParams, candidateImage);
     }
 
