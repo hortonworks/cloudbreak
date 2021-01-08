@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +20,8 @@ public class CloudBackupFolderResolverServiceTest {
     @Before
     public void setUp() {
         underTest = new CloudBackupFolderResolverService(new S3BackupConfigGenerator(),
-                new AdlsGen2BackupConfigGenerator());
+                new AdlsGen2BackupConfigGenerator(),
+                new GCSBackupConfigGenerator());
     }
 
     @Test
@@ -45,6 +47,20 @@ public class CloudBackupFolderResolverServiceTest {
                 "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         // THEN
         assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
+    }
+
+    @Test
+    public void testUpdateStorageLocationGcs() {
+        // GIVEN
+        Backup backup = createBackup();
+        backup.setS3(null);
+        backup.setGcs(new GcsCloudStorageV1Parameters());
+        backup.setStorageLocation("gs://mybucket");
+        // WHEN
+        underTest.updateStorageLocation(backup, FluentClusterType.FREEIPA.value(), "mycluster",
+                "crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
+        // THEN
+        assertEquals("gs://mybucket/cluster-backups/freeipa/mycluster_12345", backup.getStorageLocation());
     }
 
     @Test
