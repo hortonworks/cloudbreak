@@ -9,14 +9,18 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
@@ -64,7 +68,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public Set<String> listDnsZones(@ResourceCrn String environmentCrn) {
+    public Set<String> listDnsZones(@ResourceCrn @TenantAwareParam String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         try {
             return dnsZoneService.listDnsZones(environmentCrn, accountId);
@@ -75,7 +79,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsZoneBySubnet(@ResourceCrn String environmentCrn, String subnet) {
+    public void deleteDnsZoneBySubnet(@TenantAwareParam @ResourceCrn String environmentCrn, String subnet) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsZoneService.deleteDnsZoneBySubnet(environmentCrn, accountId, subnet);
@@ -86,7 +90,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsZoneBySubnetId(@ResourceCrn String environmentCrn, String networkId, String subnetId) {
+    public void deleteDnsZoneBySubnetId(@ResourceCrn @TenantAwareParam String environmentCrn, String networkId, String subnetId) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsZoneService.deleteDnsZoneBySubnetId(environmentCrn, accountId, networkId, subnetId);
@@ -97,7 +101,7 @@ public class DnsV1Controller implements DnsV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsRecordsByFqdn(@ResourceCrn @NotEmpty String environmentCrn, @NotEmpty List<String> fqdns) {
+    public void deleteDnsRecordsByFqdn(@ResourceCrn @NotEmpty @TenantAwareParam String environmentCrn, @NotEmpty List<String> fqdns) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsRecordService.deleteDnsRecordByFqdn(environmentCrn, accountId, fqdns);
@@ -110,6 +114,10 @@ public class DnsV1Controller implements DnsV1Endpoint {
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     public void addDnsARecord(@RequestObject AddDnsARecordRequest request) {
         String accountId = crnService.getCurrentAccountId();
+        addDnsARecordCommon(request, accountId);
+    }
+
+    private void addDnsARecordCommon(@RequestObject AddDnsARecordRequest request, String accountId) {
         try {
             dnsRecordService.addDnsARecord(accountId, request);
         } catch (FreeIpaClientException e) {
@@ -118,8 +126,14 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public void addDnsARecordInternal(@AccountId @NotEmpty String accountId, @Valid @NotNull AddDnsARecordRequest request) {
+        addDnsARecordCommon(request, accountId);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsARecord(@ResourceCrn String environmentCrn, String dnsZone, String hostname) {
+    public void deleteDnsARecord(@ResourceCrn @TenantAwareParam String environmentCrn, String dnsZone, String hostname) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsRecordService.deleteDnsRecord(accountId, environmentCrn, dnsZone, hostname);
@@ -132,6 +146,10 @@ public class DnsV1Controller implements DnsV1Endpoint {
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     public void addDnsCnameRecord(@RequestObject AddDnsCnameRecordRequest request) {
         String accountId = crnService.getCurrentAccountId();
+        addDnsCnameRecordCommon(request, accountId);
+    }
+
+    private void addDnsCnameRecordCommon(@RequestObject AddDnsCnameRecordRequest request, String accountId) {
         try {
             dnsRecordService.addDnsCnameRecord(accountId, request);
         } catch (FreeIpaClientException e) {
@@ -140,8 +158,14 @@ public class DnsV1Controller implements DnsV1Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public void addDnsCnameRecordInternal(@AccountId @NotEmpty String accountId, @Valid @NotNull AddDnsCnameRecordRequest request) {
+        addDnsCnameRecordCommon(request, accountId);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
-    public void deleteDnsCnameRecord(@ResourceCrn String environmentCrn, String dnsZone, String cname) {
+    public void deleteDnsCnameRecord(@ResourceCrn @TenantAwareParam String environmentCrn, String dnsZone, String cname) {
         String accountId = crnService.getCurrentAccountId();
         try {
             dnsRecordService.deleteDnsRecord(accountId, environmentCrn, dnsZone, cname);
