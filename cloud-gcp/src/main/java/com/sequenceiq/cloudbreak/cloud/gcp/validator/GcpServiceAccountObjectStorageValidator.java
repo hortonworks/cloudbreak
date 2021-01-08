@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.gcp.validator;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
-import com.google.api.services.iam.v1.model.ServiceAccount;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -24,34 +24,39 @@ public class GcpServiceAccountObjectStorageValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpServiceAccountObjectStorageValidator.class);
 
+    private static final int DEFAULT_PAGE_SIZE = 50;
+
     public ValidationResultBuilder validateObjectStorage(CloudCredential cloudCredential,
-        SpiFileSystem spiFileSystem,
-        ValidationResultBuilder resultBuilder) throws IOException {
+            SpiFileSystem spiFileSystem,
+            ValidationResultBuilder resultBuilder) throws IOException {
         LOGGER.info("Validating Gcp identities...");
         Iam iam = GcpStackUtil.buildIam(cloudCredential);
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
             String projectId = GcpStackUtil.getProjectId(cloudCredential);
+            Set<String> serviceAccountEmailsToFind = cloudFileSystems
+                    .stream()
+                    .map(cloudFileSystemView -> ((CloudGcsView) cloudFileSystemView).getServiceAccountEmail())
+                    .collect(Collectors.toSet());
 
-            ListServiceAccountsResponse listServiceAccountsResponse = iam
+            Iam.Projects.ServiceAccounts.List listServiceAccountEmailsRequest = iam
                     .projects()
                     .serviceAccounts()
                     .list("projects/" + projectId)
-                    .execute();
+                    .setPageSize(DEFAULT_PAGE_SIZE);
 
-            for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
-                CloudGcsView cloudFileSystem = (CloudGcsView) cloudFileSystemView;
-                Optional<ServiceAccount> serviceAccount = listServiceAccountsResponse.getAccounts()
-                        .stream()
-                        .filter(e -> e.getEmail().equals(cloudFileSystem.getServiceAccountEmail()))
-                        .findFirst();
+            ListServiceAccountsResponse response;
+            do {
+                response = listServiceAccountEmailsRequest.execute();
+                response.getAccounts()
+                        .forEach(serviceAccount -> serviceAccountEmailsToFind.remove(serviceAccount.getEmail()));
+                listServiceAccountEmailsRequest.setPageToken(response.getNextPageToken());
+            } while (response.getNextPageToken() != null && !serviceAccountEmailsToFind.isEmpty());
 
-                if (serviceAccount.isEmpty()) {
-                    addError(resultBuilder, String.format("Service Account with email %s does not exist in the given Google Cloud project.",
-                            cloudFileSystem.getServiceAccountEmail()));
-                }
+            if (!serviceAccountEmailsToFind.isEmpty()) {
+                addError(resultBuilder, String.format("Service Account with email(s) '%s' could not be found in the configured Google Cloud project '%s'.",
+                        String.join(", ", serviceAccountEmailsToFind), projectId));
             }
-
         }
         return resultBuilder;
     }
