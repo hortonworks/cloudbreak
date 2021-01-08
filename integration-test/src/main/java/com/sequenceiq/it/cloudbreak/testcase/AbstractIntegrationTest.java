@@ -121,7 +121,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         dto.getResponse().getImages().getCdhImages().stream()
                 .filter(img -> img.getUuid().equalsIgnoreCase(imageUuid))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(imageUuid + " base image is missing from the '" + dto.getName() + "' catalog."));
+                .orElseThrow(() -> new RuntimeException(imageUuid + " prewarmed image is missing from the '" + dto.getName() + "' catalog."));
     }
 
     protected void validateBaseImage(TestContext testContext, String imageUuid) {
