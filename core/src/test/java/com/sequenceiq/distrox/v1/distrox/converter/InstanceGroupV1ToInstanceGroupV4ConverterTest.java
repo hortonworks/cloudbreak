@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,8 +23,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -36,7 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAcce
 @ExtendWith(MockitoExtension.class)
 class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
-    private static final String INSTANE_GROUP_NAME = "ig1";
+    private static final String INSTANCE_GROUP_NAME = "ig1";
 
     private static final String SECURITY_GROUP1 = "sg1";
 
@@ -50,7 +49,9 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     private static final AwsInstanceGroupV4Parameters AWS_INSTANCE_GROUP_V4_PARAMETERS = new AwsInstanceGroupV4Parameters();
 
-    private static final InstanceTemplateV4Request INSTENCE_TEMPLATE_V4_REQUEST = new InstanceTemplateV4Request();
+    private static final InstanceTemplateV4Request INSTANCE_TEMPLATE_V4_REQUEST = new InstanceTemplateV4Request();
+
+    private static final InstanceTemplateV1Request INSTANCE_TEMPLATE_V1_REQUEST = new InstanceTemplateV1Request();
 
     @Mock
     private InstanceTemplateV1ToInstanceTemplateV4Converter instanceTemplateConverter;
@@ -61,15 +62,11 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     @InjectMocks
     private InstanceGroupV1ToInstanceGroupV4Converter underTest;
 
-    @BeforeEach
-    void setUp() {
-        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTENCE_TEMPLATE_V4_REQUEST);
-    }
-
     @Test
     void gatewayIGMustContain1Node() {
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(InstanceGroupType.GATEWAY);
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.GATEWAY);
 
         instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(2));
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.convertTo(instanceGroups, null));
@@ -85,7 +82,9 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @Test
     void convertToAwsWithoutSecurityGroupsHappyPathTest() {
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(InstanceGroupType.CORE);
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
         assertThat(results).hasSameSizeAs(instanceGroups);
@@ -94,17 +93,17 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
         assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V4_PARAMETERS);
         assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
-        assertThat(first.getName()).isEqualTo(INSTANE_GROUP_NAME);
+        assertThat(first.getName()).isEqualTo(INSTANCE_GROUP_NAME);
         assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
         assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
         assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
-        assertThat(first.getTemplate()).isEqualTo(INSTENCE_TEMPLATE_V4_REQUEST);
+        assertThat(first.getTemplate()).isEqualTo(INSTANCE_TEMPLATE_V4_REQUEST);
         assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
     }
 
     // @formatter:off
     // CHECKSTYLE:OFF
-    static Object[][] securityAccessDataProvider() {
+    static Object[][] securityAccessDataProviderForConvertTo() {
         return new Object[][] {
                 // Testcase name                       InstanceGroupType          EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox   securityGroupExpected  cidrExpected,  expectedSGs
                 { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null,                 true,                  false,         Set.of() },
@@ -123,15 +122,17 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     // @formatter:on
 
     @ParameterizedTest(name = "{0}")
-    @MethodSource("securityAccessDataProvider")
-    void createSecurityGroupFromEnvironmentTest(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet, boolean securityAccessSet,
-            String cidr, String defaultSecurityGroupId, String securityGroupIdKnox, boolean securityGroupExpected,
+    @MethodSource("securityAccessDataProviderForConvertTo")
+    void createSecurityGroupFromEnvironmentTestForConvertTo(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet,
+            boolean securityAccessSet, String cidr, String defaultSecurityGroupId, String securityGroupIdKnox, boolean securityGroupExpected,
             boolean cidrExpected, Set<String> expectedSecurityGroups) {
 
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
         DetailedEnvironmentResponse environment = environmentSet
                 ? prepareEnvironment(securityAccessSet, cidr, defaultSecurityGroupId, securityGroupIdKnox)
                 : null;
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroups(instanceGroupType);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(instanceGroupType);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
         assertThat(results).hasSameSizeAs(instanceGroups);
@@ -152,6 +153,67 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         }
     }
 
+    @Test
+    void convertFromAwsWithoutSecurityGroupsHappyPathTest() {
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
+        List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(InstanceGroupType.CORE);
+
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        assertThat(results).hasSameSizeAs(instanceGroups);
+
+        InstanceGroupV1Request first = results.stream().findFirst().get();
+
+        assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V1_PARAMETERS);
+        assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(first.getName()).isEqualTo(INSTANCE_GROUP_NAME);
+        assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
+        assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
+        assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
+        assertThat(first.getTemplate()).isEqualTo(INSTANCE_TEMPLATE_V1_REQUEST);
+        assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+    }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    static Object[][] securityAccessDataProviderForConvertFrom() {
+        return new Object[][] {
+                // Testcase name                       InstanceGroupType          EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox
+                { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null},
+                { "No SecurityAccess set",             InstanceGroupType.CORE,    true,            false,              null,        null,                   null},
+                { "SecurityAccess w/ null props",      InstanceGroupType.CORE,    true,            true,               null,        null,                   null},
+                { "SecurityAccess w/ empty cidr",      InstanceGroupType.CORE,    true,            true,               "",          null,                   null},
+                { "SecurityAccess w/ empty group Ids", InstanceGroupType.CORE,    true,            true,               null,        "",                     ""},
+                { "Core group Id",                     InstanceGroupType.CORE,    true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2},
+                { "Gateway group Id",                  InstanceGroupType.GATEWAY, true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2},
+                { "CIDR and SG uses SG",               InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", SECURITY_GROUP1,        SECURITY_GROUP2},
+                { "CIDR",                              InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", null,                   null},
+
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("securityAccessDataProviderForConvertFrom")
+    void createSecurityGroupFromEnvironmentTestForConvertFrom(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet,
+            boolean securityAccessSet, String cidr, String defaultSecurityGroupId, String securityGroupIdKnox) {
+
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
+
+        DetailedEnvironmentResponse environment = environmentSet
+                ? prepareEnvironment(securityAccessSet, cidr, defaultSecurityGroupId, securityGroupIdKnox)
+                : null;
+        List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(instanceGroupType);
+
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+        assertThat(results).hasSameSizeAs(instanceGroups);
+        InstanceGroupV1Request first = results.stream().findFirst().get();
+
+        assertThat(first.getType()).isEqualTo(instanceGroupType);
+    }
+
     private DetailedEnvironmentResponse prepareEnvironment(boolean securityAccessSet,
             String cidr, String defaultSecurityGroupId, String securityGroupIdKnox) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
@@ -161,10 +223,26 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         return environment;
     }
 
-    private Set<InstanceGroupV1Request> prepareInstanceGroups(InstanceGroupType instanceGroupType) {
+    private List<InstanceGroupV4Request> prepareInstanceGroupV4Requests(InstanceGroupType instanceGroupType) {
+        InstanceGroupV4Request instanceGroup = new InstanceGroupV4Request();
+        instanceGroup.setAws(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        instanceGroup.setName(INSTANCE_GROUP_NAME);
+        if (InstanceGroupType.GATEWAY.equals(instanceGroupType)) {
+            instanceGroup.setNodeCount(1);
+        } else {
+            instanceGroup.setNodeCount(NODE_COUNT_1);
+        }
+        instanceGroup.setRecipeNames(RECIPE_NAMES);
+        instanceGroup.setRecoveryMode(RecoveryMode.AUTO);
+        instanceGroup.setTemplate(new InstanceTemplateV4Request());
+        instanceGroup.setType(instanceGroupType);
+        return List.of(instanceGroup);
+    }
+
+    private Set<InstanceGroupV1Request> prepareInstanceGroupV1Requests(InstanceGroupType instanceGroupType) {
         InstanceGroupV1Request instanceGroup = new InstanceGroupV1Request();
         instanceGroup.setAws(AWS_INSTANCE_GROUP_V1_PARAMETERS);
-        instanceGroup.setName(INSTANE_GROUP_NAME);
+        instanceGroup.setName(INSTANCE_GROUP_NAME);
         if (InstanceGroupType.GATEWAY.equals(instanceGroupType)) {
             instanceGroup.setNodeCount(1);
         } else {
