@@ -175,14 +175,14 @@ public class TelemetryConverter {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
             Map<String, Object> waDefaultAttributes = createWAAttributesFromEnvironmentResponse(response);
-            workloadAnalyticsRequest = fillWARequestFromEnvironmenResponse(response, sdxClusterResponse, waDefaultAttributes);
+            workloadAnalyticsRequest = fillWARequestFromEnvironmentResponse(response, sdxClusterResponse, waDefaultAttributes);
         } else {
             LOGGER.debug("Workload analytics feature is disabled (globally).");
         }
         return workloadAnalyticsRequest;
     }
 
-    private WorkloadAnalyticsRequest fillWARequestFromEnvironmenResponse(TelemetryResponse response,
+    private WorkloadAnalyticsRequest fillWARequestFromEnvironmentResponse(TelemetryResponse response,
             SdxClusterResponse sdxClusterResponse, Map<String, Object> waDefaultAttributes) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (response != null && response.getFeatures() != null

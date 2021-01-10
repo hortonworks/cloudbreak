@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,11 +86,6 @@ class BaseDnsEntryServiceTest {
     @InjectMocks
     private NifiHostPublicDnsEntryService underTest;
 
-    @BeforeAll
-    static void setupAll() {
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-    }
-
     @BeforeEach
     void setupEach() {
         underTest.setCertGenerationEnabled(true);
@@ -103,7 +97,7 @@ class BaseDnsEntryServiceTest {
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
 
-        underTest.getComponentLocation(stack);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getComponentLocation(stack));
 
         verify(componentLocatorService).getComponentLocation(cluster, nifiConfigProvider.getRoleTypes());
     }
@@ -127,7 +121,7 @@ class BaseDnsEntryServiceTest {
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
 
-        Map<String, String> result = underTest.createOrUpdate(stack);
+        Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
 
         assertEquals(3, result.size());
         assertTrue(result.containsKey(FQDN_1));
@@ -155,7 +149,7 @@ class BaseDnsEntryServiceTest {
                 .thenReturn(componentLocation);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
-        Map<String, String> result = underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1));
+        Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1)));
 
         assertEquals(1, result.size());
         assertTrue(result.containsKey(FQDN_1));
@@ -181,7 +175,7 @@ class BaseDnsEntryServiceTest {
         when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
         when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
 
-        Map<String, String> result = underTest.deregister(stack);
+        Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deregister(stack));
 
         assertEquals(3, result.size());
         assertTrue(result.containsKey(FQDN_1));
@@ -209,7 +203,7 @@ class BaseDnsEntryServiceTest {
                 .thenReturn(componentLocation);
         when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
-        Map<String, String> result = underTest.deregister(stack, Map.of(FQDN_1, PUBLIC_IP_1));
+        Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deregister(stack, Map.of(FQDN_1, PUBLIC_IP_1)));
 
         assertEquals(1, result.size());
         assertTrue(result.containsKey(FQDN_1));

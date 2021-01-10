@@ -2,11 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.clustertemplate;
 
 import java.util.HashSet;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
@@ -17,16 +13,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
@@ -34,32 +30,37 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 @Component
 public class ClusterTemplateV4RequestToClusterTemplateConverter extends AbstractConversionServiceAwareConverter<ClusterTemplateV4Request, ClusterTemplate> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTemplateV4RequestToClusterTemplateConverter.class);
+    private final UserService userService;
 
-    @Inject
-    private ConverterUtil converterUtil;
+    private final ConverterUtil converterUtil;
 
-    @Inject
-    private WorkspaceService workspaceService;
+    private final WorkspaceService workspaceService;
 
-    @Inject
-    private UserService userService;
+    private final CredentialClientService credentialClientService;
 
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+    private final DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
 
-    @Inject
-    private CredentialClientService credentialClientService;
+    private final CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
-    @Inject
-    private DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter;
+    public ClusterTemplateV4RequestToClusterTemplateConverter(ConverterUtil converterUtil, WorkspaceService workspaceService, UserService userService,
+            CloudbreakRestRequestThreadLocalService restRequestThreadLocalService, CredentialClientService credentialClientService,
+            DistroXV1RequestToStackV4RequestConverter stackV4RequestConverter) {
+        this.converterUtil = converterUtil;
+        this.workspaceService = workspaceService;
+        this.userService = userService;
+        this.restRequestThreadLocalService = restRequestThreadLocalService;
+        this.credentialClientService = credentialClientService;
+        this.stackV4RequestConverter = stackV4RequestConverter;
+    }
 
     @Override
     public ClusterTemplate convert(ClusterTemplateV4Request source) {
+        if (source.getDistroXTemplate() == null) {
+            throw new BadRequestException("The Datahub template cannot be null.");
+        }
         if (StringUtils.isEmpty(source.getDistroXTemplate().getEnvironmentName())) {
             throw new BadRequestException("The environmentName cannot be null.");
         }
-
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
@@ -76,6 +77,7 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
         clusterTemplate.setDatalakeRequired(DatalakeRequired.OPTIONAL);
         clusterTemplate.setFeatureState(FeatureState.RELEASED);
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
+        checkStackWhetherItsCapableOfProvidingCldrRuntimeVersion(stack);
         clusterTemplate.setClouderaRuntimeVersion(stack.getCluster().getBlueprint().getStackVersion());
         if (source.getType() == null) {
             clusterTemplate.setType(ClusterTemplateV4Type.OTHER);
@@ -83,6 +85,15 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
             clusterTemplate.setType(source.getType());
         }
         return clusterTemplate;
+    }
+
+    private void checkStackWhetherItsCapableOfProvidingCldrRuntimeVersion(Stack stack) {
+        String msgBaseFormat = "Unable to determine Cloudera Runtime version since no %s has been found for stack: " + stack.getResourceCrn();
+        if (stack.getCluster() == null) {
+            throw new IllegalStateException(String.format(msgBaseFormat, "cluster"));
+        } else if (stack.getCluster().getBlueprint() == null) {
+            throw new IllegalStateException(String.format(msgBaseFormat, "blueprint"));
+        }
     }
 
     public void prepareEmptyInstanceMetadata(Stack stack) {
@@ -96,4 +107,5 @@ public class ClusterTemplateV4RequestToClusterTemplateConverter extends Abstract
                 ? source.getCloudPlatform()
                 : credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()).cloudPlatform();
     }
+
 }

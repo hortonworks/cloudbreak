@@ -40,6 +40,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
@@ -445,6 +448,38 @@ public class TestUtil {
         cluster.setWorkspace(workspace);
         cluster.setDatabaseServerCrn("databaseCRN");
         return cluster;
+    }
+
+    public static NetworkV4Request networkV4RequestForMock() {
+        NetworkV4Request r = new NetworkV4Request();
+        r.setMock(mockNetworkV4Parameters());
+        r.setCloudPlatform(CloudPlatform.MOCK);
+        r.setSubnetCIDR("0.0.0.0/0");
+        return r;
+    }
+
+    public static MockNetworkV4Parameters mockNetworkV4Parameters() {
+        MockNetworkV4Parameters p = new MockNetworkV4Parameters();
+        p.setSubnetId("someMockSubnet");
+        p.setVpcId("someMockVpc");
+        p.setInternetGatewayId("someMockInternetGatewayId");
+        return p;
+    }
+
+    public static NetworkV4Request networkV4RequestForAws() {
+        NetworkV4Request r = new NetworkV4Request();
+        r.setAws(awsNetworkV4Parameters());
+        r.setCloudPlatform(CloudPlatform.AWS);
+        r.setSubnetCIDR("0.0.0.0/0");
+        return r;
+    }
+
+    public static AwsNetworkV4Parameters awsNetworkV4Parameters() {
+        AwsNetworkV4Parameters p = new AwsNetworkV4Parameters();
+        p.setSubnetId("someAwsSubnet");
+        p.setVpcId("someAwsVpc");
+        p.setInternetGatewayId("someAwsInternetGatewayId");
+        return p;
     }
 
     public static KerberosConfig kerberosConfigFreeipa() {

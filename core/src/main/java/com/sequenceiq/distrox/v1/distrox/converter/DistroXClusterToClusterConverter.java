@@ -5,8 +5,6 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
@@ -20,17 +18,21 @@ import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 @Component
 public class DistroXClusterToClusterConverter {
 
-    @Inject
-    private ClouderaManagerV1ToClouderaManagerV4Converter cmConverter;
+    private final ClouderaManagerV1ToClouderaManagerV4Converter cmConverter;
 
-    @Inject
-    private CloudStorageDecorator cloudStorageDecorator;
+    private final GatewayV1ToGatewayV4Converter gatewayConverter;
 
-    @Inject
-    private GatewayV1ToGatewayV4Converter gatewayConverter;
+    private final CloudStorageDecorator cloudStorageDecorator;
 
-    @Inject
-    private ProxyEndpoint proxyEndpoint;
+    private final ProxyEndpoint proxyEndpoint;
+
+    public DistroXClusterToClusterConverter(ClouderaManagerV1ToClouderaManagerV4Converter cmConverter, CloudStorageDecorator cloudStorageDecorator,
+            GatewayV1ToGatewayV4Converter gatewayConverter, ProxyEndpoint proxyEndpoint) {
+        this.cmConverter = cmConverter;
+        this.cloudStorageDecorator = cloudStorageDecorator;
+        this.gatewayConverter = gatewayConverter;
+        this.proxyEndpoint = proxyEndpoint;
+    }
 
     public ClusterV4Request convert(DistroXV1Request request) {
         return convert(request, null);
@@ -79,4 +81,5 @@ public class DistroXClusterToClusterConverter {
     private String getProxyCrnByName(String accountId, String proxyName) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(() -> proxyEndpoint.getCrnByAccountIdAndName(accountId, proxyName));
     }
+
 }
