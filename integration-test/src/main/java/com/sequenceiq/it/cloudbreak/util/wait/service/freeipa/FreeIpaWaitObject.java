@@ -35,6 +35,10 @@ public class FreeIpaWaitObject implements WaitObject {
         return client.getFreeIpaClient().getFreeIpaV1Endpoint();
     }
 
+    protected FreeIpaClient getClient() {
+        return client;
+    }
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }

@@ -313,7 +313,6 @@ public abstract class TestContext implements ApplicationContextAware {
                     RedbeamsClient.class, redbeamsClient,
                     UmsClient.class, umsClient);
             clients.put(acting.getAccessKey(), clientMap);
-            clients.put(INTERNAL_ACTOR_ACCESS_KEY, clientMap);
             cloudbreakClient.setWorkspaceId(0L);
             redbeamsClient.setEnvironmentCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
                     .setAccountId("it")
@@ -321,6 +320,24 @@ public abstract class TestContext implements ApplicationContextAware {
                     .build().toString());
         }
         return this;
+    }
+
+    private CloudbreakUser createInternalActorForAccountIfNotExists(String tenantName) {
+        CloudbreakUser internalUser = Actor.create(tenantName, "__internal__actor__").acting(testParameter);
+        if (clients.get(internalUser.getAccessKey()) == null) {
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, internalUser);
+            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, internalUser);
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, internalUser);
+            SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, internalUser);
+            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer);
+            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, internalUser);
+            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
+                    FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
+                    RedbeamsClient.class, redbeamsClient,
+                    UmsClient.class, umsClient);
+            clients.put(internalUser.getAccessKey(), clientMap);
+        }
+        return internalUser;
     }
 
     public TestContext addDescription(TestCaseDescription testCaseDesription) {
@@ -643,7 +660,8 @@ public abstract class TestContext implements ApplicationContextAware {
         if (CloudbreakUserCache.getInstance().isInitialized()) {
             accessKey = CloudbreakUserCache.getInstance().getAdminAccessKeyByAccountId(accountId);
         } else {
-            accessKey = INTERNAL_ACTOR_ACCESS_KEY;
+            CloudbreakUser internalActorForAccount = createInternalActorForAccountIfNotExists(accountId);
+            accessKey = internalActorForAccount.getAccessKey();
         }
         U microserviceClient = getMicroserviceClient(testDtoClass, accessKey);
         if (microserviceClient == null) {
