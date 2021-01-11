@@ -28,8 +28,8 @@ import com.google.api.services.compute.model.Image.RawDisk;
 import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.Storage.Buckets;
-import com.google.api.services.storage.Storage.Objects.Copy;
 import com.google.api.services.storage.model.Bucket;
+import com.google.api.services.storage.model.RewriteResponse;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -50,6 +50,8 @@ public class GcpProvisionSetup implements Setup {
 
     private static final String READY = "READY";
 
+    private static final int MAX_RECURSION_NUMBER = 100;
+
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
@@ -61,9 +63,11 @@ public class GcpProvisionSetup implements Setup {
             ImageList list = compute.images().list(projectId).execute();
             if (!containsSpecificImage(list, imageName)) {
                 Storage storage = buildStorage(credential, cloudContext.getName());
+                String accountId = authenticatedContext.getCloudContext().getAccountId();
                 Bucket bucket = new Bucket();
-                String bucketName = GcpLabelUtil.transformValue(String.format("%s-%s-%d", projectId, cloudContext.getName(), cloudContext.getId()));
+                String bucketName = GcpLabelUtil.transformValue(String.format("%s-%s", accountId, projectId));
                 bucket.setName(bucketName);
+                bucket.setLocation(authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
                 bucket.setStorageClass("STANDARD");
                 try {
                     Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
@@ -78,8 +82,7 @@ public class GcpProvisionSetup implements Setup {
                     }
                 }
                 String tarName = getTarName(imageName);
-                Copy copy = storage.objects().copy(getBucket(imageName), tarName, bucket.getName(), tarName, new StorageObject());
-                copy.execute();
+                rewriteUntilDone(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
 
                 Image gcpApiImage = new Image();
                 gcpApiImage.setName(getImageName(imageName));
@@ -97,6 +100,38 @@ public class GcpProvisionSetup implements Setup {
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
             LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
+        }
+    }
+
+    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
+        final String destKey, Storage storage) throws IOException {
+        rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, null, storage, 1);
+    }
+
+    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
+        final String destKey, final String rewriteToken, Storage storage, int recursionNumber) throws IOException {
+        Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
+        if (rewriteToken != null) {
+            rewrite.setRewriteToken(rewriteToken);
+        }
+        RewriteResponse rewriteResponse = rewrite.execute();
+
+        if (recursionNumber > MAX_RECURSION_NUMBER) {
+            throw new CloudConnectorException(
+                    String.format("Image copy from %s/%s to %s/%s reached the maximum number. Exiting the recursion.",
+                            sourceBucket,
+                            sourceKey,
+                            destBucket,
+                            destKey));
+        }
+        if (!rewriteResponse.getDone()) {
+            String rewriteToken2 = rewriteResponse.getRewriteToken();
+            Long totalBytesRewritten = rewriteResponse.getTotalBytesRewritten();
+            LOGGER.debug("Rewriting not finished, bytes completed: {}. Calling rewrite again with token {}. Recursion reached the {}/100 attempt.",
+                    totalBytesRewritten,
+                    rewriteToken2,
+                    recursionNumber);
+            rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, rewriteToken2, storage, ++recursionNumber);
         }
     }
 

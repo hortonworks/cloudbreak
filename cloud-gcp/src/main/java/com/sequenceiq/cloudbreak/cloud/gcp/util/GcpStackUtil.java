@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -107,6 +109,10 @@ public final class GcpStackUtil {
     private static final int MIN_PATH_PARTS = 3;
 
     private static final int FIRST = 0;
+
+    private static final int ONE_MINUTE_IN_MILISECOND = 60000;
+
+    private static final int MINUTES = 3;
 
     private GcpStackUtil() {
     }
@@ -292,13 +298,25 @@ public final class GcpStackUtil {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
             return new Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(name)
-                    .setHttpRequestInitializer(credential)
+                    httpTransport, JSON_FACTORY, setHttpTimeout(credential)).setApplicationName(name)
+                    .setHttpRequestInitializer(setHttpTimeout(credential))
                     .build();
         } catch (Exception e) {
             LOGGER.warn("Error occurred while building Google Storage access.", e);
         }
         return null;
+    }
+
+    private static HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
+        return new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest httpRequest) throws IOException {
+                requestInitializer.initialize(httpRequest);
+                httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
+                httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
+            }
+        };
+
     }
 
     public static SQLAdmin buildSQLAdmin(CloudCredential gcpCredential, String name) {
