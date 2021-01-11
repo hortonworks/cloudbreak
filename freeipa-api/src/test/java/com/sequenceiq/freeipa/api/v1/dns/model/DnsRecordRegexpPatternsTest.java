@@ -51,6 +51,10 @@ class DnsRecordRegexpPatternsTest {
                 {"google.com-", false},
                 {"-google.com", false},
                 {"*.google.com", true},
+                {"ok*.google.com", false},
+                {".*.google.com", false},
+                {"*.", false},
+                {"*", false},
         };
     }
 
@@ -76,7 +80,12 @@ class DnsRecordRegexpPatternsTest {
                 {"www.goo-gle.com", true},
                 {"google.com-", false},
                 {"-google.com", false},
-                {"*.google.com", false},
+                {"*.google.com", true},
+                {"ok.*.google.com", false},
+                {"ok*.google.com", false},
+                {".*.google.com", false},
+                {"*.", false},
+                {"*", false},
         };
     }
 
@@ -103,6 +112,10 @@ class DnsRecordRegexpPatternsTest {
                 {"google.com-", false},
                 {"-google.com", false},
                 {"*.google.com", false},
+                {"ok*.google.com", false},
+                {".*.google.com", false},
+                {"*.", false},
+                {"*", false},
         };
     }
 
