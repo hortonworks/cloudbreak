@@ -2,6 +2,7 @@ base:
            '*':
              - nginx
              - tags
+             - telemetry
              - fluent
              - ntp
              - freeipa

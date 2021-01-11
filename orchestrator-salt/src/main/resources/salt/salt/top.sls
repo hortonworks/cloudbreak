@@ -7,6 +7,7 @@ base:
     - tags
     - docker
     - recipes.runner
+    - telemetry
     - fluent
     - metering
     - ntp

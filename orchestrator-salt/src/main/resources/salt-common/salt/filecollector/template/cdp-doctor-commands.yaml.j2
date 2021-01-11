@@ -1,3 +1,4 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'filecollector/settings.sls' import filecollector with context %}
 commands:
     - command: ps aux
@@ -16,7 +17,7 @@ commands:
     - command: cdp-doctor recipe results
       output: /tmp/doctor_recipes.txt
     - command: cdp-doctor scm list-commands
-      output: /tmp/doctor_scm_agent_commands.txt{% endif %}{% if filecollector.clusterType == "DATAHUB" and filecollector.cdpTelemetryVersion > 0 %}
+      output: /tmp/doctor_scm_agent_commands.txt{% endif %}{% if filecollector.clusterType == "DATAHUB" and telemetry.cdpTelemetryVersion > 0 %}
     - command: cdp-doctor metering status
       output: /tmp/doctor_metering.txt{% endif %}
 report:

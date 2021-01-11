@@ -25,6 +25,10 @@ public class TelemetryClusterDetails {
 
     private final String version;
 
+    private final String databusEndpoint;
+
+    private final boolean databusEndpointValidation;
+
     private TelemetryClusterDetails(Builder builder) {
         this.name = builder.name;
         this.type = builder.type;
@@ -32,6 +36,8 @@ public class TelemetryClusterDetails {
         this.owner = builder.owner;
         this.platform = builder.platform;
         this.version = builder.version;
+        this.databusEndpoint = builder.databusEndpoint;
+        this.databusEndpointValidation = builder.databusEndpointValidation;
     }
 
     public String getName() {
@@ -58,6 +64,14 @@ public class TelemetryClusterDetails {
         return version;
     }
 
+    public String getDatabusEndpoint() {
+        return databusEndpoint;
+    }
+
+    public boolean isDatabusEndpointValidation() {
+        return databusEndpointValidation;
+    }
+
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("platform", ObjectUtils.defaultIfNull(this.platform, EMPTY_CONFIG_DEFAULT));
@@ -66,6 +80,8 @@ public class TelemetryClusterDetails {
         map.put(CLUSTER_CRN_KEY, this.crn);
         map.put("clusterOwner", this.owner);
         map.put("clusterVersion", this.version);
+        map.put("databusEndpoint", this.databusEndpoint);
+        map.put("databusEndpointValidation", this.databusEndpointValidation);
         return map;
     }
 
@@ -82,6 +98,10 @@ public class TelemetryClusterDetails {
         private String platform;
 
         private String version;
+
+        private String databusEndpoint;
+
+        private boolean databusEndpointValidation;
 
         private Builder() {
         }
@@ -121,6 +141,16 @@ public class TelemetryClusterDetails {
 
         public Builder withVersion(String version) {
             this.version = version;
+            return this;
+        }
+
+        public Builder withDatabusEndpoint(String databusEndpoint) {
+            this.databusEndpoint = databusEndpoint;
+            return this;
+        }
+
+        public Builder withDatabusEndpointValidation(boolean databusEndpointValidation) {
+            this.databusEndpointValidation = databusEndpointValidation;
             return this;
         }
 
