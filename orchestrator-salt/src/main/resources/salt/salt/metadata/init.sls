@@ -11,9 +11,11 @@ cluster_metadata:
         {{ metadata }}
     - formatter: json
 
+{% if hostattrs is defined and hostattrs|length %}
 node_attributes:
   file.serialize:
     - name: /opt/metadata/node.json
     - dataset:
         {{ hostattrs }}
     - formatter: json
+{% endif %}
