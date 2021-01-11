@@ -117,7 +117,7 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withAccountId(getAccountId(stack)).withCcmV2Entries(ccmV2Configs(stack));
+            requestBuilder.withAccountId(getAccountId(stack)).withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack));
         }
         return requestBuilder.build();
     }
@@ -128,7 +128,7 @@ public class ClusterProxyService {
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withAccountId(getAccountId(stack)).withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withAccountId(getAccountId(stack))
+            requestBuilder.withAccountId(getAccountId(stack)).withServices(serviceConfigsForCcmV2(stack))
                     .withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
         }
         return requestBuilder.build();
@@ -138,6 +138,13 @@ public class ClusterProxyService {
         String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
         return asList(
                 cmServiceConfig(stack, null, "cloudera-manager", clusterManagerUrl(stack)),
+                cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
+    }
+
+    private List<ClusterServiceConfig> serviceConfigsForCcmV2(Stack stack) {
+        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort());
+        return asList(
+                cmServiceConfig(stack, clientCertificates(stack), "cloudera-manager", internalAdminUrl),
                 cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
     }
 
