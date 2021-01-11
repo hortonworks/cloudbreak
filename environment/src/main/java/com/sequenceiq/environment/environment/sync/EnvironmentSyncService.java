@@ -26,7 +26,7 @@ public class EnvironmentSyncService {
     }
 
     public EnvironmentStatus getStatusByFreeipa(Environment environment) {
-        Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.describe(environment.getResourceCrn());
+        Optional<DescribeFreeIpaResponse> freeIpaResponseOpt = freeIpaService.internalDescribe(environment.getResourceCrn(), environment.getAccountId());
         if (freeIpaResponseOpt.isPresent()) {
             DescribeFreeIpaResponse freeIpaResponse = freeIpaResponseOpt.get();
             switch (freeIpaResponse.getStatus()) {

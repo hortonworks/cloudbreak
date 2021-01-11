@@ -67,6 +67,13 @@ public interface FreeIpaV1Endpoint {
     DescribeFreeIpaResponse describe(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @GET
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_GET_BY_ENVID_AND_ACCOUNTID, produces = MediaType.APPLICATION_JSON,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalGetFreeIpaByEnvironmentV1")
+    DescribeFreeIpaResponse describeInternal(@QueryParam("environment") String environmentCrn, @QueryParam("accountId") @AccountId String accountId);
+
+    @GET
     @Path("/list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.LIST_BY_ACCOUNT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,

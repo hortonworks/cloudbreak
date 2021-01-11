@@ -65,6 +65,19 @@ public class FreeIpaService {
         }
     }
 
+    public Optional<DescribeFreeIpaResponse> internalDescribe(String envCrn, String accountId) {
+        try {
+            return Optional.of(freeIpaV1Endpoint.describeInternal(envCrn, accountId));
+        } catch (NotFoundException e) {
+            LOGGER.warn("Could not find freeipa with envCrn: " + envCrn);
+            return Optional.empty();
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
     public void delete(String environmentCrn, boolean forced) {
         try {
             freeIpaV1Endpoint.delete(environmentCrn, forced);

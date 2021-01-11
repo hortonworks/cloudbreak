@@ -148,6 +148,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public DescribeFreeIpaResponse describeInternal(@ResourceCrn String environmentCrn, @AccountId String accountId) {
+        return freeIpaDescribeService.describe(environmentCrn, accountId);
+    }
+
+    @Override
     @DisableCheckPermissions
     public List<ListFreeIpaResponse> list() {
         String accountId = crnService.getCurrentAccountId();
