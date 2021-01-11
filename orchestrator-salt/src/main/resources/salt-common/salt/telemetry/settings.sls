@@ -64,7 +64,7 @@
     "databusEndpoint": databus_endpoint,
     "databusEndpointValidation": databus_endpoint_validation,
     "cdpTelemetryVersion": cdp_telemetry_version,
-    "proxyFullUrl": proxy_full_url,
+    "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
     "logs": logs
 }) %}
