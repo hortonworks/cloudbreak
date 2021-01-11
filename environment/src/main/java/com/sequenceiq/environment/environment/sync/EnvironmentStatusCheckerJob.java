@@ -76,7 +76,7 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
     @VisibleForTesting
     void syncAnEnv(Environment environment) {
         try {
-            ThreadBasedUserCrnProvider.doAs(environment.getCreator(), () -> {
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
                 EnvironmentStatus status = environmentSyncService.getStatusByFreeipa(environment);
                 if (environment.getStatus() != status) {
                     if (!flowLogService.isOtherFlowRunning(environment.getId())) {

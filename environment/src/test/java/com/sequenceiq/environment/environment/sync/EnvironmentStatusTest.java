@@ -73,6 +73,7 @@ class EnvironmentStatusTest {
         environment.setId(ENVIRONMENT_ID);
         environment.setCreator("creator");
         environment.setResourceCrn("crn:env");
+        environment.setAccountId("cloudera");
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(flowLogService.isOtherFlowRunning(ENVIRONMENT_ID)).thenReturn(false);
@@ -114,7 +115,7 @@ class EnvironmentStatusTest {
     private void setFreeIpaStatus(Status freeIpaStatus) {
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
         freeIpaResponse.setStatus(freeIpaStatus);
-        when(freeIpaService.describe(environment.getResourceCrn())).thenReturn(Optional.of(freeIpaResponse));
+        when(freeIpaService.internalDescribe(environment.getResourceCrn(), environment.getAccountId())).thenReturn(Optional.of(freeIpaResponse));
     }
 
     @Configuration

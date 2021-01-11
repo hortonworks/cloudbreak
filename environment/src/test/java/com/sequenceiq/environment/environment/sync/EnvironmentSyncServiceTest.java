@@ -29,9 +29,10 @@ public class EnvironmentSyncServiceTest {
     @MethodSource("getStatusByFreeipaParams")
     void testGetStatusByFreeipa(String testName, DescribeFreeIpaResponse freeIpaResponse, EnvironmentStatus expected) {
         Environment environment = new Environment();
+        environment.setAccountId("cloudera");
         environment.setResourceCrn("crn");
 
-        when(freeIpaService.describe(environment.getResourceCrn())).thenReturn(Optional.of(freeIpaResponse));
+        when(freeIpaService.internalDescribe(environment.getResourceCrn(), "cloudera")).thenReturn(Optional.of(freeIpaResponse));
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
 
@@ -44,7 +45,7 @@ public class EnvironmentSyncServiceTest {
         environment.setResourceCrn("crn");
         environment.setCreateFreeIpa(true);
 
-        when(freeIpaService.describe(environment.getResourceCrn())).thenReturn(Optional.empty());
+        when(freeIpaService.internalDescribe(environment.getResourceCrn(), "cloudera")).thenReturn(Optional.empty());
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
         Assertions.assertEquals(EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE, actual);
@@ -56,7 +57,7 @@ public class EnvironmentSyncServiceTest {
         environment.setResourceCrn("crn");
         environment.setCreateFreeIpa(false);
 
-        when(freeIpaService.describe(environment.getResourceCrn())).thenReturn(Optional.empty());
+        when(freeIpaService.internalDescribe(environment.getResourceCrn(), "cloudera")).thenReturn(Optional.empty());
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
         Assertions.assertEquals(EnvironmentStatus.AVAILABLE, actual);
