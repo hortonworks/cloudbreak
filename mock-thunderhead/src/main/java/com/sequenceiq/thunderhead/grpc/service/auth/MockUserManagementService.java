@@ -241,6 +241,8 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT = "CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT";
 
+    private static final String CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT = "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY";
+
     private static final String MOCK_RESOURCE = "mock_resource";
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
@@ -340,6 +342,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.environment.experience.deletion.enable}")
     private boolean enableExperienceDeletionByEnvironment;
+
+    @Value("${auth.mock.endpointgateway.enable}")
+    private boolean publicEndpointAccessGatewayEnabled;
 
     private String cbLicense;
 
@@ -659,6 +664,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableExperienceDeletionByEnvironment) {
             builder.addEntitlements(createEntitlement(CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT));
+        }
+        if (publicEndpointAccessGatewayEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

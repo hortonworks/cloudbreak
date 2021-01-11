@@ -238,6 +238,9 @@ public class MockUserManagementServiceTest {
 
                 {"datalakeLoadBalancerEnabled false", "datalakeLoadBalancerEnabled", false, "CDP_DATA_LAKE_LOAD_BALANCER", false},
                 {"datalakeLoadBalancerEnabled true", "datalakeLoadBalancerEnabled", true, "CDP_DATA_LAKE_LOAD_BALANCER", true},
+
+                {"publicEndpointAccessGatewayEnabled false", "publicEndpointAccessGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", false},
+                {"publicEndpointAccessGatewayEnabled true", "publicEndpointAccessGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", true},
         };
     }
 

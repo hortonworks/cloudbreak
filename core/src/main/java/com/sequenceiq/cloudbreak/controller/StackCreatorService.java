@@ -237,7 +237,7 @@ public class StackCreatorService {
                         );
 
                 try {
-                    LOGGER.info("Create cluster entity in the database {} ms with name {}.", stackName);
+                    LOGGER.info("Create cluster entity in the database with name {}.", stackName);
                     long clusterSaveStart = System.currentTimeMillis();
                     createClusterIfNeed(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
                     LOGGER.info("Cluster save took {} ms", System.currentTimeMillis() - clusterSaveStart);

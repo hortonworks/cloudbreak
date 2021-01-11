@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Set;
+
 import com.sequenceiq.common.api.type.Tunnel;
 
 public class SubnetSelectionParameters {
@@ -10,10 +12,13 @@ public class SubnetSelectionParameters {
 
     private final boolean preferPrivateIfExist;
 
-    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean preferPrivateIfExist) {
+    private final Set<String> availabilityZones;
+
+    private SubnetSelectionParameters(Tunnel tunnel, boolean ha, boolean preferPrivateIfExist, Set<String> availabilityZones) {
         this.tunnel = tunnel;
         this.ha = ha;
         this.preferPrivateIfExist = preferPrivateIfExist;
+        this.availabilityZones = availabilityZones;
     }
 
     public Tunnel getTunnel() {
@@ -28,6 +33,10 @@ public class SubnetSelectionParameters {
         return preferPrivateIfExist;
     }
 
+    public Set<String> getAvailabilityZones() {
+        return availabilityZones;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -38,6 +47,8 @@ public class SubnetSelectionParameters {
         private boolean ha;
 
         private boolean preferPrivateIfExist;
+
+        private Set<String> requiredAvailabilityZones = Set.of();
 
         public Builder withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
@@ -54,8 +65,13 @@ public class SubnetSelectionParameters {
             return this;
         }
 
+        public Builder withRequiredAvailabilityZones(Set<String> requiredAvailabilityZones) {
+            this.requiredAvailabilityZones = requiredAvailabilityZones;
+            return this;
+        }
+
         public SubnetSelectionParameters build() {
-            return new SubnetSelectionParameters(tunnel, ha, preferPrivateIfExist);
+            return new SubnetSelectionParameters(tunnel, ha, preferPrivateIfExist, requiredAvailabilityZones);
         }
     }
 }

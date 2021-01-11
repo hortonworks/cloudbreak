@@ -1,28 +1,23 @@
 package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AwsTargetGroup {
 
     private static final String TARGET_GROUP_NAME_PREFIX = "TargetGroupPort";
 
+    private final Set<String> instanceIds = new HashSet<>();
+
     private final int port;
 
     private final String name;
 
-    private final int order;
-
-    private final List<String> instanceIds;
-
     private String arn;
 
-    public AwsTargetGroup(int port, AwsLoadBalancerScheme scheme, int order, List<String> instanceIds) {
+    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port) {
         this.port = port;
-        this.order = order;
-        this.instanceIds = instanceIds;
-        name = getTargetGroupName(port, scheme);
+        this.name = getTargetGroupName(port, scheme);
     }
 
     public int getPort() {
@@ -41,16 +36,15 @@ public class AwsTargetGroup {
         return name;
     }
 
-    public int getOrder() {
-        return order;
-    }
-
-    public List<String> getInstanceIds() {
+    public Set<String> getInstanceIds() {
         return instanceIds;
     }
 
+    public void addInstanceIds(Set<String> newInstanceIds) {
+        instanceIds.addAll(newInstanceIds);
+    }
+
     public static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {
-        return TARGET_GROUP_NAME_PREFIX + port +
-            StringUtils.capitalize(scheme.name().toLowerCase());
+        return TARGET_GROUP_NAME_PREFIX + port + scheme.resourceName();
     }
 }

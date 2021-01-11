@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.loadbalancer;
 
-import java.util.List;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.Set;
 
 public class AwsListener {
 
@@ -10,26 +8,30 @@ public class AwsListener {
 
     private final int port;
 
-    private final List<AwsTargetGroup> targetGroups;
+    private final AwsTargetGroup targetGroup;
 
     private final String name;
 
-    public AwsListener(int port, List<AwsTargetGroup> targetGroups, AwsLoadBalancerScheme scheme) {
+    public AwsListener(AwsLoadBalancerScheme scheme, int port) {
         this.port = port;
-        this.targetGroups = targetGroups;
         this.name = getListenerName(port, scheme);
+        this.targetGroup = new AwsTargetGroup(scheme, port);
     }
 
     public int getPort() {
         return port;
     }
 
-    public List<AwsTargetGroup> getTargetGroups() {
-        return targetGroups;
+    public AwsTargetGroup getTargetGroup() {
+        return targetGroup;
+    }
+
+    public void addInstancesToTargetGroup(Set<String> instanceIds) {
+        targetGroup.addInstanceIds(instanceIds);
     }
 
     public boolean areTargetGroupArnsSet() {
-        return targetGroups.stream().noneMatch(t -> t.getArn() == null || t.getArn().isEmpty());
+        return targetGroup.getArn() != null && !targetGroup.getArn().isEmpty();
     }
 
     public String getName() {
@@ -37,7 +39,6 @@ public class AwsListener {
     }
 
     private static String getListenerName(int port, AwsLoadBalancerScheme scheme) {
-        return LISTENER_NAME_PREFIX + port +
-            StringUtils.capitalize(scheme.name().toLowerCase());
+        return LISTENER_NAME_PREFIX + port + scheme.resourceName();
     }
 }

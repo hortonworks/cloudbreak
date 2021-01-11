@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -187,7 +188,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
-        stack.setLoadBalancers(createLoadBalancers(source, stack));
+        stack.setLoadBalancers(createLoadBalancers(source, stack, environment));
         return stack;
     }
 
@@ -349,39 +350,88 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         return convertedSet;
     }
 
-    private Set<LoadBalancer> createLoadBalancers(StackV4Request source, Stack stack) {
+    private Set<LoadBalancer> createLoadBalancers(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
+        LOGGER.info("Setting up load balancers for stack {}", source.getName());
         Set<LoadBalancer> loadBalancers = new HashSet<>();
-        Set<TargetGroup> targetGroups = new HashSet<>();
-        // TODO expand this to data hubs
-        if (StackType.DATALAKE.equals(source.getType()) &&
-            entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            LOGGER.info("Setting up load balancers for stack {}", source.getName());
-            Set<String> knoxGatewayGroupNames = loadBalancerConfigService.getKnoxGatewayGroups(stack);
-            Set<InstanceGroup> knoxGatewayGroups = stack.getInstanceGroups().stream()
-                .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
-                .collect(Collectors.toSet());
-            if (!knoxGatewayGroups.isEmpty()) {
-                LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
-                TargetGroup targetGroup = new TargetGroup();
-                targetGroup.setType(TargetGroupType.KNOX);
-                targetGroup.setInstanceGroups(knoxGatewayGroups);
-                targetGroups.add(targetGroup);
-                knoxGatewayGroups.forEach(ig -> ig.addTargetGroup(targetGroup));
+
+        if (environment != null) {
+            Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
+            if (knoxTargetGroup.isPresent()) {
+                if (shouldCreateInternalKnoxLoadBalancer(source.getType(), environment.getNetwork())) {
+                    LOGGER.debug("Found Knox enabled instance groups in stack. Setting up internal Knox load balancer");
+                    setupKnoxLoadBalancer(
+                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PRIVATE, stack),
+                        knoxTargetGroup.get());
+                }
+                if (shouldCreateExternalKnoxLoadBalancer(source.getType(), environment.getNetwork())) {
+                    LOGGER.debug("Public endpoint access gateway is enabled. Setting up public Knox load balancer");
+                    setupKnoxLoadBalancer(
+                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PUBLIC, stack),
+                        knoxTargetGroup.get());
+                }
+            } else {
+                LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
             }
+
             // TODO CB-9368 - create target group for CM instances
         }
 
-        if (!targetGroups.isEmpty()) {
-            LoadBalancer loadBalancer = new LoadBalancer();
+        return loadBalancers;
+    }
+
+    private boolean shouldCreateInternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
+        // TODO expand this to data hubs
+        return StackType.DATALAKE.equals(type) &&
+            (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId())
+            || isEndpointGatewayEnabled(network));
+    }
+
+    private boolean shouldCreateExternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
+        // TODO expand this to data hubs
+        return StackType.DATALAKE.equals(type) && isEndpointGatewayEnabled(network);
+    }
+
+    private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
+        return network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED
+            && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack) {
+        TargetGroup knoxTargetGroup = null;
+        Set<String> knoxGatewayGroupNames = loadBalancerConfigService.getKnoxGatewayGroups(stack);
+        Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
+            .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
+            .collect(Collectors.toSet());
+        if (!knoxGatewayInstanceGroups.isEmpty()) {
+            LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
+            knoxTargetGroup = new TargetGroup();
+            knoxTargetGroup.setType(TargetGroupType.KNOX);
+            knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
+            TargetGroup finalKnoxTargetGroup = knoxTargetGroup;
+            knoxGatewayInstanceGroups.forEach(ig -> ig.addTargetGroup(finalKnoxTargetGroup));
+        }
+        return Optional.ofNullable(knoxTargetGroup);
+    }
+
+    private LoadBalancer createLoadBalancerIfNotExists(Set<LoadBalancer> loadBalancers, LoadBalancerType type, Stack stack) {
+        LoadBalancer loadBalancer;
+        Optional<LoadBalancer> existingLoadBalancer = loadBalancers.stream()
+            .filter(lb -> lb.getType() == type)
+            .findFirst();
+        if (existingLoadBalancer.isPresent()) {
+            loadBalancer = existingLoadBalancer.get();
+        } else {
+            loadBalancer = new LoadBalancer();
+            loadBalancer.setType(type);
             loadBalancer.setStack(stack);
-            // TODO CB-9900 make this dynamic based on network type instead of hardcoded
-            loadBalancer.setType(LoadBalancerType.PRIVATE);
-            loadBalancer.setTargetGroups(targetGroups);
-            targetGroups.forEach(tg -> tg.setLoadBalancer(loadBalancer));
             loadBalancers.add(loadBalancer);
         }
+        return loadBalancer;
+    }
 
-        return loadBalancers;
+    private void setupKnoxLoadBalancer(LoadBalancer loadBalancer, TargetGroup knoxTargetGroup) {
+        loadBalancer.addTargetGroup(knoxTargetGroup);
+        knoxTargetGroup.addLoadBalancer(loadBalancer);
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
