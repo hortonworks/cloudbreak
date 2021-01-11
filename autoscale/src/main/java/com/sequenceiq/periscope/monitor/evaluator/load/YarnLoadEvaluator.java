@@ -158,6 +158,6 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         scalingEvent.setDecommissionNodeIds(yarnRecommendedDecommissionHosts);
         eventPublisher.publishEvent(scalingEvent);
         LOGGER.info("Triggered ScaleDown for Cluster '{}', NodeCount '{}', HostGroup '{}', DecommissionNodeIds '{}'",
-                yarnRecommendedDecommissionHosts.size(), cluster.getStackCrn(), policyHostGroup, yarnRecommendedDecommissionHosts);
+                cluster.getStackCrn(), yarnRecommendedDecommissionHosts.size(), policyHostGroup, yarnRecommendedDecommissionHosts);
     }
 }
