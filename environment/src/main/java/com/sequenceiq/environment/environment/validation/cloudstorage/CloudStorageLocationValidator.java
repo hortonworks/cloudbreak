@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.validation.cloudstorage;
 
 import java.util.Optional;
 
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -55,6 +56,37 @@ public class CloudStorageLocationValidator {
             }
             if (logging.getGcs() != null) {
                 return Optional.of(logging.getGcs().getType());
+            }
+        }
+        return response;
+    }
+
+    public void validateBackup(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
+        Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
+        String bucketName = getBucketName(fileSystemType, storageLocation);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+                        response.getRegion(),
+                        bucketName,
+                        environment.getLocation()));
+    }
+
+    private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {
+        Optional<FileSystemType> response = Optional.empty();
+        if (environment.getBackup() != null) {
+            EnvironmentBackup backup = environment.getBackup();
+            if (backup.getS3() != null) {
+                return Optional.of(backup.getS3().getType());
+            }
+            if (backup.getAdlsGen2() != null) {
+                return Optional.of(backup.getAdlsGen2().getType());
+            }
+            if (backup.getGcs() != null) {
+                return Optional.of(backup.getGcs().getType());
             }
         }
         return response;

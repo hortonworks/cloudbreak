@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -73,6 +74,9 @@ public class CreateFreeIpaRequest implements TaggableRequest {
 
     @ApiModelProperty(FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryRequest telemetry;
+
+    @ApiModelProperty(FreeIpaModelDescriptions.BACKUP)
+    private BackupRequest backupRequest;
 
     @ApiModelProperty(FreeIpaModelDescriptions.TAGS)
     private Map<String, String> tags = new HashMap<>();
@@ -165,6 +169,14 @@ public class CreateFreeIpaRequest implements TaggableRequest {
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupRequest getBackupRequest() {
+        return backupRequest;
+    }
+
+    public void setBackupRequest(BackupRequest backupRequest) {
+        this.backupRequest = backupRequest;
     }
 
     public Boolean getUseCcm() {

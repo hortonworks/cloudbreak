@@ -2,6 +2,7 @@ package com.sequenceiq.common.api.telemetry.doc;
 
 public class TelemetryModelDescription {
 
+    public static final String TELEMETRY_BACKUP = "Cloud backup (telemetry) settings.";
     public static final String TELEMETRY_LOGGING = "Cloud Logging (telemetry) settings.";
     public static final String TELEMETRY_WORKLOAD_ANALYTICS = "Workload analytics (telemetry) settings.";
     public static final String TELEMETRY_WORKLOAD_ANALYTICS_ATTRIBUTES = "Workload analytics (telemetry) attributes.";
@@ -14,6 +15,11 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_LOGGING_GCS_ATTRIBUTES = "telemetry - logging gcs attributes";
     public static final String TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES = "telemetry - logging cloudwatch attributes";
     public static final String TELEMETRY_LOGGING_STORAGE_LOCATION = "telemetry - logging storage location / container";
+    public static final String TELEMETRY_BACKUP_S3_ATTRIBUTES = "telemetry - backup s3 attributes";
+    public static final String TELEMETRY_BACKUP_ADLS_GEN_2_ATTRIBUTES = "telemetry - backup adls gen2 attributes";
+    public static final String TELEMETRY_BACKUP_GCS_ATTRIBUTES = "telemetry - backup gcs attributes";
+    public static final String TELEMETRY_BACKUP_CLOUDWATCH_ATTRIBUTES = "telemetry - backup cloudwatch attributes";
+    public static final String TELEMETRY_BACKUP_STORAGE_LOCATION = "telemetry - backup storage location / container";
     public static final String TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED = "enable cluster logs collection";
     public static final String TELEMETRY_CLUSTER_MONITORING_ENABLED = "enable monitoring for cluster services";
     public static final String TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED = "enable uploading daemon service logs to cloud storage from the cluster nodes. " +

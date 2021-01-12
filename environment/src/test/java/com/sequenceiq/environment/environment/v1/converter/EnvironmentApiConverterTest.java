@@ -55,6 +55,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -78,6 +79,9 @@ public class EnvironmentApiConverterTest {
 
     @Mock
     private TelemetryApiConverter telemetryApiConverter;
+
+    @Mock
+    private BackupConverter backupConverter;
 
     @Mock
     private AccountTelemetryService accountTelemetryService;
@@ -237,6 +241,7 @@ public class EnvironmentApiConverterTest {
                 .build());
         FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
         EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
@@ -245,6 +250,7 @@ public class EnvironmentApiConverterTest {
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(backupConverter.convert(eq(request.getBackupRequest()))).thenReturn(environmentBackup);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 

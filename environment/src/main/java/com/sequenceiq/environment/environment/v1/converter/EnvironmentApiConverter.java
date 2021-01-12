@@ -67,6 +67,8 @@ public class EnvironmentApiConverter {
 
     private final TelemetryApiConverter telemetryApiConverter;
 
+    private final BackupConverter backupConverter;
+
     private final AccountTelemetryService accountTelemetryService;
 
     private final TunnelConverter tunnelConverter;
@@ -76,11 +78,13 @@ public class EnvironmentApiConverter {
     private final NetworkRequestToDtoConverter networkRequestToDtoConverter;
 
     public EnvironmentApiConverter(TelemetryApiConverter telemetryApiConverter,
+            BackupConverter backupConverter,
             TunnelConverter tunnelConverter,
             AccountTelemetryService accountTelemetryService,
             CredentialService credentialService,
             FreeIpaConverter freeIpaConverter,
             NetworkRequestToDtoConverter networkRequestToDtoConverter) {
+        this.backupConverter = backupConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.accountTelemetryService = accountTelemetryService;
         this.tunnelConverter = tunnelConverter;
@@ -105,6 +109,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))
+                .withBackup(backupConverter.convert(request.getBackupRequest()))
                 .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
@@ -294,6 +299,7 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
+        NullUtil.doIfNotNull(request.getBackupRequest(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackupRequest())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
         return builder.build();

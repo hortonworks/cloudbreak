@@ -17,6 +17,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.common.api.backup.request.BackupRequest;
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -96,6 +98,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final TelemetryApiConverter telemetryApiConverter;
 
+    private final BackupConverter backupConverter;
+
     private final CloudPlatformConnectors connectors;
 
     private final EventBus eventBus;
@@ -112,6 +116,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
             TelemetryApiConverter telemetryApiConverter,
+            BackupConverter backupConverter,
             CloudPlatformConnectors connectors,
             EventBus eventBus, @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
@@ -123,6 +128,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaPollingService = freeIpaPollingService;
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.backupConverter = backupConverter;
         this.connectors = connectors;
         this.eventBus = eventBus;
         this.enabledChildPlatforms = enabledChildPlatforms;
@@ -217,6 +223,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setPlacementAndNetwork(environment, createFreeIpaRequest);
         setAuthentication(environment.getAuthentication(), createFreeIpaRequest);
         setTelemetry(environment, createFreeIpaRequest);
+        setBackup(environment, createFreeIpaRequest);
         setTags(environment, createFreeIpaRequest);
         SecurityGroupRequest securityGroupRequest = null;
         if (environment.getSecurityAccess() != null) {
@@ -239,6 +246,11 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private void setTelemetry(EnvironmentDto environmentDto, CreateFreeIpaRequest createFreeIpaRequest) {
         TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
         createFreeIpaRequest.setTelemetry(telemetryRequest);
+    }
+
+    private void setBackup(EnvironmentDto environmentDto, CreateFreeIpaRequest createFreeIpaRequest) {
+        BackupRequest backupRequest = backupConverter.convertToRequest(environmentDto.getBackup());
+        createFreeIpaRequest.setBackupRequest(backupRequest);
     }
 
     private void setPlacementAndNetwork(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {

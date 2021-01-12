@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -69,6 +70,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private EnvironmentNetworkResponse network;
 
         private TelemetryResponse telemetry;
+
+        private BackupResponse backupResponse;
 
         private EnvironmentStatus environmentStatus;
 
@@ -162,6 +165,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withTelemetry(TelemetryResponse telemetry) {
             this.telemetry = telemetry;
+            return this;
+        }
+
+        public Builder withBackup(BackupResponse backupResponse) {
+            this.backupResponse = backupResponse;
             return this;
         }
 
@@ -288,6 +296,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCreated(created);
             detailedEnvironmentResponse.setAuthentication(authentication);
             detailedEnvironmentResponse.setTelemetry(telemetry);
+            detailedEnvironmentResponse.setBackupResponse(backupResponse);
             detailedEnvironmentResponse.setSecurityAccess(securityAccess);
             detailedEnvironmentResponse.setTunnel(tunnel);
             detailedEnvironmentResponse.setIdBrokerMappingSource(idBrokerMappingSource);

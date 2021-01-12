@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -62,6 +63,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
+
+    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    private BackupRequest backupRequest;
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)
@@ -160,6 +164,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupRequest getBackupRequest() {
+        return backupRequest;
+    }
+
+    public void setBackupRequest(BackupRequest backupRequest) {
+        this.backupRequest = backupRequest;
     }
 
     public EnvironmentNetworkRequest getNetwork() {
@@ -289,6 +301,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", location=" + location +
                 ", network=" + network +
                 ", telemetry=" + telemetry +
+                ", backupRequest=" + backupRequest +
                 ", authentication=" + authentication +
                 ", freeIpa=" + freeIpa +
                 ", securityAccess=" + securityAccess +

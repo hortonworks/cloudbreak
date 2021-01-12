@@ -5,6 +5,7 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -52,6 +53,9 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryResponse telemetry;
+
+    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    private BackupResponse backupResponse;
 
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkResponse network;
@@ -168,6 +172,14 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setTelemetry(TelemetryResponse telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupResponse getBackupResponse() {
+        return backupResponse;
+    }
+
+    public void setBackupResponse(BackupResponse backupResponse) {
+        this.backupResponse = backupResponse;
     }
 
     public EnvironmentNetworkResponse getNetwork() {
