@@ -305,7 +305,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     public S3CloudStorageV1Parameters s3CloudStorageParameters() {
         S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
-        s3CloudStorageV1Parameters.setInstanceProfile(awsProperties.getCloudstorage().getS3().getInstanceProfile());
+        s3CloudStorageV1Parameters.setInstanceProfile(awsProperties.getCloudStorage().getS3().getInstanceProfile());
         return s3CloudStorageV1Parameters;
     }
 
@@ -317,11 +317,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return String.join("/", awsProperties.getCloudstorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
+        return String.join("/", awsProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     public String getInstanceProfile() {
-        return awsProperties.getCloudstorage().getS3().getInstanceProfile();
+        return awsProperties.getCloudStorage().getS3().getInstanceProfile();
     }
 
     @Override

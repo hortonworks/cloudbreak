@@ -40,7 +40,7 @@ public class S3Client {
 
     public String getBucketName() {
         try {
-            URI uri = new URI(awsProperties.getCloudstorage().getBaseLocation());
+            URI uri = new URI(awsProperties.getCloudStorage().getBaseLocation());
             return uri.getHost();
         } catch (URISyntaxException e) {
             LOGGER.error("Amazon S3 Base Location could not been parsed, because of error!", e);

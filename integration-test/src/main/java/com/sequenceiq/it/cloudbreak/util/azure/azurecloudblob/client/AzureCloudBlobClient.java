@@ -33,8 +33,8 @@ public class AzureCloudBlobClient {
      * @return CloudStorageAccount
      */
     private CloudStorageAccount getCloudStorageAccount() {
-        String accountName = azureProperties.getCloudstorage().getAccountName();
-        String accountKey = azureProperties.getCloudstorage().getAccountKey();
+        String accountName = azureProperties.getCloudStorage().getAccountName();
+        String accountKey = azureProperties.getCloudStorage().getAccountKey();
         String storageConnectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
         CloudStorageAccount storageAccount = null;
 

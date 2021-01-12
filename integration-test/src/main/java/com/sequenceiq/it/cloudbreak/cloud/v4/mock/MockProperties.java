@@ -92,7 +92,7 @@ public class MockProperties {
         return baseimage;
     }
 
-    public Cloudstorage getCloudstorage() {
+    public Cloudstorage getCloudStorage() {
         return cloudstorage;
     }
 

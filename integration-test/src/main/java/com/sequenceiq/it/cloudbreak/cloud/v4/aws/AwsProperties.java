@@ -91,7 +91,7 @@ public class AwsProperties {
         return baseimage;
     }
 
-    public Cloudstorage getCloudstorage() {
+    public Cloudstorage getCloudStorage() {
         return cloudstorage;
     }
 

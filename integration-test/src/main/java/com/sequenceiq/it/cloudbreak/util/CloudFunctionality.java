@@ -75,4 +75,8 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     Map<String, Boolean> enaSupport(List<String> instanceIds);
+
+    default String transformTagKeyOrValue(String originalValue) {
+        return originalValue;
+    }
 }

@@ -130,7 +130,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public void setImageId(String id) {
-        throwNotImplementedException();
+        yarnProperties.getBaseimage().setImageId(id);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (yarnProperties.getBaseimage().getImageId() == null || yarnProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name());
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.YARN.name());
             yarnProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {

@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 import static com.sequenceiq.it.cloudbreak.ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE;
 import static java.lang.String.format;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -299,7 +301,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         WasbCloudStorageV1Parameters wasbCloudStorageV1Parameters = new WasbCloudStorageV1Parameters();
         FileSystemType fileSystemType;
 
-        switch (azureProperties.getCloudstorage().getFileSystemType()) {
+        switch (azureProperties.getCloudStorage().getFileSystemType()) {
             case "WASB_INTEGRATED":
             case "WASB":
                 fileSystemType = wasbCloudStorageV1Parameters.getType();
@@ -312,7 +314,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                 break;
             default:
                 LOGGER.warn("The given {} File System Type is not in the list of Azure file system types. So we use the default one; {}",
-                        azureProperties.getCloudstorage().getFileSystemType(), "ADLS_GEN_2");
+                        azureProperties.getCloudStorage().getFileSystemType(), "ADLS_GEN_2");
                 fileSystemType = adlsGen2CloudStorageV1Parameters.getType();
                 break;
         }
@@ -322,27 +324,27 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return azureProperties.getCloudstorage().getBaseLocation();
+        return azureProperties.getCloudStorage().getBaseLocation();
     }
 
     public String getAssumerIdentity() {
-        return azureProperties.getCloudstorage().getAdlsGen2().getAssumerIdentity();
+        return azureProperties.getCloudStorage().getAdlsGen2().getAssumerIdentity();
     }
 
     public String getLoggerIdentity() {
-        return azureProperties.getCloudstorage().getAdlsGen2().getLoggerIdentity();
+        return azureProperties.getCloudStorage().getAdlsGen2().getLoggerIdentity();
     }
 
     public Boolean getSecure() {
-        return azureProperties.getCloudstorage().getSecure();
+        return azureProperties.getCloudStorage().getSecure();
     }
 
     public String getAccountName() {
-        return azureProperties.getCloudstorage().getAccountName();
+        return azureProperties.getCloudStorage().getAccountName();
     }
 
     public String getAccountKey() {
-        return azureProperties.getCloudstorage().getAccountKey();
+        return azureProperties.getCloudStorage().getAccountKey();
     }
 
     @Override
@@ -354,7 +356,32 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return notImplementedException();
+        if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
+            try {
+                List<ImageV4Response> images = cloudbreakClient
+                        .getCloudbreakClient()
+                        .imageCatalogV4Endpoint()
+                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                                CloudPlatform.AZURE.name()).getCdhImages();
+
+                ImageV4Response olderImage = images.get(images.size() - 2);
+                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+                Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
+                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
+                azureProperties.getBaseimage().setImageId(olderImage.getUuid());
+
+                return olderImage.getUuid();
+            } catch (Exception e) {
+                LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
+                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
+            }
+        } else {
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
+            Log.log(LOGGER, format(" Image ID for SDX create: %s ", azureProperties.getBaseimage().getImageId()));
+            return azureProperties.getBaseimage().getImageId();
+        }
     }
 
     @Override
