@@ -10,9 +10,13 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -28,6 +32,8 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Service
 public class ClusterUpgradeService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeService.class);
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
@@ -76,11 +82,20 @@ public class ClusterUpgradeService {
 
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, "Cluster stack was successfully upgraded.");
+
+        Optional<String> stackVersion = getStackVersionFromImage(targetIm);
+        stackVersion.ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
+                () -> LOGGER.warn("Cluster runtime could not be upgraded for stack with id {}", stackId));
         if (clusterRuntimeUpgradeNeeded) {
             flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, clusterStackVersion);
         } else {
             flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
         }
+    }
+
+    private Optional<String> getStackVersionFromImage(Image image) {
+        return Optional.ofNullable(image.getStackDetails())
+                .map(StackDetails::getVersion);
     }
 
     public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {

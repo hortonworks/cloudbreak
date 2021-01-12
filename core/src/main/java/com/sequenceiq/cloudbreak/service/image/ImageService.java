@@ -85,7 +85,7 @@ public class ImageService {
     }
 
     @Measure(ImageService.class)
-    public void create(Stack stack, String platformString, StatedImage imgFromCatalog)
+    public Set<Component> create(Stack stack, String platformString, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
 
         String region = stack.getRegion();
@@ -96,6 +96,7 @@ public class ImageService {
 
         Set<Component> components = getComponents(stack, Map.of(), imgFromCatalog, imageName);
         componentConfigProviderService.store(components);
+        return components;
     }
 
     //CHECKSTYLE:OFF

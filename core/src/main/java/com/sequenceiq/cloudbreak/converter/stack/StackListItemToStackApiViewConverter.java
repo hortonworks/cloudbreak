@@ -41,6 +41,7 @@ public class StackListItemToStackApiViewConverter {
         response.setDatalakeId(item.getSharedClusterId());
         response.setUserView(getUserView(item));
         response.setTerminated(item.getTerminated());
+        response.setStackVersion(item.getStackVersion());
         response.getCluster().setStack(response);
         return response;
     }

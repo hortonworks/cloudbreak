@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -14,10 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.repository.ComponentRepository;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -89,6 +91,18 @@ public class ComponentConfigProviderService {
             return component.getAttributes().get(StackTemplate.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read template for stack.", e);
+        }
+    }
+
+    public static <T> T getComponent(Collection<Component> components, Class<T> clazz, ComponentType componentType) {
+        try {
+            Optional<Component> comp = components.stream()
+                    .filter(c -> c.getComponentType() == componentType)
+                    .filter(c -> c.getName().equals(componentType.name()))
+                    .findFirst();
+            return comp.isPresent() ? comp.get().getAttributes().get(clazz) : null;
+        } catch (IOException e) {
+            throw new CloudbreakServiceException(String.format("Failed to read component of type %s", componentType.name()), e);
         }
     }
 

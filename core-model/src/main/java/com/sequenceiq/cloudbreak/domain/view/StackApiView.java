@@ -60,6 +60,8 @@ public class StackApiView extends CompactView {
 
     private String resourceCrn;
 
+    private String stackVersion;
+
     @Transient
     private Integer nodeCount;
 
@@ -180,5 +182,13 @@ public class StackApiView extends CompactView {
 
     public void setTunnel(Tunnel tunnel) {
         this.tunnel = tunnel;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }

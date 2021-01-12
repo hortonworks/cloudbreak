@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -14,6 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -45,8 +48,11 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -74,9 +80,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -546,7 +550,8 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
             LOGGER, "Target groups saved in {} ms for stack {}", stackName);
 
         try {
-            imageService.create(savedStack, platformString, imgFromCatalog);
+            Set<Component> components = imageService.create(stack, platformString, imgFromCatalog);
+            setRuntime(stack, components);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
             throw new CloudbreakApiException(e.getMessage(), e);
@@ -559,6 +564,19 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
                 LOGGER, "Save cluster template took {} ms for stack {}", stackName);
 
         return savedStack;
+    }
+
+    private void setRuntime(Stack stack, Set<Component> components) {
+        ClouderaManagerProduct runtime = ComponentConfigProviderService.getComponent(components, ClouderaManagerProduct.class, CDH_PRODUCT_DETAILS);
+        if (Objects.nonNull(runtime)) {
+            String stackVersion = substringBefore(runtime.getVersion(), "-");
+            LOGGER.debug("Setting runtime version {} for stack", stackVersion);
+            stack.setStackVersion(stackVersion);
+            stackRepository.save(stack);
+        } else {
+            // should not happen ever
+            LOGGER.warn("Product component is not present amongst components, runtime could not be set!");
+        }
     }
 
     private void setDefaultTags(Stack stack) {

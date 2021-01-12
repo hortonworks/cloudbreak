@@ -31,6 +31,7 @@ public class StackApiViewToStackViewV4ResponseConverter extends AbstractConversi
         addUser(source, stackViewResponse);
         stackViewResponse.setCloudPlatform(source.getCloudPlatform());
         stackViewResponse.setEnvironmentCrn(source.getEnvironmentCrn());
+        stackViewResponse.setStackVersion(source.getStackVersion());
         return stackViewResponse;
     }
 
