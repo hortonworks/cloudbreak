@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak;
 
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,10 +17,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
 import com.sequenceiq.cloudbreak.tag.DefaultApplicationTag;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.tag.TagPreparationObject;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 
@@ -31,6 +36,7 @@ public class DefaultCostTaggingServiceTest {
     @Before
     public void before() {
         MockitoAnnotations.initMocks(this);
+        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
     }
 
     @Test
@@ -82,10 +88,10 @@ public class DefaultCostTaggingServiceTest {
         Map<String, String> result = underTest.mergeTags(mergeRequest("AWS", envMap, requestTag));
 
         Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("pear3", "pear3");
-        Assert.assertEquals("pear4", "pear4");
-        Assert.assertEquals("apple3", "apple3");
-        Assert.assertEquals("apple4", "apple4");
+        Assert.assertEquals("pear3", result.get("pear3"));
+        Assert.assertEquals("pear4", result.get("pear4"));
+        Assert.assertEquals("apple3", result.get("apple3"));
+        Assert.assertEquals("apple4", result.get("apple4"));
     }
 
     @Test
@@ -113,13 +119,16 @@ public class DefaultCostTaggingServiceTest {
         requestTag.put("owner", "conflict");
 
         CDPTagGenerationRequest tagRequest = tagRequest("AWS", new HashMap<>(), envMap, requestTag);
-        try {
-            underTest.prepareDefaultTags(tagRequest);
-            Assert.fail("Expected an exception due to conflicting account and user tags.");
-        } catch (AccountTagValidationFailed e) {
-            Assert.assertEquals("The request must not contain tag(s) with key: 'owner', because"
-                + " with the same key tag has already been defined on account level!", e.getMessage());
-        }
+
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest);
+
+        Assert.assertEquals(6L, result.size());
+        Assert.assertEquals("owner", result.get("owner"));
+        Assert.assertEquals("creator-crn", result.get("Cloudera-Creator-Resource-Name"));
+        Assert.assertEquals("apple1", result.get("apple1"));
+        Assert.assertEquals("resource-crn", result.get("Cloudera-Resource-Name"));
+        Assert.assertEquals("environment-crn", result.get("Cloudera-Environment-Resource-Name"));
+        Assert.assertEquals("apple2", result.get("apple2"));
     }
 
     private CDPTagGenerationRequest tagRequest(String platform) {
