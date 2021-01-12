@@ -15,7 +15,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightFalseAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightTrueAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckRightFalseAssertion;
@@ -48,6 +48,12 @@ public class EnvironmentCreateTest extends AbstractMockTest {
     @Inject
     private UtilTestClient utilTestClient;
 
+    @Inject
+    private CloudbreakActor cloudbreakActor;
+
+    @Inject
+    private AuthorizationTestUtil authorizationTestUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
@@ -72,9 +78,9 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testFreeipaCreation(testContext);
@@ -88,38 +94,38 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .withEnvironmentUser()
                 .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(EnvironmentTestDto.class).getCrn());
 
         testContext
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.delete())
+                .when(environmentTestClient.delete(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .validate();
     }
 
     private void testCheckRightUtil(TestContext testContext, String envCrn) {
-        AuthorizationTestUtil.testCheckRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckRightTrueAssertion(),
+        authorizationTestUtil.testCheckRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckRightTrueAssertion(),
                 Lists.newArrayList(RightV4.ENV_CREATE), utilTestClient);
-        AuthorizationTestUtil.testCheckRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckRightFalseAssertion(),
+        authorizationTestUtil.testCheckRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckRightFalseAssertion(),
                 Lists.newArrayList(RightV4.ENV_CREATE), utilTestClient);
 
         Map<String, List<RightV4>> resourceRightsToCheckForEnv = Maps.newHashMap();
         resourceRightsToCheckForEnv.put(envCrn, Lists.newArrayList(RightV4.ENV_DELETE, RightV4.ENV_START, RightV4.ENV_STOP));
         Map<String, List<RightV4>> resourceRightsToCheckForDhOnEnv = Maps.newHashMap();
         resourceRightsToCheckForDhOnEnv.put(envCrn, Lists.newArrayList(RightV4.DH_CREATE));
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheckForEnv, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheckForDhOnEnv, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightFalseAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightFalseAssertion(),
                 resourceRightsToCheckForEnv, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightTrueAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheckForDhOnEnv, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
                 resourceRightsToCheckForEnv, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
                 resourceRightsToCheckForDhOnEnv, utilTestClient);
     }
 
@@ -138,11 +144,11 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .await(Status.AVAILABLE)
                 //testing unathorized freeipa calls for the environment
                 .whenException(freeIpaTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on 'environment' " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(freeIpaTestClient.stop(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/stopEnvironment' right on" +
-                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(freeIpaTestClient.start(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/startEnvironment' right on" +
-                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
     }
 

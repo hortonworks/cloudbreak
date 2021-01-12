@@ -26,7 +26,7 @@ public class ResourceAwait {
                 throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
             }
             Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
-            MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.getWho(runningParameter)
+            MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter)
                     .getAccessKey());
             String name = entity.getName();
             WaitObject waitObject = client.waitObject(entity, name, desiredStatuses, testContext);

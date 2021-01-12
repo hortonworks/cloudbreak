@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.who;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -8,7 +9,7 @@ import javax.ws.rs.ForbiddenException;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,6 +20,9 @@ public class RecipeTest extends AbstractIntegrationTest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private CloudbreakActor cloudbreakActor;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -50,20 +54,21 @@ public class RecipeTest extends AbstractIntegrationTest {
                 })
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName())).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
+                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
                                         patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .when(recipeTestClient.deleteV4())
+                                .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .when(recipeTestClient.deleteV4(), who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .when(recipeTestClient.listV4())
                 .then((context, dto, client) -> {
                     Assertions.assertThat(

@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -40,10 +39,6 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
-    }
-
-    public FreeIpaUserSyncTestDto await(UserSyncState userSyncState) {
-        return getTestContext().await(this, Map.of("status", userSyncState), emptyRunningParameter());
     }
 
     public FreeIpaUserSyncTestDto await(OperationState operationState) {

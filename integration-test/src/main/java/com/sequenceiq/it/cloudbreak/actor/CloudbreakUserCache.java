@@ -1,66 +1,118 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
-import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
+@Component
 public class CloudbreakUserCache {
 
-    private static volatile CloudbreakUserCache instance;
-
-    private static Object mutex = new Object();
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUserCache.class);
 
     private Map<String, List<CloudbreakUser>> usersByAccount;
 
-    private CloudbreakUserCache() {
-    }
+    private Set<String> accountIds;
 
-    public static CloudbreakUserCache getInstance() {
-        CloudbreakUserCache result = instance;
-        if (result == null) {
-            synchronized (mutex) {
-                result = instance;
-                if (result == null) {
-                    result = new CloudbreakUserCache();
-                    instance = result;
-                }
-            }
-        }
-        return result;
-    }
+    @Value("${integrationtest.ums.accountKey:}")
+    private String realUmsUserAccount;
 
-    public CloudbreakUser getByName(String name) {
-        if (usersByAccount == null) {
-            initUsers();
-        }
-        return usersByAccount.values().stream().flatMap(Collection::stream)
-                .filter(u -> u.getDisplayName().equals(name)).findFirst().get();
-    }
+    @Value("${integrationtest.ums.deploymentKey:}")
+    private String realUmsUserDeployment;
 
-    public void initUsers() {
+    @PostConstruct
+    private void initRealUmsUserCache() {
         String userConfigPath = "ums-users/api-credentials.json";
-        try {
-            this.usersByAccount = JsonUtil.readValue(
-                    FileReaderUtils.readFileFromClasspathQuietly(userConfigPath), new TypeReference<>() {
-                    });
-        } catch (IOException e) {
-            throw new RuntimeException(String.format("Can't read file: %s It's possible you did run make fetch-secrets", userConfigPath));
+        Map<String, Map<String, List<CloudbreakUser>>> fetchedUserStore;
+        List<CloudbreakUser> cloudbreakUsers;
+        Set<String> accountIds = new HashSet<>();
+        String accountId;
+
+        if (new ClassPathResource(userConfigPath).exists()) {
+            LOGGER.info("Real UMS users are initializing by deployment: {} and account: {}. User store is present at: {} path", realUmsUserDeployment,
+                    realUmsUserAccount, userConfigPath);
+            try {
+                fetchedUserStore = JsonUtil.readValue(
+                        FileReaderUtils.readFileFromClasspathQuietly(userConfigPath), new TypeReference<Map<String, Map<String, List<CloudbreakUser>>>>() { });
+                cloudbreakUsers = fetchedUserStore.entrySet().stream()
+                        .filter(mowEnvs -> mowEnvs.getKey().equalsIgnoreCase(realUmsUserDeployment))
+                        .flatMap(selectedEnv -> selectedEnv.getValue().entrySet().stream()
+                                .filter(mowAccs -> mowAccs.getKey().equalsIgnoreCase(realUmsUserAccount))
+                                .flatMap(selectedAcc -> selectedAcc.getValue().stream())).collect(Collectors.toList());
+                cloudbreakUsers.forEach(user -> accountIds.add(Objects.requireNonNull(Crn.fromString(user.getCrn())).getAccountId()));
+            } catch (Exception e) {
+                throw new TestFailException(String.format(" Can't read UMS user store: %s It's possible you did run 'make fetch-secrets'",
+                        userConfigPath), e);
+            }
+            if (CollectionUtils.isEmpty(accountIds)) {
+                LOGGER.error(" Cannot gather account Ids from the initialized real UMS user CRNs. ");
+                throw new TestFailException("Cannot gather account Ids from the initialized real UMS user CRNs.");
+            } else {
+                LOGGER.info(" Gathered account Ids based on the initialized real UMS user CRNs:: {}", accountIds);
+                accountId = accountIds.stream().findFirst().orElseThrow(() -> new TestFailException(String.format("Account Id Not Found in:: %s", accountIds)));
+                setUsersByAccount(Map.of(accountId, cloudbreakUsers));
+            }
+            usersByAccount.values().stream().flatMap(Collection::stream).forEach(user -> {
+                LOGGER.info(" Initialized real UMS user in account ({}):: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                        accountId, user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+                CloudbreakUser.validateRealUmsUser(user);
+            });
+        } else {
+            LOGGER.info("UMS user store [{}] is not available. So initialization of real UMS user cache is not possible!", userConfigPath);
         }
-        usersByAccount.values().stream().flatMap(Collection::stream).forEach(u -> CloudbreakUser.validateRealUmsUser(u));
     }
 
-    public String getAdminAccessKeyByAccountId(String accountId) {
-        return usersByAccount.get(accountId).stream().filter(CloudbreakUser::getAdmin).findFirst()
-                .orElseThrow(() -> new TestFailException(String.format("There is no account admin test user for account %s", accountId))).getAccessKey();
+    private void setUsersByAccount(Map<String, List<CloudbreakUser>> users) {
+        this.usersByAccount = users;
+    }
+
+    public CloudbreakUser getByDisplayName(String name) {
+        if (MapUtils.isEmpty(usersByAccount)) {
+            initRealUmsUserCache();
+        }
+        CloudbreakUser user = usersByAccount.values().stream().flatMap(Collection::stream)
+                .filter(u -> u.getDisplayName().equals(name)).findFirst()
+                .orElseThrow(() -> new TestFailException(String.format("There is no real UMS user with::%n name: %s%n deployment::account: %s::%s", name,
+                        realUmsUserDeployment, realUmsUserAccount)));
+        LOGGER.info(" Real UMS user has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+        return user;
+    }
+
+    public CloudbreakUser getAdminByAccountId(String accountId) {
+        LOGGER.info("Getting the requested real UMS admin by account Id: {}", accountId);
+        try {
+            CloudbreakUser adminUser = usersByAccount.values().stream().flatMap(Collection::stream)
+                    .filter(CloudbreakUser::getAdmin).findFirst()
+                    .orElseThrow(() -> new TestFailException(String.format("There is no real UMS admin in account: %s", accountId)));
+            LOGGER.info(" Real UMS account admin has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                    adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin());
+            return adminUser;
+        } catch (Exception e) {
+            throw new TestFailException(String.format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
+        }
     }
 
     public boolean isInitialized() {
-        return usersByAccount != null;
+        return MapUtils.isNotEmpty(usersByAccount);
     }
 }

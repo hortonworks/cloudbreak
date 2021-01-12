@@ -35,6 +35,11 @@ integrationtest:
     server: http://localhost
   redbeams:
     server: http://localhost
+  ums:
+    # Possible values: default, legacy
+    accountKey: default
+    # Possible values: dev, int, stage, prod
+    deploymentKey: dev
   user:
     accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlckB1bXMubW9jaw==
     secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
