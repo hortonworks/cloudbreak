@@ -1,7 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -16,7 +14,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMoc
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
-import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -82,6 +80,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
+
+    @Inject
+    private CloudbreakActor cloudbreakActor;
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
@@ -224,21 +225,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void createEnvironmentWithoutTelemetry(TestContext testContext) {
-        testContext
-                .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
-                .given(EnvironmentTestDto.class)
-                .withNetwork()
-                .withCreateFreeIpa(Boolean.TRUE)
-                .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .when(environmentTestClient.describe())
-                .validate();
-    }
-
-    protected void createEnvironmentForSdx(TestContext testContext) {
+    protected void createEnvironmentWithNetwork(TestContext testContext) {
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
@@ -246,19 +233,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withTelemetry("telemetry")
-                .withCreateFreeIpa(Boolean.TRUE)
-                .withS3Guard()
+                .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
-                .validate();
-    }
-
-    protected void createImageCatalog(TestContext testContext, String name) {
-        testContext
-                .given(ImageCatalogTestDto.class)
-                .withName(name)
-                .when(imageCatalogTestClient.createV4(), key(name))
                 .validate();
     }
 
@@ -276,11 +254,11 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createSecondUser(TestContext testContext) {
-        testContext.as(Actor::secondUser);
+        testContext.as(cloudbreakActor.secondUser());
     }
 
     protected void useRealUmsUser(TestContext testContext, String key) {
-        testContext.as(Actor.useRealUmsUser(key));
+        testContext.as(cloudbreakActor.useRealUmsUser(key));
     }
 
     protected void initializeDefaultBlueprints(TestContext testContext) {

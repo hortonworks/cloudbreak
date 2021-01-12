@@ -14,7 +14,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightFalseAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightTrueAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -36,7 +36,6 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
 public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -54,6 +53,12 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
     @Inject
     private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private CloudbreakActor cloudbreakActor;
+
+    @Inject
+    private AuthorizationTestUtil authorizationTestUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -82,18 +87,21 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
+
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDatalake(testContext);
+
         String recipe1Name = testContext
                 .given(RecipeTestDto.class).valid()
-                .when(recipeTestClient.createV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .when(recipeTestClient.createV4(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .getResponse().getName();
         String recipe2Name = testContext
                 .given(RecipeTestDto.class).valid()
-                .when(recipeTestClient.createV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .when(recipeTestClient.createV4(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .getResponse().getName();
         testContext
                 .given(EnvironmentTestDto.class)
@@ -107,14 +115,14 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .given(DistroXTestDto.class)
                 .withRecipe(recipe1Name)
                 .whenException(distroXClient.create(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/useSharedResource' right on" +
-                        " 'recipe' " + datahubRecipePattern(recipe1Name)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " 'recipe' " + datahubRecipePattern(recipe1Name)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .withRecipe(recipe2Name)
-                .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
+                .when(distroXClient.create(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .await(STACK_AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .given(RenewDistroXCertificateTestDto.class)
                 .whenException(distroXClient.renewDistroXCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datahub/repairDatahub'" +
                         " right on any of the " + environmentDhPattern(testContext) + " or on " + datahubPattern(testContext))
-                        .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
@@ -141,11 +149,11 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {
         Map<String, List<RightV4>> resourceRightsToCheck = Maps.newHashMap();
         resourceRightsToCheck.put(dhCrn, Lists.newArrayList(RightV4.DH_DELETE, RightV4.DH_START, RightV4.DH_STOP));
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheck, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightTrueAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheck, utilTestClient);
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
+        authorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ZERO_RIGHTS, new CheckResourceRightFalseAssertion(),
                 resourceRightsToCheck, utilTestClient);
     }
 }

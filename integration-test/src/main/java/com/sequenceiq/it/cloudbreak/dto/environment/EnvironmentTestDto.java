@@ -391,6 +391,20 @@ public class EnvironmentTestDto
         return getResponse().getCrn();
     }
 
+    public String getResourceCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("Environment response hasn't been set, therefore 'getResourceCrn' cannot be fulfilled.");
+        }
+        return getResponse().getResourceCrn();
+    }
+
+    public String getParentEnvironmentCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("Environment response hasn't been set, therefore 'getParentEnvironmentCrn' cannot be fulfilled.");
+        }
+        return getResponse().getParentEnvironmentCrn();
+    }
+
     @Override
     public Clue investigate() {
         if (getResponse() == null) {

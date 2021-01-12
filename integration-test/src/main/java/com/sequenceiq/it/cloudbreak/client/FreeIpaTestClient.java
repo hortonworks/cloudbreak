@@ -11,17 +11,16 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
-import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastUserSyncStatusAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
-import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSyncAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 
 @Service
 public class FreeIpaTestClient {
@@ -58,8 +57,12 @@ public class FreeIpaTestClient {
         return new FreeIpaStopAction();
     }
 
-    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> sync() {
-        return new FreeIpaSyncAction();
+    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> syncAll() {
+        return new FreeIpaSynchronizeAllUsersAction();
+    }
+
+    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> getLastSyncOperationStatus() {
+        return new FreeIpaGetLastSyncOperationStatus();
     }
 
     public Action<FreeIpaTestDto, FreeIpaClient> repair(InstanceMetadataType instanceMetadataType) {
@@ -68,9 +71,5 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaDiagnosticsTestDto, FreeIpaClient> collectDiagnostics() {
         return new FreeIpaCollectDiagnosticsAction();
-    }
-
-    public Action<FreeIpaUserSyncStatusDto, FreeIpaClient> getLastUserSyncStatus() {
-        return new FreeIpaGetLastUserSyncStatusAction();
     }
 }

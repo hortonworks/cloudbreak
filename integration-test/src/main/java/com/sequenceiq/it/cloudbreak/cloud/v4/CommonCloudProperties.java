@@ -27,6 +27,10 @@ public class CommonCloudProperties {
 
     private ImageValidation imageValidation = new ImageValidation();
 
+    private Ums ums = new Ums();
+
+    private User user = new User();
+
     public String getCloudProvider() {
         return cloudProvider;
     }
@@ -103,6 +107,22 @@ public class CommonCloudProperties {
         this.imageValidation = imageValidation;
     }
 
+    public Ums getUms() {
+        return ums;
+    }
+
+    public void setUms(Ums ums) {
+        this.ums = ums;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public static class ImageValidation {
 
         private String sourceCatalogName;
@@ -133,6 +153,70 @@ public class CommonCloudProperties {
 
         public void setImageUuid(String imageUuid) {
             this.imageUuid = imageUuid;
+        }
+    }
+
+    public static class Ums {
+        private String accountKey;
+
+        private String deploymentKey;
+
+        public String getAccountKey() {
+                return accountKey;
+        }
+
+        public void setAccountKey(String accountKey) {
+                this.accountKey = accountKey;
+        }
+
+        public String getDeploymentKey() {
+                return deploymentKey;
+        }
+
+        public void setDeploymentKey(String deploymentKey) {
+                this.deploymentKey = deploymentKey;
+        }
+    }
+
+    public static class User {
+        private String accesskey;
+
+        private String secretkey;
+
+        private String crn;
+
+        private String name;
+
+        public String getAccessKey() {
+            return accesskey;
+        }
+
+        public void setAccessKey(String accessKey) {
+            this.accesskey = accessKey;
+        }
+
+        public String getSecretKey() {
+            return secretkey;
+        }
+
+        public void setSecretKey(String secretKey) {
+            this.secretkey = secretKey;
+        }
+
+        public String getCrn() {
+            return crn;
+        }
+
+        public void setCrn(String crn) {
+            this.crn = crn;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }

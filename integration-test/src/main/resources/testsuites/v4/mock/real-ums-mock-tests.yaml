@@ -1,0 +1,10 @@
+name: "real-ums-mock-tests"
+tests:
+  - name: "real_ums_mock_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.CreateDhWithDatahubCreator
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.CredentialCreateTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.DatalakeDatahubCreateAuthTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvironmentCreateTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvStopStartWithEnvAdmin
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.RecipeTest
