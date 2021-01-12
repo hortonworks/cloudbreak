@@ -57,6 +57,7 @@ base:
     - match: compound
     - gateway.knox
     - ccm
+    - nginx.init
 
   'G@roles:idbroker':
     - match: compound
