@@ -260,11 +260,11 @@
               },
               {
                 "name": "xml.providers.flowPersistenceProvider.file-provider.enabled",
-                "value": "false"
+                "value": "true"
               },
               {
                 "name": "xml.providers.flowPersistenceProvider.database-provider.enabled",
-                "value": "true"
+                "value": "false"
               },
               {
                 "name": "nifi.registry.properties.ignored",
