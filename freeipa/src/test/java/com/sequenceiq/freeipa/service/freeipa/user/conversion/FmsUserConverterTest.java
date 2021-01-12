@@ -29,6 +29,24 @@ class FmsUserConverterTest {
     }
 
     @Test
+    public void testUserToFmsUserWithSpaces() {
+        String firstName = " Foo ";
+        String lastName = " Bar ";
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setFirstName(firstName)
+                .setLastName(lastName)
+                .setWorkloadUsername(workloadUsername)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals("foobar", fmsUser.getName());
+        assertEquals("Foo", fmsUser.getFirstName());
+        assertEquals("Bar", fmsUser.getLastName());
+    }
+
+    @Test
     public void testUserToFmsUserMissingNames() {
         String workloadUsername = "foobar";
         UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
@@ -70,6 +88,24 @@ class FmsUserConverterTest {
         assertEquals(workloadUsername, fmsUser.getName());
         assertEquals(name, fmsUser.getFirstName());
         assertEquals(id, fmsUser.getLastName());
+    }
+
+    @Test
+    public void testMachineUserToFmsUserWithSpaces() {
+        String name = " Foo ";
+        String id = " Bar ";
+        String workloadUsername = "foobar";
+        UserManagementProto.MachineUser umsMachineUser = UserManagementProto.MachineUser.newBuilder()
+                .setMachineUserName(name)
+                .setMachineUserId(id)
+                .setWorkloadUsername(workloadUsername)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsMachineUser);
+
+        assertEquals("foobar", fmsUser.getName());
+        assertEquals("Foo", fmsUser.getFirstName());
+        assertEquals("Bar", fmsUser.getLastName());
     }
 
     @Test
@@ -118,6 +154,25 @@ class FmsUserConverterTest {
     }
 
     @Test
+    public void testUserSyncActorDetailsToFmsUserWithSpaces() {
+        String firstName = " Foo ";
+        String lastName = " Bar ";
+        String workloadUsername = "foobar";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setFirstName(firstName)
+                        .setLastName(lastName)
+                        .setWorkloadUsername(workloadUsername)
+                        .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(actorDetails);
+
+        assertEquals("foobar", fmsUser.getName());
+        assertEquals("Foo", fmsUser.getFirstName());
+        assertEquals("Bar", fmsUser.getLastName());
+    }
+
+    @Test
     public void testUserSyncActorDetailsToFmsUserMissingNames() {
         String workloadUsername = "foobar";
         UserManagementProto.UserSyncActorDetails actorDetails =
@@ -140,6 +195,21 @@ class FmsUserConverterTest {
                 UserManagementProto.UserSyncActorDetails.newBuilder()
                         .setFirstName(firstName)
                         .setLastName(lastName)
+                        .build();
+
+        assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(actorDetails));
+    }
+
+    @Test
+    public void testUserSyncActorDetailsToFmsUserBlankWorkloadUsername() {
+        String firstName = "Foo";
+        String lastName = "Bar";
+        String workloadUserName = " ";
+        UserManagementProto.UserSyncActorDetails actorDetails =
+                UserManagementProto.UserSyncActorDetails.newBuilder()
+                        .setFirstName(firstName)
+                        .setLastName(lastName)
+                        .setWorkloadUsername(workloadUserName)
                         .build();
 
         assertThrows(IllegalArgumentException.class, () -> underTest.toFmsUser(actorDetails));
