@@ -13,6 +13,7 @@ import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -227,6 +228,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @DisableCheckPermissions
     public SimpleEnvironmentResponses list() {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return listAllEnvironmentsForAccount(accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public SimpleEnvironmentResponses listInternal(@AccountId String accountId) {
+        return listAllEnvironmentsForAccount(accountId);
+    }
+
+    private SimpleEnvironmentResponses listAllEnvironmentsForAccount(String accountId) {
         List<EnvironmentDto> environmentDtos = environmentService.listByAccountId(accountId);
         List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentResponseConverter::dtoToSimpleResponse)
                 .collect(Collectors.toList());

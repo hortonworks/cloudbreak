@@ -19,6 +19,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -92,6 +93,13 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listEnvironmentV1")
     SimpleEnvironmentResponses list();
+
+    @GET
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.INTERNAL_LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "internalListEnvironmentV1")
+    SimpleEnvironmentResponses listInternal(@QueryParam("accountId") @AccountId String accountId);
 
     @PUT
     @Path("/name/{name}/change_credential")

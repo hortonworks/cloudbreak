@@ -170,6 +170,17 @@ class FreeIpaV1ControllerTest {
     }
 
     @Test
+    void listInternal() {
+        List<ListFreeIpaResponse> responseList = Collections.singletonList(new ListFreeIpaResponse());
+        when(freeIpaListService.list(ACCOUNT_ID)).thenReturn(responseList);
+
+        List<ListFreeIpaResponse> actual = underTest.listInternal(ACCOUNT_ID);
+
+        assertEquals(responseList, actual);
+        verify(freeIpaListService).list(ACCOUNT_ID);
+    }
+
+    @Test
     void getRootCertificate() throws Exception {
         underTest.getRootCertificate(ENVIRONMENT_CRN);
         verify(rootCertificateService, times(1)).getRootCertificate(ENVIRONMENT_CRN, ACCOUNT_ID);

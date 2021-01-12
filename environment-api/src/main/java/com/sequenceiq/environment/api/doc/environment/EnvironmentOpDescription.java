@@ -5,6 +5,7 @@ public class EnvironmentOpDescription {
     public static final String GET_BY_NAME = "Get an environment by name.";
     public static final String GET_BY_CRN = "Get an environment by CRN.";
     public static final String LIST = "List all environments.";
+    public static final String INTERNAL_LIST = "List all environments by account ID using the internal actor.";
     public static final String DELETE_BY_NAME = "Delete an environment by name. Only possible if no cluster is running in the environment.";
     public static final String DELETE_BY_CRN = "Delete an environment by CRN. Only possible if no cluster is running in the environment.";
     public static final String DELETE_MULTIPLE_BY_NAME = "Delete multiple environment by names. Only possible if no cluster is running in the environments.";
