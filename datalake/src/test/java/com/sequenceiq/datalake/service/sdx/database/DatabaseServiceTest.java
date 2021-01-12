@@ -2,16 +2,17 @@ package com.sequenceiq.datalake.service.sdx.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,19 +21,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -61,7 +68,7 @@ public class DatabaseServiceTest {
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:2";
 
     @Captor
-    public ArgumentCaptor<AllocateDatabaseServerV4Request> allocateDatabaseServerV4RequestCaptor =
+    private ArgumentCaptor<AllocateDatabaseServerV4Request> allocateDatabaseServerV4RequestCaptor =
             ArgumentCaptor.forClass(AllocateDatabaseServerV4Request.class);
 
     @Mock
@@ -75,6 +82,12 @@ public class DatabaseServiceTest {
 
     @Mock
     private SdxStatusService sdxStatusService;
+
+    @Mock
+    private SdxService sdxService;
+
+    @Spy
+    private DatabaseServerConverter databaseServerConverter;
 
     @Mock
     private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
@@ -176,7 +189,7 @@ public class DatabaseServiceTest {
         status.setStatus(DatalakeStatusEnum.DELETE_REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> {
+        assertThrows(CloudbreakServiceException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
         });
     }
@@ -209,6 +222,36 @@ public class DatabaseServiceTest {
         underTest.stop(cluster);
 
         verify(databaseServerV4Endpoint).stop(DATABASE_CRN);
+    }
+
+    @Test
+    public void testGetDatabaseServerShouldReturnDatabaseServer() {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setDatabaseCrn(DATABASE_CRN);
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
+
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setCrn(DATABASE_CRN);
+        databaseServerV4Response.setClusterCrn(CLUSTER_CRN);
+        databaseServerV4Response.setStatus(Status.AVAILABLE);
+        when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
+
+        StackDatabaseServerResponse response = underTest.getDatabaseServer(USER_CRN, CLUSTER_CRN);
+
+        assertThat(response.getClusterCrn()).isEqualTo(CLUSTER_CRN);
+        assertThat(response.getCrn()).isEqualTo(DATABASE_CRN);
+        assertThat(response.getStatus()).isEqualTo(DatabaseServerStatus.AVAILABLE);
+    }
+
+    @Test
+    public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException() {
+        when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(new SdxCluster());
+
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> underTest.getDatabaseServer(USER_CRN, CLUSTER_CRN));
+
+        assertThat(exception.getMessage()).isEqualTo("Database for Data Lake with Data Lake crn: 'cluster crn' not found.");
+        verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
     }
 
     private DatabaseConfig getDatabaseConfig() {

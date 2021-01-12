@@ -437,6 +437,29 @@ public class ModelDescriptions {
         public static final String DATABASE_REQUEST = "unsaved RDS config to be tested by connectivity";
     }
 
+    public static class DatabaseServerModelDescription {
+        public static final String NAME = "Name of the database server";
+        public static final String CRN = "CRN of the database server";
+        public static final String DESCRIPTION = "Description of the database server";
+        public static final String HOST = "Host of the database server";
+        public static final String PORT = "Port of the database server";
+        public static final String CONNECTION_DRIVER = "Name of the JDBC connection driver (for example: 'org.postgresql.Driver')";
+        public static final String DATABASE_VENDOR = "Name of the database vendor (MYSQL, POSTGRES, ...)";
+        public static final String DATABASE_VENDOR_DISPLAY_NAME = "Display name of the database vendor (MySQL, PostgreSQL, ...)";
+        public static final String USERNAME = "Username of the administrative user of the database server";
+        public static final String PASSWORD = "Password of the administrative user of the database server";
+        public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server";
+        public static final String CLUSTER_CRN = "CRN of the cluster of the database server";
+        public static final String CREATION_DATE = "Creation date / time of the database server, in epoch milliseconds";
+        public static final String RESOURCE_STATUS = "Ownership status of the database server";
+        public static final String STATUS = "Status of the database server stack";
+        public static final String STATUS_REASON = "Additional status information about the database server stack";
+        public static final String SSL_CERTIFICATES = "Set of SSL certificates for the actual database server";
+        public static final String SSL_CERTIFICATE_TYPE = "SSL certificate type";
+        public static final String SSL_MODE = "SSL enforcement mode for the actual database server";
+        public static final String SSL_CONFIG = "SSL config of the database server";
+    }
+
     public static class FileSystem {
         public static final String NAME = "name of the filesystem";
         public static final String TYPE = "type of the filesystem";

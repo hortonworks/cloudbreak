@@ -40,6 +40,7 @@ public class DistroXOpDescription {
     public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";
     public static final String CLI_COMMAND = "produce cli command input";
     public static final String RENEW_CERTIFICATE = "Trigger a certificate renewal on the desired cluster which is identified via crn";
+    public static final String GET_DATABASE_SERVER_BY_CLUSTER_CRN = "get database server for Distrox cluster by cluster crn";
 
     private DistroXOpDescription() {
     }

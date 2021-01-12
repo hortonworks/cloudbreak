@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.sdx.DatabaseConfigController;
+import com.sequenceiq.datalake.controller.sdx.DatabaseServerController;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
@@ -44,7 +45,8 @@ public class EndpointConfig extends ResourceConfig {
             FlowController.class,
             FlowPublicController.class,
             AuthorizationInfoController.class,
-            DiagnosticsController.class);
+            DiagnosticsController.class,
+            DatabaseServerController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

@@ -27,13 +27,16 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -61,6 +64,12 @@ public class DatabaseService {
 
     @Inject
     private SdxStatusService sdxStatusService;
+
+    @Inject
+    private SdxService sdxService;
+
+    @Inject
+    private DatabaseServerConverter databaseServerConverter;
 
     @Inject
     private Map<DatabaseConfigKey, DatabaseConfig> dbConfigs;
@@ -245,5 +254,16 @@ public class DatabaseService {
         statusResponse.setStatus(response.getStatus());
         statusResponse.setStatusReason(response.getStatusReason());
         return statusResponse;
+    }
+
+    public StackDatabaseServerResponse getDatabaseServer(String userCrn, String clusterCrn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(userCrn, clusterCrn);
+        if (sdxCluster.getDatabaseCrn() == null) {
+            throw com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound("Database for Data Lake with Data Lake crn:", clusterCrn).get();
+        }
+        DatabaseServerV4Response databaseServerV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                databaseServerV4Endpoint.getByCrn(sdxCluster.getDatabaseCrn()));
+
+        return databaseServerConverter.convert(databaseServerV4Response);
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.client;
 
 import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.sdx.api.endpoint.DatabaseServerEndpoint;
 import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -20,5 +21,7 @@ public interface SdxClient {
     FlowPublicEndpoint flowPublicEndpoint();
 
     DiagnosticsEndpoint diagnosticsEndpoint();
+
+    DatabaseServerEndpoint databaseServerEndpoint();
 
 }

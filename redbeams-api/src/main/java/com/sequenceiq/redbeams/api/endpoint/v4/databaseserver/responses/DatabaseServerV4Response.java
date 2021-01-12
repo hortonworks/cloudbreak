@@ -53,6 +53,9 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
     @ApiModelProperty(DatabaseServer.SSL_CONFIG)
     private SslConfigV4Response sslConfig;
 
+    @ApiModelProperty(DatabaseServer.CLUSTER_CRN)
+    private String clusterCrn;
+
     public Long getId() {
         return id;
     }
@@ -141,6 +144,14 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
         this.sslConfig = sslConfig;
     }
 
+    public String getClusterCrn() {
+        return clusterCrn;
+    }
+
+    public void setClusterCrn(String clusterCrn) {
+        this.clusterCrn = clusterCrn;
+    }
+
     @JsonIgnore
     @Override
     public String getResourceCrn() {
@@ -160,6 +171,7 @@ public class DatabaseServerV4Response extends DatabaseServerV4Base implements Re
                 .add("resourceStatus=" + resourceStatus)
                 .add("status=" + status)
                 .add("sslConfig=" + sslConfig)
+                .add("clusterCrn=" + clusterCrn)
                 .add("statusReason='" + statusReason + "'")
                 .toString();
     }
