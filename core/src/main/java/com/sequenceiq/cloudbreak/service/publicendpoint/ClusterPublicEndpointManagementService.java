@@ -24,6 +24,9 @@ public class ClusterPublicEndpointManagementService {
     @Inject
     private List<BaseDnsEntryService> dnsEntryServices;
 
+    @Inject
+    private FreeIPAEndpointManagementService freeIPAEndpointManagementService;
+
     public boolean provision(Stack stack) {
         boolean certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
@@ -34,6 +37,7 @@ public class ClusterPublicEndpointManagementService {
         gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
         gatewayPublicEndpointManagementService.deleteLoadBalancerDnsEntry(stack, null);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack));
+        freeIPAEndpointManagementService.deleteLoadBalancerDomainFromFreeIPA(stack);
     }
 
     public void upscale(Stack stack, Map<String, String> newAddressesByFqdn) {
@@ -85,5 +89,9 @@ public class ClusterPublicEndpointManagementService {
             LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
             changeGateway(stack, ipWrapper);
         }
+    }
+
+    public void registerDomainsWithFreeIPA(Stack stack) {
+        freeIPAEndpointManagementService.registerLoadBalancerDomainWithFreeIPA(stack);
     }
 }

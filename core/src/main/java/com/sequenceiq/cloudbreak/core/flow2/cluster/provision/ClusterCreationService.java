@@ -71,6 +71,10 @@ public class ClusterCreationService {
         }
     }
 
+    public void bootstrapPrivateEndpoints(Stack stack) {
+        clusterPublicEndpointManagementService.registerDomainsWithFreeIPA(stack);
+    }
+
     public void startingClusterServices(StackView stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "Running cluster services.");
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);

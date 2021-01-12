@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationR
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapFreeIPAEndpointSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapPublicEndpointSuccess;
@@ -153,11 +154,27 @@ public class ClusterCreationActions {
         };
     }
 
+    @Bean(name = "BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE")
+    public Action<?, ?> bootStrappingPrivateEndpointAction() {
+        return new AbstractStackCreationAction<>(BootstrapPublicEndpointSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.bootstrapPrivateEndpoints(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new BootstrapFreeIPAEndpointSuccess(context.getStack().getId());
+            }
+        };
+    }
+
     @Bean(name = "UPLOAD_RECIPES_STATE")
     public Action<?, ?> uploadRecipesAction() {
-        return new AbstractClusterAction<>(BootstrapPublicEndpointSuccess.class) {
+        return new AbstractClusterAction<>(BootstrapFreeIPAEndpointSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, BootstrapPublicEndpointSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, BootstrapFreeIPAEndpointSuccess payload, Map<Object, Object> variables) {
                 sendEvent(context);
             }
 

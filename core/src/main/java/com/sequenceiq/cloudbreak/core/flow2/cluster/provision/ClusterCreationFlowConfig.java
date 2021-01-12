@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_MACHINES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_MACHINES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT;
@@ -28,6 +29,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLEANUP_FREEIPA_STATE;
@@ -67,8 +69,10 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
             .from(COLLECTING_HOST_METADATA_STATE).to(CLEANUP_FREEIPA_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
             .from(CLEANUP_FREEIPA_STATE).to(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE).event(CLEANUP_FREEIPA_FINISHED_EVENT).failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
-            .from(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE).to(UPLOAD_RECIPES_STATE).event(BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT)
+            .from(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE).to(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE).event(BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT)
                     .defaultFailureEvent()
+            .from(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE).to(UPLOAD_RECIPES_STATE).event(BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT)
+                .defaultFailureEvent()
             .from(UPLOAD_RECIPES_STATE).to(CONFIGURE_KEYTABS_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
             .from(CONFIGURE_KEYTABS_STATE).to(STARTING_CLUSTER_MANAGER_SERVICES_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
