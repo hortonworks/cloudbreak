@@ -1,0 +1,14 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'nodestatus/settings.sls' import nodestatus with context %}
+server:
+  port: 61888
+  folder: /var/lib/cdp-nodestatus/report
+{% if nodestatus.serverUsername and nodestatus.serverPassword %}
+  auth:
+    username: {{ nodestatus.serverUsername }}
+    password: {{ nodestatus.serverPassword }}
+    hash: sha256{% endif %}
+commands:
+  - "cdp-nodestatus collect --databus-url {{ telemetry.databusEndpoint }}"
+firstSleep: 660
+sleepTime: 3600

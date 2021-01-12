@@ -36,6 +36,7 @@ base:
     - cloudera.manager
     - cloudera.agent
     - gateway.cm
+    - nodestatus
 
   'G@roles:manager_agent':
     - cloudera.repo
