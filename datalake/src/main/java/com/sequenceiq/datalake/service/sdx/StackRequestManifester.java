@@ -287,7 +287,7 @@ public class StackRequestManifester {
 
     @VisibleForTesting
     void setupInstanceVolumeEncryption(StackV4Request stackRequest, String cloudPlatform, String accountId) {
-        if (CloudPlatform.AWS.name().equals(cloudPlatform)) {
+        if (CloudPlatform.AWS.name().equals(cloudPlatform) && entitlementService.freeIpaDlEbsEncryptionEnabled(accountId)) {
             stackRequest.getInstanceGroups().forEach(ig -> {
                 AwsInstanceTemplateV4Parameters aws = ig.getTemplate().createAws();
                 AwsEncryptionV4Parameters encryption = aws.getEncryption();

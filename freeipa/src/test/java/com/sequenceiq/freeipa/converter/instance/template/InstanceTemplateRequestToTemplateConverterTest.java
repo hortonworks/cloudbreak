@@ -101,9 +101,26 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
-    void shouldSetVolumeEncryptionWhenAws() {
+    void shouldNotSetVolumeEncryptionWhenAwsAndNotEntitled() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
+
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(false);
+
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
+
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isNull();
+        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isNull();
+    }
+
+    @Test
+    void shouldSetVolumeEncryptionWhenAwsAndEntitled() {
+        InstanceTemplateRequest source = new InstanceTemplateRequest();
+        source.setInstanceType(INSTANCE_TYPE);
+
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 
@@ -115,10 +132,11 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
-    void shouldSetVolumeEncryptionWhenAwsAndFastEncryption() {
+    void shouldSetVolumeEncryptionWhenAwsAndEntitledAndFastEncryption() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
 
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
         when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
@@ -131,10 +149,12 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
-    void shouldSetVolumeEncryptionAndSpotValuesPropertyWhenAwsAndSpotValuesProvided() {
+    void shouldSetVolumeEncryptionAndSpotValuesPropertyWhenAwsAndEntitledAndSpotValuesProvided() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);
         source.setAws(createAwsInstanceTemplateParameters(SPOT_PERCENTAGE, SPOT_MAX_PRICE));
+
+        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID);
 

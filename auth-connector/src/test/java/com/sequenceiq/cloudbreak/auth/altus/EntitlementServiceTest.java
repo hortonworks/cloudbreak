@@ -74,6 +74,9 @@ class EntitlementServiceTest {
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
 
+                {"CDP_FREEIPA_DL_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, false},
+                {"CDP_FREEIPA_DL_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, true},
+
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 

@@ -49,7 +49,7 @@ public class DefaultInstanceGroupProvider {
         template.setVolumeSize(0);
         template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name()));
         template.setAccountId(accountId);
-        if (cloudPlatform == CloudPlatform.AWS) {
+        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             template.setAttributes(new Json(Map.<String, Object>ofEntries(
                     entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE),

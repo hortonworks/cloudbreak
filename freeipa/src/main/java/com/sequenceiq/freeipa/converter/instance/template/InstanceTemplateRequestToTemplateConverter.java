@@ -49,7 +49,7 @@ public class InstanceTemplateRequestToTemplateConverter {
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(), defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name())));
         Map<String, Object> attributes = new HashMap<>();
-        if (cloudPlatform == CloudPlatform.AWS) {
+        if (cloudPlatform == CloudPlatform.AWS && entitlementService.freeIpaDlEbsEncryptionEnabled(accountId)) {
             // FIXME Enable EBS encryption with appropriate KMS key
             attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
             attributes.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(accountId));
