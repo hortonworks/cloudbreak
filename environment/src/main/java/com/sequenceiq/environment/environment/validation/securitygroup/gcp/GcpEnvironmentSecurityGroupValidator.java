@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -56,8 +55,7 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
                 null,
                 region.getName(),
                 getCloudPlatform().name(),
-                null,
-                CdpResourceType.DEFAULT);
+                null);
 
         Map<String, String> filters = new HashMap<>();
         if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getGcp().getSharedProjectId())) {
