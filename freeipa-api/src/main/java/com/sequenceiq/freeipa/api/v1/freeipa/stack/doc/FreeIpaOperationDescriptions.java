@@ -7,6 +7,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String GET_BY_ENVID = "Get FreeIPA stack by envid";
     public static final String INTERNAL_GET_BY_ENVID_AND_ACCOUNTID = "Get FreeIPA stack by envid and account id";
     public static final String LIST_BY_ACCOUNT = "List all FreeIPA stacks by account";
+    public static final String INTERNAL_LIST_BY_ACCOUNT = "List all FreeIPA stacks by account using the internal actor";
     public static final String GET_ROOTCERTIFICATE_BY_ENVID = "Get FreeIPA root certificate by envid";
     public static final String DELETE_BY_ENVID = "Delete FreeIPA stack by envid";
     public static final String CLEANUP = "Cleans out users, hosts and related DNS entries";

@@ -81,6 +81,13 @@ public interface FreeIpaV1Endpoint {
     List<ListFreeIpaResponse> list();
 
     @GET
+    @Path("internal/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.INTERNAL_LIST_BY_ACCOUNT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "internalListFreeIpaClustersByAccountV1")
+    List<ListFreeIpaResponse> listInternal(@QueryParam("accountId") @AccountId String accountId);
+
+    @GET
     @Path("health")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.HEALTH, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,

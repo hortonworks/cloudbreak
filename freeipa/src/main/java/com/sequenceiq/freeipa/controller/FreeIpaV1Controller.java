@@ -157,6 +157,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @DisableCheckPermissions
     public List<ListFreeIpaResponse> list() {
         String accountId = crnService.getCurrentAccountId();
+        return listInternal(accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public List<ListFreeIpaResponse> listInternal(@AccountId String accountId) {
         return freeIpaListService.list(accountId);
     }
 
