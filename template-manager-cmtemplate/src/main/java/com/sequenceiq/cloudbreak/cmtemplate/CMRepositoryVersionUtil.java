@@ -34,6 +34,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_2_7 = () -> "7.2.7";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_2_8 = () -> "7.2.8";
+
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMRepositoryVersionUtil.class);
