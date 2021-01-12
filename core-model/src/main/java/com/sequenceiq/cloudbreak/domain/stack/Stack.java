@@ -117,6 +117,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String resourceCrn;
 
+    private String stackVersion;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -844,5 +846,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCcmV2AgentCrn(String ccmV2AgentCrn) {
         this.ccmV2AgentCrn = ccmV2AgentCrn;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }

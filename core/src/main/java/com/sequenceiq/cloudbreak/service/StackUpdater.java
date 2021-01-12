@@ -45,6 +45,12 @@ public class StackUpdater {
         return stackService.save(stack);
     }
 
+    public Stack updateStackVersion(Long stackId, String stackVersion) {
+        Stack stack = stackService.getByIdWithTransaction(stackId);
+        stack.setStackVersion(stackVersion);
+        return stackService.save(stack);
+    }
+
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         Status status = detailedStatus.getStatus();

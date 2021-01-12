@@ -19,7 +19,7 @@ public class ClouderaManagerStopListenerTask extends AbstractClouderaManagerComm
 
     @Override
     public String successMessage(ClouderaManagerCommandPollerObject toolsResourceApi) {
-        return "Cloudera Manager all service stop finished with success result.";
+        return "All services have been stopped in Cloudera Manager successfully.";
     }
 
     @Override

@@ -22,10 +22,10 @@ public class StackVersionMatcher {
     }
 
     private boolean isStackVersionEquals(Image image, String stackVersion) {
-        return stackVersion.equals(mapStakVersionWithDefault(image, stackVersion));
+        return stackVersion.equals(mapStackVersionWithDefault(image, stackVersion));
     }
 
-    private String mapStakVersionWithDefault(Image image, String stackVersion) {
+    private String mapStackVersionWithDefault(Image image, String stackVersion) {
         return Optional.ofNullable(image.getStackDetails())
                 .map(StackDetails::getRepo)
                 .map(StackRepoDetails::getStack)

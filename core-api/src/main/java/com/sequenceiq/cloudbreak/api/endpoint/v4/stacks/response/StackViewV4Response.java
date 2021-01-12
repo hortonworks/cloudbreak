@@ -56,6 +56,9 @@ public class StackViewV4Response implements JsonEntity, ResourceCrnAwareApiModel
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel = Tunnel.DIRECT;
 
+    @ApiModelProperty(StackModelDescription.STACK_VERSION)
+    private String stackVersion;
+
     public String getCrn() {
         return crn;
     }
@@ -172,5 +175,13 @@ public class StackViewV4Response implements JsonEntity, ResourceCrnAwareApiModel
     @Override
     public String getResourceCrn() {
         return crn;
+    }
+
+    public String getStackVersion() {
+        return stackVersion;
+    }
+
+    public void setStackVersion(String stackVersion) {
+        this.stackVersion = stackVersion;
     }
 }
