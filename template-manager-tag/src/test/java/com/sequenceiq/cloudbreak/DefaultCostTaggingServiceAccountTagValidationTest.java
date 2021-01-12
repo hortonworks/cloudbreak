@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak;
 
+import static org.mockito.AdditionalAnswers.returnsSecondArg;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.junit.Before;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
+import com.sequenceiq.cloudbreak.tag.TagPreparationObject;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +32,11 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
 
     @InjectMocks
     private DefaultCostTaggingService underTest;
+
+    @Before
+    public void before() {
+        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
+    }
 
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsIsNullShouldThrowValidationFailed()
@@ -48,28 +60,28 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
 
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsAccountTagsKey() {
+        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
         String collidingTagKey = "accountTagKey2";
         Map<String, String> userDefinedTags = Map.of(collidingTagKey, "a colliding key's Value");
 
-        AccountTagValidationFailed exception = Assertions.assertThrows(AccountTagValidationFailed.class,
-                () -> underTest.prepareDefaultTags(tagRequest(userDefinedTags)));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest(userDefinedTags));
 
-        Assertions.assertTrue(exception.getMessage().contains(collidingTagKey));
+        Assertions.assertEquals(result.get("accountTagKey2"), "accountTagValue2");
     }
 
     @Test
     void prepareDefaultTagsWithResourceTagValidationWhenUserDefinedResourceTagsContainsMultipleAccountTagsKey() {
+        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
         String collidingTagKey = "accountTagKey2";
         String collidingTagKey2 = "accountTagKey";
         Map<String, String> resourceTags = Map.of(
                 collidingTagKey, "a colliding key's Value",
                 collidingTagKey2, "an other colliding key's value");
 
-        AccountTagValidationFailed exception = Assertions.assertThrows(AccountTagValidationFailed.class,
-                () -> underTest.prepareDefaultTags(tagRequest(resourceTags)));
+        Map<String, String> result = underTest.prepareDefaultTags(tagRequest(resourceTags));
 
-        Assertions.assertTrue(exception.getMessage().contains(collidingTagKey));
-        Assertions.assertTrue(exception.getMessage().contains(collidingTagKey2));
+        Assertions.assertEquals(result.get("accountTagKey2"), "accountTagValue2");
+        Assertions.assertEquals(result.get("accountTagKey"), "accountTagValue");
     }
 
     @Test

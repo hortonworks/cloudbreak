@@ -134,11 +134,10 @@ public class DefaultCostTaggingService implements CostTagging {
 
                 if (!duplicateTagsWithDiffValues.isEmpty()) {
                     String msg = String.format(
-                        "The request must not contain tag(s) with key: '%s', because with the same key tag has already been defined "
-                            + "on account level!",
+                        "The request contains tag(s) with key: '%s', because with the same key tag has already been defined "
+                            + "on account level so overriding that one!",
                         String.join(", ", duplicateTagsWithDiffValues));
                     LOGGER.info(msg);
-                    throw new AccountTagValidationFailed(msg);
                 }
             }
         }
