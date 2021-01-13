@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.ldap;
 import java.util.Optional;
 
 import javax.inject.Inject;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -54,9 +54,9 @@ public class LdapConfigService {
 
     private Optional<DescribeLdapConfigResponse> describeLdapConfig(String environmentCrn, String clusterName) {
         try {
-            return Optional.of(ldapConfigV1Endpoint.getForCluster(environmentCrn, clusterName));
-        } catch (NotFoundException | ForbiddenException notFoundEx) {
-            LOGGER.debug("No Ldap config found for {} environment. Ldap setup will be skipped!", environmentCrn);
+            return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(() -> ldapConfigV1Endpoint.getForCluster(environmentCrn, clusterName)));
+        } catch (NotFoundException e) {
+            LOGGER.debug("No Ldap config found for {} environment. Ldap setup will be skipped!", environmentCrn, e);
             return Optional.empty();
         } catch (WebApplicationException e) {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
