@@ -1,10 +1,12 @@
 package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.ClusterStateEvaluator;
 
@@ -29,6 +31,8 @@ public class ClusterStatusMonitor extends ClusterMonitor {
 
     @Override
     protected List<Cluster> getMonitored() {
-        return getClusterService().findAllByPeriscopeNodeId(getPeriscopeNodeConfig().getId());
+        return getClusterService().findClusterIdsByStackTypeAndPeriscopeNodeId(StackType.WORKLOAD, getPeriscopeNodeConfig().getId())
+                .stream().map(clusterId -> new Cluster(clusterId))
+                .collect(Collectors.toList());
     }
 }
