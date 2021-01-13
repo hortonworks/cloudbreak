@@ -35,7 +35,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     @Inject
     private SdxTestClient sdxTestClient;
 
-    @Test(dataProvider = TEST_CONTEXT, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak",
