@@ -207,9 +207,6 @@ public class MockUserManagementServiceTest {
                 {"mediumDutySdxEnabled false", "mediumDutySdxEnabled", false, "CDP_MEDIUM_DUTY_SDX", false},
                 {"mediumDutySdxEnabled true", "mediumDutySdxEnabled", true, "CDP_MEDIUM_DUTY_SDX", true},
 
-                {"enableFreeIpaDlEbsEncryption false", "enableFreeIpaDlEbsEncryption", false, "CDP_FREEIPA_DL_EBS_ENCRYPTION", false},
-                {"enableFreeIpaDlEbsEncryption true", "enableFreeIpaDlEbsEncryption", true, "CDP_FREEIPA_DL_EBS_ENCRYPTION", true},
-
                 {"enableAzureSingleResourceGroupDeployment false", "enableAzureSingleResourceGroupDeployment", false, "CDP_AZURE_SINGLE_RESOURCE_GROUP", false},
                 {"enableAzureSingleResourceGroupDeployment true", "enableAzureSingleResourceGroupDeployment", true, "CDP_AZURE_SINGLE_RESOURCE_GROUP", true},
 
