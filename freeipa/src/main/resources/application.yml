@@ -255,7 +255,7 @@ clusterProxy:
   registerConfigPath: /rpc/forceRegisterConfig
   updateConfigPath: /rpc/updateConfig
   removeConfigPath: /rpc/removeConfig
-  maxAttempts: 10
+  maxAttempts: 20
   maxFailure: 1
   healthCheckV1:
     # the login page returns a 400
