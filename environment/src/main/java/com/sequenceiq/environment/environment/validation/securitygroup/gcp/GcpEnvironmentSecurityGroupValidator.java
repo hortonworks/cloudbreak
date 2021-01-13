@@ -84,6 +84,11 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
     }
 
     @Override
+    public String securityGroupNotInTheSameRegion(String securityGroupId, String region) {
+        return String.format("The '%s' security group must exists on Google Cloud side that you defined in the request!", securityGroupId);
+    }
+
+    @Override
     public CloudPlatform getCloudPlatform() {
         return GCP;
     }
