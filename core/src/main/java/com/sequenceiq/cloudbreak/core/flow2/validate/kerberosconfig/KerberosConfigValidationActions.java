@@ -104,8 +104,8 @@ public class KerberosConfigValidationActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackUpdaterService.updateStatus(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
-                        ResourceEvent.KERBEROS_CONFIG_VALIDATION_FAILED, payload.getException().getMessage());
+                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
+                        ResourceEvent.KERBEROS_CONFIG_VALIDATION_FAILED, payload.getException().getMessage(), payload.getException().getMessage());
                 sendEvent(context);
             }
 

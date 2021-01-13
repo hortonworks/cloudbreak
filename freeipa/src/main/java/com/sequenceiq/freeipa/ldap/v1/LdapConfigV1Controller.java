@@ -7,14 +7,12 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
@@ -23,7 +21,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigRespo
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.notification.NotificationController;
 
@@ -38,19 +36,19 @@ public class LdapConfigV1Controller extends NotificationController implements Ld
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    public DescribeLdapConfigResponse describe(@ResourceCrn String environmentCrn) {
+    public DescribeLdapConfigResponse describe(@TenantAwareParam @ResourceCrn String environmentCrn) {
         return ldapConfigV1Service.describe(environmentCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public DescribeLdapConfigResponse getForCluster(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterName) throws FreeIpaClientException {
+    public DescribeLdapConfigResponse getForCluster(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterName) {
         String accountId = crnService.getCurrentAccountId();
-        return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
+        try {
+            return ldapConfigV1Service.getForCluster(environmentCrn, accountId, clusterName);
+        } catch (FreeIpaClientException e) {
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
     }
 
     @Override
