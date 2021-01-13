@@ -23,7 +23,7 @@ public class ExperiencesByLiftie implements Experience {
 
     @Override
     public boolean hasExistingClusterForEnvironment(EnvironmentExperienceDto environment) {
-        List<ClusterView> clusterViews = getClusterViews(environment.getName(), environment.getAccountId());
+        List<ClusterView> clusterViews = getClusterViews(environment.getCrn(), environment.getAccountId());
         return countNotDeletedClusters(clusterViews) > 0;
     }
 
@@ -37,15 +37,15 @@ public class ExperiencesByLiftie implements Experience {
         return ExperienceSource.LIFTIE;
     }
 
-    private List<ClusterView> getClusterViews(String environmentName, String tenant) {
+    private List<ClusterView> getClusterViews(String environmentCrn, String tenant) {
         List<ClusterView> clusterViews = new LinkedList<>();
-        ListClustersResponse first = liftieApi.listClusters(environmentName, tenant, null, null);
+        ListClustersResponse first = liftieApi.listClusters(environmentCrn, tenant, null, null);
         if (first.getPage().getTotalPages() > 1) {
             List<ListClustersResponse> clustersResponses = new LinkedList<>();
             clustersResponses.add(first);
             int currentPage = first.getPage().getNumber() + 1;
             while (currentPage < first.getPage().getTotalPages()) {
-                clustersResponses.add(liftieApi.listClusters(environmentName, tenant, null, currentPage));
+                clustersResponses.add(liftieApi.listClusters(environmentCrn, tenant, null, currentPage));
                 currentPage++;
             }
             for (ListClustersResponse clustersResponse : clustersResponses) {
@@ -58,7 +58,7 @@ public class ExperiencesByLiftie implements Experience {
     }
 
     private long countNotDeletedClusters(List<ClusterView> clusterViews) {
-        return clusterViews.stream().filter(clusterView -> !"DELETED".equals(clusterView.getCluster_status().getStatus())).count();
+        return clusterViews.stream().filter(clusterView -> !"DELETED".equals(clusterView.getClusterStatus().getStatus())).count();
     }
 
 }

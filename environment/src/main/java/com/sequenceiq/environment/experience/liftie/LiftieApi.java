@@ -1,8 +1,8 @@
 package com.sequenceiq.environment.experience.liftie;
 
-import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
-
 import javax.validation.constraints.NotNull;
+
+import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
 public interface LiftieApi {
 

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.Experience;
 import com.sequenceiq.environment.experience.ExperienceSource;
+import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 @Service
 public class XService implements Experience {
@@ -36,9 +37,9 @@ public class XService implements Experience {
     private final String experienceProtocol;
 
     public XService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
-            XPServices experienceProvider, CommonExperienceValidator experienceValidator) {
+            ExperienceServicesConfig config, CommonExperienceValidator experienceValidator) {
         this.experienceValidator = experienceValidator;
-        this.configuredExperiences = identifyConfiguredExperiences(experienceProvider);
+        this.configuredExperiences = identifyConfiguredExperiences(config);
         this.experienceConnectorService = experienceConnectorService;
         this.experienceProtocol = StringUtils.isEmpty(experienceProtocol) ? DEFAULT_EXPERIENCE_PROTOCOL : experienceProtocol;
         LOGGER.debug("Experience connection protocol set to: {}", this.experienceProtocol);
@@ -104,8 +105,8 @@ public class XService implements Experience {
         return experienceConnectorService.getWorkspaceNamesConnectedToEnv(pathToExperience, envCrn);
     }
 
-    private Set<CommonExperience> identifyConfiguredExperiences(XPServices experienceProvider) {
-        Set<CommonExperience> experiences = experienceProvider.getExperiences()
+    private Set<CommonExperience> identifyConfiguredExperiences(ExperienceServicesConfig config) {
+        Set<CommonExperience> experiences = config.getExperiences()
                 .stream()
                 .filter(this::isExperienceConfigured)
                 .collect(toSet());
