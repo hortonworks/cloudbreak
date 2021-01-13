@@ -32,7 +32,7 @@ public class AwsSubnetIgwExplorer {
         List<RouteTable> routeTables = describeRouteTablesResult.getRouteTables();
         Set<RouteTable> connectedRouteTables = new HashSet<>();
         for (RouteTable rt : routeTables) {
-            if (rt.getVpcId().equalsIgnoreCase(vpcId)) {
+            if (rt.getVpcId().equalsIgnoreCase(vpcId) || rt.getVpcId().startsWith(vpcId)) {
                 LOGGER.debug("Analyzing the route table('{}') for the VPC id is:'{}' and the subnet is :'{}'", rt, vpcId, subnetId);
                 for (RouteTableAssociation association : rt.getAssociations()) {
                     LOGGER.debug("Analyzing the association('{}') for the VCP id is:'{}' and the subnet is :'{}'", association, vpcId, subnetId);
@@ -40,7 +40,8 @@ public class AwsSubnetIgwExplorer {
                         LOGGER.debug("Found a route table('{}') which is 'Main'/default for the VPC('{}'), "
                                 + "doesn't need to check the subnet id as it is not returned in this case", rt, vpcId);
                         connectedRouteTables.add(rt);
-                    } else if (subnetId.equalsIgnoreCase(association.getSubnetId())) {
+                    } else if (subnetId.equalsIgnoreCase(association.getSubnetId())
+                            || (StringUtils.isNotEmpty(association.getSubnetId()) && association.getSubnetId().startsWith(subnetId))) {
                         LOGGER.info("Found the route table('{}') which is explicitly connected to the subnet('{}')", rt, subnetId);
                         connectedRouteTables.add(rt);
                         break;
