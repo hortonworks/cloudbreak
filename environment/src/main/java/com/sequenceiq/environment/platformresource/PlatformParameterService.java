@@ -1,9 +1,11 @@
 package com.sequenceiq.environment.platformresource;
 
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
+import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.SHARED_PROJECT_ID;
 import static com.sequenceiq.common.model.CredentialType.AUDIT;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,21 +67,7 @@ public class PlatformParameterService {
                 platformVariant,
                 availabilityZone,
                 null,
-                CdpResourceType.DEFAULT);
-    }
-
-    public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
-            String accountId,
-            String environmentCrn,
-            String region,
-            String platformVariant,
-            String availabilityZone) {
-        return getPlatformResourceRequestByEnvironment(
-                accountId,
-                environmentCrn,
-                region,
-                platformVariant,
-                availabilityZone,
+                new HashMap<>(),
                 null,
                 CdpResourceType.DEFAULT);
     }
@@ -91,6 +79,67 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
+            CdpResourceType cdpResourceType) {
+        return getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                null,
+                new HashMap<>(),
+                null,
+                cdpResourceType);
+    }
+
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            String sharedProjectId) {
+        return getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                sharedProjectId,
+                new HashMap<>(),
+                null,
+                CdpResourceType.DEFAULT);
+    }
+
+    public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
+            String accountId,
+            String environmentCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            String sharedProjectId) {
+        return getPlatformResourceRequestByEnvironment(
+                accountId,
+                environmentCrn,
+                region,
+                platformVariant,
+                availabilityZone,
+                sharedProjectId,
+                null,
+                CdpResourceType.DEFAULT);
+    }
+
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region,
+            String platformVariant,
+            String availabilityZone,
+            String sharedProjectId,
             AccessConfigTypeQueryParam accessConfigType) {
         return getPlatformResourceRequest(
                 accountId,
@@ -99,6 +148,8 @@ public class PlatformParameterService {
                 region,
                 platformVariant,
                 availabilityZone,
+                sharedProjectId,
+                new HashMap<>(),
                 accessConfigType,
                 CdpResourceType.DEFAULT);
     }
@@ -109,6 +160,7 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
+            String sharedProjectId,
             AccessConfigTypeQueryParam accessConfigType) {
         return getPlatformResourceRequestByEnvironment(
                 accountId,
@@ -116,6 +168,7 @@ public class PlatformParameterService {
                 region,
                 platformVariant,
                 availabilityZone,
+                sharedProjectId,
                 accessConfigType,
                 CdpResourceType.DEFAULT);
     }
@@ -127,6 +180,7 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
+            String sharedProjectId,
             AccessConfigTypeQueryParam accessConfigType,
             CdpResourceType cdpResourceType) {
         //CHECKSTYLE:ON
@@ -138,6 +192,8 @@ public class PlatformParameterService {
                 region,
                 platformVariant,
                 availabilityZone,
+                sharedProjectId,
+                new HashMap<>(),
                 accessConfigType,
                 cdpResourceType);
     }
@@ -150,6 +206,8 @@ public class PlatformParameterService {
             String region,
             String platformVariant,
             String availabilityZone,
+            String sharedProjectId,
+            Map<String, String> filter,
             AccessConfigTypeQueryParam accessConfigType,
             CdpResourceType cdpResourceType) {
     //CHECKSTYLE:ON
@@ -184,10 +242,27 @@ public class PlatformParameterService {
             platformResourceRequest.setAvailabilityZone(availabilityZone);
         }
         String accessConfigTypeString = NullUtil.getIfNotNull(accessConfigType, Enum::name);
+        if (filter != null) {
+            initFilterMap(platformResourceRequest);
+            for (Map.Entry<String, String> entry : filter.entrySet()) {
+                platformResourceRequest.getFilters().put(entry.getKey(), entry.getValue());
+            }
+        }
         if (accessConfigTypeString != null) {
-            platformResourceRequest.setFilters(Map.of(ACCESS_CONFIG_TYPE, accessConfigTypeString));
+            initFilterMap(platformResourceRequest);
+            platformResourceRequest.getFilters().put(ACCESS_CONFIG_TYPE, accessConfigTypeString);
+        }
+        if (!Strings.isNullOrEmpty(sharedProjectId)) {
+            initFilterMap(platformResourceRequest);
+            platformResourceRequest.getFilters().put(SHARED_PROJECT_ID, sharedProjectId);
         }
         return platformResourceRequest;
+    }
+
+    public void initFilterMap(PlatformResourceRequest platformResourceRequest) {
+        if (platformResourceRequest.getFilters() == null) {
+            platformResourceRequest.setFilters(new HashMap<>());
+        }
     }
 
     public CloudVmTypes getVmTypesByCredential(PlatformResourceRequest request) {
