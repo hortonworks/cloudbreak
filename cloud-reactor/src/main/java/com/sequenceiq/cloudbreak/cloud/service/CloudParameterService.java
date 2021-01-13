@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.service.OperationException;
+import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -403,7 +404,7 @@ public class CloudParameterService {
             }
             if (res.getStatus().equals(EventStatus.PERMANENTLY_FAILED)) {
                 LOGGER.debug("Failed to get platform accessConfigs", res.getErrorDetails());
-                throw new BadRequestException("Unable to fetch the access configs: " + res.getStatusReason());
+                throw new PermanentlyFailedException(res.getErrorDetails());
             }
             return res.getCloudAccessConfigs();
         } catch (InterruptedException e) {
