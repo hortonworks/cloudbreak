@@ -2,56 +2,76 @@ package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiUser2;
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
-    public static final String API_ROOT = "/api/v31";
+    public static final String API_ROOT = "/{mockUuid}/api/v31";
+
+    public static final String API_ROOT_V40 = "/{mockUuid}/api/v40";
 
     private T testDto;
 
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+    private MockedTestContext mockedTestContext;
 
-    public ClouderaManagerEndpoints(T testDto, ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure) {
+    public ClouderaManagerEndpoints(T testDto, MockedTestContext mockedTestContext) {
         this.testDto = testDto;
-        this.executeQueryToMockInfrastructure = executeQueryToMockInfrastructure;
+        this.mockedTestContext = mockedTestContext;
     }
 
     public Users<T> users() {
-        return (Users<T>) EndpointProxyFactory.create(Users.class, testDto, executeQueryToMockInfrastructure);
+        return (Users<T>) EndpointProxyFactory.create(Users.class, testDto, mockedTestContext);
     }
 
     public Admin<T> usersAdmin() {
-        return (Admin<T>) EndpointProxyFactory.create(Admin.class, testDto, executeQueryToMockInfrastructure);
+        return (Admin<T>) EndpointProxyFactory.create(Admin.class, testDto, mockedTestContext);
     }
 
     public ClusterHosts<T> clusterHosts() {
-        return (ClusterHosts<T>) EndpointProxyFactory.create(ClusterHosts.class, testDto, executeQueryToMockInfrastructure);
+        return (ClusterHosts<T>) EndpointProxyFactory.create(ClusterHosts.class, testDto, mockedTestContext);
     }
 
     public ClusterCommands.DeployConfig<T> clusterCommandsDeployConfig() {
-        return (ClusterCommands.DeployConfig<T>) EndpointProxyFactory.create(ClusterCommands.DeployConfig.class, testDto, executeQueryToMockInfrastructure);
+        return (ClusterCommands.DeployConfig<T>) EndpointProxyFactory.create(ClusterCommands.DeployConfig.class, testDto, mockedTestContext);
     }
 
     public ClusterHostTemplates.CommandsApplyHostTemplate<T> commandsApplyHostTemplate() {
         return (ClusterHostTemplates.CommandsApplyHostTemplate<T>)
-                EndpointProxyFactory.create(ClusterHostTemplates.CommandsApplyHostTemplate.class, testDto, executeQueryToMockInfrastructure);
+                EndpointProxyFactory.create(ClusterHostTemplates.CommandsApplyHostTemplate.class, testDto, mockedTestContext);
     }
 
     public Commands<T> commands() {
-        return (Commands<T>) EndpointProxyFactory.create(Commands.class, testDto, executeQueryToMockInfrastructure);
+        return (Commands<T>) EndpointProxyFactory.create(Commands.class, testDto, mockedTestContext);
     }
 
     public ClouderaManagerHosts<T> clouderaManagerHosts() {
-        return (ClouderaManagerHosts<T>) EndpointProxyFactory.create(ClouderaManagerHosts.class, testDto, executeQueryToMockInfrastructure);
+        return (ClouderaManagerHosts<T>) EndpointProxyFactory.create(ClouderaManagerHosts.class, testDto, mockedTestContext);
     }
 
-    @SparkUri(url = API_ROOT + "/cm/importClusterTemplate", requestType = ApiClusterTemplate.class)
+    public ExternalUserMappings<T> externalUserMappings() {
+        return (ExternalUserMappings<T>) EndpointProxyFactory.create(ExternalUserMappings.class, testDto, mockedTestContext);
+    }
+
+    public ClusterTemplateImport<T> importClusterTemplate() {
+        return (ClusterTemplateImport<T>) EndpointProxyFactory.create(ClusterTemplateImport.class, testDto, mockedTestContext);
+    }
+
+    public T profile(String profile, int times) {
+        mockedTestContext.getExecuteQueryToMockInfrastructure().execute(testDto.getCrn() + "/profile/" + profile + "/" + times, r -> r);
+        return testDto;
+    }
+
+    @SparkUri(url = API_ROOT_V40 + "/cm/importClusterTemplate", requestType = ApiClusterTemplate.class)
     public interface ClusterTemplateImport<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
 
         @Override
+        DefaultResponseConfigure<T> post();
+    }
+
+    @SparkUri(url = API_ROOT + "/externalUserMappings")
+    public interface ExternalUserMappings<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T> post();
     }
 
@@ -81,7 +101,7 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
     }
 
     public interface Admin<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        @SparkUri(url = API_ROOT + "/api/v31/users/admin")
+        @SparkUri(url = API_ROOT + "/users/admin")
         DefaultResponseConfigure<T> put();
     }
 

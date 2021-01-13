@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest.PROFILE_RETURN_HTTP_500;
 
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
@@ -30,12 +30,6 @@ import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMDownscaleWithHttp500ResponsesTest.class);
-
-    private static final BigDecimal DEPLOY_CLIENT_CONFIG_COMMAND_ID = new BigDecimal(100);
-
-    private static final BigDecimal APPLY_HOST_TEMPLATE_COMMAND_ID = new BigDecimal(200);
-
-    private static final BigDecimal HOSTS_DECOMMISSION_COMMAND_ID = new BigDecimal(300);
 
     private static final Duration POLLING_INTERVAL = Duration.of(3000, ChronoUnit.MILLIS);
 
@@ -77,6 +71,7 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
                 .withName(clusterName)
                 .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4(), key(clusterName))
+                .mockCm().profile(PROFILE_RETURN_HTTP_500, 1)
                 .await(STACK_AVAILABLE, key(clusterName))
                 .when(StackScalePostAction.valid().withDesiredCount(15), key(clusterName))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)

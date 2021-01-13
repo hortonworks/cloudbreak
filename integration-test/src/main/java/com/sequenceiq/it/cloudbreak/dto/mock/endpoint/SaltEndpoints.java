@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public final class SaltEndpoints<T extends CloudbreakTestDto> {
 
@@ -13,23 +13,23 @@ public final class SaltEndpoints<T extends CloudbreakTestDto> {
 
     private T testDto;
 
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+    private MockedTestContext mockedTestContext;
 
-    public SaltEndpoints(T testDto, ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure) {
+    public SaltEndpoints(T testDto, MockedTestContext mockedTestContext) {
         this.testDto = testDto;
-        this.executeQueryToMockInfrastructure = executeQueryToMockInfrastructure;
+        this.mockedTestContext = mockedTestContext;
     }
 
     public SaltHealth<T> health() {
-        return (SaltHealth<T>) EndpointProxyFactory.create(SaltHealth.class, testDto, executeQueryToMockInfrastructure);
+        return (SaltHealth<T>) EndpointProxyFactory.create(SaltHealth.class, testDto, mockedTestContext);
     }
 
     public SaltActionDistribute<T> saltActionDistribute() {
-        return (SaltActionDistribute<T>) EndpointProxyFactory.create(SaltActionDistribute.class, testDto, executeQueryToMockInfrastructure);
+        return (SaltActionDistribute<T>) EndpointProxyFactory.create(SaltActionDistribute.class, testDto, mockedTestContext);
     }
 
     public Run<T> run() {
-        return (Run<T>) EndpointProxyFactory.create(Run.class, testDto, executeQueryToMockInfrastructure);
+        return (Run<T>) EndpointProxyFactory.create(Run.class, testDto, mockedTestContext);
     }
 
     @SparkUri(url = SALT_BOOT_ROOT + "/health")

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.mock.swagger.model.ApiClusterTemplate;
+import com.sequenceiq.mock.swagger.model.ApiExternalUserMapping;
 import com.sequenceiq.mock.swagger.model.ApiServiceState;
 import com.sequenceiq.mock.swagger.model.ApiUser2;
 
@@ -15,11 +16,15 @@ public class ClouderaManagerDto {
 
     private List<ApiUser2> users = new ArrayList<>();
 
+    private List<ApiExternalUserMapping> externalUsers = new ArrayList<>();
+
     private ApiClusterTemplate clusterTemplate;
 
     private Map<String, ApiServiceState> serviceStates = new HashMap<>();
 
     private ApiServiceState status = ApiServiceState.NA;
+
+    private List<CmProfile> activeProfiles = new ArrayList<>();
 
     public ClouderaManagerDto(String mockUuid) {
         this.mockUuid = mockUuid;
@@ -59,5 +64,17 @@ public class ClouderaManagerDto {
 
     public void setStatus(ApiServiceState status) {
         this.status = status;
+    }
+
+    public List<CmProfile> getActiveProfiles() {
+        return activeProfiles;
+    }
+
+    public List<ApiExternalUserMapping> getExternalUsers() {
+        return externalUsers;
+    }
+
+    public void setExternalUsers(List<ApiExternalUserMapping> externalUsers) {
+        this.externalUsers = externalUsers;
     }
 }

@@ -44,7 +44,7 @@ public class ExecuteQueryToMockInfrastructure {
     }
 
     public <T> T execute(String path, Function<Response, T> handleResponse) {
-        return execute(path, w -> null, handleResponse);
+        return execute(path, w -> w, handleResponse);
     }
 
     public <T> T execute(String path, Function<WebTarget, WebTarget> decorateWebTarget, Function<Response, T> handleResponse) {

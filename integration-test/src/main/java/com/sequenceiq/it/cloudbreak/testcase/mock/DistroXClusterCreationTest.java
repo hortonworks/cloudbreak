@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpMethod;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -19,7 +18,6 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -173,12 +171,14 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsCDHAsProduct)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsComputeNode)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsMasterNode)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsWorkerNode)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsClusterName)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsRepositories)
+                .mockCm().importClusterTemplate().post().bodyContains("\"product\":\"CDH\"", 1).verify()
+                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"), 1).verify()
+                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "master"), 1).verify()
+                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "worker"), 3).verify()
+                .mockCm().importClusterTemplate().post()
+                .bodyContains(String.format("\"clusterName\":\"%s\"", testContext.get(DistroXTestDto.class).getName()), 1).verify()
+                .mockCm().importClusterTemplate().post().bodyContains("repositories", 1).verify()
+                .mockCm().importClusterTemplate().post().bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/", 1).verify()
                 .validate();
     }
 
@@ -280,7 +280,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
                 .await(STACK_AVAILABLE)
-                .then(DistroXClusterCreationTest::distroxClusterTemplateContainsMockHostname)
+                .mockCm().importClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 1).verify()
                 .validate();
     }
 
@@ -316,29 +316,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         return blueprintTestClient;
     }
 
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsMockHostname(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains(MOCK_HOSTNAME)
-                        .exactTimes(2),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsCDHAsProduct(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains("\"product\":\"CDH\"")
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
     private static DistroXTestDto distroxClusterGeneratedBlueprintCheck(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
         if (testDto.getGeneratedBlueprint() == null
                 || testDto.getGeneratedBlueprint().getBlueprintText() == null
@@ -346,66 +323,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             throw new TestFailException("Template Generation does not work properly because you get empty response");
         }
         return testDto;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsComputeNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"))
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsWorkerNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "worker"))
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsMasterNode(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "master"))
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsClusterName(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains(String.format("\"clusterName\":\"%s\"", testContext.get(DistroXTestDto.class).getName()))
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        );
-    }
-
-    @SuppressWarnings("unchecked")
-    private static DistroXTestDto distroxClusterTemplateContainsRepositories(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return testDto.then(
-                MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                        .bodyContains("repositories")
-                        .exactTimes(1),
-                key(DISTRO_X_STACK)
-        )
-                .then(MockVerification.verify(HttpMethod.POST,
-                        "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE")
-                                .bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/")
-                                .exactTimes(1),
-                        key(DISTRO_X_STACK));
     }
 
     private static DistroXTestDto distroxInheritedCloudStorage(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {

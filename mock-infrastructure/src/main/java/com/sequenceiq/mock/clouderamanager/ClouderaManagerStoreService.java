@@ -73,6 +73,10 @@ public class ClouderaManagerStoreService {
         return clouderaManagerDto;
     }
 
+    public boolean exists(String mockUuid) {
+        return cmDtos.get(mockUuid) != null;
+    }
+
     public ApiUser2 updateUser(String mockUuid, String userName, ApiUser2 body) {
         ApiUser2 apiUser2 = getApiUser2(mockUuid, userName);
         apiUser2.setAuthRoles(body.getAuthRoles());
