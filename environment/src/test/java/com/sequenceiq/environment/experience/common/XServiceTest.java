@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 class XServiceTest {
 
@@ -36,14 +37,14 @@ class XServiceTest {
     private static final String XP_HOST_ADDRESS = "127.0.0.1";
 
     private static final String XP_INTERNAL_ENV_ENDPOINT = "/somexp/api/v3/cp-internal/environment/{crn}";
-    
+
     private static final String TEST_XP_NAME = "AWESOME_XP";
 
     @Mock
     private CommonExperienceConnectorService mockExperienceConnectorService;
 
     @Mock
-    private XPServices mockExperienceProvider;
+    private ExperienceServicesConfig mockExperienceServicesConfig;
 
     @Mock
     private CommonExperienceValidator mockExperienceValidator;
@@ -72,7 +73,7 @@ class XServiceTest {
     void testHasExistingClusterForEnvironmentWhenEnvironmentCrnIsNullThenIllegalArgumentExceptionComes() {
         when(mockEnvironment.getCrn()).thenReturn(null);
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> underTest.hasExistingClusterForEnvironment(mockEnvironment));
@@ -86,7 +87,7 @@ class XServiceTest {
     void testHasExistingClusterForEnvironmentWhenEnvironmentCrnIsEmptyThenIllegalArgumentExceptionComes() {
         when(mockEnvironment.getCrn()).thenReturn("");
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
                 () -> underTest.hasExistingClusterForEnvironment(mockEnvironment));
@@ -98,9 +99,9 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenNoXpConnectorServiceCallHappens() {
-        when(mockExperienceProvider.getExperiences()).thenReturn(Collections.emptyList());
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(Collections.emptyList());
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -109,9 +110,9 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenFalseReturns() {
-        when(mockExperienceProvider.getExperiences()).thenReturn(Collections.emptyList());
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(Collections.emptyList());
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         boolean result = underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -120,11 +121,11 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenNoXpConnectorServiceCallHappens() {
-        
-        when(mockExperienceProvider.getExperiences()).thenReturn(List.of(mockCommonExperience));
+
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(false);
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -133,10 +134,10 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenFalseReturns() {
-        when(mockExperienceProvider.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(false);
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         boolean result = underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -146,10 +147,10 @@ class XServiceTest {
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredThenPathToExperienceShouldBeCombindedProperly() {
         String expectedPath = XP_PROTOCOL + "://" + XP_HOST_ADDRESS + ":" + XP_PORT + XP_INTERNAL_ENV_ENDPOINT;
-        when(mockExperienceProvider.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -159,12 +160,12 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredButHasNoActiveWorkspaceForEnvThenFalseReturns() {
-        when(mockExperienceProvider.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
         when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Collections.emptySet());
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         boolean result = underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
@@ -173,12 +174,12 @@ class XServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredAndHasActiveWorkspaceForEnvThentrueReturns() {
-        when(mockExperienceProvider.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
         when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of("SomeConnectedXP"));
 
-        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceProvider, mockExperienceValidator);
+        underTest = new XService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         boolean result = underTest.hasExistingClusterForEnvironment(mockEnvironment);
 
