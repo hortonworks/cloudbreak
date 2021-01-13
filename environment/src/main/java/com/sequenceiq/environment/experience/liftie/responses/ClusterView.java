@@ -2,6 +2,8 @@ package com.sequenceiq.environment.experience.liftie.responses;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.annotations.ApiModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -11,7 +13,8 @@ public class ClusterView {
 
     private String name;
 
-    private String cluster_id;
+    @JsonProperty("cluster_id")
+    private String clusterId;
 
     private String env;
 
@@ -19,9 +22,11 @@ public class ClusterView {
 
     private String tenant;
 
-    private String cluster_type;
+    @JsonProperty("cluster_type")
+    private String clusterType;
 
-    private StatusMessage cluster_status;
+    @JsonProperty("cluster_status")
+    private StatusMessage clusterStatus;
 
     public String getName() {
         return name;
@@ -31,12 +36,12 @@ public class ClusterView {
         this.name = name;
     }
 
-    public String getCluster_id() {
-        return cluster_id;
+    public String getClusterId() {
+        return clusterId;
     }
 
-    public void setCluster_id(String cluster_id) {
-        this.cluster_id = cluster_id;
+    public void setClusterId(String clusterId) {
+        this.clusterId = clusterId;
     }
 
     public String getEnv() {
@@ -63,20 +68,20 @@ public class ClusterView {
         this.tenant = tenant;
     }
 
-    public String getCluster_type() {
-        return cluster_type;
+    public String getClusterType() {
+        return clusterType;
     }
 
-    public void setCluster_type(String cluster_type) {
-        this.cluster_type = cluster_type;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
     }
 
-    public StatusMessage getCluster_status() {
-        return cluster_status;
+    public StatusMessage getClusterStatus() {
+        return clusterStatus;
     }
 
-    public void setCluster_status(StatusMessage cluster_status) {
-        this.cluster_status = cluster_status;
+    public void setClusterStatus(StatusMessage clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 
 }
