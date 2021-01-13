@@ -12,12 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckResourceRightsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckResourceRightsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
@@ -88,20 +84,6 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = UtilityOpDescription.NOTIFICATION_TEST, produces = MediaType.APPLICATION_JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES,
             nickname = "postNotificationTest")
     ResourceEventResponse postNotificationTest();
-
-    @POST
-    @Path("check_right")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CHECK_RIGHT_IN_ACCOUNT, produces = MediaType.APPLICATION_JSON, notes = Notes.CHECK_RIGHT_NOTES,
-            nickname = "checkRightInAccount")
-    CheckRightV4Response checkRightInAccount(CheckRightV4Request checkRightV4Request);
-
-    @POST
-    @Path("check_right_by_crn")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = UtilityOpDescription.CHECK_RIGHT_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CHECK_RIGHT_NOTES,
-            nickname = "checkRightByCrn")
-    CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkRightByCrnV4Request);
 
     @POST
     @Path("renew_certificate")

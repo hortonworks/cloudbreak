@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.ResourceRightsV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckResourceRightsV4Request;
+import com.sequenceiq.authorization.info.model.CheckResourceRightsV4Request;
+import com.sequenceiq.authorization.info.model.ResourceRightsV4;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -26,7 +26,7 @@ public class CheckResourceRightAction implements Action<CheckResourceRightTestDt
             resourceRightsV4.setRights(entry.getValue());
             return resourceRightsV4;
         }).collect(Collectors.toList()));
-        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().checkRightByCrn(checkRightByCrnV4Request));
+        testDto.setResponse(cloudbreakClient.getCloudbreakClient().authorizationUtilEndpoint().checkRightByCrn(checkRightByCrnV4Request));
         Log.whenJson(LOGGER, "checking right on resources response:\n", testDto.getResponse());
         return testDto;
     }

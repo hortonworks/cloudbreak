@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.v4.AuditEventV4Controller;
@@ -81,7 +82,8 @@ public class EndpointConfig extends ResourceConfig {
             FlowPublicController.class,
             AuthorizationInfoController.class,
             DistroxUpgradeV1Controller.class,
-            DistroXDatabaseServerV1Controller.class
+            DistroXDatabaseServerV1Controller.class,
+            AuthorizationUtilEndpoint.class
     );
 
     @Value("${info.app.version:unspecified}")

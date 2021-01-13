@@ -1,9 +1,8 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.Collection;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.responses.GeneralCollectionV4Response;
 
 import io.swagger.annotations.ApiModel;
 

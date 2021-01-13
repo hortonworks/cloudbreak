@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.util;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
+import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;

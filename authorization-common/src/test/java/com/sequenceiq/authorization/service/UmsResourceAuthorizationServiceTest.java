@@ -13,7 +13,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -115,19 +114,6 @@ public class UmsResourceAuthorizationServiceTest {
         result.put(RESOURCE_CRN, TRUE);
         result.put(RESOURCE_CRN2, FALSE);
         return result;
-    }
-
-    @Test
-    public void testCheckIfUserHasAtLeastOneRigthFailure() {
-        when(umsClient.hasRights(anyString(), anyString(), anyList(), any())).thenReturn(List.of(FALSE, FALSE));
-
-        AccessDeniedException exception = assertThrows(AccessDeniedException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
-                        checkIfUserHasAtLeastOneRight(USER_CRN, Map.of(RESOURCE_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT,
-                                RESOURCE_CRN2, AuthorizationResourceAction.ACCESS_ENVIRONMENT))));
-        assertTrue(exception.getMessage().contains(INSUFFICIENT_RIGHTS));
-        assertTrue(exception.getMessage().contains(formatTemplate("environments/describeEnvironment", RESOURCE_CRN)));
-        assertTrue(exception.getMessage().contains(formatTemplate("environments/accessEnvironment", RESOURCE_CRN2)));
     }
 
     private String formatTemplate(String right, String resourceCrn) {

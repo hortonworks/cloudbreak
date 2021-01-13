@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.base;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.Map;
 import java.util.function.Function;

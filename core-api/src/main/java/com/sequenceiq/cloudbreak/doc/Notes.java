@@ -86,7 +86,6 @@ public class Notes {
             + "create clusters in given regions in a given cloud provider.";
     public static final String KERBEROS_CONFIG_NOTES = "Kerberos config operations";
     public static final String INFO_CONFIG_NOTES = "Info config operations";
-    public static final String CHECK_RIGHT_NOTES = "Check right from UI";
     public static final String LIST_RETRYABLE_NOTES = "List all, currently retryable operations for the stack";
     public static final String RENEW_CERTIFICATE_NOTES = "Trigger a certificate renewal on the specified cluster.";
 

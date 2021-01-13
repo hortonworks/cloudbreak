@@ -12,12 +12,8 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckResourceRightsV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.CheckRightV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RenewCertificateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckResourceRightsV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CloudStorageSupportedV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.DeploymentPreferencesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
@@ -31,7 +27,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
-import com.sequenceiq.cloudbreak.service.authorization.UtilAuthorizationService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
@@ -70,9 +65,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private StackOperationService stackOperationService;
-
-    @Inject
-    private UtilAuthorizationService utilAuthorizationService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -128,18 +120,6 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         ResourceEventResponse response = new ResourceEventResponse();
         response.setEvent(ResourceEvent.CREDENTIAL_CREATED);
         return response;
-    }
-
-    @Override
-    @DisableCheckPermissions
-    public CheckRightV4Response checkRightInAccount(CheckRightV4Request checkRightV4Request) {
-        return utilAuthorizationService.getRightResult(checkRightV4Request);
-    }
-
-    @Override
-    @DisableCheckPermissions
-    public CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkResourceRightsV4Request) {
-        return utilAuthorizationService.getResourceRightsResult(checkResourceRightsV4Request);
     }
 
     @Override

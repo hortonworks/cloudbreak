@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckRightV4SingleResponse;
+import com.sequenceiq.authorization.info.model.CheckRightV4SingleResponse;
+import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;

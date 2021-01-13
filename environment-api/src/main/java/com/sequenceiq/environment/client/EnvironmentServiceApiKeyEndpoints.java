@@ -2,6 +2,7 @@ package com.sequenceiq.environment.client;
 
 import javax.ws.rs.client.WebTarget;
 
+import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.client.AbstractKeyBasedServiceEndpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
 import com.sequenceiq.environment.api.v1.credential.endpoint.AuditCredentialEndpoint;
@@ -51,4 +52,10 @@ public class EnvironmentServiceApiKeyEndpoints extends AbstractKeyBasedServiceEn
     public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
         return getEndpoint(CDPStructuredEventV1Endpoint.class);
     }
+
+    @Override
+    public AuthorizationUtilEndpoint authorizationUtilEndpoint() {
+        return getEndpoint(AuthorizationUtilEndpoint.class);
+    }
+
 }

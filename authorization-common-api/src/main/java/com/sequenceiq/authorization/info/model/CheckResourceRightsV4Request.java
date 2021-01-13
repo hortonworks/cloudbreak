@@ -1,11 +1,10 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.ResourceRightsV4;
 
 import io.swagger.annotations.ApiModel;
 
