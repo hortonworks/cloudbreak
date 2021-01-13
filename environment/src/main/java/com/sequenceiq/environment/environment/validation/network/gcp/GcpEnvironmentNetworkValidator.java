@@ -69,13 +69,13 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         GcpParams gcpParams, Map<String, CloudSubnet> subnetMetas) {
         if (StringUtils.isNotEmpty(gcpParams.getNetworkId())) {
             if (CollectionUtils.isEmpty(network.getSubnetIds())) {
-                String message = String.format("If networkId (%s) specified then subnet ids must be specified as well.",
+                String message = String.format("If networkId (%s) is given then subnet ids must exist on GCP as well.",
                         gcpParams.getNetworkId());
                 LOGGER.info(message);
                 resultBuilder.error(message);
             } else if (subnetMetas.size() != network.getSubnetIds().size()) {
-                String message = String.format("If networkId (%s) specified then subnet ids must be specified and should exist " +
-                                "on gcp well. Given subnetids: [%s], exisiting ones: [%s]", gcpParams.getNetworkId(),
+                String message = String.format("If networkId (%s) is given then subnet ids must be specified and must exist on GCP as well. " +
+                                " Given subnetids: [%s], exisiting ones: [%s]", gcpParams.getNetworkId(),
                         network.getSubnetIds().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")),
                         subnetMetas.keySet().stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", ")));
                 LOGGER.info(message);
@@ -97,7 +97,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     private void checkNetworkIdIsSpecifiedWhenSubnetIdsArePresent(ValidationResult.ValidationResultBuilder resultBuilder,
         GcpParams gcpParams, NetworkDto networkDto) {
         if (StringUtils.isEmpty(gcpParams.getNetworkId()) && CollectionUtils.isNotEmpty(networkDto.getSubnetIds())) {
-            resultBuilder.error("If subnetIds are specified, then networkId must be specified too.");
+            resultBuilder.error("If subnetIds are given, then networkId must be specified too.");
         }
     }
 
@@ -105,7 +105,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         GcpParams gcpParams, Map<String, CloudSubnet> subnetMetas) {
         if (StringUtils.isNotEmpty(gcpParams.getNetworkId())
                 && MapUtils.isEmpty(subnetMetas)) {
-            String message = String.format("If networkId (%s) are specified then subnet ids must be specified as well.",
+            String message = String.format("If networkId (%s) are given then subnet ids must be specified as well.",
                     gcpParams.getNetworkId());
             LOGGER.info(message);
             resultBuilder.error(message);
