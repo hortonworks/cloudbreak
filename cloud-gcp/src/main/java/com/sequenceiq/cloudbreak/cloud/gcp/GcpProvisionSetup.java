@@ -85,15 +85,27 @@ public class GcpProvisionSetup implements Setup {
                 rewriteUntilDone(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
 
                 Image gcpApiImage = new Image();
-                gcpApiImage.setName(getImageName(imageName));
+                String finalImageName = getImageName(imageName);
+                gcpApiImage.setName(finalImageName);
                 RawDisk rawDisk = new RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
                 gcpApiImage.setRawDisk(rawDisk);
                 GuestOsFeature uefiCompatible = new GuestOsFeature().setType("UEFI_COMPATIBLE");
                 GuestOsFeature multiIpSubnet = new GuestOsFeature().setType("MULTI_IP_SUBNET");
                 gcpApiImage.setGuestOsFeatures(List.of(uefiCompatible, multiIpSubnet));
-                Insert ins = compute.images().insert(projectId, gcpApiImage);
-                ins.execute();
+                try {
+                    Insert ins = compute.images().insert(projectId, gcpApiImage);
+                    ins.execute();
+                } catch (GoogleJsonResponseException ex) {
+                    if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
+                        String detailedMessage = ex.getDetails().getMessage();
+                        String msg = String.format("Failed to create image with name '%s' in project '%s': %s", finalImageName, projectId, detailedMessage);
+                        LOGGER.warn(msg, ex);
+                        throw ex;
+                    } else {
+                        LOGGER.info("No need to create image as it exists already with name '{}' in project '{}':", finalImageName, projectId);
+                    }
+                }
             }
         } catch (Exception e) {
             Long stackId = cloudContext.getId();
