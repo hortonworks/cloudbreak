@@ -58,7 +58,7 @@ public class ExperiencesByLiftie implements Experience {
     }
 
     private long countNotDeletedClusters(List<ClusterView> clusterViews) {
-        return clusterViews.stream().filter(clusterView -> !"DELETED".equals(clusterView.getCluster_status().getStatus())).count();
+        return clusterViews.stream().filter(clusterView -> !"DELETED".equals(clusterView.getClusterStatus().getStatus())).count();
     }
 
 }
