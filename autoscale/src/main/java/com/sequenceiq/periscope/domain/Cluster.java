@@ -97,6 +97,10 @@ public class Cluster implements Monitored, Clustered {
     public Cluster() {
     }
 
+    public Cluster(Long clusterId) {
+        this.id = clusterId;
+    }
+
     public Cluster(MonitoredStack monitoredStack) {
         setStackCrn(monitoredStack.getStackCrn());
         clusterManager = monitoredStack.getClusterManager();

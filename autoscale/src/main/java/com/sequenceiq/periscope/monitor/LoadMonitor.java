@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -32,8 +33,8 @@ public class LoadMonitor extends ClusterMonitor {
 
     @Override
     protected List<Cluster> getMonitored() {
-        List<Long> clusterIds = getClusterService().findLoadAlertClustersForNode(StackType.WORKLOAD,
-                ClusterState.RUNNING, true, getPeriscopeNodeConfig().getId());
-        return clusterIds.isEmpty() ? List.of() : getClusterService().findClustersByClusterIds(clusterIds);
+        return getClusterService().findLoadAlertClusterIdsForPeriscopeNodeId(StackType.WORKLOAD, ClusterState.RUNNING, true, getPeriscopeNodeConfig().getId())
+                .stream().map(clusterId -> new Cluster(clusterId))
+                .collect(Collectors.toList());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,8 @@ public class TimeMonitor extends ClusterMonitor {
 
     @Override
     protected List<Cluster> getMonitored() {
-        List<Long> clusterIds = getClusterService().findTimeAlertClustersForNode(StackType.WORKLOAD,
-                true, getPeriscopeNodeConfig().getId());
-        return clusterIds.isEmpty() ? List.of() : getClusterService().findClustersByClusterIds(clusterIds);
+        return getClusterService().findTimeAlertClusterIdsForPeriscopeNodeId(StackType.WORKLOAD, true, getPeriscopeNodeConfig().getId())
+                .stream().map(clusterId -> new Cluster(clusterId))
+                .collect(Collectors.toList());
     }
 }

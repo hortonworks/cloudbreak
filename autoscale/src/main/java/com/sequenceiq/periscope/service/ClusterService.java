@@ -225,13 +225,17 @@ public class ClusterService {
         return clusterRepository.findClustersByClusterIds(clusterIds);
     }
 
-    public List<Long> findLoadAlertClustersForNode(StackType stackType, ClusterState state,
+    public List<Long> findLoadAlertClusterIdsForPeriscopeNodeId(StackType stackType, ClusterState state,
             boolean autoscalingEnabled, String nodeId) {
         return clusterRepository.findByLoadAlertAndStackTypeAndClusterStateAndAutoscaling(stackType, state, autoscalingEnabled, nodeId);
     }
 
-    public List<Long> findTimeAlertClustersForNode(StackType stackType, boolean autoscalingEnabled, String nodeId) {
+    public List<Long> findTimeAlertClusterIdsForPeriscopeNodeId(StackType stackType, boolean autoscalingEnabled, String nodeId) {
         return clusterRepository.findByTimeAlertAndStackTypeAndAutoscaling(stackType, autoscalingEnabled, nodeId);
+    }
+
+    public List<Long> findClusterIdsByStackTypeAndPeriscopeNodeId(StackType stackType, String nodeId) {
+        return clusterRepository.findClusterIdsByStackTypeAndPeriscopeNodeId(stackType, nodeId);
     }
 
     public void validateClusterUniqueness(MonitoredStack stack) {
