@@ -57,19 +57,7 @@ class DefaultInstanceGroupProviderTest {
     }
 
     @Test
-    void createDefaultTemplateTestNoVolumeEncryptionWhenAwsAndNotEntitled() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(false);
-
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getAttributes()).isNull();
-    }
-
-    @Test
-    void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndEntitled() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
-
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAws() {
         Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
 
         assertThat(result).isNotNull();
@@ -81,8 +69,7 @@ class DefaultInstanceGroupProviderTest {
     }
 
     @Test
-    void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndEntitledAndFastEncryption() {
-        when(entitlementService.freeIpaDlEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndFastEncryption() {
         when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
         Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
