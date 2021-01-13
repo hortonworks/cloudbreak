@@ -789,7 +789,7 @@ public class AwsPlatformResources implements PlatformResources {
                 } catch (AmazonServiceException e) {
                     if (e.getStatusCode() == UNAUTHORIZED) {
                         String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
-                        LOGGER.error(policyMessage + e);
+                        LOGGER.error(policyMessage, e);
                     } else {
                         LOGGER.info(queryFailedMessage, e);
                     }
@@ -800,8 +800,8 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
-                LOGGER.error(policyMessage + ase);
-                throw new CloudConnectorException(policyMessage, ase);
+                LOGGER.error(policyMessage, ase);
+                throw new CloudUnauthorizedException(policyMessage, ase);
             } else {
                 LOGGER.info(queryFailedMessage, ase);
                 throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
@@ -873,7 +873,7 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
                 LOGGER.error("Could not get instance profiles because the user does not have enough permission.", ase);
-                throw new CloudConnectorException(ase.getMessage(), ase);
+                throw new CloudUnauthorizedException(ase.getMessage(), ase);
             } else {
                 LOGGER.info(queryFailedMessage, ase);
                 throw new CloudConnectorException(ase.getMessage(), ase);
