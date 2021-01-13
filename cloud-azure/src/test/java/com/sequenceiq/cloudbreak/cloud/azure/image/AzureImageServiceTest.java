@@ -4,12 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 import org.junit.Before;
@@ -112,6 +114,24 @@ public class AzureImageServiceTest {
     }
 
     @Test
+    public void testFindCustomImageWhenPollingTimesOut() throws Exception {
+        imagePresent(false);
+        imageRequested(true);
+        doThrow(new TimeoutException("")).when(azureManagedImageCreationPoller).startPolling(any(), any());
+        thrown.expect(CloudConnectorException.class);
+
+        try {
+            underTest.findImage(azureImageInfo, azureClient, authenticatedContext);
+
+        } catch (CloudConnectorException e) {
+            assertTrue(e.getCause() instanceof TimeoutException);
+            throw e;
+        } finally {
+            verifyPollingStarted();
+        }
+    }
+
+    @Test
     public void testFindCustomImageWhenImageWasNotRequested() throws Exception {
         imagePresent(false);
         imageRequested(false);
@@ -138,18 +158,41 @@ public class AzureImageServiceTest {
     }
 
     @Test
-    public void testCreateCustomImageWhenErrorAndImageNotPresent() {
+    public void testCreateCustomImageWhenTimeoutAndImageNotPresent() throws Exception {
         imagePresent(false);
         when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new CloudException("", null));
+        doThrow(new TimeoutException()).when(azureManagedImageCreationPoller).startPolling(any(), any());
         thrown.expect(CloudConnectorException.class);
 
         try {
             underTest.createImage(azureImageInfo, FROM_VHD_URI, azureClient, authenticatedContext);
 
         } catch (CloudConnectorException e) {
+            verifyPollingStarted();
             verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
             verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
             verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+            assertTrue(e.getCause() instanceof CloudException);
+            throw e;
+        }
+    }
+
+    @Test
+    public void testCreateCustomImageWhenErrorAndImageNotPresent() throws Exception {
+        imagePresent(false);
+        when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenThrow(new CloudException("", null));
+        doThrow(new Exception("Custom exception during polling")).when(azureManagedImageCreationPoller).startPolling(any(), any());
+        thrown.expect(CloudConnectorException.class);
+
+        try {
+            underTest.createImage(azureImageInfo, FROM_VHD_URI, azureClient, authenticatedContext);
+
+        } catch (CloudConnectorException e) {
+            verifyPollingStarted();
+            verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyAllocation(cr.capture(), any()), CommonStatus.REQUESTED);
+            verifyPersistenceNotification(cr -> verify(persistenceNotifier).notifyUpdate(cr.capture(), any()), CommonStatus.FAILED);
+            verify(azureClient).createImage(CUSTOM_IMAGE_NAME_WITH_REGION, RESOURCE_GROUP_NAME, FROM_VHD_URI, REGION_NAME);
+            assertEquals("Custom exception during polling", e.getCause().getMessage());
             throw e;
         }
     }
