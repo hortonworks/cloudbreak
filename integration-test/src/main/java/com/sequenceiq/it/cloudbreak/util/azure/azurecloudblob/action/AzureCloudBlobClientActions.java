@@ -97,7 +97,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     }
 
     private String getContainerName() {
-        String fullPath = azureProperties.getCloudstorage().getBaseLocation();
+        String fullPath = azureProperties.getCloudStorage().getBaseLocation();
         final String containerName = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.lastIndexOf("@"));
         LOGGER.info("Container Name: {} at Path: {}", containerName, fullPath);
         return containerName;
@@ -168,7 +168,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     private void validateBlobItemLength(ListBlobItem blobItem, Boolean zeroContent, Set<String> blobsWithZeroLength) {
         if (((CloudBlob) blobItem).getProperties().getLength() == 0 && !zeroContent) {
             blobsWithZeroLength.add(((CloudBlob) blobItem).getName());
-            Integer zeroBlobLengthToleration = azureProperties.getCloudstorage().getZeroBlobLengthToleration();
+            Integer zeroBlobLengthToleration = azureProperties.getCloudStorage().getZeroBlobLengthToleration();
             if (blobsWithZeroLength.size() >= zeroBlobLengthToleration) {
                 LOGGER.error("Zero blob length toleration limit ({}) reached! The following blobs has 0 bytes content: {}",
                         zeroBlobLengthToleration, StringUtils.join(blobsWithZeroLength, ", "));

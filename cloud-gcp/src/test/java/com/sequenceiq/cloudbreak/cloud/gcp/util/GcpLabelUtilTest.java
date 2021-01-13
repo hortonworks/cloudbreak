@@ -38,7 +38,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthLessThan63Chars() {
         String originalValue = "gpc-test-value-which-is-short";
 
-        String result = GcpLabelUtil.transformValue(originalValue);
+        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertEquals(originalValue, result);
     }
@@ -47,7 +47,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthMoreThan63Chars() {
         String originalValue = "gcp-dev-cloudbreak-gcp-test-9257bdae358342cca05e674b3893563-387";
 
-        String result = GcpLabelUtil.transformValue(originalValue);
+        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertEquals(GcpLabelUtil.GCP_MAX_TAG_LEN, result.length());
         assertEquals(originalValue.substring(originalValue.length() - GcpLabelUtil.GCP_MAX_TAG_LEN), result);
@@ -57,7 +57,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthMoreThan63CharsAndItIsACrn() {
         String originalValue = "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:12474ddc-6e44-4f4c-806a-b197ef12cbb8";
 
-        String result = GcpLabelUtil.transformValue(originalValue);
+        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertTrue(result.length() < GcpLabelUtil.GCP_MAX_TAG_LEN);
         assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result);

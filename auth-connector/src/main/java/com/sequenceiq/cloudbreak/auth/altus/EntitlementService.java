@@ -18,11 +18,11 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EMBEDDE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DL_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LIST_FILTERING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
@@ -124,10 +124,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_RUNTIME_UPGRADE_DATAHUB);
     }
 
-    public boolean freeIpaDlEbsEncryptionEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_FREEIPA_DL_EBS_ENCRYPTION);
-    }
-
     public boolean azureSingleResourceGroupDeploymentEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
@@ -186,6 +182,10 @@ public class EntitlementService {
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATA_LAKE_LOAD_BALANCER);
+    }
+
+    public boolean publicEndpointAccessGatewayEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY);
     }
 
     public boolean isExperienceDeletionEnabled(String accountId) {

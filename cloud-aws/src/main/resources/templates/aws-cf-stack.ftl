@@ -279,7 +279,11 @@
       "Properties" : {
         "IpAddressType" : "ipv4",
         "Scheme" : "${loadBalancer.awsScheme}",
-        "Subnets" : [ { "Ref" : "SubnetId" } ],
+        "Subnets" : [
+          <#list loadBalancer.subnetIds as subnetId>
+          "${subnetId}"<#sep>,
+          </#list>
+        ],
         "Type" : "network"
       }
     }
@@ -290,13 +294,11 @@
           "Type" : "AWS::ElasticLoadBalancingV2::Listener",
           "Properties" : {
             "DefaultActions" : [
-              <#list listener.targetGroups as targetGroup>
               {
-                "Order" : ${targetGroup.order},
-                "TargetGroupArn" : "${targetGroup.arn}",
+                "Order" : 1,
+                "TargetGroupArn" : "${listener.targetGroup.arn}",
                 "Type" : "forward"
-              }<#if (targetGroup_index + 1) != listener.targetGroups?size>,</#if>
-              </#list>
+              }
             ],
             "LoadBalancerArn" : "${loadBalancer.arn}",
             "Port" : ${listener.port},
@@ -305,28 +307,26 @@
         }
       </#if>
 
-        <#list listener.targetGroups as targetGroup>
-        ,"${targetGroup.name}" : {
-          "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
-          "Properties" : {
-            "Port" : ${targetGroup.port},
-            "Protocol" : "TCP",
-            "TargetType" : "instance",
-            <#if existingVPC>
-            "VpcId" : { "Ref" : "VPCId" }
-            <#else>
-            "VpcId" : { "Ref" : "VPC" }
-            </#if>
-            <#if targetGroup.instanceIds?size != 0 >
-            ,"Targets" : [
-              <#list targetGroup.instanceIds as i>
-                { "Id" : "${i}" }<#if (i_index + 1) != targetGroup.instanceIds?size>,</#if>
-              </#list>
-            ]
-            </#if>
-          }
+      ,"${listener.targetGroup.name}" : {
+        "Type" : "AWS::ElasticLoadBalancingV2::TargetGroup",
+        "Properties" : {
+          "Port" : ${listener.targetGroup.port},
+          "Protocol" : "TCP",
+          "TargetType" : "instance",
+          <#if existingVPC>
+          "VpcId" : { "Ref" : "VPCId" }
+          <#else>
+          "VpcId" : { "Ref" : "VPC" }
+          </#if>
+          <#if listener.targetGroup.instanceIds?size != 0 >
+          ,"Targets" : [
+            <#list listener.targetGroup.instanceIds as i>
+              { "Id" : "${i}" }<#sep>,
+            </#list>
+          ]
+          </#if>
         }
-        </#list>
+      }
       </#list>
       ,
     </#list>

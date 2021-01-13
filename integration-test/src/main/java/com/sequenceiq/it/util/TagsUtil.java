@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 import org.testng.asserts.SoftAssert;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -74,8 +75,12 @@ public class TagsUtil {
                 } else if (tag.equalsIgnoreCase("Cloudera-Creator-Resource-Name")) {
                     validateClouderaCreatorResourceNameTag(response, tag, testContext);
                 } else {
-                    Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] Not Null! ", tag, response.getTagValue(tag)));
-                    softAssert.assertNotNull(response.getTagValue(tag), String.format(MISSING_DEFAULT_TAG, tag));
+                    String tagValue = response.getTagValue(tag);
+                    if (StringUtils.isEmpty(tagValue)) {
+                        tagValue = response.getTagValue(tag.toLowerCase());
+                    }
+                    Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] Not Null! ", tag, tagValue));
+                    softAssert.assertNotNull(tagValue, String.format(MISSING_DEFAULT_TAG, tag));
                 }
             });
             softAssert.assertAll();
@@ -103,16 +108,23 @@ public class TagsUtil {
                 || response.getTagValue(tag).equals(sanitize(testContext.getActingUserName()))) {
             Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
                     testContext.getActingUserName()));
+        } else if (gcpLabelTransformedValue(response.getTagValue(tag), testContext.getActingUserName())) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name transformed to a GCP label value! ", tag,
+                    response.getTagValue(tag), testContext.getActingUserName()));
         } else {
             LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user name!", tag, response.getTagValue(tag),
                     testContext.getActingUserName());
-            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ", tag,
-                    response.getTagValue(tag), testContext.getActingUserName()));
+            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ",
+                    tag, response.getTagValue(tag), testContext.getActingUserName()));
         }
     }
 
     private String sanitize(String value) {
         return value.split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
+    }
+
+    private boolean gcpLabelTransformedValue(String tagValue, String rawValue) {
+        return tagValue.equals(GcpLabelUtil.transformLabelKeyOrValue(rawValue));
     }
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
@@ -122,16 +134,19 @@ public class TagsUtil {
         if (StringUtils.isEmpty(tagValue)) {
             tagValue = response.getTagValue(tag.toLowerCase());
         }
-        Crn clouderaCreatorResourceName = Crn.fromString(tagValue);
-
-        if (clouderaCreatorResourceName != null && clouderaCreatorResourceName.equals(actingUserCrn)) {
-            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, clouderaCreatorResourceName,
+        if (gcpLabelTransformedValue(tagValue, actingUserCrn.toString())) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN transformed to a GCP label value! ", tag, tagValue,
                     actingUserCrn));
         } else {
-            LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user CRN!", tag, clouderaCreatorResourceName,
-                    actingUserCrn);
-            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user CRN! ", tag,
-                    clouderaCreatorResourceName, actingUserCrn));
+            Crn clouderaCreatorResourceName = Crn.fromString(tagValue);
+
+            if (clouderaCreatorResourceName != null && clouderaCreatorResourceName.equals(actingUserCrn)) {
+                Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, clouderaCreatorResourceName, actingUserCrn));
+            } else {
+                LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user CRN!", tag, clouderaCreatorResourceName, actingUserCrn);
+                throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user CRN! ", tag,
+                        clouderaCreatorResourceName, actingUserCrn));
+            }
         }
     }
 

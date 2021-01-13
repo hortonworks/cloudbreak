@@ -13,6 +13,8 @@ import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -31,11 +33,13 @@ import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.type.DataHubStartAction;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -69,6 +73,8 @@ import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseCo
 @AccountEntityType(Environment.class)
 public class EnvironmentController implements EnvironmentEndpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentController.class);
+
     private final EnvironmentApiConverter environmentApiConverter;
 
     private final EnvironmentResponseConverter environmentResponseConverter;
@@ -91,6 +97,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentStackConfigUpdateService stackConfigUpdateService;
 
+    private final EntitlementService entitlementService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -102,7 +110,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentStopService environmentStopService,
             CredentialService credentialService,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            EnvironmentStackConfigUpdateService stackConfigUpdateService) {
+            EnvironmentStackConfigUpdateService stackConfigUpdateService,
+            EntitlementService entitlementService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -114,12 +123,14 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.credentialService = credentialService;
         this.credentialConverter = credentialConverter;
         this.stackConfigUpdateService = stackConfigUpdateService;
+        this.entitlementService = entitlementService;
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentRequest request) {
+        checkEndpointGatewayEntitlement(request);
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentResponseConverter.dtoToDetailedResponse(envDto);
@@ -316,6 +327,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @DisableCheckPermissions
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
+        checkEndpointGatewayEntitlement(environmentRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
@@ -325,5 +337,15 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @InternalOnly
     public void updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
         stackConfigUpdateService.updateAllStackConfigsByCrn(crn);
+    }
+
+    private void checkEndpointGatewayEntitlement(EnvironmentRequest request) {
+        if (!entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (request.getNetwork() != null && PublicEndpointAccessGateway.ENABLED.equals(request.getNetwork().getPublicEndpointAccessGateway())) {
+                LOGGER.debug("Disabling public endpoint gateway in environnment request because entitlement is not enabled.");
+                request.getNetwork().setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+                request.getNetwork().setEndpointGatewaySubnetIds(Set.of());
+            }
+        }
     }
 }

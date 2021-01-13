@@ -75,7 +75,6 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 platformVariant,
                 availabilityZone,
                 null,
-                null,
                 cdpResourceType);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
@@ -98,8 +97,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/regions, request: {}", request);
         CloudRegions regions = platformParameterService.getRegionsByCredential(request, availabilityZonesNeeded);
         RegionResponse response = convertersionService.convert(regions, RegionResponse.class);
@@ -113,16 +111,14 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             @ResourceCrn String environmentCrn,
             String region,
             String platformVariant,
-            String availabilityZone,
-            String sharedProjectId) {
+            String availabilityZone) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                sharedProjectId);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/networks, request: {}", request);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
         PlatformNetworksResponse response = convertersionService.convert(networks, PlatformNetworksResponse.class);
@@ -144,8 +140,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/ip_pools, request: {}", request);
         CloudIpPools ipPools = platformParameterService.getIpPoolsCredentialId(request);
         PlatformIpPoolsResponse response = convertersionService.convert(ipPools, PlatformIpPoolsResponse.class);
@@ -166,8 +161,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/gateways, request: {}", request);
         CloudGateWays gateways = platformParameterService.getGatewaysCredentialId(request);
         PlatformGatewaysResponse response = convertersionService.convert(gateways, PlatformGatewaysResponse.class);
@@ -189,8 +183,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/encryption_keys, request: {}", request);
         CloudEncryptionKeys encryptionKeys = platformParameterService.getEncryptionKeys(request);
         PlatformEncryptionKeysResponse response = convertersionService.convert(encryptionKeys, PlatformEncryptionKeysResponse.class);
@@ -204,16 +197,14 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             @ResourceCrn String environmentCrn,
             String region,
             String platformVariant,
-            String availabilityZone,
-            String sharedProjectId) {
+            String availabilityZone) {
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                sharedProjectId);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/security_groups, request: {}", request);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
         PlatformSecurityGroupsResponse response = convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
@@ -234,8 +225,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/ssh_keys, request: {}", request);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
         PlatformSshKeysResponse response = convertersionService.convert(sshKeys, PlatformSshKeysResponse.class);
@@ -258,7 +248,6 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 region,
                 platformVariant,
                 availabilityZone,
-                null,
                 accessConfigType);
         LOGGER.info("Get /platform_resources/access_configs, request: {}", request);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
@@ -280,8 +269,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/nosql_tables, request: {}", request);
         CloudNoSqlTables noSqlTables = platformParameterService.getNoSqlTables(request);
         PlatformNoSqlTablesResponse response = convertersionService.convert(noSqlTables, PlatformNoSqlTablesResponse.class);
@@ -302,8 +290,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 environmentCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                null);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/resource_groups, request: {}", request);
         CloudResourceGroups resourceGroups = platformParameterService.getResourceGroups(request);
         List<PlatformResourceGroupResponse> platformResourceGroups = resourceGroups.getResourceGroups().stream()

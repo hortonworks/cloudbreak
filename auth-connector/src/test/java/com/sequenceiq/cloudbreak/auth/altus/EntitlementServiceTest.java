@@ -74,9 +74,6 @@ class EntitlementServiceTest {
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
 
-                {"CDP_FREEIPA_DL_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, false},
-                {"CDP_FREEIPA_DL_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::freeIpaDlEbsEncryptionEnabled, true},
-
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, false},
                 {"LOCAL_DEV", (EntitlementCheckFunction) EntitlementService::localDevelopment, true},
 
@@ -124,7 +121,10 @@ class EntitlementServiceTest {
                 {"CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK", (EntitlementCheckFunction) EntitlementService::embeddedDatabaseOnAttachedDiskEnabled, true},
 
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
-                {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true}
+                {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
+
+                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", (EntitlementCheckFunction) EntitlementService::publicEndpointAccessGatewayEnabled, false},
+                {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", (EntitlementCheckFunction) EntitlementService::publicEndpointAccessGatewayEnabled, true}
         };
     }
 

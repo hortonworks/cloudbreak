@@ -16,4 +16,7 @@ public interface TargetGroupRepository extends CrudRepository<TargetGroup, Long>
     Set<TargetGroup> findByInstanceGroupId(@Param("instanceGroupId") Long instanceGroupId);
 
     Set<TargetGroup> findByLoadBalancerId(@Param("loadBalancerId") Long loadBalancerId);
+
+    @Query("SELECT t FROM TargetGroup t INNER JOIN t.loadBalancerSet lb WHERE lb.id= :loadBalancerId")
+    Set<TargetGroup> findTargetGroupsByLoadBalancerId(@Param("loadBalancerId") Long loadBalancerId);
 }

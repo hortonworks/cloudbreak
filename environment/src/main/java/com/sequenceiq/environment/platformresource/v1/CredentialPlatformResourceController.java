@@ -91,7 +91,6 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 platformVariant,
                 availabilityZone,
                 null,
-                null,
                 cdpResourceType);
         LOGGER.info("Get /platform_resources/machine_types, request: {}", request);
         CloudVmTypes cloudVmTypes = platformParameterService.getVmTypesByCredential(request);
@@ -142,8 +141,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String credentialCrn,
             String region,
             String platformVariant,
-            String availabilityZone,
-            String sharedProjectId) {
+            String availabilityZone) {
         CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
@@ -152,8 +150,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 credentialCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                sharedProjectId);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/networks, request: {}", request);
         CloudNetworks networks = platformParameterService.getCloudNetworks(request);
         PlatformNetworksResponse response = convertersionService.convert(networks, PlatformNetworksResponse.class);
@@ -242,8 +239,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String credentialCrn,
             String region,
             String platformVariant,
-            String availabilityZone,
-            String sharedProjectId) {
+            String availabilityZone) {
         CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
         String accountId = getAccountId();
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
@@ -252,8 +248,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 credentialCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                sharedProjectId);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/security_groups, request: {}", request);
         CloudSecurityGroups securityGroups = platformParameterService.getSecurityGroups(request);
         PlatformSecurityGroupsResponse response = convertersionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
@@ -303,7 +298,6 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 region,
                 platformVariant,
                 availabilityZone,
-                null,
                 accessConfigType);
         LOGGER.info("Get /platform_resources/access_configs, request: {}", request);
         CloudAccessConfigs accessConfigs = platformParameterService.getAccessConfigs(request);
@@ -362,8 +356,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
                 credentialCrn,
                 region,
                 platformVariant,
-                availabilityZone,
-                CdpResourceType.DEFAULT);
+                availabilityZone);
         LOGGER.info("Get /platform_resources/resource_groups, request: {}", request);
         CloudResourceGroups resourceGroups = platformParameterService.getResourceGroups(request);
         List<PlatformResourceGroupResponse> platformResourceGroups = resourceGroups.getResourceGroups().stream()

@@ -61,7 +61,7 @@ public class AzureProperties {
         return instance;
     }
 
-    public Cloudstorage getCloudstorage() {
+    public Cloudstorage getCloudStorage() {
         return cloudstorage;
     }
 

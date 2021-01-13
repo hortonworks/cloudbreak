@@ -986,4 +986,48 @@ public class StackToCloudStackConverterTest {
         assertEquals(Set.of("group1", "group2"), groupNames);
     }
 
+    @Test
+    public void testConvertWithMultipleKnoxLoadBalancers() {
+        Set<InstanceGroup> instanceGroups = new LinkedHashSet<>();
+        InstanceGroup instanceGroup1 = mock(InstanceGroup.class);
+        InstanceGroup instanceGroup2 = mock(InstanceGroup.class);
+        when(instanceGroup1.getGroupName()).thenReturn("group1");
+        when(instanceGroup2.getGroupName()).thenReturn("group2");
+        instanceGroups.add(instanceGroup1);
+        instanceGroups.add(instanceGroup2);
+        when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
+        Template template = new Template();
+        template.setVolumeTemplates(Set.of());
+        when(instanceGroup1.getTemplate()).thenReturn(template);
+        when(instanceGroup1.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of());
+        when(instanceGroup1.getStack()).thenReturn(stack);
+        when(instanceGroup2.getTemplate()).thenReturn(template);
+        when(instanceGroup2.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of());
+        when(instanceGroup2.getStack()).thenReturn(stack);
+        TargetGroup targetGroup = mock(TargetGroup.class);
+        when(targetGroup.getType()).thenReturn(TargetGroupType.KNOX);
+        LoadBalancer internalLoadBalancer = mock(LoadBalancer.class);
+        when(internalLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+        when(internalLoadBalancer.getId()).thenReturn(1L);
+        LoadBalancer externalLoadBalancer = mock(LoadBalancer.class);
+        when(externalLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
+        when(externalLoadBalancer.getId()).thenReturn(2L);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(internalLoadBalancer, externalLoadBalancer));
+        when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
+        when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(Set.of(instanceGroup1, instanceGroup2));
+        when(loadBalancerConfigService.getPortsForTargetGroup(any(TargetGroup.class))).thenReturn(Set.of(443));
+
+        CloudStack result = underTest.convert(stack);
+
+        assertEquals(2, result.getLoadBalancers().size());
+        Optional<CloudLoadBalancer> internalCloudLoadBalancer = result.getLoadBalancers().stream()
+            .filter(lb -> lb.getType() == LoadBalancerType.PRIVATE)
+            .findFirst();
+        assertTrue(internalCloudLoadBalancer.isPresent());
+        Optional<CloudLoadBalancer> externalCloudLoadBalancer = result.getLoadBalancers().stream()
+            .filter(lb -> lb.getType() == LoadBalancerType.PUBLIC)
+            .findFirst();
+        assertTrue(externalCloudLoadBalancer.isPresent());
+    }
+
 }

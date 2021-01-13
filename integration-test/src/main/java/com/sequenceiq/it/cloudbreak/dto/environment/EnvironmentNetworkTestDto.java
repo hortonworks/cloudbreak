@@ -67,6 +67,7 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         getRequest().setYarn(null);
         getRequest().setMock(null);
         getRequest().setSubnetIds(null);
+        getRequest().setGcp(null);
         getRequest().setNetworkCidr(networkCIDR);
         return this;
     }

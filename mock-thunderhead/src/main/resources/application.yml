@@ -21,7 +21,6 @@ auth:
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
-    freeipadlebsencryption.enable: true
     azure.single.resourcegroup.enable: true
     azure.single.resourcegroup.dedicated.storage.account.enable: true
     fastebsencryption.enable: true
@@ -37,3 +36,4 @@ auth:
     datalake.loadbalancer.enable: false
     ccmv2.enable: false
     environment.experience.deletion.enable: true
+    endpointgateway.enable: false

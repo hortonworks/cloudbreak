@@ -1,13 +1,13 @@
 package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 
 @Component
 public class FmsUserConverter {
@@ -36,11 +36,11 @@ public class FmsUserConverter {
     }
 
     private FmsUser createFmsUser(String workloadUsername, String firstName, String lastName) {
-        checkArgument(!Strings.isNullOrEmpty(workloadUsername));
+        checkArgument(StringUtils.isNotBlank(workloadUsername));
         FmsUser fmsUser = new FmsUser();
         fmsUser.withName(workloadUsername);
-        fmsUser.withFirstName(StringUtils.defaultIfBlank(firstName, NONE_STRING));
-        fmsUser.withLastName(StringUtils.defaultIfBlank(lastName, NONE_STRING));
+        fmsUser.withFirstName(StringUtils.defaultIfBlank(StringUtils.strip(firstName), NONE_STRING));
+        fmsUser.withLastName(StringUtils.defaultIfBlank(StringUtils.strip(lastName), NONE_STRING));
         return fmsUser;
     }
 }

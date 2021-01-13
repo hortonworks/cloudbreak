@@ -202,8 +202,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_MEDIUM_DUTY_SDX = "CDP_MEDIUM_DUTY_SDX";
 
-    private static final String CDP_FREEIPA_DL_EBS_ENCRYPTION = "CDP_FREEIPA_DL_EBS_ENCRYPTION";
-
     private static final String DATAHUB_AWS_AUTOSCALING = "DATAHUB_AWS_AUTOSCALING";
 
     private static final String DATAHUB_AZURE_AUTOSCALING = "DATAHUB_AZURE_AUTOSCALING";
@@ -240,6 +238,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     private static final String CDP_LOAD_BALANCER_ENABLEMENT = "CDP_DATA_LAKE_LOAD_BALANCER";
 
     private static final String CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT = "CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT";
+
+    private static final String CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT = "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY";
 
     private static final String MOCK_RESOURCE = "mock_resource";
 
@@ -302,9 +302,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
 
-    @Value("${auth.mock.freeipadlebsencryption.enable}")
-    private boolean enableFreeIpaDlEbsEncryption;
-
     @Value("${auth.mock.azure.single.resourcegroup.enable}")
     private boolean enableAzureSingleResourceGroupDeployment;
 
@@ -340,6 +337,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.environment.experience.deletion.enable}")
     private boolean enableExperienceDeletionByEnvironment;
+
+    @Value("${auth.mock.endpointgateway.enable}")
+    private boolean publicEndpointAccessGatewayEnabled;
 
     private String cbLicense;
 
@@ -621,9 +621,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
         }
-        if (enableFreeIpaDlEbsEncryption) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_DL_EBS_ENCRYPTION));
-        }
         if (enableAzureSingleResourceGroupDeployment) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));
         }
@@ -659,6 +656,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableExperienceDeletionByEnvironment) {
             builder.addEntitlements(createEntitlement(CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT));
+        }
+        if (publicEndpointAccessGatewayEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_ENABLEMENT));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
