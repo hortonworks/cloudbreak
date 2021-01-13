@@ -334,6 +334,12 @@ public enum ResourceEvent {
     DATALAKE_DATABASE_RESTORE_FINISHED("datalake.database.restore.finished"),
     DATALAKE_DATABASE_RESTORE_FAILED("datalake.database.restore.failed"),
     DATALAKE_DATABASE_RESTORE_COULD_NOT_START("datalake.database.restore.could.not.start"),
+    DATALAKE_BACKUP_IN_PROGRESS("datalake.backup.in.progress"),
+    DATALAKE_RESTORE_IN_PROGRESS("datalake.restore.in.progress"),
+    DATALAKE_BACKUP_FINISHED("datalake.backup.finished"),
+    DATALAKE_RESTORE_FINISHED("datalake.restore.finised"),
+    DATALAKE_BACKUP_FAILED("datalake.backup.failed"),
+    DATALAKE_RESTORE_FAILED("datalake.restore.failed"),
 
     SDX_CERT_ROTATION_STARTED("resource.sdx.cert.rotation.started"),
     SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),

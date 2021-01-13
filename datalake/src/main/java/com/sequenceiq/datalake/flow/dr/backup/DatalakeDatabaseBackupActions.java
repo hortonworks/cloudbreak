@@ -5,6 +5,8 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeDatabaseBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -16,9 +18,12 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartE
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
+import com.sequenceiq.datalake.metric.MetricType;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -49,6 +54,12 @@ public class DatalakeDatabaseBackupActions {
 
     @Inject
     private SdxDatabaseDrService sdxDatabaseDrService;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
+
+    @Inject
+    private SdxMetricService metricService;
 
     @Inject
     private SdxService sdxService;
@@ -100,6 +111,10 @@ public class DatalakeDatabaseBackupActions {
                 LOGGER.info("Datalake database backup is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_BACKUP_INPROGRESS,
+                        ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS,
+                        "Datalake backup in progress", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_BACKUP_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseBackupWaitRequest.from(context, operationId));
             }
 
@@ -181,6 +196,10 @@ public class DatalakeDatabaseBackupActions {
             protected void doExecute(SdxContext context, DatalakeBackupSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx backup is finalized with sdx id: {}", payload.getResourceId());
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT.event(), payload);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_BACKUP_FINISHED,
+                        "Datalake backup finished, Datalake is running", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FINISHED, sdxCluster);
             }
 
             @Override
@@ -228,6 +247,10 @@ public class DatalakeDatabaseBackupActions {
             protected void doExecute(SdxContext context, DatalakeBackupFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_BACKUP_FAILED,
+                        "Datalake backup failed, Datalake is running", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
