@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.experience.common;
+package com.sequenceiq.environment.experience.config;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -6,9 +6,11 @@ import java.util.List;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.environment.experience.common.CommonExperience;
+
 @Component
 @ConfigurationProperties("experience.scan.config")
-public class XPServices {
+public class ExperienceServicesConfig {
 
     private List<CommonExperience> experiences;
 
