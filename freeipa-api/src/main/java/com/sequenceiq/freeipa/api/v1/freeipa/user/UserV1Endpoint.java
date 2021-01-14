@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.doc.UserOperationDescriptions;
@@ -54,6 +55,14 @@ public interface UserV1Endpoint {
     @ApiOperation(value = UserOperationDescriptions.SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES, produces = MediaType.APPLICATION_JSON,
             nickname = "getSyncOperationStatusV1")
     SyncOperationStatus getSyncOperationStatus(@QueryParam("operationId") @NotNull String operationId);
+
+    @GET
+    @Path("internal/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UserOperationDescriptions.INTERNAL_SYNC_OPERATION_STATUS, notes = UserNotes.USER_NOTES,
+            produces = MediaType.APPLICATION_JSON, nickname = "internalGetSyncOperationStatusV1")
+    SyncOperationStatus getSyncOperationStatusInternal(
+            @QueryParam("accountId") @AccountId String accountId, @QueryParam("operationId") @NotNull String operationId);
 
     @GET
     @Path("lastStatus")
