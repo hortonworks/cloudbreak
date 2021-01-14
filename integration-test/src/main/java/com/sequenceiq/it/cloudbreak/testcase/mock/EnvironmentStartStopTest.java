@@ -128,8 +128,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .given(DX_1, DistroXTestDto.class)
                 .await(STACK_AVAILABLE, key(DX_1))
                 .given(DX_2, DistroXTestDto.class)
-                .await(STACK_AVAILABLE, key(DX_2));
-        testContext
+                .await(STACK_AVAILABLE, key(DX_2))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 // await stopped datahubs
@@ -139,19 +138,13 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .await(STACK_STOPPED, key(DX_2))
                 // await stopped datalake
                 .given(SdxInternalTestDto.class)
-                .await(SdxClusterStatusResponse.STOPPED);
-        // mock stopped freeipa health check response
-        getFreeIpaHealthCheckHandler().setUnreachable();
-        testContext
+                .await(SdxClusterStatusResponse.STOPPED)
                 // await stopped freeipa
                 .given(FreeIpaTestDto.class)
                 .await(Status.STOPPED)
                 // await stopped env
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
-        // mock started freeipa health check response
-        getFreeIpaHealthCheckHandler().setHealthy();
-        testContext.given(EnvironmentTestDto.class)
+                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL)
                 .when(environmentTestClient.start())
                 // await started freeipa
                 .given(FreeIpaTestDto.class)
@@ -178,6 +171,5 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .then(environmentListStructuredEventAssertions::checkStartEvents)
                 .then(environmentListStructuredEventAssertions::checkDeleteEvents)
                 .validate();
-        getFreeIpaHealthCheckHandler().setHealthy();
     }
 }
