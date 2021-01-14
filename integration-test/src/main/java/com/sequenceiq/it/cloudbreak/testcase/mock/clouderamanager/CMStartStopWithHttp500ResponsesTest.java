@@ -54,6 +54,7 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
                 .given(stack, StackTestDto.class)
                 .withCluster(cmcluster)
                 .when(stackTestClient.createV4(), key(stack))
+                .mockCm().profile(PROFILE_RETURN_HTTP_500, 1)
                 .await(STACK_AVAILABLE, key(stack))
                 .when(stackTestClient.stopV4(), key(stack))
                 .await(STACK_STOPPED, key(stack))

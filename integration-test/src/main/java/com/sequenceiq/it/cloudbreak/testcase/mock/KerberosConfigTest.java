@@ -1,11 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import javax.inject.Inject;
 
-import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -13,9 +9,6 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerber
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.FreeIpaKerberosDescriptor;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.MITKerberosDescriptor;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
-import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -50,7 +43,8 @@ public class KerberosConfigTest extends AbstractMockTest {
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(testData.getAssertions())
+                .mockSalt().run().post().bodyContains(SALT_HIGHSTATE, 1).atLeast(1).verify()
+                .mockCm().importClusterTemplate().post().atLeast(1).verify()
                 .validate();
     }
 
@@ -112,13 +106,6 @@ public class KerberosConfigTest extends AbstractMockTest {
     private enum KerberosTestData {
 
         ACTIVE_DIRECTORY {
-            @Override
-            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
-                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                return verifications;
-            }
 
             @Override
             public CreateKerberosConfigRequest getRequest() {
@@ -139,13 +126,6 @@ public class KerberosConfigTest extends AbstractMockTest {
         },
 
         MIT {
-            @Override
-            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
-                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                return verifications;
-            }
 
             @Override
             public CreateKerberosConfigRequest getRequest() {
@@ -164,13 +144,6 @@ public class KerberosConfigTest extends AbstractMockTest {
         },
 
         FREEIPA {
-            @Override
-            public List<Assertion<StackTestDto, CloudbreakClient>> getAssertions() {
-                List<Assertion<StackTestDto, CloudbreakClient>> verifications = new LinkedList<>();
-                verifications.add(clusterTemplatePostToCMContains("enableKerberos").exactTimes(1));
-                verifications.add(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(SALT_HIGHSTATE).exactTimes(2));
-                return verifications;
-            }
 
             @Override
             public CreateKerberosConfigRequest getRequest() {
@@ -189,13 +162,6 @@ public class KerberosConfigTest extends AbstractMockTest {
             }
         };
 
-        public abstract List<Assertion<StackTestDto, CloudbreakClient>> getAssertions();
-
         public abstract CreateKerberosConfigRequest getRequest();
-
-        private static MockVerification clusterTemplatePostToCMContains(String content) {
-            return MockVerification.verify(HttpMethod.POST, "ClouderaManagerMock.IMPORT_CLUSTERTEMPLATE").bodyContains(content);
-        }
-
     }
 }

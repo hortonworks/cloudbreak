@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class EnvironmentChildTest extends AbstractMockTest {
@@ -58,7 +59,8 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
-                .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(1).verify()
+                .given(FreeIpaTestDto.class)
+                .mockFreeIpa().session().post().bodyContains("dnszone_add", 1).times(1).verify()
                 .validate();
     }
 
@@ -131,6 +133,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .await(EnvironmentStatus.ARCHIVED)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
+                .given(FreeIpaTestDto.class)
                 .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(1).verify()
                 .validate();
     }
@@ -181,7 +184,8 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .await(EnvironmentStatus.ARCHIVED)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsNotListedByNameAndParentName)
-                .mockFreeIpa().session().post().bodyContains("dnszone_del", 1).times(0).verify()
+                .given(FreeIpaTestDto.class)
+                .mockFreeIpa().session().post().bodyContains("dnszone_del", 0).verify()
                 .validate();
     }
 

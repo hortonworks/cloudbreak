@@ -1,9 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public final class SpiEndpoints<T extends CloudbreakTestDto> {
 
@@ -19,35 +19,35 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
 
     private T testDto;
 
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+    private MockedTestContext mockedTestContext;
 
-    public SpiEndpoints(T testDto, ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure) {
+    public SpiEndpoints(T testDto, MockedTestContext mockedTestContext) {
         this.testDto = testDto;
-        this.executeQueryToMockInfrastructure = executeQueryToMockInfrastructure;
+        this.mockedTestContext = mockedTestContext;
     }
 
     public CloudInstanceStatuses<T> cloudInstanceStatuses() {
-        return (CloudInstanceStatuses<T>) EndpointProxyFactory.create(CloudInstanceStatuses.class, testDto, executeQueryToMockInfrastructure);
+        return (CloudInstanceStatuses<T>) EndpointProxyFactory.create(CloudInstanceStatuses.class, testDto, mockedTestContext);
     }
 
     public CloudMetadataStatuses<T> cloudMetadataStatuses() {
-        return (CloudMetadataStatuses<T>) EndpointProxyFactory.create(CloudMetadataStatuses.class, testDto, executeQueryToMockInfrastructure);
+        return (CloudMetadataStatuses<T>) EndpointProxyFactory.create(CloudMetadataStatuses.class, testDto, mockedTestContext);
     }
 
     public RegisterPublicKey<T> registerPublicKey() {
-        return (RegisterPublicKey<T>) EndpointProxyFactory.create(RegisterPublicKey.class, testDto, executeQueryToMockInfrastructure);
+        return (RegisterPublicKey<T>) EndpointProxyFactory.create(RegisterPublicKey.class, testDto, mockedTestContext);
     }
 
     public UnregisterPublicKey<T> unregisterPublicKey() {
-        return (UnregisterPublicKey<T>) EndpointProxyFactory.create(UnregisterPublicKey.class, testDto, executeQueryToMockInfrastructure);
+        return (UnregisterPublicKey<T>) EndpointProxyFactory.create(UnregisterPublicKey.class, testDto, mockedTestContext);
     }
 
     public GetPublicKey<T> getPublicKey() {
-        return (GetPublicKey<T>) EndpointProxyFactory.create(GetPublicKey.class, testDto, executeQueryToMockInfrastructure);
+        return (GetPublicKey<T>) EndpointProxyFactory.create(GetPublicKey.class, testDto, mockedTestContext);
     }
 
     public Launch<T> launch() {
-        return (Launch<T>) EndpointProxyFactory.create(Launch.class, testDto, executeQueryToMockInfrastructure);
+        return (Launch<T>) EndpointProxyFactory.create(Launch.class, testDto, mockedTestContext);
     }
 
     @SparkUri(url = SPI_ROOT + REGISTER_PUBLIC_KEY)

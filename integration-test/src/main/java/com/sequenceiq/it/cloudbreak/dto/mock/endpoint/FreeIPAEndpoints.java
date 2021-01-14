@@ -1,23 +1,23 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
+import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
-import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public class FreeIPAEndpoints<T extends CloudbreakTestDto> {
 
     private T testDto;
 
-    private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
+    private MockedTestContext mockedTestContext;
 
-    public FreeIPAEndpoints(T testDto, ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure) {
+    public FreeIPAEndpoints(T testDto, MockedTestContext mockedTestContext) {
         this.testDto = testDto;
-        this.executeQueryToMockInfrastructure = executeQueryToMockInfrastructure;
+        this.mockedTestContext = mockedTestContext;
     }
 
     public Session<T> session() {
-        return (Session<T>) EndpointProxyFactory.create(Session.class, testDto, executeQueryToMockInfrastructure);
+        return (Session<T>) EndpointProxyFactory.create(Session.class, testDto, mockedTestContext);
     }
 
     @SparkUri(url = "/{mockUuid}/ipa/session/json")

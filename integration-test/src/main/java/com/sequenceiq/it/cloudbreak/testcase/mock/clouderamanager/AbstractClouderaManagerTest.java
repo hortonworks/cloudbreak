@@ -10,6 +10,8 @@ import com.sequenceiq.it.util.ResourceUtil;
 
 public abstract class AbstractClouderaManagerTest extends AbstractMockTest {
 
+    public static final String PROFILE_RETURN_HTTP_500 = "HTTP_500";
+
     @Override
     protected void setupTest(TestContext testContext) {
         super.setupTest(testContext);

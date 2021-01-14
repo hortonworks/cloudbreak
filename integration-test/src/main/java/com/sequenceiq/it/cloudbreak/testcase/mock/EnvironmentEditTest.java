@@ -80,8 +80,6 @@ public class EnvironmentEditTest extends AbstractMockTest {
                     }
                     return t;
                 })
-                .mockSpi().unregisterPublicKey().post().times(1).verify()
-                .mockSpi().unregisterPublicKey().post().times(0).verify()
                 .validate();
     }
 
@@ -118,8 +116,6 @@ public class EnvironmentEditTest extends AbstractMockTest {
                     }
                     return t;
                 })
-                .mockSpi().unregisterPublicKey().post().times(0).verify()
-                .mockSpi().registerPublicKey().post().times(1).verify()
                 .validate();
     }
 

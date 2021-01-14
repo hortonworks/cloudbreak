@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
 import com.sequenceiq.mock.clouderamanager.DataProviderService;
 import com.sequenceiq.mock.clouderamanager.ResponseCreatorComponent;
+import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.swagger.model.ApiHost;
 import com.sequenceiq.mock.swagger.model.ApiHostList;
 
@@ -24,8 +25,12 @@ public class HostsResourceOperation {
     @Inject
     private ResponseCreatorComponent responseCreatorComponent;
 
+    @Inject
+    private SpiService spiService;
+
     public ResponseEntity<ApiHost> deleteHost(String mockUuid, String hostId) {
         ApiHost apiHost = dataProviderService.getApiHost(mockUuid, hostId);
+        spiService.terminateInstance(mockUuid, hostId);
         return responseCreatorComponent.exec(apiHost);
     }
 

@@ -13,7 +13,6 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -22,7 +21,6 @@ import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
-import com.sequenceiq.it.cloudbreak.assertion.MockVerification;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -98,8 +96,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .replaceInstanceGroups(instanceGroupName)
                 .when(stackTestClient.createV4(), RunningParameter.key(stackName))
                 .await(STACK_AVAILABLE, RunningParameter.key(stackName))
-                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(executionTime),
-                        RunningParameter.key(stackName))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(executionTime).verify()
                 .validate();
     }
 
@@ -156,10 +153,10 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).exactTimes(2))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
-                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(2).verify()
                 .validate();
     }
 
@@ -199,7 +196,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(4))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .validate();
     }
 
@@ -240,7 +237,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(4))
                 .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
-                .then(MockVerification.verify(HttpMethod.POST, "SaltMock.SALT_RUN").bodyContains(HIGHSTATE).atLeast(2))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .validate();
     }
 
@@ -283,20 +280,20 @@ public class RecipeClusterTest extends AbstractMockTest {
                 {
                         getBean(MockedTestContext.class),
                         POST_CLOUDERA_MANAGER_START,
-                        2,
+                        1,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("post ambari start recipes")
                                 .when("calling cluster creation with the recipes")
-                                .then("should run 2 times")
+                                .then("should run 1 times")
                 },
                 {
                         getBean(MockedTestContext.class),
                         POST_CLUSTER_INSTALL,
-                        2,
+                        1,
                         new TestCaseDescription.TestCaseDescriptionBuilder()
                                 .given("post cluster install recipes")
                                 .when("calling cluster creation with the recipes")
-                                .then("should run 2 times")
+                                .then("should run 1 times")
                 }
         };
     }

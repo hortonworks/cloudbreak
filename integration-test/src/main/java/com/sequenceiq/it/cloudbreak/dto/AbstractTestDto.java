@@ -322,28 +322,28 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public SpiEndpoints<T> mockSpi() {
         if (getTestContext() instanceof MockedTestContext) {
-            return new SpiEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+            return new SpiEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockSpi is supported by MockedTestContext only.");
     }
 
     public SaltEndpoints<T> mockSalt() {
         if (getTestContext() instanceof MockedTestContext) {
-            return new SaltEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+            return new SaltEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockSalt is supported by MockedTestContext only.");
     }
 
     public ClouderaManagerEndpoints<T> mockCm() {
         if (getTestContext() instanceof MockedTestContext) {
-            return new ClouderaManagerEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+            return new ClouderaManagerEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockCm is supported by MockedTestContext only.");
     }
 
     public FreeIPAEndpoints<T> mockFreeIpa() {
         if (getTestContext() instanceof MockedTestContext) {
-            return new FreeIPAEndpoints<>((T) this, ((MockedTestContext) getTestContext()).getExecuteQueryToMockInfrastructure());
+            return new FreeIPAEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockFreeIpa is supported by MockedTestContext only.");
     }

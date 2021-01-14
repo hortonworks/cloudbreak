@@ -3,7 +3,11 @@ package com.sequenceiq.mock.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +16,9 @@ import org.springframework.web.client.HttpServerErrorException;
 
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.util.CheckedSupplier;
+import com.sequenceiq.mock.clouderamanager.ClouderaManagerDto;
+import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
+import com.sequenceiq.mock.clouderamanager.CmProfile;
 import com.sequenceiq.mock.spi.MockResponse;
 
 @Service
@@ -21,6 +28,11 @@ public class ResponseModifierService {
 
     private final Map<String, Integer> called = new ConcurrentHashMap<>();
 
+    private final Map<String, Integer> profileCalled = new ConcurrentHashMap<>();
+
+    @Inject
+    private ClouderaManagerStoreService clouderaManagerStoreService;
+
     public void addResponse(MockResponse mockResponse) {
         String responseKey = mockResponse.getHttpMethod().toLowerCase() + "_" + mockResponse.getPath();
         List<MockResponse> mockResponses = responses.computeIfAbsent(responseKey, key -> new ArrayList<>());
@@ -29,6 +41,12 @@ public class ResponseModifierService {
 
     public List<MockResponse> getResponse(String path) {
         return responses.get(path);
+    }
+
+    public void cleanByMockUuid(String mockUuid) {
+        responses.remove(mockUuid);
+        called.remove(mockUuid);
+        profileCalled.remove(mockUuid);
     }
 
     /**
@@ -88,5 +106,23 @@ public class ResponseModifierService {
             return null;
         }
         throw new HttpServerErrorException(HttpStatus.valueOf(mockResponse.getStatusCode()), mockResponse.getMessage());
+    }
+
+    public void handleProfiles(String mockUuid, String path) {
+        if (mockUuid != null && profileSupported(mockUuid, path) && clouderaManagerStoreService.exists(mockUuid)) {
+            ClouderaManagerDto dto = clouderaManagerStoreService.read(mockUuid);
+            Optional<CmProfile> http500 = dto.getActiveProfiles().stream().filter(p -> p.getProfile().equals("HTTP_500")).findFirst();
+            if (http500.isPresent()) {
+                int called = profileCalled.computeIfAbsent(path, key -> 0);
+                profileCalled.put(path, called + 1);
+                if (called < http500.get().getTimes()) {
+                    throw new InternalServerErrorException("HTTP_500 profile set");
+                }
+            }
+        }
+    }
+
+    private boolean profileSupported(String mockUuid, String path) {
+        return path.contains(mockUuid + "/api/v31") || path.contains(mockUuid + "/api/v40");
     }
 }
