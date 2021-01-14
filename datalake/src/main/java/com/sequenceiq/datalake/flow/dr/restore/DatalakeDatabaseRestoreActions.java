@@ -6,6 +6,8 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEve
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeDatabaseRestoreEvent.DATALAKE_DATABASE_RESTORE_IN_PROGRESS_EVENT;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -17,9 +19,12 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStar
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
+import com.sequenceiq.datalake.metric.MetricType;
+import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -50,6 +55,12 @@ public class DatalakeDatabaseRestoreActions {
 
     @Inject
     private SdxDatabaseDrService sdxDatabaseDrService;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
+
+    @Inject
+    private SdxMetricService metricService;
 
     @Inject
     private SdxService sdxService;
@@ -104,6 +115,10 @@ public class DatalakeDatabaseRestoreActions {
                 LOGGER.info("Datalake database restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
+                        ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
+                        "Datalake restore in progress", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_RESTORE_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseRestoreWaitRequest.from(context, operationId));
             }
 
@@ -183,6 +198,10 @@ public class DatalakeDatabaseRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeRestoreSuccessEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx database restore is finalized with sdx id: {}", payload.getResourceId());
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                        ResourceEvent.DATALAKE_RESTORE_FINISHED,
+                        "Datalake restore finished, Datalake is running", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FINISHED, sdxCluster);
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -231,6 +250,10 @@ public class DatalakeDatabaseRestoreActions {
             protected void doExecute(SdxContext context, DatalakeRestoreFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
+                SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_FAILED,
+                        ResourceEvent.DATALAKE_RESTORE_FAILED,
+                        "Datalake restore failed", payload.getResourceId());
+                metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
                 sendEvent(context, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

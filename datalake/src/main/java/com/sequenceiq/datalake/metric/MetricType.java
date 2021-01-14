@@ -12,7 +12,13 @@ public enum MetricType implements Metric {
     SDX_REPAIR_FINISHED("sdx.repair.finished"),
     SDX_REPAIR_FAILED("sdx.repair.failed"),
     SDX_DELETION_FINISHED("sdx.deletion.finished"),
-    SDX_DELETION_FAILED("sdx.deletion.failed");
+    SDX_DELETION_FAILED("sdx.deletion.failed"),
+    SDX_BACKUP_REQUESTED("sdx.backup.requested"),
+    SDX_BACKUP_FAILED("sdx.backup.failed"),
+    SDX_BACKUP_FINISHED("sdx.backup.finished"),
+    SDX_RESTORE_REQUESTED("sdx.restore.requested"),
+    SDX_RESTORE_FAILED("sdx.restore.failed"),
+    SDX_RESTORE_FINISHED("sdx.restore.finished");
 
     private final String metricName;
 
