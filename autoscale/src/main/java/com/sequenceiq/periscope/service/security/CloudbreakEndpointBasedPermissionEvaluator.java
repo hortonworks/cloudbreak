@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
+import com.sequenceiq.periscope.domain.SecurityConfig;
 
 @Service
 @Lazy
@@ -51,11 +52,11 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
                     return true;
                 }
                 Long stackId = getStackIdFromTarget(t);
+                PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
                 if (stackId == null) {
-                    PeriscopeUser user = cachedUserDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
                     return owner.equals(user.getId());
                 }
-                return stackSecurityService.hasAccess(stackId, owner, permission.toString());
+                return stackSecurityService.hasAccess(stackId, user.getId(), permission.toString());
             } catch (IllegalAccessException e) {
                 LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
                 return false;
@@ -96,6 +97,9 @@ public class CloudbreakEndpointBasedPermissionEvaluator implements PermissionEva
         }
         if (targetDomainObject instanceof BaseAlert) {
             return ((BaseAlert) targetDomainObject).getCluster().getStackId();
+        }
+        if (targetDomainObject instanceof SecurityConfig) {
+            return ((SecurityConfig) targetDomainObject).getCluster().getStackId();
         }
         return null;
     }

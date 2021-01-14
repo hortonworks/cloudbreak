@@ -30,7 +30,9 @@ public class HistoryService {
                 .withAlert(scalingPolicy.getAlert())
                 .withCluster(scalingPolicy.getAlert().getCluster());
         PeriscopeUser periscopeUser = authenticatedUserService.getPeriscopeUser();
-        history.setUser(periscopeUser.getId());
+        if (periscopeUser != null) {
+            history.setUser(periscopeUser.getId());
+        }
         return historyRepository.save(history);
     }
 
@@ -38,7 +40,9 @@ public class HistoryService {
         History history = new History(scalingStatus, statusReason, originalNodeCount)
                 .withCluster(cluster);
         PeriscopeUser periscopeUser = authenticatedUserService.getPeriscopeUser();
-        history.setUser(periscopeUser.getId());
+        if (periscopeUser != null) {
+            history.setUser(periscopeUser.getId());
+        }
         return historyRepository.save(history);
     }
 
