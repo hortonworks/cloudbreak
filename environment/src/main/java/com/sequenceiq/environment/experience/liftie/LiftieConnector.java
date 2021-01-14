@@ -24,7 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.environment.experience.WebTargetRetrier;
+import com.sequenceiq.environment.experience.RetriableWebTarget;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
 @Component
@@ -42,40 +42,39 @@ public class LiftieConnector implements LiftieApi {
 
     private final Client client;
 
-    private WebTargetRetrier webTargetRetrier;
+    private RetriableWebTarget retriableWebTarget;
 
     public LiftieConnector(@Value("${experience.scan.liftie.api.port}") String liftiePort,
                            @Value("${experience.scan.liftie.api.address}") String liftieAddress,
                            @Value("${experience.scan.protocol}") String liftieProtocol,
                            Client client,
-                           WebTargetRetrier webTargetRetrier) {
+                           RetriableWebTarget retriableWebTarget) {
         this.liftiePort = liftiePort;
         this.liftieAddress = liftieAddress;
         this.liftieProtocol = liftieProtocol;
         this.client = client;
-        this.webTargetRetrier = webTargetRetrier;
+        this.retriableWebTarget = retriableWebTarget;
     }
 
     @Override
-    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, String workloads, Integer page) {
+    public ListClustersResponse listClusters(@NotNull String envCrn, @NotNull String tenant, String workloads, Integer page) {
         WebTarget webTarget = client.target(createPathToClusterListingEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
-        putIfPresent(queryParams, "env", env);
-        putIfPresent(queryParams, "tenant", tenant);
         putIfPresent(queryParams, "status", "ACTIVE"); // TODO: determine statuses we want to get in the list
+        putIfPresent(queryParams, "env", envCrn);
+        putIfPresent(queryParams,  "tenant", tenant);
         putIfPresent(queryParams, "workloads", workloads);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
         Response result = null;
         LOGGER.debug("About to connect Liftie API");
         try {
-            String uuid = UUID.randomUUID().toString();
             Invocation.Builder call = webTarget
                     .request()
                     .accept(APPLICATION_JSON)
                     .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
-                    .header(REQUEST_ID_HEADER, uuid);
-            result = webTargetRetrier.get(call);
+                    .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
+            result = retriableWebTarget.get(call);
         } catch (RuntimeException re) {
             LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
         }
