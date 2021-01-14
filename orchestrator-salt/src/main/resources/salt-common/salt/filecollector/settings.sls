@@ -109,18 +109,6 @@
    {% set cluster_version = '' %}
 {% endif %}
 
-{% set version_data = namespace(entities=[]) %}
-{% for role in grains.get('roles', []) %}
-{% if role.startswith("cdp_telemetry_prewarmed") %}
-  {% set version_data.entities = version_data.entities + [role.split("cdp_telemetry_prewarmed_v")[1]]%}
-{% endif %}
-{% endfor %}
-{% if version_data.entities|length > 0 %}
-{% set cdp_telemetry_version = version_data.entities[0] | int %}
-{% else %}
-{% set cdp_telemetry_version = 0 %}
-{% endif %}
-
 {% do filecollector.update({
     "destination": destination,
     "cloudStorageUploadParams": cloud_storage_upload_params,
@@ -144,7 +132,6 @@
     "clusterVersion": cluster_version,
     "uuid": uuid,
     "accountId": account_id,
-    "cdpTelemetryVersion": cdp_telemetry_version,
     "supportBundleDbusStreamName": support_bundle_dbus_stream_name,
     "supportBundleDbusHeaders": support_bundle_dbus_headers,
     "supportBundleDbusAccessKey": support_bundle_dbus_access_key,

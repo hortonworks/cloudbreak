@@ -2,6 +2,7 @@ base:
            '*':
              - nginx
              - tags
+             - telemetry
              - fluent
              - ntp
              - freeipa
@@ -16,6 +17,7 @@ base:
              - freeipa.common-install
              - freeipa.backups
              - freeipa.healthagent
+             - nodestatus
 
            'roles:freeipa_replica':
              - match: grain
@@ -23,6 +25,7 @@ base:
              - freeipa.common-install
              - freeipa.backups
              - freeipa.healthagent
+             - nodestatus
 
            'roles:freeipa_primary_replacement':
              - match: grain
@@ -31,3 +34,4 @@ base:
              - freeipa.promote-replica-to-master
              - freeipa.backups
              - freeipa.healthagent
+             - nodestatus

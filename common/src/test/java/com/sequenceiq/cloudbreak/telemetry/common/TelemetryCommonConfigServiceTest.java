@@ -22,7 +22,7 @@ public class TelemetryCommonConfigServiceTest {
 
     @Before
     public void setUp() {
-        underTest = new TelemetryCommonConfigService(null, null);
+        underTest = new TelemetryCommonConfigService(null, false, null);
     }
 
     @Test
