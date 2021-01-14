@@ -57,7 +57,7 @@
           },
           "cloudPlatform": "AWS"
         },
-        "type": "GATEWAY"
+        "type": "CORE"
       },
       {
         "name": "leader",
@@ -82,7 +82,7 @@
           },
           "cloudPlatform": "AWS"
         },
-        "type": "CORE"
+        "type": "GATEWAY"
       },
       {
         "name": "worker",

@@ -47,7 +47,7 @@
           },
           "cloudPlatform": "AZURE"
         },
-        "type": "GATEWAY"
+        "type": "CORE"
       },
       {
         "name": "leader",
@@ -67,7 +67,7 @@
           },
           "cloudPlatform": "AZURE"
         },
-        "type": "CORE"
+        "type": "GATEWAY"
       },
       {
         "name": "worker",
