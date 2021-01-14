@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -130,6 +132,12 @@ public class UserV1Controller implements UserV1Endpoint {
         checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("getSyncOperationStatus() requested for operation '{}' in account '{}'", operationId, accountId);
+        return getSyncOperationStatusInternal(accountId, operationId);
+    }
+
+    @Override
+    @InternalOnly
+    public SyncOperationStatus getSyncOperationStatusInternal(@AccountId String accountId, @NotNull String operationId) {
         return operationToSyncOperationStatus.convert(
                 operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
     }

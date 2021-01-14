@@ -230,6 +230,21 @@ public class UserV1ControllerTest {
     }
 
     @Test
+    void getStatusInternal() {
+        String operationId = "testId";
+
+        Operation operation = mock(Operation.class);
+        when(operationService.getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId)).thenReturn(operation);
+        SyncOperationStatus status = mock(SyncOperationStatus.class);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
+
+        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                underTest.getSyncOperationStatusInternal(ACCOUNT_ID, operationId)));
+
+        verify(operationService, times(1)).getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId);
+    }
+
+    @Test
     void setPassword() {
         String password = "password";
         SetPasswordRequest request = mock(SetPasswordRequest.class);
