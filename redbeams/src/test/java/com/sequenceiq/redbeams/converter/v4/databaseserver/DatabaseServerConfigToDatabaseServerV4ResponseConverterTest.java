@@ -61,6 +61,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         initializeSecrets(server);
         server.setCreationDate(System.currentTimeMillis());
         server.setEnvironmentId("myenvironment");
+        server.setClusterCrn("myclustercrn");
         server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
         DBStack dbStack = new DBStack();
         DBStackStatus dbStackStatus = new DBStackStatus();
@@ -86,6 +87,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getConnectionPassword()).isNotNull();
         assertThat(response.getCreationDate()).isEqualTo(server.getCreationDate());
         assertThat(response.getEnvironmentCrn()).isEqualTo(server.getEnvironmentId());
+        assertThat(response.getClusterCrn()).isEqualTo(server.getClusterCrn());
         assertThat(response.getResourceStatus()).isEqualTo(server.getResourceStatus());
         assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());

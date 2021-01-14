@@ -36,6 +36,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
         response.setConnectionPassword(getConversionService().convert(source.getConnectionPasswordSecret(), SecretResponse.class));
         response.setCreationDate(source.getCreationDate());
         response.setEnvironmentCrn(source.getEnvironmentId());
+        response.setClusterCrn(source.getClusterCrn());
 
         response.setResourceStatus(source.getResourceStatus());
         if (source.getDbStack().isPresent()) {
