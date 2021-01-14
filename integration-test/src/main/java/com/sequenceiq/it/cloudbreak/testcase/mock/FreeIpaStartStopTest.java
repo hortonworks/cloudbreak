@@ -39,17 +39,12 @@ public class FreeIpaStartStopTest extends AbstractMockTest {
             when = "calling a freeipe start",
             then = "freeipa sould be available")
     public void testStopStartFreeIpa(MockedTestContext testContext) {
-        getFreeIpaHealthCheckHandler().setHealthy();
         testContext
                 .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE);
-        getFreeIpaHealthCheckHandler().setUnreachable();
-        testContext.given(FreeIpaTestDto.class)
+                .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.stop())
-                .await(Status.STOPPED);
-        getFreeIpaHealthCheckHandler().setHealthy();
-        testContext.given(FreeIpaTestDto.class)
+                .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.delete())

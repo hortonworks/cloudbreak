@@ -40,7 +40,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
-import com.sequenceiq.it.cloudbreak.mock.freeipa.healthcheck.FreeIpaNodeHealthCheckHandler;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -77,9 +76,6 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
-
-    @Inject
-    private FreeIpaNodeHealthCheckHandler freeIpaNodeHealthCheckHandler;
 
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
@@ -319,9 +315,5 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         }
 
         return cloudStorage.getRequest();
-    }
-
-    public FreeIpaNodeHealthCheckHandler getFreeIpaHealthCheckHandler() {
-        return freeIpaNodeHealthCheckHandler;
     }
 }

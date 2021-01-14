@@ -35,12 +35,11 @@ public class FreeIpaSyncTest extends AbstractMockTest {
             when = "calling a freeipe start",
             then = "freeipa sould be available")
     public void testSyncFreeIpaWithInternalActor(MockedTestContext testContext) {
-        getFreeIpaHealthCheckHandler().setHealthy();
         testContext
                 .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE);
-        testContext.given(FreeIpaUserSyncTestDto.class)
+                .await(Status.AVAILABLE)
+                .given(FreeIpaUserSyncTestDto.class)
                 .await(UserSyncState.SYNC_FAILED);
         Actor internalActor = Actor.create(testContext.getActingUserCrn().getAccountId(), "__internal__actor__");
         testContext
