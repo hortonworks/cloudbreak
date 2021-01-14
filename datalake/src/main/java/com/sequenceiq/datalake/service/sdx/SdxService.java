@@ -94,6 +94,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 @Service
 public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvider {
 
+    public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
     @Inject
@@ -503,12 +505,14 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
             boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-            if (!mediumDutySdxEntitlementEnabled) {
+            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+            if (!(AWS.equals(cloudPlatform) || mediumDutySdxEntitlementEnabled)) {
                 validationBuilder.error("Provisioning a medium duty data lake cluster is not enabled for this account. " +
                         "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.");
             }
             if (!isMediumDutySdxSupported(sdxClusterRequest.getRuntime())) {
-                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= 7.2.2 and not " + sdxClusterRequest.getRuntime());
+                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION +
+                        " and not " + sdxClusterRequest.getRuntime());
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -529,15 +533,15 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
     }
 
-    /**
-     * Medium Duty HA is only on 7.2.2 and later.  If runtime is empty, then sdx-internal call was used.
+    /*
+     * Medium Duty HA is only on 7.2.7 and later.  If runtime is empty, then sdx-internal call was used.
      */
     private boolean isMediumDutySdxSupported(String runtime) {
         if (StringUtils.isEmpty(runtime)) {
             return true;
         }
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> "7.2.2") > -1;
+        return versionComparator.compare(() -> runtime, () -> MEDIUM_DUTY_REQUIRED_VERSION) > -1;
     }
 
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
