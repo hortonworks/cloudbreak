@@ -31,10 +31,10 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.NetworkCreationRequestFactory;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @Component
 public class EnvironmentNetworkService {
@@ -116,11 +116,18 @@ public class EnvironmentNetworkService {
     }
 
     private Optional<String> getResourceGroupName(EnvironmentDto environmentDto) {
-        return Optional.of(environmentDto)
-                .map(EnvironmentDto::getParameters)
-                .map(ParametersDto::getAzureParametersDto)
-                .map(AzureParametersDto::getAzureResourceGroupDto)
-                .map(AzureResourceGroupDto::getName);
+        if (isSingleResourceGroup(environmentDto)) {
+            return Optional.of(environmentDto)
+                    .map(EnvironmentDto::getParameters)
+                    .map(ParametersDto::getAzureParametersDto)
+                    .map(AzureParametersDto::getAzureResourceGroupDto)
+                    .map(AzureResourceGroupDto::getName);
+        } else {
+            return Optional.of(environmentDto)
+                    .map(EnvironmentDto::getNetwork)
+                    .map(NetworkDto::getAzure)
+                    .map(AzureParams::getResourceGroupName);
+        }
     }
 
     private String getNetworkId(NetworkDto networkDto, String envName) {

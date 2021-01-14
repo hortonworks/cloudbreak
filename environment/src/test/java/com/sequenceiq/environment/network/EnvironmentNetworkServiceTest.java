@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -177,7 +178,7 @@ class EnvironmentNetworkServiceTest {
     }
 
     @Test
-    void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroup() {
+    void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroupWhenUsagePatternMultiple() {
         CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup");
 
@@ -194,7 +195,8 @@ class EnvironmentNetworkServiceTest {
         assertEquals(STACK_NAME, argumentCaptor.getValue().getStackName());
         assertEquals(cloudCredential, argumentCaptor.getValue().getCloudCredential());
         assertEquals(environmentDto.getLocation().getName(), argumentCaptor.getValue().getRegion());
-        assertEquals(environmentDto.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName(), argumentCaptor.getValue().getResourceGroup());
+        assertEquals(environmentDto.getNetwork().getAzure().getResourceGroupName(), argumentCaptor.getValue().getResourceGroup());
+        assertFalse(argumentCaptor.getValue().isSingleResourceGroup());
     }
 
     @ParameterizedTest
