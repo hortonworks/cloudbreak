@@ -148,6 +148,8 @@ public class FreeIpaInstallService {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
+            boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(stack.getAccountId());
+            String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
             final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                     .withOwner(stack.getOwner())
                     .withName(stack.getName())
@@ -157,10 +159,9 @@ public class FreeIpaInstallService {
                     .withVersion(version)
                     .build();
 
-
             final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
                     telemetry, vmLogsService.getVmLogs(), FluentClusterType.FREEIPA.value(), stack.getResourceCrn(),
-                    stack.getName(), stack.getOwner(), stack.getCloudPlatform());
+                    stack.getName(), stack.getOwner(), stack.getCloudPlatform(), databusEndpoint);
             servicePillarConfig.put("telemetry",
                     new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 
@@ -173,8 +174,6 @@ public class FreeIpaInstallService {
                     DataBusCredential dbusCredential = altusMachineUserService.getOrCreateDataBusCredentialIfNeeded(stack);
                     String accessKey = dbusCredential.getAccessKey();
                     char[] privateKey = dbusCredential.getPrivateKey().toCharArray();
-                    boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(stack.getAccountId());
-                    String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(telemetry.getDatabusEndpoint(), useDbusCnameEndpoint);
                     DatabusConfigView databusConfigView = databusConfigService.createDatabusConfigs(accessKey, privateKey,
                             null, databusEndpoint);
                     servicePillarConfig.put("databus", new SaltPillarProperties("/databus/init.sls",

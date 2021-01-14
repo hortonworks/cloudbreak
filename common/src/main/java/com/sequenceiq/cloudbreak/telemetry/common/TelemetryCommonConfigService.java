@@ -27,16 +27,22 @@ public class TelemetryCommonConfigService {
 
     private final String version;
 
+    private final boolean databusEndpointValidation;
+
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
     public TelemetryCommonConfigService(AnonymizationRuleResolver anonymizationRuleResolver,
+            @Value("${altus.databus.endpoint.validation:false}") boolean databusEndpointValidation,
             @Value("${info.app.version:}") String version) {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
+        this.databusEndpointValidation = databusEndpointValidation;
         this.version = version;
     }
-
+    // CHECKSTYLE:OFF
+    // TODO: refactor parameters to 1 object
     public TelemetryCommonConfigView createTelemetryCommonConfigs(Telemetry telemetry, List<VmLog> logs,
-            String clusterType, String clusterCrn, String clusterName, String clusterOwner, String platform) {
+            String clusterType, String clusterCrn, String clusterName, String clusterOwner, String platform,
+            String databusEndpoint) {
         final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withOwner(clusterOwner)
                 .withName(clusterName)
@@ -44,6 +50,8 @@ public class TelemetryCommonConfigService {
                 .withCrn(clusterCrn)
                 .withPlatform(platform)
                 .withVersion(version)
+                .withDatabusEndpoint(databusEndpoint)
+                .withDatabusEndpointValidation(databusEndpointValidation)
                 .build();
         resolveLogPathReferences(telemetry, logs);
         return new TelemetryCommonConfigView.Builder()
@@ -52,6 +60,7 @@ public class TelemetryCommonConfigService {
                 .withVmLogs(logs)
                 .build();
     }
+    // CHECKSTYLE:ON
 
     @VisibleForTesting
     void resolveLogPathReferences(Telemetry telemetry, List<VmLog> logs) {
