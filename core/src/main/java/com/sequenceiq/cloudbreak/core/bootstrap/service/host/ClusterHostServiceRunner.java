@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -222,6 +223,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
             Set<Node> nodes = stackUtil.collectReachableNodes(stack);
@@ -321,7 +325,8 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
+        saveGatewayPillar(primaryGatewayConfig, cluster, stack, servicePillar, virtualGroupRequest,
+                connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -567,7 +572,7 @@ public class ClusterHostServiceRunner {
     }
 
     @SuppressWarnings("ParameterNumber")
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster,
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Stack stack,
             Map<String, SaltPillarProperties> servicePillar,
             VirtualGroupRequest virtualGroupRequest,
             ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
@@ -581,6 +586,10 @@ public class ClusterHostServiceRunner {
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
+
+        String userCrn = stackService.get(stack.getId()).getCreator().getUserCrn();
+        final boolean ccmV2Enabled = entitlementService.ccmV2Enabled(Crn.safeFromString(userCrn).getAccountId());
+        gateway.put("enable_ccmv2", ccmV2Enabled);
 
         // for cloudbreak upgradeability
         gateway.put("ssotype", SSOType.NONE);
