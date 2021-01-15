@@ -65,13 +65,13 @@ public class AwsFreeIpaSpotInstanceTest extends AbstractE2ETest {
 
     private boolean createFailedWithInsufficientInstanceCapacity(DescribeFreeIpaResponse freeIpa) {
         return freeIpa.getStatus().equals(Status.CREATE_FAILED)
-                && freeIpa.getStatusReason().contains(SpotTestResultProvider.AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE);
+                && RESULT_PROVIDER.isSpotFailureStatusReason(freeIpa.getStatusReason());
     }
 
     private boolean allInstancesHaveSpotLifecycle(DescribeFreeIpaResponse freeIpa) {
         return freeIpa.getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)
                 .flatMap(Collection::stream)
-                .allMatch(instance -> instance.getLifeCycle().equals(InstanceLifeCycle.SPOT));
+                .allMatch(instance -> InstanceLifeCycle.SPOT.equals(instance.getLifeCycle()));
     }
 }

@@ -6,12 +6,15 @@ import org.testng.Assert;
 
 class SpotTestResultProvider {
 
-    static final String AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. " +
-            "InsufficientInstanceCapacity - There is no Spot capacity available that matches your request. Launching EC2 instance failed.";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SpotTestResultProvider.class);
 
     private static final String MESSAGE_PREFIX = "[Spot test result]";
+
+    private static final String AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. " +
+            "InsufficientInstanceCapacity - There is no Spot capacity available that matches your request.";
+
+    private static final String AWS_UNFULFILLABLE_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. " +
+            "UnfulfillableCapacity - There is no capacity available that matches your request.";
 
     private final String type;
 
@@ -32,5 +35,10 @@ class SpotTestResultProvider {
     void fail(Object response) {
         String message = String.format("%s %s was not started on spot instances. Response: %s", MESSAGE_PREFIX, type, response);
         Assert.fail(message);
+    }
+
+    boolean isSpotFailureStatusReason(String statusReason) {
+        return statusReason.contains(AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE)
+                || statusReason.contains(AWS_UNFULFILLABLE_SPOT_CAPACITY_MESSAGE);
     }
 }
