@@ -7,9 +7,9 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
-import javax.ws.rs.InternalServerErrorException;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpServerErrorException;
@@ -55,14 +55,14 @@ public class ResponseModifierService {
      * Evaluate the times:
      * 0: will be permanently in the list, the next ones with the same path and method will be never evaluate
      * 1...n: evaluate n times. If reach the n-th, the response will be removed from the list of path.
-     *
+     * <p>
      * Evaluate the response or exception
      * Only if the the status code is 200 return with the response.
      * If the status code is null, throw a NotFound status.
      *
-     * @param path the http method and URI separated by `_`. e.g: get_/path
+     * @param path            the http method and URI separated by `_`. e.g: get_/path
      * @param defaultResponse supplier for the default response if the response cannot be found in the pre-defined list
-     * @param <T> Type of the default value
+     * @param <T>             Type of the default value
      * @return return with the default values or throw an exception based on the pre-defined status code
      * @throws Throwable if any errors occurred in the supplier.
      */
@@ -101,11 +101,28 @@ public class ResponseModifierService {
             throw new HttpServerErrorException(HttpStatus.NOT_FOUND, "Status code is not defined.");
         } else if (mockResponse.getStatusCode() == HttpStatus.OK.value()) {
             Object response = mockResponse.getResponse();
+            Class<?> resType = transformCmResponsePackage(mockResponse.getClss());
+            if (returnType == ResponseEntity.class) {
+                Object ret = new Gson().fromJson(new Gson().toJson(response), resType);
+                return (T) ResponseEntity.ok(ret);
+            }
             return (T) new Gson().fromJson(new Gson().toJson(response), returnType);
         } else if (mockResponse.getStatusCode() == HttpStatus.NO_CONTENT.value()) {
             return null;
         }
         throw new HttpServerErrorException(HttpStatus.valueOf(mockResponse.getStatusCode()), mockResponse.getMessage());
+    }
+
+    private Class<?> transformCmResponsePackage(String clss) {
+        if (clss == null) {
+            return Object.class;
+        }
+        String replaced = clss.replace("com.cloudera.api", "com.sequenceiq.mock");
+        try {
+            return Class.forName(replaced);
+        } catch (ClassNotFoundException e) {
+            throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Cannot parse class: " + clss);
+        }
     }
 
     public void handleProfiles(String mockUuid, String path) {
@@ -116,7 +133,7 @@ public class ResponseModifierService {
                 int called = profileCalled.computeIfAbsent(path, key -> 0);
                 profileCalled.put(path, called + 1);
                 if (called < http500.get().getTimes()) {
-                    throw new InternalServerErrorException("HTTP_500 profile set");
+                    throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "HTTP_500 profile set");
                 }
             }
         }

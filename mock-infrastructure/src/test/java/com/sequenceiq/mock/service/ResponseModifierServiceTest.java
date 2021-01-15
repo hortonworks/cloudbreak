@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -12,10 +13,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.HttpServerErrorException;
 
 import com.sequenceiq.mock.spi.MockResponse;
 import com.sequenceiq.mock.spi.controller.PublicKey;
+import com.sequenceiq.mock.swagger.model.ApiCommand;
 
 @ExtendWith(MockitoExtension.class)
 public class ResponseModifierServiceTest {
@@ -118,14 +121,14 @@ public class ResponseModifierServiceTest {
 
     @Test
     public void testEvaluateResponseSamePathFirstReturnOKNextFailed() throws Throwable {
-        MockResponse mockResponse1 = createMockResponse(1, 200, "/path1", "get", "message1");
+        MockResponse mockResponse1 = createMockResponse(1, 200, "/path1", "get", "message1", "result");
         MockResponse mockResponse3 = createMockResponse(1, 400, "/path1", "get", "message2");
         underTest.addResponse(mockResponse1);
         underTest.addResponse(mockResponse3);
 
         String assertPath = "get_/path1";
         String actualPost = underTest.evaluateResponse("get_/path1", String.class, () -> "OK");
-        assertEquals(actualPost, "message1");
+        assertEquals(actualPost, "result");
         assertException(assertPath, "400 message2", HttpStatus.BAD_REQUEST);
     }
 
@@ -139,13 +142,45 @@ public class ResponseModifierServiceTest {
     }
 
     @Test
-    public void testEvaluateResponseWhenResponseMapButTheREturnTypeObject() throws Throwable {
-        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, Map.of("publicKeyId", "id", "publicKey", "hash"));
+    public void testEvaluateResponseWhenResponsePublicKeyAndTheReturnTypeAsTheSame() throws Throwable {
+        PublicKey publicKey = new PublicKey();
+        publicKey.setPublicKey("hash");
+        publicKey.setPublicKeyId("id");
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, publicKey);
         underTest.addResponse(mockResponse1);
 
         PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null);
         assertEquals(actualPost.getPublicKey(), "hash");
         assertEquals(actualPost.getPublicKeyId(), "id");
+    }
+
+    @Test
+    public void testEvaluateResponseWhenResponseMapButTheReturnTypePublicKey() throws Throwable {
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, Map.of("publicKeyId", "id", "publicKey", "hash"), Map.class);
+        underTest.addResponse(mockResponse1);
+
+        PublicKey actualPost = underTest.evaluateResponse("get_/path1", PublicKey.class, () -> null);
+        assertEquals(actualPost.getPublicKey(), "hash");
+        assertEquals(actualPost.getPublicKeyId(), "id");
+    }
+
+    @Test
+    public void testEvaluateResponseWhenResponseEntity() throws Throwable {
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, "result");
+        underTest.addResponse(mockResponse1);
+
+        ResponseEntity<String> actualPost = underTest.evaluateResponse("get_/path1", ResponseEntity.class, () -> null);
+        assertEquals(actualPost.getBody(), "result");
+    }
+
+    @Test
+    public void testEvaluateResponseWhenTransformResponsePackage() throws Throwable {
+        MockResponse mockResponse1 = createMockResponse(0, 200, "/path1", "get", null, new ApiCommand().id(BigDecimal.ONE));
+        mockResponse1.setClss("com.cloudera.api.swagger.model.ApiCommand");
+        underTest.addResponse(mockResponse1);
+
+        ApiCommand actualPost = underTest.evaluateResponse("get_/path1", ApiCommand.class, () -> null);
+        assertEquals(actualPost.getId(), BigDecimal.ONE);
     }
 
     private void assertException(String path, String message, HttpStatus httpStatus) {
@@ -155,17 +190,24 @@ public class ResponseModifierServiceTest {
     }
 
     private MockResponse createMockResponse(int times, int code, String path, String method, String message) {
-        return createMockResponse(times, code, path, method, message, null);
+        return createMockResponse(times, code, path, method, message, null, null);
     }
 
     private MockResponse createMockResponse(int times, int code, String path, String method, String message, Object obj) {
+        return createMockResponse(times, code, path, method, message, obj, obj.getClass());
+    }
+
+    private MockResponse createMockResponse(int times, int code, String path, String method, String message, Object obj, Class clss) {
         MockResponse mockResponse = new MockResponse();
         mockResponse.setTimes(times);
         mockResponse.setStatusCode(code);
         mockResponse.setPath(path);
         mockResponse.setHttpMethod(method);
         mockResponse.setMessage(message);
-        mockResponse.setResponse(obj == null ? message : obj);
+        if (obj != null) {
+            mockResponse.setClss(clss.getName());
+            mockResponse.setResponse(obj);
+        }
         return mockResponse;
     }
 }

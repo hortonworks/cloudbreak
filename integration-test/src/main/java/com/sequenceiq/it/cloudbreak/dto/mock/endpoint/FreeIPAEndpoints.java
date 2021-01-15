@@ -22,6 +22,6 @@ public class FreeIPAEndpoints<T extends CloudbreakTestDto> {
 
     @SparkUri(url = "/{mockUuid}/ipa/session/json")
     public interface Session<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, Object> post();
     }
 }
