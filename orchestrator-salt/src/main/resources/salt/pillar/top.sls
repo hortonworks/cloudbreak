@@ -1,6 +1,9 @@
 base:
   '*':
-    - nodes.*
+    - nodes.hosts
+{%- if salt['file.file_exists']('/srv/pillar/nodes/hostattrs.sls') %}
+    - nodes.hostattrs
+{%- endif %}
     - discovery.init
     - recipes.init
     - unbound.forwarders
