@@ -24,6 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Cert;
@@ -606,6 +608,13 @@ public class FreeIpaClient {
                 throw new NullPointerException("JSON-RPC response is null");
             }
             return response;
+        } catch (ClusterProxyException e) {
+            String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
+            LOGGER.warn(message);
+            OptionalInt responseCode = extractResponseCode(e);
+            span.setTag(TracingUtil.ERROR, true);
+            span.setTag(TracingUtil.MESSAGE, e.getLocalizedMessage());
+            throw FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(new FreeIpaClientException(message, e, responseCode));
         } catch (Exception e) {
             String message = String.format("Invoke FreeIPA failed: %s", e.getLocalizedMessage());
             LOGGER.warn(message);
@@ -635,6 +644,20 @@ public class FreeIpaClient {
                 matcher.find();
                 responseCode = OptionalInt.of(Integer.parseInt(matcher.group(1)));
             }
+        } catch (Exception ex) {
+            LOGGER.warn("Couldn't extract response code from message", ex);
+        }
+        return responseCode;
+    }
+
+    private OptionalInt extractResponseCode(ClusterProxyException e) {
+        OptionalInt responseCode = OptionalInt.empty();
+        try {
+            responseCode = e.getClusterProxyError()
+                    .map(ClusterProxyError::getStatus)
+                    .stream()
+                    .mapToInt(Integer::parseInt)
+                    .findAny();
         } catch (Exception ex) {
             LOGGER.warn("Couldn't extract response code from message", ex);
         }
