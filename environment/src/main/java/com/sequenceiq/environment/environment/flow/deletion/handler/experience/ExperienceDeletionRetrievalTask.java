@@ -25,13 +25,14 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     @Override
     public boolean checkStatus(ExperiencePollerObject pollerObject) {
         EnvironmentExperienceDto dto = buildDto(pollerObject);
-        long quantity = experienceConnectorService.getConnectedExperienceQuantity(dto);
+        int quantity = experienceConnectorService.getConnectedExperienceCount(dto);
         if (quantity == 0) {
             LOGGER.info("No active experience has been found for the environment (name: {}, crn: {})", pollerObject.getEnvironmentName(),
                     pollerObject.getEnvironmentCrn());
             return true;
         }
-        LOGGER.info(quantity + " experience has found for the environment (name: {}, crn: {})", pollerObject.getEnvironmentName(), pollerObject.getEnvironmentCrn());
+        LOGGER.info(quantity + " experience has found for the environment (name: {}, crn: {})",
+                pollerObject.getEnvironmentName(), pollerObject.getEnvironmentCrn());
         return false;
     }
 
@@ -48,7 +49,7 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     @Override
     public boolean exitPolling(ExperiencePollerObject pollerObject) {
         EnvironmentExperienceDto dto = buildDto(pollerObject);
-        long quantity = experienceConnectorService.getConnectedExperienceQuantity(dto);
+        int quantity = experienceConnectorService.getConnectedExperienceCount(dto);
         if (quantity == 0) {
             LOGGER.info("No active experience has been found for the environment (CRN: {})", pollerObject.getEnvironmentCrn());
             return true;

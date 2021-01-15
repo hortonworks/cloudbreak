@@ -25,6 +25,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.experience.RetriableWebTarget;
+import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
 @Component
@@ -34,40 +35,33 @@ public class LiftieConnector implements LiftieApi {
 
     private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
-    private final String liftiePort;
-
-    private final String liftieAddress;
-
-    private final String liftieProtocol;
-
     private final Client client;
 
-    private RetriableWebTarget retriableWebTarget;
+    private final RetriableWebTarget retriableWebTarget;
+
+    private final String liftieBasePath;
 
     public LiftieConnector(@Value("${experience.scan.liftie.api.port}") String liftiePort,
-                           @Value("${experience.scan.liftie.api.address}") String liftieAddress,
-                           @Value("${experience.scan.protocol}") String liftieProtocol,
-                           Client client,
-                           RetriableWebTarget retriableWebTarget) {
-        this.liftiePort = liftiePort;
-        this.liftieAddress = liftieAddress;
-        this.liftieProtocol = liftieProtocol;
+            @Value("${experience.scan.liftie.api.address}") String liftieAddress,
+            @Value("${experience.scan.protocol}") String liftieProtocol,
+            Client client,
+            RetriableWebTarget retriableWebTarget) {
+
+        this.liftieBasePath = String.format("%s://%s:%s/liftie/api/v1", liftieProtocol, liftieAddress, liftiePort);
         this.client = client;
         this.retriableWebTarget = retriableWebTarget;
     }
 
     @Override
-    public ListClustersResponse listClusters(@NotNull String envCrn, @NotNull String tenant, String workloads, Integer page) {
-        WebTarget webTarget = client.target(createPathToClusterListingEndpoint());
+    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, Integer page) {
+        WebTarget webTarget = client.target(getPathToClustersEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
-        putIfPresent(queryParams, "status", "ACTIVE"); // TODO: determine statuses we want to get in the list
-        putIfPresent(queryParams, "env", envCrn);
-        putIfPresent(queryParams,  "tenant", tenant);
-        putIfPresent(queryParams, "workloads", workloads);
+        putIfPresent(queryParams, "env", env);
+        putIfPresent(queryParams, "tenant", tenant);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
         Response result = null;
-        LOGGER.debug("About to connect Liftie API");
+        LOGGER.debug("About to connect Liftie API to list clusters");
         try {
             Invocation.Builder call = webTarget
                     .request()
@@ -78,31 +72,55 @@ public class LiftieConnector implements LiftieApi {
         } catch (RuntimeException re) {
             LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
         }
-        return readResponse(webTarget, result).orElseThrow(() -> new IllegalStateException("Unable to resolve Liftie response!"));
+        return readResponse(webTarget, result, ListClustersResponse.class).orElseThrow(() -> new IllegalStateException("Unable to resolve Liftie response!"));
+    }
+
+    @Override
+    public DeleteClusterResponse deleteCluster(@NotNull String clusterId) {
+        WebTarget webTarget = client.target(getPathToClusterEndpoint(clusterId));
+        LOGGER.debug("About to connect Liftie API to delete cluster {}", clusterId);
+        Response result = null;
+        try {
+            String uuid = UUID.randomUUID().toString();
+            Invocation.Builder call = webTarget
+                    .request()
+                    .accept(APPLICATION_JSON)
+                    .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
+                    .header(REQUEST_ID_HEADER, uuid);
+            result = retriableWebTarget.delete(call);
+        } catch (RuntimeException re) {
+            LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
+        }
+        return readResponse(webTarget, result, DeleteClusterResponse.class).orElseThrow(() -> new IllegalStateException("Unable to resolve Liftie response!"));
     }
 
     private WebTarget setQueryParams(WebTarget webTarget, Map<String, String> nameValuePairs) {
         WebTarget target = webTarget;
-        for (String key : nameValuePairs.keySet()) {
-            String value = nameValuePairs.get(key);
+        for (Map.Entry<String, String> entry : nameValuePairs.entrySet()) {
+            String value = entry.getValue();
             if (value != null) {
-                target = target.queryParam(key, value);
+                target = target.queryParam(entry.getKey(), value);
             }
         }
         return target;
     }
 
-    private String createPathToClusterListingEndpoint() {
-        return liftieProtocol + "://" + liftieAddress + ":" + liftiePort + "/liftie/api/v1/cluster";
+    private String getPathToClustersEndpoint() {
+        return liftieBasePath + "/cluster";
     }
 
-    private Optional<ListClustersResponse> readResponse(WebTarget target, Response response) {
+    private String getPathToClusterEndpoint(String clusterId) {
+        return String.format("%s/%s", getPathToClustersEndpoint(), clusterId);
+    }
+
+
+    private <T> Optional<T> readResponse(WebTarget target, Response response, Class<T> resultClass) {
         throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));
-        ListClustersResponse result = null;
+        T result = null;
         LOGGER.debug("Going to read response from the Liftie call");
         if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
             try {
-                result = response.readEntity(ListClustersResponse.class);
+                result = response.readEntity(resultClass);
                 LOGGER.debug("Liftie response has resolved.");
             } catch (IllegalStateException | ProcessingException e) {
                 String msg = "Failed to resolve response from Liftie on path: " + target.getUri().toString();
