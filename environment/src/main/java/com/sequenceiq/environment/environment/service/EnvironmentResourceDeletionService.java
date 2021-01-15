@@ -44,7 +44,8 @@ public class EnvironmentResourceDeletionService {
     private final ExperienceConnectorService experienceConnectorService;
 
     public EnvironmentResourceDeletionService(SdxEndpoint sdxEndpoint, DatalakeV4Endpoint datalakeV4Endpoint, DistroXV1Endpoint distroXV1Endpoint,
-                                              ClusterTemplateV4Endpoint clusterTemplateV4Endpoint, ExperienceConnectorService experienceConnectorService) {
+            ClusterTemplateV4Endpoint clusterTemplateV4Endpoint, ExperienceConnectorService experienceConnectorService) {
+
         this.sdxEndpoint = sdxEndpoint;
         this.datalakeV4Endpoint = datalakeV4Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
@@ -111,12 +112,12 @@ public class EnvironmentResourceDeletionService {
         return clusterNames;
     }
 
-    public long getConnectedExperienceAmount(Environment environment) {
+    public int getConnectedExperienceAmount(Environment environment) {
         EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
                 .withAccountId(environment.getAccountId()).build();
-        return experienceConnectorService.getConnectedExperienceQuantity(dto);
+        return experienceConnectorService.getConnectedExperienceCount(dto);
     }
 
     Set<String> getAttachedDistroXClusterNames(Environment environment) {
