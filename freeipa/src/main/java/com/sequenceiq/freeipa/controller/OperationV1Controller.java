@@ -5,8 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -23,7 +22,8 @@ public class OperationV1Controller implements OperationV1Endpoint {
     private OperationToOperationStatusConverter operationToOperationStatusConverter;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
+    // TODO this API method can be authorized only on account level, which doesn't fit into the resource sharing model
+    @DisableCheckPermissions
     public OperationStatus getOperationStatus(@NotNull String operationId) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
