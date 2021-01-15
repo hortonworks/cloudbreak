@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "yarn": {
           "cpus": 4,
@@ -20,7 +20,7 @@
       "type": "CORE"
     },
     {
-      "name": "gateway",
+      "name": "admin",
       "template": {
         "yarn": {
           "cpus": 4,

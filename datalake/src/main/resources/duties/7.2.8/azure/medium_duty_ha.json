@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "instanceType": "Standard_D4s_v3",
         "attachedVolumes": [
@@ -29,7 +29,7 @@
       "recipeNames": []
     },
     {
-      "name": "gateway",
+      "name": "admin",
       "template": {
         "instanceType": "Standard_D8s_v3",
         "attachedVolumes": [

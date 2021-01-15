@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "instanceType": "m5.xlarge",
         "attachedVolumes": [
@@ -29,7 +29,7 @@
       "recipeNames": []
     },
     {
-      "name": "gateway",
+      "name": "admin",
       "template": {
         "instanceType": "m5.2xlarge",
         "attachedVolumes": [

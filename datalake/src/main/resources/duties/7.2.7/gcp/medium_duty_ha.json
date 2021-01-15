@@ -9,7 +9,7 @@
   },
   "instanceGroups": [
     {
-      "name": "master",
+      "name": "main",
       "template": {
         "instanceType": "e2-standard-8",
         "attachedVolumes": [
@@ -29,7 +29,7 @@
       "recipeNames": []
     },
     {
-      "name": "gateway",
+      "name": "admin",
       "template": {
         "instanceType": "e2-standard-8",
         "attachedVolumes": [
