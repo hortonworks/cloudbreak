@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -21,22 +19,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.authorization.service.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -77,13 +72,10 @@ public class SdxRuntimeUpgradeService {
     private EntitlementService entitlementService;
 
     @Inject
-    private GrpcUmsClient umsClient;
-
-    @Inject
     private PaywallAccessChecker paywallAccessChecker;
 
     @Inject
-    private CMLicenseParser cmLicenseParser;
+    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest, String accountId) {
         return checkForSdxUpgradeResponse(userCrn, upgradeSdxClusterRequest, clusterName, accountId);
@@ -126,9 +118,9 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest,
             String clusterName, String accountId) {
         verifyRuntimeUpgradeEntitlement(userCrn, upgradeSdxClusterRequest);
-        UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
-                sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId));
+        UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
+                .doAsInternalActor(() -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
+                        sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId));
         filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response);
         return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
     }
@@ -183,10 +175,7 @@ public class SdxRuntimeUpgradeService {
 
     private void verifyCMLicenseValidity(String userCrn) {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
-        String accountId = sdxService.getAccountIdFromCrn(userCrn);
-        Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
-        JsonCMLicense license = cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
-                .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
+        JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 

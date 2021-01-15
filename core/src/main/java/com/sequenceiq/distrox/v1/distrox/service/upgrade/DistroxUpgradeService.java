@@ -1,7 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -13,21 +11,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.sequenceiq.authorization.service.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -48,9 +43,6 @@ public class DistroxUpgradeService {
     private EntitlementService entitlementService;
 
     @Inject
-    private GrpcUmsClient umsClient;
-
-    @Inject
     private PaywallAccessChecker paywallAccessChecker;
 
     @Inject
@@ -66,7 +58,7 @@ public class DistroxUpgradeService {
     private StackService stackService;
 
     @Inject
-    private CMLicenseParser cmLicenseParser;
+    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
@@ -116,10 +108,7 @@ public class DistroxUpgradeService {
 
     private void verifyCMLicenseValidity(String userCrn) {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
-        String accountId = Crn.safeFromString(userCrn).getAccountId();
-        Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
-        JsonCMLicense license = cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
-                .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
+        JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 }
