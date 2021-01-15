@@ -3,6 +3,8 @@ package com.sequenceiq.environment.experience.config;
 import java.util.LinkedList;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ public class ExperienceServicesConfig {
 
     private List<CommonExperience> experiences;
 
+    @NotNull
     public List<CommonExperience> getExperiences() {
         return experiences != null ? experiences : new LinkedList<>();
     }

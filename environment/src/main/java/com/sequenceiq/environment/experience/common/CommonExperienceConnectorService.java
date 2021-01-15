@@ -1,85 +1,98 @@
 package com.sequenceiq.environment.experience.common;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
-import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
-import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
-import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.environment.experience.ResponseReader;
+import com.sequenceiq.environment.experience.RetriableWebTarget;
+import com.sequenceiq.environment.experience.api.CommonExperienceApi;
+import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
+import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
+import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
 
 @Service
-public class CommonExperienceConnectorService {
+public class CommonExperienceConnectorService implements CommonExperienceApi {
+
+    private static final String COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve the experience's response!";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceConnectorService.class);
 
-    private final String componentToReplaceInPath;
+    private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
-    private final Client client;
+    private final CommonExperienceWebTargetProvider commonExperienceWebTargetProvider;
 
-    public CommonExperienceConnectorService(@Value("${experience.scan.path.componentToReplace}") String componentToReplaceInPath, Client client) {
-        this.client = client;
-        throwIfTrue(isEmpty(componentToReplaceInPath),
-                () -> new IllegalArgumentException("Component what should be replaced in experience path must not be empty or null."));
-        this.componentToReplaceInPath = componentToReplaceInPath;
+    private final RetriableWebTarget retriableWebTarget;
+
+    private final ResponseReader responseReader;
+
+    public CommonExperienceConnectorService(RetriableWebTarget retriableWebTarget, CommonExperienceResponseReader commonExperienceResponseReader,
+            CommonExperienceWebTargetProvider commonExperienceWebTargetProvider) {
+        this.commonExperienceWebTargetProvider = commonExperienceWebTargetProvider;
+        this.responseReader = commonExperienceResponseReader;
+        this.retriableWebTarget = retriableWebTarget;
     }
 
-    @NotNull Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
-        throwIfNull(experienceBasePath, () -> new IllegalArgumentException("Experience base path should not be null!"));
-        String pathToExperience = experienceBasePath.replace(componentToReplaceInPath, environmentCrn);
-        LOGGER.debug("Creating WebTarget to connect experience");
-        WebTarget webTarget = client.target(pathToExperience);
-        LOGGER.debug("About to connect to experience on path: {}", pathToExperience);
-        Response result = null;
-        try {
-            result = webTarget.request().accept(APPLICATION_JSON).header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn()).get();
-        } catch (RuntimeException re) {
-            LOGGER.warn("Something happened while the experience connection attempted!", re);
-        }
-        if (result != null) {
-            Optional<CpInternalEnvironmentResponse> response = readResponse(webTarget, result);
-            return response.map(CommonExperienceConnectorService::getExperienceNamesFromResponse).orElseGet(Set::of);
+    @Override
+    @NotNull
+    public Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
+        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
+        Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retriableWebTarget.get(createCompleteCallableBuilder(webTarget)));
+        if (result.isPresent()) {
+            Optional<CpInternalEnvironmentResponse> response = responseReader
+                    .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
+            return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse).orElseGet(Set::of);
         }
         return Collections.emptySet();
     }
 
-    private Optional<CpInternalEnvironmentResponse> readResponse(WebTarget target, Response response) {
-        throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));
-        CpInternalEnvironmentResponse experienceCallResponse = null;
-        LOGGER.debug("Going to read response from experience call");
-        if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
-            try {
-                experienceCallResponse = response.readEntity(CpInternalEnvironmentResponse.class);
-            } catch (IllegalStateException | ProcessingException e) {
-                String msg = "Failed to resolve response from experience on path: " + target.getUri().toString();
-                LOGGER.warn(msg, e);
-            }
-        } else {
-            String uri = target.getUri().toString();
-            String status = response.getStatusInfo().getReasonPhrase();
-            LOGGER.info("Calling experience ( on the following path : {} ) was not successful! Status was: {}", uri, status);
-        }
-        return Optional.ofNullable(experienceCallResponse);
+    @Override
+    @NotNull
+    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
+        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
+        Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retriableWebTarget.delete(createCompleteCallableBuilder(webTarget)));
+        return responseReader.read(
+                webTarget.getUri().toString(),
+                response.orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG)),
+                DeleteCommonExperienceWorkspaceResponse.class)
+                .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
     }
 
-    private static Set<String> getExperienceNamesFromResponse(CpInternalEnvironmentResponse experienceCallResponse) {
+    private Optional<Response> executeCall(String path, Callable<Response> toCall) {
+        LOGGER.debug("About to connect to experience on path: {}", path);
+        try {
+            return Optional.ofNullable(toCall.call());
+        } catch (Exception re) {
+            LOGGER.warn("Something happened while the experience connection attempted!", re);
+        }
+        return Optional.empty();
+    }
+
+    private Invocation.Builder createCompleteCallableBuilder(WebTarget target) {
+        return target
+                .request()
+                .accept(APPLICATION_JSON)
+                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString())
+                .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    private static Set<String> getExperienceNamesFromListResponse(CpInternalEnvironmentResponse experienceCallResponse) {
         return experienceCallResponse.getResults().stream().map(CpInternalCluster::getName).collect(Collectors.toSet());
     }
 
