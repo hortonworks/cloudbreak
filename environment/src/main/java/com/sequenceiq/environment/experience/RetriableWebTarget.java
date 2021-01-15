@@ -15,4 +15,9 @@ public class RetriableWebTarget {
         return call.get();
     }
 
+    @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
+    public Response delete(Invocation.Builder call) {
+        return call.delete();
+    }
+
 }

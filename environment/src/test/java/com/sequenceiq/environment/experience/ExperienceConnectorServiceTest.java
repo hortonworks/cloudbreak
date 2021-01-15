@@ -5,18 +5,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 
+@ExtendWith(MockitoExtension.class)
 class ExperienceConnectorServiceTest {
 
     private static final boolean SCAN_ENABLED = true;
@@ -36,27 +37,24 @@ class ExperienceConnectorServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.initMocks(this);
         underTest = new ExperienceConnectorService(List.of(mockExperience), entitlementServiceMock);
     }
 
     @Test
     void testWhenScanIsNotEnabledThenNoExperienceCallHappensAndZeroShouldReturn() {
         when(entitlementServiceMock.isExperienceDeletionEnabled(any())).thenReturn(false);
-        ExperienceConnectorService underTest = new ExperienceConnectorService(List.of(mockExperience), entitlementServiceMock);
-        long result = underTest.getConnectedExperienceQuantity(mockDto);
+        int result = underTest.getConnectedExperienceCount(mockDto);
 
-        Assert.assertEquals(0L, result);
-        verify(mockExperience, never()).hasExistingClusterForEnvironment(any(EnvironmentExperienceDto.class));
+        Assertions.assertEquals(0, result);
+        verify(mockExperience, never()).clusterCountForEnvironment(any(EnvironmentExperienceDto.class));
     }
 
     @Test
     void testWhenNoExperienceHasConfiguredThenZeroShouldReturn() {
         when(entitlementServiceMock.isExperienceDeletionEnabled(any())).thenReturn(false);
-        ExperienceConnectorService underTest = new ExperienceConnectorService(Collections.emptyList(), entitlementServiceMock);
-        long result = underTest.getConnectedExperienceQuantity(mockDto);
+        int result = underTest.getConnectedExperienceCount(mockDto);
 
-        Assert.assertEquals(0L, result);
+        Assertions.assertEquals(0, result);
     }
 
 }

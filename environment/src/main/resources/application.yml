@@ -218,12 +218,7 @@ experience:
       componentToReplace: "{crn}"
     config:
       experiences:
-        - name: MLX
-          hostAddress: ${MLX_HOST_ADDRESS}
-          internalEnvEndpoint: ${MLX_INTERNAL_ENV_ENDPOINT}
-          port: ${MLX_PORT}
-        -
-          name: DWX
+        - name: DWX
           hostAddress: ${DWX_HOST_ADDRESS}
           internalEnvEndpoint: ${DWX_INTERNAL_ENV_ENDPOINT}
           port: ${DWX_PORT}
