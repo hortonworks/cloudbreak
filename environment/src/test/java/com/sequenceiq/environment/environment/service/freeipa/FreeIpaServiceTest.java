@@ -3,24 +3,32 @@ package com.sequenceiq.environment.environment.service.freeipa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.platform.commons.util.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -79,6 +87,28 @@ class FreeIpaServiceTest {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         when(userV1Endpoint.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenThrow(new WebApplicationException("network error"));
         assertThatThrownBy(() -> underTest.synchronizeAllUsersInEnvironment(ENVCRN)).isInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void internalDescribeFreeipaNotFoundTest() {
+        ExceptionResponse exceptionResponse = new ExceptionResponse("Freeipa not found");
+        final Response response = Mockito.mock(Response.class);
+        Mockito.when(response.readEntity(Mockito.any(Class.class))).thenReturn(exceptionResponse);
+        NotFoundException notFoundException = Mockito.mock(NotFoundException.class);
+        when(notFoundException.getResponse()).thenReturn(response);
+        when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111"))).thenThrow(notFoundException);
+        Optional<DescribeFreeIpaResponse> describeFreeIpaResponse = underTest.internalDescribe(ENVCRN, "1111");
+        assertThat(describeFreeIpaResponse.isEmpty()).isEqualTo(true);
+    }
+
+    @Test
+    void internalDescribeApiNotFoundTest() {
+        when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111")))
+                .thenThrow(new javax.ws.rs.NotFoundException());
+        FreeIpaOperationFailedException freeIpaOperationFailedException = Assertions.assertThrows(FreeIpaOperationFailedException.class,
+                () -> underTest.internalDescribe(ENVCRN, "1111"));
+        String errorMessage = freeIpaOperationFailedException.getMessage();
+        assertThat(errorMessage).isEqualTo("Freeipa internal describe response is NOT FOUND, but response reason is not the expected type");
     }
 
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {
