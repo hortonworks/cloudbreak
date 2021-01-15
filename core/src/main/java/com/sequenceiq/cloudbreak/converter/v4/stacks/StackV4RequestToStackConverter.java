@@ -34,8 +34,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -61,8 +59,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -75,9 +71,6 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
-import com.sequenceiq.common.api.type.LoadBalancerType;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -134,9 +127,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     @Override
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -188,7 +178,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
-        stack.setLoadBalancers(createLoadBalancers(source, stack, environment));
+        stack.setLoadBalancers(loadBalancerConfigService.createLoadBalancers(stack, environment));
         return stack;
     }
 
@@ -348,97 +338,6 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
                     convertedSet.add(ig);
                 });
         return convertedSet;
-    }
-
-    private Set<LoadBalancer> createLoadBalancers(StackV4Request source, Stack stack, DetailedEnvironmentResponse environment) {
-        LOGGER.info("Setting up load balancers for stack {}", source.getName());
-        Set<LoadBalancer> loadBalancers = new HashSet<>();
-
-        if (environment != null) {
-            Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
-            if (knoxTargetGroup.isPresent()) {
-                if (shouldCreateInternalKnoxLoadBalancer(source.getType(), environment.getNetwork())) {
-                    LOGGER.debug("Found Knox enabled instance groups in stack. Setting up internal Knox load balancer");
-                    setupKnoxLoadBalancer(
-                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PRIVATE, stack),
-                        knoxTargetGroup.get());
-                }
-                if (shouldCreateExternalKnoxLoadBalancer(source.getType(), environment.getNetwork())) {
-                    LOGGER.debug("Public endpoint access gateway is enabled. Setting up public Knox load balancer");
-                    setupKnoxLoadBalancer(
-                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PUBLIC, stack),
-                        knoxTargetGroup.get());
-                }
-            } else {
-                LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
-            }
-
-            // TODO CB-9368 - create target group for CM instances
-        }
-
-        return loadBalancers;
-    }
-
-    private boolean shouldCreateInternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
-        return shouldCreateInternalKnoxLoadBalancerForDatalake(type, network) ||
-            shouldCreateInternalKnoxLoadBalancerForDatahub(type, network);
-    }
-
-    private boolean shouldCreateInternalKnoxLoadBalancerForDatalake(StackType type, EnvironmentNetworkResponse network) {
-        return StackType.DATALAKE.equals(type) &&
-            (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId())
-            || isEndpointGatewayEnabled(network));
-    }
-
-    private boolean shouldCreateInternalKnoxLoadBalancerForDatahub(StackType type, EnvironmentNetworkResponse network) {
-        return  StackType.WORKLOAD.equals(type) && isEndpointGatewayEnabled(network);
-    }
-
-    private boolean shouldCreateExternalKnoxLoadBalancer(StackType type, EnvironmentNetworkResponse network) {
-        return (StackType.DATALAKE.equals(type) || StackType.WORKLOAD.equals(type)) && isEndpointGatewayEnabled(network);
-    }
-
-    private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
-        return network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED
-            && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack) {
-        TargetGroup knoxTargetGroup = null;
-        Set<String> knoxGatewayGroupNames = loadBalancerConfigService.getKnoxGatewayGroups(stack);
-        Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
-            .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
-            .collect(Collectors.toSet());
-        if (!knoxGatewayInstanceGroups.isEmpty()) {
-            LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
-            knoxTargetGroup = new TargetGroup();
-            knoxTargetGroup.setType(TargetGroupType.KNOX);
-            knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
-            TargetGroup finalKnoxTargetGroup = knoxTargetGroup;
-            knoxGatewayInstanceGroups.forEach(ig -> ig.addTargetGroup(finalKnoxTargetGroup));
-        }
-        return Optional.ofNullable(knoxTargetGroup);
-    }
-
-    private LoadBalancer createLoadBalancerIfNotExists(Set<LoadBalancer> loadBalancers, LoadBalancerType type, Stack stack) {
-        LoadBalancer loadBalancer;
-        Optional<LoadBalancer> existingLoadBalancer = loadBalancers.stream()
-            .filter(lb -> lb.getType() == type)
-            .findFirst();
-        if (existingLoadBalancer.isPresent()) {
-            loadBalancer = existingLoadBalancer.get();
-        } else {
-            loadBalancer = new LoadBalancer();
-            loadBalancer.setType(type);
-            loadBalancer.setStack(stack);
-            loadBalancers.add(loadBalancer);
-        }
-        return loadBalancer;
-    }
-
-    private void setupKnoxLoadBalancer(LoadBalancer loadBalancer, TargetGroup knoxTargetGroup) {
-        loadBalancer.addTargetGroup(knoxTargetGroup);
-        knoxTargetGroup.addLoadBalancer(loadBalancer);
     }
 
     private void updateCluster(StackV4Request source, Stack stack, Workspace workspace) {
