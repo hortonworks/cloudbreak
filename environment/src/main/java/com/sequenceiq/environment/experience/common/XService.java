@@ -46,15 +46,15 @@ public class XService implements Experience {
     }
 
     @Override
-    public boolean hasExistingClusterForEnvironment(EnvironmentExperienceDto environment) {
+    public int clusterCountForEnvironment(EnvironmentExperienceDto environment) {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
         Set<String> activeExperienceNames = environmentHasActiveExperience(environment.getCrn());
-        if (activeExperienceNames.size() > 0) {
+        if (!activeExperienceNames.isEmpty()) {
             String combinedNames = String.join(",", activeExperienceNames);
             LOGGER.info("The following experiences has connected to this env: [env: {}, experience(s): {}]", environment.getName(), combinedNames);
-            return true;
+            return activeExperienceNames.size();
         }
-        return false;
+        return 0;
     }
 
     @Override
@@ -124,7 +124,7 @@ public class XService implements Experience {
     private boolean isExperienceConfigured(CommonExperience xp) {
         boolean filled = experienceValidator.isExperienceFilled(xp);
         if (!filled) {
-            LOGGER.debug("The following experience has not filled properly: {}", xp.getName());
+            LOGGER.debug("The following experience is not filled properly: {}", xp.getName());
         }
         return filled;
     }

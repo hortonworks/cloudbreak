@@ -16,11 +16,11 @@ public class ClusterView {
     @JsonProperty("cluster_id")
     private String clusterId;
 
-    private String env;
+    @JsonProperty("env")
+    private String environmentCrn;
 
-    private String state;
-
-    private String tenant;
+    @JsonProperty("tenant")
+    private String accountId;
 
     @JsonProperty("cluster_type")
     private String clusterType;
@@ -44,28 +44,20 @@ public class ClusterView {
         this.clusterId = clusterId;
     }
 
-    public String getEnv() {
-        return env;
+    public String getEnvironmentCrn() {
+        return environmentCrn;
     }
 
-    public void setEnv(String env) {
-        this.env = env;
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 
-    public String getState() {
-        return state;
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setTenant(String tenant) {
-        this.tenant = tenant;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getClusterType() {
