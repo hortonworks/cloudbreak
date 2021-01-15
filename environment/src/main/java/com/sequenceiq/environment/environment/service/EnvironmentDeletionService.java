@@ -38,10 +38,10 @@ public class EnvironmentDeletionService {
     private final EnvironmentJobService environmentJobService;
 
     public EnvironmentDeletionService(EnvironmentService environmentService,
-                                      EnvironmentJobService environmentJobService,
-                                      EnvironmentDtoConverter environmentDtoConverter,
-                                      EnvironmentReactorFlowManager reactorFlowManager,
-                                      EnvironmentResourceDeletionService environmentResourceDeletionService) {
+            EnvironmentJobService environmentJobService,
+            EnvironmentDtoConverter environmentDtoConverter,
+            EnvironmentReactorFlowManager reactorFlowManager,
+            EnvironmentResourceDeletionService environmentResourceDeletionService) {
         this.environmentResourceDeletionService = environmentResourceDeletionService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentJobService = environmentJobService;
@@ -50,7 +50,7 @@ public class EnvironmentDeletionService {
     }
 
     public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+            boolean cascading, boolean forced) {
         Optional<Environment> environment = environmentService
                 .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
@@ -61,7 +61,7 @@ public class EnvironmentDeletionService {
     }
 
     public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+            boolean cascading, boolean forced) {
         Optional<Environment> environment = environmentService
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
         MDCBuilder.buildMdcContext(environment.orElseThrow(()
@@ -72,7 +72,7 @@ public class EnvironmentDeletionService {
     }
 
     public Environment delete(Environment environment, String userCrn,
-        boolean cascading, boolean forced) {
+            boolean cascading, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
         validateDeletion(environment, cascading);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
@@ -87,13 +87,13 @@ public class EnvironmentDeletionService {
     }
 
     public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+            boolean cascading, boolean forced) {
         Collection<Environment> environments = environmentService.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
         return deleteMultiple(actualUserCrn, cascading, forced, environments);
     }
 
     public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn,
-        boolean cascading, boolean forced) {
+            boolean cascading, boolean forced) {
         Collection<Environment> environments = environmentService.findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
         return deleteMultiple(actualUserCrn, cascading, forced, environments);
     }
@@ -130,7 +130,7 @@ public class EnvironmentDeletionService {
         }
 
 
-        long amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
+        int amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
         if (amountOfConnectedExperiences > 0) {
             if (amountOfConnectedExperiences == 1) {
                 throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
