@@ -12,6 +12,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Test;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {

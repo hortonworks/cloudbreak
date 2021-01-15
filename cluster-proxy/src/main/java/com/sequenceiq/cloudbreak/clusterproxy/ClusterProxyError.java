@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.client;
+package com.sequenceiq.cloudbreak.clusterproxy;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
