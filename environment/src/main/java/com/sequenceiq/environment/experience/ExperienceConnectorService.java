@@ -15,26 +15,26 @@ public class ExperienceConnectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceConnectorService.class);
 
-    private final List<Experience> experiences;
-
     private final EntitlementService entitlementService;
+
+    private final List<Experience> experiences;
 
     public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService) {
         this.experiences = experiences;
         this.entitlementService = entitlementService;
     }
 
-    public long getConnectedExperienceQuantity(EnvironmentExperienceDto dto) {
+    public int getConnectedExperienceCount(EnvironmentExperienceDto dto) {
         checkEnvironmentExperienceDto(dto);
-        if (entitlementService.isExperienceDeletionEnabled(dto.getAccountId()) && experiences.size() > 0) {
+        if (entitlementService.isExperienceDeletionEnabled(dto.getAccountId()) && !experiences.isEmpty()) {
             LOGGER.debug("Collecting connected experiences for environment: {}", dto.getName());
             return experiences
                     .stream()
-                    .filter(experience -> experience.hasExistingClusterForEnvironment(dto))
-                    .count();
+                    .map(experience -> experience.clusterCountForEnvironment(dto))
+                    .reduce(0, Integer::sum);
         }
         LOGGER.info("Scanning experience(s) has disabled, which means the returning amount of connected experiences may not represent the reality!");
-        return 0L;
+        return 0;
     }
 
     public void deleteConnectedExperiences(EnvironmentExperienceDto dto) {
@@ -45,14 +45,14 @@ public class ExperienceConnectorService {
 
     private void deleteLiftieBasedExperiences(EnvironmentExperienceDto dto) {
         experiences.stream().filter(experience -> experience.getSource().equals(ExperienceSource.LIFTIE)).forEach(experience -> {
-            LOGGER.info("About to delete LIFTIE experiences");
+            LOGGER.info("About to delete LIFTIE experiences for environment '{}'", dto.getName());
             experience.deleteConnectedExperiences(dto);
         });
     }
 
     private void deleteBasicExperiences(EnvironmentExperienceDto dto) {
         experiences.stream().filter(experience -> experience.getSource().equals(ExperienceSource.BASIC)).forEach(experience -> {
-            LOGGER.info("About to delete basic experiences");
+            LOGGER.info("About to delete basic experiences for environment '{}'", dto.getName());
             experience.deleteConnectedExperiences(dto);
         });
     }

@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.chain;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATAHUB_CLUSTERS_DELETE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_XP_DELETE_EVENT;
 
 import java.util.List;
 import java.util.Queue;
@@ -68,7 +68,7 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
                         .withForceDelete(forceDelete)
                         .build(),
                 EnvDeleteEvent.builder()
-                        .withSelector(START_FREEIPA_DELETE_EVENT.event())
+                        .withSelector(START_XP_DELETE_EVENT.event())
                         .withResourceId(resourceId)
                         .withResourceName(resourceName)
                         .withResourceCrn(resourceCrn)

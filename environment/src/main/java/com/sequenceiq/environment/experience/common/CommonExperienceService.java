@@ -22,21 +22,21 @@ import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 @Service
-public class XService implements Experience {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(XService.class);
+public class CommonExperienceService implements Experience {
 
     private static final String DEFAULT_EXPERIENCE_PROTOCOL = "https";
 
-    private final CommonExperienceConnectorService experienceConnectorService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceService.class);
 
-    private final Set<CommonExperience> configuredExperiences;
+    private final CommonExperienceConnectorService experienceConnectorService;
 
     private final CommonExperienceValidator experienceValidator;
 
+    private final Set<CommonExperience> configuredExperiences;
+
     private final String experienceProtocol;
 
-    public XService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
+    public CommonExperienceService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
             ExperienceServicesConfig config, CommonExperienceValidator experienceValidator) {
         this.experienceValidator = experienceValidator;
         this.configuredExperiences = identifyConfiguredExperiences(config);
@@ -46,15 +46,15 @@ public class XService implements Experience {
     }
 
     @Override
-    public boolean hasExistingClusterForEnvironment(EnvironmentExperienceDto environment) {
+    public int clusterCountForEnvironment(EnvironmentExperienceDto environment) {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
         Set<String> activeExperienceNames = environmentHasActiveExperience(environment.getCrn());
-        if (activeExperienceNames.size() > 0) {
+        if (!activeExperienceNames.isEmpty()) {
             String combinedNames = String.join(",", activeExperienceNames);
             LOGGER.info("The following experiences has connected to this env: [env: {}, experience(s): {}]", environment.getName(), combinedNames);
-            return true;
+            return activeExperienceNames.size();
         }
-        return false;
+        return 0;
     }
 
     @Override
@@ -63,8 +63,14 @@ public class XService implements Experience {
     }
 
     @Override
-    public void deleteConnectedExperiences(EnvironmentExperienceDto dto) {
-
+    public void deleteConnectedExperiences(EnvironmentExperienceDto environment) {
+        throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
+        Set<String> activeExperiences = environmentHasActiveExperience(environment.getCrn());
+        configuredExperiences
+                .stream()
+                .filter(commonExperience -> activeExperiences.contains(commonExperience.getName()))
+                .forEach(commonExperience -> experienceConnectorService
+                        .deleteWorkspaceForEnvironment(createPathToExperience(commonExperience), environment.getCrn()));
     }
 
     /**
@@ -78,14 +84,12 @@ public class XService implements Experience {
     private Set<String> environmentHasActiveExperience(@NotNull String environmentCrn) {
         throwIfTrue(StringUtils.isEmpty(environmentCrn), () -> new IllegalArgumentException("Unable to check environment - experience relation, since the " +
                 "given environment crn is null or empty!"));
-        Set<String> affectedExperiences;
-        affectedExperiences = configuredExperiences
+        return configuredExperiences
                 .stream()
                 .map(xp -> isExperienceActiveForEnvironment(xp.getName(), xp, environmentCrn))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(toSet());
-        return affectedExperiences;
     }
 
     private Optional<String> isExperienceActiveForEnvironment(String experienceName, CommonExperience xp, String environmentCrn) {
@@ -101,8 +105,11 @@ public class XService implements Experience {
     }
 
     private Set<String> collectExperienceEntryNamesWhenItHasActiveWorkspaceForEnv(CommonExperience xp, String envCrn) {
-        String pathToExperience = experienceProtocol + "://" + xp.getHostAddress() + ":" + xp.getPort() + xp.getInternalEnvEndpoint();
-        return experienceConnectorService.getWorkspaceNamesConnectedToEnv(pathToExperience, envCrn);
+        return experienceConnectorService.getWorkspaceNamesConnectedToEnv(createPathToExperience(xp), envCrn);
+    }
+
+    private String createPathToExperience(CommonExperience xp) {
+        return experienceProtocol + "://" + xp.getHostAddress() + ":" + xp.getPort() + xp.getInternalEnvEndpoint();
     }
 
     private Set<CommonExperience> identifyConfiguredExperiences(ExperienceServicesConfig config) {
@@ -124,7 +131,7 @@ public class XService implements Experience {
     private boolean isExperienceConfigured(CommonExperience xp) {
         boolean filled = experienceValidator.isExperienceFilled(xp);
         if (!filled) {
-            LOGGER.debug("The following experience has not filled properly: {}", xp.getName());
+            LOGGER.debug("The following experience is not filled properly: {}", xp.getName());
         }
         return filled;
     }
