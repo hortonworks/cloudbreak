@@ -1,9 +1,10 @@
 package com.sequenceiq.datalake.service.upgrade;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,9 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,18 +24,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
+import com.sequenceiq.authorization.service.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -94,16 +91,13 @@ public class SdxRuntimeUpgradeServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private GrpcUmsClient umsClient;
-
-    @Mock
     private RestClientFactory restClientFactory;
 
     @Mock
     private PaywallAccessChecker paywallAccessChecker;
 
     @Mock
-    private CMLicenseParser cmLicenseParser;
+    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @InjectMocks
     private SdxRuntimeUpgradeService underTest;
@@ -134,7 +128,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
         response.setUpgradeCandidates(new ArrayList<>());
         sdxUpgradeResponse.setUpgradeCandidates(new ArrayList<>());
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId())));
@@ -154,7 +148,7 @@ public class SdxRuntimeUpgradeServiceTest {
         imageInfo.setImageId(ANOTHER_IMAGE_ID);
         response.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId())));
@@ -177,7 +171,7 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeResponse.setUpgradeCandidates(List.of(imageInfo));
         sdxUpgradeResponse.setReason("error reason");
 
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId())));
@@ -204,7 +198,7 @@ public class SdxRuntimeUpgradeServiceTest {
         sdxUpgradeRequest.setLockComponents(false);
         sdxUpgradeRequest.setImageId(null);
 
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId())));
@@ -415,10 +409,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
-        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
-
-        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
-        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -449,10 +440,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
-        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
-
-        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
-        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
 
         doThrow(new BadRequestException("The Cloudera Manager license is not valid to authenticate to paywall, "
                 + "please contact a Cloudera administrator to update it."))
@@ -493,10 +481,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(response)).thenReturn(sdxUpgradeResponse);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(true);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(any())).thenReturn(false);
-        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
-
-        Account account = Account.newBuilder().setClouderaManagerLicenseKey("license").build();
-        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(account);
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
 
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
@@ -533,7 +518,7 @@ public class SdxRuntimeUpgradeServiceTest {
     public void testCheckForRuntimeUpgradeByNameWhenNotEnabled() {
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.checkForUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
@@ -544,7 +529,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
@@ -555,7 +540,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
 
@@ -567,7 +552,7 @@ public class SdxRuntimeUpgradeServiceTest {
         when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
         when(entitlementService.runtimeUpgradeEnabled(any())).thenReturn(false);
 
-        BadRequestException exception = Assertions.assertThrows(
+        BadRequestException exception = assertThrows(
                 BadRequestException.class,
                 () -> underTest.triggerUpgradeByName(USER_CRN, STACK_NAME, sdxUpgradeRequest, Crn.fromString(USER_CRN).getAccountId()));
 

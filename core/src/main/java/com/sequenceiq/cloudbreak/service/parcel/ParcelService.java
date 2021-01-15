@@ -19,19 +19,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Service
 public class ParcelService {
@@ -46,6 +47,9 @@ public class ParcelService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private PaywallCredentialPopulator paywallCredentialPopulator;
 
     public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
         Cluster cluster = stack.getCluster();
@@ -116,6 +120,7 @@ public class ParcelService {
         try {
             Client client = restClientFactory.getOrCreateDefault();
             WebTarget target = client.target(StringUtils.stripEnd(baseUrl, "/") + "/manifest.json");
+            addPaywallCredentialsIfNecessary(baseUrl, target);
             Response response = target.request().get();
             content = readResponse(target, response);
             return ImmutablePair.of(ManifestStatus.SUCCESS, JsonUtil.readValue(content, Manifest.class));
@@ -126,6 +131,10 @@ public class ParcelService {
             LOGGER.info("Could not read manifest.json from parcel repo: {}, message: {}", baseUrl, e.getMessage());
             return ImmutablePair.of(ManifestStatus.FAILED, null);
         }
+    }
+
+    private void addPaywallCredentialsIfNecessary(String baseUrl, WebTarget target) {
+        paywallCredentialPopulator.populateWebTarget(baseUrl, target);
     }
 
     private String readResponse(WebTarget target, Response response) {

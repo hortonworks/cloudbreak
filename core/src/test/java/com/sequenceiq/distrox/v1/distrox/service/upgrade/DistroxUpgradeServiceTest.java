@@ -1,6 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,7 +11,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,17 +20,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.authorization.service.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -59,9 +55,6 @@ class DistroxUpgradeServiceTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private GrpcUmsClient umsClient;
-
-    @Mock
     private PaywallAccessChecker paywallAccessChecker;
 
     @Mock
@@ -77,7 +70,7 @@ class DistroxUpgradeServiceTest {
     private StackService stackService;
 
     @Mock
-    private CMLicenseParser cmLicenseParser;
+    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @InjectMocks
     private DistroxUpgradeService underTest;
@@ -105,9 +98,7 @@ class DistroxUpgradeServiceTest {
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
-        when(umsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq("9d74eee4-1cad-45d7-b645-7ccf9edbb73d"), any()))
-                .thenReturn(UserManagementProto.Account.getDefaultInstance());
-        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.empty());
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenThrow(new BadRequestException("No valid CM license is present"));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
         assertEquals(exception.getMessage(), "No valid CM license is present");
@@ -120,9 +111,7 @@ class DistroxUpgradeServiceTest {
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
         when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
-        when(umsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq("9d74eee4-1cad-45d7-b645-7ccf9edbb73d"), any()))
-                .thenReturn(UserManagementProto.Account.getDefaultInstance());
-        when(cmLicenseParser.parseLicense(any())).thenReturn(Optional.of(new JsonCMLicense()));
+        when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
         imageInfoV4Response.setImageCatalogName("catalogName");
