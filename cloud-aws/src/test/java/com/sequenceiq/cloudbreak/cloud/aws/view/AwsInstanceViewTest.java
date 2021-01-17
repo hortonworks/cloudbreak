@@ -37,7 +37,6 @@ public class AwsInstanceViewTest {
         assertThat(actual.isKmsDefault()).isTrue();
         assertThat(actual.isKmsCustom()).isFalse();
         assertThat(actual.getKmsKey()).isNull();
-        assertThat(actual.isFastEbsEncryptionEnabled()).isFalse();
     }
 
     @Test
@@ -56,20 +55,6 @@ public class AwsInstanceViewTest {
         assertThat(actual.isKmsDefault()).isFalse();
         assertThat(actual.isKmsCustom()).isTrue();
         assertThat(actual.getKmsKey()).isEqualTo(ENCRYPTION_KEY_ARN);
-        assertThat(actual.isFastEbsEncryptionEnabled()).isFalse();
-    }
-
-    @Test
-    public void testEncryptionParametersWhenFast() {
-        Map<String, Object> map = new HashMap<>();
-        map.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true);
-
-        InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
-                map, 0L, IMAGE_ID);
-
-        AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-
-        assertThat(actual.isFastEbsEncryptionEnabled()).isTrue();
     }
 
     @Test

@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -25,7 +24,6 @@ import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.GetTemplateResult;
 import com.amazonaws.services.cloudformation.model.UpdateStackRequest;
 import com.github.jknack.handlebars.internal.Files;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -53,9 +51,6 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
 
     @Mock
     private ResourceNotifier resourceNotifier;
-
-    @Mock
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Mock
     private LaunchConfigurationHandler launchConfigurationHandler;
@@ -98,7 +93,6 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
         when(image.getImageName()).thenReturn(IMAGE_NAME);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(cloudFormationClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(autoScalingClient);
-        when(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier)).thenReturn(Collections.emptyMap());
     }
 
     @Test

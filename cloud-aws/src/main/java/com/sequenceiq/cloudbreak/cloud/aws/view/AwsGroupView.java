@@ -54,8 +54,6 @@ public class AwsGroupView {
 
     private final int onDemandPercentage;
 
-    private final Boolean fastEbsEncryptionEnabled;
-
     private final Double spotMaxPrice;
 
     private final String placementGroupStrategy;
@@ -63,7 +61,7 @@ public class AwsGroupView {
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Boolean ebsEncrypted, Integer rootVolumeSize,
             Map<String, Long> volumeCounts, List<SecurityRule> rules, List<String> cloudSecurityIds, String subnetId, Boolean kmsKeyDefined,
             String kmsKey, String encryptedAMI, boolean useNetworkCidrAsSourceForDefaultRules, String instanceProfile, int onDemandPercentage,
-            boolean fastEbsEncryptionEnabled, Double spotMaxPrice, String placementGroupStrategy) {
+            Double spotMaxPrice, String placementGroupStrategy) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -84,7 +82,6 @@ public class AwsGroupView {
         this.instanceProfile = instanceProfile;
         hasInstanceProfile = instanceProfile != null;
         this.onDemandPercentage = onDemandPercentage;
-        this.fastEbsEncryptionEnabled = fastEbsEncryptionEnabled;
         this.spotMaxPrice = spotMaxPrice;
         this.placementGroupStrategy = placementGroupStrategy;
     }
@@ -195,10 +192,6 @@ public class AwsGroupView {
 
     public int getOnDemandPercentage() {
         return onDemandPercentage;
-    }
-
-    public Boolean getFastEbsEncryptionEnabled() {
-        return fastEbsEncryptionEnabled;
     }
 
     public Double getSpotMaxPrice() {

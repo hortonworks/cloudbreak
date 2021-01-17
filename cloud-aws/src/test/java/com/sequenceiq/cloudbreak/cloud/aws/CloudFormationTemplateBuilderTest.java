@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
-import static java.util.Map.entry;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
@@ -21,8 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import java.util.Set;
+
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
@@ -1129,70 +1128,6 @@ public class CloudFormationTemplateBuilderTest {
                 .withEnableInstanceProfile(true)
                 .withInstanceProfileAvailable(true)
                 .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
-                .withTemplate(awsCloudFormationTemplate)
-                .withEncryptedAMIByGroupName(Map.ofEntries(entry("master", "masterAMI"), entry("gateway", "gatewayAMI")));
-        String templateString = cloudFormationTemplateBuilder.build(modelContext);
-        //THEN
-        Assertions.assertThat(templateString)
-                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
-                .doesNotContain("\"Encrypted\"")
-                .contains("\"masterAMI\"")
-                .contains("\"gatewayAMI\"")
-                .contains("SecurityGroupIngress")
-                .doesNotContain("{ \"Ref\" : \"AMI\" }");
-    }
-
-    @Test
-    public void buildTestEbsEncryptionWithCustomKey() {
-        //GIVEN
-        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
-        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
-        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "customEncryptionKeyArn");
-
-        //WHEN
-        modelContext = new ModelContext()
-                .withAuthenticatedContext(authenticatedContext)
-                .withStack(cloudStack)
-                .withExistingVpc(true)
-                .withExistingIGW(true)
-                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
-                .withExistinVpcCidr(List.of(existingSubnetCidr))
-                .mapPublicIpOnLaunch(true)
-                .withEnableInstanceProfile(true)
-                .withInstanceProfileAvailable(true)
-                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
-                .withTemplate(awsCloudFormationTemplate)
-                .withEncryptedAMIByGroupName(Map.ofEntries(entry("master", "masterAMI"), entry("gateway", "gatewayAMI")));
-        String templateString = cloudFormationTemplateBuilder.build(modelContext);
-        //THEN
-        Assertions.assertThat(templateString)
-                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
-                .doesNotContain("\"Encrypted\"")
-                .contains("\"masterAMI\"")
-                .contains("\"gatewayAMI\"")
-                .contains("SecurityGroupIngress")
-                .doesNotContain("{ \"Ref\" : \"AMI\" }");
-    }
-
-    @Test
-    public void buildTestEbsEncryptionWithDefaultKeyAndFastEncryption() {
-        //GIVEN
-        instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
-        instance.getTemplate().putParameter(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true);
-        instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
-
-        //WHEN
-        modelContext = new ModelContext()
-                .withAuthenticatedContext(authenticatedContext)
-                .withStack(cloudStack)
-                .withExistingVpc(true)
-                .withExistingIGW(true)
-                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
-                .withExistinVpcCidr(List.of(existingSubnetCidr))
-                .mapPublicIpOnLaunch(true)
-                .withEnableInstanceProfile(true)
-                .withInstanceProfileAvailable(true)
-                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
                 .withTemplate(awsCloudFormationTemplate);
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -1205,10 +1140,9 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestEbsEncryptionWithCustomKeyAndFastEncryption() {
+    public void buildTestEbsEncryptionWithCustomKey() {
         //GIVEN
         instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
-        instance.getTemplate().putParameter(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true);
         instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
         instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, "customEncryptionKeyArn");
 

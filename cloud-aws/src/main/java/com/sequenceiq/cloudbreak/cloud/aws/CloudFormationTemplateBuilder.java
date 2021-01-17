@@ -67,7 +67,6 @@ public class CloudFormationTemplateBuilder {
                     group.getSecurity().isUseNetworkCidrAsSourceForDefaultRules(),
                     getInstanceProfile(group),
                     awsInstanceView.getOnDemandPercentage(),
-                    awsInstanceView.isFastEbsEncryptionEnabled(),
                     awsInstanceView.getSpotMaxPrice(),
                     awsInstanceView.getPlacementGroupStrategy().name());
             awsGroupViews.add(groupView);

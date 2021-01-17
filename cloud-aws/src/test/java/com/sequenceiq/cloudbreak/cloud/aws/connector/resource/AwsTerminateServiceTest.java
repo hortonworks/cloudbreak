@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContextBuilder;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -70,9 +69,6 @@ public class AwsTerminateServiceTest {
 
     @Mock
     private EncryptedSnapshotService snapshotService;
-
-    @Mock
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CloudStack cloudStack;
@@ -127,7 +123,6 @@ public class AwsTerminateServiceTest {
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(snapshotService, times(1)).deleteResources(any(), any(), any());
     }
 
@@ -142,7 +137,6 @@ public class AwsTerminateServiceTest {
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(snapshotService, times(1)).deleteResources(any(), any(), any());
     }
 
@@ -163,7 +157,6 @@ public class AwsTerminateServiceTest {
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
         verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(snapshotService, times(1)).deleteResources(any(), any(), any());
     }
 
@@ -172,7 +165,6 @@ public class AwsTerminateServiceTest {
         underTest.terminate(authenticatedContext(), cloudStack, null);
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingRetryClient, never()).describeAutoScalingGroups(any());
 
@@ -183,7 +175,6 @@ public class AwsTerminateServiceTest {
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of());
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingRetryClient, never()).describeAutoScalingGroups(any());
         Assertions.assertEquals(0, result.size(), "Resources result should be empty");
@@ -195,7 +186,6 @@ public class AwsTerminateServiceTest {
                 .terminate(authenticatedContext(), cloudStack, List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build()));
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingRetryClient, never()).describeAutoScalingGroups(any());
         Assertions.assertEquals(0, result.size(), "Resources result should be empty");
@@ -219,7 +209,6 @@ public class AwsTerminateServiceTest {
         ));
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingRetryClient, never()).describeAutoScalingGroups(any());
         Assertions.assertEquals(0, result.size(), "Resources result should be empty");
@@ -250,7 +239,6 @@ public class AwsTerminateServiceTest {
 
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
-        verify(encryptedImageCopyService, times(1)).deleteResources(any(), any(), any());
         verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
         verify(amazonAutoScalingRetryClient, times(1)).describeAutoScalingGroups(any());
         Assertions.assertEquals(0, result.size(), "Resources result should have one size list");

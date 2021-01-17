@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws.encryption;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService.SNAPSHOT_NOT_FOUND_MSG_CODE;
 import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.WaiterRunner.run;
 
 import java.util.Collection;
@@ -50,6 +49,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class EncryptedSnapshotService {
 
     static final String VOLUME_NOT_FOUND_MSG_CODE = "InvalidVolume.NotFound";
+
+    static final String SNAPSHOT_NOT_FOUND_MSG_CODE = "InvalidSnapshot.NotFound";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EncryptedSnapshotService.class);
 

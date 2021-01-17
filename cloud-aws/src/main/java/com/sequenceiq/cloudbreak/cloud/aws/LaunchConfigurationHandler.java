@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -42,8 +41,8 @@ public class LaunchConfigurationHandler {
     }
 
     public String createNewLaunchConfiguration(String imageName, AmazonAutoScalingClient autoScalingClient,
-            LaunchConfiguration oldLaunchConfiguration, CloudContext cloudContext, String encryptedImageName) {
-        String selectedImageName = StringUtils.isBlank(encryptedImageName) ? imageName : encryptedImageName;
+            LaunchConfiguration oldLaunchConfiguration, CloudContext cloudContext) {
+        String selectedImageName = imageName;
         CreateLaunchConfigurationRequest createLaunchConfigurationRequest = getCreateLaunchConfigurationRequest(selectedImageName, oldLaunchConfiguration);
         LOGGER.debug("Create LaunchConfiguration {} with image {}",
                 createLaunchConfigurationRequest.getLaunchConfigurationName(), selectedImageName);

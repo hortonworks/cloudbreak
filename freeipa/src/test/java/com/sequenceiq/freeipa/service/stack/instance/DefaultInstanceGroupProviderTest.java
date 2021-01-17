@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -64,21 +63,6 @@ class DefaultInstanceGroupProviderTest {
         Json attributes = result.getAttributes();
         assertThat(attributes).isNotNull();
         assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.FALSE);
-        assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
-    }
-
-    @Test
-    void createDefaultTemplateTestVolumeEncryptionAddedWhenAwsAndFastEncryption() {
-        when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        Template result = underTest.createDefaultTemplate(CloudPlatform.AWS, ACCOUNT_ID);
-
-        assertThat(result).isNotNull();
-        Json attributes = result.getAttributes();
-        assertThat(attributes).isNotNull();
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
-        assertThat(attributes.<Object>getValue(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(Boolean.TRUE);
         assertThat(attributes.<Object>getValue(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.DEFAULT.name());
     }
 

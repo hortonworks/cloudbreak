@@ -223,8 +223,7 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenAttachedVolumesOnlyAndEncryptionWithDefaultKeyAndSnapshotError() {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
-                        entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, false)));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
 
         when(encryptedSnapshotService.isEncryptedVolumeRequested(group)).thenReturn(true);
         when(encryptedSnapshotService.createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier)).thenReturn(Optional.empty());
@@ -238,8 +237,7 @@ class AwsVolumeResourceBuilderTest {
     void buildTestWhenAttachedVolumesOnlyAndEncryptionWithDefaultKey() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
-                        entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, false)));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
 
         when(encryptedSnapshotService.isEncryptedVolumeRequested(group)).thenReturn(true);
         when(encryptedSnapshotService.createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier)).thenReturn(Optional.of(SNAPSHOT_ID));
@@ -252,6 +250,7 @@ class AwsVolumeResourceBuilderTest {
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
         verifyCreateVolumeRequest(SNAPSHOT_ID, null, null);
+        verify(encryptedSnapshotService, never()).createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier);
     }
 
     @Test
@@ -259,8 +258,7 @@ class AwsVolumeResourceBuilderTest {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN),
-                        entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, false)));
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)));
 
         when(encryptedSnapshotService.isEncryptedVolumeRequested(group)).thenReturn(true);
         when(encryptedSnapshotService.createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier)).thenReturn(Optional.of(SNAPSHOT_ID));
@@ -273,46 +271,6 @@ class AwsVolumeResourceBuilderTest {
         List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
         verifyVolumes(volumes, "/dev/xvdb");
         verifyCreateVolumeRequest(SNAPSHOT_ID, null, null);
-    }
-
-    @Test
-    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithDefaultKeyFast() throws Exception {
-        Group group = createGroup(List.of(createVolume(TYPE_GP2)),
-                Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
-                        entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true)));
-
-        when(encryptedSnapshotService.isEncryptedVolumeRequested(group)).thenReturn(true);
-        setUpTaskExecutors();
-        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
-
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
-
-        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
-        verifyVolumes(volumes, "/dev/xvdb");
-        verifyCreateVolumeRequest(null, true, null);
-        verify(encryptedSnapshotService, never()).createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier);
-    }
-
-    @Test
-    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithCustomKeyFast() throws Exception {
-        Group group = createGroup(List.of(createVolume(TYPE_GP2)),
-                Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),
-                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN),
-                        entry(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, true)));
-
-        when(encryptedSnapshotService.isEncryptedVolumeRequested(group)).thenReturn(true);
-        setUpTaskExecutors();
-        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
-
-        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
-                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
-
-        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
-        verifyVolumes(volumes, "/dev/xvdb");
-        verifyCreateVolumeRequest(null, true, ENCRYPTION_KEY_ARN);
         verify(encryptedSnapshotService, never()).createSnapshotIfNeeded(authenticatedContext, cloudStack, group, resourceNotifier);
     }
 

@@ -214,8 +214,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT = "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT";
 
-    private static final String CDP_CB_FAST_EBS_ENCRYPTION = "CDP_CB_FAST_EBS_ENCRYPTION";
-
     private static final String CDP_CLOUD_IDENTITY_MAPPING = "CDP_CLOUD_IDENTITY_MAPPING";
 
     private static final String CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE = "CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE";
@@ -307,9 +305,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
     private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
-
-    @Value("${auth.mock.fastebsencryption.enable}")
-    private boolean enableFastEbsEncryption;
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
@@ -626,9 +621,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
-        }
-        if (enableFastEbsEncryption) {
-            builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));

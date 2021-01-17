@@ -215,9 +215,6 @@ public class MockUserManagementServiceTest {
                 {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
                         "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
 
-                {"enableFastEbsEncryption false", "enableFastEbsEncryption", false, "CDP_CB_FAST_EBS_ENCRYPTION", false},
-                {"enableFastEbsEncryption true", "enableFastEbsEncryption", true, "CDP_CB_FAST_EBS_ENCRYPTION", true},
-
                 {"enableCloudIdentityMappinng false", "enableCloudIdentityMappinng", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
                 {"enableCloudIdentityMappinng true", "enableCloudIdentityMappinng", true, "CDP_CLOUD_IDENTITY_MAPPING", true},
 

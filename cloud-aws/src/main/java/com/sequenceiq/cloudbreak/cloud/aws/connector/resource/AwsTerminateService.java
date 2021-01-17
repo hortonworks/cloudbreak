@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -59,9 +58,6 @@ public class AwsTerminateService {
 
     @Inject
     private EncryptedSnapshotService encryptedSnapshotService;
-
-    @Inject
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
@@ -166,7 +162,6 @@ public class AwsTerminateService {
 
     private void cleanupEncryptedResources(AuthenticatedContext ac, List<CloudResource> resources, String regionName, AmazonEC2Client amazonEC2Client) {
         encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
-        encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {

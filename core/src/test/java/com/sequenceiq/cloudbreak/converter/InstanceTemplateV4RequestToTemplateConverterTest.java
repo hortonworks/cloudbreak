@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -241,31 +240,8 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         assertThat(result.getAttributes()).isNotNull();
         Map<String, Object> map = result.getAttributes().getMap();
         assertThat(map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
-        assertThat(map.get(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(false);
 
         assertThat(result.getSecretAttributes()).isNotNull();
-    }
-
-    @Test
-    public void convertWithAwsEncryptionFast() {
-        InstanceTemplateV4Request source = getSampleAwsRequest();
-
-        when(entitlementService.fastEbsEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
-
-        Template result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
-
-        assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
-        assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
-        assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
-
-        assertThat(result.getAttributes()).isNotNull();
-        Map<String, Object> map = result.getAttributes().getMap();
-        assertThat(map.get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).isEqualTo(EncryptionType.CUSTOM.name());
-        assertThat(map.get(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED)).isEqualTo(true);
-
-        assertThat(result.getSecretAttributes()).isNotNull();
-        assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
     }
 
     private InstanceTemplateV4Request getSampleAwsRequest() {
