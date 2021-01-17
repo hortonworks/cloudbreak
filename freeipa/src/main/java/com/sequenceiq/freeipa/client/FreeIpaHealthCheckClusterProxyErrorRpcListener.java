@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 public class FreeIpaHealthCheckClusterProxyErrorRpcListener implements FreeIpaHealthCheckRpcListener {
@@ -24,7 +25,7 @@ public class FreeIpaHealthCheckClusterProxyErrorRpcListener implements FreeIpaHe
     private void throwIfClusterProxyError(Response response) {
         Optional<ClusterProxyError> clusterProxyError = deserializeAsClusterProxyError(response);
         if (clusterProxyError.isPresent()) {
-            throw new ClusterProxyException(String.format("Cluster proxy service returned error: %s", clusterProxyError.get()));
+            throw new ClusterProxyException(String.format("Cluster proxy service returned error: %s", clusterProxyError.get()), clusterProxyError);
         }
     }
 

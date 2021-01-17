@@ -25,6 +25,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.authorization.service.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
@@ -41,6 +42,9 @@ public class ParcelServiceTest {
 
     @Mock
     private RestClientFactory restClientFactory;
+
+    @Mock
+    private PaywallCredentialPopulator paywallCredentialPopulator;
 
     @InjectMocks
     private ParcelService underTest;

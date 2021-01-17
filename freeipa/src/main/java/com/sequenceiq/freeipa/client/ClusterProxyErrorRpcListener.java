@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.googlecode.jsonrpc4j.JsonRpcClient;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class ClusterProxyErrorRpcListener implements JsonRpcClient.RequestListen
     private void throwIfClusterProxyError(ObjectNode node) {
         Optional<ClusterProxyError> clusterProxyError = deserializeAsClusterProxyError(node);
         if (clusterProxyError.isPresent()) {
-            throw new ClusterProxyException(String.format("Cluster proxy service returned error: %s", clusterProxyError.get()));
+            throw new ClusterProxyException(String.format("Cluster proxy service returned error: %s", clusterProxyError.get()), clusterProxyError);
         }
     }
 

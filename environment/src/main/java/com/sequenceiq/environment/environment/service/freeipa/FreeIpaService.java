@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -69,8 +70,14 @@ public class FreeIpaService {
         try {
             return Optional.of(freeIpaV1Endpoint.describeInternal(envCrn, accountId));
         } catch (NotFoundException e) {
-            LOGGER.warn("Could not find freeipa with envCrn: " + envCrn);
-            return Optional.empty();
+            try {
+                ExceptionResponse exceptionResponse = e.getResponse().readEntity(ExceptionResponse.class);
+                LOGGER.info("Freeipa not found, reason: {}", exceptionResponse.getMessage());
+                return Optional.empty();
+            } catch (RuntimeException convertException) {
+                LOGGER.info("Conversion failed", convertException);
+                throw new FreeIpaOperationFailedException("Freeipa internal describe response is NOT FOUND, but response reason is not the expected type", e);
+            }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
