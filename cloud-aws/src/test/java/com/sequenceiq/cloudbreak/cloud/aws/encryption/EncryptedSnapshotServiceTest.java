@@ -30,6 +30,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 public class EncryptedSnapshotServiceTest {
 
+    private static final String USER_ID = "horton@hortonworks.com";
+
+    private static final Long WORKSPACE_ID = 1L;
+
+    private static final String SNAPSHOT_NOT_FOUND_MSG_CODE = "InvalidSnapshot.NotFound";
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
@@ -37,12 +43,6 @@ public class EncryptedSnapshotServiceTest {
     private AmazonEC2Client ec2Client;
 
     private AuthenticatedContext authenticatedContext;
-
-    private static final String USER_ID = "horton@hortonworks.com";
-
-    private static final Long WORKSPACE_ID = 1L;
-
-    private static final String SNAPSHOT_NOT_FOUND_MSG_CODE = "InvalidSnapshot.NotFound";
 
     @InjectMocks
     private EncryptedSnapshotService underTest;

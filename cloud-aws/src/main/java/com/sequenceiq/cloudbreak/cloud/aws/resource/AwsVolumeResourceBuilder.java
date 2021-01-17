@@ -168,8 +168,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
-        String snapshotId = null;
-        String volumeEncryptionKey = getVolumeEncryptionKey(group);
+        boolean encryptedVolume = isEncryptedVolumeRequested(group);
+        String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolume);
         TagSpecification tagSpecification = new TagSpecification()
                 .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
                 .withTags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()));
@@ -188,7 +188,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
-                    .map(createVolumeRequest(snapshotId, volumeEncryptionKey, tagSpecification, volumeSet))
+                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
@@ -225,24 +225,25 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
     }
 
-    private String getVolumeEncryptionKey(Group group) {
-        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
-        return awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
+    private boolean isEncryptedVolumeRequested(Group group) {
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes();
     }
 
-    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(String snapshotId,
+    private String getVolumeEncryptionKey(Group group, boolean encryptedVolume) {
+        AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
+        return encryptedVolume && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
+    }
+
+    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(boolean encryptedVolume,
             String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
         return volume -> {
             CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest()
                     .withAvailabilityZone(volumeSet.getAvailabilityZone())
                     .withSize(volume.getSize())
-                    .withSnapshotId(snapshotId)
                     .withTagSpecifications(tagSpecification)
-                    .withVolumeType(volume.getType());
-            if (snapshotId == null) {
-                createVolumeRequest
-                        .withKmsKeyId(volumeEncryptionKey);
-            }
+                    .withVolumeType(volume.getType())
+                    .withEncrypted(encryptedVolume)
+                    .withKmsKeyId(volumeEncryptionKey);
             return createVolumeRequest;
         };
     }
