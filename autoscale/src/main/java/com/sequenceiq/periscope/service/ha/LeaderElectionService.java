@@ -112,8 +112,8 @@ public class LeaderElectionService {
                         try {
                             long limit = clock.getCurrentTimeMillis() - heartbeatThresholdRate;
                             List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
-                            reallocateOrphanClusters(activeNodes);
                             if (!activeNodes.isEmpty()) {
+                                reallocateOrphanClusters(activeNodes);
                                 cleanupInactiveNodesByActiveNodes(activeNodes);
                             }
                         } catch (RuntimeException e) {
