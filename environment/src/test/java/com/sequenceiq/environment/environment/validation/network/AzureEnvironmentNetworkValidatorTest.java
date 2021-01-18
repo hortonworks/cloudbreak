@@ -111,8 +111,9 @@ class AzureEnvironmentNetworkValidatorTest {
 
         assertTrue(validationResultBuilder.build().hasError());
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "It is not possible to create private endpoints: existing network with id 'networkId' in resource group 'networkResourceGroupName' " +
-                        "has no subnet with privateEndpointNetworkPolicies disabled."));
+                "It is not possible to create private endpoints for existing network with id 'networkId' in resource group 'networkResourceGroupName': " +
+                        "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
+                        "network policies in at least one of the following subnets and retry: 'subnet-one'."));
     }
 
     @Test
@@ -371,6 +372,7 @@ class AzureEnvironmentNetworkValidatorTest {
     private Map<String, CloudSubnet> getCloudSubnets(boolean privateEndpointNetworkPoliciesEnabled) {
         CloudSubnet cloudSubnetOne = new CloudSubnet();
         cloudSubnetOne.putParameter("privateEndpointNetworkPolicies", privateEndpointNetworkPoliciesEnabled ? "enabled" : "disabled");
+        cloudSubnetOne.setName("subnet-one");
         return Map.of("subnet-one", cloudSubnetOne);
     }
 
