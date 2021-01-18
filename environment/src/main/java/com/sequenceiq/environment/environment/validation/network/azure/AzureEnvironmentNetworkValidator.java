@@ -31,10 +31,10 @@ import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @Component
 public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValidator {
@@ -137,9 +137,11 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
 
         boolean noSuitableSubnetPresent = cloudNetworks.values().stream().noneMatch(azureCloudSubnetParametersService::isPrivateEndpointNetworkPoliciesDisabled);
         if (noSuitableSubnetPresent) {
-            String errorMessage = String.format("It is not possible to create private endpoints: existing network with id '%s' in resource group '%s' " +
-                            "has no subnet with privateEndpointNetworkPolicies disabled.",
-                    networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName());
+            String subnetsInVnet = cloudNetworks.values().stream().map(CloudSubnet::getName).collect(Collectors.joining(", "));
+            String errorMessage = String.format("It is not possible to create private endpoints for existing network with id '%s' in resource group '%s': " +
+                            "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
+                            "network policies in at least one of the following subnets and retry: '%s'.",
+                    networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName(), subnetsInVnet);
             LOGGER.warn(errorMessage);
             resultBuilder.error(errorMessage);
         }
