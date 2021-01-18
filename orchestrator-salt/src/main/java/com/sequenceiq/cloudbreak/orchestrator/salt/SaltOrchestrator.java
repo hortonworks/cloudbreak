@@ -307,7 +307,7 @@ SaltOrchestrator implements HostOrchestrator {
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt upscale", e);
-            throw new CloudbreakOrchestratorFailedException(e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
 
@@ -1118,7 +1118,7 @@ SaltOrchestrator implements HostOrchestrator {
             saltUploadRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during file distribute to gateway nodes", e);
-            throw new CloudbreakOrchestratorFailedException(e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
 
