@@ -69,13 +69,13 @@ public class AwsDistroXSpotInstanceTest extends AbstractE2ETest {
 
     private boolean createFailedWithInsufficientInstanceCapacity(StackV4Response stack) {
         return stack.getStatus().equals(Status.CREATE_FAILED)
-                && stack.getStatusReason().contains(SpotTestResultProvider.AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE);
+                && RESULT_PROVIDER.isSpotFailureStatusReason(stack.getStatusReason());
     }
 
     private boolean allInstancesHaveSpotLifecycle(StackV4Response stack) {
         return stack.getInstanceGroups().stream()
                 .map(InstanceGroupV4Response::getMetadata)
                 .flatMap(Collection::stream)
-                .allMatch(instance -> instance.getLifeCycle().equals(InstanceLifeCycle.SPOT));
+                .allMatch(instance -> InstanceLifeCycle.SPOT.equals(instance.getLifeCycle()));
     }
 }
