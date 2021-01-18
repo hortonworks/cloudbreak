@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -55,11 +56,11 @@ public class BootstrapService {
     @Inject
     private ImageService imageService;
 
-    public void bootstrap(Long stackId) {
+    public void bootstrap(Long stackId) throws CloudbreakOrchestratorException {
         bootstrap(stackId, null);
     }
 
-    public void bootstrap(Long stackId, List<String> instanceIds) {
+    public void bootstrap(Long stackId, List<String> instanceIds) throws CloudbreakOrchestratorException {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stackId).stream()
                 .filter(instanceMetaData -> Objects.isNull(instanceIds) || instanceIds.contains(instanceMetaData.getInstanceId()))
                 .collect(Collectors.toSet());
@@ -85,8 +86,10 @@ public class BootstrapService {
                     stateConfigZip, params, new StackBasedExitCriteriaModel(stackId));
         } catch (IOException e) {
             LOGGER.error("Couldnt read state config", e);
+            throw new CloudbreakOrchestratorFailedException("Couldnt read state config", e);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Bootstrap failed", e);
+            throw e;
         }
     }
 

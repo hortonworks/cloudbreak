@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.message.StackStatusMessageTransformator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
@@ -27,6 +28,9 @@ public class StackUpdater {
 
     @Inject
     private SecurityConfigService securityConfigService;
+
+    @Inject
+    private StackStatusMessageTransformator stackStatusMessageTransformator;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
         return doUpdateStackStatus(stackId, detailedStatus, statusReason);
@@ -52,12 +56,13 @@ public class StackUpdater {
         return doUpdateStackStatus(stack, detailedStatus, statusReason);
     }
 
-    private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus newDetailedStatus, String newStatusReason) {
+    private Stack doUpdateStackStatus(Stack stack, DetailedStackStatus newDetailedStatus, String rawNewStatusReason) {
         Status newStatus = newDetailedStatus.getStatus();
         StackStatus stackStatus = stack.getStackStatus();
         if (!Status.DELETE_COMPLETED.equals(stackStatus.getStatus())) {
-            if (isStatusChanged(stack, newDetailedStatus, newStatusReason, newStatus)) {
-                stack = handleStatusChange(stack, newDetailedStatus, newStatusReason, newStatus, stackStatus);
+            String transformedStatusReason = stackStatusMessageTransformator.transformMessage(rawNewStatusReason);
+            if (isStatusChanged(stack, newDetailedStatus, transformedStatusReason, newStatus)) {
+                stack = handleStatusChange(stack, newDetailedStatus, transformedStatusReason, newStatus, stackStatus);
             } else {
                 LOGGER.debug("Statuses are the same, it will not update");
                 updateInMemoryStoreIfStackIsMissing(stack, newStatus);
