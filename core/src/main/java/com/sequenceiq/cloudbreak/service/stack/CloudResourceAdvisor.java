@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.Collection;
@@ -255,7 +255,7 @@ public class CloudResourceAdvisor {
 
     private AutoscaleRecommendation recommendAutoscale(BlueprintTextProcessor blueprintTextProcessor) {
         String version = blueprintTextProcessor.getVersion().orElse("");
-        if (!isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_0)) {
+        if (!isVersionNewerOrEqualThanLimited(version, CLOUDERAMANAGER_VERSION_7_2_1)) {
             LOGGER.debug("Autoscale is not supported in this version {}.", version);
             return new AutoscaleRecommendation(Set.of(), Set.of());
         }
