@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.Experience;
 import com.sequenceiq.environment.experience.ExperienceSource;
+import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.ClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 

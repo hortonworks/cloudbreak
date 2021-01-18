@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.experience.liftie;
+package com.sequenceiq.environment.experience.api;
 
 import javax.validation.constraints.NotNull;
 
@@ -7,8 +7,8 @@ import com.sequenceiq.environment.experience.liftie.responses.ListClustersRespon
 
 public interface LiftieApi {
 
-    ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, Integer page);
+    @NotNull ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, Integer page);
 
-    DeleteClusterResponse deleteCluster(@NotNull String clusterId);
+    @NotNull DeleteClusterResponse deleteCluster(@NotNull String clusterId);
 
 }
