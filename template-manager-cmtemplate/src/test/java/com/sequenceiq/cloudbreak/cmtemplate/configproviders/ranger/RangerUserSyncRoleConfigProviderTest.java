@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
@@ -39,10 +41,30 @@ public class RangerUserSyncRoleConfigProviderTest {
     }
 
     @Test
-    public void testAws() {
+    public void testAwsWhenCmVersionIs728ShouldReturnWithRangerAsSysAdmin() {
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withServicePrincipals(null)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.8"), new ArrayList<>())
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .build();
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+
+        assertEquals(2, serviceConfigs.size());
+        assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
+        assertEquals("<property><name>ranger.usersync.unix.backend</name><value>nss</value></property>", serviceConfigs.get(0).getValue());
+
+        assertEquals("ranger.usersync.group.based.role.assignment.rules", serviceConfigs.get(1).getName());
+        assertEquals("&ROLE_SYS_ADMIN:g:mockAdmin&ROLE_SYS_ADMIN:u:ranger", serviceConfigs.get(1).getValue());
+    }
+
+    @Test
+    public void testAwsWhenCmVersionIs726ShouldReturnWithRangerAsSysAdmin() {
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withCloudPlatform(CloudPlatform.AWS)
+                .withServicePrincipals(null)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.6"), new ArrayList<>())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .build();
 
@@ -57,11 +79,33 @@ public class RangerUserSyncRoleConfigProviderTest {
     }
 
     @Test
-    public void testAzure() {
+    public void testAzureWhenCmVersionIs728ShouldReturnWithRangerAsSysAdmin() {
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setEnableRangerRaz(false);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.8"), new ArrayList<>())
+                .withServicePrincipals(null)
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .build();
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(RANGER_USERSYNC, preparationObject);
+
+        assertEquals(2, serviceConfigs.size());
+        assertEquals("conf/ranger-ugsync-site.xml_role_safety_valve", serviceConfigs.get(0).getName());
+        assertEquals("<property><name>ranger.usersync.unix.backend</name><value>nss</value></property>", serviceConfigs.get(0).getValue());
+
+        assertEquals("ranger.usersync.group.based.role.assignment.rules", serviceConfigs.get(1).getName());
+        assertEquals("&ROLE_SYS_ADMIN:g:mockAdmin&ROLE_SYS_ADMIN:u:ranger", serviceConfigs.get(1).getValue());
+    }
+
+    @Test
+    public void testAzureWhenCmVersionIs726ShouldReturnWithRangerAsSysAdmin() {
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setEnableRangerRaz(false);
+        TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
+                .withCloudPlatform(CloudPlatform.AZURE)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.6"), new ArrayList<>())
                 .withServicePrincipals(null)
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
@@ -82,6 +126,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         generalClusterConfigs.setEnableRangerRaz(true);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.6"), new ArrayList<>())
                 .withServicePrincipals(generateServicePrincipals())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();
@@ -107,6 +152,7 @@ public class RangerUserSyncRoleConfigProviderTest {
         generalClusterConfigs.setEnableRangerRaz(true);
         TemplatePreparationObject preparationObject = TemplatePreparationObject.Builder.builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.6"), new ArrayList<>())
                 .withServicePrincipals(Collections.emptyMap())
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .build();

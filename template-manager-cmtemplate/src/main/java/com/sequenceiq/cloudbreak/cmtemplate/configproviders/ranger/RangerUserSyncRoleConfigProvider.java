@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_8;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
 
 import java.util.List;
 import java.util.Objects;
@@ -39,19 +42,27 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         String adminGroup = virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight());
-
+        String rangerAdminAsSysAdminConfigProvider = rangerAdminAsSysAdminConfigProvider(source);
         if (CloudPlatform.AZURE.equals(source.getCloudPlatform()) && source.getGeneralClusterConfigs().isEnableRangerRaz()
                 && source.getServicePrincipals() != null) {
             String servicePrincipals = getServicePrincipalsString(source);
             return List.of(
                     config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
-                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup),
+                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup + rangerAdminAsSysAdminConfigProvider),
                     config(RANGER_USERSYNC_AZURE_MAPPING, servicePrincipals));
         } else {
             return List.of(
                     config(ROLE_SAFETY_VALVE, ConfigUtils.getSafetyValveProperty(RANGER_USERSYNC_UNIX_BACKEND, "nss")),
-                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup));
+                    config(ROLE_ASSIGNMENT_RULES, "&ROLE_SYS_ADMIN:g:" + adminGroup + rangerAdminAsSysAdminConfigProvider));
         }
+    }
+
+    private String rangerAdminAsSysAdminConfigProvider(TemplatePreparationObject source) {
+        String cmVersion = getCmVersion(source);
+        if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_8)) {
+            return "&ROLE_SYS_ADMIN:u:ranger";
+        }
+        return "";
     }
 
     private String getServicePrincipalsString(TemplatePreparationObject source) {
