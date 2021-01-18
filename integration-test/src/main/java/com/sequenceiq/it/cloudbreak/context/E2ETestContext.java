@@ -12,7 +12,7 @@ import com.sequenceiq.it.util.TagsUtil;
 
 @Prototype
 @Primary
-public class SparklessTestContext extends TestContext {
+public class E2ETestContext extends TestContext {
 
     @Inject
     private TagsUtil tagsUtil;

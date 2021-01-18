@@ -5,8 +5,8 @@ import java.lang.reflect.Proxy;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
-import com.sequenceiq.it.cloudbreak.dto.mock.SparkUriAnnotationHandler;
-import com.sequenceiq.it.cloudbreak.dto.mock.SparkUriParameters;
+import com.sequenceiq.it.cloudbreak.dto.mock.MockUriNameParser;
+import com.sequenceiq.it.cloudbreak.dto.mock.MockUriParameters;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
 
 public class EndpointProxyFactory {
@@ -21,7 +21,7 @@ public class EndpointProxyFactory {
                 new Class[]{endpoint},
                 (proxy, method, args) -> {
                     Method httpMethod = Method.build(method.getName());
-                    SparkUriParameters parameters = new SparkUriAnnotationHandler(endpoint, method).getParameters();
+                    MockUriParameters parameters = new MockUriNameParser(endpoint, method).getParameters();
                     return new DefaultResponseConfigure(httpMethod, parameters.getUri(), testDto, testContext.getExecuteQueryToMockInfrastructure());
 
                 });

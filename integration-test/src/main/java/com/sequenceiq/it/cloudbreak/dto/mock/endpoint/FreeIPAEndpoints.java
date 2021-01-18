@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
+import com.sequenceiq.it.cloudbreak.dto.mock.MockUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
 
 public class FreeIPAEndpoints<T extends CloudbreakTestDto> {
@@ -20,7 +20,7 @@ public class FreeIPAEndpoints<T extends CloudbreakTestDto> {
         return (Session<T>) EndpointProxyFactory.create(Session.class, testDto, mockedTestContext);
     }
 
-    @SparkUri(url = "/{mockUuid}/ipa/session/json")
+    @MockUri(url = "/{mockUuid}/ipa/session/json")
     public interface Session<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, Object> post();
     }

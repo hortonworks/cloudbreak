@@ -171,14 +171,14 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create())
                 .await(STACK_AVAILABLE)
-                .mockCm().importClusterTemplate().post().bodyContains("\"product\":\"CDH\"", 1).verify()
-                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"), 1).verify()
-                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "master"), 1).verify()
-                .mockCm().importClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "worker"), 3).verify()
-                .mockCm().importClusterTemplate().post()
+                .mockCm().cmImportClusterTemplate().post().bodyContains("\"product\":\"CDH\"", 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"), 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "master"), 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "worker"), 3).verify()
+                .mockCm().cmImportClusterTemplate().post()
                 .bodyContains(String.format("\"clusterName\":\"%s\"", testContext.get(DistroXTestDto.class).getName()), 1).verify()
-                .mockCm().importClusterTemplate().post().bodyContains("repositories", 1).verify()
-                .mockCm().importClusterTemplate().post().bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/", 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains("repositories", 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/", 1).verify()
                 .validate();
     }
 
@@ -280,7 +280,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
                 .await(STACK_AVAILABLE)
-                .mockCm().importClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 1).verify()
                 .validate();
     }
 

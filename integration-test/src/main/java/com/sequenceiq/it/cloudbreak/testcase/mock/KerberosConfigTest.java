@@ -44,7 +44,7 @@ public class KerberosConfigTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .mockSalt().run().post().bodyContains(SALT_HIGHSTATE, 1).atLeast(1).verify()
-                .mockCm().importClusterTemplate().post().atLeast(1).verify()
+                .mockCm().cmImportClusterTemplate().post().atLeast(1).verify()
                 .validate();
     }
 
