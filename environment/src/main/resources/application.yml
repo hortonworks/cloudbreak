@@ -1,4 +1,7 @@
-server.servlet.context-path: "/environmentservice"
+server:
+  servlet:
+    context-path: "/environmentservice"
+  shutdown: graceful
 
 server.port: 8088
 
@@ -22,6 +25,9 @@ management:
           enabled: true
     prometheus:
       enabled: true
+    health:
+      probes:
+        enabled: true
   metrics:
     distribution:
       sla:

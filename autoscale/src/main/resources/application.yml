@@ -1,4 +1,7 @@
-server.servlet.context-path: "/as"
+server:
+  servlet:
+    context-path: "/as"
+  shutdown: graceful
 
 opentracing:
   jaeger:
@@ -22,6 +25,8 @@ management:
       enabled: true
     health:
       show-details: always
+      probes:
+        enabled: true
   metrics:
     distribution:
       sla:

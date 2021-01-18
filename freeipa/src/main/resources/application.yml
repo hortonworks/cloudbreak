@@ -1,4 +1,7 @@
-server.servlet.context-path: "/freeipa"
+server:
+  servlet:
+    context-path: "/freeipa"
+  shutdown: graceful
 
 opentracing:
   jaeger:
@@ -20,6 +23,9 @@ management:
           enabled: true
     prometheus:
       enabled: true
+    health:
+      probes:
+        enabled: true
   metrics:
     distribution:
       sla:

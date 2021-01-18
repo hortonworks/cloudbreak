@@ -1,5 +1,8 @@
-server.servlet.context-path: "/dl"
-
+server:
+  servlet:
+    context-path: "/dl"
+  shutdown: graceful
+  
 spring:
   application:
     name: DatalakeService
@@ -24,6 +27,9 @@ management:
           enabled: true
     prometheus:
       enabled: true
+    health:
+      probes:
+        enabled: true
   metrics:
     distribution:
       sla:
