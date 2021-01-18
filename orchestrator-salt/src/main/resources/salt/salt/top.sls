@@ -7,7 +7,6 @@ base:
     - tags
     - docker
     - recipes.runner
-    - telemetry
     - fluent
     - metering
     - ntp
@@ -36,7 +35,6 @@ base:
     - cloudera.manager
     - cloudera.agent
     - gateway.cm
-    - nodestatus
 
   'G@roles:manager_agent':
     - cloudera.repo

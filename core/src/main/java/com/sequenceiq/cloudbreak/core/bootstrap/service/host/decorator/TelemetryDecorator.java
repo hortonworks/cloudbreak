@@ -160,8 +160,7 @@ public class TelemetryDecorator {
                 .withVersion(version)
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
-                telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform(),
-                databusEndpoint);
+                telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform());
         servicePillar.put("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 

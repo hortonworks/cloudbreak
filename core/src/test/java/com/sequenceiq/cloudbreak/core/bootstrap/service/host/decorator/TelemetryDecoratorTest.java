@@ -286,8 +286,7 @@ public class TelemetryDecoratorTest {
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
             MeteringConfigView meteringConfigView, MonitoringConfigView monitoringConfigView,
             TelemetryCommonConfigView telemetryCommonConfigView) {
-        given(dataBusEndpointProvider.getDataBusEndpoint(isNull(), anyBoolean())).willReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
-        given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), anyString()))
+        given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), isNull()))
                 .willReturn(databusConfigView);
         given(fluentConfigService.createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), any(Telemetry.class)))
@@ -297,9 +296,10 @@ public class TelemetryDecoratorTest {
         given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
-                anyString(), anyString(), anyString(), anyString()))
+                anyString(), anyString(), anyString()))
                 .willReturn(telemetryCommonConfigView);
         given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
     }
 
 }

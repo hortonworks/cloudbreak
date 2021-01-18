@@ -21,11 +21,6 @@
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/prometheus.conf
 
-/etc/nginx/sites-enabled/ssl-locations.d/nodestatus.conf:
-  file.managed:
-    - makedirs: True
-    - source: salt://nginx/conf/ssl-locations.d/nodestatus.conf
-
 /etc/nginx/sites-enabled/ssl-locations.d/saltapi.conf:
   file.managed:
     - makedirs: True
