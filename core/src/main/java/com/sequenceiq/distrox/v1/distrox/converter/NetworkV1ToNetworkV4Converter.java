@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,7 +18,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.GcpNetworkV1Parameters;
@@ -29,6 +38,15 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 public class NetworkV1ToNetworkV4Converter {
 
     private static final String NO_SUBNET_ID_FOUND_MESSAGE = "No subnet id found for this environment.";
+
+    @Inject
+    private SubnetSelector subnetSelector;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private EndpointGatewayNetworkValidator endpointGatewayNetworkValidator;
 
     public NetworkV4Request convertToNetworkV4Request(Pair<NetworkV1Request, DetailedEnvironmentResponse> network) {
         EnvironmentNetworkResponse value = network.getValue().getNetwork();
@@ -157,8 +175,25 @@ public class NetworkV1ToNetworkV4Converter {
             String subnetId = key.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(key.getSubnetId());
-            } else if (source.getValue() != null) {
-                response.setSubnetId(source.getValue().getPreferedSubnetId());
+            } else if (value != null) {
+                response.setSubnetId(value.getPreferedSubnetId());
+            }
+
+            if (entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), value));
+                if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
+                    throw new BadRequestException("Endpoint gateway subnet validation failed: " + validationResult.getFormattedErrors());
+                }
+
+                if (PublicEndpointAccessGateway.ENABLED.equals(value.getPublicEndpointAccessGateway())) {
+                    Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(value, response.getSubnetId());
+                    if (endpointGatewaySubnet.isPresent()) {
+                        // This should always be true because the endpointGatewayNetworkValidator verifies this optional is set
+                        response.setEndpointGatewaySubnetId(endpointGatewaySubnet.get().getId());
+                    } else {
+                        throw new AssertionError("Could not find endpoint gateway subnet even though network passed validation.");
+                    }
+                }
             }
         }
 
