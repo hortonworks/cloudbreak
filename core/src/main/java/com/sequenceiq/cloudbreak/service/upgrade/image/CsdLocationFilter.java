@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -21,16 +20,18 @@ public class CsdLocationFilter implements PackageLocationFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsdLocationFilter.class);
 
+    private static final String IGNORED_PARCEL_NAME = "CDH";
+
     @Override
     public boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams) {
         if (StackType.WORKLOAD.equals(imageFilterParams.getStackType())) {
-            if (image == null || image.getPreWarmCsd() == null || image.getPreWarmCsd().isEmpty()) {
+            if (isInvalidImage(image)) {
                 LOGGER.debug("Image or CSD parcels are not present. Image: {}", image);
                 return false;
             } else {
-                List<String> csdList = getPreWarmCsdList(image, imageFilterParams);
-                LOGGER.debug("Matching URLs: [{}]", csdList);
-                return !csdList.isEmpty() && csdList.stream().allMatch(csdUrl -> URL_PATTERN.matcher(csdUrl).find());
+                Set<String> requiredParcels = getRequiredParcels(imageFilterParams);
+                LOGGER.debug("Stack related required parcels: {}", requiredParcels);
+                return requiredParcels.isEmpty() || isEligibleForUpgrade(image, requiredParcels);
             }
         } else {
             LOGGER.debug("Skip filtering because the stack type is {}", imageFilterParams.getStackType());
@@ -38,28 +39,52 @@ public class CsdLocationFilter implements PackageLocationFilter {
         }
     }
 
-    private List<String> getPreWarmCsdList(Image image, ImageFilterParams imageFilterParams) {
-        Set<String> relatedParcelNames = getParcelNames(imageFilterParams);
-        List<String> imagePreWarmCsd = image.getPreWarmCsd();
-        return CollectionUtils.isEmpty(relatedParcelNames) ? imagePreWarmCsd
-                : filterPreWarmCsdListByStackRelatedParcels(relatedParcelNames, imagePreWarmCsd);
+    private boolean isInvalidImage(Image image) {
+        return image == null || image.getPreWarmCsd() == null || image.getPreWarmCsd().isEmpty();
     }
 
-    private List<String> filterPreWarmCsdListByStackRelatedParcels(Set<String> stackRelatedParcelNames, List<String> imagePreWarmCsd) {
-        return imagePreWarmCsd.stream()
-                .filter(preWarmCsd -> stackRelatedParcelNames.stream().anyMatch(csdUrlContainsParcelName(preWarmCsd)))
-                .collect(Collectors.toList());
-    }
-
-    private Set<String> getParcelNames(ImageFilterParams imageFilterParams) {
-        return Optional.ofNullable(imageFilterParams)
-                .map(ImageFilterParams::getStackRelatedParcels)
+    private Set<String> getRequiredParcels(ImageFilterParams imageFilterParams) {
+        return Optional.ofNullable(imageFilterParams.getStackRelatedParcels())
                 .map(Map::keySet)
-                .orElse(Collections.emptySet());
+                .orElse(Collections.emptySet())
+                .stream()
+                .filter(parcel -> !IGNORED_PARCEL_NAME.equals(parcel))
+                .collect(Collectors.toSet());
     }
 
-    private Predicate<String> csdUrlContainsParcelName(String preWarmCsd) {
-        return parcelName -> !"CDH".equals(parcelName) && preWarmCsd.toLowerCase().contains(parcelName.toLowerCase());
+    private boolean isEligibleForUpgrade(Image image, Set<String> requiredParcels) {
+        Map<String, Set<String>> csdUrlsByParcel = getCsdUrlsByParcelNames(image, requiredParcels);
+        LOGGER.debug("Available CSD URLs for the parcels: {} on image: {}", csdUrlsByParcel, image.getUuid());
+        return !csdUrlsByParcel.isEmpty() && allRequiredCsdAvailable(csdUrlsByParcel) && allRequiredCsdUrlLocationEligible(csdUrlsByParcel);
+    }
+
+    private boolean allRequiredCsdAvailable(Map<String, Set<String>> csdList) {
+        return csdList.entrySet().stream().noneMatch(csdListByParcel -> csdListByParcel.getValue().isEmpty());
+    }
+
+    private boolean allRequiredCsdUrlLocationEligible(Map<String, Set<String>> csdList) {
+        return csdList.entrySet().stream()
+                .allMatch(csdListByParcel -> csdListByParcel.getValue().stream()
+                        .allMatch(csdUrl -> URL_PATTERN.matcher(csdUrl).find()));
+    }
+
+    private Map<String, Set<String>> getCsdUrlsByParcelNames(Image image, Set<String> requiredParcels) {
+        List<String> imagePreWarmCsd = image.getPreWarmCsd();
+        LOGGER.debug("Available CSD urls: {}", imagePreWarmCsd);
+        return requiredParcels.stream()
+                .collect(Collectors.toMap(
+                        parcelName -> parcelName,
+                        parcelName -> filterCsdUrlsByStackRelatedParcel(imagePreWarmCsd, parcelName)));
+    }
+
+    private Set<String> filterCsdUrlsByStackRelatedParcel(List<String> imagePreWarmCsd, String parcelName) {
+        return imagePreWarmCsd.stream()
+                .filter(csdUrlContainsParcelName(parcelName))
+                .collect(Collectors.toSet());
+    }
+
+    private Predicate<String> csdUrlContainsParcelName(String parcelName) {
+        return preWarmCsd -> preWarmCsd.toLowerCase().contains(parcelName.toLowerCase());
     }
 
 }

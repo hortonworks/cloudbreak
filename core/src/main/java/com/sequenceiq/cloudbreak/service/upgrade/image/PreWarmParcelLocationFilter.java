@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -24,16 +23,18 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
 
     private static final String URL_PREFIX = "http";
 
+    private static final String IGNORED_PARCEL_NAME = "CDH";
+
     @Override
     public boolean filterImage(Image image, Image currentImage, ImageFilterParams imageFilterParams) {
         if (StackType.WORKLOAD.equals(imageFilterParams.getStackType())) {
-            List<String> parcelUrls = getUrls(image, imageFilterParams.getStackRelatedParcels());
-            if (parcelUrls.isEmpty()) {
+            if (isInvalidImage(image)) {
                 LOGGER.debug("Image or some part of it is null or not contains the parcel urls: {}", image);
                 return false;
             } else {
-                LOGGER.debug("Matching URLs: [{}]", parcelUrls);
-                return parcelUrls.stream().allMatch(parcelUrl -> URL_PATTERN.matcher(parcelUrl).find());
+                Set<String> requiredParcels = getRequiredParcels(imageFilterParams);
+                LOGGER.debug("Stack related required parcels: {}", requiredParcels);
+                return requiredParcels.isEmpty() || isEligibleForUpgrade(image, requiredParcels);
             }
         } else {
             LOGGER.debug("Skip filtering because the stack type is {}", imageFilterParams.getStackType());
@@ -41,26 +42,57 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
         }
     }
 
-    private List<String> getUrls(Image image, Map<String, String> stackRelatedParcels) {
+    private boolean isInvalidImage(Image image) {
+        return image == null || image.getPreWarmParcels() == null || image.getPreWarmParcels().isEmpty();
+    }
+
+    private Set<String> getRequiredParcels(ImageFilterParams imageFilterParams) {
+        return Optional.ofNullable(imageFilterParams.getStackRelatedParcels())
+                .map(Map::keySet)
+                .orElse(Collections.emptySet())
+                .stream()
+                .filter(parcel -> !IGNORED_PARCEL_NAME.equals(parcel))
+                .collect(Collectors.toSet());
+    }
+
+    private boolean isEligibleForUpgrade(Image image, Set<String> requiredParcels) {
+        Map<String, Set<String>> preWarmParcelsByParcelName = getPreWarmParcelsByParcelName(image, requiredParcels);
+        LOGGER.debug("Available pre warm parcels: {} on image: {}", preWarmParcelsByParcelName, image.getUuid());
+        return !preWarmParcelsByParcelName.isEmpty() && allRequiredPreWarmParcelAvailable(preWarmParcelsByParcelName)
+                && allRequiredPreWarmParcelUrlLocationEligible(preWarmParcelsByParcelName);
+    }
+
+    private Map<String, Set<String>> getPreWarmParcelsByParcelName(Image image, Set<String> requiredParcels) {
+        List<List<String>> imagePreWarmParcels = image.getPreWarmParcels();
+        LOGGER.debug("Available preWarmParcels: {}", imagePreWarmParcels);
+        return requiredParcels.stream()
+                .collect(Collectors.toMap(
+                        parcelName -> parcelName,
+                        parcelName -> filterUrlsByStackRelatedParcel(image, parcelName)));
+    }
+
+    private boolean allRequiredPreWarmParcelAvailable(Map<String, Set<String>> preWarmParcelsByParcelName) {
+        return preWarmParcelsByParcelName.entrySet().stream().noneMatch(parcels -> parcels.getValue().isEmpty());
+    }
+
+    private boolean allRequiredPreWarmParcelUrlLocationEligible(Map<String, Set<String>> preWarmParcelsByParcelName) {
+        return preWarmParcelsByParcelName.entrySet().stream()
+                .allMatch(parcels -> parcels.getValue().stream()
+                        .allMatch(parcelUrl -> URL_PATTERN.matcher(parcelUrl).find()));
+    }
+
+    private Set<String> filterUrlsByStackRelatedParcel(Image image, String requiredParcel) {
         return Optional.ofNullable(image)
                 .map(Image::getPreWarmParcels).orElse(Collections.emptyList())
                 .stream()
-                .filter(filterByStackRelatedParcels(stackRelatedParcels))
+                .filter(filterByStackRelatedParcel(requiredParcel))
                 .flatMap(List::stream)
                 .filter(parcel -> StringUtils.hasText(parcel) && parcel.startsWith(URL_PREFIX))
-                .collect(Collectors.toList());
+                .collect(Collectors.toSet());
     }
 
-    private Predicate<List<String>> filterByStackRelatedParcels(Map<String, String> stackRelatedParcels) {
-        Set<String> stackRelatedParcelNames = getParcelNames(stackRelatedParcels);
-        return parcelList -> CollectionUtils.isEmpty(stackRelatedParcels) || parcelList.stream()
-                .anyMatch(parcel -> stackRelatedParcelNames.stream()
-                        .anyMatch(relatedParcel -> StringUtils.hasText(parcel) && parcel.startsWith(relatedParcel)));
-    }
-
-    private Set<String> getParcelNames(Map<String, String> parcels) {
-        return Optional.ofNullable(parcels)
-                .map(Map::keySet)
-                .orElse(Collections.emptySet());
+    private Predicate<List<String>> filterByStackRelatedParcel(String requiredParcel) {
+        return parcelList -> parcelList.stream()
+                .anyMatch(relatedParcel -> StringUtils.hasText(relatedParcel) && relatedParcel.toLowerCase().startsWith(requiredParcel.toLowerCase()));
     }
 }
