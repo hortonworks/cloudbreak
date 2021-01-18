@@ -13,7 +13,7 @@ mock:
     address: localhost
 
 integrationtest:
-  threadCount: 8
+  threadCount: 6
   parallel: methods
   timeOut: 6000000
   command: suiteurls
