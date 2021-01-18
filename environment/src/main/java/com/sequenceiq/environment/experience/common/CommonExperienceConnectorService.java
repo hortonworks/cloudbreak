@@ -1,29 +1,30 @@
 package com.sequenceiq.environment.experience.common;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
-import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.Family.SUCCESSFUL;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
+import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
 
 @Service
 public class CommonExperienceConnectorService {
@@ -43,13 +44,15 @@ public class CommonExperienceConnectorService {
 
     @NotNull Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
         throwIfNull(experienceBasePath, () -> new IllegalArgumentException("Experience base path should not be null!"));
-        String pathToExperience = experienceBasePath.replace(componentToReplaceInPath, environmentCrn);
+        //String pathToExperience = experienceBasePath.replace(componentToReplaceInPath, environmentCrn);
+        String pathToExperience = experienceBasePath.replace(componentToReplaceInPath, "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:c6778868-3b8c-4f67-a00f-4fa4c855ebcb");
         LOGGER.debug("Creating WebTarget to connect experience");
         WebTarget webTarget = client.target(pathToExperience);
         LOGGER.debug("About to connect to experience on path: {}", pathToExperience);
         Response result = null;
         try {
-            result = webTarget.request().accept(APPLICATION_JSON).header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn()).get();
+            var crn = "crn:altus:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:4898cf22-7c43-418b-90d5-1b12a542150e";
+            result = webTarget.request().accept(APPLICATION_JSON).header(CRN_HEADER, /*ThreadBasedUserCrnProvider.getUserCrn()*/ crn).get();
         } catch (RuntimeException re) {
             LOGGER.warn("Something happened while the experience connection attempted!", re);
         }

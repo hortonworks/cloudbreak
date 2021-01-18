@@ -15,9 +15,9 @@ public class ExperienceConnectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceConnectorService.class);
 
-    private final List<Experience> experiences;
-
     private final EntitlementService entitlementService;
+
+    private final List<Experience> experiences;
 
     public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService) {
         this.experiences = experiences;
@@ -26,7 +26,7 @@ public class ExperienceConnectorService {
 
     public int getConnectedExperienceCount(EnvironmentExperienceDto dto) {
         checkEnvironmentExperienceDto(dto);
-        if (entitlementService.isExperienceDeletionEnabled(dto.getAccountId()) && !experiences.isEmpty()) {
+        if (/*entitlementService.isExperienceDeletionEnabled(dto.getAccountId()) && */!experiences.isEmpty()) {
             LOGGER.debug("Collecting connected experiences for environment: {}", dto.getName());
             return experiences
                     .stream()

@@ -31,15 +31,17 @@ import com.sequenceiq.environment.experience.liftie.responses.ListClustersRespon
 @Component
 public class LiftieConnector implements LiftieApi {
 
+    private static final String LIFTIE_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve Liftie response!";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(LiftieConnector.class);
 
     private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
-    private final Client client;
-
     private final RetriableWebTarget retriableWebTarget;
 
     private final String liftieBasePath;
+
+    private final Client client;
 
     public LiftieConnector(@Value("${experience.scan.liftie.api.port}") String liftiePort,
             @Value("${experience.scan.liftie.api.address}") String liftieAddress,
@@ -91,7 +93,12 @@ public class LiftieConnector implements LiftieApi {
         } catch (RuntimeException re) {
             LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
         }
-        return readResponse(webTarget, result, DeleteClusterResponse.class).orElseThrow(() -> new IllegalStateException("Unable to resolve Liftie response!"));
+        if (result != null) {
+            return readResponse(webTarget, result, DeleteClusterResponse.class)
+                    .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } else {
+            throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG);
+        }
     }
 
     private WebTarget setQueryParams(WebTarget webTarget, Map<String, String> nameValuePairs) {
@@ -112,7 +119,6 @@ public class LiftieConnector implements LiftieApi {
     private String getPathToClusterEndpoint(String clusterId) {
         return String.format("%s/%s", getPathToClustersEndpoint(), clusterId);
     }
-
 
     private <T> Optional<T> readResponse(WebTarget target, Response response, Class<T> resultClass) {
         throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));

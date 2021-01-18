@@ -22,9 +22,9 @@ import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 @Service
-public class XService implements Experience {
+public class CommonExperienceService implements Experience {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(XService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceService.class);
 
     private static final String DEFAULT_EXPERIENCE_PROTOCOL = "https";
 
@@ -36,7 +36,7 @@ public class XService implements Experience {
 
     private final String experienceProtocol;
 
-    public XService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
+    public CommonExperienceService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
             ExperienceServicesConfig config, CommonExperienceValidator experienceValidator) {
         this.experienceValidator = experienceValidator;
         this.configuredExperiences = identifyConfiguredExperiences(config);
