@@ -14,17 +14,20 @@ public class MockResponse {
 
     private int statusCode;
 
-    public MockResponse(Object response, String httpMethod, String path) {
-        this(response, null, httpMethod, path, 0, 200);
+    private String clss;
+
+    public MockResponse(Object response, String httpMethod, String path, String clss) {
+        this(response, null, httpMethod, path, 0, 200, clss);
     }
 
-    public MockResponse(Object response, String message, String httpMethod, String path, int times, int statusCode) {
+    public MockResponse(Object response, String message, String httpMethod, String path, int times, int statusCode, String clss) {
         this.response = response;
         this.message = message;
         this.httpMethod = httpMethod;
         this.path = path;
         this.times = times;
         this.statusCode = statusCode;
+        this.clss = clss;
     }
 
     public String getPath() {
@@ -73,5 +76,13 @@ public class MockResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getClss() {
+        return clss;
+    }
+
+    public void setClss(String clss) {
+        this.clss = clss;
     }
 }

@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
+import java.util.List;
+import java.util.Map;
+
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
@@ -52,31 +57,31 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
 
     @SparkUri(url = SPI_ROOT + REGISTER_PUBLIC_KEY)
     public interface RegisterPublicKey<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, Void> post();
     }
 
     @SparkUri(url = SPI_ROOT + UNREGISTER_PUBLIC_KEY)
     public interface UnregisterPublicKey<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, Void> post();
     }
 
     @SparkUri(url = SPI_ROOT + GET_PUBLIC_KEY_BY_ID)
     public interface GetPublicKey<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> get();
+        DefaultResponseConfigure<T, Map<String, String>> get();
     }
 
     @SparkUri(url = SPI_WITH_MOCK_ROOT + "/cloud_instance_statuses")
     public interface CloudInstanceStatuses<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, List<CloudVmInstanceStatus>> post();
     }
 
     @SparkUri(url = SPI_WITH_MOCK_ROOT + "/cloud_metadata_statuses")
     public interface CloudMetadataStatuses<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, List<CloudVmMetaDataStatus>> post();
     }
 
     @SparkUri(url = SPI_WITH_MOCK_ROOT + "/launch")
     public interface Launch<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
-        DefaultResponseConfigure<T> post();
+        DefaultResponseConfigure<T, List<CloudVmInstanceStatus>> post();
     }
 }

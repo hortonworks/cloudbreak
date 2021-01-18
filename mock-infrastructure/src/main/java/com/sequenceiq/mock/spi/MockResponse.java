@@ -14,6 +14,8 @@ public class MockResponse {
 
     private int statusCode;
 
+    private String clss;
+
     public String getPath() {
         return path;
     }
@@ -60,5 +62,13 @@ public class MockResponse {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getClss() {
+        return clss;
+    }
+
+    public void setClss(String clss) {
+        this.clss = clss;
     }
 }

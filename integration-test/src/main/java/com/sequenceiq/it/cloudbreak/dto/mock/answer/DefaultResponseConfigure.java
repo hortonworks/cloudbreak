@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 import com.sequenceiq.it.verification.Call;
 
-public class DefaultResponseConfigure<T extends CloudbreakTestDto> {
+public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
     private final Method method;
 
     private final String path;
@@ -48,12 +48,12 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto> {
         return path;
     }
 
-    public DefaultResponseConfigure<T> atLeast(int atLeast) {
+    public DefaultResponseConfigure<T, R> atLeast(int atLeast) {
         verifications.add(CheckCount.atLeast(atLeast));
         return this;
     }
 
-    public DefaultResponseConfigure<T> times(int times) {
+    public DefaultResponseConfigure<T, R> times(int times) {
         verifications.add(CheckCount.times(times));
         return this;
     }
@@ -83,7 +83,7 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto> {
         return testDto;
     }
 
-    public DefaultResponseConfigure<T> bodyContains(String body, int times) {
+    public DefaultResponseConfigure<T, R> bodyContains(String body, int times) {
         verifications.add(new TextBodyContainsVerification(body, times));
         return this;
     }
@@ -101,23 +101,32 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto> {
     }
 
     public T thenReturn(String message, int statusCode, int times) {
-        return thenReturn(null, message, statusCode, times);
+        return thenReturn(null, message, statusCode, times, null);
     }
 
-    public T thenReturn(Object retValue, String message, int statusCode, int times) {
+    public T thenReturn(R retValue, String message, int statusCode, int times, String clss) {
         String crn = testDto.getCrn();
         if (crn != null) {
             pathVariable("mockUuid", crn);
         }
-        executeQuery.executeConfigure(pathVariables(), new MockResponse(retValue, message, getMethod().getHttpMethod().name(), getPath(), times, statusCode));
+        String retType = clss;
+        if (retType == null && retValue != null) {
+            retType = retValue.getClass().getName();
+        }
+        MockResponse body = new MockResponse(retValue, message, getMethod().getHttpMethod().name(), getPath(), times, statusCode, retType);
+        executeQuery.executeConfigure(pathVariables(), body);
         return testDto;
     }
 
-    public T thenReturn(Object retValue) {
-        return thenReturn(retValue, null, 200, 1);
+    public T thenReturn(R retValue) {
+        return thenReturn(retValue, null, 200, 1, null);
     }
 
-    public DefaultResponseConfigure<T> pathVariable(String name, String value) {
+    public T thenReturn(R retValue, Class<?> clss) {
+        return thenReturn(retValue, null, 200, 1, clss.getName());
+    }
+
+    public DefaultResponseConfigure<T, R> pathVariable(String name, String value) {
         pathVariableInternal(name, value);
         return this;
     }
@@ -133,7 +142,7 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto> {
         return call.getUri().contains(replace);
     }
 
-    public DefaultResponseConfigure<T> crnless() {
+    public DefaultResponseConfigure<T, R> crnless() {
         this.crnless = true;
         return this;
     }
