@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import javax.inject.Inject;
 
@@ -52,10 +53,10 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
-                .await(Status.UPDATE_IN_PROGRESS)
+                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
-                .await(Status.UPDATE_IN_PROGRESS)
+                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
                 .await(FREEIPA_DELETE_COMPLETED)

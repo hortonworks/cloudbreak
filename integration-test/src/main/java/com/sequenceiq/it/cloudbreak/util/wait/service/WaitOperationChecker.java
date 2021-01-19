@@ -81,6 +81,7 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
                 return true;
             }
             if (waitObject.isCreateFailed()) {
+                LOGGER.info("'{}' the polled resource entered into creation failed state. Exit waiting!", name);
                 return true;
             }
             return waitObject.isFailed();
