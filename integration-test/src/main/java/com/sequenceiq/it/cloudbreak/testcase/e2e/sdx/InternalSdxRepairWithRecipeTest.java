@@ -91,7 +91,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 })
                 .awaitForInstance(getSdxInstancesStoppedState())
                 .when(sdxTestClient.repairInternal(), key(sdxInternal))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
