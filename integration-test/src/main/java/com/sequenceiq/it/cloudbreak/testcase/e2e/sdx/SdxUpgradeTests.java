@@ -61,7 +61,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .when(sdxTestClient.upgrade(), key(sdx))
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForInstance(getSdxInstancesHealthyState())
                 .then((tc, testDto, client) -> {
