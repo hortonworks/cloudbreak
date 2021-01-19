@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -137,7 +138,8 @@ class GcpAttachedDiskResourceBuilderTest {
         auth = new AuthenticatedContext(cloudContext, cloudCredential);
 
         params = Map.of();
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
+                new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
@@ -151,7 +153,7 @@ class GcpAttachedDiskResourceBuilderTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), 50, Optional.empty());
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume("1234", "noop", 0, "eph"));
+        volumes.add(new VolumeSetAttributes.Volume("1234", "noop", 0, "eph", CloudVolumeUsageType.GENERAL));
 
         VolumeSetAttributes attributes = new VolumeSetAttributes("Ireland", true, "", volumes, 0, "eph");
         Map<String, Object> params = new HashMap<>();

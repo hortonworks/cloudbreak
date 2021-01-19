@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashSet;
@@ -8,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
@@ -17,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -29,12 +34,10 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 public class StackUtil {
@@ -104,44 +107,27 @@ public class StackUtil {
     }
 
     public Set<Node> collectNodesWithDiskData(Stack stack) {
-        Set<Node> agents = new HashSet<>();
-        List<Resource> volumeSets = stack.getDiskResources();
-        Map<String, Map<String, String>> instanceToVolumeInfoMap = createInstanceToVolumeInfoMap(volumeSets);
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    if (im.getDiscoveryFQDN() != null) {
-                        String instanceId = im.getInstanceId();
-                        String instanceType = instanceGroup.getTemplate().getInstanceType();
-                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("dataVolumes", "");
-                        String serialIds = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("serialIds", "");
-                        String fstab = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("fstab", "");
-                        String uuids = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("uuids", "");
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
-                                im.getDiscoveryFQDN(), im.getInstanceGroupName(), dataVolumes, serialIds, fstab, uuids));
-                    }
-                }
-            }
-        }
-        return agents;
+        return collectNewNodesWithDiskData(stack, Set.of());
     }
 
     public Set<Node> collectNewNodesWithDiskData(Stack stack, Set<String> newNodeAddresses) {
         Set<Node> agents = new HashSet<>();
         List<Resource> volumeSets = stack.getDiskResources();
-        Map<String, Map<String, String>> instanceToVolumeInfoMap = createInstanceToVolumeInfoMap(volumeSets);
+        Map<String, Map<String, Object>> instanceToVolumeInfoMap = createInstanceToVolumeInfoMap(volumeSets);
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
                 for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    if (im.getDiscoveryFQDN() != null && newNodeAddresses.contains(im.getPrivateIp())) {
+                    if (im.getDiscoveryFQDN() != null && (newNodeAddresses.isEmpty() || newNodeAddresses.contains(im.getPrivateIp()))) {
                         String instanceId = im.getInstanceId();
                         String instanceType = instanceGroup.getTemplate().getInstanceType();
-                        String dataVolumes = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("dataVolumes", "");
-                        String serialIds = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("serialIds", "");
-                        String fstab = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("fstab", "");
-                        String uuids = instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault("uuids", "");
+                        String dataVolumes = getOrDefault(instanceToVolumeInfoMap, instanceId, "dataVolumes", "");
+                        String serialIds = getOrDefault(instanceToVolumeInfoMap, instanceId, "serialIds", "");
+                        String fstab = getOrDefault(instanceToVolumeInfoMap, instanceId, "fstab", "");
+                        String uuids = getOrDefault(instanceToVolumeInfoMap, instanceId, "uuids", "");
+                        Integer databaseVolumeIndex = getOrDefault(instanceToVolumeInfoMap, instanceId, "dataBaseVolumeIndex", -1);
+                        NodeVolumes nodeVolumes = new NodeVolumes(databaseVolumeIndex, dataVolumes, serialIds, fstab, uuids);
                         agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType, im.getDiscoveryFQDN(), im.getInstanceGroupName(),
-                                dataVolumes, serialIds, fstab, uuids));
+                                nodeVolumes));
                     }
                 }
             }
@@ -149,7 +135,7 @@ public class StackUtil {
         return agents;
     }
 
-    private Map<String, Map<String, String>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
+    private Map<String, Map<String, Object>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
                 .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
@@ -157,13 +143,22 @@ public class StackUtil {
                     List<Volume> volumes = entry.getValue().map(VolumeSetAttributes::getVolumes).orElse(List.of());
                     List<String> dataVolumes = volumes.stream().map(Volume::getDevice).collect(Collectors.toList());
                     List<String> serialIds = volumes.stream().map(Volume::getId).collect(Collectors.toList());
-                    return new ImmutableEntry<>(entry.getKey(), Map.of(
+                    int dataBaseVolumeIndex = IntStream.range(0, volumes.size())
+                            .filter(index -> volumes.get(index).getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE)
+                            .findFirst()
+                            .orElse(-1);
+                    return new ImmutableEntry<String, Map<String, Object>>(entry.getKey(), Map.of(
                             "dataVolumes", String.join(" ", dataVolumes),
                             "serialIds", String.join(" ", serialIds),
+                            "dataBaseVolumeIndex", dataBaseVolumeIndex,
                             "fstab", entry.getValue().map(VolumeSetAttributes::getFstab).orElse(""),
                             "uuids", entry.getValue().map(VolumeSetAttributes::getUuids).orElse("")));
                 })
                 .collect(Collectors.toMap(AbstractImmutableEntry::getKey, AbstractImmutableEntry::getValue));
+    }
+
+    private <T> T getOrDefault(Map<String, Map<String, Object>> instanceToVolumeInfoMap, String instanceId, String innerKey, T defaultValue) {
+        return (T) instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault(innerKey, defaultValue);
     }
 
     public String extractClusterManagerIp(StackView stackView) {

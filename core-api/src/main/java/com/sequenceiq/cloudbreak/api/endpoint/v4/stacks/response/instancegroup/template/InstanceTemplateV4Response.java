@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.DatabaseVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.RootVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -26,6 +27,8 @@ public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
     private VolumeV4Response ephemeralVolume;
 
     private Set<VolumeV4Response> attachedVolumes;
+
+    private DatabaseVolumeV4Response databaseVolume;
 
     public Long getId() {
         return id;
@@ -57,5 +60,13 @@ public class InstanceTemplateV4Response extends InstanceTemplateV4Base {
 
     public void setAttachedVolumes(Set<VolumeV4Response> attachedVolumes) {
         this.attachedVolumes = attachedVolumes;
+    }
+
+    public DatabaseVolumeV4Response getDatabaseVolume() {
+        return databaseVolume;
+    }
+
+    public void setDatabaseVolume(DatabaseVolumeV4Response databaseVolume) {
+        this.databaseVolume = databaseVolume;
     }
 }

@@ -20,6 +20,8 @@ public class PlatformParametersConsts {
 
     public static final String REGIONS_SUPPORTED = "regionsSupported";
 
+    public static final String VOLUME_ATTACHMENT_SUPPORTED = "volumeAttachmentSupported";
+
     public static final String FREEIPA_STACK_TYPE = "freeipa";
 
     public static final String CLOUD_STACK_TYPE_PARAMETER = "cloudStackType";

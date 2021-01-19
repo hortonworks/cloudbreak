@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -7,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.domain.converter.VolumeUsageTypeConverter;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
@@ -23,6 +25,9 @@ public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {
     private Integer volumeSize;
 
     private String volumeType;
+
+    @Convert(converter = VolumeUsageTypeConverter.class)
+    private VolumeUsageType usageType = VolumeUsageType.GENERAL;
 
     @ManyToOne
     private Template template;
@@ -57,6 +62,14 @@ public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setVolumeType(String volumeType) {
         this.volumeType = volumeType;
+    }
+
+    public VolumeUsageType getUsageType() {
+        return usageType == null ? VolumeUsageType.GENERAL : usageType;
+    }
+
+    public void setUsageType(VolumeUsageType usageType) {
+        this.usageType = usageType;
     }
 
     public Template getTemplate() {

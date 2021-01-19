@@ -18,8 +18,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -30,6 +30,7 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -62,9 +64,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -196,11 +198,26 @@ public class StackToCloudStackConverter {
         List<Volume> volumes = new ArrayList<>();
         template.getVolumeTemplates().stream().forEach(volumeModel -> {
             for (int i = 0; i < volumeModel.getVolumeCount(); i++) {
-                Volume volume = new Volume(VolumeUtils.VOLUME_PREFIX + (i + 1), volumeModel.getVolumeType(), volumeModel.getVolumeSize());
+                String mount = volumeModel.getUsageType() == VolumeUsageType.GENERAL ? VolumeUtils.VOLUME_PREFIX + (i + 1) : VolumeUtils.DATABASE_VOLUME;
+                Volume volume = new Volume(mount, volumeModel.getVolumeType(), volumeModel.getVolumeSize(), getVolumeUsageType(volumeModel.getUsageType()));
                 volumes.add(volume);
             }
         });
         return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId);
+    }
+
+    private CloudVolumeUsageType getVolumeUsageType(VolumeUsageType volumeUsageType) {
+        CloudVolumeUsageType cloudVolumeUsageType;
+        switch (volumeUsageType) {
+            case DATABASE:
+                cloudVolumeUsageType = CloudVolumeUsageType.DATABASE;
+                break;
+            case GENERAL:
+            default:
+                cloudVolumeUsageType = CloudVolumeUsageType.GENERAL;
+                break;
+        }
+        return cloudVolumeUsageType;
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {

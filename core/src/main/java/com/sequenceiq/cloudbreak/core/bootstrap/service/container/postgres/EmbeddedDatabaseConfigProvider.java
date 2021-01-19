@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseInfo;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -37,11 +36,10 @@ public class EmbeddedDatabaseConfigProvider {
 
     public Map<String, Object> collectEmbeddedDatabaseConfigs(Stack stack) {
         Map<String, Object> result;
-        EmbeddedDatabaseInfo embeddedDatabaseInfo = embeddedDatabaseService.getEmbeddedDatabaseInfo(stack);
-        if (embeddedDatabaseInfo.isEmbeddedDatabaseOnAttachedDiskEnabled()) {
+        if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)) {
             LOGGER.info("Attached disk will be used to store data for postgres sql server, as '{}' entitlement is enabled",
                     Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
-            result = createEmbeddedDbOnAttachedDiskConfig(embeddedDatabaseInfo.getAttachedDisksCount());
+            result = createEmbeddedDbOnAttachedDiskConfig();
         } else {
             LOGGER.info("Default settings for data storage will be used for postgres sql server, as '{}' entitlement is disabled or no disks attached",
                     Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
@@ -54,10 +52,10 @@ public class EmbeddedDatabaseConfigProvider {
         return result;
     }
 
-    private Map<String, Object> createEmbeddedDbOnAttachedDiskConfig(int volumeCount) {
+    private Map<String, Object> createEmbeddedDbOnAttachedDiskConfig() {
         return Map.of(
-            POSTGRES_DIRECTORY_KEY, VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK),
-            POSTGRES_LOG_DIRECTORY_KEY, VolumeUtils.buildSingleVolumePath(volumeCount, POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK),
+            POSTGRES_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK,
+            POSTGRES_LOG_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK,
             POSTGRES_DATA_ON_ATTACHED_DISK_KEY, true);
     }
 }

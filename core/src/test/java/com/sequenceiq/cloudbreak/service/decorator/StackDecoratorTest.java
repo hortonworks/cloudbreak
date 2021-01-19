@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.EnvironmentSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -68,6 +69,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 public class StackDecoratorTest {
+    private static final String ACCOUNT_ID = "cloudera";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:test@cloudera.com";
 
     private static final String MISCONFIGURED_STACK_FOR_SHARED_SERVICE = "Shared service stack configuration contains some errors";
 
@@ -214,7 +218,8 @@ public class StackDecoratorTest {
 
     @Test
     public void testDecorateWhenMethodCalledThenExactlyOneSharedServiceValidatorCallShouldHappen() {
-        underTest.decorate(subject, request, user, workspace);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace));
 
         verify(sharedServiceValidator, times(1)).checkSharedServiceStackRequirements(any(StackV4Request.class), any(Workspace.class));
     }
@@ -223,7 +228,8 @@ public class StackDecoratorTest {
     public void testDecorateWhenMethodCalledWithMultipleGatewayGroupThenShouldThrowBadRequestException() {
         Set<InstanceGroup> instanceGroups = createInstanceGroups(GATEWAY, GATEWAY);
         subject.setInstanceGroups(instanceGroups);
-        underTest.decorate(subject, request, user, workspace);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace));
     }
 
     @Test
@@ -233,7 +239,8 @@ public class StackDecoratorTest {
         when(request.getSharedService()).thenReturn(sharedServiceV4Request);
         when(clusterRequest.getDatabases()).thenReturn(Set.of("db1", "db2"));
 
-        underTest.decorate(subject, request, user, workspace);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace));
         assertEquals("resource-group", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_NAME_PARAMETER));
         assertEquals("SINGLE", subject.getParameters().get(PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER));
     }
@@ -246,7 +253,8 @@ public class StackDecoratorTest {
         thrown.expect(BadRequestException.class);
         thrown.expectMessage(MISCONFIGURED_STACK_FOR_SHARED_SERVICE);
 
-        underTest.decorate(subject, request, user, workspace);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.decorate(subject, request, user, workspace));
     }
 
     private Set<InstanceGroup> createInstanceGroups(InstanceGroupType... types) {
@@ -261,5 +269,4 @@ public class StackDecoratorTest {
         }
         return groups;
     }
-
 }

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -179,7 +180,7 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume("volume-1", "device", 100, "ssd"));
+        volumes.add(new VolumeSetAttributes.Volume("volume-1", "device", 100, "ssd", CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
                 .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")))
                 .name("volume").build();
@@ -194,7 +195,7 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd"));
+        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd", CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
                 .params(Map.of(
                         CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")
@@ -227,7 +228,7 @@ public class AzureVolumeResourceBuilderTest {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd"));
+        volumes.add(new VolumeSetAttributes.Volume("vol1", "device", 100, "ssd", CloudVolumeUsageType.GENERAL));
         CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
                 .params(Map.of(
                         CloudResource.ATTRIBUTES, new VolumeSetAttributes("az", true, "", volumes, 100, "ssd")

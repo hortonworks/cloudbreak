@@ -113,7 +113,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                     template.getVolumes().stream()
                                             .map(volume -> new VolumeSetAttributes.Volume(
                                                     resourceNameService.resourceName(ResourceType.AZURE_DISK, stackName, groupName, privateId,
-                                                            template.getVolumes().indexOf(volume), stackCrn), null, volume.getSize(), volume.getType()))
+                                                            template.getVolumes().indexOf(volume), stackCrn),
+                                                    null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
                                             .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -164,7 +165,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                             LOGGER.debug("Managed disk for resourcegroup: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
                         String volumeId = result.id();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType()));
+                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType(),
+                                volume.getCloudVolumeUsageType()));
                     }))
                     .collect(Collectors.toList()));
         }
