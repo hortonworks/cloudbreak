@@ -53,11 +53,17 @@ base:
     - postgresql
 
   # The reason why we need gateway and knox is becuse the knox role is not applied if the CM template does have Knox in it, and CB injects it automatically
-  'G@roles:gateway or G@roles:knox':
+  # CB-10699 DH HA has knox nodes on non-gateway nodes, so nginx shouldn't be installed there, but gateway's have knox.
+  'G@roles:gateway':
     - match: compound
     - gateway.knox
     - ccm
     - nginx.init
+
+  'G@roles:knox':
+    - match: compound
+    - gateway.knox
+    - ccm
 
   'G@roles:idbroker':
     - match: compound
