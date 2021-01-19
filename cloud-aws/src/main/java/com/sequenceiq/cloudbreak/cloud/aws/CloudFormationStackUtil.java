@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
+import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -62,6 +63,9 @@ public class CloudFormationStackUtil {
 
     @Inject
     private AwsClient awsClient;
+
+    @Inject
+    private LoadBalancerTypeConverter loadBalancerTypeConverter;
 
     @Retryable(
             value = SdkClientException.class,
@@ -191,7 +195,7 @@ public class CloudFormationStackUtil {
             Set<String> updatedInstanceIds = getInstanceIdsForGroups(resourcesToAdd, entry.getValue());
 
             // Find target group ARN
-            AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(loadBalancer.getType().name());
+            AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
             String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
 
             // Use ARN to fetch a list of current targets
@@ -229,7 +233,7 @@ public class CloudFormationStackUtil {
             Set<String> instancesToRemove = getInstanceIdsForGroups(resourcesToRemove, entry.getValue());
 
             // Find target group ARN
-            AwsLoadBalancerScheme scheme = AwsLoadBalancerScheme.valueOf(loadBalancer.getType().name());
+            AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
             String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
 
             // Deregister any instances that no longer exist
