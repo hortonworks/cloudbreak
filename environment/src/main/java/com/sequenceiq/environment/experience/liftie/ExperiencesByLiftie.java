@@ -1,7 +1,11 @@
 package com.sequenceiq.environment.experience.liftie;
 
+import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
+
 import java.util.LinkedList;
 import java.util.List;
+
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +36,8 @@ public class ExperiencesByLiftie implements Experience {
     }
 
     @Override
-    public void deleteConnectedExperiences(EnvironmentExperienceDto environment) {
+    public void deleteConnectedExperiences(@NotNull EnvironmentExperienceDto environment) {
+        throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
         LOGGER.debug("Getting Liftie cluster list for environment '{}'", environment.getName());
         List<ClusterView> clusterViews = getClusterViews(environment.getName(), environment.getAccountId());
         LOGGER.debug("Starting Liftie clusters deletion for environment '{}'", environment.getName());
