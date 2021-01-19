@@ -43,6 +43,9 @@ import reactor.bus.EventBus;
 @Component
 public class ServiceProviderCredentialAdapter {
 
+    public static final String FAILED_CREDETIAL_VERIFICATION_MESSAGE = "Failed to verify the credential "
+            + "(try few minutes later if policies and roles are newly created or modified): ";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceProviderCredentialAdapter.class);
 
     private static final String FAILED_CREDENTIAL_VERFICIATION_MSG = "Couldn't verify credential.";
@@ -83,7 +86,7 @@ public class ServiceProviderCredentialAdapter {
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             CredentialVerificationResult res = request.await();
-            String message = "Failed to verify the credential: ";
+            String message = FAILED_CREDETIAL_VERIFICATION_MESSAGE;
             LOGGER.debug("Result: {}", res);
             if (res.getStatus() != EventStatus.OK) {
                 LOGGER.info(message, res.getErrorDetails());

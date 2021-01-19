@@ -25,7 +25,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsDefaultRegionSelector.AwsDefaultRegionSelectionFailed;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;

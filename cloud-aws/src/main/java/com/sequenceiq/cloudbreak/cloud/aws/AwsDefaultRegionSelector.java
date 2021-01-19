@@ -16,7 +16,6 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 
@@ -91,22 +90,4 @@ public class AwsDefaultRegionSelector {
         return regionIsViable;
     }
 
-    protected static class AwsDefaultRegionSelectionFailed extends CloudConnectorException {
-
-        public AwsDefaultRegionSelectionFailed(String message) {
-            super(message);
-        }
-
-        public AwsDefaultRegionSelectionFailed(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public AwsDefaultRegionSelectionFailed(Throwable cause) {
-            super(cause);
-        }
-
-        protected AwsDefaultRegionSelectionFailed(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-            super(message, cause, enableSuppression, writableStackTrace);
-        }
-    }
 }
