@@ -146,6 +146,25 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));
     }
 
+    @Test
+    public void testEndpointGatewayIsDisabledd() {
+        CloudSubnet privateSubnet = getCloudSubnet(AZ_1);
+        CloudSubnet publicSubnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        EnvironmentNetworkResponse source = setupResponse();
+        source.setSubnetMetas(Map.of("key", privateSubnet));
+        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
+        source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
+
+        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.of(privateSubnet));
+
+        Network[] network = new Network[1];
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
+        });
+
+        assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));
+    }
+
     private CloudSubnet getCloudSubnet(String availabilityZone) {
         return new CloudSubnet("eu-west-1", "name", availabilityZone, "cidr");
     }
