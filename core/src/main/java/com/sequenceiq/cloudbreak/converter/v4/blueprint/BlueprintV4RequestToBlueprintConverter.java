@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -12,22 +14,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
-import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.json.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 
@@ -84,6 +86,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
                 blueprint.setStackType("CDH");
+                validateBlueprintJson(blueprint);
             } else {
                 throw new BadRequestException("Failed to determine cluster template format");
             }
@@ -97,6 +100,26 @@ public class BlueprintV4RequestToBlueprintConverter
         return blueprint;
     }
 
+    private void validateBlueprintJson(Blueprint blueprint) {
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintText());
+        if (cmTemplateProcessor.isInstantiatorPresent()) {
+            throw new BadRequestException("Instantiator is present in your Cloudera Manager template which is probably incorrect.");
+        }
+        if (cmTemplateProcessor.isRepositoriesPresent()) {
+            throw new BadRequestException("Repositories are present in your Cloudera Manager template, this must be removed.");
+        }
+        Pattern passwordPattern = Pattern.compile("\\*\\*\\*");
+        Matcher passwordMatch = passwordPattern.matcher(blueprint.getBlueprintText());
+        if (passwordMatch.find()) {
+            throw new BadRequestException("Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
+        }
+        Pattern volumePattern = Pattern.compile("/hadoopfs/fs(.*?)");
+        Matcher volumeMatch = volumePattern.matcher(blueprint.getBlueprintText());
+        if (volumeMatch.find()) {
+            throw new BadRequestException("Volume configuration should not be part of your Cloudera Manager template.");
+        }
+    }
+
     private String getNameByItsAvailability(@Nullable String name) {
         return Strings.isNullOrEmpty(name) ? missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT) : name;
     }
@@ -106,53 +129,6 @@ public class BlueprintV4RequestToBlueprintConverter
             return new Json(tags);
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Invalid tag(s) in the cluster template: Unable to parse JSON.", e);
-        }
-    }
-
-    private void validateHostGroups(JsonNode root) {
-        JsonNode hostGroups = root.path("host_groups");
-        if (hostGroups.isMissingNode() || !hostGroups.isArray() || hostGroups.size() == 0) {
-            throw new BadRequestException("Validation error: 'host_groups' node is missing from JSON or is not an array or empty.");
-        }
-        for (JsonNode hostGroup : hostGroups) {
-            JsonNode hostGroupName = hostGroup.path("name");
-            if (isTextPropertyMissing(hostGroupName)) {
-                throw new BadRequestException("Validation error: one of the 'host_groups' has no name.");
-            } else if (!blueprintUtils.isValidHostGroupName(hostGroupName.asText())) {
-                throw new BadRequestException(String.format("Validation error: '%s' is not a valid host group name. Host group name "
-                        + "must be alphanumeric with underscores ('_').", hostGroupName.asText()));
-            }
-            validateComponentsInHostgroup(hostGroup, hostGroupName.asText());
-        }
-    }
-
-    private void validateComponentsInHostgroup(JsonNode hostGroup, String hostGroupName) {
-        JsonNode components = hostGroup.path("components");
-        if (components.isMissingNode() || !components.isArray() || components.size() == 0) {
-            throw new BadRequestException(
-                    String.format("Validation error: '%s' hostgroup's 'components' node is missing from JSON or is not an array or empty.", hostGroupName));
-        }
-        for (JsonNode component : components) {
-            JsonNode componentName = component.path("name");
-            if (isTextPropertyMissing(componentName)) {
-                throw new BadRequestException(String.format("Validation error: one fo the 'components' has no name in '%s' hostgroup.", hostGroupName));
-            }
-        }
-    }
-
-    private boolean isTextPropertyMissing(JsonNode hostGroupName) {
-        return hostGroupName.isMissingNode() || !hostGroupName.isTextual() || hostGroupName.asText().isEmpty();
-    }
-
-    private void hasBlueprintNameInBlueprint(TreeNode root) {
-        if (root.path("Blueprints").path("blueprint_name").isMissingNode()) {
-            throw new BadRequestException("Validation error: 'blueprint_name' under 'Blueprints' is missing from JSON.");
-        }
-    }
-
-    private void hasBlueprintInBlueprint(TreeNode root) {
-        if (root.path("Blueprints").isMissingNode()) {
-            throw new BadRequestException("Validation error: 'Blueprints' node is missing from JSON.");
         }
     }
 }

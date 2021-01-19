@@ -380,6 +380,14 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .collect(toSet());
     }
 
+    public boolean isInstantiatorPresent() {
+        return cmTemplate.getInstantiator() != null;
+    }
+
+    public boolean isRepositoriesPresent() {
+        return cmTemplate.getRepositories() != null && !cmTemplate.getRepositories().isEmpty();
+    }
+
     public void addInstantiator(ClouderaManagerRepo clouderaManagerRepoDetails, TemplatePreparationObject templatePreparationObject, String sdxContextName) {
         ApiClusterTemplateInstantiator instantiator = ofNullable(cmTemplate.getInstantiator()).orElseGet(ApiClusterTemplateInstantiator::new);
         if (instantiator.getClusterName() == null) {
