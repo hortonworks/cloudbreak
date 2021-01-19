@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServicePrincipalRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.VaultCleanupRequest;
+import com.sequenceiq.freeipa.client.InvalidFreeIpaStateException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientService;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
@@ -146,7 +147,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private <T> T retryableWithKeytabCreationException(CheckedFunction<Void, T, Exception> f) {
         try {
             return retryableFreeIpaClientService.invokeWithRetries(f);
-        } catch (KeytabCreationException e) {
+        } catch (KeytabCreationException | InvalidFreeIpaStateException e) {
             throw e;
         } catch (RetryableFreeIpaClientException e) {
             LOGGER.error("internal server error", e);
@@ -164,7 +165,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private <T> T retryableWithDeletionException(CheckedFunction<Void, T, Exception> f) {
         try {
             return retryableFreeIpaClientService.invokeWithRetries(f);
-        } catch (DeleteException e) {
+        } catch (DeleteException | InvalidFreeIpaStateException e) {
             throw e;
         } catch (RetryableFreeIpaClientException e) {
             LOGGER.error("internal server error", e);
