@@ -321,7 +321,8 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
-        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar, virtualGroupRequest, connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
+        saveGatewayPillar(primaryGatewayConfig, cluster, stack, servicePillar, virtualGroupRequest,
+                connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -567,7 +568,7 @@ public class ClusterHostServiceRunner {
     }
 
     @SuppressWarnings("ParameterNumber")
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster,
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Stack stack,
             Map<String, SaltPillarProperties> servicePillar,
             VirtualGroupRequest virtualGroupRequest,
             ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
@@ -581,6 +582,7 @@ public class ClusterHostServiceRunner {
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
+        gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2());
 
         // for cloudbreak upgradeability
         gateway.put("ssotype", SSOType.NONE);
