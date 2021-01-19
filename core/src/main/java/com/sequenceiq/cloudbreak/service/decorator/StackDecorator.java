@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -29,19 +30,23 @@ import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.conf.EmbeddedDatabaseConfig;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.CdpResourceTypeProvider;
+import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -106,6 +111,12 @@ public class StackDecorator {
 
     @Inject
     private CdpResourceTypeProvider cdpResourceTypeProvider;
+
+    @Inject
+    private EmbeddedDatabaseService embeddedDatabaseService;
+
+    @Inject
+    private EmbeddedDatabaseConfig embeddedDatabaseConfig;
 
     @Measure(StackDecorator.class)
     public Stack decorate(@Nonnull Stack subject, @Nonnull StackV4Request request, User user, Workspace workspace) {
@@ -218,6 +229,7 @@ public class StackDecorator {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
         CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         subject.getInstanceGroups().parallelStream().forEach(instanceGroup -> {
             subject.getCluster().getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
@@ -236,6 +248,7 @@ public class StackDecorator {
                     template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant(),
                             cdpResourceType);
                     template.setWorkspace(subject.getWorkspace());
+                    setupDatabaseAttachedVolume(subject, accountId, instanceGroup, template);
                     template = templateService.create(user, template);
                     instanceGroup.setTemplate(template);
                 }
@@ -250,6 +263,31 @@ public class StackDecorator {
                 }
             }
         });
+    }
+
+    private void setupDatabaseAttachedVolume(Stack subject, String accountId, InstanceGroup instanceGroup, Template template) {
+        InstanceGroupType instanceGroupType = instanceGroup.getInstanceGroupType();
+        if (instanceGroupType == InstanceGroupType.GATEWAY
+                && embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(accountId, subject, subject.getCluster())) {
+            String databaseVolumeType = embeddedDatabaseConfig.getPlatformVolumeType(subject.cloudPlatform())
+                    .orElseThrow(() -> new BadRequestException(String.format("If embedded db is enabled on attached disk, database volumetype" +
+                    " have to be defined for cloudprovider in app config! Missing database volumetype on %s provider", subject.cloudPlatform())));
+            VolumeTemplate databaseVolumeTemplate = new VolumeTemplate();
+            databaseVolumeTemplate.setUsageType(VolumeUsageType.DATABASE);
+            databaseVolumeTemplate.setVolumeSize(embeddedDatabaseConfig.getSize());
+            databaseVolumeTemplate.setVolumeCount(1);
+            databaseVolumeTemplate.setVolumeType(databaseVolumeType);
+            databaseVolumeTemplate.setTemplate(template);
+            template.getVolumeTemplates().add(databaseVolumeTemplate);
+            LOGGER.debug("Extra disk is attached with {} type and {}GB size for the embedded database.", databaseVolumeTemplate.getVolumeType(),
+                    databaseVolumeTemplate.getVolumeSize());
+        } else {
+            if (instanceGroupType == InstanceGroupType.GATEWAY) {
+                LOGGER.debug("No extra disk will be attached to the gateway instance as db volume because it is disabled or external database is used.");
+            } else {
+                LOGGER.debug("No extra disk will be attached to the instance as db volume because it is CORE instance.");
+            }
+        }
     }
 
     private Set<InstanceGroupParameterRequest> getInstanceGroupParameterRequests(Stack subject) {

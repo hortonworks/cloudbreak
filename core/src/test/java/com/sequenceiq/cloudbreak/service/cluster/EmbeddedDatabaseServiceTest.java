@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,77 +13,130 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class EmbeddedDatabaseServiceTest {
     private static final String ACCOUNT_ID = "cloudera";
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:test@cloudera.com";
+    private static final String CLOUDPLATFORM = "cloudplatform";
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private CloudParameterCache cloudParameterCache;
 
     @InjectMocks
     private EmbeddedDatabaseService underTest;
 
     @Test
-    public void testGetEmbeddedDatabaseInfoWithAttachmentEnabled() {
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabled() {
         // GIVEN
-        Stack stack = createStack(5);
+        Stack stack = createStack(1);
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
+        Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(true);
         // WHEN
-        EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
         // THEN
-        assertTrue(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
-        assertEquals(5, actualResult.getAttachedDisksCount());
+        assertTrue(actualResult);
     }
 
     @Test
-    public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsEnabledButNoDisksAttached() {
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenAttachedDiskEntitlementIsEnabledButNoDisksAttachedSupported() {
         // GIVEN
         Stack stack = createStack(0);
         Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
+        Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         // WHEN
-        EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
         // THEN
-        assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
-        assertEquals(0, actualResult.getAttachedDisksCount());
+        assertFalse(actualResult);
     }
 
     @Test
-    public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsEnabledButNoTemplateProvided() {
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenExternalDBUsed() {
+        // GIVEN
+        Stack stack = createStack(0);
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.NON_HA);
+        // WHEN
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
+        // THEN
+        assertFalse(actualResult);
+    }
+
+    @Test
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenExternalDBCrnSet() {
+        // GIVEN
+        Stack stack = createStack(0);
+        Cluster cluster = new Cluster();
+        cluster.setDatabaseServerCrn("dbcrn");
+        // WHEN
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, cluster);
+        // THEN
+        assertFalse(actualResult);
+    }
+
+    @Test
+    public void testIsAttachedDiskForEmbeddedDatabaseCreated() {
+        // GIVEN
+        Stack stack = createStack(1);
+        Cluster cluster = new Cluster();
+        cluster.setEmbeddedDatabaseOnAttachedDisk(true);
+        stack.setCluster(cluster);
+        // WHEN
+        boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
+        // THEN
+        assertTrue(actualResult);
+    }
+
+    @Test
+    public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenNoVolumeAttached() {
+        // GIVEN
+        Stack stack = createStack(0);
+        Cluster cluster = new Cluster();
+        cluster.setEmbeddedDatabaseOnAttachedDisk(true);
+        stack.setCluster(cluster);
+        // WHEN
+        boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
+        // THEN
+        assertFalse(actualResult);
+    }
+
+    @Test
+    public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenNoTemplate() {
         // GIVEN
         Stack stack = createStackWithoutTemplate();
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
+        Cluster cluster = new Cluster();
+        cluster.setEmbeddedDatabaseOnAttachedDisk(true);
+        stack.setCluster(cluster);
         // WHEN
-        EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
+        boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
-        assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
-        assertEquals(0, actualResult.getAttachedDisksCount());
+        assertFalse(actualResult);
     }
 
     @Test
-    public void testGetEmbeddedDatabaseInfoWithAttachmentEnabledWhenAttachedDiskEntitlementIsDisabled() {
+    public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenDbOnAttachedDisIsDisabled() {
         // GIVEN
-        Stack stack = createStack(5);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(false);
+        Stack stack = createStack(1);
+        Cluster cluster = new Cluster();
+        cluster.setEmbeddedDatabaseOnAttachedDisk(false);
+        stack.setCluster(cluster);
         // WHEN
-        EmbeddedDatabaseInfo actualResult = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.getEmbeddedDatabaseInfo(INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, null));
+        boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
-        assertFalse(actualResult.isEmbeddedDatabaseOnAttachedDiskEnabled());
-        assertEquals(0, actualResult.getAttachedDisksCount());
+        assertFalse(actualResult);
     }
 
     private Stack createStack(int volumeCount) {
@@ -99,9 +150,11 @@ public class EmbeddedDatabaseServiceTest {
         Template template = new Template();
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeCount(volumeCount);
+        volumeTemplate.setUsageType(VolumeUsageType.DATABASE);
         template.setVolumeTemplates(Set.of(volumeTemplate));
         masterGroup.setTemplate(template);
         stack.setInstanceGroups(Set.of(masterGroup));
+        stack.setCloudPlatform(CLOUDPLATFORM);
         return stack;
     }
 

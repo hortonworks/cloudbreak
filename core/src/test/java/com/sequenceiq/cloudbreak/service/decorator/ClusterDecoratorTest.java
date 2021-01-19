@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseInfo;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
@@ -100,8 +99,7 @@ class ClusterDecoratorTest {
         Blueprint blueprint = getBlueprint();
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
-        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, expectedClusterInstance))
-                .thenReturn(new EmbeddedDatabaseInfo(0));
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
         Cluster result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null));
 
@@ -118,8 +116,7 @@ class ClusterDecoratorTest {
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         when(platformParameters.isAutoTlsSupported()).thenReturn(useAutoTls);
-        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, expectedClusterInstance))
-                .thenReturn(new EmbeddedDatabaseInfo(0));
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
 
         Cluster result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null));
@@ -135,8 +132,7 @@ class ClusterDecoratorTest {
                 .thenReturn(expectedClusterInstance);
         ArgumentCaptor<Platform> platformArgumentCaptor = ArgumentCaptor.forClass(Platform.class);
         when(cloudPlatformConnectors.get(platformArgumentCaptor.capture(), any())).thenReturn(connector);
-        when(embeddedDatabaseService.getEmbeddedDatabaseInfo(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, ACCOUNT_ID, stack, expectedClusterInstance))
-                .thenReturn(new EmbeddedDatabaseInfo(0));
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
 
         String platform = CloudPlatform.YARN.name();
         ThreadBasedUserCrnProvider.doAs(USER_CRN,

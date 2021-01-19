@@ -24,13 +24,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Joiner;
@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -189,15 +190,18 @@ SaltOrchestrator implements HostOrchestrator {
             initializePillar(allNodes, exitModel, gatewayTargetIpAddresses, sc);
             Callable<Boolean> saltPillarRunner;
 
-            Map<String, String> dataVolumeMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, Node::getDataVolumes));
-            Map<String, String> serialIdMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, Node::getSerialIds));
-            Map<String, String> fstabMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, Node::getFstab));
+            Map<String, String> dataVolumeMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
+            Map<String, String> serialIdMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
+            Map<String, String> fstabMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
+            Map<String, Integer> dataBaseVolumeIndexMap =
+                    nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
 
             Map<String, Object> hostnameDiskMountMap = nodes.stream().map(Node::getHostname).collect(Collectors.toMap(hn -> hn, hn -> Map.of(
                     "attached_volume_name_list", dataVolumeMap.getOrDefault(hn, ""),
                     "attached_volume_serial_list", serialIdMap.getOrDefault(hn, ""),
                     "cloud_platform", platformVariant,
-                    "previous_fstab", fstabMap.getOrDefault(hn, "")
+                    "previous_fstab", fstabMap.getOrDefault(hn, ""),
+                    "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1)
             )));
 
             SaltPillarProperties mounDiskProperties = new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
@@ -240,7 +244,7 @@ SaltOrchestrator implements HostOrchestrator {
     private Map<String, String> mountDisks(String platformVariant, SaltConnector sc, Glob hostname, String uuidList, String fstab) {
         String mountCommandParams = "CLOUD_PLATFORM='" + platformVariant + "' ATTACHED_VOLUME_UUID_LIST='" + uuidList + "' ";
 
-        if (!StringUtils.isEmpty(fstab)) {
+        if (StringUtils.isNotEmpty(fstab)) {
             mountCommandParams += "PREVIOUS_FSTAB='" + fstab + "' ";
         }
         SaltStates.runCommandOnHosts(retry, sc, hostname, "(cd " + SRV_SALT_DISK + ';' + mountCommandParams + " ./" + DISK_MOUNT + ')');
@@ -248,12 +252,13 @@ SaltOrchestrator implements HostOrchestrator {
     }
 
     private String formatDisks(String platformVariant, SaltConnector sc, Node node, Glob hostname) {
-        if (!StringUtils.isEmpty(node.getFstab())) {
-            return node.getUuids();
+        NodeVolumes nodeVolumes = node.getNodeVolumes();
+        if (StringUtils.isNotEmpty(nodeVolumes.getFstab())) {
+            return nodeVolumes.getUuids();
         }
 
-        String dataVolumes = String.join(" ", node.getDataVolumes());
-        String serialIds = String.join(" ", node.getSerialIds());
+        String dataVolumes = String.join(" ", nodeVolumes.getDataVolumes());
+        String serialIds = String.join(" ", nodeVolumes.getSerialIds());
         String formatCommandParams = "CLOUD_PLATFORM='" + platformVariant
                 + "' ATTACHED_VOLUME_NAME_LIST='" + dataVolumes
                 + "' ATTACHED_VOLUME_SERIAL_LIST='" + serialIds + "' ";
@@ -757,7 +762,7 @@ SaltOrchestrator implements HostOrchestrator {
                     .map(node -> {
                         Glob hostname = new Glob(node.getHostname());
                         String uuidList = formatDisks(platformVariant, sc, node, hostname);
-                        Map<String, String> fstabResponse = mountDisks(platformVariant, sc, hostname, uuidList, node.getFstab());
+                        Map<String, String> fstabResponse = mountDisks(platformVariant, sc, hostname, uuidList, node.getNodeVolumes().getFstab());
                         String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
                         return new SimpleImmutableEntry<>(node.getHostname(), Map.of("uuids", uuidList, "fstab", fstab));
                     })

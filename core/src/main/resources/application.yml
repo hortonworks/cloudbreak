@@ -151,6 +151,13 @@ cb:
     schema: public
     cert.file: database.crt
     ssl: false
+    embedded.volume:
+      size: 100
+      platformVolumeTypeMap:
+        AWS: standard
+        AZURE: StandardSSD_LRS
+        GCP: pd-standard
+        MOCK: magnetic
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
 

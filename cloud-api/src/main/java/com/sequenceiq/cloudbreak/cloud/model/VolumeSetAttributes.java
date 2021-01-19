@@ -108,15 +108,18 @@ public class VolumeSetAttributes {
 
         private String type;
 
+        private CloudVolumeUsageType cloudVolumeUsageType;
+
         public Volume(@JsonProperty("id") String id,
                 @JsonProperty("device") String device,
                 @JsonProperty("size") Integer size,
-                @JsonProperty("type") String type) {
+                @JsonProperty("type") String type,
+                @JsonProperty("usageType") CloudVolumeUsageType cloudVolumeUsageType) {
             this.id = id;
             this.device = device;
             this.type = type;
             this.size = size;
-
+            this.cloudVolumeUsageType = cloudVolumeUsageType;
         }
 
         public String getId() {
@@ -149,6 +152,14 @@ public class VolumeSetAttributes {
 
         public void setType(String type) {
             this.type = type;
+        }
+
+        public CloudVolumeUsageType getCloudVolumeUsageType() {
+            return cloudVolumeUsageType == null ? CloudVolumeUsageType.GENERAL : cloudVolumeUsageType;
+        }
+
+        public void setCloudVolumeUsageType(CloudVolumeUsageType cloudVolumeUsageType) {
+            this.cloudVolumeUsageType = cloudVolumeUsageType;
         }
     }
 

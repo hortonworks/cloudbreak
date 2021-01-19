@@ -6,6 +6,8 @@ public final class VolumeUtils {
 
     public static final String ROOT_VOLUME_PREFIX = "/hadoopfs/root";
 
+    public static final String DATABASE_VOLUME = "/dbfs";
+
     private static final int FIRST_VOLUME = 1;
 
     private static final long GB_TO_BYTES = 1024 * 1024 * 1024;

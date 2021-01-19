@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -293,8 +294,10 @@ public class TemplatePreparationObject {
                 InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
                 if (instanceGroup != null) {
                     Template template = instanceGroup.getTemplate();
-                    int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream()
-                            .mapToInt(volume -> volume.getVolumeCount()).sum();
+                    int volumeCount = template == null ? 1 : template.getVolumeTemplates().stream().
+                            filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.GENERAL)
+                            .mapToInt(volume -> volume.getVolumeCount())
+                            .sum();
                     Set<VolumeTemplate> volumeTemplates = template == null ? Collections.EMPTY_SET
                             : template.getVolumeTemplates();
                     Set<String> fqdns = instanceGroup.getAllInstanceMetaData().stream()

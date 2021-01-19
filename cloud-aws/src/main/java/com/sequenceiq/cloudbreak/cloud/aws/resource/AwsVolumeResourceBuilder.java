@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -137,7 +139,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream()
                                     .filter(vol -> !AwsDiskType.Ephemeral.value().equalsIgnoreCase(vol.getType()))
-                                    .map(vol -> new Volume(null, null, vol.getSize(), vol.getType()))
+                                    .map(vol -> new Volume(null, null, vol.getSize(), vol.getType(), vol.getVolumeUsageType()))
                                     .collect(Collectors.toList()))
                             .build()))
                     .build();
@@ -185,10 +187,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
-                    .map(request -> intermediateBuilderExecutor.submit(() -> {
+                    .map(requestWithUsage -> intermediateBuilderExecutor.submit(() -> {
+                        CreateVolumeRequest request = requestWithUsage.getFirst();
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
-                        Volume volume = new Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType());
+                        Volume volume = new Volume(volumeId, generator.next(), request.getSize(), request.getVolumeType(), requestWithUsage.getSecond());
                         volumeSetMap.get(resource.getName()).add(volume);
                     }))
                     .collect(Collectors.toList()));
@@ -230,10 +233,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return encryptedVolume && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
     }
 
-    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(boolean encryptedVolume,
+    private Function<Volume, Pair<CreateVolumeRequest, CloudVolumeUsageType>> createVolumeRequest(boolean encryptedVolume,
             String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
         return volume -> {
-            return new CreateVolumeRequest()
+            CreateVolumeRequest createVolumeRequest =  new CreateVolumeRequest()
                     .withAvailabilityZone(volumeSet.getAvailabilityZone())
                     .withSize(volume.getSize())
                     .withSnapshotId(null)
@@ -241,6 +244,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .withVolumeType(volume.getType())
                     .withEncrypted(encryptedVolume)
                     .withKmsKeyId(volumeEncryptionKey);
+            return Pair.of(createVolumeRequest, volume.getCloudVolumeUsageType());
         };
     }
 
