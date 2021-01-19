@@ -7,10 +7,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.it.cloudbreak.util.gcp.action.GcpClientActions;
 
 @Component
 public class GcpUtil {
+
     @Inject
     private GcpClientActions gcpClientActions;
 
@@ -31,5 +33,31 @@ public class GcpUtil {
 
     public void stopHostGroupInstances(List<String> instanceIds) {
         gcpClientActions.stopHostGroupInstances(instanceIds);
+    }
+
+    public void cloudStorageListContainer(String baseLocation) {
+        listSelectedObject(baseLocation);
+    }
+
+    public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
+        listSelectedObject(baseLocation);
+    }
+
+    public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
+        listSelectedObject(baseLocation);
+    }
+
+    public void cloudStorageDeleteContainer(String baseLocation) {
+        String bucketName = GcpStackUtil.getBucketName(baseLocation);
+        gcpClientActions.deleteNonVersionedBucket(bucketName);
+    }
+
+    private void listSelectedObject(String baseLocation) {
+        String bucketName = GcpStackUtil.getBucketName(baseLocation);
+        String objectPath = GcpStackUtil
+                .getPath(baseLocation)
+                .replace(bucketName + "/", "")
+                + "/";
+        gcpClientActions.listBucketSelectedObject(bucketName, objectPath, false);
     }
 }

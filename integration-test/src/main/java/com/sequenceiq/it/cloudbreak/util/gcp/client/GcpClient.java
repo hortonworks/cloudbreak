@@ -19,12 +19,15 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
+import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
@@ -37,6 +40,12 @@ public class GcpClient {
 
     private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL);
 
+    private static final int ONE_MINUTE_IN_MILLISECOND = 60000;
+
+    private static final int MINUTES = 3;
+
+    private static final String APPLICATION_NAME = "Gcp E2E test credential";
+
     @Inject
     private GcpProperties gcpProperties;
 
@@ -45,13 +54,39 @@ public class GcpClient {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential credential = buildCredential(httpTransport);
             return new Compute.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName("Gcp E2E test credential")
+                    httpTransport, JSON_FACTORY, null).setApplicationName(APPLICATION_NAME)
                     .setHttpRequestInitializer(credential)
                     .build();
         } catch (Exception e) {
             LOGGER.warn("Error occurred while building Google Compute access.", e);
             throw new IllegalArgumentException("Error occurred while building Google Compute access.", e);
         }
+    }
+
+    public Storage buildStorage() {
+        try {
+            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+            GoogleCredential credential = buildCredential(httpTransport);
+            return new Storage.Builder(
+                    httpTransport, JSON_FACTORY, setHttpTimeout(credential)).setApplicationName(APPLICATION_NAME)
+                    .setHttpRequestInitializer(setHttpTimeout(credential))
+                    .build();
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred while building Google Storage access.", e);
+        }
+        return null;
+    }
+
+    private HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
+        return new HttpRequestInitializer() {
+            @Override
+            public void initialize(HttpRequest httpRequest) throws IOException {
+                requestInitializer.initialize(httpRequest);
+                httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILLISECOND);
+                httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILLISECOND);
+            }
+        };
+
     }
 
     public GoogleCredential buildCredential(HttpTransport httpTransport) throws IOException, GeneralSecurityException {
