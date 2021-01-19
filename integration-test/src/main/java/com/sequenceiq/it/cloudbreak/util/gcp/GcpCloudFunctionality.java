@@ -6,7 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -51,22 +50,22 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public void cloudStorageListContainer(String baseLocation) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.cloudStorageListContainer(baseLocation);
     }
 
     @Override
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.cloudStorageListContainerFreeIpa(baseLocation, clusterName, crn);
     }
 
     @Override
     public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.cloudStorageListContainerDataLake(baseLocation, clusterName, crn);
     }
 
     @Override
     public void cloudStorageDeleteContainer(String baseLocation) {
-        throw new NotImplementedException(GCP_IMPLEMENTATION_MISSING);
+        gcpUtil.cloudStorageDeleteContainer(baseLocation);
     }
 
     @Override

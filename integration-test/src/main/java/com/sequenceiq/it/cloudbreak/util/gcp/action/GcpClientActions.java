@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.gcp.action;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.storage.Storage;
 import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpProperties;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
@@ -62,7 +64,13 @@ public class GcpClientActions extends GcpClient {
                         .instances()
                         .get(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
                         .execute();
-                instanceIdDiskNamesMap.put(instanceId, instance.getDisks().stream().map(AttachedDisk::getDeviceName).collect(Collectors.toList()));
+                List<String> attachedDiskNames = instance
+                        .getDisks()
+                        .stream()
+                        .filter(ad -> !ad.getBoot())
+                        .map(AttachedDisk::getDeviceName)
+                        .collect(Collectors.toList());
+                instanceIdDiskNamesMap.put(instanceId, attachedDiskNames);
             } catch (Exception e) {
                 LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
             }
@@ -170,5 +178,31 @@ public class GcpClientActions extends GcpClient {
         LOGGER.info("Waiting for operation: [{}] with details: {} have been done. Elapsed rounds [{}] and time [{}] ms.", opId, operationDetails, attemps,
                 elapsed);
         return operation == null ? null : operation.getError();
+    }
+
+    public void listBucketSelectedObject(String baseLocation, String selectedObject, boolean zeroContent) {
+        LOGGER.info("List bucket from base location: '{}', with selected object: '{}', without content: '{}'", baseLocation, selectedObject, zeroContent);
+        Storage storage = buildStorage();
+        try {
+            Storage.Objects.Get operation = storage.objects().get(baseLocation, selectedObject);
+            operation.execute();
+        } catch (IOException ioException) {
+            String msg = String.format("Failed to list bucket object '%s' from base location '%s'", baseLocation, selectedObject);
+            LOGGER.error(msg, ioException);
+            throw new TestFailException(msg, ioException);
+        }
+    }
+
+    public void deleteNonVersionedBucket(String baseLocation) {
+        LOGGER.info("Delete bucket from base location: '{}'", baseLocation);
+        Storage storage = buildStorage();
+        try {
+            Storage.Buckets.Delete operation = storage.buckets().delete(baseLocation);
+            operation.execute();
+        } catch (IOException ioException) {
+            String msg = String.format("Failed to delete bucket from base location '%s'", baseLocation);
+            LOGGER.error(msg, ioException);
+            throw new TestFailException(msg, ioException);
+        }
     }
 }

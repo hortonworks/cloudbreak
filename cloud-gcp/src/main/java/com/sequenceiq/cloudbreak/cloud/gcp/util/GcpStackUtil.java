@@ -316,7 +316,6 @@ public final class GcpStackUtil {
                 httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
             }
         };
-
     }
 
     public static SQLAdmin buildSQLAdmin(CloudCredential gcpCredential, String name) {
