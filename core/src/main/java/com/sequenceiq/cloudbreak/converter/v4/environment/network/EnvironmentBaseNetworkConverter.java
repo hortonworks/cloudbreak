@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetworkConverter {
@@ -48,7 +49,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         attributes.put("subnetId", cloudSubnet.get().getId());
         attributes.put("cloudPlatform", getCloudPlatform().name());
         attributes.putAll(getAttributesForLegacyNetwork(source));
-        if (entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())
+            && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(source, cloudSubnet.get().getId());
             if (endpointGatewaySubnet.isPresent()) {
                 attributes.put("endpointGatewaySubnetId", endpointGatewaySubnet.get().getId());
