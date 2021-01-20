@@ -121,7 +121,7 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     private Image createImage(List<List<String>> preWarmParcels) {
-        return new Image(null, null, null, null, null, null, null, null, null, null, null, preWarmParcels, null, null);
+        return new Image(null, null, null, null, null, null, null, null, null, null, null, preWarmParcels, null, null, true);
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {

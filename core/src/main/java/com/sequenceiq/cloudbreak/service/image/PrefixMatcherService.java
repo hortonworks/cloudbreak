@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 
 @Component
-class PrefixMatcherService {
+public class PrefixMatcherService {
 
     @Inject
     private ImageCatalogVersionFilter versionFilter;
 
-    PrefixMatchImages prefixMatchForCBVersion(String cbVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
+    public PrefixMatchImages prefixMatchForCBVersion(String cbVersion, Collection<CloudbreakVersion> cloudbreakVersions) {
         Set<String> supportedVersions = new HashSet<>();
         Set<String> vMImageUUIDs = new HashSet<>();
         Set<String> defaultVMImageUUIDs = new HashSet<>();

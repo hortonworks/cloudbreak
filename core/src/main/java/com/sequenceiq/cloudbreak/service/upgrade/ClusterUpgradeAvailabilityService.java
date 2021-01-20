@@ -174,11 +174,7 @@ public class ClusterUpgradeAvailabilityService {
     }
 
     private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, String cloudPlatform, ImageFilterParams imageFilterParams) {
-        return clusterUpgradeImageFilter.filter(getCdhImages(imageCatalog), imageCatalog.getVersions(), cloudPlatform, imageFilterParams);
-    }
-
-    private List<Image> getCdhImages(CloudbreakImageCatalogV3 imageCatalog) {
-        return imageCatalog.getImages().getCdhImages();
+        return clusterUpgradeImageFilter.filter(imageCatalog, cloudPlatform, imageFilterParams);
     }
 
     private UpgradeV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,

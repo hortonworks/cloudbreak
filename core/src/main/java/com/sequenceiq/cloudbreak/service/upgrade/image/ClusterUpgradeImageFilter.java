@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -19,8 +21,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
 
 @Component
 public class ClusterUpgradeImageFilter {
@@ -28,9 +28,6 @@ public class ClusterUpgradeImageFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeImageFilter.class);
 
     private static final String IGNORED_CM_VERSION = "7.x.0";
-
-    @Inject
-    private VersionBasedImageFilter versionBasedImageFilter;
 
     @Inject
     private EntitlementDrivenPackageLocationFilter packageLocationFilter;
@@ -41,18 +38,17 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private CmAndStackVersionFilter cmAndStackVersionFilter;
 
-    public ImageFilterResult filter(List<Image> images, Versions versions, String cloudPlatform, ImageFilterParams imageFilterParams) {
-        ImageFilterResult imagesForCbVersion = getImagesForCbVersion(versions, images);
+    @Inject
+    private ImageCatalogServiceProxy imageCatalogServiceProxy;
+
+    public ImageFilterResult filter(CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        ImageFilterResult imagesForCbVersion = imageCatalogServiceProxy.getImageFilterResult(imageCatalogV3);
         List<Image> imageList = imagesForCbVersion.getAvailableImages().getCdhImages();
         if (CollectionUtils.isEmpty(imageList)) {
             return imagesForCbVersion;
         }
         LOGGER.debug("{} image(s) found for the given CB version", imageList.size());
         return filterImages(imageList, cloudPlatform, imageFilterParams);
-    }
-
-    private ImageFilterResult getImagesForCbVersion(Versions supportedVersions, List<Image> availableImages) {
-        return versionBasedImageFilter.getCdhImagesForCbVersion(supportedVersions, availableImages);
     }
 
     private ImageFilterResult filterImages(List<Image> availableImages, String cloudPlatform, ImageFilterParams imageFilterParams) {

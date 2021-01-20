@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
@@ -34,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
@@ -48,6 +48,9 @@ public class CachedImageCatalogProvider {
 
     @Inject
     private ObjectMapper objectMapper;
+
+    @Inject
+    private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public CloudbreakImageCatalogV3 getImageCatalogV3(String catalogUrl) throws CloudbreakImageCatalogException {
@@ -69,8 +72,7 @@ public class CachedImageCatalogProvider {
                 content = readCatalogFromFile(catalogUrl);
             }
             catalog = objectMapper.readValue(content, CloudbreakImageCatalogV3.class);
-            validateImageCatalogUuids(catalog);
-            validateCloudBreakVersions(catalog);
+            imageCatalogServiceProxy.validate(catalog);
             cleanAndValidateMaps(catalog);
             catalog = filterImagesByOsType(catalog);
             long timeOfParse = System.currentTimeMillis() - started;
@@ -141,21 +143,6 @@ public class CachedImageCatalogProvider {
     public void evictImageCatalogCache(String catalogUrl) {
     }
 
-    private void validateImageCatalogUuids(CloudbreakImageCatalogV3 imageCatalog) throws CloudbreakImageCatalogException {
-        Stream<String> baseUuids = imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid);
-        Stream<String> cdhUuids = imageCatalog.getImages().getCdhImages().stream().map(Image::getUuid);
-        Stream<String> uuidStream = Stream.of(baseUuids, cdhUuids).
-                reduce(Stream::concat).
-                orElseGet(Stream::empty);
-        List<String> uuidList = uuidStream.collect(Collectors.toList());
-        List<String> orphanUuids = imageCatalog.getVersions().getCloudbreakVersions().stream().flatMap(cbv -> cbv.getImageIds().stream()).
-                filter(imageId -> !uuidList.contains(imageId)).collect(Collectors.toList());
-        if (!orphanUuids.isEmpty()) {
-            throw new CloudbreakImageCatalogException(String.format("Images with ids: %s is not present in cdh-images block",
-                    StringUtils.join(orphanUuids, ",")));
-        }
-    }
-
     private String readCatalogFromFile(String catalogUrl) throws IOException {
         File customCatalogFile = new File(etcConfigDir, catalogUrl);
         return FileReaderUtils.readFileFromPath(customCatalogFile.toPath());
@@ -174,11 +161,5 @@ public class CachedImageCatalogProvider {
         return images.stream()
                 .peek(i -> i.getImageSetsByProvider().values().removeIf(Objects::isNull))
                 .allMatch(i -> i.getImageSetsByProvider().isEmpty());
-    }
-
-    private void validateCloudBreakVersions(CloudbreakImageCatalogV3 catalog) throws CloudbreakImageCatalogException {
-        if (catalog.getVersions() == null || catalog.getVersions().getCloudbreakVersions().isEmpty()) {
-            throw new CloudbreakImageCatalogException("Cloudbreak versions cannot be NULL");
-        }
     }
 }

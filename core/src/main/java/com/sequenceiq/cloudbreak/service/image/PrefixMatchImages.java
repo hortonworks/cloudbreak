@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.Set;
 
-class PrefixMatchImages {
+public class PrefixMatchImages {
 
     private final Set<String> vMImageUUIDs;
 
@@ -10,7 +10,7 @@ class PrefixMatchImages {
 
     private final Set<String> supportedVersions;
 
-    PrefixMatchImages(Set<String> vMImageUUIDs, Set<String> defaultVMImageUUIDs, Set<String> supportedVersions) {
+    public PrefixMatchImages(Set<String> vMImageUUIDs, Set<String> defaultVMImageUUIDs, Set<String> supportedVersions) {
         this.vMImageUUIDs = vMImageUUIDs;
         this.defaultVMImageUUIDs = defaultVMImageUUIDs;
         this.supportedVersions = supportedVersions;

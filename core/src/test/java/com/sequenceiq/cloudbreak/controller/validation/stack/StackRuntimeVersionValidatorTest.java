@@ -256,7 +256,7 @@ public class StackRuntimeVersionValidatorTest {
 
     private Image createImage(String dataHubVersion) {
         return new Image(null, null, null, null, null, null, null, null,
-                new StackDetails(dataHubVersion, null, null), null, null, null, null, null);
+                new StackDetails(dataHubVersion, null, null), null, null, null, null, null, true);
     }
 
     private StackV4Request createStackRequestWithoutCm() {

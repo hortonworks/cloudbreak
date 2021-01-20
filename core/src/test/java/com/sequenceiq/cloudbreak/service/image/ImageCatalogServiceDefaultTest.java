@@ -34,6 +34,11 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
+import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
+import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -96,6 +101,21 @@ public class ImageCatalogServiceDefaultTest {
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
 
     @InjectMocks
+    private VersionBasedImageProvider versionBasedImageProvider;
+
+    @Mock
+    private AdvertisedImageProvider advertisedImageProvider;
+
+    @InjectMocks
+    private ImageCatalogServiceProxy imageCatalogServiceProxy;
+
+    @InjectMocks
+    private AdvertisedImageCatalogService advertisedImageCatalogService;
+
+    @InjectMocks
+    private VersionBasedImageCatalogService versionBasedImageCatalogService;
+
+    @InjectMocks
     private ImageCatalogService underTest;
 
     public ImageCatalogServiceDefaultTest(String catalogFile, String provider,
@@ -134,6 +154,11 @@ public class ImageCatalogServiceDefaultTest {
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
         when(userService.getOrCreate(any())).thenReturn(user);
         when(entitlementService.baseImageEnabled(anyString())).thenReturn(true);
+
+        ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
+        ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);
+        ReflectionTestUtils.setField(imageCatalogServiceProxy, "versionBasedImageCatalogService", versionBasedImageCatalogService);
+        ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
     }
 
     @Test
