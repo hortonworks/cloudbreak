@@ -159,6 +159,11 @@ public class EnvironmentModificationService {
                     LOGGER.debug("Updating workload analytics (environment telemetry feature): {}.",
                             features.getWorkloadAnalytics().isEnabled());
                 }
+                if (features.getCloudStorageLogging() != null) {
+                    actualFeatures.setCloudStorageLogging(features.getCloudStorageLogging());
+                    LOGGER.debug("Updating cloud storage logging (environment telemetry feature): {}.",
+                            features.getCloudStorageLogging().isEnabled());
+                }
                 telemetry.setFeatures(actualFeatures);
                 // required to re-set as telemetry is saved as a JSON string
                 environment.setTelemetry(telemetry);
