@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -150,7 +151,7 @@ public class LoadBalancerConfigService {
         LOGGER.info("Setting up load balancers for stack {}", stack.getDisplayName());
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (isLoadBalancerEnabled(stack.getType(), environment)) {
+        if (isLoadBalancerEnabled(stack.getType(), stack.getCloudPlatform(), environment)) {
             LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
             if (knoxTargetGroup.isPresent()) {
@@ -206,13 +207,14 @@ public class LoadBalancerConfigService {
         return false;
     }
 
-    private boolean isLoadBalancerEnabled(StackType type, DetailedEnvironmentResponse environment) {
-        return isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment);
+    private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment) {
+        return isLoadBalancerEnabledForDatalake(type, cloudPlatform, environment) || isLoadBalancerEnabledForDatahub(type, environment);
     }
 
-    private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
+    private boolean isLoadBalancerEnabledForDatalake(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment) {
         return StackType.DATALAKE.equals(type) && environment != null &&
-            (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) ||
+            (CloudConstants.AWS.equals(cloudPlatform) ||
+                entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) ||
                 isEndpointGatewayEnabled(environment.getNetwork()));
     }
 
