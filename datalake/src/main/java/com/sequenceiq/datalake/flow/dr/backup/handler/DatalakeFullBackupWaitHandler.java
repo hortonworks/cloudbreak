@@ -9,7 +9,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeBackupSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
@@ -36,7 +36,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
     private int durationInMinutes;
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Override
     public String selector() {
@@ -58,7 +58,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
             LOGGER.info("Start polling datalake full backup status for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
                 TimeUnit.MINUTES);
-            sdxDatabaseDrService.waitForDatalakeDrBackupOperation(sdxId, request.getOperationId(), request.getUserId(),
+            sdxBackupRestoreService.waitForDatalakeDrBackupToComplete(sdxId, request.getOperationId(), request.getUserId(),
                 pollingConfig, "Full backup");
             response = new DatalakeBackupSuccessEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {

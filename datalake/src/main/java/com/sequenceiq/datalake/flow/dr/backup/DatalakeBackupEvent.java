@@ -9,9 +9,10 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupInProgress
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-public enum DatalakeDatabaseBackupEvent implements FlowEvent {
+public enum DatalakeBackupEvent implements FlowEvent {
 
     DATALAKE_DATABASE_BACKUP_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupStartEvent.class)),
+    DATALAKE_TRIGGER_BACKUP_EVENT("DATALAKE_TRIGGER_BACKUP_EVENT"),
     DATALAKE_DATABASE_BACKUP_COULD_NOT_START_EVENT(EventSelectorUtil.selector(DatalakeDatabaseBackupCouldNotStartEvent.class)),
     DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT("DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT"),
     DATALAKE_FULL_BACKUP_IN_PROGRESS_EVENT(EventSelectorUtil.selector(DatalakeFullBackupInProgressEvent.class)),
@@ -24,7 +25,7 @@ public enum DatalakeDatabaseBackupEvent implements FlowEvent {
 
     private final String event;
 
-    DatalakeDatabaseBackupEvent(String event) {
+    DatalakeBackupEvent(String event) {
         this.event = event;
     }
 

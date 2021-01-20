@@ -15,9 +15,13 @@ public class DatalakeDrStatusResponse {
 
     private final State state;
 
+    private final String drOperationId;
+
     private final Optional<String> failureReason;
 
-    public DatalakeDrStatusResponse(State state, Optional<String> failureReason) {
+    public
+    DatalakeDrStatusResponse(String drOperationId, State state, Optional<String> failureReason) {
+        this.drOperationId = drOperationId;
         this.state = state;
         this.failureReason = failureReason.isPresent() && "null".equals(failureReason.get())
             ? Optional.empty() : failureReason;
@@ -27,11 +31,19 @@ public class DatalakeDrStatusResponse {
         return state == State.SUCCESSFUL || state == State.FAILED;
     }
 
+    public boolean failed() {
+        return state.equals(State.FAILED);
+    }
+
     public State getState() {
         return state;
     }
 
     public String getFailureReason() {
         return failureReason.isPresent() ? failureReason.get() : NO_FAILURES;
+    }
+
+    public String getDrOperationId() {
+        return drOperationId;
     }
 }

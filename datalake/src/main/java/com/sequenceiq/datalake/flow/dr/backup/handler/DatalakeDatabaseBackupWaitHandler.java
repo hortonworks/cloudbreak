@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup.handler;
 
+import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeFullBackupInProgressEvent;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
@@ -7,8 +8,9 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
+import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
@@ -35,7 +37,10 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
     private int durationInMinutes;
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
+
+    @Inject
+    private SdxOperationRepository sdxOperationRepository;
 
     @Override
     public String selector() {
@@ -56,17 +61,23 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
         try {
             LOGGER.info("Start polling datalake database backup  for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            sdxDatabaseDrService.waitCloudbreakFlow(sdxId, pollingConfig, "Database backup");
+            sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database backup");
             response = new DatalakeFullBackupInProgressEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database backup polling exited before timeout. Cause: ", userBreakException);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, userBreakException.getLocalizedMessage());
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId, userBreakException);
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Database backup poller stopped for cluster: {}", sdxId);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, pollerStoppedException.getLocalizedMessage());
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database backup timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Database backup polling failed for cluster: {}", sdxId);
+            sdxBackupRestoreService.updateDatabaseStatusEntry(event.getData().getOperationId(),
+                    SdxOperationStatus.FAILED, exception.getLocalizedMessage());
             response = new DatalakeDatabaseBackupFailedEvent(sdxId, userId, exception);
         }
         return response;

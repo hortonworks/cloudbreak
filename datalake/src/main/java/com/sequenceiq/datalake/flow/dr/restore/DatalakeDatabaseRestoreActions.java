@@ -23,7 +23,7 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -54,7 +54,7 @@ public class DatalakeDatabaseRestoreActions {
     private static final String RESTORE_ID = "RESTORE-ID";
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -87,7 +87,7 @@ public class DatalakeDatabaseRestoreActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database restore has been started for {}", payload.getResourceId());
-                sdxDatabaseDrService.databaseRestore(payload.getDrStatus(),
+                sdxBackupRestoreService.databaseRestore(payload.getDrStatus(),
                         payload.getResourceId(),
                         payload.getBackupId(),
                         payload.getBackupLocation());
@@ -114,7 +114,7 @@ public class DatalakeDatabaseRestoreActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database restore is in progress for {} ", payload.getResourceId());
                 String operationId = (String) variables.get(OPERATION_ID);
-                sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
+                sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RESTORE_INPROGRESS,
                         ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS,
                         "Datalake restore in progress", payload.getResourceId());
@@ -143,7 +143,7 @@ public class DatalakeDatabaseRestoreActions {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
-                sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
+                sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -170,9 +170,9 @@ public class DatalakeDatabaseRestoreActions {
                 String restoreId = (String) variables.get(RESTORE_ID);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 SdxDatabaseRestoreStatusResponse restoreStatusResponse =
-                        sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);
+                        sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, operationId);
                 if (restoreStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
-                    sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
+                    sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.SUCCEEDED, null);
                 }
                 sendEvent(context, DatalakeFullRestoreWaitRequest.from(context, restoreId));
             }
@@ -226,7 +226,7 @@ public class DatalakeDatabaseRestoreActions {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
-                sdxDatabaseDrService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
+                sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

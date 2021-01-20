@@ -4,10 +4,11 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
-public enum DatalakeDatabaseBackupState implements FlowState {
+public enum DatalakeBackupState implements FlowState {
 
     INIT_STATE,
     DATALAKE_DATABASE_BACKUP_START_STATE,
+    DATALAKE_TRIGGERING_BACKUP_STATE,
     DATALAKE_DATABASE_BACKUP_COULD_NOT_START_STATE,
     DATALAKE_DATABASE_BACKUP_IN_PROGRESS_STATE,
     DATALAKE_FULL_BACKUP_IN_PROGRESS_STATE,
@@ -18,10 +19,10 @@ public enum DatalakeDatabaseBackupState implements FlowState {
 
     private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
 
-    DatalakeDatabaseBackupState() {
+    DatalakeBackupState() {
     }
 
-    DatalakeDatabaseBackupState(Class<? extends DefaultRestartAction> restartAction) {
+    DatalakeBackupState(Class<? extends DefaultRestartAction> restartAction) {
         this.restartAction = restartAction;
     }
 

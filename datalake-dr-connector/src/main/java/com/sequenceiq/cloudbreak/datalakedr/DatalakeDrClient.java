@@ -6,6 +6,7 @@ import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc.datalakeDRBlockingStub;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeDrStatusResponseConverter;
@@ -44,7 +46,35 @@ public class DatalakeDrClient {
         this.tracer = tracer;
     }
 
+    public DatalakeDrStatusResponse triggerbackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
+        if (!datalakeDrConfig.isConfigured()) {
+            return missingConnectorResponse();
+        }
+
+        checkNotNull(datalakeName);
+        checkNotNull(actorCrn);
+        checkNotNull(backupLocation);
+
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            BackupDatalakeRequest.Builder builder = BackupDatalakeRequest.newBuilder()
+                    .setDatalakeName(datalakeName)
+                    .setBackupLocation(backupLocation);
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            return statusConverter.convert(
+                    newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
+                            .backupDatalake(builder.build())
+            );
+        }
+    }
+
     public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
+        return getBackupStatusByBackupId(datalakeName, backupId, null, actorCrn);
+    }
+
+    public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId,
+        String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponse();
         }
@@ -57,7 +87,12 @@ public class DatalakeDrClient {
             BackupDatalakeStatusRequest.Builder builder = BackupDatalakeStatusRequest.newBuilder()
                 .setDatalakeName(datalakeName)
                 .setBackupId(backupId);
-
+            if (!Strings.isNullOrEmpty(backupName)) {
+                builder.setBackupName(backupName);
+            }
+            if (!Strings.isNullOrEmpty(backupId)) {
+                builder.setBackupId(backupId);
+            }
             return statusConverter.convert(
                 newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                     .backupDatalakeStatus(builder.build())
@@ -114,7 +149,7 @@ public class DatalakeDrClient {
     }
 
     private DatalakeDrStatusResponse missingConnectorResponse() {
-        return new DatalakeDrStatusResponse(
+        return new DatalakeDrStatusResponse(UUID.randomUUID().toString(),
             DatalakeDrStatusResponse.State.FAILED,
             Optional.of(NO_CONNECTOR_ERROR)
         );
