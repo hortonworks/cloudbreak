@@ -33,6 +33,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
@@ -279,6 +280,11 @@ public class FlowLogDBService implements FlowLogService {
         LOGGER.debug("Checking if there is a pending flowEvent based on these flowLogs {}", Joiner.on(",")
                 .join(flowLogs.stream().map(flowLog -> flowLog.minimizedString()).collect(Collectors.toList())));
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
+    }
+
+    public <T extends AbstractFlowConfiguration> List<FlowLog> getFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+        Long resourceId = getResourceIdByCrnOrName(resourceCrn);
+        return flowLogRepository.findAllFlowByType(resourceId, clazz);
     }
 
     public Predicate<FlowLog> pendingFlowLogPredicate() {
