@@ -63,8 +63,8 @@ public class RejectedThreadMonitor extends AbstractMonitor<RejectedThread> {
     }
 
     @Override
-    protected RejectedThread save(RejectedThread monitored) {
-        return getRejectedThreadService().save(monitored);
+    protected void updateLastEvaluated(RejectedThread monitored) {
+        getRejectedThreadService().save(monitored);
     }
 
     private int compareRejectedThreadsByCount(RejectedThread o1, RejectedThread o2) {

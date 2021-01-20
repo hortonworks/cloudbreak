@@ -301,7 +301,11 @@ ID             Applied At          Description
 
 ------------------------------------------------------------------------
 ```
-
+If you would like to log out all Hibernate-generated queries and show query parameter values as well, add this export to your Profile file, or from the IDE 
+just add the following flag:
+```
+export CB_JAVA_OPTS="-Dperiscope.hibernate.debug=true"
+```
 ## Building
 
 Gradle is used for build and dependency management. Gradle wrapper is added to Cloudbreak git repository, therefore building can be done with:

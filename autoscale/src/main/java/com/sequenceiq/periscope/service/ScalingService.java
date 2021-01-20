@@ -30,19 +30,20 @@ public class ScalingService {
         ScalingPolicy scalingPolicy = policyRepository.save(policy);
         alert.setScalingPolicy(scalingPolicy);
         alertService.save(alert);
-        LOGGER.info("Scaling policiy [name: {}] was created for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
+        LOGGER.info("Scaling policy [name: {}] was created for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
                 scalingPolicy.getName(), clusterId, alertId, alert.getName(), scalingPolicy);
         return scalingPolicy;
     }
 
     public ScalingPolicy updatePolicy(Long clusterId, Long policyId, ScalingPolicy scalingPolicy) {
+        LOGGER.info("Updating scaling policy [id: {}] operation has been triggered for cluster [id: {}]", policyId, clusterId);
         ScalingPolicy policy = getScalingPolicy(clusterId, policyId);
         policy.setName(scalingPolicy.getName());
         policy.setHostGroup(scalingPolicy.getHostGroup());
         policy.setAdjustmentType(scalingPolicy.getAdjustmentType());
         policy.setScalingAdjustment(scalingPolicy.getScalingAdjustment());
         policy = policyRepository.save(policy);
-        LOGGER.info("Scaling policiy [name: {}] was updated for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
+        LOGGER.info("Scaling policy [name: {}] was updated for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
                 scalingPolicy.getName(), clusterId, policy.getAlertId(), policy.getAlert().getName(), scalingPolicy);
         return policy;
     }
@@ -54,7 +55,7 @@ public class ScalingService {
         policy.setAlert(null);
         policyRepository.delete(policy);
         alertService.save(alert);
-        LOGGER.info("Scaling policiy [name: {}] was deleted for cluster [id: {}] and detached from the alert [id: {}, name: {}]: {}",
+        LOGGER.info("Scaling policy [name: {}] was deleted for cluster [id: {}] and detached from the alert [id: {}, name: {}]: {}",
                 policy.getName(), clusterId, alert.getId(), alert.getName(), policy);
     }
 
