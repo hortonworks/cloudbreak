@@ -227,8 +227,12 @@ public class GcpPlatformResources implements PlatformResources {
             String tmpProjectId = !Strings.isNullOrEmpty(sharedProjectId) ? sharedProjectId : projectId;
             subnetworkList = new SubnetworkList().setItems(new ArrayList<>());
             for (String subnetId : subnetIds) {
-                Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
-                subnetworkList.getItems().add(subnetwork);
+                try {
+                    Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
+                    subnetworkList.getItems().add(subnetwork);
+                } catch (Exception e) {
+                    LOGGER.info("Could not get Subnetworks from {} project with {} subnetId: {}", tmpProjectId, subnetId, e);
+                }
             }
         }
         return subnetworkList;
@@ -241,8 +245,14 @@ public class GcpPlatformResources implements PlatformResources {
                     .list(projectId).execute();
         } else {
             if (!Strings.isNullOrEmpty(sharedProjectId)) {
-                networkList = new NetworkList()
+                try {
+                    networkList = new NetworkList()
                         .setItems(Collections.singletonList(compute.networks().get(sharedProjectId, networkId).execute()));
+                } catch (Exception e) {
+                    LOGGER.info("Could not get Subnetworks from {} project with {} networkId: {}", sharedProjectId, networkId, e);
+                    networkList = new NetworkList()
+                            .setItems(List.of());
+                }
             } else {
                 networkList = new NetworkList()
                         .setItems(Collections.singletonList(compute.networks().get(projectId, networkId).execute()));

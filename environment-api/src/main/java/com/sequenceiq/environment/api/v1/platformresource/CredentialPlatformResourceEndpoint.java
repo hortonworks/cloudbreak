@@ -83,6 +83,7 @@ public interface CredentialPlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone,
+            @QueryParam("networkId") String networkId,
             @QueryParam("subnetIds") String subnetIds,
             @QueryParam("sharedProjectId") String sharedProjectId);
 

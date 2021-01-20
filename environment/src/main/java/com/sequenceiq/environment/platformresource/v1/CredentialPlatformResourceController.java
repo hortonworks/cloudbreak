@@ -145,6 +145,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             String region,
             String platformVariant,
             String availabilityZone,
+            String networkId,
             String subnetIds,
             String sharedProjectId) {
         CustomCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
@@ -152,6 +153,9 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         Map<String, String> filter = new HashMap<>();
         if (!Strings.isNullOrEmpty(subnetIds)) {
             filter.put("subnetIds", subnetIds);
+        }
+        if (!Strings.isNullOrEmpty(networkId)) {
+            filter.put("networkId", networkId);
         }
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequest(
                 accountId,
