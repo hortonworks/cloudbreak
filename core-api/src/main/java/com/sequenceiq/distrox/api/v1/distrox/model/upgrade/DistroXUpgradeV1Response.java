@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
-public class DistroxUpgradeV1Response {
+public class DistroXUpgradeV1Response {
 
     private ImageInfoV4Response current;
 
@@ -18,23 +18,23 @@ public class DistroxUpgradeV1Response {
 
     private FlowIdentifier flowIdentifier;
 
-    public DistroxUpgradeV1Response() {
+    public DistroXUpgradeV1Response() {
     }
 
-    public DistroxUpgradeV1Response(UpgradeOptionV4Response upgradeResponse) {
+    public DistroXUpgradeV1Response(UpgradeOptionV4Response upgradeResponse) {
         current = upgradeResponse.getCurrent();
         upgradeCandidates = upgradeResponse.getUpgrade() != null ? List.of(upgradeResponse.getUpgrade()) : List.of();
         reason = upgradeResponse.getReason();
     }
 
-    public DistroxUpgradeV1Response(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates, String reason, FlowIdentifier flowIdentifier) {
+    public DistroXUpgradeV1Response(ImageInfoV4Response current, List<ImageInfoV4Response> upgradeCandidates, String reason, FlowIdentifier flowIdentifier) {
         this.current = current;
         this.upgradeCandidates = upgradeCandidates;
         this.reason = reason;
         this.flowIdentifier = flowIdentifier;
     }
 
-    public DistroxUpgradeV1Response(String reason, FlowIdentifier flowIdentifier) {
+    public DistroXUpgradeV1Response(String reason, FlowIdentifier flowIdentifier) {
         this.reason = reason;
         this.flowIdentifier = flowIdentifier;
     }
@@ -81,7 +81,7 @@ public class DistroxUpgradeV1Response {
 
     @Override
     public String toString() {
-        return "DistroxUpgradeV1Response{" +
+        return "DistroXUpgradeV1Response{" +
                 "current=" + current +
                 ", upgradeCandidates=" + upgradeCandidates +
                 ", reason='" + reason + '\'' +

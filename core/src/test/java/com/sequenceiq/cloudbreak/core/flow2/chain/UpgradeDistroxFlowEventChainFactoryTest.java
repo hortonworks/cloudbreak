@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroxUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -54,7 +54,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForNonReplaceVms() {
-        DistroxUpgradeTriggerEvent event = new DistroxUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false);
         Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(3, flowChainQueue.size());
@@ -69,7 +69,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(new HashMap<>());
         when(clusterRepairService.validateRepair(any(), any(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroxUpgradeTriggerEvent event = new DistroxUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
+        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true);
         Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.size());

@@ -12,10 +12,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeReplaceVms;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeShowAvailableImages;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -26,23 +26,23 @@ class UpgradeConverterTest {
     @ParameterizedTest
     @EnumSource(UpgradeShowAvailableImages.class)
     public void testFromUpgradeShowAvailableImagesToDistroxUpgradeShowAvailableImages(UpgradeShowAvailableImages upgradeShowAvailableImagesEnum) {
-        DistroxUpgradeShowAvailableImages.valueOf(upgradeShowAvailableImagesEnum.name());
+        DistroXUpgradeShowAvailableImages.valueOf(upgradeShowAvailableImagesEnum.name());
     }
 
     @ParameterizedTest
-    @EnumSource(DistroxUpgradeShowAvailableImages.class)
-    public void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroxUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
+    @EnumSource(DistroXUpgradeShowAvailableImages.class)
+    public void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroXUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
         UpgradeShowAvailableImages.valueOf(distroxUpgradeShowAvailableImages.name());
     }
 
     @Test
     public void testConvertRequest() {
-        DistroxUpgradeV1Request source = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         source.setDryRun(Boolean.TRUE);
         source.setImageId("asdf");
-        source.setShowAvailableImages(DistroxUpgradeShowAvailableImages.LATEST_ONLY);
+        source.setShowAvailableImages(DistroXUpgradeShowAvailableImages.LATEST_ONLY);
         source.setLockComponents(Boolean.TRUE);
-        source.setReplaceVms(DistroxUpgradeReplaceVms.DISABLED);
+        source.setReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
         source.setRuntime("runtime");
 
         UpgradeV4Request result = underTest.convert(source);
@@ -63,7 +63,7 @@ class UpgradeConverterTest {
         source.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, "asdg"));
         source.setReason("fdas");
 
-        DistroxUpgradeV1Response result = underTest.convert(source);
+        DistroXUpgradeV1Response result = underTest.convert(source);
 
         assertEquals(source.getCurrent(), result.getCurrent());
         assertEquals(source.getFlowIdentifier(), result.getFlowIdentifier());

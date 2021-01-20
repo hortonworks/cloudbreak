@@ -5,13 +5,13 @@ import java.util.StringJoiner;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
-public class DistroxUpgradeTriggerEvent extends StackEvent {
+public class DistroXUpgradeTriggerEvent extends StackEvent {
 
     private final ImageChangeDto imageChangeDto;
 
     private final boolean replaceVms;
 
-    public DistroxUpgradeTriggerEvent(String selector, Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
+    public DistroXUpgradeTriggerEvent(String selector, Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
         super(selector, stackId);
         this.imageChangeDto = imageChangeDto;
         this.replaceVms = replaceVms;
@@ -27,7 +27,7 @@ public class DistroxUpgradeTriggerEvent extends StackEvent {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", DistroxUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", DistroXUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageChangeDto=" + imageChangeDto)
                 .add("replaceVms=" + replaceVms)
                 .toString();

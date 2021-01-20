@@ -16,9 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @Component
-public class DistroxUpgradeImageSelector {
+public class DistroXUpgradeImageSelector {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroxUpgradeImageSelector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeImageSelector.class);
 
     public ImageInfoV4Response determineImageId(UpgradeV4Request request, List<ImageInfoV4Response> upgradeCandidates) {
         Optional<ImageInfoV4Response> image = Optional.empty();

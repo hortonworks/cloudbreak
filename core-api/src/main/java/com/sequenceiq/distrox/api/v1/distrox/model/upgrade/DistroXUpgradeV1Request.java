@@ -5,7 +5,7 @@ import java.util.Objects;
 import io.swagger.annotations.ApiModelProperty;
 
 @ValidUpgradeRequest
-public class DistroxUpgradeV1Request {
+public class DistroXUpgradeV1Request {
 
     private String imageId;
 
@@ -15,9 +15,9 @@ public class DistroxUpgradeV1Request {
 
     private Boolean dryRun;
 
-    private DistroxUpgradeShowAvailableImages showAvailableImages;
+    private DistroXUpgradeShowAvailableImages showAvailableImages;
 
-    private DistroxUpgradeReplaceVms replaceVms;
+    private DistroXUpgradeReplaceVms replaceVms;
 
     public String getImageId() {
         return imageId;
@@ -55,19 +55,19 @@ public class DistroxUpgradeV1Request {
         this.dryRun = dryRun;
     }
 
-    public DistroxUpgradeShowAvailableImages getShowAvailableImages() {
+    public DistroXUpgradeShowAvailableImages getShowAvailableImages() {
         return showAvailableImages;
     }
 
-    public void setShowAvailableImages(DistroxUpgradeShowAvailableImages showAvailableImages) {
+    public void setShowAvailableImages(DistroXUpgradeShowAvailableImages showAvailableImages) {
         this.showAvailableImages = showAvailableImages;
     }
 
-    public DistroxUpgradeReplaceVms getReplaceVms() {
+    public DistroXUpgradeReplaceVms getReplaceVms() {
         return replaceVms;
     }
 
-    public void setReplaceVms(DistroxUpgradeReplaceVms replaceVms) {
+    public void setReplaceVms(DistroXUpgradeReplaceVms replaceVms) {
         this.replaceVms = replaceVms;
     }
 
@@ -92,7 +92,7 @@ public class DistroxUpgradeV1Request {
 
     @ApiModelProperty(hidden = true)
     public boolean isShowAvailableImagesSet() {
-        return Objects.nonNull(showAvailableImages) && DistroxUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
+        return Objects.nonNull(showAvailableImages) && DistroXUpgradeShowAvailableImages.DO_NOT_SHOW != showAvailableImages;
     }
 
     private boolean isUnspecifiedUpgradeType() {
@@ -103,7 +103,7 @@ public class DistroxUpgradeV1Request {
 
     @Override
     public String toString() {
-        return "DistroxUpgradeRequest{" +
+        return "DistroXUpgradeRequest{" +
                 "imageId='" + imageId + '\'' +
                 ", runtime='" + runtime + '\'' +
                 ", lockComponents=" + lockComponents +

@@ -29,15 +29,15 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
-public class DistroxUpgradeService {
+public class DistroXUpgradeService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroxUpgradeService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeService.class);
 
     @Value("${cb.paywall.url}")
     private String paywallUrl;
 
     @Inject
-    private DistroxUpgradeAvailabilityService upgradeAvailabilityService;
+    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -46,7 +46,7 @@ public class DistroxUpgradeService {
     private PaywallAccessChecker paywallAccessChecker;
 
     @Inject
-    private DistroxUpgradeImageSelector imageSelector;
+    private DistroXUpgradeImageSelector imageSelector;
 
     @Inject
     private StackCommonService stackCommonService;
@@ -71,7 +71,7 @@ public class DistroxUpgradeService {
         ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeCandidates);
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(cluster, workspaceId);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroxUpgrade(stackId, imageChangeDto, request.getReplaceVms());
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stackId, imageChangeDto, request.getReplaceVms());
         return new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
     }
 

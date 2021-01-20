@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXDatabaseServerV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
-import com.sequenceiq.distrox.v1.distrox.controller.DistroxUpgradeV1Controller;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -81,7 +81,7 @@ public class EndpointConfig extends ResourceConfig {
             FlowController.class,
             FlowPublicController.class,
             AuthorizationInfoController.class,
-            DistroxUpgradeV1Controller.class,
+            DistroXUpgradeV1Controller.class,
             DistroXDatabaseServerV1Controller.class,
             AuthorizationUtilEndpoint.class
     );

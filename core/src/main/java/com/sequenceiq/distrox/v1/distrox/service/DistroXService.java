@@ -17,7 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Service
-public class DistroxService {
+public class DistroXService {
 
     private final StackOperations stackOperations;
 
@@ -29,7 +29,7 @@ public class DistroxService {
 
     private final StackViewService stackViewService;
 
-    public DistroxService(EnvironmentClientService environmentClientService, StackOperations stackOperations, WorkspaceService workspaceService,
+    public DistroXService(EnvironmentClientService environmentClientService, StackOperations stackOperations, WorkspaceService workspaceService,
             DistroXV1RequestToStackV4RequestConverter stackRequestConverter, StackViewService stackViewService) {
         this.environmentClientService = environmentClientService;
         this.stackRequestConverter = stackRequestConverter;

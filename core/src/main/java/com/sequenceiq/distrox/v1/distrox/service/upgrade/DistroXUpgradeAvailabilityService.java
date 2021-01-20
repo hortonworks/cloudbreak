@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @Service
-public class DistroxUpgradeAvailabilityService {
+public class DistroXUpgradeAvailabilityService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroxUpgradeAvailabilityService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeAvailabilityService.class);
 
     @Inject
     private EntitlementService entitlementService;

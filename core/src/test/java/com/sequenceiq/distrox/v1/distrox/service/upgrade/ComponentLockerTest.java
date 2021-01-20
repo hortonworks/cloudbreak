@@ -1,7 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeShowAvailableImages.LATEST_ONLY;
-import static com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeShowAvailableImages.SHOW;
+import static com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages.LATEST_ONLY;
+import static com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages.SHOW;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,8 +16,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeShowAvailableImages;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 
 @ExtendWith(MockitoExtension.class)
 class ComponentLockerTest {
@@ -25,7 +25,7 @@ class ComponentLockerTest {
     private static final String USER_CRN = "userCrn";
 
     @Mock
-    private DistroxUpgradeAvailabilityService upgradeAvailabilityService;
+    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
     @InjectMocks
     private ComponentLocker underTest;
@@ -78,9 +78,9 @@ class ComponentLockerTest {
     @MethodSource("scenarios")
     @MockitoSettings(strictness = Strictness.LENIENT)
     public void testLocking(String name, Boolean runtimeUpgradeEnable, Boolean dryRun, String runtime, String imageId,
-            Boolean lockComponents, DistroxUpgradeShowAvailableImages showAvailableImages,  Boolean shouldLockComponents) {
+            Boolean lockComponents, DistroXUpgradeShowAvailableImages showAvailableImages,  Boolean shouldLockComponents) {
         when(upgradeAvailabilityService.isRuntimeUpgradeEnabled(USER_CRN)).thenReturn(runtimeUpgradeEnable);
-        DistroxUpgradeV1Request request = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
         request.setDryRun(dryRun);
         request.setRuntime(runtime);
         request.setImageId(imageId);
