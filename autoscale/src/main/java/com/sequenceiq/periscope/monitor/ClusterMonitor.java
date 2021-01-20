@@ -31,8 +31,8 @@ public abstract class ClusterMonitor extends AbstractMonitor<Cluster> {
     }
 
     @Override
-    protected Cluster save(Cluster monitored) {
-        return clusterService.save(monitored);
+    protected void updateLastEvaluated(Cluster monitored) {
+        clusterService.updateLastEvaluated(monitored);
     }
 
     PeriscopeNodeConfig getPeriscopeNodeConfig() {

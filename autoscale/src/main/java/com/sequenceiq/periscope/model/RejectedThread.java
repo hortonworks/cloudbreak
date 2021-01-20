@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.model;
 
+import java.util.StringJoiner;
+
 import com.sequenceiq.periscope.monitor.Monitored;
 
 public class RejectedThread implements Monitored {
@@ -47,5 +49,14 @@ public class RejectedThread implements Monitored {
     @Override
     public void setLastEvaluated(long lastEvaluated) {
 
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RejectedThread.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("rejectedCount=" + rejectedCount)
+                .add("type='" + type + "'")
+                .toString();
     }
 }

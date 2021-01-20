@@ -1,16 +1,22 @@
 package com.sequenceiq.periscope.config;
 
+import static ch.qos.logback.classic.Level.TRACE;
+
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
+import org.hibernate.type.descriptor.sql.BasicBinder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,6 +71,18 @@ public class DatabaseConfig {
 
     @Inject
     private PeriscopeNodeConfig periscopeNodeConfig;
+
+    @PostConstruct
+    public void setupQueryParameterLogging() {
+        if (debug) {
+            final Logger logger = LoggerFactory.getLogger(BasicBinder.class.getName());
+            if (!(logger instanceof ch.qos.logback.classic.Logger)) {
+                return;
+            }
+            ch.qos.logback.classic.Logger logbackLogger = (ch.qos.logback.classic.Logger) logger;
+            logbackLogger.setLevel(TRACE);
+        }
+    }
 
     @Bean
     public DataSource dataSource() throws SQLException {

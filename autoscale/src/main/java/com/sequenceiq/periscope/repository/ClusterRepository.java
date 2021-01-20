@@ -42,4 +42,9 @@ public interface ClusterRepository extends BaseRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")
     void deallocateClustersOfNode(@Param("periscopeNodeId") String periscopeNodeId);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.lastEvaluated = :lastEvaluated WHERE c.id = :id")
+    void updateLastEvaluated(@Param("id") long id, @Param("lastEvaluated") long lastEvaluated);
+
 }
