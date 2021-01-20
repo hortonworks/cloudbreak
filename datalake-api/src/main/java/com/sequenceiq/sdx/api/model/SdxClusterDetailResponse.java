@@ -33,7 +33,8 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
 
     @Override
     public String getTagValue(String key) {
-        return Optional.ofNullable(stackV4Response.getTags())
+        return Optional.ofNullable(stackV4Response)
+                .map(stack -> stack.getTags())
                 .map(tags -> tags.getTagValue(key))
                 .orElse(null);
     }
