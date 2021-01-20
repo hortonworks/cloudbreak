@@ -38,7 +38,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
-class DistroxUpgradeServiceTest {
+class DistroXUpgradeServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
@@ -49,7 +49,7 @@ class DistroxUpgradeServiceTest {
     private static final Long STACK_ID = 3L;
 
     @Mock
-    private DistroxUpgradeAvailabilityService upgradeAvailabilityService;
+    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
     @Mock
     private EntitlementService entitlementService;
@@ -58,7 +58,7 @@ class DistroxUpgradeServiceTest {
     private PaywallAccessChecker paywallAccessChecker;
 
     @Mock
-    private DistroxUpgradeImageSelector imageSelector;
+    private DistroXUpgradeImageSelector imageSelector;
 
     @Mock
     private StackCommonService stackCommonService;
@@ -73,7 +73,7 @@ class DistroxUpgradeServiceTest {
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     @InjectMocks
-    private DistroxUpgradeService underTest;
+    private DistroXUpgradeService underTest;
 
     @Test
     public void testUpgradeResponseHasReason() {
@@ -122,7 +122,7 @@ class DistroxUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getIdByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(STACK_ID);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroxUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -151,7 +151,7 @@ class DistroxUpgradeServiceTest {
                 .thenReturn(imageChangeDto);
         when(stackService.getIdByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(STACK_ID);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroxUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean())).thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 

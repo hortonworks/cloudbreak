@@ -14,9 +14,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
-class DistroxUpgradeImageSelectorTest {
+class DistroXUpgradeImageSelectorTest {
 
-    private final DistroxUpgradeImageSelector underTest = new DistroxUpgradeImageSelector();
+    private final DistroXUpgradeImageSelector underTest = new DistroXUpgradeImageSelector();
 
     @Test
     public void testLatestImageFromCandidatesWhenRequestNull() {

@@ -17,18 +17,18 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroxUpgradeV1Endpoint;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.ComponentLocker;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroxUpgradeAvailabilityService;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroxUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 
 @Controller
-public class DistroxUpgradeV1Controller implements DistroxUpgradeV1Endpoint {
+public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistroxUpgradeV1Controller.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DistroXUpgradeV1Controller.class);
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -37,31 +37,31 @@ public class DistroxUpgradeV1Controller implements DistroxUpgradeV1Endpoint {
     private UpgradeConverter upgradeConverter;
 
     @Inject
-    private DistroxUpgradeAvailabilityService upgradeAvailabilityService;
+    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
     @Inject
-    private DistroxUpgradeService upgradeService;
+    private DistroXUpgradeService upgradeService;
 
     @Inject
     private ComponentLocker componentLocker;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroxUpgradeV1Response upgradeClusterByName(@ResourceName String clusterName, @Valid DistroxUpgradeV1Request distroxUpgradeRequest) {
+    public DistroXUpgradeV1Response upgradeClusterByName(@ResourceName String clusterName, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
         return upgradeCluster(clusterName, distroxUpgradeRequest, nameOrCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
-    public DistroxUpgradeV1Response upgradeClusterByCrn(@ResourceCrn String clusterCrn, @Valid DistroxUpgradeV1Request distroxUpgradeRequest) {
+    public DistroXUpgradeV1Response upgradeClusterByCrn(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn);
     }
 
-    private DistroxUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroxUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {
+    private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        DistroxUpgradeV1Request modifiedRequest = componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, userCrn, clusterNameOrCrn);
+        DistroXUpgradeV1Request modifiedRequest = componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, userCrn, clusterNameOrCrn);
         UpgradeV4Request request = upgradeConverter.convert(modifiedRequest);
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {

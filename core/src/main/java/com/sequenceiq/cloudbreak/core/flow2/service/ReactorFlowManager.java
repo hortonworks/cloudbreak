@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroxUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
@@ -166,9 +166,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new ClusterUpgradeTriggerEvent(selector, stackId, imageId));
     }
 
-    public FlowIdentifier triggerDistroxUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
+    public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroxUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms));
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms));
     }
 
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {

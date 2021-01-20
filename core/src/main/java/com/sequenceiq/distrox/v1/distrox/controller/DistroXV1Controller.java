@@ -78,7 +78,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClust
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliRequestConverter;
-import com.sequenceiq.distrox.v1.distrox.service.DistroxService;
+import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
@@ -127,7 +127,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private StackOperationService stackOperationService;
 
     @Inject
-    private DistroxService distroxService;
+    private DistroXService distroxService;
 
     @Override
     @DisableCheckPermissions

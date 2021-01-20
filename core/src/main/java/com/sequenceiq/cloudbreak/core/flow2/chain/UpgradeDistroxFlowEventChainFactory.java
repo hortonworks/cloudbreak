@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroxUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 
 @Component
-public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactory<DistroxUpgradeTriggerEvent> {
+public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactory<DistroXUpgradeTriggerEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
 
@@ -45,7 +45,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(DistroxUpgradeTriggerEvent event) {
+    public Queue<Selectable> createFlowTriggerEventQueue(DistroXUpgradeTriggerEvent event) {
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
         chain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
@@ -59,7 +59,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return chain;
     }
 
-    private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroxUpgradeTriggerEvent event) {
+    private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult =
                 clusterRepairService.validateRepair(ManualClusterRepairMode.ALL, event.getResourceId(), Set.of(), false);
         return toStringMap(validationResult.getSuccess());

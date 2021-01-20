@@ -10,7 +10,7 @@ import javax.validation.Payload;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = DistroxUpgradeRequestValidator.class)
+@Constraint(validatedBy = DistroXUpgradeRequestValidator.class)
 public @interface ValidUpgradeRequest {
 
     String message() default "Invalid upgrade request: "

@@ -29,7 +29,7 @@ import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @ExtendWith(MockitoExtension.class)
-class DistroxUpgradeAvailabilityServiceTest {
+class DistroXUpgradeAvailabilityServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
@@ -44,7 +44,7 @@ class DistroxUpgradeAvailabilityServiceTest {
     private StackOperations stackOperations;
 
     @InjectMocks
-    private DistroxUpgradeAvailabilityService underTest;
+    private DistroXUpgradeAvailabilityService underTest;
 
     @BeforeEach
     public void init() {

@@ -17,12 +17,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroxUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.ComponentLocker;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroxUpgradeAvailabilityService;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroxUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 
 @ExtendWith(MockitoExtension.class)
 class DistroxUpgradeV1ControllerTest {
@@ -40,16 +40,16 @@ class DistroxUpgradeV1ControllerTest {
     private UpgradeConverter upgradeConverter;
 
     @Mock
-    private DistroxUpgradeAvailabilityService upgradeAvailabilityService;
+    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
     @Mock
-    private DistroxUpgradeService upgradeService;
+    private DistroXUpgradeService upgradeService;
 
     @Mock
     private ComponentLocker componentLocker;
 
     @InjectMocks
-    private DistroxUpgradeV1Controller underTest;
+    private DistroXUpgradeV1Controller underTest;
 
     @BeforeEach
     public void init() {
@@ -58,14 +58,14 @@ class DistroxUpgradeV1ControllerTest {
 
     @Test
     public void testDryRun() {
-        DistroxUpgradeV1Request distroxUpgradeRequest = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         when(componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, USER_CRN,  CLUSTER_NAME)).thenReturn(distroxUpgradeRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.TRUE);
         when(upgradeConverter.convert(distroxUpgradeRequest)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroxUpgradeV1Response());
+        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -75,14 +75,14 @@ class DistroxUpgradeV1ControllerTest {
 
     @Test
     public void testShowAvailableImages() {
-        DistroxUpgradeV1Request distroxUpgradeRequest = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         when(componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, USER_CRN,  CLUSTER_NAME)).thenReturn(distroxUpgradeRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.SHOW);
         when(upgradeConverter.convert(distroxUpgradeRequest)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroxUpgradeV1Response());
+        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -92,14 +92,14 @@ class DistroxUpgradeV1ControllerTest {
 
     @Test
     public void testUpgradeCalled() {
-        DistroxUpgradeV1Request distroxUpgradeRequest = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         when(componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, USER_CRN,  CLUSTER_NAME)).thenReturn(distroxUpgradeRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeConverter.convert(distroxUpgradeRequest)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroxUpgradeV1Response());
+        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -109,14 +109,14 @@ class DistroxUpgradeV1ControllerTest {
 
     @Test
     public void testUpgradeCalledWithCrn() {
-        DistroxUpgradeV1Request distroxUpgradeRequest = new DistroxUpgradeV1Request();
+        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         when(componentLocker.lockComponentsIfRuntimeUpgradeIsDisabled(distroxUpgradeRequest, USER_CRN,  CLUSTER_NAME)).thenReturn(distroxUpgradeRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
         when(upgradeConverter.convert(distroxUpgradeRequest)).thenReturn(upgradeV4Request);
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroxUpgradeV1Response());
+        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(new DistroXUpgradeV1Response());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
 

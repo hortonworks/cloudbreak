@@ -41,7 +41,7 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
-class DistroxServiceTest {
+class DistroXServiceTest {
 
     private static final Long USER_ID = 123456L;
 
@@ -61,7 +61,7 @@ class DistroxServiceTest {
     private StackViewService stackViewService;
 
     @InjectMocks
-    private DistroxService underTest;
+    private DistroXService underTest;
 
     @BeforeEach
     void setUp() {
