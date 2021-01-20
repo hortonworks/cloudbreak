@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.base;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.List;
 
@@ -11,19 +11,9 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
-public class ResourceRightsV4 {
-
-    private String resourceCrn;
+public class CheckRightV4Request {
 
     private List<RightV4> rights;
-
-    public String getResourceCrn() {
-        return resourceCrn;
-    }
-
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
-    }
 
     public List<RightV4> getRights() {
         return rights;

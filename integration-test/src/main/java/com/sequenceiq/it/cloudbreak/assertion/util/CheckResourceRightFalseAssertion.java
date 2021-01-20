@@ -2,7 +2,7 @@ package com.sequenceiq.it.cloudbreak.assertion.util;
 
 import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckResourceRightV4SingleResponse;
+import com.sequenceiq.authorization.info.model.CheckResourceRightV4SingleResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.context.TestContext;

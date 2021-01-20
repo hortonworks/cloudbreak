@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.List;
 

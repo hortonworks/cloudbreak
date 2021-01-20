@@ -3,8 +3,8 @@ package com.sequenceiq.it.cloudbreak.dto.util;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.CheckResourceRightsV4Response;
+import com.sequenceiq.authorization.info.model.CheckResourceRightsV4Response;
+import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;

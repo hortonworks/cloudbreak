@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
@@ -63,20 +61,6 @@ public class UmsResourceAuthorizationService {
         checkRightOfUserOnResources(userCrn, right, resourceCrns, authorizationMessageUtilsService.formatTemplate(right, resourceCrns));
     }
 
-    public void checkIfUserHasAtLeastOneRight(String userCrn, Map<String, AuthorizationResourceAction> checkedRightsForResources) {
-        LOGGER.info("Check if user has at least one rigth: {}", checkedRightsForResources);
-        List<AuthorizationProto.RightCheck> rightCheckList = checkedRightsForResources.entrySet().stream().map(entry ->
-                AuthorizationProto.RightCheck.newBuilder()
-                        .setResource(entry.getKey())
-                        .setRight(umsRightProvider.getRight(entry.getValue()))
-                        .build()).collect(Collectors.toList());
-        List<Boolean> rightCheckResults = umsClient.hasRights(userCrn, userCrn, rightCheckList, getRequestId());
-        LOGGER.info("Right check results: {}", rightCheckResults);
-        if (rightCheckResults.stream().noneMatch(Boolean::booleanValue)) {
-            throw new AccessDeniedException(authorizationMessageUtilsService.formatTemplate(rightCheckList));
-        }
-    }
-
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
         if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
             if (!umsClient.checkResourceRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
@@ -116,12 +100,6 @@ public class UmsResourceAuthorizationService {
                     .map(e -> e.getEntitlementName().toUpperCase())
                     .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         }
-        return entitled;
-    }
-
-    private boolean isEntitledAndLogResult(String actorCrn, String accountId, Entitlement entitlement) {
-        boolean entitled = isEntitled(actorCrn, accountId, entitlement);
-        LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
         return entitled;
     }
 }

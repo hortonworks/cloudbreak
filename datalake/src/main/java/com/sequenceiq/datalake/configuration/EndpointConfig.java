@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
@@ -46,6 +47,7 @@ public class EndpointConfig extends ResourceConfig {
             FlowPublicController.class,
             AuthorizationInfoController.class,
             DiagnosticsController.class,
+            AuthorizationUtilEndpoint.class,
             DatabaseServerController.class);
 
     @Value("${info.app.version:unspecified}")

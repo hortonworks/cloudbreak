@@ -1,20 +1,29 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests;
+package com.sequenceiq.authorization.info.model;
 
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
-public class CheckRightV4Request {
+public class ResourceRightsV4 {
+
+    private String resourceCrn;
 
     private List<RightV4> rights;
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
 
     public List<RightV4> getRights() {
         return rights;

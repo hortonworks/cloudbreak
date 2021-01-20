@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
-
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.base.RightV4;
+package com.sequenceiq.authorization.info.model;
 
 import io.swagger.annotations.ApiModel;
 

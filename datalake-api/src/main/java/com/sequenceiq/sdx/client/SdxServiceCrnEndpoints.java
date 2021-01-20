@@ -2,6 +2,7 @@ package com.sequenceiq.sdx.client;
 
 import javax.ws.rs.client.WebTarget;
 
+import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -50,5 +51,10 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public DatabaseServerEndpoint databaseServerEndpoint() {
         return getEndpoint(DatabaseServerEndpoint.class);
+    }
+
+    @Override
+    public AuthorizationUtilEndpoint authorizationUtilEndpoint() {
+        return getEndpoint(AuthorizationUtilEndpoint.class);
     }
 }
