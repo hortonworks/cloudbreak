@@ -7,8 +7,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})
-public @interface SparkUri {
+public @interface MockUri {
     String url();
-
-    Class requestType() default String.class;
 }

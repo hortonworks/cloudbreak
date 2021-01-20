@@ -35,7 +35,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MeasuredTestContext;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.PurgeGarbageService;
-import com.sequenceiq.it.cloudbreak.context.SparklessTestContext;
+import com.sequenceiq.it.cloudbreak.context.E2ETestContext;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription;
 import com.sequenceiq.it.cloudbreak.context.TestCaseDescription.TestCaseDescriptionBuilder;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -160,7 +160,7 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     @DataProvider(name = TEST_CONTEXT)
     public Object[][] testContextWithoutMock() {
-        return new Object[][]{{getBean(SparklessTestContext.class)}};
+        return new Object[][]{{getBean(E2ETestContext.class)}};
     }
 
     public ResourcePropertyProvider resourcePropertyProvider() {

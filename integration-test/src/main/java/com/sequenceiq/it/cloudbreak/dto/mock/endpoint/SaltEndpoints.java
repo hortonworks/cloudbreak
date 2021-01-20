@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
-import com.sequenceiq.it.cloudbreak.dto.mock.SparkUri;
+import com.sequenceiq.it.cloudbreak.dto.mock.MockUri;
 import com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure;
 
 public final class SaltEndpoints<T extends CloudbreakTestDto> {
@@ -34,30 +34,30 @@ public final class SaltEndpoints<T extends CloudbreakTestDto> {
         return (Run<T>) EndpointProxyFactory.create(Run.class, testDto, mockedTestContext);
     }
 
-    @SparkUri(url = SALT_BOOT_ROOT + "/health")
+    @MockUri(url = SALT_BOOT_ROOT + "/health")
     public interface SaltHealth<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, Void> post();
 
         DefaultResponseConfigure<T, GenericResponse> get();
     }
 
-    @SparkUri(url = SALT_API_ROOT + "/run")
+    @MockUri(url = SALT_API_ROOT + "/run")
     public interface Run<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, Object> post();
     }
 
-    @SparkUri(url = SALT_BOOT_ROOT + "/file/distribute")
+    @MockUri(url = SALT_BOOT_ROOT + "/file/distribute")
     public interface SaltFileDistribute<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, GenericResponses> post();
     }
 
-    @SparkUri(url = SALT_BOOT_ROOT + "/salt/action/distribute")
+    @MockUri(url = SALT_BOOT_ROOT + "/salt/action/distribute")
     public interface SaltActionDistribute<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, GenericResponses> post();
     }
 
     // SALT_BOOT_ROOT + "/salt/server/pillar/distribute"
-    @SparkUri(url = SALT_BOOT_ROOT + "/salt/server/pillar/distribute")
+    @MockUri(url = SALT_BOOT_ROOT + "/salt/server/pillar/distribute")
     public interface SaltPillar<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
         DefaultResponseConfigure<T, GenericResponses> post();
     }
