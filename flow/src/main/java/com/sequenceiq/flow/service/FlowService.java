@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -82,6 +83,13 @@ public class FlowService {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting flow logs by resource crn {}", resourceCrn);
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceCrn);
+        return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
+    }
+
+    public <T extends AbstractFlowConfiguration> List<FlowLogResponse> getFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+        checkState(Crn.isCrn(resourceCrn));
+        LOGGER.info("Getting flow logs by resource crn {} and type {}", resourceCrn, clazz.getCanonicalName());
+        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, clazz);
         return flowLogs.stream().map(flowLog -> conversionService.convert(flowLog, FlowLogResponse.class)).collect(Collectors.toList());
     }
 
