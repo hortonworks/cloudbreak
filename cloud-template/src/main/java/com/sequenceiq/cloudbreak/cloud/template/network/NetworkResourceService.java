@@ -103,13 +103,16 @@ public class NetworkResourceService {
         List<CloudResourceStatus> results = new ArrayList<>();
         CloudContext cloudContext = auth.getCloudContext();
         for (NetworkResourceBuilder<ResourceBuilderContext> builder : resourceBuilders.network(cloudContext.getPlatform())) {
-            CloudResource resource = getResources(networkResources, builder.resourceType()).get(0);
-            CloudResourceStatus status = builder.update(context, auth, network, security, resource);
-            if (status != null) {
-                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                        builder, auth, Collections.singletonList(status.getCloudResource()), context, true);
-                List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                results.addAll(pollerResult);
+            List<CloudResource> resources = getResources(networkResources, builder.resourceType());
+            if (!resources.isEmpty()) {
+                CloudResource resource = resources.get(0);
+                CloudResourceStatus status = builder.update(context, auth, network, security, resource);
+                if (status != null) {
+                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
+                            builder, auth, Collections.singletonList(status.getCloudResource()), context, true);
+                    List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                    results.addAll(pollerResult);
+                }
             }
         }
         return results;
