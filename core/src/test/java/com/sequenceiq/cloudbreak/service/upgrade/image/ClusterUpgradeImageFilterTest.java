@@ -20,10 +20,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.service.image.VersionBasedImageFilter;
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterUpgradeImageFilterTest {
@@ -68,9 +69,6 @@ public class ClusterUpgradeImageFilterTest {
     private ClusterUpgradeImageFilter underTest;
 
     @Mock
-    private VersionBasedImageFilter versionBasedImageFilter;
-
-    @Mock
     private Versions supportedCbVersions;
 
     @Mock
@@ -82,6 +80,9 @@ public class ClusterUpgradeImageFilterTest {
     @Mock
     private CmAndStackVersionFilter cmAndStackVersionFilter;
 
+    @Mock
+    private ImageCatalogServiceProxy imageCatalogServiceProxy;
+
     private Image currentImage;
 
     private Image properImage;
@@ -89,6 +90,9 @@ public class ClusterUpgradeImageFilterTest {
     private boolean lockComponents;
 
     private Map<String, String> activatedParcels;
+
+    @Mock
+    private CloudbreakImageCatalogV3 cloudbreakImageCatalogV3;
 
     @Before
     public void before() {
@@ -107,9 +111,9 @@ public class ClusterUpgradeImageFilterTest {
         List<Image> properImages = List.of(properImage);
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, properImages, null), "");
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -124,9 +128,9 @@ public class ClusterUpgradeImageFilterTest {
         Predicate<Image> predicate = mock(Predicate.class);
         when(predicate.test(any())).thenReturn(Boolean.FALSE);
         when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), eq(imageFilterParams))).thenReturn(predicate);
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
     }
@@ -140,9 +144,9 @@ public class ClusterUpgradeImageFilterTest {
         Predicate<Image> predicate = mock(Predicate.class);
         when(predicate.test(any())).thenReturn(Boolean.FALSE);
         when(cmAndStackVersionFilter.filterCmAndStackVersion(any(ImageFilterParams.class), any())).thenReturn(predicate);
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, properImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(properImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
     }
@@ -154,9 +158,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -169,9 +173,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade for aws cloud platform.", actual.getReason());
@@ -184,9 +188,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
@@ -198,9 +202,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images with supported Cloudera Manager or CDP version.", actual.getReason());
@@ -212,9 +216,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, allImage, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, allImage)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(allImage, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade available with Cloudera Manager packages.", actual.getReason());
@@ -227,9 +231,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(imageWithSameStackAndCmVersion));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -242,9 +246,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
@@ -256,9 +260,9 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no newer compatible images available.", actual.getReason());
@@ -273,9 +277,25 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(PARCEL_NAME, PARCEL_VERSION), DATALAKE_STACK_TYPE);
         ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
 
-        when(versionBasedImageFilter.getCdhImagesForCbVersion(supportedCbVersions, availableImages)).thenReturn(imageFilterResult);
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
 
-        ImageFilterResult actual = underTest.filter(availableImages, supportedCbVersions, CLOUD_PLATFORM, imageFilterParams);
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
+
+        assertEquals(actual.getReason(), 2, actual.getAvailableImages().getCdhImages().size());
+    }
+
+    @Test
+    public void advertisedImageFilterShouldBeCalledInCaseOfNullVersions() {
+        Image imageWithSameStackAndCmVersion1 = createImageWithSameStackAndCmVersion();
+        Image imageWithSameStackAndCmVersion2 = createImageWithSameStackAndCmVersion();
+        Image imageWithDifferentStackVersioning = createImageWithDifferentStackVersioning();
+        List<Image> availableImages = List.of(imageWithSameStackAndCmVersion1, imageWithSameStackAndCmVersion2, imageWithDifferentStackVersioning);
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, true, Map.of(PARCEL_NAME, PARCEL_VERSION), DATALAKE_STACK_TYPE);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(new Images(null, availableImages, null), "");
+
+        when(imageCatalogServiceProxy.getImageFilterResult(cloudbreakImageCatalogV3)).thenReturn(imageFilterResult);
+
+        ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertEquals(actual.getReason(), 2, actual.getAvailableImages().getCdhImages().size());
     }
@@ -284,49 +304,49 @@ public class ClusterUpgradeImageFilterTest {
         return new Image(DATE, CREATED, null, OS, CURRENT_IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createProperImage() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createImageWithDifferentPlatform() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createImageWithDifferentOs() {
         return new Image(null, CREATED_LARGER, null, "ubuntu", IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createImageWithSameStackAndCmVersion() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createImageWithDifferentStackVersioning() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions("7.x.0", V_7_0_3),
-                getParcels(), null, null);
+                getParcels(), null, null, true);
     }
 
     private Image createImageWithoutCmVersion() {
         return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
-                OS_TYPE, createPackageVersions("", V_7_0_2), getParcels(), null, null);
+                OS_TYPE, createPackageVersions("", V_7_0_2), getParcels(), null, null, true);
     }
 
     private Image createImageWithCurrentImageId() {
         return new Image(null, CREATED_LARGER, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
-                null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3), getParcels(), null, null);
+                null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3), getParcels(), null, null, true);
     }
 
     private Map<String, String> createPackageVersions(String cmVersion, String cdhVersion) {

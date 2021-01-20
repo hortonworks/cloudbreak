@@ -23,6 +23,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 import javax.ws.rs.core.Response.StatusType;
 
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Before;
@@ -92,6 +93,9 @@ public class ImageCatalogProviderTest {
 
     @Mock
     private StatusType statusTypeMock;
+
+    @Mock
+    private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -255,17 +259,6 @@ public class ImageCatalogProviderTest {
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
         underTest.getImageCatalogV3(catalogUrl);
-    }
-
-    @Test
-    public void testImageCatalogWithEmptyCloudBreakVersions() {
-        String path = getPath(CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON);
-        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
-        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
-
-        String errorMessage = getErrorMessage(CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON);
-        String expected = "Cloudbreak versions cannot be NULL";
-        Assert.assertTrue("Check that the Cloudbreak version cannot be empty", errorMessage.startsWith(expected));
     }
 
     @Test

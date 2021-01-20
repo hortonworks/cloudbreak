@@ -14,7 +14,7 @@ public class CloudbreakImageCatalogV3 {
     @JsonCreator
     public CloudbreakImageCatalogV3(
             @JsonProperty(value = "images", required = true) Images images,
-            @JsonProperty(value = "versions", required = true) Versions versions) {
+            @JsonProperty(value = "versions") Versions versions) {
         this.images = images;
         this.versions = versions;
     }

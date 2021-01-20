@@ -82,7 +82,7 @@ public class ImageCatalogValidator implements ConstraintValidator<ValidImageCata
         @JsonCreator
         public CloudbreakImageCatalog(
                 @JsonProperty(value = "images", required = true) Map<String, Object> images,
-                @JsonProperty(value = "versions", required = true) Map<String, Object> versions) {
+                @JsonProperty(value = "versions") Map<String, Object> versions) {
             this.images = images;
             this.versions = versions;
         }

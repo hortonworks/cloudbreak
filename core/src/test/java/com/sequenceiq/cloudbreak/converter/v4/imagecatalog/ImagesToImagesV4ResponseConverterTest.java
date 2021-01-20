@@ -68,7 +68,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
 
         return new Image("", System.currentTimeMillis(), "", osType, UUID.randomUUID().toString(), "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, osType, Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList(), "1");
+                Collections.emptyList(), Collections.emptyList(), "1", true);
     }
 
     private void setupStackEntries() {
