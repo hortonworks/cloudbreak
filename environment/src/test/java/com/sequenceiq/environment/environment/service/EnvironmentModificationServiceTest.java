@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -565,6 +566,7 @@ class EnvironmentModificationServiceTest {
         String accountId = "myAccountId";
         String envCrn = "myEnvCrn";
         EnvironmentFeatures featuresInput = new EnvironmentFeatures();
+        featuresInput.addCloudStorageLogging(false);
         featuresInput.addClusterLogsCollection(true);
         Environment environment = new Environment();
         environment.setTelemetry(new EnvironmentTelemetry());
@@ -576,6 +578,7 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.changeTelemetryFeaturesByEnvironmentCrn(accountId, envCrn, featuresInput);
 
         verify(environmentService).save(any());
+        assertFalse(environment.getTelemetry().getFeatures().getCloudStorageLogging().isEnabled());
         assertTrue(environment.getTelemetry().getFeatures().getClusterLogsCollection().isEnabled());
     }
 
