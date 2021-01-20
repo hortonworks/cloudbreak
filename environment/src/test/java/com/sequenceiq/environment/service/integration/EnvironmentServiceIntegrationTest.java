@@ -21,9 +21,11 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -38,6 +40,7 @@ import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.authorization.service.UmsResourceAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsDefaultRegionSelectionFailed;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -191,6 +194,25 @@ public class EnvironmentServiceIntegrationTest {
         CredentialResponse response = client.credentialV1Endpoint().post(credentialRequest);
         assertTrue(response.getName().equals(credentialRequest.getName()), " not saved, or response is different");
         assertTrue(credentialRepository.findByNameAndAccountId(credentialRequest.getName(), TEST_ACCOUNT_ID, List.of("AWS"), ENVIRONMENT).isPresent());
+    }
+
+    @Test
+    public void testCredentialCreateAwsDefaultRegionExceptionMappedToForbidden() throws InterruptedException {
+        credentialRequest.setAws(getAwsKeyBasedCredentialParameters(false, "yyy", "zzzz"));
+        credentialRequest.setCloudPlatform("AWS");
+        credentialRequest.setName("testcredential");
+
+        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+                invocation -> new CredentialVerificationRequest(invocation.getArgument(0), invocation.getArgument(1)) {
+                    @Override
+                    public CredentialVerificationResult await() {
+                        throw new AwsDefaultRegionSelectionFailed("this is an exceptional exception");
+                    }
+                });
+        when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
+
+        Assertions.assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().post(credentialRequest));
     }
 
     @Test
