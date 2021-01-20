@@ -472,7 +472,6 @@ public class ClusterHostServiceRunner {
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
             String license = licenseOpt.get();
-            LOGGER.debug("Got license key from UMS: {}", license);
             servicePillar.put("cloudera-manager-license",
                     new SaltPillarProperties("/cloudera-manager/license.sls",
                             singletonMap("cloudera-manager",
