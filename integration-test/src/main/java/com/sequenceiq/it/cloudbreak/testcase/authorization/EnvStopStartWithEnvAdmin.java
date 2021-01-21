@@ -124,7 +124,7 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {
         Map<String, List<RightV4>> resourceRightsToCheck = Maps.newHashMap();
         resourceRightsToCheck.put(dhCrn, Lists.newArrayList(RightV4.DH_DELETE, RightV4.DH_START, RightV4.DH_STOP));
-        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightFalseAssertion(),
+        AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_A, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheck, utilTestClient);
         AuthorizationTestUtil.testCheckResourceRightUtil(testContext, AuthUserKeys.ENV_CREATOR_B, new CheckResourceRightTrueAssertion(),
                 resourceRightsToCheck, utilTestClient);
