@@ -154,8 +154,11 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         CloudSubnet mlxSubnet = new CloudSubnet();
         mlxSubnet.setType(SubnetType.MLX);
 
-        CloudSubnet publicSubnet = new CloudSubnet();
-        publicSubnet.setType(SubnetType.PUBLIC);
+        CloudSubnet publicSubnet1 = new CloudSubnet();
+        publicSubnet1.setType(SubnetType.PUBLIC);
+
+        CloudSubnet publicSubnet2 = new CloudSubnet();
+        publicSubnet2.setType(SubnetType.PUBLIC);
 
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
@@ -163,8 +166,9 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
                 .withSubnetMetas(Map.of(
                         "1", dwxSubnet,
                         "2", mlxSubnet,
-                        "3", publicSubnet,
-                        "4", privateSubnet
+                        "3", publicSubnet1,
+                        "4", publicSubnet2,
+                        "5", privateSubnet
                         )
                 )
                 .build();
@@ -181,7 +185,7 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getNetworkType());
         Assert.assertEquals(3,
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPrivateSubnets());
-        Assert.assertEquals(1,
+        Assert.assertEquals(2,
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPublicSubnets());
     }
 
