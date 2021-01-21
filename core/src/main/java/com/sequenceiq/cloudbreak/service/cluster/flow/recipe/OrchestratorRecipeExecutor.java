@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPLOAD_RECIPES;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
@@ -50,6 +53,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 class OrchestratorRecipeExecutor {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -98,9 +103,12 @@ class OrchestratorRecipeExecutor {
             hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            throw new CloudbreakException("Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
+            String preClusterManagerStartException = "Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", preClusterManagerStartException, timeoutException);
+            throw new CloudbreakException(preClusterManagerStartException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
+            LOGGER.info(message);
             throw new CloudbreakException(message);
         }
     }
@@ -111,9 +119,12 @@ class OrchestratorRecipeExecutor {
             hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            throw new CloudbreakException("Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
+            String postClusterManagerStartException = "Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", postClusterManagerStartException, timeoutException);
+            throw new CloudbreakException(postClusterManagerStartException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
+            LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
     }
@@ -124,9 +135,12 @@ class OrchestratorRecipeExecutor {
             hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
                     clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            throw new CloudbreakException("Post install" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
+            String postInstallException = getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", postInstallException, timeoutException);
+            throw new CloudbreakException(postInstallException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
+            LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
     }
@@ -147,9 +161,12 @@ class OrchestratorRecipeExecutor {
         try {
             hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);
         } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            throw new CloudbreakException("Pre-termination" + getRecipeTimeoutErrorMessage(timeoutException), timeoutException);
+            String preTerminationException = "Pre-termination" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", preTerminationException, timeoutException);
+            throw new CloudbreakException(preTerminationException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
             String message = getRecipeExecutionFaiureMessage(stack, e);
+            LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
     }
@@ -184,9 +201,13 @@ class OrchestratorRecipeExecutor {
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
+        TemplatePreparationObject templatePreparationObject = measure(() -> conversionService.convert(stack, TemplatePreparationObject.class),
+            LOGGER, "Template prepartion object generation took {} ms for recipes generation.");
         Map<HostGroup, List<RecipeModel>> recipeModels = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty())
-                .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes())));
-        prepareGeneratedRecipes(recipeModels, stack.getWorkspace());
+                .collect(Collectors.toMap(h -> h, h -> convert(stack, h.getRecipes(), templatePreparationObject)));
+        measure(() -> prepareGeneratedRecipes(recipeModels, stack.getWorkspace()),
+                LOGGER,
+                "Persisting all the generated recipes took {} ms");
         return recipeModels;
     }
 
@@ -202,12 +223,14 @@ class OrchestratorRecipeExecutor {
         }
     }
 
-    private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes) {
+    private List<RecipeModel> convert(Stack stack, Set<Recipe> recipes, TemplatePreparationObject templatePreparationObject) {
         List<RecipeModel> result = new ArrayList<>();
         for (Recipe recipe : recipes) {
             String decodedContent = new String(Base64.decodeBase64(recipe.getContent()));
-            TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
-            String generatedRecipeText = centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent);
+            String generatedRecipeText = measure(() -> centralRecipeUpdater.getRecipeText(templatePreparationObject, decodedContent),
+                    LOGGER,
+                    "Recipe generation took {} ms");
+            LOGGER.info("Generated recipe is: {}", generatedRecipeText);
             RecipeModel recipeModel = new RecipeModel(recipe.getName(), recipe.getRecipeType(), generatedRecipeText);
             result.add(recipeModel);
         }

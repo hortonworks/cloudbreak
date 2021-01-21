@@ -185,9 +185,10 @@ public class AwsMetadataCollector implements MetadataCollector {
         LOGGER.debug("Collect AWS load balancer metadata, for cluster {}", ac.getCloudContext().getName());
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
-        try {
-            for (LoadBalancerType type : loadBalancerTypes) {
-                String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(loadBalancerTypeConverter.convert(type));
+        for (LoadBalancerType type : loadBalancerTypes) {
+            String loadBalancerName = AwsLoadBalancer.getLoadBalancerName(loadBalancerTypeConverter.convert(type));
+            LOGGER.debug("Attempting to collected metadata for load balancer {}, type {}", loadBalancerName, type);
+            try {
                 LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
                 cloudLoadBalancerMetadata.add(new CloudLoadBalancerMetadata(
                     type,
@@ -195,10 +196,12 @@ public class AwsMetadataCollector implements MetadataCollector {
                     loadBalancer.getCanonicalHostedZoneId(),
                     null
                 ));
+                LOGGER.debug("Saved metdata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.getDNSName(),
+                    loadBalancer.getCanonicalHostedZoneId());
+            } catch (RuntimeException e) {
+                LOGGER.debug("Unable to find metadata for load balancer " + loadBalancerName, e);
             }
-            return cloudLoadBalancerMetadata;
-        } catch (RuntimeException e) {
-            throw new CloudConnectorException(e.getMessage(), e);
         }
+        return cloudLoadBalancerMetadata;
     }
 }
