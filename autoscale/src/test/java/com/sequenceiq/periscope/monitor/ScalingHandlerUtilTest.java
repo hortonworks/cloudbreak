@@ -131,7 +131,7 @@ public class ScalingHandlerUtilTest {
         when(autoscaleEndpoint.getHostMetadataCountForAutoscale(10L, "hg")).thenReturn(1L);
         when(applicationContext.getBean("ScalingRequest", cluster, policy, 1, 2)).thenReturn(runnable);
         underTest.scaleIfNeed(cluster, alert);
-        verify(clusterService, times(1)).save(cluster);
+        verify(clusterService, times(1)).updateLastScalingActivity(cluster);
         verify(loggedExecutorService, times(1)).submit("ScalingHandler", runnable);
     }
 

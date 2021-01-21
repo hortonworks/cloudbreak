@@ -10,7 +10,6 @@ Cloudbreak uses [Semantic Version numbers](http://semver.org):
 - `pre-release` is a postfix that signals whether the artifact was built locally, or if it is a development or a release candidate.
 - `build-metadata` is only used in locally built artifacts and contains the git hash of the latest commit. 
 
-
 ### Example 1: Local development versions
 
 Local development should be done on feature branches, branched from `master`. Locally built artifacts will have a version like this:
