@@ -114,7 +114,7 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
             cdpNetworkDetails.setServiceEndpointCreation(network.getServiceEndpointCreation().name());
             if (network.getSubnetMetas() != null) {
                 List<SubnetType> types = network.getSubnetMetas().values().stream().map(CloudSubnet::getType)
-                        .filter(Objects::nonNull).sorted().distinct().collect(Collectors.toUnmodifiableList());
+                        .filter(Objects::nonNull).sorted().collect(Collectors.toUnmodifiableList());
                 cdpNetworkDetails.setNumberPrivateSubnets(
                         types.stream()
                                 .filter(e -> e.equals(SubnetType.PRIVATE) || e.equals(SubnetType.MLX) || e.equals(SubnetType.DWX))
