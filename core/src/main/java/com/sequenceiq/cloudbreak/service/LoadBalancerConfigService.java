@@ -2,12 +2,14 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,8 +19,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -40,6 +45,8 @@ public class LoadBalancerConfigService {
 
     private static final String ENDPOINT_SUFFIX = "gateway";
 
+    private static final String SUBNET_ID = "subnetId";
+
     private static final Set<Integer> DEFAULT_KNOX_PORTS = Set.of(443);
 
     @Inject
@@ -47,6 +54,9 @@ public class LoadBalancerConfigService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private SubnetSelector subnetSelector;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
         LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
@@ -97,9 +107,18 @@ public class LoadBalancerConfigService {
     public String getLoadBalancerUserFacingFQDN(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
         if (!loadBalancers.isEmpty()) {
-            LoadBalancer preferredLB = loadBalancers.stream().filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType())).findAny()
+            LoadBalancer preferredLB = loadBalancers.stream()
+                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
+                .findAny()
                 .orElse(loadBalancers.iterator().next());
-            return preferredLB.getFqdn();
+            if (StringUtils.isNotEmpty(preferredLB.getFqdn())) {
+                return preferredLB.getFqdn();
+            } else {
+                return loadBalancers.stream()
+                    .map(LoadBalancer::getFqdn)
+                    .filter(StringUtils::isNotEmpty)
+                    .findFirst().orElse(null);
+            }
         }
 
         return null;
@@ -135,17 +154,21 @@ public class LoadBalancerConfigService {
             LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
             if (knoxTargetGroup.isPresent()) {
-                if (arePrivateSubnetsAvailable(environment.getNetwork())) {
+                if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                     LOGGER.debug("Found Knox enabled instance groups in stack. Setting up internal Knox load balancer");
                     setupKnoxLoadBalancer(
                         createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PRIVATE, stack),
                         knoxTargetGroup.get());
+                } else {
+                    LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
                 }
-                if (shouldCreateExternalKnoxLoadBalancer(environment.getNetwork())) {
+                if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork())) {
                     LOGGER.debug("Public endpoint access gateway is enabled. Setting up public Knox load balancer");
                     setupKnoxLoadBalancer(
                         createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PUBLIC, stack),
                         knoxTargetGroup.get());
+                } else {
+                    LOGGER.debug("External load balancer creation is disabled.");
                 }
             } else {
                 LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
@@ -155,6 +178,32 @@ public class LoadBalancerConfigService {
         }
 
         return loadBalancers;
+    }
+
+    private boolean isNetworkUsingPrivateSubnet(Network network, EnvironmentNetworkResponse envNetwork) {
+        return isSelectedSubnetAvailableAndRequestedType(network, envNetwork, true);
+    }
+
+    private boolean isNetworkUsingPublicSubnet(Network network, EnvironmentNetworkResponse envNetwork) {
+        return isSelectedSubnetAvailableAndRequestedType(network, envNetwork, false);
+    }
+
+    private boolean isSelectedSubnetAvailableAndRequestedType(Network network, EnvironmentNetworkResponse envNetwork, boolean privateType) {
+        if (network != null) {
+            Json attributes = network.getAttributes();
+            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
+            String subnetId = params.get(SUBNET_ID) != null ? String.valueOf(params.get(SUBNET_ID)) : null;
+            if (StringUtils.isNotEmpty(subnetId)) {
+                LOGGER.debug("Found selected stack subnet {}", subnetId);
+                Optional<CloudSubnet> selectedSubnet = subnetSelector.findSubnetById(envNetwork.getSubnetMetas(), subnetId);
+                if (selectedSubnet.isPresent()) {
+                    LOGGER.debug("Subnet {} type {}", subnetId, selectedSubnet.get().isPrivateSubnet() ? "private" : "public");
+                    return privateType == selectedSubnet.get().isPrivateSubnet();
+                }
+            }
+        }
+        LOGGER.debug("Subnet for load balancer creation was not found.");
+        return false;
     }
 
     private boolean isLoadBalancerEnabled(StackType type, DetailedEnvironmentResponse environment) {
@@ -171,25 +220,19 @@ public class LoadBalancerConfigService {
         return StackType.WORKLOAD.equals(type) && environment != null && isEndpointGatewayEnabled(environment.getNetwork());
     }
 
-    private boolean arePrivateSubnetsAvailable(EnvironmentNetworkResponse network) {
-        LOGGER.debug("Checking if network has private subnets defined...");
-        boolean result = network != null && network.getSubnetMetas() != null &&
-            network.getSubnetMetas().values().stream().anyMatch(CloudSubnet::isPrivateSubnet);
-        if (result) {
-            LOGGER.debug("Private subnets found.");
-        } else {
-            LOGGER.debug("No private subnets found. Internal load balancer for stack will not be created.");
-        }
-        return result;
-    }
-
-    private boolean shouldCreateExternalKnoxLoadBalancer(EnvironmentNetworkResponse network) {
-        return isEndpointGatewayEnabled(network) || !arePrivateSubnetsAvailable(network);
+    private boolean shouldCreateExternalKnoxLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork) {
+        return isEndpointGatewayEnabled(envNetwork) || isNetworkUsingPublicSubnet(network, envNetwork);
     }
 
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
-        return network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED
+        boolean result =  network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED
             && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId());
+        if (result) {
+            LOGGER.debug("Public endpoint access gateway is enabled. A public load balancer will be created.");
+        } else {
+            LOGGER.debug("Public endpoint access gateway is disabled.");
+        }
+        return result;
     }
 
     private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack) {
