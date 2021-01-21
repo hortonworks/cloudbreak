@@ -330,7 +330,7 @@ public class AwsMetaDataCollectorTest {
 
     @Test
     public void testCollectLoadBalancers() {
-        setupMethodsForLoadBalancer();
+        setupMethodsForLoadBalancer(true);
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
@@ -353,7 +353,7 @@ public class AwsMetaDataCollectorTest {
 
     @Test
     public void testCollectLoadBalancerOnlyDefaultGateway() {
-        setupMethodsForLoadBalancer();
+        setupMethodsForLoadBalancer(true);
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
@@ -370,7 +370,7 @@ public class AwsMetaDataCollectorTest {
 
     @Test
     public void testCollectLoadBalancerOnlyEndpointAccessGateway() {
-        setupMethodsForLoadBalancer();
+        setupMethodsForLoadBalancer(true);
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
@@ -383,6 +383,24 @@ public class AwsMetaDataCollectorTest {
         Assert.assertTrue(externalMetadata.isPresent());
         Assert.assertEquals(EXTERNAL_LB_DNS, externalMetadata.get().getCloudDns());
         Assert.assertEquals(ZONE_2, externalMetadata.get().getHostedZoneId());
+    }
+
+    @Test
+    public void testCollectLoadBalancerMissingMetadata() {
+        setupMethodsForLoadBalancer(false);
+
+        AuthenticatedContext ac = authenticatedContext();
+        List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
+            List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC));
+
+        Assert.assertEquals(1, metadata.size());
+        Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()
+            .filter(m -> m.getType() == LoadBalancerType.PUBLIC)
+            .findFirst();
+        Assert.assertTrue(externalMetadata.isPresent());
+        Assert.assertEquals(LoadBalancerType.PUBLIC, metadata.iterator().next().getType());
+        Assert.assertEquals(EXTERNAL_LB_DNS, metadata.iterator().next().getCloudDns());
+        Assert.assertEquals(ZONE_2, metadata.iterator().next().getHostedZoneId());
     }
 
     private Reservation getReservation(Instance... instance) {
@@ -402,7 +420,7 @@ public class AwsMetaDataCollectorTest {
         return authenticatedContext;
     }
 
-    private void setupMethodsForLoadBalancer() {
+    private void setupMethodsForLoadBalancer(boolean canFindInternalLB) {
         LoadBalancer internalLoadBalancer = new LoadBalancer()
             .withDNSName(INTERNAL_LB_DNS)
             .withCanonicalHostedZoneId(ZONE_1);
@@ -410,7 +428,11 @@ public class AwsMetaDataCollectorTest {
             .withDNSName(EXTERNAL_LB_DNS)
             .withCanonicalHostedZoneId(ZONE_2);
 
-        when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(INTERNAL_LB_ID))).thenReturn(internalLoadBalancer);
+        if (canFindInternalLB) {
+            when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(INTERNAL_LB_ID))).thenReturn(internalLoadBalancer);
+        } else {
+            when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(INTERNAL_LB_ID))).thenThrow(new RuntimeException("missing metadata"));
+        }
         when(cloudFormationStackUtil.getLoadBalancerByLogicalId(any(), eq(EXTERNAL_LB_ID))).thenReturn(externalLoadBalancer);
         when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PRIVATE))).thenReturn(AwsLoadBalancerScheme.INTERNAL);
         when(loadBalancerTypeConverter.convert(eq(LoadBalancerType.PUBLIC))).thenReturn(AwsLoadBalancerScheme.INTERNET_FACING);
