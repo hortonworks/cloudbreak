@@ -51,7 +51,7 @@ public class ScalingHandlerUtil {
         if (totalNodes != desiredNodeCount) {
             LOGGER.info("{} cluster id will be scaled up with {} policy", cluster.getId(), policy.getName());
             cluster.setLastScalingActivityCurrent();
-            clusterService.save(cluster);
+            clusterService.updateLastScalingActivity(cluster);
             scale(cluster, policy);
         } else {
             LOGGER.info("No scaling activity required for '{}' policy", policy.getName());

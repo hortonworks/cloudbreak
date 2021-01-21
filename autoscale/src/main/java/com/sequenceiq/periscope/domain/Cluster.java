@@ -70,7 +70,7 @@ public class Cluster implements Monitored {
     @Column(name = "cb_stack_id")
     private Long stackId;
 
-    @Column(name = "last_scaling_activity")
+    @Column(name = "last_scaling_activity", updatable = false)
     private volatile long lastScalingActivity;
 
     @Column(name = "autoscaling_enabled")

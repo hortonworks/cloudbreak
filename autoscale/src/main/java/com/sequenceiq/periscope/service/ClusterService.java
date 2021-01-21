@@ -148,6 +148,21 @@ public class ClusterService {
         }
     }
 
+    public void updateLastScalingActivity(Cluster cluster) {
+        try {
+            transactionService.required(() -> {
+                LOGGER.debug("Updating last scaling activity timestamp for cluster (id: {}) with value {}",
+                        cluster.getId(), cluster.getLastScalingActivity());
+                clusterRepository.updateClusterLastScalingActivity(cluster.getId(), cluster.getLastScalingActivity());
+                LOGGER.debug("Update last scaling activity timestamp for cluster (id: {}) with value {} finished successfully",
+                        cluster.getId(), cluster.getLastScalingActivity());
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Unable to set lastScalingActivity column", e);
+        }
+    }
+
     public Cluster findById(Long clusterId) {
         return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
