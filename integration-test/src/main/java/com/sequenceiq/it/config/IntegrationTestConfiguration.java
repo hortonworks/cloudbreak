@@ -24,6 +24,12 @@ import org.testng.TestNG;
 
 import com.sequenceiq.it.TestParameter;
 
+import io.jaegertracing.internal.JaegerTracer;
+import io.jaegertracing.internal.reporters.InMemoryReporter;
+import io.jaegertracing.internal.samplers.ConstSampler;
+import io.jaegertracing.spi.Reporter;
+import io.jaegertracing.spi.Sampler;
+
 @Configuration
 @ComponentScan("com.sequenceiq.it")
 @EnableConfigurationProperties
@@ -59,6 +65,17 @@ public class IntegrationTestConfiguration {
         LOGGER.info("Application.yml based parameters ::: ");
         testParameter.putAll(getAllKnownProperties(environment));
         return testParameter;
+    }
+
+    @Bean
+    public io.opentracing.Tracer jaegerTracer() {
+        // can't turn of jaeger any other way, skipping autoconfiguration does not work
+        final Reporter reporter = new InMemoryReporter();
+        final Sampler sampler = new ConstSampler(false);
+        return new JaegerTracer.Builder("untraced-service")
+                .withReporter(reporter)
+                .withSampler(sampler)
+                .build();
     }
 
     private Map<String, String> getAllKnownProperties(Environment env) {
