@@ -74,6 +74,9 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private ComponentLocatorService componentLocatorService;
 
+    @Mock
+    private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
+
     @InjectMocks
     private final ServiceEndpointCollector underTest = new ServiceEndpointCollector();
 
@@ -98,6 +101,8 @@ public class ServiceEndpointCollectorTest {
         when(exposedServiceCollector.knoxServicesForComponents(anyList())).thenReturn(
                 List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI")));
         when(exposedServiceCollector.getFullServiceListBasedOnList(anyList())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
+        when(serviceEndpointCollectorVersionComparator.maxVersionSupported(any(), any())).thenReturn(true);
+        when(serviceEndpointCollectorVersionComparator.minVersionSupported(any(), any())).thenReturn(true);
     }
 
     @Test

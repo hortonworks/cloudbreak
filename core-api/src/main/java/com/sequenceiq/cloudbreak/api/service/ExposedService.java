@@ -30,6 +30,10 @@ public class ExposedService {
 
     private boolean visibleForDatahub;
 
+    private String minVersion;
+
+    private String maxVersion;
+
     public String getName() {
         return name;
     }
@@ -138,6 +142,22 @@ public class ExposedService {
         return isVisibleForDatalake() || isVisibleForDatahub();
     }
 
+    public void setMinVersion(String minVersion) {
+        this.minVersion = minVersion;
+    }
+
+    public void setMaxVersion(String maxVersion) {
+        this.maxVersion = maxVersion;
+    }
+
+    public String getMinVersion() {
+        return minVersion;
+    }
+
+    public String getMaxVersion() {
+        return maxVersion;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
@@ -159,6 +179,8 @@ public class ExposedService {
                 Objects.equals(knoxService, that.knoxService) &&
                 Objects.equals(knoxUrl, that.knoxUrl) &&
                 Objects.equals(port, that.port) &&
+                Objects.equals(minVersion, that.minVersion) &&
+                Objects.equals(maxVersion, that.maxVersion) &&
                 Objects.equals(tlsPort, that.tlsPort);
     }
     //CHECKSTYLE:ON
@@ -166,7 +188,7 @@ public class ExposedService {
     @Override
     public int hashCode() {
         return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
-                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake);
+                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion, maxVersion);
     }
 
     @Override
@@ -184,6 +206,8 @@ public class ExposedService {
                 ", apiIncluded=" + apiIncluded +
                 ", isVisibleForDatahub=" + visibleForDatahub +
                 ", isVisibleForDatalake=" + visibleForDatalake +
+                ", minVersion=" + minVersion +
+                ", maxVersion=" + maxVersion +
                 '}';
     }
 }

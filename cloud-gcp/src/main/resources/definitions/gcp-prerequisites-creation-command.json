@@ -9,28 +9,28 @@ gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A CDP S
 
 
 echo "Binding Instance Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.instanceAdmin.v1 --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.instanceAdmin.v1 --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Network Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.networkAdmin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.networkAdmin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Security Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.securityAdmin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.securityAdmin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Image User role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.imageUser --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.imageUser --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Storage Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.storageAdmin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.storageAdmin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding RuntimeConfig Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/runtimeconfig.admin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/runtimeconfig.admin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Cloud KMS Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/cloudkms.admin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/cloudkms.admin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Cloud SQL role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/cloudsql.admin --quiet --no-user-output-enabled
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/cloudsql.admin --quiet --no-user-output-enabled --condition=None
 
 echo "Creating key for the service account"
 gcloud iam service-accounts keys create --iam-account=$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com $SERVICE_ACCOUNT_NAME-gcp-cred.json

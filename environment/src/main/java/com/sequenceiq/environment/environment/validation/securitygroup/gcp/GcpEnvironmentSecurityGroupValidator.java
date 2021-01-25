@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -55,7 +56,8 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
                 null,
                 region.getName(),
                 getCloudPlatform().name(),
-                null);
+                null,
+                CdpResourceType.DEFAULT);
 
         Map<String, String> filters = new HashMap<>();
         if (!Strings.isNullOrEmpty(environmentDto.getNetwork().getGcp().getSharedProjectId())) {
@@ -79,6 +81,11 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
         if (!securityGroupFoundInRegion) {
             resultBuilder.error(securityGroupNotInTheSameRegion(securityGroupId, region.getName()));
         }
+    }
+
+    @Override
+    public String securityGroupNotInTheSameRegion(String securityGroupId, String region) {
+        return String.format("The '%s' security group must exists on Google Cloud side that you defined in the request!", securityGroupId);
     }
 
     @Override

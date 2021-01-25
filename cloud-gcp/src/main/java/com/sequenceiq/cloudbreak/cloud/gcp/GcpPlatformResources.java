@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -26,6 +27,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,11 +50,13 @@ import com.google.api.services.compute.model.NetworkList;
 import com.google.api.services.compute.model.RegionList;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
+import com.google.api.services.iam.v1.Iam;
+import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
@@ -94,10 +98,20 @@ public class GcpPlatformResources implements PlatformResources {
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
 
+    @Value("${cb.gcp.distrox.enabled.instance.types:}")
+    private List<String> enabledDistroxInstanceTypes;
+
+    @Value("${distrox.restrict.instance.types:true}")
+    private boolean restrictInstanceTypes;
+
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
+
+    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
+            .filter(it -> !it.isEmpty())
+            .anyMatch(di -> vmt.value().equals(di));
 
     @PostConstruct
     public void init() {
@@ -207,24 +221,21 @@ public class GcpPlatformResources implements PlatformResources {
     private SubnetworkList getSubnetworkList(Region region, Compute compute, String projectId, List<String> subnetIds,
         String sharedProjectId) throws IOException {
         SubnetworkList subnetworkList;
-        validateSubnetRequest(subnetIds, sharedProjectId);
-        if (subnetIds.isEmpty()) {
+        if (subnetIds.isEmpty() && Strings.isNullOrEmpty(sharedProjectId)) {
             subnetworkList = compute.subnetworks().list(projectId, region.value()).execute();
         } else {
             String tmpProjectId = !Strings.isNullOrEmpty(sharedProjectId) ? sharedProjectId : projectId;
             subnetworkList = new SubnetworkList().setItems(new ArrayList<>());
             for (String subnetId : subnetIds) {
-                Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
-                subnetworkList.getItems().add(subnetwork);
+                try {
+                    Subnetwork subnetwork = compute.subnetworks().get(tmpProjectId, region.value(), subnetId).execute();
+                    subnetworkList.getItems().add(subnetwork);
+                } catch (Exception e) {
+                    LOGGER.info("Could not get Subnetworks from {} project with {} subnetId: {}", tmpProjectId, subnetId, e);
+                }
             }
         }
         return subnetworkList;
-    }
-
-    private void validateSubnetRequest(List<String> subnetIds, String sharedProjectId) {
-        if (!Strings.isNullOrEmpty(sharedProjectId) && subnetIds.isEmpty()) {
-            throw new CloudConnectorException("If shared project id defined then subnet Id required.");
-        }
     }
 
     public NetworkList getNetworkList(Compute compute, String projectId, String networkId, String sharedProjectId) throws IOException {
@@ -234,8 +245,14 @@ public class GcpPlatformResources implements PlatformResources {
                     .list(projectId).execute();
         } else {
             if (!Strings.isNullOrEmpty(sharedProjectId)) {
-                networkList = new NetworkList()
+                try {
+                    networkList = new NetworkList()
                         .setItems(Collections.singletonList(compute.networks().get(sharedProjectId, networkId).execute()));
+                } catch (Exception e) {
+                    LOGGER.info("Could not get Subnetworks from {} project with {} networkId: {}", sharedProjectId, networkId, e);
+                    networkList = new NetworkList()
+                            .setItems(List.of());
+                }
             } else {
                 networkList = new NetworkList()
                         .setItems(Collections.singletonList(compute.networks().get(projectId, networkId).execute()));
@@ -353,6 +370,26 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
+        Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
+        Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
+        if (restrictInstanceTypes) {
+            for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
+                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(enabledDistroxInstanceTypeFilter)
+                        .collect(Collectors.toSet()));
+            }
+        } else {
+            for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
+                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .collect(Collectors.toSet()));
+            }
+        }
+        return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
+    }
+
+    @NotNull
+    public CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = GcpStackUtil.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
@@ -409,7 +446,25 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return new CloudAccessConfigs(new HashSet<>());
+        Iam iam = GcpStackUtil.buildIam(cloudCredential);
+        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        Set<CloudAccessConfig> collect = new HashSet<>();
+        try {
+            ListServiceAccountsResponse listServiceAccountsResponse = iam
+                    .projects()
+                    .serviceAccounts()
+                    .list("projects/" + projectId)
+                    .execute();
+
+            collect = listServiceAccountsResponse
+                    .getAccounts()
+                    .stream()
+                    .map(e -> new CloudAccessConfig(e.getName(), e.getEmail(), new HashMap<>()))
+                    .collect(Collectors.toSet());
+            return new CloudAccessConfigs(collect);
+        } catch (Exception ex) {
+            return new CloudAccessConfigs(collect);
+        }
     }
 
     @Override
