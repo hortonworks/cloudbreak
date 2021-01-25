@@ -152,8 +152,6 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING), anyCollection());
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
-                eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED), anyCollection());
     }
 
     @Test
@@ -170,8 +168,6 @@ public class InstanceMetadataUpdaterTest {
 
         verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
                 eq(ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT), anyCollection());
-        verify(cloudbreakEventService, times(1)).fireCloudbreakEvent(anyLong(), anyString(),
-                eq(ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED), anyCollection());
     }
 
     private Map<String, String> packageMap() {
