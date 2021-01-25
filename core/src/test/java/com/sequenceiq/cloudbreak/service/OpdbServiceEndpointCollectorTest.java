@@ -91,6 +91,9 @@ public class OpdbServiceEndpointCollectorTest {
     @Mock
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Mock
+    private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
+
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter =
     new GatewayTopologyV4RequestToExposedServicesConverter();
@@ -148,6 +151,8 @@ public class OpdbServiceEndpointCollectorTest {
         services.add("CM-UI");
         services.add("CM-API");
         when(exposedServiceCollector.getFullServiceListBasedOnList(any())).thenReturn(services);
+        when(serviceEndpointCollectorVersionComparator.maxVersionSupported(any(), any())).thenReturn(true);
+        when(serviceEndpointCollectorVersionComparator.minVersionSupported(any(), any())).thenReturn(true);
         // Skip exposed service validation
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         // Couldn't get all mocks wired up with the Spring autowiring working. So, this is a pared down

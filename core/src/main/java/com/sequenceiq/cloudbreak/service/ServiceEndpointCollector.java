@@ -69,6 +69,9 @@ public class ServiceEndpointCollector {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
+    @Inject
+    private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
+
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
         return getKnoxServices(blueprint);
@@ -252,6 +255,10 @@ public class ServiceEndpointCollector {
         return exposedServiceCollector.knoxServicesForComponents(components)
                 .stream()
                 .filter(ExposedService::isVisible)
+                .filter(e -> serviceEndpointCollectorVersionComparator
+                        .maxVersionSupported(processor.getCmVersion(), e.getMaxVersion()))
+                .filter(e -> serviceEndpointCollectorVersionComparator
+                        .minVersionSupported(processor.getCmVersion(), e.getMinVersion()))
                 .collect(Collectors.toList());
     }
 
