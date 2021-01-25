@@ -15,26 +15,30 @@ public class ServiceEndpointCollectorVersionComparator {
     private VersionComparator versionComparator = new VersionComparator();
 
     public boolean minVersionSupported(Optional<String> blueprintVersionOptional, String minVersionString) {
+        boolean shouldInclude = false;
         if (Strings.isNullOrEmpty(minVersionString)) {
-            return true;
+            shouldInclude = true;
         } else if (blueprintVersionOptional.isEmpty()) {
-            return true;
+            shouldInclude =  true;
         } else {
             Versioned blueprintVersion = () -> StringUtils.substringBefore(blueprintVersionOptional.get(), "-");
             Versioned minVersion = () -> StringUtils.substringBefore(minVersionString, "-");
-            return versionComparator.compare(blueprintVersion, minVersion) >= 0;
+            shouldInclude = versionComparator.compare(blueprintVersion, minVersion) >= 0;
         }
+        return shouldInclude;
     }
 
     public boolean maxVersionSupported(Optional<String> blueprintVersionOptional, String maxVersionString) {
+        boolean shouldInclude = false;
         if (Strings.isNullOrEmpty(maxVersionString)) {
-            return true;
+            shouldInclude = true;
         } else if (blueprintVersionOptional.isEmpty()) {
-            return true;
+            shouldInclude = true;
         } else {
             Versioned blueprintVersion = () -> StringUtils.substringBefore(blueprintVersionOptional.get(), "-");
             Versioned maxVersion = () -> StringUtils.substringBefore(maxVersionString, "-");
-            return versionComparator.compare(blueprintVersion, maxVersion) <= 0;
+            shouldInclude = versionComparator.compare(blueprintVersion, maxVersion) <= 0;
         }
+        return shouldInclude;
     }
 }

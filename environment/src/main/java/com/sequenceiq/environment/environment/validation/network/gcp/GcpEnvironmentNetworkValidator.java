@@ -105,7 +105,7 @@ public class GcpEnvironmentNetworkValidator implements EnvironmentNetworkValidat
         GcpParams gcpParams, Map<String, CloudSubnet> subnetMetas) {
         if (StringUtils.isNotEmpty(gcpParams.getNetworkId())
                 && MapUtils.isEmpty(subnetMetas)) {
-            String message = String.format("If networkId (%s) are given then subnet ids must be specified as well.",
+            String message = String.format("If networkId (%s) is given then subnet ids must be specified as well.",
                     gcpParams.getNetworkId());
             LOGGER.info(message);
             resultBuilder.error(message);
