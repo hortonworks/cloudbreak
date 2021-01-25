@@ -8,7 +8,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 @Component
-public class RetriableWebTarget {
+public class RetryableWebTarget {
 
     @Retryable(maxAttempts = 5, backoff = @Backoff(delay = 500))
     public Response get(Invocation.Builder call) {
