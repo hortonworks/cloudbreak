@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.customcontainer.CustomContainerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -72,6 +74,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     @Inject
     private IdBrokerConverterUtil idBrokerConverterUtil;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public Cluster convert(ClusterV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
@@ -87,6 +92,12 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCloudStorage());
             cluster.setFileSystem(fileSystem);
+
+            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            if (entitlementService.dataLakeEfsEnabled(accountId)) {
+                FileSystem additionalFileSystem = cloudStorageConverter.requestToAdditionalFileSystem(source.getCloudStorage());
+                cluster.setAdditionalFileSystem(additionalFileSystem);
+            }
         }
         convertAttributes(source, cluster);
         try {

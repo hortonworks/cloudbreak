@@ -36,9 +36,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 @ActiveProfiles("component")
@@ -126,7 +129,23 @@ public class ComponentTestUtil {
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "default", "default-id", new HashMap<>());
 
         String template = configuration.getTemplate(LATEST_AWS_CLOUD_FORMATION_TEMPLATE_PATH, "UTF-8").toString();
-        return new CloudStack(groups, network, image, Map.of(), Map.of(), template, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY, null);
+
+        SpiFileSystem efsFileSystem = getEfsFileSystem();
+
+        return new CloudStack(groups, network, image, Map.of(), Map.of(), template, instanceAuthentication, LOGIN_USER_NAME, PUBLIC_KEY, efsFileSystem);
+    }
+
+    private SpiFileSystem getEfsFileSystem() {
+        String fileSystemName = "efs-test";
+        Map<String, String> tags = new HashMap<>();
+        tags.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS_NAME, fileSystemName);
+        SpiFileSystem newEfsFileSystem = new SpiFileSystem(fileSystemName, FileSystemType.EFS, null, new HashMap<>());
+        newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_ENCRYPTED, true);
+        newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS, tags);
+        newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, "generalPurpose");
+        newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, "provisioned");
+
+        return newEfsFileSystem;
     }
 
     private CloudInstance getCloudInstance(InstanceAuthentication instanceAuthentication,

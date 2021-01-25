@@ -495,8 +495,51 @@
     </#if>
     <#if group_has_next>,</#if>
     </#list>
+
+    <#if enableEfs>
+    ,
+    "ElasticFileSystem":{
+      "Type":"AWS::EFS::FileSystem",
+      "Properties":{
+        <#if efsFileSystem.backupPolicyStatus??>
+          "BackupPolicy" : {
+            "Status" : "${efsFileSystem.backupPolicyStatus}"
+          },
+        </#if>
+        "Encrypted" : "${efsFileSystem.encrypted? string("true", "false")}",
+        <#if efsFileSystem.fileSystemPolicy??>
+          "FileSystemPolicy" : ${efsFileSystem.fileSystemPolicy},
+        </#if>
+        <#if efsFileSystem.fileSystemTags??>
+          "FileSystemTags": [
+            <#list efsFileSystem.fileSystemTags?keys as key>
+            {
+              "Key" : "${key}",
+              "Value" : "${efsFileSystem.fileSystemTags[key]}"
+            }<#if (key_index + 1) != efsFileSystem.fileSystemTags?keys?size> ,</#if>
+          </#list>
+          ],
+        </#if>
+        <#if efsFileSystem.kmsKeyId??>
+         "KmsKeyId": "${efsFileSystem.kmsKeyId}",
+        </#if>
+        <#if efsFileSystem.lifeCyclePolicies??>
+          "LifecyclePolicies": [
+            <#list efsFileSystem.lifeCyclePolicies as lifeCyclePolicy>
+              ${lifeCyclePolicy}<#if (lifeCyclePolicy_index + 1) != efsFileSystem.lifeCyclePolicies?size> ,</#if>
+            </#list>
+            ],
+        </#if>
+        "PerformanceMode": "${efsFileSystem.performanceMode}",
+        <#if efsFileSystem.throughputMode == "provisioned">
+          "ProvisionedThroughputInMibps": "${efsFileSystem.provisionedThroughputInMibps}",
+        </#if>
+        "ThroughputMode": "${efsFileSystem.throughputMode}"
+      }
+    }
+    </#if>
   }
-  <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole)>
+  <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole) || !existingVPC || !existingSubnet || enableEfs>
   ,
   "Outputs" : {
   <#if mapPublicIpOnLaunch>
@@ -515,13 +558,22 @@
     }
   </#if>
   <#if !existingVPC>
-    ,"CreatedVpc": {
+    <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole)>,</#if>
+    "CreatedVpc": {
         "Value" : { "Ref" : "VPC" }
     }
   </#if>
   <#if !existingSubnet>
-    ,"CreatedSubnet": {
+    <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole) || !existingVPC>,</#if>
+    "CreatedSubnet": {
         "Value" :  { "Ref" : "PublicSubnet" }
+    }
+  </#if>
+  <#if enableEfs>
+    <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole) || !existingVPC || !existingSubnet> , </#if>
+    "EfsFileSystemID": {
+        "Description" : "EFS File system ID",
+        "Value" :  { "Ref" : "ElasticFileSystem" }
     }
   </#if>
   }

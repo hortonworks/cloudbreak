@@ -12,6 +12,8 @@ public class CloudIdentity {
 
     private S3Identity s3Identity;
 
+    private EfsIdentity efsIdentity;
+
     private AdlsGen2Identity adlsGen2Identity;
 
     private GcsIdentity gcsIdentity;
@@ -22,6 +24,8 @@ public class CloudIdentity {
             return wasbIdentity.getType();
         } else if (s3Identity != null) {
             return s3Identity.getType();
+        } else if (efsIdentity != null) {
+            return efsIdentity.getType();
         } else if (adlsGen2Identity != null) {
             return adlsGen2Identity.getType();
         } else if (gcsIdentity != null) {
@@ -52,6 +56,14 @@ public class CloudIdentity {
 
     public void setS3Identity(S3Identity s3Identity) {
         this.s3Identity = s3Identity;
+    }
+
+    public EfsIdentity getEfsIdentity() {
+        return efsIdentity;
+    }
+
+    public void setEfsIdentity(EfsIdentity efsIdentity) {
+        this.efsIdentity = efsIdentity;
     }
 
     public AdlsGen2Identity getAdlsGen2Identity() {

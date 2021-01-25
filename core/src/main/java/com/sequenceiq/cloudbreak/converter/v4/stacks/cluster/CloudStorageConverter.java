@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -12,23 +15,29 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AdlsGen2Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.EfsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.GcsIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.S3Identity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.WasbIdentity;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemResolver;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
+import com.sequenceiq.common.api.cloudstorage.AwsEfsParameters;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -106,6 +115,89 @@ public class CloudStorageConverter {
 
         return fileSystem;
 
+    }
+
+    public FileSystem requestToAdditionalFileSystem(CloudStorageBase cloudStorageRequest) {
+        FileSystem fileSystem = new FileSystem();
+        AwsEfsParameters efsParameters = cloudStorageRequest.getAws() == null ? null : cloudStorageRequest.getAws().getEfsParameters();
+
+        if (efsParameters == null || StringUtils.isEmpty(efsParameters.getName())) {
+            return null;
+        }
+
+        fileSystem.setName(efsParameters.getName());
+        FileSystemType fileSystemType = FileSystemType.EFS;
+        fileSystem.setType(fileSystemType);
+
+        Map<String, Object> configurations = new HashMap<>();
+        configurations.put(CloudEfsConfiguration.KEY_BACKUP_POLICY_STATUS, efsParameters.getBackupPolicyStatus());
+        configurations.put(CloudEfsConfiguration.KEY_ENCRYPTED, efsParameters.getEncrypted());
+        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_POLICY, efsParameters.getFileSystemPolicy());
+        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS, efsParameters.getFileSystemTags());
+        configurations.put(CloudEfsConfiguration.KEY_KMSKEYID, efsParameters.getKmsKeyId());
+        configurations.put(CloudEfsConfiguration.KEY_LIFECYCLE_POLICIES, efsParameters.getLifeCyclePolicies());
+        configurations.put(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, efsParameters.getPerformanceMode());
+        configurations.put(CloudEfsConfiguration.KEY_PROVISIONED_THROUGHPUT_INMIBPS, efsParameters.getProvisionedThroughputInMibps());
+        configurations.put(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, efsParameters.getThroughputMode());
+
+        String configString;
+        try {
+            configString = JsonUtil.writeValueAsString(configurations);
+        } catch (JsonProcessingException ignored) {
+            configString = configurations.toString();
+        }
+
+        fileSystem.setConfigurations(new Json(configString));
+
+        CloudStorage cloudStorage = new CloudStorage();
+
+        if (cloudStorageRequest.getIdentities() != null) {
+
+            Optional<CloudIdentity> cloudIdentity = cloudStorageRequest.getIdentities().stream()
+                    .map(this::identityRequestToCloudIdentity)
+                    .filter(currCloudIdentity -> currCloudIdentity.getEfsIdentity() != null)
+                    .findFirst();
+
+            if (cloudIdentity != null && cloudIdentity.get() != null) {
+                cloudStorage.setCloudIdentities(List.of(cloudIdentity.get()));
+            }
+        }
+
+        cloudStorage.setAccountMapping(accountMappingRequestToAccountMapping(cloudStorageRequest.getAccountMapping()));
+        fileSystem.setCloudStorage(cloudStorage);
+
+        return fileSystem;
+    }
+
+    public AwsEfsParameters fileSystemToEfsParameters(FileSystem fileSystem) {
+        if (fileSystem == null || !FileSystemType.EFS.equals(fileSystem.getType()) || fileSystem.getConfigurations() == null) {
+            return null;
+        }
+
+        AwsEfsParameters efsParameters = new AwsEfsParameters();
+
+        efsParameters.setName(fileSystem.getName());
+
+        Map<String, String> configurations = null;
+        try {
+            configurations = JsonUtil.readValue(fileSystem.getConfigurations().getValue(), Map.class);
+        } catch (IOException ex) {
+            // TODO: log the error
+            return null;
+        }
+
+        efsParameters.setName(fileSystem.getName());
+        efsParameters.setEncrypted(Boolean.valueOf(configurations.get(CloudEfsConfiguration.KEY_ENCRYPTED)));
+
+        if (configurations.containsKey(CloudEfsConfiguration.KEY_FILESYSTEM_ID)) {
+            efsParameters.setFilesystemId(configurations.get(CloudEfsConfiguration.KEY_FILESYSTEM_ID));
+        }
+
+        if (configurations.containsKey(CloudEfsConfiguration.KEY_LIFECYCLE_STATE)) {
+            efsParameters.setLifeCycleState(configurations.get(CloudEfsConfiguration.KEY_LIFECYCLE_STATE));
+        }
+
+        return efsParameters;
     }
 
     private String getS3GuardDynamoTableName(CloudStorageBase cloudStorageRequest) {
@@ -311,6 +403,10 @@ public class CloudStorageConverter {
             S3Identity s3Identity = identityRequestToS3(storageIdentityRequest);
             cloudIdentity.setS3Identity(s3Identity);
         }
+        if (storageIdentityRequest.getEfs() != null) {
+            EfsIdentity efsIdentity = identityRequestToEfs(storageIdentityRequest);
+            cloudIdentity.setEfsIdentity(efsIdentity);
+        }
         if (storageIdentityRequest.getWasb() != null) {
             WasbIdentity wasbIdentity = identityRequestToWasb(storageIdentityRequest);
             cloudIdentity.setWasbIdentity(wasbIdentity);
@@ -333,6 +429,12 @@ public class CloudStorageConverter {
         S3Identity s3Identity = new S3Identity();
         s3Identity.setInstanceProfile(storageIdentityRequest.getS3().getInstanceProfile());
         return s3Identity;
+    }
+
+    private EfsIdentity identityRequestToEfs(StorageIdentityBase storageIdentityRequest) {
+        EfsIdentity efsIdentity = new EfsIdentity();
+        efsIdentity.setInstanceProfile(storageIdentityRequest.getS3().getInstanceProfile());
+        return efsIdentity;
     }
 
     private WasbIdentity identityRequestToWasb(StorageIdentityBase storageIdentityRequest) {
@@ -374,5 +476,4 @@ public class CloudStorageConverter {
         }
         return accountMappingRequest;
     }
-
 }

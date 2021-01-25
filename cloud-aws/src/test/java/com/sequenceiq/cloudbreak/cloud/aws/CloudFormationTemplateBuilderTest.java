@@ -24,6 +24,8 @@ import java.util.Optional;
 
 import java.util.Set;
 import org.assertj.core.api.Assertions;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,6 +39,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
+import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -61,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -1472,6 +1476,96 @@ public class CloudFormationTemplateBuilderTest {
             templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-443\" },{ \"Id\" : \"instance1-443\" }]}}");
         assert templateString.contains("\"Targets\" : [{ \"Id\" : \"instance1-888\" },{ \"Id\" : \"instance2-888\" }]}}") ||
             templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-888\" },{ \"Id\" : \"instance1-888\" }]}}");
+    }
+
+    @Test
+    public void buildTestEfsNullFields() {
+        //GIVEN
+        AwsEfsFileSystem awsEfsFileSystem = setupEfsFileSystemNullFields();
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withEnableEfs(true)
+                .withEfsFileSystem(awsEfsFileSystem);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("AWS::EFS::FileSystem")
+                .contains("\"Encrypted\" : \"true\"")
+                .contains("\"PerformanceMode\": \"generalPurpose\"")
+                .contains("\"ThroughputMode\": \"bursting\"");
+    }
+
+    @Test
+    public void buildTestEfsSetFields() {
+        //GIVEN
+        AwsEfsFileSystem awsEfsFileSystem = setupEfsFileSystemValidSet();
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withEnableEfs(true)
+                .withEfsFileSystem(awsEfsFileSystem);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("AWS::EFS::FileSystem")
+                .contains("\"Encrypted\" : \"false\"")
+                .contains("\"PerformanceMode\": \"maxIO\"")
+                .contains("\"ThroughputMode\": \"provisioned\"");
+    }
+
+    private AwsEfsFileSystem setupEfsFileSystemNullFields() {
+        return new AwsEfsFileSystem(null, true, null, null, null, null,
+                null, null, null);
+    }
+
+    private AwsEfsFileSystem setupEfsFileSystemValidSet() {
+        String fileSystemName = "efs-test";
+        Map<String, String> fileSystemTags = new HashMap<>();
+        fileSystemTags.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS_NAME, fileSystemName);
+
+        JSONObject fileSystemPolicy = null;
+        try {
+            fileSystemPolicy = new JSONObject("{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": " +
+                    "[\"elasticfilesystem:ClientMount\"],\"Principal\":  {\"AWS\": \"arn:aws:iam::111122223333:root\"}}]}");
+        } catch (JSONException e) {
+        }
+
+        // It does not make sense to have more than one such policy. but to test the syntex, create two policies
+        List<String> lifeCyclePolicies = new ArrayList<>();
+        lifeCyclePolicies.add("{\"TransitionToIA\" : \"AFTER_30_DAYS\"}");
+        lifeCyclePolicies.add("{\"TransitionToIA\" : \"AFTER_7_DAYS\"}");
+
+        return new AwsEfsFileSystem("DISABLED", false, fileSystemPolicy != null ? fileSystemPolicy.toString() : null, fileSystemTags,
+                "sdx-key", lifeCyclePolicies, "maxIO", 1.0, "provisioned");
     }
 
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {

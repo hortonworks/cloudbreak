@@ -26,6 +26,7 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient;
 import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
@@ -39,6 +40,7 @@ import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -178,6 +180,20 @@ public class AwsClient {
         client.setRegion(RegionUtils.getRegion(regionName));
         client.addRequestHandler(new AwsTracingRequestHandler(tracer));
         return client;
+    }
+
+    public AmazonElasticFileSystemClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
+
+        AmazonElasticFileSystemClient client = isRoleAssumeRequired(awsCredential) ?
+                new AmazonElasticFileSystemClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
+                new AmazonElasticFileSystemClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
+        client.setRegion(RegionUtils.getRegion(regionName));
+        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
+        return client;
+    }
+
+    public AmazonEfsRetryClient createEfsRetryClient(AwsCredentialView awsCredential, String regionName) {
+        return new AmazonEfsRetryClient(createElasticFileSystemClient(awsCredential, regionName), retry);
     }
 
     public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {

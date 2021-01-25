@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -45,6 +46,21 @@ public class AwsTaggingService {
         return tags;
     }
 
+    public Collection<com.amazonaws.services.elasticfilesystem.model.Tag> prepareEfsTags(Map<String, String> userDefinedTags) {
+        Collection<com.amazonaws.services.elasticfilesystem.model.Tag> tags = new ArrayList<>();
+        tags.addAll(userDefinedTags.entrySet().stream()
+                .map(entry -> prepareEfsTag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
+        return tags;
+    }
+
+    public Map<String, String> convertAwsEfsTags(Collection<com.amazonaws.services.elasticfilesystem.model.Tag> awsTags) {
+        Map<String, String> efsTagMap = new HashMap<>();
+        awsTags.stream().map(awsTag -> efsTagMap.put(awsTag.getKey(), awsTag.getValue())).collect(Collectors.toList());
+
+        return efsTagMap;
+    }
+
     public void tagRootVolumes(AuthenticatedContext ac, AmazonEC2Client ec2Client, List<CloudResource> instanceResources, Map<String, String> userDefinedTags) {
         String stackName = ac.getCloudContext().getName();
         LOGGER.debug("Fetch AWS instances to collect all root volume ids for stack: {}", stackName);
@@ -83,6 +99,10 @@ public class AwsTaggingService {
 
     private com.amazonaws.services.ec2.model.Tag prepareEc2Tag(String key, String value) {
         return new com.amazonaws.services.ec2.model.Tag().withKey(key).withValue(value);
+    }
+
+    private com.amazonaws.services.elasticfilesystem.model.Tag prepareEfsTag(String key, String value) {
+        return new com.amazonaws.services.elasticfilesystem.model.Tag().withKey(key).withValue(value);
     }
 
     private Optional<InstanceBlockDeviceMapping> getRootVolumeId(com.amazonaws.services.ec2.model.Instance instance) {

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
@@ -209,7 +210,30 @@ public class AwsLaunchService {
             .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
             .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
 
+        AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
+
+        if (efsFileSystem != null) {
+            modelContext.withEnableEfs(true);
+            modelContext.withEfsFileSystem(efsFileSystem);
+        } else {
+            modelContext.withEnableEfs(false);
+        }
+
         return modelContext;
+    }
+
+    // there should be at most one file system configured for EFS. return the first EFS configuration
+    private AwsEfsFileSystem getAwsEfsFileSystem(CloudStack stack) {
+        AwsEfsFileSystem efsFileSystem = null;
+
+        if (stack.getFileSystem().isPresent()) {
+            efsFileSystem = AwsEfsFileSystem.toAwsEfsFileSystem(stack.getFileSystem().get());
+        }
+
+        if (efsFileSystem == null && stack.getAdditionalFileSystem().isPresent()) {
+            return AwsEfsFileSystem.toAwsEfsFileSystem(stack.getAdditionalFileSystem().get());
+        }
+        return efsFileSystem;
     }
 
     @VisibleForTesting

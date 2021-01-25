@@ -190,6 +190,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @ManyToOne
     private FileSystem fileSystem;
 
+    @ManyToOne
+    private FileSystem additionalFileSystem;
+
     @Column(nullable = false)
     @Convert(converter = ConfigStrategyConverter.class)
     private ConfigStrategy configStrategy;
@@ -371,6 +374,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setFileSystem(FileSystem fileSystem) {
         this.fileSystem = fileSystem;
+    }
+
+    public FileSystem getAdditionalFileSystem() {
+        return additionalFileSystem;
+    }
+
+    public void setAdditionalFileSystem(FileSystem additionalFileSystem) {
+        this.additionalFileSystem = additionalFileSystem;
     }
 
     public String getUserName() {
