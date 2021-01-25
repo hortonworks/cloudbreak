@@ -849,7 +849,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
             if (testFailException != null) {
                 testResult.setThrowable(testFailException);
-                testResult.setTestName(getTestMethodName().get());
+                testResult.setTestName(getTestMethodName().orElse("undefinedMethod"));
                 testResult.setStatus(ITestResult.FAILURE);
 
                 String methodName = testResult.getName();
