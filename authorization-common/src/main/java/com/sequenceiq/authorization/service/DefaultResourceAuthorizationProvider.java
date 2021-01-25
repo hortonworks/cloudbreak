@@ -28,7 +28,11 @@ public class DefaultResourceAuthorizationProvider {
 
     public Optional<AuthorizationRule> authorizeDefaultOrElseCompute(String resourceCrn, AuthorizationResourceAction action,
             Supplier<Optional<AuthorizationRule>> supplier) {
-        DefaultResourceChecker defaultResourceChecker = defaultResourceCheckerMap.get(action.getAuthorizationResourceType());
+        AuthorizationResourceType authorizationResourceType = action.getAuthorizationResourceType();
+        DefaultResourceChecker defaultResourceChecker = null;
+        if (authorizationResourceType != null) {
+            defaultResourceChecker = defaultResourceCheckerMap.get(authorizationResourceType);
+        }
         if (defaultResourceChecker != null && defaultResourceChecker.isDefault(resourceCrn)) {
             commonPermissionCheckingUtils.throwAccessDeniedIfActionNotAllowed(action, List.of(resourceCrn), defaultResourceChecker);
             return Optional.empty();
