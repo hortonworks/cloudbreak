@@ -233,7 +233,6 @@ public enum ResourceEvent {
     CLUSTER_PRIMARY_GATEWAY_UNHEALTHY_SYNC_STARTED("cluster.pgw.unhealthy.sync.started"),
     CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT("cluster.sync.instance.different.packages"),
     CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING("cluster.sync.instance.missing.package.versions"),
-    CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED("cluster.sync.instance.changed.packages"),
     CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED("cluster.sync.instance.failedquery.packages"),
     CLUSTER_UPLOAD_RECIPES("cluster.recipes.upload"),
     CLUSTER_BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES("cluster.bootstrapper.error.nodes.failed"),

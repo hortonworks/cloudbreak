@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED;
 
@@ -88,9 +86,7 @@ public class InstanceMetadataUpdater {
 
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
 
-        Map<String, Multimap<String, String>> changedVersionsByHost =
-                updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
-        notifyIfPackagesHaveChangedVersions(stack, changedVersionsByHost);
+        updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
 
         List<String> packagesWithMultipleVersions = collectPackagesWithMultipleVersions(instanceMetaDataSet);
         notifyIfPackagesHaveDifferentVersions(stack, packagesWithMultipleVersions);
@@ -135,7 +131,6 @@ public class InstanceMetadataUpdater {
 
     private Map<String, Multimap<String, String>> updateInstanceMetaDataWithPackageVersions(Map<String, Map<String, String>> packageVersionsByNameByHost,
             Set<InstanceMetaData> instanceMetaDataSet) throws IOException {
-
         Map<String, Multimap<String, String>> changedVersionsByHost = new HashMap<>();
         for (InstanceMetaData im : instanceMetaDataSet) {
             Map<String, String> packageVersionsOnHost = packageVersionsByNameByHost.get(im.getDiscoveryFQDN());
@@ -161,17 +156,6 @@ public class InstanceMetadataUpdater {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(),
                     CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED,
                     Collections.singletonList(failedVersionQueryByHost.stream().collect(Collectors.joining("\r\n"))));
-        }
-    }
-
-    private void notifyIfPackagesHaveChangedVersions(Stack stack, Map<String, Multimap<String, String>> changedVersionsByHost) {
-        if (!changedVersionsByHost.isEmpty()) {
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_REQUESTED.name(),
-                    CLUSTER_PACKAGE_VERSIONS_ARE_CHANGED,
-                    Collections.singletonList(changedVersionsByHost.entrySet().stream()
-                            .map(entry -> String.format("On Instance ID: [%s], package versions have been changed: [%s]",
-                                    entry.getKey(), entry.getValue().toString()))
-                            .collect(Collectors.joining("\r\n"))));
         }
     }
 
