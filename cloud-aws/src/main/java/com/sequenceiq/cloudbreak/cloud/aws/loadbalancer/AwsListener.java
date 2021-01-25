@@ -12,10 +12,10 @@ public class AwsListener {
 
     private final String name;
 
-    public AwsListener(AwsLoadBalancerScheme scheme, int port) {
+    public AwsListener(AwsLoadBalancerScheme scheme, int port, int healthCheckPort) {
         this.port = port;
         this.name = getListenerName(port, scheme);
-        this.targetGroup = new AwsTargetGroup(scheme, port);
+        this.targetGroup = new AwsTargetGroup(scheme, port, healthCheckPort);
     }
 
     public int getPort() {

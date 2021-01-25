@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
@@ -19,10 +20,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -48,6 +50,12 @@ public class LoadBalancerConfigService {
     private static final String SUBNET_ID = "subnetId";
 
     private static final Set<Integer> DEFAULT_KNOX_PORTS = Set.of(443);
+
+    @Value("${cb.https.port:443}")
+    private String httpsPort;
+
+    @Value("${cb.knox.port:8443}")
+    private String knoxServicePort;
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -95,12 +103,12 @@ public class LoadBalancerConfigService {
         return name.toString();
     }
 
-    public Set<Integer> getPortsForTargetGroup(TargetGroup targetGroup) {
+    public Set<TargetGroupPortPair> getTargetGroupPortPairs(TargetGroup targetGroup) {
         switch (targetGroup.getType()) {
             case KNOX:
-                return DEFAULT_KNOX_PORTS;
+                return Set.of(new TargetGroupPortPair(Integer.parseInt(httpsPort), Integer.parseInt(knoxServicePort)));
             default:
-                return Collections.emptySet();
+                return null;
         }
     }
 

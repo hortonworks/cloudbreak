@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -265,12 +266,13 @@ public class StackToCloudStackConverter {
         for (LoadBalancer loadBalancer : loadBalancerPersistenceService.findByStackId(stack.getId())) {
             CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType());
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
-                Set<Integer> ports = loadBalancerConfigService.getPortsForTargetGroup(targetGroup);
+                Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
                     .map(InstanceGroup::getGroupName)
                     .collect(Collectors.toSet());
-                for (Integer port : ports) {
-                    cloudLoadBalancer.addPortToTargetGroupMapping(port, instanceGroups.stream()
+
+                for (TargetGroupPortPair portPair : portPairs) {
+                    cloudLoadBalancer.addPortToTargetGroupMapping(portPair, instanceGroups.stream()
                         .filter(ig -> targetInstanceGroupName.contains(ig.getName()))
                         .collect(Collectors.toSet()));
                 }

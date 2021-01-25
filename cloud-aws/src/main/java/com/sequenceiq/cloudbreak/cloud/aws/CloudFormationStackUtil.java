@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -194,13 +195,13 @@ public class CloudFormationStackUtil {
         AmazonElasticLoadBalancingClient amazonElbClient =
             awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        for (Map.Entry<Integer, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
+        for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
             // Get a list of the new instances in the target groups
             Set<String> updatedInstanceIds = getInstanceIdsForGroups(resourcesToAdd, entry.getValue());
 
             // Find target group ARN
             AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
-            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
+            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey().getTrafficPort(), scheme), region);
 
             // Use ARN to fetch a list of current targets
             DescribeTargetHealthResult targetHealthResult = amazonElbClient.describeTargetHealth(new DescribeTargetHealthRequest()
@@ -232,13 +233,13 @@ public class CloudFormationStackUtil {
         AmazonElasticLoadBalancingClient amazonElbClient =
             awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
-        for (Map.Entry<Integer, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
+        for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
             // Get a list of the instance ids to remove
             Set<String> instancesToRemove = getInstanceIdsForGroups(resourcesToRemove, entry.getValue());
 
             // Find target group ARN
             AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
-            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey(), scheme), region);
+            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey().getTrafficPort(), scheme), region);
 
             // Deregister any instances that no longer exist
             if (!instancesToRemove.isEmpty()) {

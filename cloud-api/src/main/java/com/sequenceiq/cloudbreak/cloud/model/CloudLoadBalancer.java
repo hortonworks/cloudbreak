@@ -10,22 +10,22 @@ public class CloudLoadBalancer {
 
     private final LoadBalancerType type;
 
-    private final Map<Integer, Set<Group>> portToTargetGroupMapping;
+    private final Map<TargetGroupPortPair, Set<Group>> portToTargetGroupMapping;
 
     public CloudLoadBalancer(LoadBalancerType type) {
         this.type = type;
         portToTargetGroupMapping = new HashMap<>();
     }
 
-    public void addPortToTargetGroupMapping(Integer port, Set<Group> targetGroups) {
-        if (portToTargetGroupMapping.containsKey(port)) {
-            portToTargetGroupMapping.get(port).addAll(targetGroups);
+    public void addPortToTargetGroupMapping(TargetGroupPortPair portPair, Set<Group> targetGroups) {
+        if (portToTargetGroupMapping.containsKey(portPair)) {
+            portToTargetGroupMapping.get(portPair).addAll(targetGroups);
         } else {
-            portToTargetGroupMapping.put(port, targetGroups);
+            portToTargetGroupMapping.put(portPair, targetGroups);
         }
     }
 
-    public Map<Integer, Set<Group>> getPortToTargetGroupMapping() {
+    public Map<TargetGroupPortPair, Set<Group>> getPortToTargetGroupMapping() {
         return portToTargetGroupMapping;
     }
 

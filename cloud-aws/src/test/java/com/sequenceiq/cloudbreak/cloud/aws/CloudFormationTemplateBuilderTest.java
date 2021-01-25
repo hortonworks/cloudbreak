@@ -21,8 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import java.util.Set;
+
 import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1399,6 +1399,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
             .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
             .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
@@ -1430,6 +1431,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
             .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
             .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
@@ -1464,6 +1466,7 @@ public class CloudFormationTemplateBuilderTest {
 
         //THEN
         Assertions.assertThat(templateString)
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
             .contains("\"LoadBalancerInternal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::LoadBalancer\"")
             .contains("\"Scheme\" : \"internal\"")
             .contains("\"TargetGroupPort443Internal\" : {\"Type\" : \"AWS::ElasticLoadBalancingV2::TargetGroup\"")
@@ -1478,6 +1481,34 @@ public class CloudFormationTemplateBuilderTest {
             templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-888\" },{ \"Id\" : \"instance1-888\" }]}}");
     }
 
+    public void buildTestHealthCheckPortDifferentFromTrafficPort() {
+        //GIVEN
+        AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true);
+
+        //WHEN
+        modelContext = new ModelContext()
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withLoadBalancers(List.of(awsLoadBalancer));
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+            .contains("\"Port\" : 443")
+            .contains("\"HealthCheckPort\" : \"8443\"");
+    }
+
     @Test
     public void buildTestEfsNullFields() {
         //GIVEN
@@ -1485,29 +1516,29 @@ public class CloudFormationTemplateBuilderTest {
 
         //WHEN
         modelContext = new ModelContext()
-                .withAuthenticatedContext(authenticatedContext)
-                .withStack(cloudStack)
-                .withExistingVpc(true)
-                .withExistingIGW(true)
-                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
-                .withExistinVpcCidr(List.of(existingSubnetCidr))
-                .mapPublicIpOnLaunch(true)
-                .withEnableInstanceProfile(true)
-                .withInstanceProfileAvailable(true)
-                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
-                .withTemplate(awsCloudFormationTemplate)
-                .withEnableEfs(true)
-                .withEfsFileSystem(awsEfsFileSystem);
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withEnableEfs(true)
+            .withEfsFileSystem(awsEfsFileSystem);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
         Assertions.assertThat(templateString)
-                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
-                .contains("AWS::EFS::FileSystem")
-                .contains("\"Encrypted\" : \"true\"")
-                .contains("\"PerformanceMode\": \"generalPurpose\"")
-                .contains("\"ThroughputMode\": \"bursting\"");
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+            .contains("AWS::EFS::FileSystem")
+            .contains("\"Encrypted\" : \"true\"")
+            .contains("\"PerformanceMode\": \"generalPurpose\"")
+            .contains("\"ThroughputMode\": \"bursting\"");
     }
 
     @Test
@@ -1517,34 +1548,34 @@ public class CloudFormationTemplateBuilderTest {
 
         //WHEN
         modelContext = new ModelContext()
-                .withAuthenticatedContext(authenticatedContext)
-                .withStack(cloudStack)
-                .withExistingVpc(true)
-                .withExistingIGW(true)
-                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
-                .withExistinVpcCidr(List.of(existingSubnetCidr))
-                .mapPublicIpOnLaunch(true)
-                .withEnableInstanceProfile(true)
-                .withInstanceProfileAvailable(true)
-                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
-                .withTemplate(awsCloudFormationTemplate)
-                .withEnableEfs(true)
-                .withEfsFileSystem(awsEfsFileSystem);
+            .withAuthenticatedContext(authenticatedContext)
+            .withStack(cloudStack)
+            .withExistingVpc(true)
+            .withExistingIGW(true)
+            .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+            .withExistinVpcCidr(List.of(existingSubnetCidr))
+            .mapPublicIpOnLaunch(true)
+            .withEnableInstanceProfile(true)
+            .withInstanceProfileAvailable(true)
+            .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+            .withTemplate(awsCloudFormationTemplate)
+            .withEnableEfs(true)
+            .withEfsFileSystem(awsEfsFileSystem);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
         Assertions.assertThat(templateString)
-                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
-                .contains("AWS::EFS::FileSystem")
-                .contains("\"Encrypted\" : \"false\"")
-                .contains("\"PerformanceMode\": \"maxIO\"")
-                .contains("\"ThroughputMode\": \"provisioned\"");
+            .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+            .contains("AWS::EFS::FileSystem")
+            .contains("\"Encrypted\" : \"false\"")
+            .contains("\"PerformanceMode\": \"maxIO\"")
+            .contains("\"ThroughputMode\": \"provisioned\"");
     }
 
     private AwsEfsFileSystem setupEfsFileSystemNullFields() {
         return new AwsEfsFileSystem(null, true, null, null, null, null,
-                null, null, null);
+            null, null, null);
     }
 
     private AwsEfsFileSystem setupEfsFileSystemValidSet() {
@@ -1555,7 +1586,7 @@ public class CloudFormationTemplateBuilderTest {
         JSONObject fileSystemPolicy = null;
         try {
             fileSystemPolicy = new JSONObject("{\"Version\": \"2012-10-17\",\"Statement\": [{\"Effect\": \"Allow\",\"Action\": " +
-                    "[\"elasticfilesystem:ClientMount\"],\"Principal\":  {\"AWS\": \"arn:aws:iam::111122223333:root\"}}]}");
+                "[\"elasticfilesystem:ClientMount\"],\"Principal\":  {\"AWS\": \"arn:aws:iam::111122223333:root\"}}]}");
         } catch (JSONException e) {
         }
 
@@ -1565,13 +1596,13 @@ public class CloudFormationTemplateBuilderTest {
         lifeCyclePolicies.add("{\"TransitionToIA\" : \"AFTER_7_DAYS\"}");
 
         return new AwsEfsFileSystem("DISABLED", false, fileSystemPolicy != null ? fileSystemPolicy.toString() : null, fileSystemTags,
-                "sdx-key", lifeCyclePolicies, "maxIO", 1.0, "provisioned");
+            "sdx-key", lifeCyclePolicies, "maxIO", 1.0, "provisioned");
     }
 
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(scheme);
         loadBalancer.addSubnets(Set.of("subnet1"));
-        AwsListener listener = loadBalancer.getOrCreateListener(port);
+        AwsListener listener = loadBalancer.getOrCreateListener(port, 8443);
         listener.addInstancesToTargetGroup(Set.of("instance1-" + port, "instance2-" + port));
 
         if (setArn) {

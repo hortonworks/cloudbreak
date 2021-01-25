@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -476,7 +477,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testSetLoadBalancerMetadata() {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
-        loadBalancer.getOrCreateListener(PORT);
+        loadBalancer.getOrCreateListener(PORT, PORT);
         when(result.getStackResourceSummaries()).thenReturn(createSummaries(Set.of(LoadBalancerType.PRIVATE), false));
 
         underTest.setLoadBalancerMetadata(List.of(loadBalancer), result);
@@ -521,7 +522,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerType type) {
         Group group = new Group(INSTANCE_NAME, GATEWAY, List.of(), null, null, null, null, null, null, 100, null);
         CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type);
-        cloudLoadBalancer.addPortToTargetGroupMapping(PORT, Set.of(group));
+        cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(PORT, PORT), Set.of(group));
         return cloudLoadBalancer;
     }
 
