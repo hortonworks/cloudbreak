@@ -505,8 +505,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
             boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-            CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
-            if (!(AWS.equals(cloudPlatform) || mediumDutySdxEntitlementEnabled)) {
+            if (!mediumDutySdxEntitlementEnabled) {
                 validationBuilder.error("Provisioning a medium duty data lake cluster is not enabled for this account. " +
                         "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.");
             }
