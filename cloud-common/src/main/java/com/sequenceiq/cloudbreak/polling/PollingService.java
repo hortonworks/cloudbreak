@@ -43,6 +43,7 @@ public class PollingService<T> {
             LOGGER.debug("Polling attempt {}.", attempts);
             try {
                 success = statusCheckerTask.checkStatus(t);
+                consecutiveFailures = 0;
             } catch (Exception ex) {
                 consecutiveFailures++;
                 actual = ex;
@@ -57,7 +58,6 @@ public class PollingService<T> {
                 LOGGER.debug(statusCheckerTask.successMessage(t));
                 LOGGER.debug("Set the number of consecutive failures to 0, since we received a positve answer. Original number of consecutiveFailures: {}",
                         consecutiveFailures);
-                consecutiveFailures = 0;
                 return new ImmutablePair<>(PollingResult.SUCCESS, actual);
             }
             sleep(interval);
