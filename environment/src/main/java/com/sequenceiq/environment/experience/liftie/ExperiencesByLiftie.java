@@ -30,7 +30,7 @@ public class ExperiencesByLiftie implements Experience {
     }
 
     @Override
-    public int clusterCountForEnvironment(EnvironmentExperienceDto environment) {
+    public int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment) {
         List<ClusterView> clusterViews = getClusterViews(environment.getName(), environment.getAccountId());
         return countNotDeletedClusters(clusterViews);
     }
