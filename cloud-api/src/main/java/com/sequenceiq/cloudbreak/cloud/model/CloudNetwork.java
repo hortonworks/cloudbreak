@@ -12,7 +12,7 @@ public class CloudNetwork {
 
     private String id;
 
-    private Set<CloudSubnet> subnets;
+    private final Set<CloudSubnet> subnets;
 
     private Map<String, Object> properties;
 
@@ -40,7 +40,7 @@ public class CloudNetwork {
     }
 
     public Map<String, String> getSubnets() {
-        return subnets.stream().collect(Collectors.toMap(s -> s.getId(), s -> s.getName()));
+        return subnets.stream().collect(Collectors.toMap(CloudSubnet::getId, CloudSubnet::getName));
     }
 
     public Map<String, CloudSubnet> getSubnetsWithMetadata() {
