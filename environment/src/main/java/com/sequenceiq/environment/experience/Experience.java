@@ -15,7 +15,7 @@ public interface Experience {
      *                    This object cannot be null since its content is can be crucial.
      * @return
      */
-    int clusterCountForEnvironment(EnvironmentExperienceDto environment);
+    int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment);
 
     /**
      * Operation that invokes deletion on the implemented/designated experience.

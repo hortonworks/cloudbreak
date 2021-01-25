@@ -1,13 +1,20 @@
 package com.sequenceiq.environment.experience;
 
+import static com.sequenceiq.environment.experience.ExperienceSource.BASIC;
+import static com.sequenceiq.environment.experience.ExperienceSource.LIFTIE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,41 +27,106 @@ import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 @ExtendWith(MockitoExtension.class)
 class ExperienceConnectorServiceTest {
 
-    private static final boolean SCAN_ENABLED = true;
+    private static final int ONCE = 1;
 
-    private static final String TENANT = "someTenantValue";
+    private static final String TEST_ENV_CRN = "someTestEnvCrn";
 
-    @Mock
-    private Experience mockExperience;
+    private static final String TEST_ENV_NAME = "someTestEnvName";
 
-    @Mock
-    private EnvironmentExperienceDto mockDto;
+    private static final String TEST_ACCOUNT_ID = "someTestAccountId";
+
+    private static final String NULL_ENV_DTO_EXCEPTION_MSG = "environment should not be null!";
+
+    private List<Experience> mockExperiences = List.of(createMockExperience(LIFTIE), createMockExperience(BASIC));
+
+    private ExperienceConnectorService underTest;
 
     @Mock
     private EntitlementService entitlementServiceMock;
 
-    private ExperienceConnectorService underTest;
-
     @BeforeEach
     void setUp() {
-        underTest = new ExperienceConnectorService(List.of(mockExperience), entitlementServiceMock);
+        underTest = new ExperienceConnectorService(mockExperiences, entitlementServiceMock);
     }
 
     @Test
     void testWhenScanIsNotEnabledThenNoExperienceCallHappensAndZeroShouldReturn() {
-        when(entitlementServiceMock.isExperienceDeletionEnabled(any())).thenReturn(false);
-        int result = underTest.getConnectedExperienceCount(mockDto);
+        EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
 
-        Assertions.assertEquals(0, result);
-        verify(mockExperience, never()).clusterCountForEnvironment(any(EnvironmentExperienceDto.class));
+        when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(false);
+
+        int result = underTest.getConnectedExperienceCount(dto);
+
+        assertEquals(0, result);
+        mockExperiences.forEach(experience -> verify(experience, never()).getConnectedClusterCountForEnvironment(any(EnvironmentExperienceDto.class)));
     }
 
     @Test
     void testWhenNoExperienceHasConfiguredThenZeroShouldReturn() {
-        when(entitlementServiceMock.isExperienceDeletionEnabled(any())).thenReturn(false);
-        int result = underTest.getConnectedExperienceCount(mockDto);
+        EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
+        underTest = new ExperienceConnectorService(new ArrayList<>(), entitlementServiceMock);
 
-        Assertions.assertEquals(0, result);
+        when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(true);
+
+        int result = underTest.getConnectedExperienceCount(dto);
+
+        assertEquals(0, result);
+        mockExperiences.forEach(xp -> verify(xp, never()).getConnectedClusterCountForEnvironment(any(EnvironmentExperienceDto.class)));
+    }
+
+    @Test
+    void testWhenExperienceCheckingIsEnabledAndEachExperienceHasClusterForTheGivenEnvThenItsSumShouldReturn() {
+        int connectedClusterQuantity = 1;
+        EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
+        mockExperiences.forEach(xp -> when(xp.getConnectedClusterCountForEnvironment(dto)).thenReturn(connectedClusterQuantity));
+
+        when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(true);
+
+        int result = underTest.getConnectedExperienceCount(dto);
+
+        assertEquals(mockExperiences.size() * connectedClusterQuantity, result);
+    }
+
+    @Test
+    void testGetConnectedExperienceCountWhenProvidedDtoIsNullThenIllegalArgumentExceptionShouldCome() {
+        IllegalArgumentException expectedException = assertThrows(IllegalArgumentException.class, () -> underTest.getConnectedExperienceCount(null));
+
+        assertNotNull(expectedException);
+        assertEquals(NULL_ENV_DTO_EXCEPTION_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    void testDeleteConnectedExperiencesWhenProvidedDtoIsNullThenIllegalArgumentExceptionShouldCome() {
+        IllegalArgumentException expectedException = assertThrows(IllegalArgumentException.class, () -> underTest.deleteConnectedExperiences(null));
+
+        assertNotNull(expectedException);
+        assertEquals(NULL_ENV_DTO_EXCEPTION_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    void testDeleteConnectedExperiencesWhenInputIsValidThenAllExperienceShouldHaveAcceptDeletion() {
+        EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
+
+        underTest.deleteConnectedExperiences(dto);
+
+        mockExperiences.forEach(xp -> {
+            verify(xp, times(ONCE)).deleteConnectedExperiences(any(EnvironmentExperienceDto.class));
+            verify(xp, times(ONCE)).deleteConnectedExperiences(dto);
+        });
+    }
+
+    private EnvironmentExperienceDto createEnvironmentExperienceDto() {
+        return new EnvironmentExperienceDto.Builder()
+                .withAccountId(TEST_ACCOUNT_ID)
+                .withName(TEST_ENV_NAME)
+                .withCrn(TEST_ENV_CRN)
+                .build();
+    }
+
+    private Experience createMockExperience(ExperienceSource type) {
+        Experience xp = mock(Experience.class);
+        when(xp.getSource()).thenReturn(type);
+        return xp;
     }
 
 }

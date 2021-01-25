@@ -1,12 +1,8 @@
 package com.sequenceiq.environment.experience.common;
 
-import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
@@ -19,9 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.ResponseReader;
-import com.sequenceiq.environment.experience.RetriableWebTarget;
+import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.CommonExperienceApi;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
@@ -34,26 +30,28 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceConnectorService.class);
 
-    private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
-
     private final CommonExperienceWebTargetProvider commonExperienceWebTargetProvider;
 
-    private final RetriableWebTarget retriableWebTarget;
+    private final InvocationBuilderProvider invocationBuilderProvider;
+
+    private final RetryableWebTarget retryableWebTarget;
 
     private final ResponseReader responseReader;
 
-    public CommonExperienceConnectorService(RetriableWebTarget retriableWebTarget, CommonExperienceResponseReader commonExperienceResponseReader,
-            CommonExperienceWebTargetProvider commonExperienceWebTargetProvider) {
+    public CommonExperienceConnectorService(RetryableWebTarget retryableWebTarget, CommonExperienceResponseReader commonExperienceResponseReader,
+            CommonExperienceWebTargetProvider commonExperienceWebTargetProvider, InvocationBuilderProvider invocationBuilderProvider) {
         this.commonExperienceWebTargetProvider = commonExperienceWebTargetProvider;
+        this.invocationBuilderProvider = invocationBuilderProvider;
         this.responseReader = commonExperienceResponseReader;
-        this.retriableWebTarget = retriableWebTarget;
+        this.retryableWebTarget = retryableWebTarget;
     }
 
     @Override
     @NotNull
     public Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
-        Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retriableWebTarget.get(createCompleteCallableBuilder(webTarget)));
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
             Optional<CpInternalEnvironmentResponse> response = responseReader
                     .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
@@ -66,7 +64,8 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @NotNull
     public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
-        Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retriableWebTarget.delete(createCompleteCallableBuilder(webTarget)));
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.delete(call));
         return responseReader.read(
                 webTarget.getUri().toString(),
                 response.orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG)),
@@ -82,14 +81,6 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
             LOGGER.warn("Something happened while the experience connection attempted!", re);
         }
         return Optional.empty();
-    }
-
-    private Invocation.Builder createCompleteCallableBuilder(WebTarget target) {
-        return target
-                .request()
-                .accept(APPLICATION_JSON)
-                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString())
-                .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     private static Set<String> getExperienceNamesFromListResponse(CpInternalEnvironmentResponse experienceCallResponse) {

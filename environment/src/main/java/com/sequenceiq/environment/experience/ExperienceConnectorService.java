@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.experience;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -7,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 
 @Service
@@ -30,7 +31,7 @@ public class ExperienceConnectorService {
             LOGGER.debug("Collecting connected experiences for environment: {}", dto.getName());
             return experiences
                     .stream()
-                    .map(experience -> experience.clusterCountForEnvironment(dto))
+                    .map(experience -> experience.getConnectedClusterCountForEnvironment(dto))
                     .reduce(0, Integer::sum);
         }
         LOGGER.info("Scanning experience(s) has disabled, which means the returning amount of connected experiences may not represent the reality!");
@@ -58,7 +59,7 @@ public class ExperienceConnectorService {
     }
 
     private void checkEnvironmentExperienceDto(EnvironmentExperienceDto dto) {
-        NullUtil.throwIfNull(dto, () -> new IllegalArgumentException("environment should not be null!"));
+        throwIfNull(dto, () -> new IllegalArgumentException("environment should not be null!"));
     }
 
 }

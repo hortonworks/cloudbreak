@@ -1,12 +1,9 @@
 package com.sequenceiq.environment.experience.liftie;
 
-import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Client;
@@ -18,9 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.ResponseReader;
-import com.sequenceiq.environment.experience.RetriableWebTarget;
+import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
@@ -33,9 +30,9 @@ public class LiftieConnector implements LiftieApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiftieConnector.class);
 
-    private static final String REQUEST_ID_HEADER = "x-cdp-request-id";
+    private final InvocationBuilderProvider invocationBuilderProvider;
 
-    private final RetriableWebTarget retriableWebTarget;
+    private final RetryableWebTarget retryableWebTarget;
 
     private final LiftiePathProvider liftiePathProvider;
 
@@ -43,10 +40,11 @@ public class LiftieConnector implements LiftieApi {
 
     private final Client client;
 
-    public LiftieConnector(LiftiePathProvider liftiePathProvider, LiftieResponseReader liftieResponseReader, RetriableWebTarget retriableWebTarget,
-            Client client) {
+    public LiftieConnector(LiftiePathProvider liftiePathProvider, LiftieResponseReader liftieResponseReader, RetryableWebTarget retryableWebTarget,
+            Client client, InvocationBuilderProvider invocationBuilderProvider) {
+        this.invocationBuilderProvider = invocationBuilderProvider;
         this.liftiePathProvider = liftiePathProvider;
-        this.retriableWebTarget = retriableWebTarget;
+        this.retryableWebTarget = retryableWebTarget;
         this.responseReader = liftieResponseReader;
         this.client = client;
     }
@@ -61,8 +59,8 @@ public class LiftieConnector implements LiftieApi {
         putIfPresent(queryParams, "tenant", tenant);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
-        Invocation.Builder call = createInvocationBuilder(webTarget);
-        try (Response result = retriableWebTarget.get(call)) {
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        try (Response result = retryableWebTarget.get(call)) {
             if (result != null) {
                 return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
                         .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
@@ -83,8 +81,8 @@ public class LiftieConnector implements LiftieApi {
     public DeleteClusterResponse deleteCluster(@NotNull String clusterId) {
         LOGGER.debug("About to connect Liftie API to delete cluster {}", clusterId);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
-        Invocation.Builder call = createInvocationBuilder(webTarget);
-        try (Response result = retriableWebTarget.delete(call)) {
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        try (Response result = retryableWebTarget.delete(call)) {
             if (result != null) {
                 return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
                         .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
@@ -104,14 +102,6 @@ public class LiftieConnector implements LiftieApi {
             }
         }
         return target;
-    }
-
-    private Invocation.Builder createInvocationBuilder(WebTarget webTarget) {
-        return webTarget
-                .request()
-                .accept(APPLICATION_JSON)
-                .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
-                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
     }
 
 }

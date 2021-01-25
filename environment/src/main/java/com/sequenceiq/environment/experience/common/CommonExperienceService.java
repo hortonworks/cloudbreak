@@ -46,7 +46,7 @@ public class CommonExperienceService implements Experience {
     }
 
     @Override
-    public int clusterCountForEnvironment(EnvironmentExperienceDto environment) {
+    public int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment) {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
         Set<String> activeExperienceNames = environmentHasActiveExperience(environment.getCrn());
         if (!activeExperienceNames.isEmpty()) {

@@ -76,7 +76,7 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> underTest.clusterCountForEnvironment(mockEnvironment));
+                () -> underTest.getConnectedClusterCountForEnvironment(mockEnvironment));
 
         assertNotNull(exception);
         assertEquals("Unable to check environment - experience relation, since the " +
@@ -90,7 +90,7 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> underTest.clusterCountForEnvironment(mockEnvironment));
+                () -> underTest.getConnectedClusterCountForEnvironment(mockEnvironment));
 
         assertNotNull(exception);
         assertEquals("Unable to check environment - experience relation, since the " +
@@ -103,7 +103,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        underTest.clusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         verify(mockExperienceConnectorService, never()).getWorkspaceNamesConnectedToEnv(any(), any());
     }
@@ -114,7 +114,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        int result = underTest.clusterCountForEnvironment(mockEnvironment);
+        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         assertEquals(0, result);
     }
@@ -127,7 +127,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        underTest.clusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         verify(mockExperienceConnectorService, never()).getWorkspaceNamesConnectedToEnv(any(), any());
     }
@@ -139,7 +139,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        int result = underTest.clusterCountForEnvironment(mockEnvironment);
+        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         assertEquals(0, result);
     }
@@ -152,7 +152,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        underTest.clusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         verify(mockExperienceConnectorService, times(1)).getWorkspaceNamesConnectedToEnv(any(), any());
         verify(mockExperienceConnectorService, times(1)).getWorkspaceNamesConnectedToEnv(expectedPath, ENV_CRN);
@@ -167,7 +167,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        int result = underTest.clusterCountForEnvironment(mockEnvironment);
+        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         assertEquals(0, result);
     }
@@ -181,7 +181,7 @@ class CommonExperienceServiceTest {
 
         underTest = new CommonExperienceService(XP_PROTOCOL, mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator);
 
-        int result = underTest.clusterCountForEnvironment(mockEnvironment);
+        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
 
         assertEquals(1, result);
     }
