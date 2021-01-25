@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -387,8 +388,8 @@ public class AwsLaunchService {
 
     private void setupLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
             AwsLoadBalancer awsLoadBalancer) {
-        for (Map.Entry<Integer, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
-            AwsListener listener = awsLoadBalancer.getOrCreateListener(entry.getKey());
+        for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : cloudLoadBalancer.getPortToTargetGroupMapping().entrySet()) {
+            AwsListener listener = awsLoadBalancer.getOrCreateListener(entry.getKey().getTrafficPort(), entry.getKey().getHealthCheckPort());
             List<CloudResource> lbTargetInstances = instances.stream()
                 .filter(instance -> entry.getValue().stream().anyMatch(tg -> tg.getName().equals(instance.getGroup())))
                 .collect(Collectors.toList());

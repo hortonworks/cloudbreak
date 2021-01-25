@@ -313,6 +313,7 @@
           "Port" : ${listener.targetGroup.port},
           "Protocol" : "TCP",
           "TargetType" : "instance",
+          "HealthCheckPort" : "${listener.targetGroup.healthCheckPort}",
           <#if existingVPC>
           "VpcId" : { "Ref" : "VPCId" }
           <#else>

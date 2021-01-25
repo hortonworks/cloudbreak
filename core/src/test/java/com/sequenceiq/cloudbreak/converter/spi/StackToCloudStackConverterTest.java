@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -969,14 +970,15 @@ public class StackToCloudStackConverterTest {
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(Set.of(instanceGroup1, instanceGroup2));
-        when(loadBalancerConfigService.getPortsForTargetGroup(any(TargetGroup.class))).thenReturn(Set.of(443));
+        TargetGroupPortPair targetGroupPortPair = new TargetGroupPortPair(443, 8443);
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(targetGroupPortPair));
 
         CloudStack result = underTest.convert(stack);
 
         assertEquals(1, result.getLoadBalancers().size());
         CloudLoadBalancer cloudLoadBalancer = result.getLoadBalancers().iterator().next();
         assertEquals(LoadBalancerType.PRIVATE, cloudLoadBalancer.getType());
-        assertEquals(Set.of(443), cloudLoadBalancer.getPortToTargetGroupMapping().keySet());
+        assertEquals(Set.of(targetGroupPortPair), cloudLoadBalancer.getPortToTargetGroupMapping().keySet());
         Set<String> groupNames = cloudLoadBalancer.getPortToTargetGroupMapping().values().stream()
             .flatMap(Collection::stream)
             .collect(Collectors.toSet())
@@ -1015,7 +1017,7 @@ public class StackToCloudStackConverterTest {
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(internalLoadBalancer, externalLoadBalancer));
         when(targetGroupPersistenceService.findByLoadBalancerId(anyLong())).thenReturn(Set.of(targetGroup));
         when(instanceGroupService.findByTargetGroupId(anyLong())).thenReturn(Set.of(instanceGroup1, instanceGroup2));
-        when(loadBalancerConfigService.getPortsForTargetGroup(any(TargetGroup.class))).thenReturn(Set.of(443));
+        when(loadBalancerConfigService.getTargetGroupPortPairs(any(TargetGroup.class))).thenReturn(Set.of(new TargetGroupPortPair(443, 8443)));
 
         CloudStack result = underTest.convert(stack);
 

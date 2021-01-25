@@ -13,10 +13,13 @@ public class AwsTargetGroup {
 
     private final String name;
 
+    private final String healthCheckPort;
+
     private String arn;
 
-    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port) {
+    public AwsTargetGroup(AwsLoadBalancerScheme scheme, int port, int healthCheckPort) {
         this.port = port;
+        this.healthCheckPort = String.valueOf(healthCheckPort);
         this.name = getTargetGroupName(port, scheme);
     }
 
@@ -42,6 +45,10 @@ public class AwsTargetGroup {
 
     public void addInstanceIds(Set<String> newInstanceIds) {
         instanceIds.addAll(newInstanceIds);
+    }
+
+    public String getHealthCheckPort() {
+        return healthCheckPort;
     }
 
     public static String getTargetGroupName(int port, AwsLoadBalancerScheme scheme) {

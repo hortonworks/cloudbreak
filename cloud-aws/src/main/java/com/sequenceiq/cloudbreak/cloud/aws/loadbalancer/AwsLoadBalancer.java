@@ -40,14 +40,14 @@ public class AwsLoadBalancer {
         return listeners;
     }
 
-    public AwsListener getOrCreateListener(int port) {
+    public AwsListener getOrCreateListener(int port, int healthCheckPort) {
         return listeners.stream()
             .filter(l -> l.getPort() == port)
-            .findFirst().orElseGet(() -> createListener(port));
+            .findFirst().orElseGet(() -> createListener(port, healthCheckPort));
     }
 
-    private AwsListener createListener(int port) {
-        AwsListener listener = new AwsListener(scheme, port);
+    private AwsListener createListener(int port, int healthCheckPort) {
+        AwsListener listener = new AwsListener(scheme, port, healthCheckPort);
         listeners.add(listener);
         return listener;
     }
